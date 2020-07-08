@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -332,16 +334,38 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * z-up sole frame.
     * </p>
     */
-   default double getMaximumStepZ()
+   default double getMaximumLeftStepZ()
    {
-      return get(maxStepZ);
+      return get(maxLeftStepZ);
+   }
+
+   /**
+    * Maximum vertical distance between consecutive footsteps
+    *
+    * <p>
+    * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+    * z-up sole frame.
+    * </p>
+    */
+   default double getMaximumRightStepZ()
+   {
+      return get(maxRightStepZ);
+   }
+
+   /**
+    * Returns nominal maximum step z
+    * @return
+    */
+   default double getMaximumAverageStepZ()
+   {
+      return EuclidCoreTools.interpolate(getMaximumLeftStepZ(), getMaximumRightStepZ(), 0.5);
    }
 
    /**
     * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
     *
     * <p>
-    *    The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+    *    The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     * </p>
     */
@@ -354,7 +378,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
     *
     * <p>
-    *    The maximum depdistanceth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+    *    The maximum depdistanceth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     * </p>
     */
@@ -715,7 +739,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-    * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */
    default double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
@@ -823,5 +846,13 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getDistanceEpsilonToBridgeRegions()
    {
       return get(distanceEpsilonToBridgeRegions);
+   }
+
+   /**
+    * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+    */
+   default RobotSide getStepOnlyWithRequestedSide()
+   {
+      return RobotSide.fromByte((byte) get(stepOnlyWithRequestedSide));
    }
 }

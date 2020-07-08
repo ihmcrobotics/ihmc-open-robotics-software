@@ -14,7 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameSphere3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
@@ -24,7 +27,10 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameShapeRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
@@ -32,6 +38,7 @@ import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -122,7 +129,7 @@ public class SingleContactImpulseCalculatorTest
          SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(worldFrame, rootBodyA, forwardDynamicsCalculatorA, null, null);
          impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
+         impulseCalculator.setContactParameters(new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
          impulseCalculator.computeImpulse(dt);
@@ -163,7 +170,7 @@ public class SingleContactImpulseCalculatorTest
                                                                                                forwardDynamicsCalculatorB);
          impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
+         impulseCalculator.setContactParameters(new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
 
@@ -184,12 +191,116 @@ public class SingleContactImpulseCalculatorTest
       }
    }
 
+   /**
+    * Tests the collision of 2 spheres colliding head on. The test is rather simplistic and could be
+    * extended.
+    */
+   @Test
+   public void testFlyingCollidingSpheres()
+   {
+      long seed = new Random().nextLong();
+      System.out.println(seed);
+      Random random = new Random(9030112133717752657L);
+      ContactParameters contactParameters = new ContactParameters();
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setCoefficientOfRestitution(1.0);
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setConstraintForceMixing(1.0);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         double dt = 1.0e-3;
+         RigidBodyBasics sphereBodyA = nextFloatingSphereBody(random, "sphereBodyA");
+         RigidBodyBasics sphereBodyB = nextFloatingSphereBody(random, "sphereBodyB");
+         FloatingJointBasics rootJointA = (FloatingJointBasics) sphereBodyA.getParentJoint();
+         FloatingJointBasics rootJointB = (FloatingJointBasics) sphereBodyB.getParentJoint();
+         double massA = sphereBodyA.getInertia().getMass();
+         double massB = sphereBodyB.getInertia().getMass();
+         double radiusA = random.nextDouble();
+         double radiusB = random.nextDouble();
+         Collidable sphereCollidableA = new Collidable(sphereBodyA, -1, -1, new FrameSphere3D(sphereBodyA.getBodyFixedFrame(), radiusA));
+         Collidable sphereCollidableB = new Collidable(sphereBodyB, -1, -1, new FrameSphere3D(sphereBodyB.getBodyFixedFrame(), radiusB));
+
+         Point3DBasics positionA = rootJointA.getJointPose().getPosition();
+         Point3DBasics positionB = rootJointB.getJointPose().getPosition();
+
+         positionA.set(EuclidCoreRandomTools.nextPoint3D(random));
+         Vector3D translation = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, radiusA + radiusB - contactParameters.getMinimumPenetration());
+         positionB.add(positionA, translation);
+
+         CollisionResult collisionResult = new CollisionResult();
+         collisionResult.setCollidableA(sphereCollidableA);
+         collisionResult.setCollidableB(sphereCollidableB);
+         FrameUnitVector3D collisionAxis = collisionResult.getCollisionAxisForA();
+         collisionAxis.setReferenceFrame(worldFrame);
+         collisionAxis.setAndNegate(translation);
+         Vector3D sphereAInitialVelocity = new Vector3D();
+         sphereAInitialVelocity.setAndScale(-EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), collisionAxis);
+         Vector3D sphereBInitialVelocity = new Vector3D();
+         rootJointA.getJointTwist().getLinearPart().set(sphereAInitialVelocity);
+         rootJointB.getJointTwist().getLinearPart().set(sphereBInitialVelocity);
+
+         rootJointA.updateFramesRecursively();
+         rootJointB.updateFramesRecursively();
+
+         collisionResult.getPointOnARootFrame().setReferenceFrame(worldFrame);
+         collisionResult.getPointOnBRootFrame().setReferenceFrame(worldFrame);
+         collisionResult.getPointOnARootFrame().scaleAdd(-radiusA, collisionAxis, positionA);
+         collisionResult.getPointOnBRootFrame().scaleAdd(+radiusB, collisionAxis, positionB);
+
+         collisionResult.getCollisionData().getPointOnA().setIncludingFrame(collisionResult.getPointOnARootFrame());
+         collisionResult.getCollisionData().getPointOnB().setIncludingFrame(collisionResult.getPointOnBRootFrame());
+         collisionResult.getCollisionData().getPointOnA().changeFrame(sphereBodyA.getBodyFixedFrame());
+         collisionResult.getCollisionData().getPointOnB().changeFrame(sphereBodyB.getBodyFixedFrame());
+
+         ForwardDynamicsCalculator forwardDynamicsCalculatorA = new ForwardDynamicsCalculator(sphereCollidableA.getRootBody());
+         ForwardDynamicsCalculator forwardDynamicsCalculatorB = new ForwardDynamicsCalculator(sphereCollidableB.getRootBody());
+         SingleContactImpulseCalculator calculator = new SingleContactImpulseCalculator(worldFrame,
+                                                                                        sphereCollidableA.getRootBody(),
+                                                                                        forwardDynamicsCalculatorA,
+                                                                                        sphereCollidableB.getRootBody(),
+                                                                                        forwardDynamicsCalculatorB);
+         forwardDynamicsCalculatorA.compute();
+         forwardDynamicsCalculatorB.compute();
+         calculator.setCollision(collisionResult);
+         calculator.setTolerance(GAMMA);
+         calculator.setContactParameters(contactParameters);
+         calculator.initialize(dt);
+         calculator.updateInertia(null, null);
+         calculator.computeImpulse(dt);
+         calculator.finalizeImpulse();
+
+         updateVelocities(calculator, dt);
+
+         // Check that the spheres do not start spinning
+         assertTrue(TupleTools.isTupleZero(rootJointA.getJointTwist().getAngularPart(), 1.0e-5),
+                    "Iteration: " + i + ", non-zero angular velocity, magnitude: " + rootJointA.getJointTwist().getAngularPart().length());
+         assertTrue(TupleTools.isTupleZero(rootJointB.getJointTwist().getAngularPart(), 1.0e-5),
+                    "Iteration: " + i + ", non-zero angular velocity, magnitude: " + rootJointB.getJointTwist().getAngularPart().length());
+
+         // Computing expected velocities post impulse
+         Vector3D sphereAFinalVelocity = new Vector3D();
+         Vector3D sphereBFinalVelocity = new Vector3D();
+
+         sphereAFinalVelocity.setAndScale(massA - massB, sphereAInitialVelocity);
+         sphereAFinalVelocity.scaleAdd(2.0 * massB, sphereBInitialVelocity, sphereAFinalVelocity);
+         sphereAFinalVelocity.scale(1.0 / (massA + massB));
+
+         sphereBFinalVelocity.setAndScale(2.0 * massA, sphereAInitialVelocity);
+         sphereBFinalVelocity.scaleAdd(massB - massA, sphereBInitialVelocity, sphereBFinalVelocity);
+         sphereBFinalVelocity.scale(1.0 / (massA + massB));
+
+         EuclidCoreTestTools.assertTuple3DEquals(sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals(sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
+      }
+   }
+
    static void assertContactResponseProperties(String messagePrefix, double dt, FrameVector3D contactLinearVelocityNoImpulse,
                                                SingleContactImpulseCalculator impulseCalculator, double epsilon, double postImpulseVelocityEpsilon)
          throws Throwable
    {
       CollisionResult collisionResult = impulseCalculator.getCollisionResult();
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       RigidBodyBasics bodyA = collisionResult.getCollidableA().getRigidBody();
       RigidBodyBasics bodyB = collisionResult.getCollidableB().getRigidBody();
       DMatrixRMaj jointVelocityChangeA = impulseCalculator.getJointVelocityChangeA();
@@ -284,7 +395,7 @@ public class SingleContactImpulseCalculatorTest
    {
       CollisionResult collisionResult = new CollisionResult();
       collisionResult.setCollidableA(nextCollidable(random, contactingBodyA));
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       FramePoint3D pointInBodyFrameA = collisionResult.getCollisionData().getPointOnA();
       FramePoint3D pointInBodyFrameB = collisionResult.getCollisionData().getPointOnB();
       FramePoint3D pointOnARootFrame = collisionResult.getPointOnARootFrame();
@@ -370,8 +481,7 @@ public class SingleContactImpulseCalculatorTest
                                impulseCalculator.getJointVelocityChangeB());
    }
 
-   static void updateJointVelocities(double dt, RigidBodyBasics rigidBody, ForwardDynamicsCalculator forwardDynamicsCalculator,
-                                     DMatrixRMaj jointVelocityChange)
+   static void updateJointVelocities(double dt, RigidBodyBasics rigidBody, ForwardDynamicsCalculator forwardDynamicsCalculator, DMatrixRMaj jointVelocityChange)
    {
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
       List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootBody));
@@ -457,6 +567,19 @@ public class SingleContactImpulseCalculatorTest
       return floatingBody;
    }
 
+   static RigidBodyBasics nextFloatingSphereBody(Random random, String name)
+   {
+      RigidBody rootBody = new RigidBody(name + "RootBody", worldFrame);
+      SixDoFJoint floatingJoint = MultiBodySystemRandomTools.nextSixDoFJoint(random, name + "RootJoint", rootBody);
+
+      double radius = EuclidCoreRandomTools.nextDouble(random, 0.001, 1.0);
+      double mass = EuclidCoreRandomTools.nextDouble(random, 0.1, 10.0);
+      Matrix3D inertia = MomentOfInertiaFactory.solidSphere(mass, radius);
+      RigidBody floatingBody = new RigidBody(name + "Body", floatingJoint, inertia, mass, EuclidCoreTools.zeroVector3D);
+      floatingJoint.setSuccessor(floatingBody);
+      return floatingBody;
+   }
+
    static Collidable nextStaticCollidable(Random random)
    {
       return new Collidable(null, -1, -1, EuclidFrameShapeRandomTools.nextFrameShape3D(random, worldFrame));
@@ -465,8 +588,8 @@ public class SingleContactImpulseCalculatorTest
    static Collidable nextCollidable(Random random, RigidBodyBasics rigidBody)
    {
       FrameShape3DBasics shape = EuclidFrameShapeRandomTools.nextFrameConvexShape3D(random,
-                                                                               rigidBody.getBodyFixedFrame(),
-                                                                               rigidBody.getInertia().getCenterOfMassOffset());
+                                                                                    rigidBody.getBodyFixedFrame(),
+                                                                                    rigidBody.getInertia().getCenterOfMassOffset());
       return new Collidable(rigidBody, -1, -1, shape);
    }
 }

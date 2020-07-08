@@ -9,10 +9,18 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -476,5 +484,201 @@ public class EuclidCoreMissingTools
       double dx = projectionX - pointX;
       double dy = projectionY - pointY;
       return dx * dx + dy * dy;
+   }
+
+   /**
+    * Calculates the 3D part of the given {@code input} that is parallel to the given
+    * {@code normalAxis} and stores the result in {@code inputNormalPartToPack}.
+    * <p>
+    * The result has the following properties:
+    * <ul>
+    * <li><tt>x.n = x<sub>n</sub>.n</tt>
+    * <li><tt>|x<sub>n</sub>&times;n| = 0</tt>
+    * </ul>
+    * where:
+    * <ul>
+    * <li><tt>x</tt> is {@code input}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>x<sub>n</sub></tt> is {@code inputNormalPartToPack}.
+    * </ul>
+    * </p>
+    * 
+    * @param input                 the tuple to extract the normal part of. Not modified.
+    * @param normalAxis            the normal vector. It is normalized internally if needed. Not
+    *                              modified.
+    * @param inputNormalPartToPack the tuple used to store the normal part of the input. Modified.
+    */
+   public static void extractNormalPart(Tuple3DReadOnly input, Vector3DReadOnly normalAxis, Tuple3DBasics inputNormalPartToPack)
+   {
+      double normalX = normalAxis.getX();
+      double normalY = normalAxis.getY();
+      double normalZ = normalAxis.getZ();
+      double normalLengthSquared = EuclidCoreTools.normSquared(normalX, normalY, normalZ);
+
+      double dot = TupleTools.dot(normalAxis, input) / normalLengthSquared;
+      inputNormalPartToPack.setAndScale(dot, normalAxis);
+   }
+
+   /**
+    * Calculates the 3D part of the given {@code input} that is parallel to the given
+    * {@code normalAxis} and stores the result in {@code inputNormalPartToPack}.
+    * <p>
+    * The result has the following properties:
+    * <ul>
+    * <li><tt>x.n = x<sub>n</sub>.n</tt>
+    * <li><tt>|x<sub>n</sub>&times;n| = 0</tt>
+    * </ul>
+    * where:
+    * <ul>
+    * <li><tt>x</tt> is {@code input}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>x<sub>n</sub></tt> is {@code inputNormalPartToPack}.
+    * </ul>
+    * </p>
+    * 
+    * @param input                 the tuple to extract the normal part of. Not modified.
+    * @param normalAxis            the normal vector. It is normalized internally if needed. Not
+    *                              modified.
+    * @param inputNormalPartToPack the tuple used to store the normal part of the input. Modified.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
+    *                                         frame.
+    */
+   public static void extractNormalPart(FrameTuple3DReadOnly input, FrameVector3DReadOnly normalAxis, FixedFrameTuple3DBasics inputNormalPartToPack)
+   {
+      input.checkReferenceFrameMatch(normalAxis, inputNormalPartToPack);
+      extractNormalPart((Tuple3DReadOnly) input, (Vector3DReadOnly) normalAxis, (Tuple3DBasics) inputNormalPartToPack);
+   }
+
+   /**
+    * Calculates the 3D part of the given {@code input} that is parallel to the given
+    * {@code normalAxis} and stores the result in {@code inputNormalPartToPack}.
+    * <p>
+    * The result has the following properties:
+    * <ul>
+    * <li><tt>x.n = x<sub>n</sub>.n</tt>
+    * <li><tt>|x<sub>n</sub>&times;n| = 0</tt>
+    * </ul>
+    * where:
+    * <ul>
+    * <li><tt>x</tt> is {@code input}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>x<sub>n</sub></tt> is {@code inputNormalPartToPack}.
+    * </ul>
+    * </p>
+    * 
+    * @param input                 the tuple to extract the normal part of. Not modified.
+    * @param normalAxis            the normal vector. It is normalized internally if needed. Not
+    *                              modified.
+    * @param inputNormalPartToPack the tuple used to store the normal part of the input. Modified.
+    * @throws ReferenceFrameMismatchException if {@code input} and {@code normalAxis} are not expressed
+    *                                         in the same reference frame.
+    */
+   public static void extractNormalPart(FrameTuple3DReadOnly input, FrameVector3DReadOnly normalAxis, FrameTuple3DBasics inputNormalPartToPack)
+   {
+      input.checkReferenceFrameMatch(normalAxis);
+      inputNormalPartToPack.setReferenceFrame(input.getReferenceFrame());
+      extractNormalPart((Tuple3DReadOnly) input, (Vector3DReadOnly) normalAxis, (Tuple3DBasics) inputNormalPartToPack);
+   }
+
+   /**
+    * Calculates the 3D part of the given {@code input} that is orthogonal to the given
+    * {@code normalAxis} and stores the result in {@code inputTangentialPartToPack}.
+    * <p>
+    * The result has the following properties:
+    * <ul>
+    * <li><tt>x<sub>t</sub>.n = 0</tt>
+    * <li><tt>|x - (x.n)n| = |x<sub>t</sub>|</tt>
+    * </ul>
+    * where:
+    * <ul>
+    * <li><tt>x</tt> is {@code input}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>x<sub>t</sub></tt> is {@code inputTangentialPartToPack}.
+    * </ul>
+    * </p>
+    * 
+    * @param input                     the tuple to extract the tangential part of. Not modified.
+    * @param normalAxis                the normal vector. It is normalized internally if needed. Not
+    *                                  modified.
+    * @param inputTangentialPartToPack the tuple used to store the tangential part of the input.
+    *                                  Modified.
+    */
+   public static void extractTangentialPart(Tuple3DReadOnly input, Vector3DReadOnly normalAxis, Tuple3DBasics inputTagentialPartToPack)
+   {
+      double normalX = normalAxis.getX();
+      double normalY = normalAxis.getY();
+      double normalZ = normalAxis.getZ();
+      double normalLengthSquared = EuclidCoreTools.normSquared(normalX, normalY, normalZ);
+
+      double dot = TupleTools.dot(normalX, normalY, normalZ, input) / normalLengthSquared;
+      double normalPartX = dot * normalX;
+      double normalPartY = dot * normalY;
+      double normalPartZ = dot * normalZ;
+
+      inputTagentialPartToPack.set(input);
+      inputTagentialPartToPack.sub(normalPartX, normalPartY, normalPartZ);
+   }
+
+   /**
+    * Calculates the 3D part of the given {@code input} that is orthogonal to the given
+    * {@code normalAxis} and stores the result in {@code inputTangentialPartToPack}.
+    * <p>
+    * The result has the following properties:
+    * <ul>
+    * <li><tt>x<sub>t</sub>.n = 0</tt>
+    * <li><tt>|x - (x.n)n| = |x<sub>t</sub>|</tt>
+    * </ul>
+    * where:
+    * <ul>
+    * <li><tt>x</tt> is {@code input}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>x<sub>t</sub></tt> is {@code inputTangentialPartToPack}.
+    * </ul>
+    * </p>
+    * 
+    * @param input                     the tuple to extract the tangential part of. Not modified.
+    * @param normalAxis                the normal vector. It is normalized internally if needed. Not
+    *                                  modified.
+    * @param inputTangentialPartToPack the tuple used to store the tangential part of the input.
+    *                                  Modified.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
+    *                                         frame.
+    */
+   public static void extractTangentialPart(FrameTuple3DReadOnly input, FrameVector3DReadOnly normalAxis, FixedFrameTuple3DBasics inputTangentialPartToPack)
+   {
+      input.checkReferenceFrameMatch(normalAxis, inputTangentialPartToPack);
+      extractTangentialPart((Tuple3DReadOnly) input, (Vector3DReadOnly) normalAxis, (Tuple3DBasics) inputTangentialPartToPack);
+   }
+
+   /**
+    * Calculates the 3D part of the given {@code input} that is orthogonal to the given
+    * {@code normalAxis} and stores the result in {@code inputTangentialPartToPack}.
+    * <p>
+    * The result has the following properties:
+    * <ul>
+    * <li><tt>x<sub>t</sub>.n = 0</tt>
+    * <li><tt>|x - (x.n)n| = |x<sub>t</sub>|</tt>
+    * </ul>
+    * where:
+    * <ul>
+    * <li><tt>x</tt> is {@code input}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>x<sub>t</sub></tt> is {@code inputTangentialPartToPack}.
+    * </ul>
+    * </p>
+    * 
+    * @param input                     the tuple to extract the tangential part of. Not modified.
+    * @param normalAxis                the normal vector. It is normalized internally if needed. Not
+    *                                  modified.
+    * @param inputTangentialPartToPack the tuple used to store the tangential part of the input.
+    *                                  Modified.
+    * @throws ReferenceFrameMismatchException if {@code input} and {@code normalAxis} are not expressed
+    *                                         in the same reference frame.
+    */
+   public static void extractTangentialPart(FrameTuple3DReadOnly input, FrameVector3DReadOnly normalAxis, FrameTuple3DBasics inputTangentialPartToPack)
+   {
+      input.checkReferenceFrameMatch(normalAxis);
+      inputTangentialPartToPack.setReferenceFrame(input.getReferenceFrame());
+      extractTangentialPart((Tuple3DReadOnly) input, (Vector3DReadOnly) normalAxis, (Tuple3DBasics) inputTangentialPartToPack);
    }
 }

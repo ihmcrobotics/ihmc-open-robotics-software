@@ -38,6 +38,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    public static final double DEFAULT_NO_VALUE = -11.1;
 
+   public static final byte ROBOT_SIDE_LEFT = (byte) 0;
+
+   public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -220,7 +224,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public double maximum_step_z_ = -11.1;
+   public double maximum_left_step_z_ = -11.1;
+
+   /**
+            * Maximum vertical distance between consecutive footsteps
+            * 
+            * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+            * z-up sole frame.
+            */
+   public double maximum_right_step_z_ = -11.1;
 
    /**
             * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
@@ -548,8 +560,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double distance_epsilon_to_bridge_regions_ = -11.1;
 
+   /**
+            * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+            * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+            * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+            * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+            */
+   public byte step_only_with_requested_side_ = (byte) 255;
+
    public FootstepPlannerParametersPacket()
    {
+
 
 
 
@@ -691,7 +712,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       translation_scale_from_grandparent_node_ = other.translation_scale_from_grandparent_node_;
 
 
-      maximum_step_z_ = other.maximum_step_z_;
+      maximum_left_step_z_ = other.maximum_left_step_z_;
+
+
+      maximum_right_step_z_ = other.maximum_right_step_z_;
 
 
       minimum_step_z_when_fully_pitched_ = other.minimum_step_z_when_fully_pitched_;
@@ -836,6 +860,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       distance_epsilon_to_bridge_regions_ = other.distance_epsilon_to_bridge_regions_;
+
+
+      step_only_with_requested_side_ = other.step_only_with_requested_side_;
 
    }
 
@@ -1318,9 +1345,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public void setMaximumStepZ(double maximum_step_z)
+   public void setMaximumLeftStepZ(double maximum_left_step_z)
    {
-      maximum_step_z_ = maximum_step_z;
+      maximum_left_step_z_ = maximum_left_step_z;
    }
    /**
             * Maximum vertical distance between consecutive footsteps
@@ -1328,9 +1355,31 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public double getMaximumStepZ()
+   public double getMaximumLeftStepZ()
    {
-      return maximum_step_z_;
+      return maximum_left_step_z_;
+   }
+
+
+   /**
+            * Maximum vertical distance between consecutive footsteps
+            * 
+            * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+            * z-up sole frame.
+            */
+   public void setMaximumRightStepZ(double maximum_right_step_z)
+   {
+      maximum_right_step_z_ = maximum_right_step_z;
+   }
+   /**
+            * Maximum vertical distance between consecutive footsteps
+            * 
+            * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+            * z-up sole frame.
+            */
+   public double getMaximumRightStepZ()
+   {
+      return maximum_right_step_z_;
    }
 
 
@@ -2274,6 +2323,28 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
 
+   /**
+            * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+            * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+            * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+            * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+            */
+   public void setStepOnlyWithRequestedSide(byte step_only_with_requested_side)
+   {
+      step_only_with_requested_side_ = step_only_with_requested_side;
+   }
+   /**
+            * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+            * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+            * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+            * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+            */
+   public byte getStepOnlyWithRequestedSide()
+   {
+      return step_only_with_requested_side_;
+   }
+
+
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
       return FootstepPlannerParametersPacketPubSubType::new;
@@ -2352,7 +2423,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_scale_from_grandparent_node_, other.translation_scale_from_grandparent_node_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_left_step_z_, other.maximum_left_step_z_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_right_step_z_, other.maximum_right_step_z_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_z_when_fully_pitched_, other.minimum_step_z_when_fully_pitched_, epsilon)) return false;
@@ -2499,6 +2573,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_epsilon_to_bridge_regions_, other.distance_epsilon_to_bridge_regions_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_only_with_requested_side_, other.step_only_with_requested_side_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -2572,7 +2649,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.translation_scale_from_grandparent_node_ != otherMyClass.translation_scale_from_grandparent_node_) return false;
 
 
-      if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
+      if(this.maximum_left_step_z_ != otherMyClass.maximum_left_step_z_) return false;
+
+
+      if(this.maximum_right_step_z_ != otherMyClass.maximum_right_step_z_) return false;
 
 
       if(this.minimum_step_z_when_fully_pitched_ != otherMyClass.minimum_step_z_when_fully_pitched_) return false;
@@ -2719,6 +2799,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.distance_epsilon_to_bridge_regions_ != otherMyClass.distance_epsilon_to_bridge_regions_) return false;
 
 
+      if(this.step_only_with_requested_side_ != otherMyClass.step_only_with_requested_side_) return false;
+
+
       return true;
    }
 
@@ -2789,8 +2872,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("translation_scale_from_grandparent_node=");
       builder.append(this.translation_scale_from_grandparent_node_);      builder.append(", ");
 
-      builder.append("maximum_step_z=");
-      builder.append(this.maximum_step_z_);      builder.append(", ");
+      builder.append("maximum_left_step_z=");
+      builder.append(this.maximum_left_step_z_);      builder.append(", ");
+
+      builder.append("maximum_right_step_z=");
+      builder.append(this.maximum_right_step_z_);      builder.append(", ");
 
       builder.append("minimum_step_z_when_fully_pitched=");
       builder.append(this.minimum_step_z_when_fully_pitched_);      builder.append(", ");
@@ -2934,7 +3020,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.shin_height_offet_);      builder.append(", ");
 
       builder.append("distance_epsilon_to_bridge_regions=");
-      builder.append(this.distance_epsilon_to_bridge_regions_);
+      builder.append(this.distance_epsilon_to_bridge_regions_);      builder.append(", ");
+
+      builder.append("step_only_with_requested_side=");
+      builder.append(this.step_only_with_requested_side_);
       builder.append("}");
       return builder.toString();
    }

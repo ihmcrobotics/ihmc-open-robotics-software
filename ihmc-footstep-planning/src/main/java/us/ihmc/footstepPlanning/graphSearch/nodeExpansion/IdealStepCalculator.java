@@ -22,7 +22,8 @@ public class IdealStepCalculator
 {
    // TODO extract these to parameters once they're stable
    private static final double idealStepLengthWhenUpOrDownMultiplier = 0.7;
-   private static final double maxAdjustmentTowardsPath = 0.05;
+   private static final double maxDistanceAdjustmentTowardsPath = 0.15;
+   private static final double maxYawAdjustmentTowardsPath = Math.toRadians(20.0);
 
    private final HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
    private final FootstepPlannerParametersReadOnly parameters;
@@ -75,8 +76,10 @@ public class IdealStepCalculator
 
    private FootstepNode computeIdealStepInternal(FootstepNode stanceNode)
    {
+      boolean attemptSquareUp = attemptSquareUp(stanceNode);
+
       FootstepNode goalNode = goalNodes.get(stanceNode.getRobotSide().getOppositeSide());
-      if (!flatGroundMode() && nodeChecker.test(goalNode, stanceNode))
+      if (!flatGroundMode() && nodeChecker.test(goalNode, stanceNode) && !attemptSquareUp)
       {
          return goalNode;
       }
@@ -90,6 +93,12 @@ public class IdealStepCalculator
       double distanceFromGoalSquared = midFootPoint.distanceSquared(goalMidFootPose.getPosition());
       double distanceFromPathSquared = midFootPoint.distanceXYSquared(projectionPose.getPosition());
       double finalTurnProximity = parameters.getFinalTurnProximity();
+
+      if (attemptSquareUp)
+      {
+         double turnYaw = 0.0;
+         return turnInPlaceStep(stanceNode, midFootPoint, stanceNode.getRobotSide(), 0.5 * parameters.getIdealFootstepWidth(), turnYaw);
+      }
 
       double desiredYaw;
       if (distanceFromGoalSquared < MathTools.square(finalTurnProximity))
@@ -148,6 +157,10 @@ public class IdealStepCalculator
             double correctiveWidth = calculateCorrectiveDistance(segmentIndex);
             double stepWidth = stanceSide.negateIfLeftSide(0.5 * parameters.getIdealFootstepWidth());
             idealStep.appendTranslation(0.0, stepWidth + correctiveWidth);
+
+            // correct step yaw
+            double yawAdjustment = calculateCorrectiveYaw(segmentIndex);
+            idealStep.appendRotation(yawAdjustment);
          }
          else if (desiredHeading == FootstepPlanHeading.BACKWARD)
          {
@@ -191,6 +204,12 @@ public class IdealStepCalculator
       }
    }
 
+   private boolean attemptSquareUp(FootstepNode stanceNode)
+   {
+      RobotSide requestedStepSide = parameters.getStepOnlyWithRequestedSide();
+      return requestedStepSide != null && requestedStepSide != stanceNode.getRobotSide().getOppositeSide();
+   }
+
    private static FootstepNode turnInPlaceStep(FootstepNode startNode, Point2DBasics midFootPoint, RobotSide stanceSide, double idealFootstepWidth, double turnYaw)
    {
       Pose2D idealStep = new Pose2D(midFootPoint, startNode.getYaw());
@@ -203,9 +222,17 @@ public class IdealStepCalculator
    {
       boolean onSideOfLine = bodyPathPlanHolder.getSegmentLine(segmentIndex).isPointOnLeftSideOfLine(idealStep.getPosition());
       double distanceFromPath = bodyPathPlanHolder.getSegmentLine(segmentIndex).distance(idealStep.getPosition());
-      double clampedDistanceFromPath = Math.min(maxAdjustmentTowardsPath, distanceFromPath);
+      double clampedDistanceFromPath = Math.min(maxDistanceAdjustmentTowardsPath, distanceFromPath);
 
       double signedDistanceFromPath = clampedDistanceFromPath * (onSideOfLine ? 1.0 : -1.0);
       return - signedDistanceFromPath;
+   }
+
+   private double calculateCorrectiveYaw(int segmentIndex)
+   {
+      double currentYaw = idealStep.getYaw();
+      double desiredYaw = bodyPathPlanHolder.getSegmentYaw(segmentIndex);
+      double correctiveYaw = AngleTools.computeAngleDifferenceMinusPiToPi(desiredYaw, currentYaw);
+      return MathTools.clamp(correctiveYaw, maxYawAdjustmentTowardsPath);
    }
 }

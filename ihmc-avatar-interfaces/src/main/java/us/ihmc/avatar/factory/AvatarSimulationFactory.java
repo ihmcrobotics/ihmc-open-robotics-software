@@ -174,7 +174,7 @@ public class AvatarSimulationFactory
          experimentalSimulation.addEnvironmentCollidables(helper, robotCollisionMask, environmentCollisionMask, commonAvatarEnvironment.get());
          RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
                                                                        .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
-         experimentalSimulation.addRobot(robotModel.get(), simulationRobotCollisionModel, robotInitialStateWriter);
+         experimentalSimulation.configureRobot(robotModel.get(), simulationRobotCollisionModel, robotInitialStateWriter);
 
          simulationConstructionSet = new SimulationConstructionSet(experimentalSimulation,
                                                                    guiInitialSetup.get().getGraphics3DAdapter(),

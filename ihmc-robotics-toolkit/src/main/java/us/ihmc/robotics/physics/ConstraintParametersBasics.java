@@ -19,6 +19,7 @@ public interface ConstraintParametersBasics extends ConstraintParametersReadOnly
    default void set(ConstraintParametersReadOnly other)
    {
       setCoefficientOfRestitution(other.getCoefficientOfRestitution());
+      setRestitutionThreshold(other.getRestitutionThreshold());
       setConstraintForceMixing(other.getConstraintForceMixing());
       setErrorReductionParameter(other.getErrorReductionParameter());
    }
@@ -43,9 +44,21 @@ public interface ConstraintParametersBasics extends ConstraintParametersReadOnly
     * </ul>
     * </p>
     * 
-    * @param coefficientOfRestitution the coefficient of restitution, recommended [0, 0.1].
+    * @param coefficientOfRestitution the coefficient of restitution.
     */
    void setCoefficientOfRestitution(double coefficientOfRestitution);
+
+   /**
+    * Sets the velocity minimum threshold to enable restitution.
+    * <p>
+    * The threshold on the pre-impulse velocity, if it's magnitude is above the threshold, then the
+    * coefficient of restitution is used to resolve the impact, if it is below a coefficient of
+    * restitution of zero is used.
+    * </p>
+    * 
+    * @param restitutionThreshold the restitution threshold on the pre-impulse velocity magnitude.
+    */
+   void setRestitutionThreshold(double restitutionThreshold);
 
    /**
     * Set the constraint force mixing parameter.

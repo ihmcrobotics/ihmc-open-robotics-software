@@ -30,7 +30,7 @@ import java.util.*;
 public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
-   private final String saveFileName;
+   private String saveFileName;
 
    private final Object[] values;
    private final Class<?> classForLoading;
@@ -210,8 +210,17 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   @Override
    public void load()
    {
+      load(saveFileName);
+   }
+
+   @Override
+   public void load(String fileName)
+   {
+      this.saveFileName = fileName;
+
       ExceptionTools.handle(() ->
       {
          Properties properties = new Properties();
@@ -351,12 +360,13 @@ public class StoredPropertySet implements StoredPropertySetBasics
       return classForLoading.getResource(saveFileName);
    }
 
-   private Path findFileForSaving()
+   public Path findFileForSaving()
    {
       return findSaveFileDirectory().resolve(saveFileName);
    }
 
-   private Path findSaveFileDirectory()
+   @Override
+   public Path findSaveFileDirectory()
    {
       // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
       // of just save the file in the working directory

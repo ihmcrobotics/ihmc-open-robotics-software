@@ -66,7 +66,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       constraintCalculator.setConstraintRegions(constraintRegions);
       constraintCalculator.setCaptureRegion(captureRegion);
 
-      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
 
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
    }
@@ -127,7 +127,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       constraintCalculator.setOmega0(omega);
       constraintCalculator.setConstraintRegions(constraintRegions);
       constraintCalculator.setCaptureRegion(captureRegion);
-      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
 
       assertTrue(smallRegionPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
 
@@ -140,7 +140,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
 
       constraintCalculator.setCaptureRegion(captureRegion);
 
-      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
 
       GeometryPolygonTestTools.assertConcavePolygon2DEquals(groundPlane.getConcaveHull(), constraintCalculator.getConstraintRegion().getConcaveHull(), 1e-8);
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));

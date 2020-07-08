@@ -1,0 +1,560 @@
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
+import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.OpenPullDoorBehavior.OpenDoorState;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
+import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
+{
+
+   enum OpenDoorState
+   {
+      START,
+      MOVE_LEFT_HAND_TO_INITIAL_LOCATION,
+      MOVE_RIGHT_HAND_TO_INITIAL_LOCATION,
+      TURN_ON_OPEN_DOOR_DETECTOR,
+      OPEN_RIGHT_HAND,
+
+      GRAB_DOOR_KNOB,
+      CLOSE_RIGHT_HAND,
+      TURN_DOOR_KNOB,
+      PULL_ON_DOOR,
+      PULL_ON_DOOR_MORE,
+      PUT_LEFT_HAND_IN_DOOR,
+      RELEASE_DOOR_KNOB,
+      MOVE_RIGHT_HAND_CLEAR,
+      SAFE_RIGHT_HAND,
+      PUSH_OPEN_DOOR,
+      PULL_BACK_HANDS,
+      DONE,
+      FAILED
+   }
+
+   private PoseReferenceFrame doorPoseFrame = null;
+
+   private boolean succeeded;
+
+   private final AtlasPrimitiveActions atlasPrimitiveActions;
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private SleepBehavior sleepBehavior;
+   private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
+   private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+
+   private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
+
+   public OpenPullDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
+                               DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
+      this.atlasPrimitiveActions = atlasPrimitiveActions;
+      this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
+      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
+      sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
+      abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
+
+      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationPacket::set);
+
+      setupStateMachine();
+
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+      succeeded = false;
+      doorLocationPacket.set(null);
+      super.onBehaviorEntered();
+   }
+
+   public boolean succeeded()
+   {
+      return succeeded;
+   }
+
+   @Override
+   protected OpenDoorState configureStateMachineAndReturnInitialKey(StateMachineFactory<OpenDoorState, BehaviorAction> factory)
+   {
+
+      
+      BehaviorAction start = new BehaviorAction(atlasPrimitiveActions.leftHandDesiredConfigurationBehavior,
+                                                atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
+      {
+         @Override
+         public void onEntry()
+         {
+            super.onEntry();
+            doorLocationPacket.set(null);
+         }
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            
+            HandDesiredConfigurationMessage leftHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT,
+                                                                                                                         HandConfiguration.CLOSE);
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.CLOSE);
+
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+
+            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(leftHandMessage);
+            
+         }
+         public boolean isDone()
+         {
+            //wait for the door to be located and a baseline set for open detection
+            if (doorLocationPacket.get() != null)
+            {
+               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
+            }
+            return doorLocationPacket.get() != null;
+         }
+
+      };
+      
+      
+     
+
+      BehaviorAction moveLeftHandToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            setAutomaticArmAbort(false);
+
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 1.041,  0.206,  1.131,
+                                                                                -2.833001530795148, -0.030807973085045466, -0.12069474717811632,
+                                                                               RobotSide.LEFT,
+                                                                               "Moving Left Hand To Door",
+                                                                               4));
+
+         }
+      };
+
+      BehaviorAction moveRightHandToDoor = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            setAutomaticArmAbort(false);
+
+            //pre speedup values for distance from door -0.102
+            //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.0635, 1.079, 1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT, "Moving Right Hand Above Door Knob",3));
+
+            //RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.095,  1.032 ) orientation 1.549469789243062, 0.08444685410187032, 0.037877956817564146
+
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.775,  0.243,  0.909,
+                                                                                -1.586084090324106, 0.020808916332101107, -1.6129154247182247,
+                                                                                RobotSide.RIGHT,
+                                                                                "Moving Right Hand Above Door Knob",
+                                                                                4));
+
+            //  atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.298, -0.147, 1.097, 1.2554068994570775, 0.03416782147174632,
+            //                                                                    0.26586161890007015, RobotSide.LEFT, "Moving Left Hand To Door",4));
+
+         }
+      };
+
+      BehaviorAction setDoorDetectorStart = new BehaviorAction()
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            publishTextToSpeech("Starting Door Open Detector Service");
+
+            doorOpenDetectorBehaviorService.reset();
+            doorOpenDetectorBehaviorService.run(true);
+         }
+
+         @Override
+         public boolean isDone()
+         {
+            //wait for the door to be located and a baseline set for open detection
+            if (doorOpenDetectorBehaviorService.doorDetected())
+            {
+               publishTextToSpeech("Door Open Detector Service has closed door position saved");
+
+            }
+            return doorOpenDetectorBehaviorService.doorDetected();
+
+         }
+
+      };
+      
+      BehaviorAction openRightHand = new BehaviorAction(atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
+      {
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            
+            
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.OPEN);
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+ 
+         }
+      };
+      
+      
+      BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            setAutomaticArmAbort(true);
+
+            //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.0635, 0.879, 1.551252338779563, 0.048351007951384285,
+            //                                                                                0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+
+            //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.8, -0.1, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+
+            //      RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.096,  0.932 ) orientation 1.5511648101378044, 0.08462087065219358, 0.03818089607481523
+
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.782,  0.108,  0.942 ,
+                                                                       -1.342294556486076, 0.04822421606410083, -1.4743436629660387,
+                                                                                RobotSide.RIGHT,
+                                                                                "Moving Hand To Door Knob",
+                                                                                4));
+
+         }
+      };
+      
+      BehaviorAction closeRightHand = new BehaviorAction(atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
+      {
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            
+            
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.CLOSE);
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+ 
+         }
+      };
+
+      BehaviorAction turnDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            setAutomaticArmAbort(true);
+
+            //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.0635, 0.879, 1.551252338779563, 0.048351007951384285,
+            //                                                                                0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+
+            //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.8, -0.1, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+
+            //      RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.096,  0.932 ) orientation 1.5511648101378044, 0.08462087065219358, 0.03818089607481523
+
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.782,  0.108,  0.896,
+                                                                                -1.3422944603797606, 0.04822423756056547, -0.7762116142400511,
+                                                                                RobotSide.RIGHT,
+                                                                                "Turn Door Knob",
+                                                                                4));
+
+         }
+      };
+      BehaviorAction pullDoorALittle = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.75, -0.00, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Push Door A Little", 1));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.696,  0.281,  0.934,
+                                                                                -1.22759914078621, 0.14836371122511496, -1.2187336694291255,
+                                                                                RobotSide.RIGHT,
+                                                                                "Pull Door A Little",
+                                                                                2));
+            //RIGHT hand in MultiClickdoor_0_objID197 ( 0.750, -0.049,  0.896 ) orientation 1.5911238903674156, 0.038548649273740986, -7.31590778193919E-4
+
+         }
+      };
+      
+      BehaviorAction pullDoorMore = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.75, -0.00, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Push Door A Little", 1));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.609,  0.389,  0.956,
+                                                                                 -1.1487588047896384, 0.041777716044080836, -0.8109110450874472,
+                                                                                RobotSide.RIGHT,
+                                                                                "Pull Door More",
+                                                                                2));
+            //RIGHT hand in MultiClickdoor_0_objID197 ( 0.750, -0.049,  0.896 ) orientation 1.5911238903674156, 0.038548649273740986, -7.31590778193919E-4
+
+         }
+      };
+      
+      BehaviorAction putLeftHandInDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            //otherwise the robot stops the arm motion because it is to fast
+            setAutomaticArmAbort(false);
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.818,  0.112,  1.133,
+                                                                               -3.005059183962542, -0.08222760637317995, 0.09712104081764292,
+                                                                               RobotSide.LEFT,
+                                                                               "Put Left Hand In Door",
+                                                                               2));
+         }
+
+      };
+      
+      BehaviorAction releaseHandle = new BehaviorAction(atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
+      {
+
+         @Override
+         protected void setBehaviorInput()
+         {
+            
+            
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.OPEN);
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+ 
+         }
+      };
+      
+      BehaviorAction moveRightHandClear = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.75, -0.00, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Push Door A Little", 1));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.589,  1.055,  0.830,
+                                                                                -1.554026654268604, 0.759223557761935, -1.6572679687794496,
+                                                                                RobotSide.RIGHT,
+                                                                                "Move Right Hand Clear",
+                                                                                2));
+            //RIGHT hand in MultiClickdoor_0_objID197 ( 0.750, -0.049,  0.896 ) orientation 1.5911238903674156, 0.038548649273740986, -7.31590778193919E-4
+
+         }
+      };
+      
+      
+      BehaviorAction pushDoorOpen = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            //otherwise the robot stops the arm motion because it is to fast
+            setAutomaticArmAbort(false);
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.363,  0.546,  1.137,
+                                                                               2.4835904948189986, 0.018198548283333248, 0.13293536111042364,
+                                                                               RobotSide.LEFT,
+                                                                               "Pushing Door Open With Left Hand",
+                                                                               2));
+         }
+
+      };
+
+      BehaviorAction pullHandsBack = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            setAutomaticArmAbort(true);
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(1.329,  0.642,  0.843,
+                                                                               -2.367683866476793, 0.5316805288956675, -1.2625699425496124,
+                                                                               RobotSide.LEFT,
+                                                                               "Pulling Left Hand Back",
+                                                                               1));
+         }
+      };
+
+      BehaviorAction done = new BehaviorAction()
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            succeeded = true;
+            publishTextToSpeech("DOOR OPENING COMPLETE");
+         }
+      };
+
+      BehaviorAction failed = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior,atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            
+            
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
+                                                                                                                          HandConfiguration.OPEN);
+
+            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
+            
+            
+            succeeded = false;
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 1.041,  0.206,  1.131,
+                                                                                -2.833001530795148, -0.030807973085045466, -0.12069474717811632,
+                                                                               RobotSide.LEFT,
+                                                                               "Pulling Left Hand Back",
+                                                                               4));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.775,  0.243,  0.909,
+                                                                                -1.586084090324106, 0.020808916332101107, -1.6129154247182247,
+                                                                                RobotSide.RIGHT,
+                                                                                "Pulling Right Hand Back",
+                                                                                4));
+
+            publishTextToSpeech("DOOR OPENING FAILED Reseting");
+         }
+      };
+
+      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION,moveLeftHandToDoor,OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR);
+      factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.OPEN_RIGHT_HAND);
+      
+      factory.addStateAndDoneTransition(OpenDoorState.OPEN_RIGHT_HAND, openRightHand, OpenDoorState.GRAB_DOOR_KNOB);
+      factory.addStateAndDoneTransition(OpenDoorState.GRAB_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.CLOSE_RIGHT_HAND);
+      factory.addStateAndDoneTransition(OpenDoorState.CLOSE_RIGHT_HAND, closeRightHand, OpenDoorState.TURN_DOOR_KNOB);
+
+
+                                        
+                                        
+
+      factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, turnDoorKnob, OpenDoorState.PULL_ON_DOOR);
+
+      //      
+      factory.addState(OpenDoorState.PULL_ON_DOOR, pullDoorALittle);
+      factory.addState(OpenDoorState.PULL_ON_DOOR_MORE, pullDoorMore);
+
+      factory.addState(OpenDoorState.DONE, done);
+      factory.addState(OpenDoorState.FAILED, failed);
+
+      factory.addTransition(OpenDoorState.PULL_ON_DOOR, OpenDoorState.FAILED, t -> pullDoorALittle.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PULL_ON_DOOR, OpenDoorState.PULL_ON_DOOR_MORE, t -> doorOpenDetectorBehaviorService.isDoorOpen());
+      
+      
+      factory.addTransition(OpenDoorState.PULL_ON_DOOR_MORE, OpenDoorState.FAILED, t -> pullDoorMore.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PULL_ON_DOOR_MORE, OpenDoorState.PUT_LEFT_HAND_IN_DOOR, t -> pullDoorMore.isDone()&&doorOpenDetectorBehaviorService.isDoorOpen());
+      
+      
+      factory.addStateAndDoneTransition(OpenDoorState.PUT_LEFT_HAND_IN_DOOR, putLeftHandInDoor, OpenDoorState.RELEASE_DOOR_KNOB);
+      factory.addStateAndDoneTransition(OpenDoorState.RELEASE_DOOR_KNOB, releaseHandle, OpenDoorState.MOVE_RIGHT_HAND_CLEAR);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_CLEAR, moveRightHandClear, OpenDoorState.SAFE_RIGHT_HAND);
+      factory.addStateAndDoneTransition(OpenDoorState.SAFE_RIGHT_HAND, closeRightHand, OpenDoorState.PUSH_OPEN_DOOR);
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen, OpenDoorState.PULL_BACK_HANDS);
+      factory.addStateAndDoneTransition(OpenDoorState.PULL_BACK_HANDS, pullHandsBack, OpenDoorState.DONE);
+
+      return OpenDoorState.START;
+
+   }
+
+   /*
+    * @Override public boolean isDone() {
+    * //System.out.println("done check "+super.isDone()+" "+getStateMachine().
+    * getCurrentBehaviorKey()+" " +getStateMachine().getCurrentAction().isDone()); return
+    * super.isDone(); }
+    */
+
+   private HandTrajectoryMessage moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll,
+                                          final RobotSide side, final String description, double trajectoryTime)
+   {
+      publishTextToSpeech(description);
+
+      FramePose3D point = offsetPointFromDoorInWorldFrame(x, y, z, yaw, pitch, roll);
+
+      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
+
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side,
+                                                                                                     trajectoryTime,
+                                                                                                     point.getPosition(),
+                                                                                                     point.getOrientation(),
+                                                                                                     CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+
+      return handTrajectoryMessage;
+   }
+
+   private void setAutomaticArmAbort(boolean enableAbort)
+   {
+      AutomaticManipulationAbortMessage automaticManipulationAbortPacket = HumanoidMessageTools.createAutomaticManipulationAbortMessage(enableAbort);
+      abortMessagePublisher.publish(automaticManipulationAbortPacket);
+   }
+
+   public void setGrabLocation(Pose3D doorPose3D)
+   {
+      publishTextToSpeech("grab location set " + doorPose3D);
+      PoseReferenceFrame doorPose = new PoseReferenceFrame("OpenDoorReferenceFrame", ReferenceFrame.getWorldFrame());
+      doorPose.setPoseAndUpdate(new Pose3D(doorPose3D));
+      this.doorPoseFrame = doorPose;
+   }
+
+   @Override
+   public void doControl()
+   {
+
+      super.doControl();
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
+      doorPoseFrame = null;
+
+   }
+
+   private FramePose3D offsetPointFromDoorInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
+   {
+      System.out.println("doorPoseFrame " + doorPoseFrame);
+      FramePoint3D point1 = new FramePoint3D(doorPoseFrame, x, y, z);
+      point1.changeFrame(ReferenceFrame.getWorldFrame());
+      FrameQuaternion orient = new FrameQuaternion(doorPoseFrame, yaw, pitch, roll);
+      orient.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FramePose3D pose = new FramePose3D(point1, orient);
+
+      return pose;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+}
