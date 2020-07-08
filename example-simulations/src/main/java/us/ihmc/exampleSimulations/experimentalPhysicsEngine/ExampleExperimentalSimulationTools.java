@@ -30,7 +30,16 @@ public class ExampleExperimentalSimulationTools
    {
       RobotDescription robotDescription = new RobotDescription(name);
       FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription link = new LinkDescription(name + "Link");
+      rootJoint.setLink(newSphereLink(name + "Link", radius, mass, radiusOfGyrationPercent, appearance, addStripes, stripesAppearance));
+      robotDescription.addRootJoint(rootJoint);
+
+      return robotDescription;
+   }
+
+   public static LinkDescription newSphereLink(String name, double radius, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance,
+                                               boolean addStripes, AppearanceDefinition stripesAppearance)
+   {
+      LinkDescription link = new LinkDescription(name);
       double radiusOfGyration = radiusOfGyrationPercent * radius;
       link.setMassAndRadiiOfGyration(mass, radiusOfGyration, radiusOfGyration, radiusOfGyration);
 
@@ -46,10 +55,7 @@ public class ExampleExperimentalSimulationTools
       }
 
       link.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(link);
-      robotDescription.addRootJoint(rootJoint);
-
-      return robotDescription;
+      return link;
    }
 
    static RobotDescription newCylinderRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
@@ -128,16 +134,32 @@ public class ExampleExperimentalSimulationTools
 
    public static LinkDescription newBoxLink(String linkName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance)
    {
-      return newBoxLink(linkName, size.getX(), size.getY(), size.getZ(), mass, radiusOfGyrationPercent, appearance);
+      return newBoxLink(linkName, size, mass, radiusOfGyrationPercent, null, appearance);
+   }
+
+   public static LinkDescription newBoxLink(String linkName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent,
+                                            Vector3DReadOnly offsetFromParent, AppearanceDefinition appearance)
+   {
+      return newBoxLink(linkName, size.getX(), size.getY(), size.getZ(), mass, radiusOfGyrationPercent, offsetFromParent, appearance);
    }
 
    public static LinkDescription newBoxLink(String linkName, double sizeX, double sizeY, double sizeZ, double mass, double radiusOfGyrationPercent,
                                             AppearanceDefinition appearance)
    {
+      return newBoxLink(linkName, sizeX, sizeY, sizeZ, mass, radiusOfGyrationPercent, null, appearance);
+   }
+
+   public static LinkDescription newBoxLink(String linkName, double sizeX, double sizeY, double sizeZ, double mass, double radiusOfGyrationPercent,
+                                            Vector3DReadOnly offsetFromParentJoint, AppearanceDefinition appearance)
+   {
       LinkDescription link = new LinkDescription(linkName);
       link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * sizeX, radiusOfGyrationPercent * sizeY, radiusOfGyrationPercent * sizeZ);
+      if (offsetFromParentJoint != null)
+         link.setCenterOfMassOffset(offsetFromParentJoint);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
+      if (offsetFromParentJoint != null)
+         linkGraphics.translate(offsetFromParentJoint);
       linkGraphics.translate(0.0, 0.0, -sizeZ / 2.0);
       linkGraphics.addCube(sizeX, sizeY, sizeZ, appearance);
       link.setLinkGraphics(linkGraphics);

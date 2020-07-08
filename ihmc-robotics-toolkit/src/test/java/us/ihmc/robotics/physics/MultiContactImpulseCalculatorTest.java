@@ -90,7 +90,7 @@ public class MultiContactImpulseCalculatorTest
 
          MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame);
          multiContactImpulseCalculator.configure(physicsEngineRobotDataMap, collisionGroup);
-         multiContactImpulseCalculator.setContactParameters(new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0));
+         multiContactImpulseCalculator.setContactParameters(ContactParameters.defaultIneslasticContactParameters(false));
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
          try

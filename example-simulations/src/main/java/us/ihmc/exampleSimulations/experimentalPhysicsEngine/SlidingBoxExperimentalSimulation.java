@@ -20,10 +20,16 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class SlidingBoxExperimentalSimulation
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.001, 0.5, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public SlidingBoxExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setErrorReductionParameter(0.001);
+      contactParameters.setSlipErrorReductionParameter(0.5);
+      contactParameters.setConstraintForceMixing(1.0);
+
       Vector3D boxSize = new Vector3D(0.4, 0.4, 0.4);
 
       double groundPitch = Math.toRadians(34.0);
