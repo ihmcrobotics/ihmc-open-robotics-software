@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -40,8 +41,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class BuildingExplorationBehaviorCoordinator
 {
+   private static final boolean DEBUG = true;
    private static final int UPDATE_RATE_MILLIS = 50;
-   private static final double xyProximityToDoorToStopWalking = 2.0;
+   private static final double xyProximityToDoorToStopWalking = 1.6;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final Ros2Node ros2Node;
@@ -164,12 +166,25 @@ public class BuildingExplorationBehaviorCoordinator
       public void onEntry()
       {
          // do nothing, this is an idle state where the operator sends commands from the VR UI
+         if (DEBUG)
+         {
+            LogTools.info("Entering " + getClass().getSimpleName());
+         }
       }
 
       @Override
       public void doAction(double timeInState)
       {
          // do nothing
+      }
+
+      @Override
+      public void onExit(double timeInState)
+      {
+         if (DEBUG)
+         {
+            LogTools.info("Exiting " + getClass().getSimpleName());
+         }
       }
    }
 
@@ -232,6 +247,11 @@ public class BuildingExplorationBehaviorCoordinator
 
          goalPublisher.publish(bombPose);
          ThreadTools.sleep(100);
+
+         if (DEBUG)
+         {
+            LogTools.info("Entering " + getClass().getSimpleName());
+         }
       }
 
       @Override
@@ -243,7 +263,12 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onExit(double timeInState)
       {
+         if (DEBUG)
+         {
+            LogTools.info("Exiting " + getClass().getSimpleName());
+         }
 
+         resetPublisher.publish(new Empty());
       }
 
       void setBombPose(Pose3DReadOnly bombPose)
@@ -284,6 +309,11 @@ public class BuildingExplorationBehaviorCoordinator
          humanoidBehaviorTypePacket.setHumanoidBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR.toByte());
          behaviorTypePublisher.publish(humanoidBehaviorTypePacket);
          isDone.set(false);
+
+         if (DEBUG)
+         {
+            LogTools.info("Entering " + getClass().getSimpleName());
+         }
       }
 
       @Override
@@ -297,6 +327,11 @@ public class BuildingExplorationBehaviorCoordinator
          BehaviorControlModePacket behaviorControlModePacket = new BehaviorControlModePacket();
          behaviorControlModePacket.setBehaviorControlModeEnumRequest(BehaviorControlModeEnum.STOP.toByte());
          behaviorModePublisher.publish(behaviorControlModePacket);
+
+         if (DEBUG)
+         {
+            LogTools.info("Exiting " + getClass().getSimpleName());
+         }
       }
 
       @Override
@@ -312,6 +347,10 @@ public class BuildingExplorationBehaviorCoordinator
       public void onEntry()
       {
          // TODO fill in once state is implemented
+         if (DEBUG)
+         {
+            LogTools.info("Entering " + getClass().getSimpleName());
+         }
       }
 
       @Override
@@ -323,13 +362,17 @@ public class BuildingExplorationBehaviorCoordinator
       public void onExit(double timeInState)
       {
          // TODO fill in once state is implemented
+         if (DEBUG)
+         {
+            LogTools.info("Exiting " + getClass().getSimpleName());
+         }
       }
 
       @Override
       public boolean isDone(double timeInState)
       {
          // TODO listen for callback from stairs behavior
-         return false;
+         return true;
       }
    }
 
