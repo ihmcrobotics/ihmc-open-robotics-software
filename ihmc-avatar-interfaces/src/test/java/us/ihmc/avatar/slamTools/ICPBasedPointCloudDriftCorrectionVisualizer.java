@@ -164,7 +164,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          optimizer.iterate();
 
          // get parameter.
-         icpTransformer.set(inputFunction.apply(optimizer.getOptimalParameter()));
+         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
          correctedSensorPoseToWorld.set(frameForSourcePoints.getInitialSensorPoseToWorld());
          correctedSensorPoseToWorld.multiply(icpTransformer);
          for (int i = 0; i < correctedData.length; i++)
