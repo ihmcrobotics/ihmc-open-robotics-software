@@ -33,4 +33,9 @@ public class PlanarRegionSLAMMapper
 
       return slamMap;
    }
+
+   public PlanarRegionsList getSlamMap()
+   {
+      return slamMap;
+   }
 }
