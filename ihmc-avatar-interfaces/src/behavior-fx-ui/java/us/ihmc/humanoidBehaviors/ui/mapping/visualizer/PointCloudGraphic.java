@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.Group;
@@ -35,13 +37,14 @@ public class PointCloudGraphic extends Group
 
    private static final int palleteSizeForMeshBuilder = 2048;
 
+   private final Random selector = new Random(0612L);
+
    private volatile List<Node> messageNodes;
    private List<Node> lastNodes = null;
    private volatile List<Node> updatePointCloudMeshViews;
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
 
-   // linear interpolated trajectory. once StereoVisionPointCloudMessage holds linear/angular velocity, this will be generated with cubic spline.
    private final boolean visualizeTrajectory;
    private RigidBodyTransform latestSensorPose = null;
    private final ArrayList<Point3D> sensorPoseTrajectory = new ArrayList<Point3D>();
@@ -94,25 +97,32 @@ public class PointCloudGraphic extends Group
 
    public void addStereoVisionPointCloudMessageMesh(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, Color pointCloudColor)
    {
-      int redScaler = (int) (0xFF * (1 - (stereoVisionPointCloudMessage.getSensorPoseConfidence())));
-      int greenScaler = (int) (0xFF * (stereoVisionPointCloudMessage.getSensorPoseConfidence()));
-      Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
-      addSensorPoseMesh(MessageTools.unpackSensorPose(stereoVisionPointCloudMessage), confidenceColor);
-
+      addSensorPoseMesh(MessageTools.unpackSensorPose(stereoVisionPointCloudMessage), pointCloudColor);
       addPointsMeshes(PointCloudCompression.decompressPointCloudToArray(stereoVisionPointCloudMessage), pointCloudColor);
    }
 
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz)
    {
-      Point3D32 scanPoint = new Point3D32();
-
       int numberOfScanPoints = points.length;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
-      for (int j = 0; j < sizeOfPointCloudToVisualize; j++)
-      {
-         scanPoint.set(points[j]);
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
-      }
+      IntStream limit = selector.ints(0, points.length).distinct().limit(sizeOfPointCloudToVisualize);
+      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), points[index], colorToViz));
+   }
+
+   /**
+    * default size is 0.005.
+    */
+   public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz, double size)
+   {
+      int numberOfScanPoints = points.length;
+      int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
+      IntStream limit = selector.ints(0, points.length).distinct().limit(sizeOfPointCloudToVisualize);
+      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), points[index], colorToViz));
+   }
+
+   public void addLineMesh(Point3DReadOnly from, Point3DReadOnly to, Color color, double width)
+   {
+      meshBuilder.addMesh(MeshDataGenerator.Line(from, to, width), new Point3D(), color);
    }
 
    public void addSensorPoseMesh(RigidBodyTransformReadOnly sensorPose, Color colorToViz)
