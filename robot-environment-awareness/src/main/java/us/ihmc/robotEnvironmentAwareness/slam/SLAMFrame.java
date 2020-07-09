@@ -1,17 +1,29 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.jOctoMap.iterators.OcTreeIterable;
+import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
 {
-   protected final SLAMFrame previousFrame;
+   private final SLAMFrame previousFrame;
 
    /**
     * original sensor pose from message.
@@ -19,14 +31,9 @@ public class SLAMFrame
    private final RigidBodyTransformReadOnly originalSensorPoseToWorld;
 
    /**
-    * fixedDiff(parent.originalSensorPoseToWorld vs this.originalSensorPoseToWorld).
-    */
-   private final RigidBodyTransformReadOnly transformFromPreviousFrame;
-
-   /**
     * parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
     */
-   protected final RigidBodyTransformReadOnly sensorPoseToWorld;
+   private final RigidBodyTransformReadOnly sensorPoseToWorld;
 
    /**
     * SLAM result.
@@ -36,7 +43,7 @@ public class SLAMFrame
    /**
     * this.sensorPoseToWorld * this.slamTransformer.
     */
-   protected final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
 
    protected final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
    protected final Point3DReadOnly[] pointCloudToSensorFrame;
@@ -50,7 +57,6 @@ public class SLAMFrame
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
-      transformFromPreviousFrame = new RigidBodyTransform(originalSensorPoseToWorld);
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
       optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
 
@@ -69,13 +75,7 @@ public class SLAMFrame
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
-      RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
-      transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
-      transformFromPreviousFrame = new RigidBodyTransform(transformDiff);
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform(frame.optimizedSensorPoseToWorld);
-      transformToWorld.multiply(transformFromPreviousFrame);
-      sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
+      sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
 
       originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
@@ -103,8 +103,74 @@ public class SLAMFrame
          optimizedPointCloudToWorld[i].set(pointCloudToSensorFrame[i]);
          optimizedSensorPoseToWorld.transform(optimizedPointCloudToWorld[i]);
       }
+
+      for (int i = 0; i < surfaceElements.size(); i++)
+      {
+         Plane3D surfel = surfaceElements.get(i);
+         surfel.set(surfaceElementsToSensor.get(i));
+         getSensorPose().transform(surfel.getPoint());
+         getSensorPose().transform(surfel.getNormal());
+      }
    }
-   
+
+   private final List<Plane3D> surfaceElements = new ArrayList<>();
+   private final List<Plane3DReadOnly> surfaceElementsToSensor = new ArrayList<>();
+   private NormalOcTree frameMap;
+
+   public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
+   {
+      surfaceElements.clear();
+      surfaceElementsToSensor.clear();
+      frameMap = new NormalOcTree(surfaceElementResolution);
+
+      ScanCollection scanCollection = new ScanCollection();
+      int numberOfPoints = getOriginalPointCloud().length;
+
+      scanCollection.setSubSampleSize(numberOfPoints);
+      scanCollection.addScan(SLAMTools.toScan(getOriginalPointCloud(), getOriginalPointCloudToSensorPose(), getOriginalSensorPose(), map, windowMargin));
+
+      frameMap.insertScanCollection(scanCollection, false);
+      frameMap.enableParallelComputationForNormals(true);
+
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+      frameMap.setNormalEstimationParameters(normalEstimationParameters);
+      if(updateNormal)
+         frameMap.updateNormals();
+
+      OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(frameMap.getRoot());
+      for (NormalOcTreeNode node : iterable)
+      {
+         if (node.getNumberOfHits() >= minimumNumberOfHits)
+         {
+            if (!updateNormal || node.getNormalAverageDeviation() < 0.00005)
+            {
+               Plane3D surfaceElement = new Plane3D();
+               node.getNormal(surfaceElement.getNormal());
+               node.getHitLocation(surfaceElement.getPoint());
+
+               surfaceElements.add(surfaceElement);
+               surfaceElementsToSensor.add(SLAMTools.createConvertedSurfaceElementToSensorPose(getOriginalSensorPose(), surfaceElement));
+            }
+         }
+      }
+   }
+
+   public NormalOcTree getFrameMap()
+   {
+      return frameMap;
+   }
+
+   public List<Plane3D> getSurfaceElements()
+   {
+      return surfaceElements;
+   }
+
+   public List<Plane3DReadOnly> getSurfaceElementsToSensor()
+   {
+      return surfaceElementsToSensor;
+   }
+
    public void setConfidenceFactor(double value)
    {
       confidenceFactor = value;
@@ -152,7 +218,7 @@ public class SLAMFrame
    {
       return previousFrame;
    }
-   
+
    public double getConfidenceFactor()
    {
       return confidenceFactor;
