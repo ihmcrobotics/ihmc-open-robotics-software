@@ -1,7 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
@@ -18,6 +21,7 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
@@ -45,6 +49,9 @@ public class REAOcTreeUpdater
    private final AtomicReference<Boolean> useBoundingBox;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
 
+   /** Lifetime of a node in milliseconds before it decays when not being hit. */
+   private final AtomicReference<Long> nodeLifetimeMilliseconds;
+
    public REAOcTreeUpdater(double octreeResolution, REAOcTreeBuffer[] buffers, Messager reaMessager)
    {
       initializeReferenceOctree(octreeResolution);
@@ -58,9 +65,14 @@ public class REAOcTreeUpdater
       maxRange = reaMessager.createInput(REAModuleAPI.LidarMaxRange, 5.0);
       useBoundingBox = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxEnable, true);
       atomicBoundingBoxParameters = reaMessager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters,
-                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f, -2.0f, -3.0f, 5.0f, 2.0f,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f,
+                                                                                                                           -2.0f,
+                                                                                                                           -3.0f,
+                                                                                                                           5.0f,
+                                                                                                                           2.0f,
                                                                                                                            0.5f));
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
+      nodeLifetimeMilliseconds = reaMessager.createInput(REAModuleAPI.OcTreeNodeLifetimeMillis, 60000L);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
    }
@@ -77,6 +89,7 @@ public class REAOcTreeUpdater
    {
       reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, enable.get());
       reaMessager.submitMessage(REAModuleAPI.NormalEstimationEnable, enableNormalEstimation.get());
+      reaMessager.submitMessage(REAModuleAPI.OcTreeNodeLifetimeMillis, nodeLifetimeMilliseconds.get());
       reaMessager.submitMessage(REAModuleAPI.LidarMinRange, minRange.get());
       reaMessager.submitMessage(REAModuleAPI.LidarMaxRange, maxRange.get());
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, useBoundingBox.get());
@@ -93,6 +106,9 @@ public class REAOcTreeUpdater
       Boolean enableNormalEstimationFile = filePropertyHelper.loadBooleanProperty(REAModuleAPI.NormalEstimationEnable.getName());
       if (enableNormalEstimationFile != null)
          enableNormalEstimation.set(enableNormalEstimationFile);
+      Long nodeLifetimeMillisFile = filePropertyHelper.loadLongProperty(REAModuleAPI.OcTreeNodeLifetimeMillis.getName());
+      if (nodeLifetimeMillisFile != null)
+         nodeLifetimeMilliseconds.set(nodeLifetimeMillisFile);
       String normalEstimationParametersFile = filePropertyHelper.loadProperty(REAModuleAPI.NormalEstimationParameters.getName());
       if (normalEstimationParametersFile != null)
          normalEstimationParameters.set(NormalEstimationParameters.parse(normalEstimationParametersFile));
@@ -114,6 +130,7 @@ public class REAOcTreeUpdater
    {
       filePropertyHelper.saveProperty(REAModuleAPI.OcTreeEnable.getName(), enable.get());
       filePropertyHelper.saveProperty(REAModuleAPI.NormalEstimationEnable.getName(), enableNormalEstimation.get());
+      filePropertyHelper.saveProperty(REAModuleAPI.OcTreeNodeLifetimeMillis.getName(), nodeLifetimeMilliseconds.get());
       filePropertyHelper.saveProperty(REAModuleAPI.OcTreeBoundingBoxEnable.getName(), useBoundingBox.get());
 
       filePropertyHelper.saveProperty(REAModuleAPI.NormalEstimationParameters.getName(), normalEstimationParameters.get().toString());
@@ -155,11 +172,18 @@ public class REAOcTreeUpdater
          {
             PointCloud pointCloud = new PointCloud();
             bufferOctree.forEach(node -> pointCloud.add(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ()));
+            pointCloud.setTimestamp(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
             Scan scan = new Scan(sensorOrigin, pointCloud);
             Set<NormalOcTreeNode> updatedNodes = new HashSet<>();
             referenceOctree.insertScan(scan, updatedNodes, null);
+
+            LogTools.info("Decay lifetime " + nodeLifetimeMilliseconds.get());
+            if (nodeLifetimeMilliseconds.get() > 0L)
+               decayOcTreeNodes();
+
             hasOcTreeBeenUpdated = true;
          }
+
          if (bufferSensorPose != null)
          {
             sensorPose.set(bufferSensorPose);
@@ -176,6 +200,20 @@ public class REAOcTreeUpdater
          return;
 
       referenceOctree.updateNormals();
+   }
+
+   private void decayOcTreeNodes()
+   {
+      long currentTimestamp = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+      List<NormalOcTreeNode> decayedNodes = new ArrayList<>();
+
+      for (NormalOcTreeNode node : referenceOctree)
+      {
+         if (currentTimestamp - node.getLastHitTimestamp() >= nodeLifetimeMilliseconds.get())
+            decayedNodes.add(node);
+      }
+      LogTools.info("Number of decayedrt nodes: " + decayedNodes.size());
+      decayedNodes.forEach(node -> referenceOctree.deleteNode(node.getKeyCopy()));
    }
 
    public void clearOcTree()
