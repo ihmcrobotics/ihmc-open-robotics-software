@@ -34,7 +34,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepBodyPathModule bodyPathModule;
    private final LookAndStepFootstepPlanningPart.TaskSetup footstepPlanningModule;
    private final LookAndStepRobotMotionModule robotMotionModule;
-   private final AtomicReference<State> behaviorState;
+   private final BehaviorStateReference<State> behaviorState;
    private final StatusLogger statusLogger;
 
    public enum State
@@ -79,7 +79,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
       Notification resetInput = helper.createROS2Notification(RESET);
-      behaviorState = new AtomicReference<>(State.BODY_PATH_PLANNING);
+      behaviorState = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
@@ -107,15 +107,12 @@ public class LookAndStepBehavior implements BehaviorInterface
                helper.publishROS2(REACHED_GOAL);
             },
             newBodyPathGoalNeeded::get,
-            lastSteppedSolePoses::get,
-            lastSteppedSolePoses::put,
+            lastSteppedSolePoses,
             helper.getOrCreateFootstepPlanner(),
-            lastStanceSide::get,
-            lastStanceSide::set,
+            lastStanceSide,
             operatorReviewEnabledInput::get,
             robot::pollHumanoidRobotState,
-            this::updateState,
-            behaviorState::get
+            behaviorState
       );
       robotMotionModule = new LookAndStepRobotMotionModule(statusLogger);
 
