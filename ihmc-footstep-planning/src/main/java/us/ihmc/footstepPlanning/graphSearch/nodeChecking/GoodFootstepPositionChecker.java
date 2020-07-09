@@ -75,6 +75,7 @@ public class GoodFootstepPositionChecker
       stepWidth = stepSide.negateIfRightSide(candidateFootPose.getY());
       stepReachXY = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
       stepHeight = candidateFootPose.getZ();
+      double maximumStepZ = stepSide == RobotSide.LEFT ? parameters.getMaximumLeftStepZ() : parameters.getMaximumRightStepZ();
 
       if (stepWidth < parameters.getMinimumStepWidth())
       {
@@ -91,14 +92,14 @@ public class GoodFootstepPositionChecker
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
          return false;
       }
-      else if (Math.abs(stepHeight) > parameters.getMaximumStepZ())
+      else if (Math.abs(stepHeight) > maximumStepZ)
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
          return false;
       }
 
       double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
-      double minZFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepZ()), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alphaPitchedBack);
+      double minZFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(maximumStepZ), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alphaPitchedBack);
       double maxXFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alphaPitchedBack);
       double stepDownFraction = - stepHeight / minZFromPitchContraint;
       double stepForwardFraction = stepLength / maxXFromPitchContraint;
@@ -154,7 +155,7 @@ public class GoodFootstepPositionChecker
       }
 
       double stepReach3D = EuclidCoreTools.norm(stepReachXY, stepHeight);
-      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(stepHeight / parameters.getMaximumStepZ()));
+      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(stepHeight / maximumStepZ));
       maxInterpolationFactor = Math.min(maxInterpolationFactor, 1.0);
       double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw(),
                                                            maxInterpolationFactor);

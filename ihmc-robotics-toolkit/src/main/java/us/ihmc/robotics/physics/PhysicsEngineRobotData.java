@@ -47,6 +47,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
       collidables = robotCollisionModel != null ? robotCollisionModel.getRobotCollidables(multiBodySystem) : Collections.emptyList();
 
       forwardDynamicsPlugin = new SingleRobotForwardDynamicsPlugin(multiBodySystem);
+      FrameShapePosePredictor frameShapePosePredictor = new FrameShapePosePredictor(forwardDynamicsPlugin.getForwardDynamicsCalculator());
+      collidables.forEach(collidable -> collidable.setFrameShapePosePredictor(frameShapePosePredictor));
 
       YoVariableRegistry jointLimitConstraintCalculatorRegistry = new YoVariableRegistry(RobotJointLimitImpulseBasedCalculator.class.getSimpleName());
       robotRegistry.addChild(jointLimitConstraintCalculatorRegistry);
@@ -160,6 +162,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       environmentContactConstraintCalculatorPool.clear();
       selfContactConstraintCalculatorPool.clear();
       interRobotContactConstraintCalculatorPools.forEach((rigidBodyBasics, calculators) -> calculators.clear());
+      integrator.reset();
    }
 
    public RobotJointLimitImpulseBasedCalculator getJointLimitConstraintCalculator()

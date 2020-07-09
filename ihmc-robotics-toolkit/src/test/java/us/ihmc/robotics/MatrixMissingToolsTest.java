@@ -3,6 +3,8 @@ package us.ihmc.robotics;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 
 import java.util.Random;
 
@@ -38,6 +40,26 @@ public class MatrixMissingToolsTest
             }
 
          }
+      }
+   }
+
+   @Test
+   public void testFastInverse()
+   {
+      int iters = 500;
+      double epsilon = 1e-8;
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         DMatrixRMaj matrix = new DMatrixRMaj(2, 2);
+         DMatrixRMaj matrixInverseExpected = new DMatrixRMaj(2, 2);
+         DMatrixRMaj matrixInverse = new DMatrixRMaj(2, 2);
+         matrix.setData(RandomNumbers.nextDoubleArray(random, 4, 10.0));
+
+         NativeCommonOps.invert(matrix, matrixInverseExpected);
+         MatrixMissingTools.fast2x2Inverse(matrix, matrixInverse);
+
+         MatrixTestTools.assertMatrixEquals(matrixInverseExpected, matrixInverse, epsilon);
       }
    }
 }

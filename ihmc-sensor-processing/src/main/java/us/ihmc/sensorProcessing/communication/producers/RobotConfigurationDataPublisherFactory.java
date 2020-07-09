@@ -45,7 +45,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<ROS2Topic> outputTopicField = new RequiredFactoryField<>("outputTopic");
+   private final RequiredFactoryField<ROS2Topic<?>> outputTopicField = new RequiredFactoryField<>("outputTopic");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -174,10 +174,10 @@ public class RobotConfigurationDataPublisherFactory
    /**
     * ROS 2 necessary information to create the real-time publisher.
     * 
-    * @param ros2Node                    the real-time node to create the publisher with.
+    * @param ros2Node    the real-time node to create the publisher with.
     * @param outputTopic the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic outputTopic)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic<?> outputTopic)
    {
       realtimeRos2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);

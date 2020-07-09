@@ -83,6 +83,13 @@ public class FootstepPlannerParametersUIController
       planningParameters.save();
    }
 
+   @FXML
+   public void loadFile()
+   {
+      tableViewWrapper.loadNewFile();
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
+   }
+
    private class StepShapeManager
    {
       double minStepYaw, maxStepYaw, minStepWidth, maxStepWidth, minStepLength, maxStepLength, worstYaw;
