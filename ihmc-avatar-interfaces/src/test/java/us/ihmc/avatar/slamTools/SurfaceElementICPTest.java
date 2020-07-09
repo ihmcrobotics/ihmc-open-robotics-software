@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.ejml.data.DMatrixRMaj;
@@ -34,7 +35,7 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 @Tag("point-cloud-drift-correction-test")
 public class SurfaceElementICPTest
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
 
    @Test
    public void testSurfaceElements()
@@ -177,12 +178,24 @@ public class SurfaceElementICPTest
 
       int numberOfSurfel = frame2.getSurfaceElementsToSensor().size();
       LogTools.info("numberOfSurfel " + numberOfSurfel);
+      Function<DMatrixRMaj, RigidBodyTransform> inputFunction = new Function<DMatrixRMaj, RigidBodyTransform>()
+      {
+         @Override
+         public RigidBodyTransform apply(DMatrixRMaj input)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+
+            transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            transform.getTranslation().set(input.get(0), input.get(1), input.get(2));
+            return transform;
+         }
+      };
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-            RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
+            RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getOriginalSensorPose());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
 
@@ -210,7 +223,7 @@ public class SurfaceElementICPTest
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution());
          }
       };
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, numberOfSurfel, outputCalculator);
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction, outputCalculator, 6, numberOfSurfel);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0005);
       purterbationVector.set(1, 0.0005);
@@ -231,9 +244,8 @@ public class SurfaceElementICPTest
       }
 
       // get parameter.
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
+      RigidBodyTransform icpTransformer = new RigidBodyTransform(inputFunction.apply(optimizer.getOptimalParameter()));
       System.out.println(optimizer.getOptimalParameter());
-      icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
       frame2.updateOptimizedCorrection(icpTransformer);
       System.out.println("icpTransformer");
       System.out.println(icpTransformer);
@@ -270,14 +282,4 @@ public class SurfaceElementICPTest
       }
    }
 
-   private RigidBodyTransform convertTransform(double... transformParameters)
-   {
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslationAndIdentityRotation(transformParameters[0], transformParameters[1], transformParameters[2]);
-      transform.appendRollRotation(transformParameters[3]);
-      transform.appendPitchRotation(transformParameters[4]);
-      transform.appendYawRotation(transformParameters[5]);
-
-      return transform;
-   }
 }
