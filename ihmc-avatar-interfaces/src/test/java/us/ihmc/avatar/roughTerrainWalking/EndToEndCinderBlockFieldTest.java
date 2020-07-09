@@ -32,7 +32,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockField
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-@Tag("fast")
 @Tag("video")
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
 {
@@ -67,6 +66,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    }
 
    @Test
+   @Tag("fast")
    public void testWalkingOverCinderBlockField() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
