@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.util.TimerSnapshot;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
+import us.ihmc.humanoidBehaviors.lookAndStep.BehaviorStateReference;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -35,7 +35,7 @@ class LookAndStepBodyPathTask
    protected final VisibilityGraphsParametersReadOnly visibilityGraphParameters;
    protected final LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected final Supplier<Boolean> operatorReviewEnabled;
-   protected final Consumer<LookAndStepBehavior.State> behaviorStateUpdater;
+   protected final BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
 
    protected Consumer<ArrayList<Pose3D>> autonomousOutput;
    protected Consumer<List<? extends Pose3DReadOnly>> initiateReviewOutput;
@@ -55,14 +55,14 @@ class LookAndStepBodyPathTask
                            VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                            LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                            Supplier<Boolean> operatorReviewEnabled,
-                           Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
+                           BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
    {
       this.statusLogger = statusLogger;
       this.uiPublisher = uiPublisher;
       this.visibilityGraphParameters = visibilityGraphParameters;
       this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
       this.operatorReviewEnabled = operatorReviewEnabled;
-      this.behaviorStateUpdater = behaviorStateUpdater;
+      this.behaviorStateReference = behaviorStateReference;
    }
 
    protected void update(PlanarRegionsList mapRegions,
@@ -187,7 +187,7 @@ class LookAndStepBodyPathTask
          }
          else
          {
-            behaviorStateUpdater.accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+            behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
             autonomousOutput.accept(bodyPathPlanForReview);
          }
       }
