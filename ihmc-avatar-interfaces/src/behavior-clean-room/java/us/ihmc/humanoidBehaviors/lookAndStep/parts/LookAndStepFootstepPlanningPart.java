@@ -19,10 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
-import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
-import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
+import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
@@ -35,9 +32,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -52,22 +48,20 @@ public class LookAndStepFootstepPlanningPart
    protected UIPublisher uiPublisher;
    protected Runnable newBodyPathGoalNeededNotifier;
    protected Supplier<Boolean> newBodyPathGoalNeededSupplier;
-   protected Function<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseSupplier;
-   protected BiConsumer<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseConsumer;
+   protected SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses;
    protected FootstepPlanningModule footstepPlanningModule;
    protected Consumer<RobotSide> lastStanceSideSetter;
    protected Supplier<Boolean> operatorReviewEnabledSupplier;
    protected Consumer<FootstepPlan> reviewPlanOutput;
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Runnable planningFailedNotifier;
-   protected Consumer<LookAndStepBehavior.State> behaviorStateUpdater;
+   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
 
    public static class TaskSetup extends LookAndStepFootstepPlanningPart
    {
       private final SingleThreadSizeOneQueueExecutor executor;
       private final Supplier<HumanoidRobotState> robotStateSupplier;
-      private final Supplier<RobotSide> lastStanceSideSupplier;
-      private final Supplier<LookAndStepBehavior.State> behaviorStateSupplier;
+      private final AtomicReference<RobotSide> lastStanceSideReference;
 
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -81,15 +75,12 @@ public class LookAndStepFootstepPlanningPart
                        UIPublisher uiPublisher,
                        Runnable newBodyPathGoalNeededNotifier,
                        Supplier<Boolean> newBodyPathGoalNeededSupplier,
-                       Function<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseSupplier, // TODO: Make these into one
-                       BiConsumer<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseConsumer,
+                       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
                        FootstepPlanningModule footstepPlanningModule,
-                       Supplier<RobotSide> lastStanceSideSupplier,
-                       Consumer<RobotSide> lastStanceSideSetter,
+                       AtomicReference<RobotSide> lastStanceSideReference,
                        Supplier<Boolean> operatorReviewEnabledSupplier,
                        Supplier<HumanoidRobotState> robotStateSupplier,
-                       Consumer<LookAndStepBehavior.State> behaviorStateUpdater,
-                       Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
+                       BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
       {
          this.statusLogger = statusLogger;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
@@ -98,15 +89,12 @@ public class LookAndStepFootstepPlanningPart
          this.uiPublisher = uiPublisher;
          this.newBodyPathGoalNeededNotifier = newBodyPathGoalNeededNotifier;
          this.newBodyPathGoalNeededSupplier = newBodyPathGoalNeededSupplier;
-         this.lastSteppedSolePoseSupplier = lastSteppedSolePoseSupplier;
-         this.lastSteppedSolePoseConsumer = lastSteppedSolePoseConsumer;
+         this.lastSteppedSolePoses = lastSteppedSolePoses;
          this.footstepPlanningModule = footstepPlanningModule;
-         this.lastStanceSideSetter = lastStanceSideSetter;
+         this.lastStanceSideReference = lastStanceSideReference;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
-         this.behaviorStateUpdater = behaviorStateUpdater;
          this.robotStateSupplier = robotStateSupplier;
-         this.lastStanceSideSupplier = lastStanceSideSupplier;
-         this.behaviorStateSupplier = behaviorStateSupplier;
+         this.behaviorStateReference = behaviorStateReference;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -148,8 +136,8 @@ public class LookAndStepFootstepPlanningPart
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
          bodyPathPlan = bodyPathPlanInput.get();
          robotState = robotStateSupplier.get();
-         lastStanceSide = lastStanceSideSupplier.get();
-         behaviorState = behaviorStateSupplier.get();
+         lastStanceSide = lastStanceSideReference.get();
+         behaviorState = behaviorStateReference.get();
 
          if (evaluateEntry())
          {
@@ -158,6 +146,7 @@ public class LookAndStepFootstepPlanningPart
       }
    }
 
+   // instance variables
    protected PlanarRegionsList planarRegions;
    protected TimerSnapshot planarRegionReceptionTimerSnapshot;
    protected TimerSnapshot planningFailureTimerSnapshot;
@@ -258,14 +247,14 @@ public class LookAndStepFootstepPlanningPart
       if (reachedGoal)
       {
          statusLogger.warn("Footstep planning: Robot reached goal. Not planning");
-         behaviorStateUpdater.accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+         behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          newBodyPathGoalNeededNotifier.run();
          return;
       }
       if (abortGoalWalkingSupplier.get())
       {
          statusLogger.warn("Footstep planning: Goal was cancelled. Not planning");
-         behaviorStateUpdater.accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+         behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          newBodyPathGoalNeededNotifier.run();
          return;
       }
@@ -293,13 +282,13 @@ public class LookAndStepFootstepPlanningPart
       ArrayList<FootstepForUI> startFootPosesForUI = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
       {
-         FramePose3DReadOnly lastSteppedSolePose = lastSteppedSolePoseSupplier.apply(side);
+         FramePose3DReadOnly lastSteppedSolePose = lastSteppedSolePoses.get(side);
          if (lastSteppedSolePose == null)
          {
             FramePose3D soleFrameZUpPose = new FramePose3D(robotState.getSoleZUpFrame(side));
             soleFrameZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
             lastSteppedSolePose = soleFrameZUpPose;
-            lastSteppedSolePoseConsumer.accept(side, lastSteppedSolePose);
+            lastSteppedSolePoses.put(side, lastSteppedSolePose);
          }
 
          startFootPosesForUI.add(new FootstepForUI(side, new Pose3D(lastSteppedSolePose), side.getPascalCaseName() + " Start"));
@@ -367,7 +356,7 @@ public class LookAndStepFootstepPlanningPart
       }
       else
       {
-         behaviorStateUpdater.accept(LookAndStepBehavior.State.SWINGING);
+         behaviorStateReference.set(LookAndStepBehavior.State.SWINGING);
          autonomousOutput.accept(footstepPlannerOutput.getFootstepPlan());
       }
    }
