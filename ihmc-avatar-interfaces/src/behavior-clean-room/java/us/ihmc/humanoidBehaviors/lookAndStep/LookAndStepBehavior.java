@@ -8,10 +8,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepBodyPathModule;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepFootstepPlanningModule;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepReviewPart;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepRobotMotionModule;
+import us.ihmc.humanoidBehaviors.lookAndStep.parts.*;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
@@ -35,7 +32,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final RemoteHumanoidRobotInterface robot;
 
    private final LookAndStepBodyPathModule bodyPathModule;
-   private final LookAndStepFootstepPlanningModule footstepPlanningModule;
+   private final LookAndStepFootstepPlanningPart.TaskSetup footstepPlanningModule;
    private final LookAndStepRobotMotionModule robotMotionModule;
    private final AtomicReference<State> behaviorState;
    private final StatusLogger statusLogger;
@@ -99,7 +96,27 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                      robot::pollHumanoidRobotState,
                                                      behaviorState::get,
                                                      this::updateState);
-      footstepPlanningModule = new LookAndStepFootstepPlanningModule(statusLogger);
+      footstepPlanningModule = new LookAndStepFootstepPlanningPart.TaskSetup(
+            statusLogger,
+            lookAndStepParameters,
+            footstepPlannerParameters,
+            resetInput::poll,
+            helper::publishToUI,
+            () -> {
+               bodyPathModule.acceptGoal(null);
+               helper.publishROS2(REACHED_GOAL);
+            },
+            newBodyPathGoalNeeded::get,
+            lastSteppedSolePoses::get,
+            lastSteppedSolePoses::put,
+            helper.getOrCreateFootstepPlanner(),
+            lastStanceSide::get,
+            lastStanceSide::set,
+            operatorReviewEnabledInput::get,
+            robot::pollHumanoidRobotState,
+            this::updateState,
+            behaviorState::get
+      );
       robotMotionModule = new LookAndStepRobotMotionModule(statusLogger);
 
       LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>(statusLogger,
@@ -123,27 +140,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setReviewInitiator(bodyPathReview::review);
       bodyPathModule.setAutonomousOutput(footstepPlanningModule::acceptBodyPathPlan);
 
-      footstepPlanningModule.setAbortGoalWalkingSupplier(resetInput::poll);
-      footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
-      footstepPlanningModule.setUiPublisher(helper::publishToUI);
-      footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
-      footstepPlanningModule.setFootstepPlannerParameters(footstepPlannerParameters);
-      footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> {
-         bodyPathModule.acceptGoal(null);
-         helper.publishROS2(REACHED_GOAL);
-      });
-      footstepPlanningModule.setNewBodyPathGoalNeededSupplier(newBodyPathGoalNeeded::get);
-      footstepPlanningModule.setLastStanceSideSupplier(lastStanceSide::get);
-      footstepPlanningModule.setLastStanceSideSetter(lastStanceSide::set);
-      footstepPlanningModule.setLastSteppedSolePoseSupplier(lastSteppedSolePoses::get);
-      footstepPlanningModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
-      footstepPlanningModule.setOperatorReviewEnabledSupplier(operatorReviewEnabledInput::get);
-      footstepPlanningModule.setReviewPlanOutput(footstepPlanReview::review);
-      footstepPlanningModule.setAutonomousOutput(robotMotionModule::acceptFootstepPlan);
-      footstepPlanningModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
-      footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
-      footstepPlanningModule.setBehaviorStateSupplier(behaviorState::get);
-      footstepPlanningModule.setBehaviorStateUpdater(this::updateState);
+      footstepPlanningModule.laterSetup(footstepPlanReview::isBeingReviewed,
+                                        footstepPlanReview::review,
+                                        robotMotionModule::acceptFootstepPlan);
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
