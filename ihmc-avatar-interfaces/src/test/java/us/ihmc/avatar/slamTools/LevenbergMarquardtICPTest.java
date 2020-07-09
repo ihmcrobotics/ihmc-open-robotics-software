@@ -23,7 +23,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer2;
+import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
 @Tag("point-cloud-drift-correction-test")
 public class LevenbergMarquardtICPTest
@@ -300,7 +300,7 @@ public class LevenbergMarquardtICPTest
             return errorSpace;
          }
       };
-      LevenbergMarquardtParameterOptimizer2 optimizer = new LevenbergMarquardtParameterOptimizer2(inputFunction, outputCalculator, 3, data1.size());
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction, outputCalculator, 3, data1.size());
       DMatrixRMaj purterbationVector = new DMatrixRMaj(3, 1);
       purterbationVector.set(0, 0.00001);
       purterbationVector.set(1, 0.00001);
@@ -346,6 +346,10 @@ public class LevenbergMarquardtICPTest
       }
    }
 
+   /**
+    * method finding the closest point for the given point with brute force.
+    * for point cloud data, we will use k-d tree (joctomap).
+    */
    private double computeClosestDistance(Point2D point, List<Point2D> pointCloud)
    {
       double minDistance = Double.MAX_VALUE;

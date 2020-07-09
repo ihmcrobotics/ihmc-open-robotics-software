@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.ejml.data.DMatrixRMaj;
@@ -28,6 +29,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, false);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
@@ -61,7 +63,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree, surfel.getPoint(), octree.getResolution());
          }
       };
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, numberOfSurfel, outputCalculator);
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction, outputCalculator, 6, numberOfSurfel);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0005);
       purterbationVector.set(1, 0.0005);

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.optimization;
 
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.ejml.MatrixDimensionException;
@@ -7,21 +8,19 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class LevenbergMarquardtParameterOptimizer
 {
    private static final boolean DEBUG = false;
-   private int parameterDimension;
+   private int inputDimension;
    private int outputDimension;
 
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction;
    private final UnaryOperator<DMatrixRMaj> outputCalculator;
-   private boolean useDampingCoefficient = false;
-   private final DMatrixRMaj dampingCoefficient;
-   private static final double DEFAULT_RESIDUAL_SCALER = 0.1;
-   private double residualScaler = DEFAULT_RESIDUAL_SCALER;
 
    private final DMatrixRMaj currentInput;
-   private final DMatrixRMaj currentOutput;
+   private final OuputSpace currentOutputSpace;
    private final DMatrixRMaj purterbationVector;
    private final DMatrixRMaj perturbedInput;
    private final DMatrixRMaj perturbedOutput;
@@ -33,34 +32,36 @@ public class LevenbergMarquardtParameterOptimizer
 
    private final DMatrixRMaj optimizeDirection;
 
-   // higher : make quick approach when the model and the data are in long distance.
-   // lower   : slower approach but better accuracy in near distance.
-   private boolean[] correspondence;
+   /**
+    * higher : make quick approach when the model and the data are in long distance. lower : slower
+    * approach but better accuracy in near distance.
+    */
    private double correspondenceThreshold = 1.0;
-   private int numberOfCorespondingPoints = 0;
+   private static final double DEFAULT_PERTURBATION = 0.0001;
+   private static final double DEFAULT_DAMPING_COEFFICIENT = 0.001;
+   private boolean useDamping = true;
 
    private double computationTime;
-   private double initialQuality;
-   private double quality;
    private int iteration;
    private boolean optimized;
 
    /**
     * iterate the direction to minimize output space, -inv(J^T * J + W_N) * J^T * e
     */
-   public LevenbergMarquardtParameterOptimizer(int inputParameterDimension, int outputDimension, UnaryOperator<DMatrixRMaj> outputCalculator)
+   public LevenbergMarquardtParameterOptimizer(Function<DMatrixRMaj, RigidBodyTransform> inputFunction, UnaryOperator<DMatrixRMaj> outputCalculator,
+                                               int inputParameterDimension, int outputDimension)
    {
-      if (DEBUG)
-         System.out.println("Optimizer Info = " + inputParameterDimension + " " + outputDimension + " space solver");
-      this.parameterDimension = inputParameterDimension;
+      this.inputFunction = inputFunction;
+      this.inputDimension = inputParameterDimension;
       this.outputDimension = outputDimension;
       this.outputCalculator = outputCalculator;
 
-      dampingCoefficient = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
-
       currentInput = new DMatrixRMaj(inputParameterDimension, 1);
-      currentOutput = new DMatrixRMaj(outputDimension, 1);
+      currentOutputSpace = new OuputSpace(outputDimension);
+
       purterbationVector = new DMatrixRMaj(inputParameterDimension, 1);
+      for (int i = 0; i < inputParameterDimension; i++)
+         purterbationVector.set(i, DEFAULT_PERTURBATION);
       perturbedInput = new DMatrixRMaj(inputParameterDimension, 1);
       perturbedOutput = new DMatrixRMaj(outputDimension, 1);
       jacobian = new DMatrixRMaj(outputDimension, inputParameterDimension);
@@ -70,14 +71,12 @@ public class LevenbergMarquardtParameterOptimizer
       invMultJacobianTranspose = new DMatrixRMaj(inputParameterDimension, outputDimension);
 
       optimizeDirection = new DMatrixRMaj(inputParameterDimension, 1);
-
-      correspondence = new boolean[outputDimension];
    }
 
    public void setPerturbationVector(DMatrixRMaj purterbationVector)
    {
       if (this.purterbationVector.getNumCols() != purterbationVector.getNumCols())
-         throw new MatrixDimensionException("do reShape first.");
+         throw new MatrixDimensionException("dimension is wrong. " + this.purterbationVector.getNumCols() + " " + purterbationVector.getNumCols());
       this.purterbationVector.set(purterbationVector);
    }
 
@@ -86,65 +85,13 @@ public class LevenbergMarquardtParameterOptimizer
       this.correspondenceThreshold = correspondenceThreshold;
    }
 
-   private double computeQuality(DMatrixRMaj space, boolean[] correspondence)
-   {
-      double norm = 0.0;
-      for (int i = 0; i < space.getNumRows(); i++)
-      {
-         if (correspondence[i])
-         {
-            norm = norm + space.get(i, 0) * space.get(i, 0);
-         }
-      }
-      return norm;
-   }
-
-   private double computePureQuality(DMatrixRMaj space)
-   {
-      double norm = 0.0;
-      for (int i = 0; i < space.getNumRows(); i++)
-      {
-         norm = norm + space.get(i, 0) * space.get(i, 0);
-      }
-      return norm;
-   }
-
-   private void updateDamping()
-   {
-      if (quality < initialQuality)
-         residualScaler = quality / initialQuality * DEFAULT_RESIDUAL_SCALER;
-
-      for (int i = 0; i < parameterDimension; i++)
-      {
-         for (int j = 0; j < parameterDimension; j++)
-         {
-            if (i == j)
-            {
-               dampingCoefficient.set(i, j, residualScaler);
-            }
-         }
-      }
-   }
-
-   public void initialize()
+   public boolean initialize()
    {
       iteration = 0;
       optimized = false;
-      residualScaler = DEFAULT_RESIDUAL_SCALER;
-      for (int i = 0; i < parameterDimension; i++)
-      {
-         for (int j = 0; j < parameterDimension; j++)
-         {
-            if (i == j)
-            {
-               dampingCoefficient.set(i, j, 1.0);
-            }
-            else
-            {
-               dampingCoefficient.set(i, j, 0.0);
-            }
-         }
-      }
+      currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
+
+      return currentOutputSpace.computeCorrespondence();
    }
 
    public double iterate()
@@ -152,39 +99,18 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
-      DMatrixRMaj newInput = new DMatrixRMaj(parameterDimension, 1);
+      DMatrixRMaj newInput = new DMatrixRMaj(inputDimension, 1);
 
-      // compute correspondence space.
-      numberOfCorespondingPoints = 0;
-      currentOutput.set(outputCalculator.apply(currentInput));
-      for (int i = 0; i < outputDimension; i++)
-      {
-         if (currentOutput.get(i, 0) < correspondenceThreshold)
-         {
-            correspondence[i] = true;
-            numberOfCorespondingPoints++;
-         }
-         else
-         {
-            correspondence[i] = false;
-         }
-      }
-
-      if (numberOfCorespondingPoints == 0)
+      currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
+      if (!currentOutputSpace.computeCorrespondence())
       {
          return -1;
       }
-
-      quality = computeQuality(currentOutput, correspondence);
-      initialQuality = quality;
-      if (DEBUG)
-      {
-         System.out.println("Initial Quality = " + quality);
-      }
+      currentOutputSpace.computeQuality();
 
       // start.      
       // compute jacobian.
-      for (int i = 0; i < parameterDimension; i++)
+      for (int i = 0; i < inputDimension; i++)
       {
          perturbedInput.set(currentInput);
          perturbedInput.add(i, 0, purterbationVector.get(i));
@@ -192,9 +118,9 @@ public class LevenbergMarquardtParameterOptimizer
          perturbedOutput.set(outputCalculator.apply(perturbedInput));
          for (int j = 0; j < outputDimension; j++)
          {
-            if (correspondence[j])
+            if (currentOutputSpace.isCorresponding(j))
             {
-               double partialValue = (perturbedOutput.get(j) - currentOutput.get(j)) / purterbationVector.get(i);
+               double partialValue = (perturbedOutput.get(j) - currentOutputSpace.getOutput().get(j)) / purterbationVector.get(i);
                jacobian.set(j, i, partialValue);
             }
             else
@@ -209,48 +135,36 @@ public class LevenbergMarquardtParameterOptimizer
       CommonOps_DDRM.transpose(jacobianTranspose);
 
       CommonOps_DDRM.mult(jacobianTranspose, jacobian, squaredJacobian);
-
-      if (useDampingCoefficient)
-      {
-         updateDamping();
-         CommonOps_DDRM.add(squaredJacobian, dampingCoefficient, squaredJacobian);
-      }
       CommonOps_DDRM.invert(squaredJacobian);
 
       CommonOps_DDRM.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
-      CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutput, optimizeDirection);
+      CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutputSpace.getOutput(), optimizeDirection);
 
       // update currentInput.
       CommonOps_DDRM.subtract(currentInput, optimizeDirection, newInput);
 
       // compute new quality.
       currentInput.set(newInput);
-      currentOutput.set(outputCalculator.apply(currentInput));
-      for (int i = 0; i < outputDimension; i++)
-      {
-         if (currentOutput.get(i, 0) < correspondenceThreshold)
-         {
-            correspondence[i] = true;
-         }
-         else
-         {
-            correspondence[i] = false;
-         }
-      }
-
-      quality = computeQuality(currentOutput, correspondence);
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       if (DEBUG)
       {
-         System.out.println("elapsed iteration time is " + iterateTime + " " + numberOfCorespondingPoints);
+         System.out.println("elapsed iteration time is " + iterateTime);
       }
-      return quality;
+
+      return currentOutputSpace.getCorrespondingQuality();
+   }
+
+   public void convertInputToTransform(DMatrixRMaj input, RigidBodyTransform transformToPack)
+   {
+      if (input.getData().length != inputDimension)
+         throw new MatrixDimensionException("dimension is wrong. " + input.getData().length + " " + inputDimension);
+      transformToPack.set(inputFunction.apply(input));
    }
 
    public int getNumberOfCorespondingPoints()
    {
-      return numberOfCorespondingPoints;
+      return currentOutputSpace.getNumberOfCorrespondingPoints();
    }
 
    public DMatrixRMaj getOptimalParameter()
@@ -265,17 +179,12 @@ public class LevenbergMarquardtParameterOptimizer
 
    public double getQuality()
    {
-      return quality;
+      return currentOutputSpace.getCorrespondingQuality();
    }
 
    public double getPureQuality()
    {
-      return computePureQuality(currentOutput);
-   }
-
-   public double getDampingCoefficient()
-   {
-      return residualScaler;
+      return currentOutputSpace.getQuality();
    }
 
    public int getIteration()
@@ -286,5 +195,113 @@ public class LevenbergMarquardtParameterOptimizer
    public double getComputationTime()
    {
       return computationTime;
+   }
+
+   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction()
+   {
+      return new Function<DMatrixRMaj, RigidBodyTransform>()
+      {
+         @Override
+         public RigidBodyTransform apply(DMatrixRMaj input)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+
+            transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            transform.getTranslation().set(input.get(0), input.get(1), input.get(2));
+            return transform;
+         }
+      };
+   }
+
+   private class OuputSpace
+   {
+      private final DMatrixRMaj output;
+      private final boolean[] correspondence;
+      private int numberOfCorrespondingPoints;
+      private double correspondingQuality;
+      private double quality;
+
+      private OuputSpace(int dimension)
+      {
+         output = new DMatrixRMaj(dimension, 1);
+         correspondence = new boolean[dimension];
+      }
+
+      /**
+       * update output.
+       */
+      void updateOutputSpace(DMatrixRMaj output)
+      {
+         this.output.set(output);
+      }
+
+      /**
+       * compute correspondence and update them. return false if there is no correspondence point.
+       */
+      boolean computeCorrespondence()
+      {
+         numberOfCorrespondingPoints = 0;
+         for (int i = 0; i < output.getNumRows(); i++)
+         {
+            if (output.get(i, 0) < correspondenceThreshold)
+            {
+               correspondence[i] = true;
+               numberOfCorrespondingPoints++;
+            }
+            else
+            {
+               correspondence[i] = false;
+            }
+         }
+         if (numberOfCorrespondingPoints == 0)
+         {
+            return false;
+         }
+         return true;
+      }
+
+      /**
+       * there are two kinds of quality. one is distance between corresponding points
+       * (correspondingQuality). the other is distance between the closest points (quality).
+       */
+      void computeQuality()
+      {
+         correspondingQuality = 0.0;
+         quality = 0.0;
+         for (int i = 0; i < output.getNumRows(); i++)
+         {
+            double norm = output.get(i, 0) * output.get(i, 0);
+            quality = quality + norm;
+            if (correspondence[i])
+            {
+               correspondingQuality = correspondingQuality + norm;
+            }
+         }
+      }
+
+      DMatrixRMaj getOutput()
+      {
+         return output;
+      }
+
+      boolean isCorresponding(int index)
+      {
+         return correspondence[index];
+      }
+
+      int getNumberOfCorrespondingPoints()
+      {
+         return numberOfCorrespondingPoints;
+      }
+
+      double getCorrespondingQuality()
+      {
+         return correspondingQuality;
+      }
+
+      double getQuality()
+      {
+         return quality;
+      }
    }
 }
