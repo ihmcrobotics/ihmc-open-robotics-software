@@ -21,7 +21,6 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
@@ -177,7 +176,6 @@ public class REAOcTreeUpdater
             Set<NormalOcTreeNode> updatedNodes = new HashSet<>();
             referenceOctree.insertScan(scan, updatedNodes, null);
 
-            LogTools.info("Decay lifetime " + nodeLifetimeMilliseconds.get());
             if (nodeLifetimeMilliseconds.get() > 0L)
                decayOcTreeNodes();
 
@@ -212,7 +210,6 @@ public class REAOcTreeUpdater
          if (currentTimestamp - node.getLastHitTimestamp() >= nodeLifetimeMilliseconds.get())
             decayedNodes.add(node);
       }
-      LogTools.info("Number of decayedrt nodes: " + decayedNodes.size());
       decayedNodes.forEach(node -> referenceOctree.deleteNode(node.getKeyCopy()));
    }
 
