@@ -35,8 +35,6 @@ class LookAndStepBodyPathTask
    protected final VisibilityGraphsParametersReadOnly visibilityGraphParameters;
    protected final LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected final Supplier<Boolean> operatorReviewEnabled;
-   protected final Supplier<Boolean> needNewPlan;
-   protected final Runnable clearNewBodyPathNeededCallback;
    protected final Consumer<LookAndStepBehavior.State> behaviorStateUpdater;
 
    protected Consumer<ArrayList<Pose3D>> autonomousOutput;
@@ -57,8 +55,6 @@ class LookAndStepBodyPathTask
                            VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                            LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                            Supplier<Boolean> operatorReviewEnabled,
-                           Supplier<Boolean> needNewPlan,
-                           Runnable clearNewBodyPathNeededCallback,
                            Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
    {
       this.statusLogger = statusLogger;
@@ -66,8 +62,6 @@ class LookAndStepBodyPathTask
       this.visibilityGraphParameters = visibilityGraphParameters;
       this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
       this.operatorReviewEnabled = operatorReviewEnabled;
-      this.needNewPlan = needNewPlan;
-      this.clearNewBodyPathNeededCallback = clearNewBodyPathNeededCallback;
       this.behaviorStateUpdater = behaviorStateUpdater;
    }
 
@@ -157,8 +151,6 @@ class LookAndStepBodyPathTask
       statusLogger.info("Body path planning...");
       // TODO: Add robot standing still for 20s for real robot?
       uiPublisher.publishToUI(MapRegionsForUI, mapRegions);
-
-      clearNewBodyPathNeededCallback.run();
 
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);

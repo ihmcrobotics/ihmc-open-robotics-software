@@ -46,8 +46,7 @@ public class LookAndStepFootstepPlanningPart
    protected Supplier<Boolean> isBeingReviewedSupplier;
    protected Supplier<Boolean> abortGoalWalkingSupplier;
    protected UIPublisher uiPublisher;
-   protected Runnable newBodyPathGoalNeededNotifier;
-   protected Supplier<Boolean> newBodyPathGoalNeededSupplier;
+   protected Runnable onReachedGoal;
    protected SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses;
    protected FootstepPlanningModule footstepPlanningModule;
    protected Consumer<RobotSide> lastStanceSideSetter;
@@ -73,8 +72,7 @@ public class LookAndStepFootstepPlanningPart
                        FootstepPlannerParametersReadOnly footstepPlannerParameters,
                        Supplier<Boolean> abortGoalWalkingSupplier,
                        UIPublisher uiPublisher,
-                       Runnable newBodyPathGoalNeededNotifier,
-                       Supplier<Boolean> newBodyPathGoalNeededSupplier,
+                       Runnable onReachedGoal,
                        SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
                        FootstepPlanningModule footstepPlanningModule,
                        AtomicReference<RobotSide> lastStanceSideReference,
@@ -87,8 +85,7 @@ public class LookAndStepFootstepPlanningPart
          this.footstepPlannerParameters = footstepPlannerParameters;
          this.abortGoalWalkingSupplier = abortGoalWalkingSupplier;
          this.uiPublisher = uiPublisher;
-         this.newBodyPathGoalNeededNotifier = newBodyPathGoalNeededNotifier;
-         this.newBodyPathGoalNeededSupplier = newBodyPathGoalNeededSupplier;
+         this.onReachedGoal = onReachedGoal;
          this.lastSteppedSolePoses = lastSteppedSolePoses;
          this.footstepPlanningModule = footstepPlanningModule;
          this.lastStanceSideReference = lastStanceSideReference;
@@ -189,11 +186,6 @@ public class LookAndStepFootstepPlanningPart
          statusLogger.debug("Footstep planning suppressed: Plan being reviewed");
          proceed = false;
       }
-      else if (newBodyPathGoalNeededSupplier.get())
-      {
-         statusLogger.debug("Footstep planning suppressed: New body path goal needed");
-         proceed = false;
-      }
 
       return proceed;
    }
@@ -244,40 +236,20 @@ public class LookAndStepFootstepPlanningPart
       boolean reachedGoal = closestPointAlongPath.distanceXY(goalPoint) < lookAndStepBehaviorParameters.getGoalSatisfactionRadius();
       reachedGoal &= Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw()))
                      < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
-      if (reachedGoal)
+      if (reachedGoal | abortGoalWalkingSupplier.get())
       {
-         statusLogger.warn("Footstep planning: Robot reached goal. Not planning");
+         if (reachedGoal) statusLogger.warn("Footstep planning: Robot reached goal. Not planning");
+         if (abortGoalWalkingSupplier.get()) statusLogger.warn("Footstep planning: Goal was cancelled. Not planning");
          behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
-         newBodyPathGoalNeededNotifier.run();
+         onReachedGoal.run();
          return;
       }
-      if (abortGoalWalkingSupplier.get())
-      {
-         statusLogger.warn("Footstep planning: Goal was cancelled. Not planning");
-         behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
-         newBodyPathGoalNeededNotifier.run();
-         return;
-      }
-
-      //      double trailingBy = goalPoseBetweenFeet.getPositionDistance(initialPoseBetweenFeet);
-      //      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
-      //      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon) - trailingBy, 0.0, 0.0);
-
-      //      Vector2D headingVector = new Vector2D();
-      //      headingVector.set(goalPoint.getX(), goalPoint.getY());
-      //      headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
 
       statusLogger.info("Found next sub goal: {}", goalPoint);
       goalPoseBetweenFeet.getPosition().set(goalPoint);
-
-      //      double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
-      //      LogTools.info("Setting yaw: {}", yaw);
-      //      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
-
       goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // update last stepped poses to plan from; initialize to current poses
-
       SideDependentList<FramePose3DReadOnly> startFootPoses = new SideDependentList<>();
       ArrayList<FootstepForUI> startFootPosesForUI = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -329,7 +301,6 @@ public class LookAndStepFootstepPlanningPart
       footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.POSITION);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      //      footstepPlanningModule.addStatusCallback(this::footstepPlanningStatusUpdate);
       footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
 
       statusLogger.info("Footstep planner started...");

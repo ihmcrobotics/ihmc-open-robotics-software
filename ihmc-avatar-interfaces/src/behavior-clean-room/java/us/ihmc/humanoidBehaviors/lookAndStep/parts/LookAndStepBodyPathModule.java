@@ -35,8 +35,6 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
                                     VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                                     LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                                     Supplier<Boolean> operatorReviewEnabled,
-                                    Supplier<Boolean> needNewPlan,
-                                    Runnable clearNewBodyPathNeededCallback,
                                     Supplier<HumanoidRobotState> robotStateSupplier,
                                     Supplier<LookAndStepBehavior.State> behaviorStateSupplier,
                                     Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
@@ -46,8 +44,6 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
             visibilityGraphParameters,
             lookAndStepBehaviorParameters,
             operatorReviewEnabled,
-            needNewPlan,
-            clearNewBodyPathNeededCallback,
             behaviorStateUpdater);
 
       this.robotStateSupplier = robotStateSupplier;
