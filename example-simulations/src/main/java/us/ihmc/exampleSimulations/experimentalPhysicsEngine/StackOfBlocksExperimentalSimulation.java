@@ -24,10 +24,16 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 
 public class StackOfBlocksExperimentalSimulation
 {
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.3, 0.15, 0.01, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public StackOfBlocksExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setCoefficientOfRestitution(0.3);
+      contactParameters.setRestitutionThreshold(0.15);
+      contactParameters.setErrorReductionParameter(0.01);
+
       int numberOfBlocks = 6;
       Random random = new Random(1886L);
 

@@ -42,8 +42,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -57,10 +59,9 @@ public class SingleContactImpulseCalculatorTest
    private static final double GAMMA = 1.0e-10;
 
    @Test
-   public void testComputeContactPointVelocity()
+   public void testComputeContactPointLinearVelocity()
    {
       Random random = new Random(4564);
-      //      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -83,26 +84,72 @@ public class SingleContactImpulseCalculatorTest
 
          FrameVector3D actualLinearVelocity = new FrameVector3D();
 
-         SingleContactImpulseCalculator.computeContactPointVelocity(dt,
-                                                                    rootBody,
-                                                                    contactingBody,
-                                                                    spatialAccelerationCalculator,
-                                                                    contactPoint,
-                                                                    actualLinearVelocity);
+         SingleContactImpulseCalculator.computeContactPointLinearVelocity(dt,
+                                                                          rootBody,
+                                                                          contactingBody,
+                                                                          spatialAccelerationCalculator,
+                                                                          contactPoint,
+                                                                          actualLinearVelocity);
 
          for (OneDoFJoint joint : joints)
          {
             joint.setQd(joint.getQd() + dt * joint.getQdd());
          }
 
-         //         integrator.setIntegrationDT(dt);
-         //         integrator.doubleIntegrateFromAcceleration(joints);
          rootBody.updateFramesRecursively();
 
          FrameVector3D expectedLinearVelocity = new FrameVector3D();
          contactingBody.getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(contactPoint, expectedLinearVelocity);
 
          EuclidFrameTestTools.assertFrameTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
+      }
+   }
+
+   @Test
+   public void testComputeContactPointSpatialVelocity()
+   {
+      Random random = new Random(4564);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         double gravity = EuclidCoreRandomTools.nextDouble(random, -20.0, -1.0);
+         double dt = random.nextDouble();
+         int numberOfJoints = random.nextInt(50) + 1;
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+
+         for (JointStateType state : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, state, joints);
+
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+         rootBody.updateFramesRecursively();
+
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame, false);
+         spatialAccelerationCalculator.setGravitionalAcceleration(gravity);
+
+         RigidBodyBasics contactingBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         FramePoint3D contactPoint = EuclidFrameRandomTools.nextFramePoint3D(random, contactingBody.getBodyFixedFrame());
+
+         SpatialVector actualSpatialVelocity = new SpatialVector();
+
+         SingleContactImpulseCalculator.predictContactPointSpatialVelocity(dt,
+                                                                           rootBody,
+                                                                           contactingBody,
+                                                                           spatialAccelerationCalculator,
+                                                                           contactPoint,
+                                                                           actualSpatialVelocity);
+
+         for (OneDoFJoint joint : joints)
+         {
+            joint.setQd(joint.getQd() + dt * joint.getQdd());
+         }
+
+         rootBody.updateFramesRecursively();
+
+         SpatialVector expectedSpatialVelocity = new SpatialVector(contactingBody.getBodyFixedFrame());
+         expectedSpatialVelocity.getAngularPart().set(contactingBody.getBodyFixedFrame().getTwistOfFrame().getAngularPart());
+         contactingBody.getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(contactPoint, expectedSpatialVelocity.getLinearPart());
+
+         MecanoTestTools.assertSpatialVectorEquals(expectedSpatialVelocity, actualSpatialVelocity, EPSILON);
       }
    }
 
@@ -129,7 +176,7 @@ public class SingleContactImpulseCalculatorTest
          SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(worldFrame, rootBodyA, forwardDynamicsCalculatorA, null, null);
          impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.setContactParameters(new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0));
+         impulseCalculator.setContactParameters(ContactParameters.defaultIneslasticContactParameters(false));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
          impulseCalculator.computeImpulse(dt);
@@ -170,7 +217,7 @@ public class SingleContactImpulseCalculatorTest
                                                                                                forwardDynamicsCalculatorB);
          impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.setContactParameters(new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0));
+         impulseCalculator.setContactParameters(ContactParameters.defaultIneslasticContactParameters(false));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
 
@@ -198,14 +245,11 @@ public class SingleContactImpulseCalculatorTest
    @Test
    public void testFlyingCollidingSpheres()
    {
-      long seed = new Random().nextLong();
-      System.out.println(seed);
       Random random = new Random(9030112133717752657L);
       ContactParameters contactParameters = new ContactParameters();
       contactParameters.setCoefficientOfFriction(0.7);
       contactParameters.setCoefficientOfRestitution(1.0);
       contactParameters.setMinimumPenetration(5.0e-5);
-      contactParameters.setConstraintForceMixing(1.0);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -290,8 +334,8 @@ public class SingleContactImpulseCalculatorTest
          sphereBFinalVelocity.scaleAdd(massB - massA, sphereBInitialVelocity, sphereBFinalVelocity);
          sphereBFinalVelocity.scale(1.0 / (massA + massB));
 
-         EuclidCoreTestTools.assertTuple3DEquals(sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals(sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
       }
    }
 
@@ -506,12 +550,12 @@ public class SingleContactImpulseCalculatorTest
       RigidBodyReadOnly rootBody = MultiBodySystemTools.getRootBody(rigidBody);
       if (noVelocityRigidBodyAccelerationProvider != null)
       {
-         SingleContactImpulseCalculator.computeContactPointVelocity(dt,
-                                                                    rootBody,
-                                                                    rigidBody,
-                                                                    noVelocityRigidBodyAccelerationProvider,
-                                                                    bodyFixedPoint,
-                                                                    contactLinearVelocity);
+         SingleContactImpulseCalculator.computeContactPointLinearVelocity(dt,
+                                                                          rootBody,
+                                                                          rigidBody,
+                                                                          noVelocityRigidBodyAccelerationProvider,
+                                                                          bodyFixedPoint,
+                                                                          contactLinearVelocity);
       }
       else
       {

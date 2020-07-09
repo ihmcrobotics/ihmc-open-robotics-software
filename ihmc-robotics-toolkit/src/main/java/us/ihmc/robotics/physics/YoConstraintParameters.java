@@ -8,31 +8,27 @@ public class YoConstraintParameters implements ConstraintParametersBasics
    private final YoDouble coefficientOfRestitution;
    private final YoDouble restitutionThreshold;
    private final YoDouble errorReductionParameter;
-   private final YoDouble constraintForceMixing;
 
    public YoConstraintParameters(String prefix, YoVariableRegistry registry)
    {
-      String corName, erpName, cfmName, rthName;
+      String corName, erpName, rthName;
 
       if (prefix == null || prefix.isEmpty())
       {
          corName = "coefficientOfRestitution";
          rthName = "restitutionThreshold";
          erpName = "errorReductionParameter";
-         cfmName = "constraintForceMixing";
       }
       else
       {
          corName = prefix + "CoefficientOfRestitution";
          rthName = prefix + "RestitutionThreshold";
          erpName = prefix + "ErrorReductionParameter";
-         cfmName = prefix + "ConstraintForceMixing";
       }
 
       coefficientOfRestitution = new YoDouble(corName, registry);
       restitutionThreshold = new YoDouble(rthName, registry);
       errorReductionParameter = new YoDouble(erpName, registry);
-      constraintForceMixing = new YoDouble(cfmName, registry);
    }
 
    @Override
@@ -54,12 +50,6 @@ public class YoConstraintParameters implements ConstraintParametersBasics
    }
 
    @Override
-   public void setConstraintForceMixing(double constraintForceMixing)
-   {
-      this.constraintForceMixing.set(constraintForceMixing);
-   }
-
-   @Override
    public double getCoefficientOfRestitution()
    {
       return coefficientOfRestitution.getValue();
@@ -75,11 +65,5 @@ public class YoConstraintParameters implements ConstraintParametersBasics
    public double getErrorReductionParameter()
    {
       return errorReductionParameter.getValue();
-   }
-
-   @Override
-   public double getConstraintForceMixing()
-   {
-      return constraintForceMixing.getValue();
    }
 }

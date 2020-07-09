@@ -1,6 +1,9 @@
 package us.ihmc.robotics.physics;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -13,15 +16,23 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class SingleRobotFirstOrderIntegrator
@@ -40,15 +51,21 @@ public class SingleRobotFirstOrderIntegrator
    /** Intermediate variable used to perform garbage-free operations. */
    private final SpatialVector spatialVelocityChange = new SpatialVector();
 
+   private final RigidBodyTwistChangeCalculator rigidBodyTwistChangeCalculator;
+   private final RigidBodyTwistProvider rigidBodyTwistChangeProvider;
+
    public SingleRobotFirstOrderIntegrator(MultiBodySystemBasics input)
    {
       this.input = input;
       velocityChangeMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(input.getAllJoints()), 1);
+      rigidBodyTwistChangeCalculator = new RigidBodyTwistChangeCalculator();
+      rigidBodyTwistChangeProvider = RigidBodyTwistProvider.toRigidBodyTwistProvider(rigidBodyTwistChangeCalculator, input.getInertialFrame());
    }
 
-   public void resetJointVelocityChange()
+   public void reset()
    {
       velocityChangeMatrix.zero();
+      rigidBodyTwistChangeCalculator.reset();
    }
 
    public void setJointVelocityChange(DMatrixRMaj velocityChange)
@@ -88,8 +105,6 @@ public class SingleRobotFirstOrderIntegrator
          }
          startIndex += joint.getDegreesOfFreedom();
       }
-
-      resetJointVelocityChange();
    }
 
    public void integrateOneDoFJoint(double dt, OneDoFJointBasics joint, double velocityChange)
@@ -142,5 +157,71 @@ public class SingleRobotFirstOrderIntegrator
       spatialAcceleration.setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration, twist);
 
       orientation.append(orientationChange);
+   }
+
+   public RigidBodyTwistProvider getRigidBodyTwistChangeProvider()
+   {
+      return rigidBodyTwistChangeProvider;
+   }
+
+   private class RigidBodyTwistChangeCalculator implements Function<RigidBodyReadOnly, TwistReadOnly>
+   {
+      public void reset()
+      {
+         rigidBodyTwistMap.clear();
+      }
+
+      private final Map<RigidBodyReadOnly, Twist> rigidBodyTwistMap = new HashMap<>();
+      private final Twist jointTwist = new Twist();
+      private final JointMatrixIndexProvider jointMatrixIndexProvider = input.getJointMatrixIndexProvider();
+
+      @Override
+      public TwistReadOnly apply(RigidBodyReadOnly body)
+      {
+         Twist twistOfBody = rigidBodyTwistMap.get(body);
+
+         if (twistOfBody == null)
+         {
+            JointReadOnly parentJoint = body.getParentJoint();
+            TwistReadOnly twistOfParentBody;
+            RigidBodyReadOnly parentBody = parentJoint.getPredecessor();
+            if (parentBody.isRootBody())
+               twistOfParentBody = null;
+            else
+               twistOfParentBody = apply(parentBody);
+
+            if (parentJoint instanceof OneDoFJointReadOnly)
+            {
+               jointTwist.setIncludingFrame(((OneDoFJointReadOnly) parentJoint).getUnitJointTwist());
+               jointTwist.scale(velocityChangeMatrix.get(jointMatrixIndexProvider.getJointDoFIndices(parentJoint)[0]));
+            }
+            else if (parentJoint instanceof SixDoFJointReadOnly)
+            {
+               jointTwist.set(jointMatrixIndexProvider.getJointDoFIndices(parentJoint)[0], velocityChangeMatrix);
+               jointTwist.setReferenceFrame(parentJoint.getFrameAfterJoint());
+               jointTwist.setBaseFrame(parentJoint.getFrameBeforeJoint());
+               jointTwist.setBodyFrame(parentJoint.getFrameAfterJoint());
+            }
+            else
+            {
+               throw new UnsupportedOperationException("Implement me for: " + parentJoint.getClass().getSimpleName());
+            }
+
+            jointTwist.changeFrame(body.getBodyFixedFrame());
+            jointTwist.setBaseFrame(parentBody.getBodyFixedFrame());
+            jointTwist.setBodyFrame(body.getBodyFixedFrame());
+
+            twistOfBody = new Twist();
+            if (twistOfParentBody == null)
+               twistOfBody.setToZero(parentBody.getBodyFixedFrame(), input.getInertialFrame(), parentBody.getBodyFixedFrame());
+            else
+               twistOfBody.setIncludingFrame(twistOfParentBody);
+            twistOfBody.changeFrame(body.getBodyFixedFrame());
+            twistOfBody.add(jointTwist);
+            rigidBodyTwistMap.put(body, twistOfBody);
+         }
+
+         return twistOfBody;
+      }
    }
 }

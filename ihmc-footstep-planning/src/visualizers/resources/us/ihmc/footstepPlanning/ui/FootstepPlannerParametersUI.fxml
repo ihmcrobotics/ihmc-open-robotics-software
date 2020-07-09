@@ -13,6 +13,7 @@
         <VBox maxWidth="350.0">
             <Region prefHeight="10"/>
             <Button onAction="#saveToFile" prefWidth="130.0" text="Save Parameters" alignment="CENTER"/>
+            <Button onAction="#loadFile" prefWidth="130.0" text="Load File" alignment="CENTER"/>
             <Region prefHeight="10"/>
             <AnchorPane minHeight="200.0" minWidth="250.0" prefHeight="202.0" prefWidth="250.0">
                 <children>

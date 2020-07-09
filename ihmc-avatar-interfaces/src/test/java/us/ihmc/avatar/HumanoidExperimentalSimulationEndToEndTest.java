@@ -51,13 +51,10 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
    public void testStanding(TestInfo testInfo) throws Exception
    {
-      simulationTestingParameters.setUsePefectSensors(true);
-
       DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
-      drcSimulationTestHelper.getSCSInitialSetup().setRecordFrequency(1);
       drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + "." + testInfo.getTestMethod().get().getName() + "()");
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }

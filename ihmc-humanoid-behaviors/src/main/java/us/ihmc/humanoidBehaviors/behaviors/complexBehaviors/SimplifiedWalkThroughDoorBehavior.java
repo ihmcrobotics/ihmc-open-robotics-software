@@ -79,7 +79,7 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
 
    //define some of the sub-behaviors that will be used that are specific to this behavior
    private final SearchForDoorBehavior searchForDoorBehavior;
-   private final OpenDoorBehavior openDoorBehavior;
+   private final OpenPushDoorBehavior openDoorBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
 
@@ -126,7 +126,7 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
-      openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
+      openDoorBehavior = new OpenPushDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
                                               yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       doorToBehaviorPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);

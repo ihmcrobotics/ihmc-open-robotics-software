@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
@@ -55,9 +56,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       //if distance to door < approach point location skip this step.
       //walk to general door location... point offseet from door approach location
       //search for door precise location
-      WALKING_TO_DOOR, //if failed jump to clear state
+      WALKING_TO_PUSH_DOOR, //if failed jump to clear state
+      WALKING_TO_PULL_DOOR,
       SEARCHING_FOR_DOOR_FINAL, //search for door handle
-      OPEN_DOOR, // in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
+      OPEN_PUSH_DOOR, // in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
+      OPEN_PULL_DOOR, // in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
+
       SET_UP_ROBOT_FOR_DOOR_WALK,
       WAITING_FOR_USER_CONFIRMATION,
       WALK_THROUGH_DOOR,
@@ -66,14 +70,18 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       DONE
    }
 
-
    //this is the predefined walk to points relative to the door reference frame, these should eventualy be replaced by a behavior that finds the best location to walk up to given an arm task space 
-   private Vector3D32 doorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
-   private Vector3D32 doorOffsetPoint2 = new Vector3D32(0.5f, -0.6f, 0f);
+   private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
+   private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.5f, -0.6f, 0f);
+
+   private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(1.0f, 0.9f, 0f);
+   private Vector3D32 pullDoorOffsetPoint2 = new Vector3D32(0.95f, 0.8f, 0f);
 
    //define some of the sub-behaviors that will be used that are specific to this behavior
    private final SearchForDoorBehavior searchForDoorBehavior;
-   private final OpenDoorBehavior openDoorBehavior;
+   private final OpenPushDoorBehavior openPushDoorBehavior;
+   private final OpenPullDoorBehavior openPullDoorBehavior;
+
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
 
@@ -95,24 +103,34 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-//      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-//      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+      //      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+      //      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
       addBehaviorService(doorOpenDetectorBehaviorService);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
-      
+
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
       //set up behaviors
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
-      openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
-                                              yoGraphicsListRegistry);
+      openPushDoorBehavior = new OpenPushDoorBehavior(robotName,
+                                                      yoNamePrefix,
+                                                      yoTime,
+                                                      ros2Node,
+                                                      atlasPrimitiveActions,
+                                                      doorOpenDetectorBehaviorService,
+                                                      yoGraphicsListRegistry);
+      openPullDoorBehavior = new OpenPullDoorBehavior(robotName,
+                                                      yoNamePrefix,
+                                                      yoTime,
+                                                      ros2Node,
+                                                      atlasPrimitiveActions,
+                                                      doorOpenDetectorBehaviorService,
+                                                      yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      
-            
 
       //setup publisher for sending door location to UI
       setupStateMachine();
@@ -122,15 +140,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    public void doControl()
    {
 
-
-      
-
-      
       //should constantly be searching for door and updating its location here
 
       if (doorOpenDetectorBehaviorService.newPose != null)
       {
-         
+
          Point3D location = new Point3D();
          Quaternion orientation = new Quaternion();
          doorOpenDetectorBehaviorService.newPose.get(location, orientation);
@@ -184,6 +198,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
 
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(leftHandMessage);
+
          }
 
       };
@@ -199,6 +214,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             lookDown();
             super.onEntry();
          }
+
       };
 
       BehaviorAction searchForDoorNear = new BehaviorAction(searchForDoorBehavior)
@@ -221,7 +237,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      BehaviorAction walkToDoorAction = new BehaviorAction(walkToInteractableObjectBehavior)
+      BehaviorAction walkToDoorPushDoorAction = new BehaviorAction(walkToInteractableObjectBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -229,16 +245,33 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             lookDown();
             if (DEBUG)
             {
-               publishTextToSpeech("walk to door action");
+               publishTextToSpeech("walk to push door action");
             }
-            FramePoint3D point1 = offsetPointFromDoor(doorOffsetPoint1);
-            FramePoint3D point2 = offsetPointFromDoor(doorOffsetPoint2);
+            FramePoint3D point1 = offsetPointFromDoor(pushDoorOffsetPoint1);
+            FramePoint3D point2 = offsetPointFromDoor(pushDoorOffsetPoint2);
 
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
       };
 
-      BehaviorAction openDoorAction = new BehaviorAction(openDoorBehavior)
+      BehaviorAction walkToDoorPullDoorAction = new BehaviorAction(walkToInteractableObjectBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            lookDown();
+            if (DEBUG)
+            {
+               publishTextToSpeech("walk to pull door action");
+            }
+            FramePoint3D point1 = offsetPointFromDoor(pullDoorOffsetPoint1);
+            FramePoint3D point2 = offsetPointFromDoor(pullDoorOffsetPoint2);
+
+            walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
+         }
+      };
+
+      BehaviorAction openPushDoorAction = new BehaviorAction(openPushDoorBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -248,8 +281,23 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             {
                publishTextToSpeech("open door action");
             }
-           //this should happen in the openDoorBehavior
-            openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
+            //this should happen in the openDoorBehavior
+            openPushDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
+         }
+      };
+
+      BehaviorAction openPullDoorAction = new BehaviorAction(openPullDoorBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            lookDown();
+            if (DEBUG)
+            {
+               publishTextToSpeech("open door action");
+            }
+            //this should happen in the openDoorBehavior
+            openPushDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
          }
       };
 
@@ -262,19 +310,19 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             {
                publishTextToSpeech("setup for walk");
             }
-//            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
-//                  1.3376930879072813};
-//            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
-//                  -0.8771109242461594, -1.336089159719967};
+            //            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
+            //                  1.3376930879072813};
+            //            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
+            //                  -0.8771109242461594, -1.336089159719967};
 
-  //          double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
-//          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
+            //          double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
+            //          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
 
-          
-          double[] rightArmPose = new double[] {1.4183220415980604, 0.39055667789847864, 0.9442635783301307, -2.0569246166596393, 2.8812595031701362, -0.06984858968272295, 0.7887047653418846};
-          double[] leftArmPose = new double[] {-1.4141618751532627, -1.0073892313065864, 1.879864339482996, 1.461406972715835, 0.028921330852778603, -1.1543763213792428, -2.797065870312528};
+            double[] rightArmPose = new double[] {1.4183220415980604, 0.39055667789847864, 0.9442635783301307, -2.0569246166596393, 2.8812595031701362,
+                  -0.06984858968272295, 0.7887047653418846};
+            double[] leftArmPose = new double[] {-1.4141618751532627, -1.0073892313065864, 1.879864339482996, 1.461406972715835, 0.028921330852778603,
+                  -1.1543763213792428, -2.797065870312528};
 
-            
             ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
 
             ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
@@ -321,26 +369,73 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       };
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SETUP_ROBOT, resetRobot, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar, WalkThroughDoorBehaviorState.WALKING_TO_DOOR);
+      factory.addState(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorFar);
 
-      factory.addState(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, walkToDoorAction);
-      factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+      factory.addTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR,
+                            WalkThroughDoorBehaviorState.WALKING_TO_PUSH_DOOR,
+                            t -> searchForDoorFar.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR,
+                            WalkThroughDoorBehaviorState.WALKING_TO_PULL_DOOR,
+                            t -> searchForDoorFar.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT);
+
+      factory.addState(WalkThroughDoorBehaviorState.WALKING_TO_PUSH_DOOR, walkToDoorPushDoorAction);
+
+      factory.addState(WalkThroughDoorBehaviorState.WALKING_TO_PULL_DOOR, walkToDoorPullDoorAction);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_PUSH_DOOR,
+                            WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
                             t -> isWalkingDone() && hasWalkingSucceded());
-      factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.FAILED, t -> isWalkingDone() && !hasWalkingSucceded());
+      factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_PUSH_DOOR,
+                            WalkThroughDoorBehaviorState.FAILED,
+                            t -> isWalkingDone() && !hasWalkingSucceded());
 
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, searchForDoorNear, WalkThroughDoorBehaviorState.OPEN_DOOR);
-      factory.addState(WalkThroughDoorBehaviorState.OPEN_DOOR, openDoorAction);
+      factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_PULL_DOOR,
+                            WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+                            t -> isWalkingDone() && hasWalkingSucceded());
+      factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_PULL_DOOR,
+                            WalkThroughDoorBehaviorState.FAILED,
+                            t -> isWalkingDone() && !hasWalkingSucceded());
 
-      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
-                            t -> openDoorAction.isDone() && !openDoorBehavior.succeeded());
-      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
-                            t -> openDoorAction.isDone() && openDoorBehavior.succeeded());
+      factory.addState(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, searchForDoorNear);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+                            WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
+                            t -> searchForDoorNear.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+                            WalkThroughDoorBehaviorState.OPEN_PULL_DOOR,
+                            t -> searchForDoorNear.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT);
+
+      //OPEN PUSH DOOR      
+      factory.addState(WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR, openPushDoorAction);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
+                            WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+                            t -> openPushDoorAction.isDone() && !openPushDoorBehavior.succeeded());
+      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
+                            WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+                            t -> openPushDoorAction.isDone() && openPushDoorBehavior.succeeded());
+
+      //OPEN PULL DOOR
+      factory.addState(WalkThroughDoorBehaviorState.OPEN_PULL_DOOR, openPullDoorAction);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_PULL_DOOR,
+                            WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+                            t -> openPullDoorAction.isDone() && !openPullDoorBehavior.succeeded());
+      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_PULL_DOOR,
+                            WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+                            t -> openPullDoorAction.isDone() && openPullDoorBehavior.succeeded());
+
+      ///
 
       factory.addState(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk);
 
-      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.OPEN_DOOR,
+      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+                            WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
                             t -> setUpForWalk.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
+      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+                            WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
                             t -> setUpForWalk.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
 
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
@@ -350,10 +445,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
       factory.addState(WalkThroughDoorBehaviorState.DONE, doneState);
 
-      factory.addStateChangedListener((from, to) -> {
+      factory.addStateChangedListener((from, to) ->
+      {
          publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
       });
-
 
       return WalkThroughDoorBehaviorState.SETUP_ROBOT;
    }
@@ -375,73 +470,143 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       Pose3D unrotatedDoor = new Pose3D(searchForDoorBehavior.getLocation());
 
-      double offsetLeftRight = .381;
-      double footSpread = -.05;
-      
-
-      
-      unrotatedDoor.appendYawRotation(Math.toRadians(180));
-      unrotatedDoor.appendTranslation(-0.9144, 0, 0);
-
-      doorPose.setPoseAndUpdate(unrotatedDoor);
-
-      RobotSide startStep = RobotSide.LEFT;
-
-
+      double offsetLeftRight = 0;
+      double footSpread = 0;
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
                                                                                            atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
+      if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT)
+      {
+         offsetLeftRight = .381;
+         footSpread = -.05;
+         unrotatedDoor.appendYawRotation(Math.toRadians(180));
+         unrotatedDoor.appendTranslation(-0.9144, 0, 0);
 
-      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(-0.124+offsetLeftRight, 0.592160790421584, -0),
-              new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+         doorPose.setPoseAndUpdate(unrotatedDoor);
+
+         RobotSide startStep = RobotSide.LEFT;
 
       
-      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep, new Point3D(0.124+offsetLeftRight, 0.592160790421584, -0),
-                                                       new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
-     
-   
-      
-     
 
-      FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(footSpread+offsetLeftRight, 0.23597592988662308, -0),
-                                                       new Quaternion(-1.5943418991263463E-13, 2.75059506574629E-13, -0.7043243641759355, 0.7098782924052293));
-     
-      FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep, new Point3D(-footSpread+offsetLeftRight, -0.26851462759487155, -0),
-                                                       new Quaternion(-3.236982396751798E-13, 3.899712427026468E-14, -0.7043243760613419, 0.7098782806128114));
-      FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(-0.124+offsetLeftRight, -0.7234607322382425, -0),
-                                                       new Quaternion(1.7351711631778928E-14, -1.6924263791365571E-13, -0.7043243760613419,
-                                                                     0.7098782806128114));
-      FootstepDataMessage fs6 = createRelativeFootStep(doorPose, startStep, new Point3D(0.124+offsetLeftRight, -0.7199905519593679, -0),
-                                                       new Quaternion(2.5501844493298926E-13, -3.0463423083022023E-13, -0.7043243760613419,
-                                                                      0.7098782806128114));
-      
-      
-      
-      
-      
-      
-      /* FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5864031335585762+offsetLeftRight, 0.592160790421584, -0),
-                                                       new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
-     
+         FootstepDataMessage fs1 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(-0.124 + offsetLeftRight, 0.592160790421584, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
 
-      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(0.4053278408799188+offsetLeftRight, 0.23597592988662308, -0),
-                                                       new Quaternion(-1.5943418991263463E-13, 2.75059506574629E-13, -0.7043243641759355, 0.7098782924052293));
-      FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5924372369454293+offsetLeftRight, -0.26851462759487155, -0),
-                                                       new Quaternion(-3.236982396751798E-13, 3.899712427026468E-14, -0.7043243760613419, 0.7098782806128114));
-      FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(0.36887783182356804+offsetLeftRight, -0.7234607322382425, -0),
-                                                       new Quaternion(1.7351711631778928E-14, -1.6924263791365571E-13, -0.7043243760613419,
-                                                                      0.7098782806128114));
-      FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5896714303877739+offsetLeftRight, -0.7199905519593679, -0),
-                                                       new Quaternion(2.5501844493298926E-13, -3.0463423083022023E-13, -0.7043243760613419,
-                                                                      0.7098782806128114));
-                                                                      */
+         FootstepDataMessage fs2 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.124 + offsetLeftRight, 0.592160790421584, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
 
-      message.getFootstepDataList().add().set(fs1);
-      message.getFootstepDataList().add().set(fs2);
-      message.getFootstepDataList().add().set(fs3);
-      message.getFootstepDataList().add().set(fs4);
-      message.getFootstepDataList().add().set(fs5);
-      message.getFootstepDataList().add().set(fs6);
-      message.setTrustHeightOfFootsteps(true);
+         FootstepDataMessage fs3 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(footSpread + offsetLeftRight, 0.23597592988662308, -0),
+                                                          new Quaternion(-1.5943418991263463E-13,
+                                                                         2.75059506574629E-13,
+                                                                         -0.7043243641759355,
+                                                                         0.7098782924052293));
+
+         FootstepDataMessage fs4 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(-footSpread + offsetLeftRight, -0.26851462759487155, -0),
+                                                          new Quaternion(-3.236982396751798E-13,
+                                                                         3.899712427026468E-14,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         FootstepDataMessage fs5 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(-0.124 + offsetLeftRight, -0.7234607322382425, -0),
+                                                          new Quaternion(1.7351711631778928E-14,
+                                                                         -1.6924263791365571E-13,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         FootstepDataMessage fs6 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.124 + offsetLeftRight, -0.7199905519593679, -0),
+                                                          new Quaternion(2.5501844493298926E-13,
+                                                                         -3.0463423083022023E-13,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+
+         message.getFootstepDataList().add().set(fs1);
+         message.getFootstepDataList().add().set(fs2);
+         message.getFootstepDataList().add().set(fs3);
+         message.getFootstepDataList().add().set(fs4);
+         message.getFootstepDataList().add().set(fs5);
+         message.getFootstepDataList().add().set(fs6);
+         message.setTrustHeightOfFootsteps(true);
+      }
+      if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT)
+      {
+         
+         offsetLeftRight = .481;
+         footSpread = -.05;
+         
+         doorPose.setPoseAndUpdate(unrotatedDoor);
+
+         RobotSide startStep = RobotSide.LEFT;
+
+      
+         FootstepDataMessage fs1p = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(0.148 + offsetLeftRight, 0.7, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+         FootstepDataMessage fs2p = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.396 + offsetLeftRight, 0.7, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+         
+
+         FootstepDataMessage fs1 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(-0.124 + offsetLeftRight, 0.592160790421584, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+         FootstepDataMessage fs2 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.124 + offsetLeftRight, 0.592160790421584, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+         FootstepDataMessage fs3 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(footSpread + offsetLeftRight, 0.23597592988662308, -0),
+                                                          new Quaternion(-1.5943418991263463E-13,
+                                                                         2.75059506574629E-13,
+                                                                         -0.7043243641759355,
+                                                                         0.7098782924052293));
+
+         FootstepDataMessage fs4 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(-footSpread + offsetLeftRight, -0.26851462759487155, -0),
+                                                          new Quaternion(-3.236982396751798E-13,
+                                                                         3.899712427026468E-14,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         FootstepDataMessage fs5 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(-0.124 + offsetLeftRight, -0.7234607322382425, -0),
+                                                          new Quaternion(1.7351711631778928E-14,
+                                                                         -1.6924263791365571E-13,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         FootstepDataMessage fs6 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.124 + offsetLeftRight, -0.7199905519593679, -0),
+                                                          new Quaternion(2.5501844493298926E-13,
+                                                                         -3.0463423083022023E-13,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         message.getFootstepDataList().add().set(fs1p);
+         message.getFootstepDataList().add().set(fs2p);
+         message.getFootstepDataList().add().set(fs1);
+         message.getFootstepDataList().add().set(fs2);
+         message.getFootstepDataList().add().set(fs3);
+         message.getFootstepDataList().add().set(fs4);
+         message.getFootstepDataList().add().set(fs5);
+         message.getFootstepDataList().add().set(fs6);
+         message.setTrustHeightOfFootsteps(true);
+      }
+
 
       return message;
    }
@@ -481,7 +646,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0.8);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, atlasPrimitiveActions.referenceFrames.getChestFrame(),
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0,
+                                                                                                     headOrientation,
+                                                                                                     atlasPrimitiveActions.referenceFrames.getChestFrame(),
                                                                                                      atlasPrimitiveActions.referenceFrames.getChestFrame());
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       headTrajectoryPublisher.publish(headTrajectoryMessage);
@@ -492,7 +659,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation,atlasPrimitiveActions.referenceFrames.getChestFrame(),
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0,
+                                                                                                     headOrientation,
+                                                                                                     atlasPrimitiveActions.referenceFrames.getChestFrame(),
                                                                                                      atlasPrimitiveActions.referenceFrames.getChestFrame());
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       headTrajectoryPublisher.publish(headTrajectoryMessage);

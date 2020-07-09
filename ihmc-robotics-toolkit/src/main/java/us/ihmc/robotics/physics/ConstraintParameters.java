@@ -5,17 +5,15 @@ public class ConstraintParameters implements ConstraintParametersBasics
    private double coefficientOfRestitution;
    private double restitutionThreshold;
    private double errorReductionParameter;
-   private double constraintForceMixing;
 
    public ConstraintParameters()
    {
    }
 
-   public ConstraintParameters(double coefficientOfRestitution, double restitutionThreshold, double errorReductionParameter, double constraintForceMixing)
+   public ConstraintParameters(double coefficientOfRestitution, double restitutionThreshold, double errorReductionParameter)
    {
       this.coefficientOfRestitution = coefficientOfRestitution;
       this.errorReductionParameter = errorReductionParameter;
-      this.constraintForceMixing = constraintForceMixing;
    }
 
    @Override
@@ -37,12 +35,6 @@ public class ConstraintParameters implements ConstraintParametersBasics
    }
 
    @Override
-   public void setConstraintForceMixing(double constraintForceMixing)
-   {
-      this.constraintForceMixing = constraintForceMixing;
-   }
-
-   @Override
    public double getCoefficientOfRestitution()
    {
       return coefficientOfRestitution;
@@ -58,11 +50,5 @@ public class ConstraintParameters implements ConstraintParametersBasics
    public double getErrorReductionParameter()
    {
       return errorReductionParameter;
-   }
-
-   @Override
-   public double getConstraintForceMixing()
-   {
-      return constraintForceMixing;
    }
 }

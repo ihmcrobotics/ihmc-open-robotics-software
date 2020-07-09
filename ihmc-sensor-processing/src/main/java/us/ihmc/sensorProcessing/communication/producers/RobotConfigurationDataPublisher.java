@@ -41,25 +41,20 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    /**
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
     * 
-    * @param realtimeRos2Node            the ROS 2 node to create the publisher with.
-    * @param outputTopic the generator to use to create the name of the topic.
-    * @param rootJointSensorData         the data provider for the root joint.
-    * @param jointSensorData             the data providers for the 1-DoF joints.
-    * @param imuSensorData               the data providers for the IMUs.
-    * @param forceSensorData             the data providers for the force sensors.
-    * @param timestampHolder             the data provider for the timestamps.
-    * @param robotMotionStatusHolder     the data provider for the robot motion status.
-    * @param publishPeriod               period in nanoseconds to publish.
+    * @param realtimeRos2Node        the ROS 2 node to create the publisher with.
+    * @param outputTopic             the generator to use to create the name of the topic.
+    * @param rootJointSensorData     the data provider for the root joint.
+    * @param jointSensorData         the data providers for the 1-DoF joints.
+    * @param imuSensorData           the data providers for the IMUs.
+    * @param forceSensorData         the data providers for the force sensors.
+    * @param timestampHolder         the data provider for the timestamps.
+    * @param robotMotionStatusHolder the data provider for the robot motion status.
+    * @param publishPeriod           period in nanoseconds to publish.
     */
-   public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node,
-                                          ROS2Topic outputTopic,
-                                          FloatingJointStateReadOnly rootJointSensorData,
-                                          List<? extends OneDoFJointStateReadOnly> jointSensorData,
-                                          List<? extends IMUSensorReadOnly> imuSensorData,
-                                          List<? extends ForceSensorDataReadOnly> forceSensorData,
-                                          SensorTimestampHolder timestampHolder,
-                                          RobotMotionStatusHolder robotMotionStatusHolder,
-                                          long publishPeriod)
+   public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node, ROS2Topic<?> outputTopic, FloatingJointStateReadOnly rootJointSensorData,
+                                          List<? extends OneDoFJointStateReadOnly> jointSensorData, List<? extends IMUSensorReadOnly> imuSensorData,
+                                          List<? extends ForceSensorDataReadOnly> forceSensorData, SensorTimestampHolder timestampHolder,
+                                          RobotMotionStatusHolder robotMotionStatusHolder, long publishPeriod)
    {
       this.rootJointSensorData = rootJointSensorData;
       this.jointSensorData = jointSensorData;

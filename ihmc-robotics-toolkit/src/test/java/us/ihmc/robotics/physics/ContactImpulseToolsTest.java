@@ -24,7 +24,6 @@ import static us.ihmc.robotics.physics.ContactImpulseTools.isInsideFrictionCone;
 import static us.ihmc.robotics.physics.ContactImpulseTools.lineOfSightTest;
 import static us.ihmc.robotics.physics.ContactImpulseTools.multQuad;
 import static us.ihmc.robotics.physics.ContactImpulseTools.negateMult;
-import static us.ihmc.robotics.physics.ContactImpulseTools.polarGradient2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -313,8 +312,8 @@ public class ContactImpulseToolsTest
          assertEquals(expectedCost, actualCost, Math.max(Math.abs(expectedCost), 1.0) * EPSILON, "Iteration " + i);
 
          boolean areEqual = MatrixFeatures_DDRM.isEquals(expectedLambda,
-                                                    actualLambda,
-                                                    Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
+                                                         actualLambda,
+                                                         Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
          if (!areEqual)
          {
             System.out.println("iteration: " + i);
@@ -364,6 +363,32 @@ public class ContactImpulseToolsTest
       double dE_dTheta = (Minv_xy * cosTheta * cosTheta + (Minv_yy - Minv_xx) * sinTheta * cosTheta - Minv_xy * sinTheta * sinTheta) * square(mu * lambda_z);
       dE_dTheta += ((c_y + Minv_zy * lambda_z) * cosTheta - (c_x + Minv_zx * lambda_z) * sinTheta) * mu * lambda_z;
       return dE_dTheta;
+   }
+
+   public static double polarGradient2(DMatrixRMaj M_inv, DMatrixRMaj c, double theta, double mu)
+   { // Obtained by directly evaluating dE/dTheta
+      double c_x = c.get(0);
+      double c_y = c.get(1);
+      double c_z = c.get(2);
+
+      double cosTheta = Math.cos(theta);
+      double sinTheta = Math.sin(theta);
+
+      double Mxx = M_inv.get(0, 0);
+      double Mxy = M_inv.get(0, 1);
+      double Myy = M_inv.get(1, 1);
+      double Mzx = M_inv.get(2, 0);
+      double Mzy = M_inv.get(2, 1);
+      double Mzz = M_inv.get(2, 2);
+
+      double Mtheta = Mzx * cosTheta + Mzy * sinTheta;
+
+      return -c_z * mu
+            * (((-Mzy * c_x + Mzx * c_y) * Mtheta + (Mzy * (Mxx * cosTheta + Mxy * sinTheta) - Mzx * (Mxy * cosTheta + Myy * sinTheta)) * c_z) * mu * mu
+                  + Mzz * (-(sinTheta * Mtheta + Mzy) * c_x + (cosTheta * Mtheta + Mzx) * c_y
+                        + (cosTheta * sinTheta * Mxx - Mxy + 2 * sinTheta * sinTheta * Mxy - sinTheta * cosTheta * Myy) * c_z) * mu
+                  + Mzz * ((-sinTheta * c_x + cosTheta * c_y) * Mzz + c_z * (Mzx * sinTheta - Mzy * cosTheta)))
+            / ContactImpulseTools.cube(Mzz + Mtheta * mu);
    }
 
    public static double findOptimalTheta(DMatrixRMaj M, DMatrixRMaj M_inv, DMatrixRMaj c, double mu, double tolerance, double dTheta, boolean verbose)
@@ -530,8 +555,8 @@ public class ContactImpulseToolsTest
          assertEquals(expectedCost, actualCost, Math.max(Math.abs(expectedCost), 1.0) * EPSILON, "Iteration " + i);
 
          boolean areEqual = MatrixFeatures_DDRM.isEquals(expectedLambda,
-                                                    actualLambda,
-                                                    Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
+                                                         actualLambda,
+                                                         Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
          if (!areEqual)
          {
             System.out.println("iteration: " + i);
@@ -596,17 +621,17 @@ public class ContactImpulseToolsTest
                                1.0e-12, //1.0E-6,
                                0.7,
                                new DMatrixRMaj(3,
-                                                  3,
-                                                  true,
-                                                  0.12177228584776682,
-                                                  -0.006490285501662073,
-                                                  -0.0198942344541152,
-                                                  -0.0064902855016620966,
-                                                  0.03749206992467399,
-                                                  -0.020817228276444992,
-                                                  -0.019894234454115235,
-                                                  -0.020817228276444992,
-                                                  0.06819326854414993),
+                                               3,
+                                               true,
+                                               0.12177228584776682,
+                                               -0.006490285501662073,
+                                               -0.0198942344541152,
+                                               -0.0064902855016620966,
+                                               0.03749206992467399,
+                                               -0.020817228276444992,
+                                               -0.019894234454115235,
+                                               -0.020817228276444992,
+                                               0.06819326854414993),
                                new DMatrixRMaj(3, 1, true, -0.9626403389842907, -0.36649553510266114, -1.2699859622739815)));
       datasets.add(new Dataset(0.35,
                                0.95,
@@ -614,17 +639,17 @@ public class ContactImpulseToolsTest
                                1.0E-6,
                                0.7,
                                new DMatrixRMaj(3,
-                                                  3,
-                                                  true,
-                                                  0.5377939246837216,
-                                                  0.07285205074934606,
-                                                  0.1410180601120504,
-                                                  0.07285205074934609,
-                                                  0.31156159306905296,
-                                                  0.37755617516622175,
-                                                  0.14101806011205031,
-                                                  0.37755617516622164,
-                                                  0.6485524022866964),
+                                               3,
+                                               true,
+                                               0.5377939246837216,
+                                               0.07285205074934606,
+                                               0.1410180601120504,
+                                               0.07285205074934609,
+                                               0.31156159306905296,
+                                               0.37755617516622175,
+                                               0.14101806011205031,
+                                               0.37755617516622164,
+                                               0.6485524022866964),
                                new DMatrixRMaj(3, 1, true, -0.4009147394246455, 0.48869427996462383, -1.5083682060883388)));
       return datasets;
    }

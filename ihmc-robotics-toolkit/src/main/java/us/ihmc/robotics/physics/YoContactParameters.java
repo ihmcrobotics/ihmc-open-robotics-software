@@ -1,13 +1,15 @@
 package us.ihmc.robotics.physics;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoContactParameters extends YoConstraintParameters implements ContactParametersBasics
 {
    private final YoDouble minimumPenetration;
    private final YoDouble coefficientOfFriction;
-   private final YoDouble slipErrorReductionParameter;
+   private final YoBoolean computeMomentFriction;
+   private final YoDouble coulombMomentFrictionRatio;
 
    public YoContactParameters(String prefix, YoVariableRegistry registry)
    {
@@ -15,24 +17,28 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
 
       String minPenName;
       String cofName;
-      String slipERPName;
+      String cmfName;
+      String cmfrName;
 
       if (prefix == null || prefix.isEmpty())
       {
          minPenName = "minimumPenetration";
          cofName = "coefficientOfFriction";
-         slipERPName = "slipErrorReductionParameter";
+         cmfName = "computeMomentFriction";
+         cmfrName = "coulombMomentFrictionRatio";
       }
       else
       {
          minPenName = prefix + "MinimumPenetration";
          cofName = prefix + "CoefficientOfFriction";
-         slipERPName = "SlipErrorReductionParameter";
+         cmfName = prefix + "ComputeMomentFriction";
+         cmfrName = prefix + "CoulombMomentFrictionRatio";
       }
 
       minimumPenetration = new YoDouble(minPenName, registry);
       coefficientOfFriction = new YoDouble(cofName, registry);
-      slipErrorReductionParameter = new YoDouble(slipERPName, registry);
+      computeMomentFriction = new YoBoolean(cmfName, registry);
+      coulombMomentFrictionRatio = new YoDouble(cmfrName, registry);
    }
 
    @Override
@@ -48,9 +54,15 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    }
 
    @Override
-   public void setSlipErrorReductionParameter(double slipErrorReductionParameter)
+   public void setComputeFrictionMoment(boolean computeFrictionMoment)
    {
-      this.slipErrorReductionParameter.set(slipErrorReductionParameter);
+      this.computeMomentFriction.set(computeFrictionMoment);
+   }
+
+   @Override
+   public void setCoulombMomentFrictionRatio(double coulombFrictionMomentRatio)
+   {
+      this.coulombMomentFrictionRatio.set(coulombFrictionMomentRatio);
    }
 
    @Override
@@ -66,8 +78,14 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    }
 
    @Override
-   public double getSlipErrorReductionParameter()
+   public boolean getComputeFrictionMoment()
    {
-      return slipErrorReductionParameter.getValue();
+      return computeMomentFriction.getValue();
+   }
+
+   @Override
+   public double getCoulombMomentFrictionRatio()
+   {
+      return coulombMomentFrictionRatio.getValue();
    }
 }
