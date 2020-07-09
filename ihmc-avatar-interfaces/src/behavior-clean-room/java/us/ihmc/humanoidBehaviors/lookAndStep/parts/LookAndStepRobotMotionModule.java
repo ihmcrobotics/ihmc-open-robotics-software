@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
 {
    private final Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
-   private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
 
    private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
 
@@ -37,8 +36,7 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
       validateNonChanging();
 
       update(footstepPlanInput.get(),
-             robotStateSupplier.get().get(),
-             behaviorStateSupplier.get().get());
+             robotStateSupplier.get().get());
 
       run();
    }
@@ -46,10 +44,5 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
    public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
    {
       this.robotStateSupplier.set(robotStateSupplier);
-   }
-
-   public void setBehaviorStateSupplier(Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
-   {
-      this.behaviorStateSupplier.set(behaviorStateSupplier);
    }
 }
