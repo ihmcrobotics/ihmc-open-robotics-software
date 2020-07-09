@@ -19,7 +19,6 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -75,7 +74,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
 
-      AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true); // TODO remove this and use state instead
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
       Notification resetInput = helper.createROS2Notification(RESET);
@@ -91,8 +89,6 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                      visibilityGraphParameters,
                                                      lookAndStepParameters,
                                                      operatorReviewEnabledInput::get,
-                                                     newBodyPathGoalNeeded::get, // TODO: hook up to subgoal mover
-                                                     () -> newBodyPathGoalNeeded.set(false),
                                                      robot::pollHumanoidRobotState,
                                                      behaviorState::get,
                                                      this::updateState);
@@ -106,7 +102,6 @@ public class LookAndStepBehavior implements BehaviorInterface
                bodyPathModule.acceptGoal(null);
                helper.publishROS2(REACHED_GOAL);
             },
-            newBodyPathGoalNeeded::get,
             lastSteppedSolePoses,
             helper.getOrCreateFootstepPlanner(),
             lastStanceSide,
