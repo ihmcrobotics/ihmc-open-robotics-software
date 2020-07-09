@@ -161,7 +161,8 @@ public class LevenbergMarquardtICPVisualizer
          DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
          for (int i = 0; i < driftedCowPointCloud.length; i++)
             transformedData[i].set(driftedCowPointCloud[i]);
-         RigidBodyTransform transform = new RigidBodyTransform(inputFunction.apply(optimalParameter));
+         RigidBodyTransform transform = new RigidBodyTransform();
+         optimizer.convertInputToTransform(optimalParameter, transform);
          transformPointCloud(transformedData, transform);
          dataLocation.set(initialDataLocation);
          dataOrientation.set(initialDataOrientation);

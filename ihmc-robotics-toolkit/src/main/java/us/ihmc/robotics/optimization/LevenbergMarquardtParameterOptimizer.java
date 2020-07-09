@@ -10,6 +10,26 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
+/**
+ * this class is to iterate minimizing input parameters for the given output calculator matrix. in
+ * general, the input parameters are related six-dimensional in spatial space to transform rigid
+ * body. for example, we may let the rigid body with a camera frame and minimize the distance
+ * between two frames.
+ * <p>
+ * the way to use this is simple like defining input function {@link Function<DMatrixRMaj,
+ * RigidBodyTransform>} and output calculator {@link UnaryOperator<DMatrixRMaj>}. and do
+ * {@code initialize()} and {@code iterate()}
+ * <p>
+ * the method {@code iterate()} updates the input space with the following equation.
+ * <p>
+ * {@linkplain -inv(J^T * J + W_N) * J^T * e }
+ * <p>
+ * see the following examples and slides.
+ * <p>
+ * {@link LevenbergMarquardtICPTest}, {@link LevenbergMarquardtICPVisualizer}.
+ * <p>
+ * @see <a href="https://docs.google.com/presentation/d/1GH2QqMLM1cKgll5hcd-nX18c-cGVjB5ABkz_voOZU1w/edit?usp=sharing">20200722_LearningLunch_Inho</a>
+ */
 public class LevenbergMarquardtParameterOptimizer
 {
    private static final boolean DEBUG = false;
@@ -34,8 +54,9 @@ public class LevenbergMarquardtParameterOptimizer
    private final DMatrixRMaj optimizeDirection;
 
    /**
-    * higher : make quick approach when the model and the data are in long distance. lower : slower
-    * approach but better accuracy in near distance.
+    * higher : make quick approach when the model and the data are in long distance.
+    * <p>
+    * lower : slower approach but better accuracy in near distance.
     */
    private double correspondenceThreshold = 1.0;
    private static final double DEFAULT_PERTURBATION = 0.0001;
