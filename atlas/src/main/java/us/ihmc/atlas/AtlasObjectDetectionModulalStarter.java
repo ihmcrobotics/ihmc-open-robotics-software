@@ -7,10 +7,10 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
-public class AtlasFiducialModulalStarter
+public class AtlasObjectDetectionModulalStarter
 {
    public static void main(String[] args) throws JSAPException
    {
@@ -40,7 +40,7 @@ public class AtlasFiducialModulalStarter
 
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-      new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),robotModel.createFullRobotModel(),robotModel.getLogModelProvider(),pubSubImplementation);
+      new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),robotModel.createFullRobotModel(),robotModel.getLogModelProvider(),pubSubImplementation);
 
    }
 }
