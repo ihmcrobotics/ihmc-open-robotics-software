@@ -28,6 +28,7 @@ public class LevenbergMarquardtParameterOptimizer
 
    private final DMatrixRMaj jacobianTranspose;
    private final DMatrixRMaj squaredJacobian;
+   private final DMatrixRMaj dampingMatrix;
    private final DMatrixRMaj invMultJacobianTranspose;
 
    private final DMatrixRMaj optimizeDirection;
@@ -68,6 +69,7 @@ public class LevenbergMarquardtParameterOptimizer
 
       jacobianTranspose = new DMatrixRMaj(outputDimension, inputParameterDimension);
       squaredJacobian = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
+      dampingMatrix = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       invMultJacobianTranspose = new DMatrixRMaj(inputParameterDimension, outputDimension);
 
       optimizeDirection = new DMatrixRMaj(inputParameterDimension, 1);
@@ -89,6 +91,16 @@ public class LevenbergMarquardtParameterOptimizer
    {
       iteration = 0;
       optimized = false;
+      for (int i = 0; i < inputDimension; i++)
+      {
+         for (int j = 0; j < inputDimension; j++)
+         {
+            if (i == j)
+            {
+               dampingMatrix.set(i, j, DEFAULT_DAMPING_COEFFICIENT);
+            }
+         }
+      }
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
       return currentOutputSpace.computeCorrespondence();
@@ -135,6 +147,10 @@ public class LevenbergMarquardtParameterOptimizer
       CommonOps_DDRM.transpose(jacobianTranspose);
 
       CommonOps_DDRM.mult(jacobianTranspose, jacobian, squaredJacobian);
+      if (useDamping)
+      {
+         CommonOps_DDRM.add(squaredJacobian, dampingMatrix, squaredJacobian);
+      }
       CommonOps_DDRM.invert(squaredJacobian);
 
       CommonOps_DDRM.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
