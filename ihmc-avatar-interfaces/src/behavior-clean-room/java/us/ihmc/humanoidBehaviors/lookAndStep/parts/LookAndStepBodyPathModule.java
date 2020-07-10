@@ -31,14 +31,16 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
                                     LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                                     Supplier<Boolean> operatorReviewEnabled,
                                     Supplier<HumanoidRobotState> robotStateSupplier,
-                                    BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
+                                    BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                                    Supplier<Boolean> robotConnectedSupplier)
    {
       super(statusLogger,
             uiPublisher,
             visibilityGraphParameters,
             lookAndStepBehaviorParameters,
             operatorReviewEnabled,
-            behaviorStateReference);
+            behaviorStateReference,
+            robotConnectedSupplier);
 
       this.robotStateSupplier = robotStateSupplier;
 

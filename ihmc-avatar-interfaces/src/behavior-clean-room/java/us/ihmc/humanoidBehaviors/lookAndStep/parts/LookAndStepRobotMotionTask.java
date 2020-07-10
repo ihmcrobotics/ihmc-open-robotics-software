@@ -4,6 +4,7 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.Foots
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.StartAndGoalFootPosesForUI;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -37,6 +38,7 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    private final Field<UIPublisher> uiPublisher = required();
    private final Field<RobotWalkRequester> robotWalkRequester = required();
    private final Field<Runnable> replanFootstepsOutput = required();
+   private final Field<Supplier<Boolean>> robotConnectedSupplier = required();
    protected final Field<BehaviorStateReference<LookAndStepBehavior.State>> behaviorStateReference = required();
 
    private FootstepPlan footstepPlan;
@@ -69,6 +71,11 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
                        footstepPlan == null ? null : footstepPlan.getNumberOfSteps());
          behaviorStateReference.get().set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          replanFootstepsOutput.get().run();
+         proceed = false;
+      }
+      else if (!robotConnectedSupplier.get().get())
+      {
+         statusLogger.debug("Footstep planning supressed: Robot disconnected");
          proceed = false;
       }
 
@@ -169,5 +176,10 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    public void setBehaviorStateReference(BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
    {
       this.behaviorStateReference.set(behaviorStateReference);
+   }
+
+   public void setRobotConnectedSupplier(Supplier<Boolean> robotConnectedSupplier)
+   {
+      this.robotConnectedSupplier.set(robotConnectedSupplier);
    }
 }
