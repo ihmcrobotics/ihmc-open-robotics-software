@@ -8,6 +8,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
@@ -21,21 +22,24 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       super(octreeResolution);
    }
 
+   private int temp = 0;
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
+      LogTools.info("temp "+temp);
+      temp++;
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
       frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      LogTools.info("numberOfSurfel " + numberOfSurfel);
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
@@ -84,7 +88,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       // get parameter.
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      icpTransformer.set(optimizer.getOptimalParameter());
+      optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
 
       return icpTransformer;
    }
