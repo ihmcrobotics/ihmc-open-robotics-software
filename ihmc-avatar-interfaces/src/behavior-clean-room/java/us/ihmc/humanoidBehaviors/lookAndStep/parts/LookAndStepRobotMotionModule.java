@@ -4,6 +4,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 
 import java.util.function.Supplier;
@@ -40,8 +41,8 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
       run();
    }
 
-   public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
+   public void setRobotStateSupplier(RemoteSyncedHumanoidRobotState syncedRobot)
    {
-      this.robotStateSupplier.set(robotStateSupplier);
+      this.robotStateSupplier.set(syncedRobot::pollHumanoidRobotState);
    }
 }

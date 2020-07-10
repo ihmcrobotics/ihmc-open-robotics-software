@@ -2,11 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
@@ -16,11 +12,14 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.ros2.ROS2TopicNameTools;
 
 public class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends Settable<?>>> controllerSupportedStatusMessages;
+   private static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
+   private static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
 
    static
    {
@@ -60,6 +59,7 @@ public class ControllerAPIDefinition
       commands.add(HandWrenchTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
+      controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(CapturabilityBasedStatus.class);
@@ -77,6 +77,7 @@ public class ControllerAPIDefinition
       statusMessages.add(RobotDesiredConfigurationData.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
+      outputMessageClasses.addAll(controllerSupportedStatusMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
@@ -84,19 +85,19 @@ public class ControllerAPIDefinition
       return controllerSupportedCommands;
    }
 
+   public static HashSet<Class<?>> getROS2CommandMessageTypes()
+   {
+      return inputMessageClasses;
+   }
+
+   public static HashSet<Class<?>> getROS2StatusMessageTypes()
+   {
+      return inputMessageClasses;
+   }
+
    public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()
    {
       return controllerSupportedStatusMessages;
-   }
-
-   public static ROS2Topic getInputTopic(String robotName)
-   {
-      return ROS2Tools.getControllerInputTopic(robotName);
-   }
-
-   public static ROS2Topic getOutputTopic(String robotName)
-   {
-      return ROS2Tools.getControllerOutputTopic(robotName);
    }
 
    public static MessageValidator createDefaultMessageValidation()
@@ -176,5 +177,29 @@ public class ControllerAPIDefinition
             return extractor == null ? NO_ID : extractor.getMessageID(message);
          }
       };
+   }
+
+   public static ROS2Topic<?> getInputTopic(String robotName)
+   {
+      return ROS2Tools.getControllerInputTopic(robotName);
+   }
+
+   public static ROS2Topic<?> getOutputTopic(String robotName)
+   {
+      return ROS2Tools.getControllerOutputTopic(robotName);
+   }
+
+   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   {
+      if (inputMessageClasses.contains(messageClass))
+      {
+         return getInputTopic(robotName).withType(messageClass);
+      }
+      if (outputMessageClasses.contains(messageClass))
+      {
+         return getOutputTopic(robotName).withType(messageClass);
+      }
+
+      throw new RuntimeException("Topic does not exist: " + messageClass);
    }
 }
