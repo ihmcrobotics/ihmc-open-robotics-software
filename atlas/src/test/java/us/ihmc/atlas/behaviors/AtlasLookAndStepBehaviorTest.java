@@ -8,8 +8,11 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
@@ -26,6 +29,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -47,27 +52,30 @@ public class AtlasLookAndStepBehaviorTest
    @Test
    public void testLookAndStepOverStairs()
    {
-      assertTimeoutPreemptively(Duration.ofMinutes(4), this::runTheTest);
+      assertTimeoutPreemptively(Duration.ofMinutes(10), this::runTheTest);
    }
 
    private void runTheTest()
    {
       ThreadTools.startAsDaemon(this::reaModule, "REAModule");
       ThreadTools.startAsDaemon(this::kinematicSimulation, "KinematicsSimulation");
+      Notification finishedDynamicsSimulationSetup = new Notification();
+//      ThreadTools.startAsDaemon(() -> dynamicsSimulation(finishedDynamicsSimulationSetup), "DynamicsSimulation");
 
       BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), createRobotModel());
-
       Ros2Node ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, "Helper");
       AtlasRobotModel robotModel = createRobotModel();
-
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, robotModel);
-
       Messager behaviorMessager = behaviorModule.getMessager();
-      behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
 
       AtomicReference<String> currentState = behaviorMessager.createInput(LookAndStepBehaviorAPI.CurrentState);
-
       behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
+
+//      finishedDynamicsSimulationSetup.blockingPoll();
+
+      behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+      IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
+      goalInputPublisher.publish(new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0));
 
       Notification atTheTop = new Notification();
       Notification reachedOtherSide = new Notification();
@@ -83,6 +91,7 @@ public class AtlasLookAndStepBehaviorTest
 
       atTheTop.blockingPoll();
       LogTools.info("REACHED THE TOP");
+      goalInputPublisher.publish(new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0));
       reachedOtherSide.blockingPoll();
       LogTools.info("REACHED OTHER SIDE");
    }
@@ -92,7 +101,7 @@ public class AtlasLookAndStepBehaviorTest
                               Notification atTheTop,
                               Notification reachedOtherSide)
    {
-      FramePose3DReadOnly pelvisPose = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame);
+      FramePose3DReadOnly pelvisPose = robot.newSyncedRobot().quickPollPoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame);
       LogTools.info("{} pose: {}", currentState.get(), pelvisPose);
 
       if (pelvisPose.getPosition().getX() > 2.5 && pelvisPose.getPosition().getZ() > 1.3)
@@ -114,6 +123,26 @@ public class AtlasLookAndStepBehaviorTest
       visiblePlanarRegionService.start();
 
       new PlanarRegionsMappingModule(INTRAPROCESS); // Start the SLAM mapper which look and step uses
+   }
+
+   private void dynamicsSimulation(Notification finishedSettingUp)
+   {
+      LogTools.info("Creating dynamics simulation");
+      int recordFrequencySpeedup = 10; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
+      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), INTRAPROCESS, recordFrequencySpeedup).simulate();
+      LogTools.info("Finished setting up dynamics simulation.");
+      finishedSettingUp.set();
+   }
+
+   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
+   {
+      String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
+      YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
+      return new PlanarRegionsListDefinedEnvironment(environmentName,
+                                                     environment.get(),
+                                                     cinderBlockTexture,
+                                                     0.02,
+                                                     false);
    }
 
    private void kinematicSimulation()
