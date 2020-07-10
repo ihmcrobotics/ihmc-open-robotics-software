@@ -3,7 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.ui.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.RandomICPSLAMParametersProperty;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceElementICPSLAMParametersProperty;
 
 public class SLAMAnchorPaneController extends REABasicUIController
 {
@@ -46,7 +46,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    @FXML
    private Label stationaryFlag;
 
-   private final RandomICPSLAMParametersProperty ihmcSLAMParametersProperty = new RandomICPSLAMParametersProperty(this, "ihmcSLAMParameters");
+   private final SurfaceElementICPSLAMParametersProperty ihmcSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
    {
@@ -78,11 +78,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeNormalMap, showNormal.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
 
-      ihmcSLAMParametersProperty.bindBidirectionalNumberOfSourcePoints(sourcePointsSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalMaximumICPSearchingSize(searchingSizeSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalMinimumOverlappedRatio(minimumOverlappedRatioSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalWindowSize(windowMarginSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalMinimumInliersRatioOfKeyFrame(minimumInliersRatioSlider.valueProperty());
+//      ihmcSLAMParametersProperty.bindBidirectionalNumberOfSourcePoints(sourcePointsSlider.valueProperty());
+//      ihmcSLAMParametersProperty.bindBidirectionalMaximumICPSearchingSize(searchingSizeSlider.valueProperty());
+//      ihmcSLAMParametersProperty.bindBidirectionalMinimumOverlappedRatio(minimumOverlappedRatioSlider.valueProperty());
+//      ihmcSLAMParametersProperty.bindBidirectionalWindowSize(windowMarginSlider.valueProperty());
+//      ihmcSLAMParametersProperty.bindBidirectionalMinimumInliersRatioOfKeyFrame(minimumInliersRatioSlider.valueProperty());
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, ihmcSLAMParametersProperty);
 
