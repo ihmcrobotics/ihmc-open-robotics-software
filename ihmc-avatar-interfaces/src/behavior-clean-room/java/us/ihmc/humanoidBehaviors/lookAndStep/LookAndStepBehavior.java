@@ -14,6 +14,7 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -72,14 +73,14 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       lookAndStepParameters = new LookAndStepBehaviorParameters();
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
-      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
-      helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
-      // hook up override parameters
+      // TODO: hook up override parameters
+      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.getIdealFootstepLengthOverride());
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.getWiggleInsideDeltaOverride());
       footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
       footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
+      helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
@@ -88,6 +89,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
       Notification resetInput = helper.createROS2Notification(RESET);
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
+
+      // TODO: Footstep log
+      WalkingFootstepTracker walkingFootstepTracker = new WalkingFootstepTracker(helper.getManagedROS2Node(), helper.getRobotModel().getSimpleRobotName());
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
