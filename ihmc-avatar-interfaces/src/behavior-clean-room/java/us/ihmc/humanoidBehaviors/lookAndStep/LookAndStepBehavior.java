@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -35,6 +36,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepRobotMotionModule robotMotionModule;
    private final BehaviorStateReference<State> behaviorStateReference;
    private final StatusLogger statusLogger;
+   private final LookAndStepBehaviorParameters lookAndStepParameters;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -65,7 +67,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       visibilityGraphParameters.setIncludePreferredExtrusions(false);
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
-      LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
+      lookAndStepParameters = new LookAndStepBehaviorParameters();
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
@@ -91,14 +93,13 @@ public class LookAndStepBehavior implements BehaviorInterface
       // could add meaning by local variables before passing
       bodyPathModule = new LookAndStepBodyPathModule(statusLogger,
                                                      helper::publishToUI,
-                                                     visibilityGraphParameters,
-                                                     lookAndStepParameters,
+                                                     visibilityGraphParameters, lookAndStepParameters,
                                                      operatorReviewEnabledInput::get,
                                                      robot::pollHumanoidRobotState,
-                                                     behaviorStateReference);
+                                                     behaviorStateReference,
+                                                     this::robotConnected);
       footstepPlanningModule = new LookAndStepFootstepPlanningPart.TaskSetup(
-            statusLogger,
-            lookAndStepParameters,
+            statusLogger, lookAndStepParameters,
             footstepPlannerParameters,
             resetInput::poll,
             helper::publishToUI,
@@ -111,7 +112,8 @@ public class LookAndStepBehavior implements BehaviorInterface
             lastStanceSide,
             operatorReviewEnabledInput::get,
             robot::pollHumanoidRobotState,
-            behaviorStateReference
+            behaviorStateReference,
+            this::robotConnected
       );
       robotMotionModule = new LookAndStepRobotMotionModule(statusLogger);
 
@@ -141,6 +143,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                         robotMotionModule::acceptFootstepPlan);
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
+      robotMotionModule.setRobotConnectedSupplier(this::robotConnected);
       robotMotionModule.setLastSteppedSolePoses(lastSteppedSolePoses);
       robotMotionModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       robotMotionModule.setReplanFootstepsOutput(footstepPlanningModule::runOrQueue);
@@ -152,6 +155,13 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathModule::acceptMapRegions);
       helper.createROS2Callback(GOAL_INPUT, bodyPathModule::acceptGoal);
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
+   }
+
+   private boolean robotConnected()
+   {
+      TimerSnapshotWithExpiration timerSnaphot = robot.getRobotConfigurationDataReceptionTimerSnapshot()
+                                                                     .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
+      return timerSnaphot.hasBeenSet() && !timerSnaphot.isExpired();
    }
 
    private void updateState(State state)

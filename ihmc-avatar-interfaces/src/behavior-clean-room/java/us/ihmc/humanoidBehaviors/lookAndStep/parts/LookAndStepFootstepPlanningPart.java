@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
-import us.ihmc.communication.util.TimerSnapshot;
+import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -49,18 +49,18 @@ public class LookAndStepFootstepPlanningPart
    protected Runnable onReachedGoal;
    protected SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses;
    protected FootstepPlanningModule footstepPlanningModule;
-   protected Consumer<RobotSide> lastStanceSideSetter;
    protected Supplier<Boolean> operatorReviewEnabledSupplier;
    protected Consumer<FootstepPlan> reviewPlanOutput;
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Runnable planningFailedNotifier;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
+   protected Supplier<Boolean> robotConnectedSupplier;
+   protected AtomicReference<RobotSide> lastStanceSideReference;
 
    public static class TaskSetup extends LookAndStepFootstepPlanningPart
    {
       private final SingleThreadSizeOneQueueExecutor executor;
       private final Supplier<HumanoidRobotState> robotStateSupplier;
-      private final AtomicReference<RobotSide> lastStanceSideReference;
 
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -78,7 +78,8 @@ public class LookAndStepFootstepPlanningPart
                        AtomicReference<RobotSide> lastStanceSideReference,
                        Supplier<Boolean> operatorReviewEnabledSupplier,
                        Supplier<HumanoidRobotState> robotStateSupplier,
-                       BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
+                       BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                       Supplier<Boolean> robotConnectedSupplier)
       {
          this.statusLogger = statusLogger;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
@@ -92,6 +93,7 @@ public class LookAndStepFootstepPlanningPart
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
          this.robotStateSupplier = robotStateSupplier;
          this.behaviorStateReference = behaviorStateReference;
+         this.robotConnectedSupplier = robotConnectedSupplier;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -145,8 +147,8 @@ public class LookAndStepFootstepPlanningPart
 
    // instance variables
    protected PlanarRegionsList planarRegions;
-   protected TimerSnapshot planarRegionReceptionTimerSnapshot;
-   protected TimerSnapshot planningFailureTimerSnapshot;
+   protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
    protected HumanoidRobotState robotState;
    protected RobotSide lastStanceSide;
@@ -184,6 +186,11 @@ public class LookAndStepFootstepPlanningPart
       else if (isBeingReviewedSupplier.get())
       {
          statusLogger.debug("Footstep planning suppressed: Plan being reviewed");
+         proceed = false;
+      }
+      else if (!robotConnectedSupplier.get())
+      {
+         statusLogger.debug("Footstep planning suppressed: Robot disconnected");
          proceed = false;
       }
 
@@ -286,7 +293,7 @@ public class LookAndStepFootstepPlanningPart
          }
       }
 
-      lastStanceSideSetter.accept(stanceSide);
+      lastStanceSideReference.set(stanceSide);
 
       uiPublisher.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
 

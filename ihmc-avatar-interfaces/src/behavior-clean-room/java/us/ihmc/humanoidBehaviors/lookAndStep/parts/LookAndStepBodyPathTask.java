@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
-import us.ihmc.communication.util.TimerSnapshot;
+import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -36,6 +36,7 @@ class LookAndStepBodyPathTask
    protected final LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected final Supplier<Boolean> operatorReviewEnabled;
    protected final BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
+   protected final Supplier<Boolean> robotConnectedSupplier;
 
    protected Consumer<ArrayList<Pose3D>> autonomousOutput;
    protected Consumer<List<? extends Pose3DReadOnly>> initiateReviewOutput;
@@ -46,8 +47,8 @@ class LookAndStepBodyPathTask
    private PlanarRegionsList mapRegions;
    private Pose3D goal;
    private HumanoidRobotState humanoidRobotState;
-   private TimerSnapshot mapRegionsReceptionTimerSnapshot;
-   private TimerSnapshot planningFailureTimerSnapshot;
+   private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
+   private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    private LookAndStepBehavior.State behaviorState;
 
    LookAndStepBodyPathTask(StatusLogger statusLogger,
@@ -55,7 +56,8 @@ class LookAndStepBodyPathTask
                            VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                            LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                            Supplier<Boolean> operatorReviewEnabled,
-                           BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
+                           BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                           Supplier<Boolean> robotConnectedSupplier)
    {
       this.statusLogger = statusLogger;
       this.uiPublisher = uiPublisher;
@@ -63,13 +65,14 @@ class LookAndStepBodyPathTask
       this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
       this.operatorReviewEnabled = operatorReviewEnabled;
       this.behaviorStateReference = behaviorStateReference;
+      this.robotConnectedSupplier = robotConnectedSupplier;
    }
 
    protected void update(PlanarRegionsList mapRegions,
                          Pose3D goal,
                          HumanoidRobotState humanoidRobotState,
-                         TimerSnapshot mapRegionsReceptionTimerSnapshot,
-                         TimerSnapshot planningFailureTimerSnapshot,
+                         TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot,
+                         TimerSnapshotWithExpiration planningFailureTimerSnapshot,
                          LookAndStepBehavior.State behaviorState)
    {
       this.mapRegions = mapRegions;
@@ -116,6 +119,11 @@ class LookAndStepBodyPathTask
       else if (isBeingReviewed.get())
       {
          statusLogger.debug("Body path planning supressed: Is being reviewed");
+         proceed = false;
+      }
+      else if (!robotConnectedSupplier.get())
+      {
+         statusLogger.debug("Body path planning supressed: Robot disconnected");
          proceed = false;
       }
 

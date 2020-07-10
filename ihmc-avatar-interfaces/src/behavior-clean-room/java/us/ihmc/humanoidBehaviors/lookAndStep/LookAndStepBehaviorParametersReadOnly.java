@@ -88,4 +88,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(LookAndStepBehaviorParameters.percentSwingToWait);
    }
+
+   default double getRobotConfigurationDataExpiration()
+   {
+      return get(LookAndStepBehaviorParameters.robotConfigurationDataExpiration);
+   }
 }

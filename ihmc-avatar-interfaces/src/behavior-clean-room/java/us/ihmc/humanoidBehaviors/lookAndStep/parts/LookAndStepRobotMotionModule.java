@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
