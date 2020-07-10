@@ -3,6 +3,8 @@ package us.ihmc.humanoidBehaviors.tools;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.util.Timer;
+import us.ihmc.communication.util.TimerSnapshot;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -11,11 +13,10 @@ import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
-import static us.ihmc.communication.ROS2Tools.HUMANOID_CONTROLLER;
-
 public class RemoteSyncedRobotModel
 {
    protected final FullHumanoidRobotModel fullRobotModel;
+   private final Timer dataReceptionTimer;
    protected RobotConfigurationData robotConfigurationData;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
@@ -29,17 +30,17 @@ public class RemoteSyncedRobotModel
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
-
-      robotConfigurationDataInput = new ROS2Input<RobotConfigurationData>(ros2Node,
-                                                                          RobotConfigurationData.class,
-                                                                          HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
-                                                                                             .withOutput(),
-                                                                          ROS2TopicNameTools.newMessageInstance(RobotConfigurationData.class),
-                                                                          message ->
-                                                                          {
-                                                                             FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
-                                                                             return true;
-                                                                          });
+      robotConfigurationDataInput = new ROS2Input<>(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                    ROS2TopicNameTools.newMessageInstance(RobotConfigurationData.class),
+                                                    message ->
+                                                    {
+                                                       FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
+                                                       return true;
+                                                    });
+      dataReceptionTimer = new Timer();
+      robotConfigurationDataInput.addCallback(message -> dataReceptionTimer.reset());
    }
 
    public FullHumanoidRobotModel pollFullRobotModel()
@@ -67,5 +68,10 @@ public class RemoteSyncedRobotModel
    public boolean hasReceivedFirstMessage()
    {
       return robotConfigurationDataInput.hasReceivedFirstMessage();
+   }
+
+   public TimerSnapshot getDataReceptionTimerSnapshot()
+   {
+      return dataReceptionTimer.createSnapshot();
    }
 }
