@@ -6,6 +6,7 @@ import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
@@ -30,7 +31,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
                                     VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                                     LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                                     Supplier<Boolean> operatorReviewEnabled,
-                                    Supplier<HumanoidRobotState> robotStateSupplier,
+                                    RemoteSyncedHumanoidRobotState syncedRobot,
                                     BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
                                     Supplier<Boolean> robotConnectedSupplier)
    {
@@ -42,7 +43,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
             behaviorStateReference,
             robotConnectedSupplier);
 
-      this.robotStateSupplier = robotStateSupplier;
+      this.robotStateSupplier = syncedRobot::pollHumanoidRobotState;
 
       // don't run two body path plans at the same time
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());

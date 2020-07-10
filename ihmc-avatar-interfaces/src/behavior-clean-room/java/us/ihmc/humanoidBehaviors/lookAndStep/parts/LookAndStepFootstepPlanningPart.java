@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -77,7 +78,7 @@ public class LookAndStepFootstepPlanningPart
                        FootstepPlanningModule footstepPlanningModule,
                        AtomicReference<RobotSide> lastStanceSideReference,
                        Supplier<Boolean> operatorReviewEnabledSupplier,
-                       Supplier<HumanoidRobotState> robotStateSupplier,
+                       RemoteSyncedHumanoidRobotState syncedRobot,
                        BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
                        Supplier<Boolean> robotConnectedSupplier)
       {
@@ -91,7 +92,7 @@ public class LookAndStepFootstepPlanningPart
          this.footstepPlanningModule = footstepPlanningModule;
          this.lastStanceSideReference = lastStanceSideReference;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
-         this.robotStateSupplier = robotStateSupplier;
+         this.robotStateSupplier = syncedRobot::pollHumanoidRobotState;
          this.behaviorStateReference = behaviorStateReference;
          this.robotConnectedSupplier = robotConnectedSupplier;
 

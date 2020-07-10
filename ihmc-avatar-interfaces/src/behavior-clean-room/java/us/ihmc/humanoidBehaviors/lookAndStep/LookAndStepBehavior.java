@@ -12,6 +12,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.*;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -29,7 +30,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
    private final BehaviorHelper helper;
-   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteHumanoidRobotInterface robotInterface;
 
    private final LookAndStepBodyPathModule bodyPathModule;
    private final LookAndStepFootstepPlanningPart.TaskSetup footstepPlanningModule;
@@ -37,6 +38,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final BehaviorStateReference<State> behaviorStateReference;
    private final StatusLogger statusLogger;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
+   private final RemoteSyncedHumanoidRobotState syncedRobot;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -60,7 +62,8 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       this.helper = helper;
 
-      robot = helper.getOrCreateRobotInterface();
+      robotInterface = helper.getOrCreateRobotInterface();
+      syncedRobot = robotInterface.newSyncedRobot();
       statusLogger = helper.getOrCreateStatusLogger();
 
       VisibilityGraphsParametersBasics visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
@@ -95,7 +98,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                      helper::publishToUI,
                                                      visibilityGraphParameters, lookAndStepParameters,
                                                      operatorReviewEnabledInput::get,
-                                                     robot::pollHumanoidRobotState,
+                                                     robotInterface.newSyncedRobot(),
                                                      behaviorStateReference,
                                                      this::robotConnected);
       footstepPlanningModule = new LookAndStepFootstepPlanningPart.TaskSetup(
@@ -111,7 +114,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             helper.getOrCreateFootstepPlanner(),
             lastStanceSide,
             operatorReviewEnabledInput::get,
-            robot::pollHumanoidRobotState,
+            robotInterface.newSyncedRobot(),
             behaviorStateReference,
             this::robotConnected
       );
@@ -142,12 +145,12 @@ public class LookAndStepBehavior implements BehaviorInterface
                                         footstepPlanReview::review,
                                         robotMotionModule::acceptFootstepPlan);
 
-      robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
+      robotMotionModule.setRobotStateSupplier(robotInterface.newSyncedRobot());
       robotMotionModule.setRobotConnectedSupplier(this::robotConnected);
       robotMotionModule.setLastSteppedSolePoses(lastSteppedSolePoses);
       robotMotionModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       robotMotionModule.setReplanFootstepsOutput(footstepPlanningModule::runOrQueue);
-      robotMotionModule.setRobotWalkRequester(robot::requestWalk);
+      robotMotionModule.setRobotWalkRequester(robotInterface::requestWalk);
       robotMotionModule.setUiPublisher(helper::publishToUI);
       robotMotionModule.setBehaviorStateReference(behaviorStateReference);
 
@@ -159,8 +162,8 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private boolean robotConnected()
    {
-      TimerSnapshotWithExpiration timerSnaphot = robot.getRobotConfigurationDataReceptionTimerSnapshot()
-                                                                     .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
+      TimerSnapshotWithExpiration timerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
+                                                            .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
       return timerSnaphot.hasBeenSet() && !timerSnaphot.isExpired();
    }
 
@@ -178,7 +181,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       helper.setCommunicationCallbacksEnabled(enabled);
 
-      robot.pitchHeadWithRespectToChest(0.38);
+      robotInterface.pitchHeadWithRespectToChest(0.38);
       //      Commanding neck trajectory: slider: 43.58974358974359 angle: 0.3824055641025641
    }
 }
