@@ -46,7 +46,7 @@ public class SLAMBasics implements SLAMInterface
       octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
-   public void updatePlanarRegionsMap()
+   public void updateOctreeMap()
    {
       octree.updateNormals();
    }

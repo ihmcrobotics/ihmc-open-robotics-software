@@ -14,6 +14,7 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
    public static final boolean DEBUG = false;
+   private final Function<DMatrixRMaj, RigidBodyTransform> transformConverter = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
@@ -24,18 +25,18 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       double surfaceElementResolution = 0.04;
-      double windowMargin = 0.05;
+      double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
-      frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, false);
+      frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
-      Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-            RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
+
+            RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
 
@@ -60,20 +61,20 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree, surfel.getPoint(), octree.getResolution());
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree, surfel.getPoint(), octree.getResolution() * 1.1);
          }
       };
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction, outputCalculator, 6, numberOfSurfel);
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, 6, numberOfSurfel);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
-      purterbationVector.set(0, 0.0005);
-      purterbationVector.set(1, 0.0005);
-      purterbationVector.set(2, 0.0005);
-      purterbationVector.set(3, 0.0001);
-      purterbationVector.set(4, 0.0001);
-      purterbationVector.set(5, 0.0001);
+      purterbationVector.set(0, octree.getResolution() * 0.002);
+      purterbationVector.set(1, octree.getResolution() * 0.002);
+      purterbationVector.set(2, octree.getResolution() * 0.002);
+      purterbationVector.set(3, 0.00001);
+      purterbationVector.set(4, 0.00001);
+      purterbationVector.set(5, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.initialize();
-      optimizer.setCorrespondenceThreshold(0.05);
+      optimizer.setCorrespondenceThreshold(octree.getResolution() * 1.5);
 
       // do ICP.
       for (int i = 0; i < 30; i++)
@@ -83,19 +84,8 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       // get parameter.
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
+      icpTransformer.set(optimizer.getOptimalParameter());
 
       return icpTransformer;
-   }
-
-   private RigidBodyTransform convertTransform(double... transformParameters)
-   {
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslationAndIdentityRotation(transformParameters[0], transformParameters[1], transformParameters[2]);
-      transform.appendRollRotation(transformParameters[3]);
-      transform.appendPitchRotation(transformParameters[4]);
-      transform.appendYawRotation(transformParameters[5]);
-
-      return transform;
    }
 }
