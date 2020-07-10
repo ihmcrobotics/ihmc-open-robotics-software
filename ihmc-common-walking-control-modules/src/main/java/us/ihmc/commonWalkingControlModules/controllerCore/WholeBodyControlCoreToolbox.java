@@ -149,10 +149,6 @@ public class WholeBodyControlCoreToolbox
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
       this.rootJoint = rootJoint;
-      multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
-      if (centerOfMassFrame == null)
-         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", multiBodySystemInput.getInertialFrame(), multiBodySystemInput.getRootBody());
-      this.centerOfMassFrame = centerOfMassFrame;
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -163,6 +159,11 @@ public class WholeBodyControlCoreToolbox
          controlledJointsWithRoot[0] = rootJoint;
          controlledJoints = controlledJointsWithRoot;
       }
+
+      multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
+      if (centerOfMassFrame == null)
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", multiBodySystemInput.getInertialFrame(), multiBodySystemInput.getRootBody());
+      this.centerOfMassFrame = centerOfMassFrame;
 
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
