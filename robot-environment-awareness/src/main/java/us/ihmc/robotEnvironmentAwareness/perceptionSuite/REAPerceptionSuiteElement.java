@@ -15,6 +15,7 @@ public class REAPerceptionSuiteElement implements PerceptionSuiteElement<LIDARBa
       stage = new Stage();
       perceptionModule = moduleProvider.createModule();
       uiModule = uiProvider.createUI(stage);
+      perceptionModule.start();
 
       stage.setOnCloseRequest((event) -> hide());
    }

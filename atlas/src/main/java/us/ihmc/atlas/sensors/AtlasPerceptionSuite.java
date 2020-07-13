@@ -29,7 +29,7 @@ public class AtlasPerceptionSuite extends PerceptionSuite
       return AtlasSLAMModule.createIntraprocessModule(ros2Node, robotModel);
    }
 
-   public static AtlasPerceptionSuite createIntraprocess(Messager messager) throws Exception
+   public static AtlasPerceptionSuite createIntraprocess(Messager messager)
    {
       return new AtlasPerceptionSuite(messager);
    }
