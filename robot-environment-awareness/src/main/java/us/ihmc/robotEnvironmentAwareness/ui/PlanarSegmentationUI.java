@@ -27,7 +27,6 @@ public class PlanarSegmentationUI implements PerceptionUI
    private final REAUIMessager uiMessager;
    private final SegmentationMeshViewer meshViewer;
 
-
    @FXML
    private OcTreeEssentialsAnchorPaneController ocTreeEssentialsAnchorPaneController;
    @FXML
@@ -164,6 +163,11 @@ public class PlanarSegmentationUI implements PerceptionUI
    {
       refreshModuleState();
       primaryStage.show();
+   }
+
+   public void hide()
+   {
+      primaryStage.hide();
    }
 
    public void stop()
