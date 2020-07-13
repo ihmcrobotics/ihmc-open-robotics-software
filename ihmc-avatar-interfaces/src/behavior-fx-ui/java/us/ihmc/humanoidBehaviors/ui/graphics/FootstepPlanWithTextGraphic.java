@@ -19,12 +19,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class FootstepPlanWithTextGraphic extends Group
 {
    private final MeshView meshView = new MeshView();
+   private final Map<String, LabelGraphic> labelRecycler = new HashMap<>();
    private final ArrayList<LabelGraphic> existingLabels = new ArrayList<>();
    private final ArrayList<LabelGraphic> labelsToAdd = new ArrayList<>();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
@@ -90,7 +93,7 @@ public class FootstepPlanWithTextGraphic extends Group
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
 
-         LabelGraphic labelGraphic = new LabelGraphic(footstepForUI.getDescription());
+         LabelGraphic labelGraphic = labelRecycler.computeIfAbsent(footstepForUI.getDescription(), LabelGraphic::new);
          labelGraphic.getPose().set(footstepForUI.getSolePoseInWorld());
          labelGraphic.update();
          tempLabelsToAdd.add(labelGraphic);
