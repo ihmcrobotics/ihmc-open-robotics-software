@@ -29,12 +29,9 @@ public class AtlasPerceptionSuite extends PerceptionSuite
       return AtlasSLAMModule.createIntraprocessModule(ros2Node, robotModel);
    }
 
-   public static AtlasPerceptionSuite createIntraprocess() throws Exception
+   public static AtlasPerceptionSuite createIntraprocess(Messager messager) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(PerceptionSuiteAPI.API,
-                                                                NetworkPorts.PERCEPTION_SUITE_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      return new AtlasPerceptionSuite(moduleMessager);
+      return new AtlasPerceptionSuite(messager);
    }
 
 }

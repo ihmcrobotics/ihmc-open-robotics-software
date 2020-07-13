@@ -13,18 +13,28 @@ public class PerceptionSuiteAPI
 
    public static final Topic<Boolean> RunRealSenseSLAM = topic("RunRealSenseSLAM");
    public static final Topic<Boolean> RunRealSenseSLAMUI = topic("RunRealSenseSLAMUI");
+   public static final Topic<Boolean> GUIRunRealSenseSLAM = topic("GUIRunRealSenseSLAM");
+   public static final Topic<Boolean> GUIRunRealSenseSLAMUI = topic("GUIRunRealSenseSLAMUI");
 
    public static final Topic<Boolean> RunMapSegmentation = topic("RunMapSegmentation");
    public static final Topic<Boolean> RunMapSegmentationUI = topic("RunMapSegmentationUI");
+   public static final Topic<Boolean> GUIRunMapSegmentation = topic("GUIRunMapSegmentation");
+   public static final Topic<Boolean> GUIRunMapSegmentationUI = topic("GUIRunMapSegmentationUI");
 
    public static final Topic<Boolean> RunLidarREA = topic("RunLidarREA");
    public static final Topic<Boolean> RunLidarREAUI = topic("RunLidarREAUI");
+   public static final Topic<Boolean> GUIRunLidarREA = topic("GUIRunLidarREA");
+   public static final Topic<Boolean> GUIRunLidarREAUI = topic("GUIRunLidarREAUI");
 
    public static final Topic<Boolean> RunRealSenseREA = topic("RunDepthREA");
    public static final Topic<Boolean> RunRealSenseREAUI = topic("RunDepthREAUI");
+   public static final Topic<Boolean> GUIRunRealSenseREA = topic("GUIRunDepthREA");
+   public static final Topic<Boolean> GUIRunRealSenseREAUI = topic("GUIRunDepthREAUI");
 
    public static final Topic<Boolean> RunLiveMap = topic("RunLiveMap");
    public static final Topic<Boolean> RunLiveMapUI = topic("RunLiveMapUI");
+   public static final Topic<Boolean> GUIRunLiveMap = topic("GUIRunLiveMap");
+   public static final Topic<Boolean> GUIRunLiveMapUI = topic("GUIRunLiveMapUI");
 
    public static final Topic<String> ErrorMessage = topic("ErrorMessage");
    public static final Topic<Boolean> ClearErrorMessage = topic("ClearErrorMessage");

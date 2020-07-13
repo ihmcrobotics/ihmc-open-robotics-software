@@ -50,13 +50,23 @@ public class PerceptionSuiteUI
    private PerceptionSuiteUI(REAUIMessager messager, Stage primaryStage) throws Exception
    {
       this.messager = messager;
-      messager.startMessager();
 
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       mainPane = loader.load();
+
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunRealSenseSLAM, runSlamModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunRealSenseSLAMUI, runSlamUI.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunLidarREA, runLidarREAModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunLidarREAUI, runLidarREAUI.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunMapSegmentation, runMapSegmentationModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunMapSegmentationUI, runMapSegmentationUI.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunRealSenseREA, runRealSenseREAModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunLiveMap, runLiveMapModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.GUIRunLiveMapUI, runLiveMapUI.selectedProperty());
 
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseSLAM, runSlamModule.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseSLAMUI, runSlamUI.selectedProperty());
@@ -90,23 +100,13 @@ public class PerceptionSuiteUI
 
    public void stop()
    {
-      try
-      {
-         messager.closeMessager();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
    }
 
 
-   public static PerceptionSuiteUI createIntraprocessUI(Stage primaryStage) throws java.lang.Exception
+   public static PerceptionSuiteUI createIntraprocessUI(Stage primaryStage, Messager messager) throws java.lang.Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(PerceptionSuiteAPI.API,
-                                                                NetworkPorts.PERCEPTION_SUITE_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
+      REAUIMessager uiMessager = new REAUIMessager(messager);
+      uiMessager.startMessager();
       return new PerceptionSuiteUI(uiMessager, primaryStage);
    }
 }
