@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -27,7 +28,7 @@ import java.util.concurrent.Executors;
 public class FootstepPlanWithTextGraphic extends Group
 {
    private final MeshView meshView = new MeshView();
-   private final Map<String, LabelGraphic> labelRecycler = new HashMap<>();
+   private final Map<Pair<String, Integer>, LabelGraphic> labelRecycler = new HashMap<>();
    private final ArrayList<LabelGraphic> existingLabels = new ArrayList<>();
    private final ArrayList<LabelGraphic> labelsToAdd = new ArrayList<>();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
@@ -93,7 +94,7 @@ public class FootstepPlanWithTextGraphic extends Group
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
 
-         LabelGraphic labelGraphic = labelRecycler.computeIfAbsent(footstepForUI.getDescription(), LabelGraphic::new);
+         LabelGraphic labelGraphic = labelRecycler.computeIfAbsent(Pair.of(footstepForUI.getDescription(), i), key -> new LabelGraphic(key.getLeft()));
          labelGraphic.getPose().set(footstepForUI.getSolePoseInWorld());
          labelGraphic.update();
          tempLabelsToAdd.add(labelGraphic);
