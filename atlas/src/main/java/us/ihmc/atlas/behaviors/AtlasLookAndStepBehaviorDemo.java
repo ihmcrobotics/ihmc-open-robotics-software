@@ -101,8 +101,9 @@ public class AtlasLookAndStepBehaviorDemo
    private void dynamicsSimulation()
    {
       LogTools.info("Creating dynamics simulation");
-      int recordFrequencySpeedup = 10; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
-      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), pubSubMode, recordFrequencySpeedup).simulate();
+      int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
+      int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
+      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), pubSubMode, recordFrequencySpeedup, dataBufferSize).simulate();
    }
 
    private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
