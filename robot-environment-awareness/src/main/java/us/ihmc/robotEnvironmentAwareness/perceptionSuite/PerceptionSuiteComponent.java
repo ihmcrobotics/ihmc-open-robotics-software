@@ -12,8 +12,8 @@ import java.util.List;
 
 public class PerceptionSuiteComponent<M extends PerceptionModule, U extends PerceptionUI>
 {
-   private final Topic<Boolean> runModuleTopic;
-   private final Topic<Boolean> showUITopic;
+   private final Topic<Boolean> guiRunModuleTopic;
+   private final Topic<Boolean> guiShowUITopic;
 
    private PerceptionSuiteElement<M, U> element;
 
@@ -27,13 +27,15 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
                                    ElementProvider<M, U> elementProvider,
                                    Messager messager,
                                    Topic<Boolean> runModuleTopic,
-                                   Topic<Boolean> showUITopic)
+                                   Topic<Boolean> showUITopic,
+                                   Topic<Boolean> guiRunModuleTopic,
+                                   Topic<Boolean> guiShowUITopic)
    {
       this.name = name;
       this.elementProvider = elementProvider;
       this.messager = messager;
-      this.runModuleTopic = runModuleTopic;
-      this.showUITopic = showUITopic;
+      this.guiRunModuleTopic = guiRunModuleTopic;
+      this.guiShowUITopic = guiShowUITopic;
 
       messager.registerTopicListener(runModuleTopic, run -> run(run, this::startModule, this::stopModule));
       messager.registerTopicListener(showUITopic, run -> run(run, this::showUI, this::hideUI));
@@ -58,8 +60,6 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
    {
       if (element == null)
       {
-
-
          Platform.runLater(() ->
                            {
                               try
@@ -102,8 +102,8 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
          element = null;
       }
 
-      messager.submitMessage(runModuleTopic, false);
-      messager.submitMessage(showUITopic, false);
+      messager.submitMessage(guiRunModuleTopic, false);
+      messager.submitMessage(guiShowUITopic, false);
 
       for (PerceptionSuiteComponent<?, ?> dependentModule : dependentModules)
       {
@@ -115,8 +115,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
    {
       Platform.runLater(() ->
                         {
-                           element.hide();
-                           messager.submitMessage(showUITopic, false);
+                           if (element != null)
+                              element.hide();
+                           messager.submitMessage(guiShowUITopic, false);
                         });
    }
 

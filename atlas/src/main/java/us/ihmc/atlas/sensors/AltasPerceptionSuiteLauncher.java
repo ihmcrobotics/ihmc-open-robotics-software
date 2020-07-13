@@ -3,19 +3,24 @@ package us.ihmc.atlas.sensors;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PerceptionSuiteUI;
 
 public class AltasPerceptionSuiteLauncher extends Application
 {
+   private SharedMemoryJavaFXMessager messager;
    private AtlasPerceptionSuite module;
-
    private PerceptionSuiteUI ui;
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      module = AtlasPerceptionSuite.createIntraprocess();
-      ui = PerceptionSuiteUI.createIntraprocessUI(primaryStage);
+      messager = new SharedMemoryJavaFXMessager(PerceptionSuiteAPI.API);
+      messager.startMessager();
+
+      module = AtlasPerceptionSuite.createIntraprocess(messager);
+      ui = PerceptionSuiteUI.createIntraprocessUI(primaryStage, messager);
 
       module.start();
       ui.show();
@@ -28,6 +33,7 @@ public class AltasPerceptionSuiteLauncher extends Application
    {
       module.stop();
       ui.stop();
+      messager.closeMessager();
 
       Platform.exit();
    }

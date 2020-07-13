@@ -44,7 +44,9 @@ public class PerceptionSuite
                                                                                        SLAMBasedEnvironmentAwarenessUI::creatIntraprocessUI),
                                                   messager,
                                                   PerceptionSuiteAPI.RunRealSenseSLAM,
-                                                  PerceptionSuiteAPI.RunRealSenseSLAMUI);
+                                                  PerceptionSuiteAPI.RunRealSenseSLAMUI,
+                                                  PerceptionSuiteAPI.GUIRunRealSenseSLAM,
+                                                  PerceptionSuiteAPI.GUIRunRealSenseSLAMUI);
       realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
                                                           () -> new REAPerceptionSuiteElement(this::createRealSenseREAModule,
                                                                                               stage -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(
@@ -52,26 +54,34 @@ public class PerceptionSuite
                                                                                                     NetworkPorts.REA_MODULE2_UI_PORT)),
                                                           messager,
                                                           PerceptionSuiteAPI.RunRealSenseREA,
-                                                          PerceptionSuiteAPI.RunRealSenseREAUI);
+                                                          PerceptionSuiteAPI.RunRealSenseREAUI,
+                                                          PerceptionSuiteAPI.GUIRunRealSenseREA,
+                                                          PerceptionSuiteAPI.GUIRunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
                                                       () -> new REAPerceptionSuiteElement(() -> LIDARBasedREAModule.createIntraprocessModule(
                                                             LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME,
                                                             ros2Node), LIDARBasedEnvironmentAwarenessUI::creatIntraprocessUI),
                                                       messager,
                                                       PerceptionSuiteAPI.RunLidarREA,
-                                                      PerceptionSuiteAPI.RunLidarREAUI);
+                                                      PerceptionSuiteAPI.RunLidarREAUI,
+                                                      PerceptionSuiteAPI.GUIRunLidarREA,
+                                                      PerceptionSuiteAPI.GUIRunLidarREAUI);
       segmentationModule = new PerceptionSuiteComponent<>("Segmentation",
                                                           () -> new SegmentationPerceptionSuiteElement(this::createSegmentationModule,
                                                                                                        PlanarSegmentationUI::createIntraprocessUI),
                                                           messager,
                                                           PerceptionSuiteAPI.RunMapSegmentation,
-                                                          PerceptionSuiteAPI.RunMapSegmentationUI);
+                                                          PerceptionSuiteAPI.RunMapSegmentationUI,
+                                                          PerceptionSuiteAPI.GUIRunMapSegmentation,
+                                                          PerceptionSuiteAPI.GUIRunMapSegmentationUI);
       liveMapModule = new PerceptionSuiteComponent<>("LiveMap",
                                                      () -> new LiveMapPerceptionSuiteElement(() -> LiveMapModule.createIntraprocess(ros2Node),
                                                                                              LiveMapUI::createIntraprocessUI),
                                                      messager,
                                                      PerceptionSuiteAPI.RunLiveMap,
-                                                     PerceptionSuiteAPI.RunLiveMapUI);
+                                                     PerceptionSuiteAPI.RunLiveMapUI,
+                                                     PerceptionSuiteAPI.GUIRunLiveMap,
+                                                     PerceptionSuiteAPI.GUIRunLiveMapUI);
 
       slamModule.attachDependentModule(segmentationModule);
    }
@@ -122,24 +132,11 @@ public class PerceptionSuite
       segmentationModule.stop();
       liveMapModule.stop();
 
-      try
-      {
-         messager.closeMessager();
-      }
-      catch (Exception e)
-      {
-         String error = e.getMessage();
-         LogTools.error(error);
-         messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
-      }
       ros2Node.destroy();
    }
 
-   public static PerceptionSuite createIntraprocess() throws Exception
+   public static PerceptionSuite createIntraprocess(Messager messager) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(PerceptionSuiteAPI.API,
-                                                                NetworkPorts.PERCEPTION_SUITE_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      return new PerceptionSuite(moduleMessager);
+      return new PerceptionSuite(messager);
    }
 }
