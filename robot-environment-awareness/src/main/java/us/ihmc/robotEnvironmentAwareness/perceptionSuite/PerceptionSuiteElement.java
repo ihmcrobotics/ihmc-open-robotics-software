@@ -3,45 +3,39 @@ package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
-public class PerceptionSuiteElement<M extends PerceptionModule, U extends PerceptionUI>
+public interface PerceptionSuiteElement<M extends PerceptionModule, U extends PerceptionUI>
 {
-   private final Stage stage;
-   private final M perceptionModule;
-   private final U uiModule;
+   M getPerceptionModule();
 
-   public PerceptionSuiteElement(ModuleProvider<M> moduleProvider, UIProvider<U> uiProvider) throws Exception
+   U getPerceptionUI();
+
+   Stage getStage();
+
+   default void stopInternal()
    {
-      stage = new Stage();
-      perceptionModule = moduleProvider.createModule();
-      uiModule = uiProvider.createUI(stage);
-
-      stage.setOnCloseRequest((event) -> hide());
    }
 
-   public M getPerceptionModule()
+   default void stop()
    {
-      return perceptionModule;
-   }
+      stopInternal();
 
-   public void stop()
-   {
       Platform.runLater(() ->
                         {
-                           perceptionModule.stop();
-                           uiModule.stop();
-                           stage.close();
+                           getPerceptionModule().stop();
+                           getPerceptionUI().stop();
+                           getStage().close();
                         });
    }
 
-   public void show()
+   default void show()
    {
-      stage.show();
-      uiModule.show();
+      getStage().show();
+      getPerceptionUI().show();
    }
 
-   public void hide()
+   default void hide()
    {
-      stage.hide();
+      getStage().hide();
    }
 
    interface ModuleProvider<T>
