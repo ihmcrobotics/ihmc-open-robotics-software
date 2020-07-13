@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
+import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
@@ -39,33 +40,34 @@ public class PerceptionSuite
       this.messager = messager;
 
       slamModule = new PerceptionSuiteComponent<>("RealSense SLAM",
-                                                  this::createSLAMModuleInternal,
-                                                  SLAMBasedEnvironmentAwarenessUI::creatIntraprocessUI,
+                                                  () -> new PerceptionSuiteElement<>(this::createSLAMModuleInternal,
+                                                                                     SLAMBasedEnvironmentAwarenessUI::creatIntraprocessUI),
                                                   messager,
                                                   PerceptionSuiteAPI.RunRealSenseSLAM,
                                                   PerceptionSuiteAPI.RunRealSenseSLAMUI);
       realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
-                                                          this::createRealSenseREAModule,
-                                                          stage -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(stage,
-                                                                                                                        NetworkPorts.REA_MODULE2_UI_PORT),
+                                                          () -> new PerceptionSuiteElement<>(this::createRealSenseREAModule,
+                                                                                             stage -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(stage,
+                                                                                                                                                           NetworkPorts.REA_MODULE2_UI_PORT)),
                                                           messager,
                                                           PerceptionSuiteAPI.RunRealSenseREA,
                                                           PerceptionSuiteAPI.RunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
-                                                      () -> LIDARBasedREAModule.createIntraprocessModule(LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME, ros2Node),
-                                                      LIDARBasedEnvironmentAwarenessUI::creatIntraprocessUI,
+                                                      () -> new PerceptionSuiteElement<>(() -> LIDARBasedREAModule.createIntraprocessModule(
+                                                            LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME,
+                                                            ros2Node), LIDARBasedEnvironmentAwarenessUI::creatIntraprocessUI),
                                                       messager,
                                                       PerceptionSuiteAPI.RunLidarREA,
                                                       PerceptionSuiteAPI.RunLidarREAUI);
       segmentationModule = new PerceptionSuiteComponent<>("Segmentation",
-                                                          this::createSegmentationModule,
-                                                          PlanarSegmentationUI::createIntraprocessUI,
+                                                          () -> new PerceptionSuiteElement<>(this::createSegmentationModule,
+                                                                                             PlanarSegmentationUI::createIntraprocessUI),
                                                           messager,
                                                           PerceptionSuiteAPI.RunMapSegmentation,
                                                           PerceptionSuiteAPI.RunMapSegmentationUI);
       liveMapModule = new PerceptionSuiteComponent<>("LiveMap",
-                                                     () -> LiveMapModule.createIntraprocess(ros2Node),
-                                                     LiveMapUI::createIntraprocessUI,
+                                                     () -> new PerceptionSuiteElement<>(() -> LiveMapModule.createIntraprocess(ros2Node),
+                                                                                        LiveMapUI::createIntraprocessUI),
                                                      messager,
                                                      PerceptionSuiteAPI.RunLiveMap,
                                                      PerceptionSuiteAPI.RunLiveMapUI);
@@ -81,8 +83,8 @@ public class PerceptionSuite
    private SLAMModule createSLAMModuleInternal() throws Exception
    {
       SLAMModule slamModule = createSLAMModule();
-      if (segmentationModule.getModule() != null)
-         slamModule.attachOcTreeConsumer(segmentationModule.getModule());
+      if (segmentationModule.getElement() != null)
+         slamModule.attachOcTreeConsumer(segmentationModule.getElement().getPerceptionModule());
 
       return slamModule;
    }
@@ -90,8 +92,8 @@ public class PerceptionSuite
    private PlanarSegmentationModule createSegmentationModule() throws Exception
    {
       PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME, ros2Node);
-      if (slamModule.getModule() != null)
-         slamModule.getModule().attachOcTreeConsumer(segmentationModule);
+      if (slamModule.getElement() != null)
+         slamModule.getElement().getPerceptionModule().attachOcTreeConsumer(segmentationModule);
 
       return segmentationModule;
    }

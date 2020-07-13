@@ -13,35 +13,30 @@ import java.util.List;
 public class PerceptionSuiteComponent<M extends PerceptionModule, U extends PerceptionUI>
 {
    private final Topic<Boolean> runModuleTopic;
-   private final Topic<Boolean> runUITopic;
+   private final Topic<Boolean> showUITopic;
 
-   private Stage uiStage;
-   private M module;
-   private U ui;
+   private PerceptionSuiteElement<M, U> element;
 
-   private final ModuleProvider<M> moduleProvider;
-   private final UIProvider<U> uiProvider;
+   private final ElementProvider<M, U> elementProvider;
    private final String name;
    private final Messager messager;
 
    private final List<PerceptionSuiteComponent<?, ?>> dependentModules = new ArrayList<>();
 
    public PerceptionSuiteComponent(String name,
-                                   ModuleProvider<M> moduleProvider,
-                                   UIProvider<U> uiProvider,
+                                   ElementProvider<M, U> elementProvider,
                                    Messager messager,
                                    Topic<Boolean> runModuleTopic,
-                                   Topic<Boolean> runUITopic)
+                                   Topic<Boolean> showUITopic)
    {
       this.name = name;
-      this.moduleProvider = moduleProvider;
-      this.uiProvider = uiProvider;
+      this.elementProvider = elementProvider;
       this.messager = messager;
       this.runModuleTopic = runModuleTopic;
-      this.runUITopic = runUITopic;
+      this.showUITopic = showUITopic;
 
       messager.registerTopicListener(runModuleTopic, run -> run(run, this::startModule, this::stopModule));
-      messager.registerTopicListener(runUITopic, run -> run(run, this::startUI, this::stopUI));
+      messager.registerTopicListener(showUITopic, run -> run(run, this::showUI, this::hideUI));
    }
 
    public void attachDependentModule(PerceptionSuiteComponent<?, ?> dependentModule)
@@ -49,9 +44,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       this.dependentModules.add(dependentModule);
    }
 
-   public M getModule()
+   public PerceptionSuiteElement<M, U> getElement()
    {
-      return module;
+      return element;
    }
 
    public String getName()
@@ -59,12 +54,23 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       return name;
    }
 
-   public void startModule() throws Exception
+   public void startModule()
    {
-      if (module == null)
+      if (element == null)
       {
-         module = moduleProvider.createModule();
-         module.start();
+
+
+         Platform.runLater(() ->
+                           {
+                              try
+                              {
+                                 element = elementProvider.createElement();
+                              }
+                              catch (Exception e)
+                              {
+
+                              }
+                           });
       }
       else
       {
@@ -72,84 +78,50 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       }
    }
 
-   public void startUI()
+   public void showUI()
    {
-      if (module == null)
+      if (element == null)
       {
-         String error = name + " Module must be running first.";
+         String error = "UI " + name + " is not running.";
          LogTools.error(error);
          messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
-         messager.submitMessage(runUITopic, false);
          return;
       }
 
-      if (ui == null)
-      {
-         Platform.runLater(() ->
-                           {
-                              uiStage = new Stage();
-                              try
-                              {
-                                 ui = uiProvider.createUI(uiStage);
-                                 ui.show();
-                              }
-                              catch (Exception e)
-                              {
-                                 LogTools.warn(e.getMessage());
-                                 messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, e.getMessage());
-                              }
-                              uiStage.setOnCloseRequest(event ->
-                                                        {
-                                                           messager.submitMessage(runUITopic, false);
-                                                           stopUI();
-                                                        });
-                           });
-      }
-      else
-      {
-         stopUI();
-         String error = name + " UI is already running.";
-         LogTools.error(error);
-         messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
-      }
+      Platform.runLater(() ->
+                        {
+                           element.show();
+                        });
    }
 
    public void stopModule()
    {
-      if (module != null)
+      if (element != null)
       {
-         module.stop();
-         module = null;
+         element.stop();
+         element = null;
       }
 
-      stopUI();
       messager.submitMessage(runModuleTopic, false);
+      messager.submitMessage(showUITopic, false);
 
       for (PerceptionSuiteComponent<?, ?> dependentModule : dependentModules)
       {
-         dependentModule.stopUI();
          dependentModule.stopModule();
       }
    }
 
-   public void stopUI()
+   public void hideUI()
    {
-      if (ui != null)
-      {
-         Platform.runLater(() ->
-                           {
-                              uiStage.close();
-                              ui.stop();
-                              uiStage = null;
-                              ui = null;
-                           });
-      }
-      messager.submitMessage(runUITopic, false);
+      Platform.runLater(() ->
+                        {
+                           element.hide();
+                           messager.submitMessage(showUITopic, false);
+                        });
    }
 
    public void stop()
    {
-      stopUI();
       stopModule();
    }
 
@@ -169,6 +141,7 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
          catch (Exception e)
          {
             String error = "Failed to start " + name + ": " + e.getMessage();
+            e.printStackTrace();
             LogTools.error(error);
             messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
          }
@@ -188,13 +161,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       }
    }
 
-   interface ModuleProvider<T>
+   interface ElementProvider<M extends PerceptionModule, U extends PerceptionUI>
    {
-      T createModule() throws Exception;
+      PerceptionSuiteElement<M, U> createElement() throws Exception;
    }
 
-   interface UIProvider<T>
-   {
-      T createUI(Stage stage) throws Exception;
-   }
 }
