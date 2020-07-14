@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import org.junit.jupiter.api.Test;
+import org.ojalgo.random.RandomNumber;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
@@ -241,5 +243,9 @@ public class FootstepPlannerParametersTest
       double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDistanceEpsilonToBridgeRegions(distanceEpsilonToBridgeRegions);
       assertEquals(distanceEpsilonToBridgeRegions, parameters.getDistanceEpsilonToBridgeRegions());
+
+      byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
+      parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);
+      assertEquals(RobotSide.fromByte(stepOnlyWithRequestedSide), parameters.getStepOnlyWithRequestedSide());
    }
 }
