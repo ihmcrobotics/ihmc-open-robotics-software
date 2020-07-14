@@ -9,6 +9,7 @@ import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -18,6 +19,7 @@ import java.util.function.Supplier;
 public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 {
    private final Supplier<HumanoidRobotState> robotStateSupplier;
+   private final WalkingFootstepTracker walkingFootstepTracker;
 
    private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
    private final TypedInput<Pose3D> goalInput = new TypedInput<>();
@@ -33,7 +35,8 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
                                     Supplier<Boolean> operatorReviewEnabled,
                                     RemoteSyncedHumanoidRobotState syncedRobot,
                                     BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                                    Supplier<Boolean> robotConnectedSupplier)
+                                    Supplier<Boolean> robotConnectedSupplier,
+                                    WalkingFootstepTracker walkingFootstepTracker)
    {
       super(statusLogger,
             uiPublisher,
@@ -44,6 +47,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
             robotConnectedSupplier);
 
       this.robotStateSupplier = syncedRobot::pollHumanoidRobotState;
+      this.walkingFootstepTracker = walkingFootstepTracker;
 
       // don't run two body path plans at the same time
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
@@ -73,7 +77,8 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
              robotStateSupplier.get(),
              mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration()),
              planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed()),
-             behaviorStateReference.get());
+             behaviorStateReference.get(),
+             walkingFootstepTracker.getNumberOfIncompleteFootsteps());
 
       run();
    }
