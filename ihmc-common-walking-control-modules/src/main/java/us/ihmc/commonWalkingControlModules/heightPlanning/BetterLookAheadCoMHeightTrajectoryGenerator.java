@@ -29,7 +29,7 @@ import java.util.List;
 
 public class BetterLookAheadCoMHeightTrajectoryGenerator
 {
-   private static final double defaultPercentageInOffset = 0.05;
+   private static final double defaultPercentageInOffset = 0.15;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private boolean visualize = true;
