@@ -4,6 +4,7 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.Foots
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.StartAndGoalFootPosesForUI;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -44,6 +45,7 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
    private FootstepPlan footstepPlan;
    private HumanoidRobotState robotState;
+   private long previousStepMessageId = 0L;
 
    LookAndStepRobotMotionTask(StatusLogger statusLogger)
    {
@@ -109,6 +111,10 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
                                                                                                                     swingTime,
                                                                                                                     transferTime);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      long messageId = UUID.randomUUID().getLeastSignificantBits();
+      footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
+      previousStepMessageId = messageId;
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.get().requestWalk(footstepDataListMessage);
 
       uiPublisher.get()

@@ -25,6 +25,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -62,6 +63,7 @@ public class LookAndStepFootstepPlanningPart
    {
       private final SingleThreadSizeOneQueueExecutor executor;
       private final Supplier<HumanoidRobotState> robotStateSupplier;
+      private final WalkingFootstepTracker walkingFootstepTracker;
 
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -80,7 +82,8 @@ public class LookAndStepFootstepPlanningPart
                        Supplier<Boolean> operatorReviewEnabledSupplier,
                        RemoteSyncedHumanoidRobotState syncedRobot,
                        BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                       Supplier<Boolean> robotConnectedSupplier)
+                       Supplier<Boolean> robotConnectedSupplier,
+                       WalkingFootstepTracker walkingFootstepTracker)
       {
          this.statusLogger = statusLogger;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
@@ -95,6 +98,7 @@ public class LookAndStepFootstepPlanningPart
          this.robotStateSupplier = syncedRobot::pollHumanoidRobotState;
          this.behaviorStateReference = behaviorStateReference;
          this.robotConnectedSupplier = robotConnectedSupplier;
+         this.walkingFootstepTracker = walkingFootstepTracker;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -138,6 +142,7 @@ public class LookAndStepFootstepPlanningPart
          robotState = robotStateSupplier.get();
          lastStanceSide = lastStanceSideReference.get();
          behaviorState = behaviorStateReference.get();
+         numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
 
          if (evaluateEntry())
          {
@@ -154,6 +159,7 @@ public class LookAndStepFootstepPlanningPart
    protected HumanoidRobotState robotState;
    protected RobotSide lastStanceSide;
    protected LookAndStepBehavior.State behaviorState;
+   protected int numberOfIncompleteFootsteps;
 
    protected boolean evaluateEntry()
    {
@@ -192,6 +198,14 @@ public class LookAndStepFootstepPlanningPart
       else if (!robotConnectedSupplier.get())
       {
          statusLogger.debug("Footstep planning suppressed: Robot disconnected");
+         proceed = false;
+      }
+      else if (numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps())
+      {
+         statusLogger.debug("Footstep planning suppressed: numberOfIncompleteFootsteps {} > {}",
+                            numberOfIncompleteFootsteps,
+                            lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
+
          proceed = false;
       }
 

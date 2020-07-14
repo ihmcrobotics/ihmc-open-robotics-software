@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.Ros2NodeInterface;
@@ -33,18 +34,21 @@ public class WalkingFootstepTracker
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
    {
-      synchronized (this)
+      if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.COMPLETED)
       {
-         ++stepsCompleted;
-
-         if (stepsCommanded < stepsCompleted)
+         synchronized (this)
          {
-            LogTools.warn("Delayed message(s) detected.");
-            stepsCompleted = stepsCommanded;
-         }
-      }
+            ++stepsCompleted;
 
-      LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+            if (stepsCommanded < stepsCompleted)
+            {
+               LogTools.warn("Delayed message(s) detected.");
+               stepsCompleted = stepsCommanded;
+            }
+         }
+
+         LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+      }
    }
 
    private void interceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)

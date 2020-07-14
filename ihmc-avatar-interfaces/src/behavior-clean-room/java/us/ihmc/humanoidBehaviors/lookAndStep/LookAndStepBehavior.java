@@ -85,6 +85,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
 
+      // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
       Notification resetInput = helper.createROS2Notification(RESET);
@@ -104,9 +105,11 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                      operatorReviewEnabledInput::get,
                                                      robotInterface.newSyncedRobot(),
                                                      behaviorStateReference,
-                                                     this::robotConnected);
+                                                     this::robotConnected,
+                                                     walkingFootstepTracker);
       footstepPlanningModule = new LookAndStepFootstepPlanningPart.TaskSetup(
-            statusLogger, lookAndStepParameters,
+            statusLogger,
+            lookAndStepParameters,
             footstepPlannerParameters,
             resetInput::poll,
             helper::publishToUI,
@@ -120,7 +123,8 @@ public class LookAndStepBehavior implements BehaviorInterface
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
-            this::robotConnected
+            this::robotConnected,
+            walkingFootstepTracker
       );
       robotMotionModule = new LookAndStepRobotMotionModule(statusLogger);
 
