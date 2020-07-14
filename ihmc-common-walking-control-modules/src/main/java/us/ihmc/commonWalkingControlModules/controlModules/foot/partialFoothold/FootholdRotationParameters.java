@@ -39,6 +39,9 @@ public class FootholdRotationParameters
    private final IntegerProvider shrinkMaxLimit;
    private final DoubleProvider distanceFromRotationToCrop;
 
+   private final BooleanProvider useCoPOccupancyGridForCropping;
+   private final DoubleProvider footDropThresholdForCrop;
+
    private final BooleanParameter doPartialFootholdDetection;
    private final BooleanParameter applyPartialFootholds;
 
@@ -78,6 +81,9 @@ public class FootholdRotationParameters
       minimumAreaForCropping = new DoubleParameter(namePrefix + "MinimumAreaForCropping", registry, 0.0);
       shrinkMaxLimit = new IntegerParameter(namePrefix + "ShrinkMaxLimit", registry, 1);
       distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.0);
+
+      useCoPOccupancyGridForCropping = new BooleanParameter(namePrefix + "UseCopOccupancyGrid", registry, true);
+      footDropThresholdForCrop = new DoubleParameter(namePrefix + "FootDropThresholdForCrop", registry, 0.03);
 
       doPartialFootholdDetection = new BooleanParameter("doPartialFootholdDetection", registry, true);
       applyPartialFootholds = new BooleanParameter("applyPartialFootholds", registry, false);
@@ -196,6 +202,16 @@ public class FootholdRotationParameters
    public DoubleProvider getTransverseCoPHistoryStdDev()
    {
       return transverseCoPHistoryStdDev;
+   }
+
+   public BooleanProvider getUseCoPOccupancyGridForCropping()
+   {
+      return useCoPOccupancyGridForCropping;
+   }
+
+   public DoubleProvider getFootDropThresholdForCrop()
+   {
+      return footDropThresholdForCrop;
    }
 
    public BooleanProvider getApplyPartialFootholds()
