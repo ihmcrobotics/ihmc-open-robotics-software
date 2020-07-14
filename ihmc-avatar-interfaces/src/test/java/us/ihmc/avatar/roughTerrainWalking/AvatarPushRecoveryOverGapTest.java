@@ -222,6 +222,12 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          drcSimulationTestHelper = null;
       }
 
+      if (stepConstraintModule != null)
+      {
+         stepConstraintModule.closeAndDispose();
+         stepConstraintModule = null;
+      }
+
       if (pushRobotController != null)
       {
          pushRobotController = null;
