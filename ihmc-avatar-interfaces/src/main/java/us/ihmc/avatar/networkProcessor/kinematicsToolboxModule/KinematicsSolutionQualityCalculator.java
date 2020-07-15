@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.NormOps_DDRM;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -48,7 +48,7 @@ public class KinematicsSolutionQualityCalculator
     *                                     error for each command. Not modified.
     * @return the overall solution quality.
     */
-   public double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   public double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder)
    {
       double error = 0.0;
 
@@ -91,7 +91,7 @@ public class KinematicsSolutionQualityCalculator
     *                                     error for each command. Not modified.
     * @return the quality of the command.
     */
-   private double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   private double calculateCommandQuality(CenterOfMassFeedbackControlCommand command, FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder)
    {
       feedbackControllerDataHolder.getCenterOfMassVectorData(positionError, Type.ERROR, Space.POSITION);
       command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
@@ -112,7 +112,7 @@ public class KinematicsSolutionQualityCalculator
     *                                     error for each command. Not modified.
     * @return the quality of the command.
     */
-   private double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   private double calculateCommandQuality(SpatialFeedbackControlCommand command, FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder)
    {
       SpatialAccelerationCommand accelerationCommand = command.getSpatialAccelerationCommand();
       RigidBodyBasics endEffector = accelerationCommand.getEndEffector();
@@ -160,7 +160,7 @@ public class KinematicsSolutionQualityCalculator
       return NormOps_DDRM.normP2(errorSubspace);
    }
 
-   private double calculateCommandQuality(OneDoFJointFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)
+   private double calculateCommandQuality(OneDoFJointFeedbackControlCommand command, FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder)
    {
       return Math.abs(command.getJoint().getQ() - command.getReferencePosition()) * command.getWeightForSolver();
    }

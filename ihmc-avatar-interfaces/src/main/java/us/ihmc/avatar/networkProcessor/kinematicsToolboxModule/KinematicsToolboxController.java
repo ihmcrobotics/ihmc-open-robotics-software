@@ -24,7 +24,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -158,7 +158,7 @@ public class KinematicsToolboxController extends ToolboxController
     * {@link #feedbackControllerDataHolder} is used here to compute the solution quality every tick
     * from the tracking error for each end-effector being controlled.
     */
-   private final FeedbackControllerDataReadOnly feedbackControllerDataHolder;
+   private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
 
    /**
     * This is the output of the {@code KinematicsToolboxController}. It is filled with the robot
@@ -1134,7 +1134,7 @@ public class KinematicsToolboxController extends ToolboxController
       return inverseKinematicsSolution;
    }
 
-   public FeedbackControllerDataReadOnly getFeedbackControllerDataHolder()
+   public FeedbackControllerDataHolderReadOnly getFeedbackControllerDataHolder()
    {
       return feedbackControllerDataHolder;
    }

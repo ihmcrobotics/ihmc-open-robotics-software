@@ -319,7 +319,7 @@ public class WholeBodyControllerCore
       return rootJointDesiredConfigurationData;
    }
 
-   public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
+   public FeedbackControllerDataHolderReadOnly getWholeBodyFeedbackControllerDataHolder()
    {
       return feedbackController.getWholeBodyFeedbackControllerDataHolder();
    }
