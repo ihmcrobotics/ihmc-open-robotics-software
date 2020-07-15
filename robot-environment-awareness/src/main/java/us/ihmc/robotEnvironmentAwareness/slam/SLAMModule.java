@@ -42,7 +42,7 @@ public class SLAMModule
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
    private static final Color LATEST_ORIGINAL_POINT_CLOUD_COLOR = Color.BEIGE;
-   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.BLACK;
+   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.RED;
    private static final Color LATEST_POINT_CLOUD_COLOR = Color.LIME;
 
    protected final AtomicReference<Boolean> enable;
@@ -231,7 +231,6 @@ public class SLAMModule
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
-
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
@@ -239,13 +238,11 @@ public class SLAMModule
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
       Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
-      //TODO:
-      Point3DReadOnly[] sourcePointsToWorld = null;
-      //Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
+      Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePoints();
       if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
          return;
       StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
-                                                                                                         null,
+                                                                                                         sourcePointsToWorld,
                                                                                                          correctedPointCloud);
       RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
       latestStereoMessage.getSensorPosition().set(sensorPose.getTranslation());

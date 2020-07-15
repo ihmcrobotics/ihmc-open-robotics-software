@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -8,6 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
@@ -17,23 +19,39 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    public static final boolean DEBUG = false;
    private final Function<DMatrixRMaj, RigidBodyTransform> transformConverter = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
 
+   private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<SurfaceElementICPSLAMParameters>(new SurfaceElementICPSLAMParameters());
+
+   private final SLAMHistory history = null;
+
    public SurfaceElementICPSLAM(double octreeResolution)
    {
       super(octreeResolution);
    }
 
-   private int temp = 0;
+   public void updateParameters(SurfaceElementICPSLAMParameters parameters)
+   {
+      this.parameters.set(parameters);
+   }
+
+   /**
+    * see {@link SurfaceElementICPBasedDriftCorrectionVisualizer}
+    */
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
-      LogTools.info("temp "+temp);
-      temp++;
+      SurfaceElementICPSLAMParameters parameters = this.parameters.getAndSet(null);
+      if (parameters == null)
+         return null;
+
+      // TODO: add diagnosing manager.
+
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
       frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      sourcePoints = new Point3D[numberOfSurfel];
       LogTools.info("numberOfSurfel " + numberOfSurfel);
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
@@ -52,6 +70,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
+               sourcePoints[i] = new Point3D(correctedSensorPoseToWorld.getTranslation());
             }
 
             DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
@@ -81,9 +100,11 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       optimizer.setCorrespondenceThreshold(octree.getResolution() * 1.5);
 
       // do ICP.
-      for (int i = 0; i < 30; i++)
+      for (int i = 0; i < 20; i++)
       {
          optimizer.iterate();
+         // TODO: add terminal condition. 
+
       }
 
       // get parameter.
