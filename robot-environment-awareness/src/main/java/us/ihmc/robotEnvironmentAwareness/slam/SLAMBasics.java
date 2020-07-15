@@ -8,6 +8,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -17,6 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 public class SLAMBasics implements SLAMInterface
 {
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
+   protected Point3DBasics[] sourcePoints;
    protected final NormalOcTree octree;
    private final AtomicInteger mapSize = new AtomicInteger();
 
@@ -90,12 +92,17 @@ public class SLAMBasics implements SLAMInterface
       octree.clear();
    }
 
+   public Point3DReadOnly[] getSourcePoints()
+   {
+      return sourcePoints;
+   }
+
    public boolean isEmpty()
    {
-      if (latestSlamFrame.get() == null)
-         return true;
-      else
+      if (mapSize.get() == 0)
          return false;
+      else
+         return true;
    }
 
    public int getMapSize()
