@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData3D;
@@ -62,14 +60,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final List<Pair<? extends Clearable, List<YoBoolean>>> clearableDataOld = new ArrayList<>();
    private final List<FeedbackControllerData> clearableData = new ArrayList<>();
 
    private final Map<RigidBodyBasics, EnumMap<Type, PositionData3D>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBodyBasics, EnumMap<Type, QuaternionData3D>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBodyBasics, EnumMap<Type, EnumMap<Space, VectorData3D>>> endEffectorDataVectors = new HashMap<>();
-   private final Map<RigidBodyBasics, EnumMap<Space, RateLimitedVectorData3D>> endEffectorRateLimitedDataVectors = new HashMap<>();
-   private final Map<RigidBodyBasics, EnumMap<Space, AlphaFilteredVectorData3D>> endEffectorFilteredDataVectors = new HashMap<>();
+   private final Map<RigidBodyBasics, EnumMap<Type, EnumMap<Space, RateLimitedVectorData3D>>> endEffectorRateLimitedDataVectors = new HashMap<>();
+   private final Map<RigidBodyBasics, EnumMap<Type, EnumMap<Space, AlphaFilteredVectorData3D>>> endEffectorFilteredDataVectors = new HashMap<>();
 
    private final Map<RigidBodyBasics, YoPID3DGains> endEffectorOrientationGains = new HashMap<>();
    private final Map<RigidBodyBasics, YoPID3DGains> endEffectorPositionGains = new HashMap<>();
@@ -78,8 +75,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    private final EnumMap<Type, PositionData3D> centerOfMassPositions = new EnumMap<>(Type.class);
    private final EnumMap<Type, EnumMap<Space, VectorData3D>> centerOfMassDataVectors = new EnumMap<>(Type.class);
-   private final EnumMap<Space, RateLimitedVectorData3D> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
-   private final EnumMap<Space, AlphaFilteredVectorData3D> centerOfMassFilteredDataVectors = new EnumMap<>(Space.class);
+   private final EnumMap<Type, EnumMap<Space, RateLimitedVectorData3D>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Type.class);
+   private final EnumMap<Type, EnumMap<Space, AlphaFilteredVectorData3D>> centerOfMassFilteredDataVectors = new EnumMap<>(Type.class);
    private YoPID3DGains centerOfMassPositionGains;
 
    private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
@@ -140,20 +137,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoMutableFrameVector3D getCenterOfMassDataVector(Type type, Space space, YoBoolean enabled)
    {
-      EnumMap<Space, VectorData3D> dataVectors = centerOfMassDataVectors.get(type);
-
-      if (dataVectors == null)
-      {
-         dataVectors = new EnumMap<>(Space.class);
-         centerOfMassDataVectors.put(type, dataVectors);
-      }
-
-      VectorData3D vectorData = dataVectors.get(space);
+      EnumMap<Space, VectorData3D> vectorDataSubMap = getSubEnumMap(centerOfMassDataVectors, type, Space.class);
+      VectorData3D vectorData = vectorDataSubMap.get(space);
 
       if (vectorData == null)
       {
          vectorData = new VectorData3D(centerOfMassName, type, space, registry);
-         dataVectors.put(space, vectorData);
+         vectorDataSubMap.put(space, vectorData);
          clearableData.add(vectorData);
       }
 
@@ -180,13 +170,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public AlphaFilteredYoMutableFrameVector3D getCenterOfMassAlphaFilteredDataVector(Type rawDataType, Space space, double dt,
                                                                                      DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
-      AlphaFilteredVectorData3D filteredVectorData = centerOfMassFilteredDataVectors.get(space);
+      EnumMap<Space, AlphaFilteredVectorData3D> filteredVectorDataSubMap = getSubEnumMap(centerOfMassFilteredDataVectors, rawDataType, Space.class);
+      AlphaFilteredVectorData3D filteredVectorData = filteredVectorDataSubMap.get(space);
 
       if (filteredVectorData == null)
       {
          FrameVector3DReadOnly rawVectorData = getCenterOfMassDataVector(rawDataType, space, enabled);
          filteredVectorData = new AlphaFilteredVectorData3D(centerOfMassName, rawDataType, space, breakFrequencyProvider, dt, rawVectorData, registry);
-         centerOfMassFilteredDataVectors.put(space, filteredVectorData);
+         filteredVectorDataSubMap.put(space, filteredVectorData);
          clearableData.add(filteredVectorData);
       }
 
@@ -212,13 +203,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public RateLimitedYoMutableFrameVector3D getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate,
                                                                                  YoBoolean enabled)
    {
-      RateLimitedVectorData3D rateLimitedVectorData = centerOfMassRateLimitedDataVectors.get(space);
+      EnumMap<Space, RateLimitedVectorData3D> rateLimitedVectorDataSubMap = getSubEnumMap(centerOfMassRateLimitedDataVectors, rawDataType, Space.class);
+      RateLimitedVectorData3D rateLimitedVectorData = rateLimitedVectorDataSubMap.get(space);
 
       if (rateLimitedVectorData == null)
       {
          FrameVector3DReadOnly rawVectorData = getCenterOfMassDataVector(rawDataType, space, enabled);
          rateLimitedVectorData = new RateLimitedVectorData3D(centerOfMassName, rawDataType, space, maximumRate, dt, rawVectorData, registry);
-         centerOfMassRateLimitedDataVectors.put(space, rateLimitedVectorData);
+         rateLimitedVectorDataSubMap.put(space, rateLimitedVectorData);
          clearableData.add(rateLimitedVectorData);
       }
 
@@ -260,26 +252,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoMutableFramePoint3D getPosition(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      EnumMap<Type, PositionData3D> typeDependentPositions = endEffectorPositions.get(endEffector);
+      EnumMap<Type, PositionData3D> positionDataSubMap = getSubEnumMap(endEffectorPositions, endEffector, Type.class);
+      PositionData3D positionData = positionDataSubMap.get(type);
 
-      if (typeDependentPositions == null)
+      if (positionData == null)
       {
-         typeDependentPositions = new EnumMap<>(Type.class);
-         endEffectorPositions.put(endEffector, typeDependentPositions);
+         positionData = new PositionData3D(endEffector.getName(), type, registry);
+         positionDataSubMap.put(type, positionData);
+         clearableData.add(positionData);
       }
 
-      PositionData3D positionData3D = typeDependentPositions.get(type);
+      positionData.addActiveFlag(enabled);
 
-      if (positionData3D == null)
-      {
-         positionData3D = new PositionData3D(endEffector.getName(), type, registry);
-         typeDependentPositions.put(type, positionData3D);
-         clearableData.add(positionData3D);
-      }
-
-      positionData3D.addActiveFlag(enabled);
-
-      return positionData3D;
+      return positionData;
    }
 
    /**
@@ -299,26 +284,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoMutableFrameQuaternion getOrientation(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      EnumMap<Type, QuaternionData3D> typeDependentOrientations = endEffectorOrientations.get(endEffector);
+      EnumMap<Type, QuaternionData3D> orientationDataSubMap = getSubEnumMap(endEffectorOrientations, endEffector, Type.class);
+      QuaternionData3D orientationData = orientationDataSubMap.get(type);
 
-      if (typeDependentOrientations == null)
+      if (orientationData == null)
       {
-         typeDependentOrientations = new EnumMap<>(Type.class);
-         endEffectorOrientations.put(endEffector, typeDependentOrientations);
+         orientationData = new QuaternionData3D(endEffector.getName(), type, registry);
+         orientationDataSubMap.put(type, orientationData);
+         clearableData.add(orientationData);
       }
 
-      QuaternionData3D quaternionData = typeDependentOrientations.get(type);
+      orientationData.addActiveFlag(enabled);
 
-      if (quaternionData == null)
-      {
-         quaternionData = new QuaternionData3D(endEffector.getName(), type, registry);
-         typeDependentOrientations.put(type, quaternionData);
-         clearableData.add(quaternionData);
-      }
-
-      quaternionData.addActiveFlag(enabled);
-
-      return quaternionData;
+      return orientationData;
    }
 
    /**
@@ -338,34 +316,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoMutableFrameVector3D getDataVector(RigidBodyBasics endEffector, Type type, Space space, YoBoolean enabled)
    {
-      EnumMap<Type, EnumMap<Space, VectorData3D>> dataVectorStep1 = endEffectorDataVectors.get(endEffector);
+      EnumMap<Space, VectorData3D> vectorDataSubMap = getSubSubEnumMap(endEffectorDataVectors, endEffector, type, Space.class);
+      VectorData3D vectorData = vectorDataSubMap.get(space);
 
-      if (dataVectorStep1 == null)
+      if (vectorData == null)
       {
-         dataVectorStep1 = new EnumMap<>(Type.class);
-         endEffectorDataVectors.put(endEffector, dataVectorStep1);
+         vectorData = new VectorData3D(endEffector.getName(), type, space, registry);
+         vectorDataSubMap.put(space, vectorData);
+         clearableData.add(vectorData);
       }
 
-      EnumMap<Space, VectorData3D> dataVectorStep2 = dataVectorStep1.get(type);
+      vectorData.addActiveFlag(enabled);
 
-      if (dataVectorStep2 == null)
-      {
-         dataVectorStep2 = new EnumMap<>(Space.class);
-         dataVectorStep1.put(type, dataVectorStep2);
-      }
-
-      VectorData3D vectorData3D = dataVectorStep2.get(space);
-
-      if (vectorData3D == null)
-      {
-         vectorData3D = new VectorData3D(endEffector.getName(), type, space, registry);
-         dataVectorStep2.put(space, vectorData3D);
-         clearableData.add(vectorData3D);
-      }
-
-      vectorData3D.addActiveFlag(enabled);
-
-      return vectorData3D;
+      return vectorData;
    }
 
    /**
@@ -392,21 +355,17 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public RateLimitedYoMutableFrameVector3D getRateLimitedDataVector(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
                                                                      YoDouble maximumRate, YoBoolean enabled)
    {
-      EnumMap<Space, RateLimitedVectorData3D> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
-
-      if (endEffectorDataVectors == null)
-      {
-         endEffectorDataVectors = new EnumMap<>(Space.class);
-         endEffectorRateLimitedDataVectors.put(endEffector, endEffectorDataVectors);
-      }
-
-      RateLimitedVectorData3D rateLimitedVectorData = endEffectorDataVectors.get(space);
+      EnumMap<Space, RateLimitedVectorData3D> rateLimitedVectorDataSubMap = getSubSubEnumMap(endEffectorRateLimitedDataVectors,
+                                                                                             endEffector,
+                                                                                             rawDataType,
+                                                                                             Space.class);
+      RateLimitedVectorData3D rateLimitedVectorData = rateLimitedVectorDataSubMap.get(space);
 
       if (rateLimitedVectorData == null)
       {
          FrameVector3DReadOnly rawVectorData = getDataVector(endEffector, rawDataType, space, enabled);
          rateLimitedVectorData = new RateLimitedVectorData3D(endEffector.getName(), rawDataType, space, maximumRate, dt, rawVectorData, registry);
-         endEffectorDataVectors.put(space, rateLimitedVectorData);
+         rateLimitedVectorDataSubMap.put(space, rateLimitedVectorData);
          clearableData.add(rateLimitedVectorData);
       }
 
@@ -440,15 +399,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public AlphaFilteredYoMutableFrameVector3D getAlphaFilteredDataVector(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
                                                                          DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
-      EnumMap<Space, AlphaFilteredVectorData3D> endEffectorDataVectors = endEffectorFilteredDataVectors.get(endEffector);
-
-      if (endEffectorDataVectors == null)
-      {
-         endEffectorDataVectors = new EnumMap<>(Space.class);
-         endEffectorFilteredDataVectors.put(endEffector, endEffectorDataVectors);
-      }
-
-      AlphaFilteredVectorData3D alphaFilteredVectorData = endEffectorDataVectors.get(space);
+      EnumMap<Space, AlphaFilteredVectorData3D> alphaFilteredVectorDataSubMap = getSubSubEnumMap(endEffectorFilteredDataVectors,
+                                                                                                 endEffector,
+                                                                                                 rawDataType,
+                                                                                                 Space.class);
+      AlphaFilteredVectorData3D alphaFilteredVectorData = alphaFilteredVectorDataSubMap.get(space);
 
       if (alphaFilteredVectorData == null)
       {
@@ -460,7 +415,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                  dt,
                                                                  rawVectorData,
                                                                  registry);
-         endEffectorDataVectors.put(space, alphaFilteredVectorData);
+         alphaFilteredVectorDataSubMap.put(space, alphaFilteredVectorData);
          clearableData.add(alphaFilteredVectorData);
       }
 
@@ -726,13 +681,6 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public void clearUnusedData()
    {
-      for (int i = 0; i < clearableDataOld.size(); i++)
-      {
-         Pair<? extends Clearable, List<YoBoolean>> pair = clearableDataOld.get(i);
-         if (!hasData(pair.getRight()))
-            pair.getLeft().setToNaN();
-      }
-
       for (int i = 0; i < clearableData.size(); i++)
       {
          clearableData.get(i).clearIfInactive();
@@ -824,18 +772,26 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return true;
    }
 
-   private static boolean hasData(List<YoBoolean> enabledList)
-   {
-      for (int i = 0; i < enabledList.size(); i++)
-      {
-         if (enabledList.get(i).getBooleanValue())
-            return true;
-      }
-      return false;
-   }
-
    public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
    {
       return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
+   }
+
+   @SuppressWarnings("unchecked")
+   private static <K, E1 extends Enum<E1>, E2 extends Enum<E2>, V> EnumMap<E2, V> getSubSubEnumMap(Map<K, EnumMap<E1, EnumMap<E2, V>>> enclosingMap, K key1,
+                                                                                                   E1 key2, Class<E2> subSubMapEnumType)
+   {
+      return getSubEnumMap(getSubEnumMap(enclosingMap, key1, (Class<E1>) key2.getClass()), key2, subSubMapEnumType);
+   }
+
+   private static <K, E extends Enum<E>, V> EnumMap<E, V> getSubEnumMap(Map<K, EnumMap<E, V>> enclosingMap, K key, Class<E> subMapEnumType)
+   {
+      EnumMap<E, V> subMap = enclosingMap.get(key);
+      if (subMap == null)
+      {
+         subMap = new EnumMap<>(subMapEnumType);
+         enclosingMap.put(key, subMap);
+      }
+      return subMap;
    }
 }
