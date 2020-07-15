@@ -8,7 +8,11 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -23,6 +27,7 @@ import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.jOctoMap.tools.OcTreeNearestNeighborTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -45,25 +50,29 @@ public class SLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition, double minimumDepth, double maximumDepth)
+   public static Scan toScan(Point3DReadOnly[] points, Point3DReadOnly[] pointsToSensorFrame, RigidBodyTransformReadOnly sensorPose, NormalOcTree map,
+                             double windowMargin)
    {
-      PointCloud pointCloud = new PointCloud();
+      if (points.length != pointsToSensorFrame.length)
+      {
+         LogTools.error("size of point cloud are different " + points.length + " " + pointsToSensorFrame.length);
+         return null;
+      }
 
-      double minimumSquared = minimumDepth * minimumDepth;
-      double maximumSquared = maximumDepth * maximumDepth;
+      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(map, sensorPose);
+      PointCloud pointCloud = new PointCloud();
 
       for (int i = 0; i < points.length; i++)
       {
-         double x = points[i].getX();
-         double y = points[i].getY();
-         double z = points[i].getZ();
-         double depthSquared = (x - sensorPosition.getX()) * (x - sensorPosition.getX()) + (y - sensorPosition.getY()) * (y - sensorPosition.getY())
-               + (z - sensorPosition.getZ()) * (z - sensorPosition.getZ());
-
-         if (minimumSquared < depthSquared && depthSquared < maximumSquared)
+         if (windowForMap.isPointInside(pointsToSensorFrame[i].getX(), pointsToSensorFrame[i].getY(), -windowMargin))
+         {
+            double x = points[i].getX();
+            double y = points[i].getY();
+            double z = points[i].getZ();
             pointCloud.add(x, y, z);
+         }
       }
-      return new Scan(new Point3D(sensorPosition), pointCloud);
+      return new Scan(new Point3D(sensorPose.getTranslation()), pointCloud);
    }
 
    public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
@@ -75,6 +84,15 @@ public class SLAMTools
       }
 
       return convertedPoints;
+   }
+
+   public static Plane3D createConvertedSurfaceElementToSensorPose(RigidBodyTransformReadOnly sensorPose, Plane3DReadOnly surfaceElement)
+   {
+      Plane3D convertedSurfel = new Plane3D();
+      sensorPose.inverseTransform(surfaceElement.getPoint(), convertedSurfel.getPoint());
+      sensorPose.inverseTransform(surfaceElement.getNormal(), convertedSurfel.getNormal());
+
+      return convertedSurfel;
    }
 
    public static Point3D createConvertedPointToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly point)
@@ -196,7 +214,7 @@ public class SLAMTools
       return rawData;
    }
 
-   public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize)
+   public static double computeDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
@@ -204,12 +222,58 @@ public class SLAMTools
 
       MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
 
-      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), octree.getResolution(), node ->
+      double resolution = octree.getResolution();
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), resolution * 1.5, node ->
       {
          nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), node.getHitLocationCopy().distanceSquared(point)));
       });
 
       return Math.sqrt(nearestHitDistanceSquared.getValue());
+   }
+
+   public static double computePerpendicularDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
+   {
+      OcTreeKey occupiedKey = octree.coordinateToKey(point);
+      OcTreeKey nearestKey = new OcTreeKey();
+      OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
+
+      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
+
+      double resolution = octree.getResolution();
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), resolution * 2, node ->
+      {
+         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(),
+                                                     EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, node.getHitLocationCopy(), node.getNormalCopy())));
+      });
+
+      return nearestHitDistanceSquared.getValue();
+   }
+
+   public static double computeBoundedPerpendicularDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point, double bound)
+   {
+      OcTreeKey occupiedKey = octree.coordinateToKey(point);
+      OcTreeKey nearestKey = new OcTreeKey();
+      OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
+
+      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
+
+      double resolution = octree.getResolution();
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), resolution * 2, node ->
+      {
+         double linearDistance = point.distance(node.getHitLocationCopy());
+
+         double distance = linearDistance;
+
+         if (linearDistance < bound)
+         {
+            double distanceToSurfel = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, node.getHitLocationCopy(), node.getNormalCopy());
+            distance = distanceToSurfel;
+         }
+
+         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), distance));
+      });
+
+      return nearestHitDistanceSquared.getValue();
    }
 
    /**
@@ -317,8 +381,7 @@ public class SLAMTools
       return sourcePoints;
    }
 
-   public static int countNumberOfInliers(NormalOcTree octree, RigidBodyTransformReadOnly sensorPoseToWorld, Point3DReadOnly[] sourcePointsToSensor,
-                                          int maximumSearchingSize)
+   public static int countNumberOfInliers(NormalOcTree octree, RigidBodyTransformReadOnly sensorPoseToWorld, Point3DReadOnly[] sourcePointsToSensor)
    {
       int numberOfInliers = 0;
       Point3D newSourcePointToWorld = new Point3D();
@@ -327,7 +390,7 @@ public class SLAMTools
          newSourcePointToWorld.set(sourcePoint);
          sensorPoseToWorld.transform(newSourcePointToWorld);
 
-         double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumSearchingSize);
+         double distance = SLAMTools.computeDistancePointToNormalOctree(octree, newSourcePointToWorld);
 
          if (distance >= 0)
          {

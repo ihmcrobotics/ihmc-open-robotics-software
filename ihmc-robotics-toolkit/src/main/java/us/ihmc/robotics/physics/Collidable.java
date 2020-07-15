@@ -53,6 +53,8 @@ public class Collidable
 
    private int collidableID = 0;
 
+   private FrameShapePosePredictor predictor;
+
    /**
     * Creates a new collidable that represents entirely or partially the geometry of the given
     * {@code rigidBody}.
@@ -119,6 +121,11 @@ public class Collidable
       return true;
    }
 
+   public void setFrameShapePosePredictor(FrameShapePosePredictor predictor)
+   {
+      this.predictor = predictor;
+   }
+
    /**
     * Performs a collision evaluation between this collidable and {@code other} in order to calculate
     * their closest point, separating/penetration distance, etc.
@@ -145,6 +152,32 @@ public class Collidable
       PhysicsEngineTools.evaluateShape3DShape3DCollision(shape, other.shape, resultToPack.getCollisionData());
       resultToPack.setCollidableA(this);
       resultToPack.setCollidableB(other);
+   }
+
+   /**
+    * Performs a collision evaluation between this collidable and {@code other} in order to calculate
+    * their closest point, separating/penetration distance, etc.
+    * <p>
+    * Note that this method uses the predicted poses for each collidable one {@code dt} in the future.
+    * </p>
+    * 
+    * @param dt           the integration period to use when predicting the pose of each collidable.
+    * @param other        the query. Not modified.
+    * @param resultToPack where the result of the evaluation is stored. Modified.
+    */
+   public void evaluateCollision(double dt, Collidable other, CollisionResult resultToPack)
+   {
+      PhysicsEngineTools.evaluateShape3DShape3DCollision(predictShape(dt), other.predictShape(dt), resultToPack.getCollisionData());
+      resultToPack.setCollidableA(this);
+      resultToPack.setCollidableB(other);
+   }
+
+   private FrameShape3DReadOnly predictShape(double dt)
+   {
+      if (predictor == null)
+         return shape;
+
+      return predictor.predictShape(shape, rigidBody, dt);
    }
 
    /**

@@ -19,10 +19,13 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 
 public class FlyingCollidingSpheresExperimentalSimulation
 {
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 1.0, 0., 0.0, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public FlyingCollidingSpheresExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setCoefficientOfRestitution(1.0);
 
       double radius1 = 0.2;
       double mass1 = 1.0;

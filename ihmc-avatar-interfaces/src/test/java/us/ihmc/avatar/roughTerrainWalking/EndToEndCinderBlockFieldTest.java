@@ -66,6 +66,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    }
 
    @Test
+   @Tag("fast")
    public void testWalkingOverCinderBlockField() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import java.io.IOException;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
    }
 
    @Tag("quadruped-xgait")
+   @Ignore
    @Override
    @Test
    public void testWalkingOverConsecutiveRamps() throws IOException

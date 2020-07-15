@@ -19,10 +19,14 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class BoxTeeteringEdgeToEdgeExperimentalSimulation
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.001, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public BoxTeeteringEdgeToEdgeExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setErrorReductionParameter(0.001);
+
       double boxXLength = 0.2;
       double boxYWidth = 0.12;
       double boxZHeight = 0.4;

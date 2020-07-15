@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +20,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -28,18 +31,22 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalculator
 {
-   private final YoBoolean isContactClosing;
-   private final YoFrameVector3D collisionAxis;
-   private final YoFrameVector3D accumulatedSlip;
-   private final YoFrameVector3D impulseA, impulseB;
-   private final YoFramePoint3D pointA, pointB;
-   private final YoFrameVector3D velocityRelative;
-   private final YoFrameVector3D velocityInitialA, velocityInitialB;
-   private final YoFrameVector3D velocityNoImpulseA, velocityNoImpulseB;
-   private final YoFrameVector3D velocityDueToOtherImpulseA, velocityDueToOtherImpulseB;
-   private final YoFrameVector3D velocityChangeA, velocityChangeB;
-   private final List<JointVelocityChange> jointVelocityChangeAList;
-   private final List<JointVelocityChange> jointVelocityChangeBList;
+   private final static boolean EXTRA_YOVARIABLES = false;
+
+   private YoBoolean isContactClosing;
+   private YoFrameVector3D collisionAxis;
+   private YoFrameVector3D impulseA, impulseB;
+   private YoFramePoint3D pointA, pointB;
+   private YoFixedFrameSpatialVector velocityRelative;
+   private YoFixedFrameSpatialVector velocitySolverInput;
+   private YoMatrix collisionMatrix;
+   private YoDouble collisionMatrixDet;
+   private YoFixedFrameSpatialVector velocityInitialA, velocityInitialB;
+   private YoFixedFrameSpatialVector velocityNoImpulseA, velocityNoImpulseB;
+   private YoFixedFrameSpatialVector velocityDueToOtherImpulseA, velocityDueToOtherImpulseB;
+   private YoFixedFrameSpatialVector velocityChangeA, velocityChangeB;
+   private List<JointVelocityChange> jointVelocityChangeAList;
+   private List<JointVelocityChange> jointVelocityChangeBList;
 
    public YoSingleContactImpulseCalculator(String prefix, int identifier, ReferenceFrame rootFrame, RigidBodyBasics rootBodyA,
                                            ForwardDynamicsCalculator forwardDynamicsCalculatorA, RigidBodyBasics rootBodyB,
@@ -49,45 +56,46 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 
       isContactClosing = new YoBoolean(prefix + "IsContactClosing" + identifier, registry);
       collisionAxis = new YoFrameVector3D(prefix + "CollisionAxis" + identifier, rootFrame, registry);
-      accumulatedSlip = new YoFrameVector3D(prefix + "AccumulatedSlip" + identifier, rootFrame, registry);
       pointA = new YoFramePoint3D(prefix + "PointA" + identifier, rootFrame, registry);
       pointB = new YoFramePoint3D(prefix + "PointB" + identifier, rootFrame, registry);
 
-      velocityRelative = new YoFrameVector3D(prefix + "VelocityRelative" + identifier, rootFrame, registry);
+      velocityRelative = new YoFixedFrameSpatialVector(prefix + "VelocityRelative" + identifier, rootFrame, registry);
+
+      if (EXTRA_YOVARIABLES)
+      {
+         velocitySolverInput = new YoFixedFrameSpatialVector(prefix + "VelocitySolverInput" + identifier, rootFrame, registry);
+         collisionMatrix = new YoMatrix(prefix + "CollisionMatrix" + identifier, 4, 4, registry);
+         collisionMatrixDet = new YoDouble(prefix + "CollisionMatrixDet" + identifier, registry);
+      }
 
       impulseA = new YoFrameVector3D(prefix + "ImpulseA" + identifier, rootFrame, registry);
-      velocityInitialA = new YoFrameVector3D(prefix + "VelocityInitialA" + identifier, rootFrame, registry);
-      velocityNoImpulseA = new YoFrameVector3D(prefix + "VelocityNoImpulseA" + identifier, rootFrame, registry);
-      velocityDueToOtherImpulseA = new YoFrameVector3D(prefix + "VelocityDueToOtherImpulseA" + identifier, rootFrame, registry);
-      velocityChangeA = new YoFrameVector3D(prefix + "VelocityChangeA" + identifier, rootFrame, registry);
-      jointVelocityChangeAList = SubtreeStreams.fromChildren(rootBodyA)
-                                               .map(joint -> JointVelocityChange.toJointVelocityChange(prefix, "VelocityChangeA", identifier, joint, registry))
-                                               .collect(Collectors.toList());
 
-      if (rootBodyB != null)
+      if (EXTRA_YOVARIABLES)
       {
-         impulseB = new YoFrameVector3D(prefix + "ImpulseB" + identifier, rootFrame, registry);
-         velocityInitialB = new YoFrameVector3D(prefix + "VelocityInitialB" + identifier, rootFrame, registry);
-         velocityNoImpulseB = new YoFrameVector3D(prefix + "VelocityNoImpulseB" + identifier, rootFrame, registry);
-         velocityDueToOtherImpulseB = new YoFrameVector3D(prefix + "VelocityDueToOtherImpulseB" + identifier, rootFrame, registry);
-         velocityChangeB = new YoFrameVector3D(prefix + "VelocityChangeB" + identifier, rootFrame, registry);
-         jointVelocityChangeBList = SubtreeStreams.fromChildren(rootBodyB)
-                                                  .map(joint -> JointVelocityChange.toJointVelocityChange(prefix,
-                                                                                                          "VelocityChangeB",
-                                                                                                          identifier,
-                                                                                                          joint,
-                                                                                                          registry))
+         velocityInitialA = new YoFixedFrameSpatialVector(prefix + "VelocityInitialA" + identifier, rootFrame, registry);
+         velocityNoImpulseA = new YoFixedFrameSpatialVector(prefix + "VelocityNoImpulseA" + identifier, rootFrame, registry);
+         velocityDueToOtherImpulseA = new YoFixedFrameSpatialVector(prefix + "VelocityDueToOtherImpulseA" + identifier, rootFrame, registry);
+         velocityChangeA = new YoFixedFrameSpatialVector(prefix + "VelocityChangeA" + identifier, rootFrame, registry);
+         jointVelocityChangeAList = SubtreeStreams.fromChildren(rootBodyA)
+                                                  .map(joint -> toJointVelocityChange(prefix, "VelocityChangeA", identifier, joint, registry))
                                                   .collect(Collectors.toList());
       }
-      else
+
+      if (EXTRA_YOVARIABLES)
       {
-         impulseB = null;
-         velocityInitialB = null;
-         velocityNoImpulseB = null;
-         velocityDueToOtherImpulseB = null;
-         velocityChangeB = null;
-         jointVelocityChangeBList = null;
+         if (rootBodyB != null)
+         {
+            impulseB = new YoFrameVector3D(prefix + "ImpulseB" + identifier, rootFrame, registry);
+            velocityInitialB = new YoFixedFrameSpatialVector(prefix + "VelocityInitialB" + identifier, rootFrame, registry);
+            velocityNoImpulseB = new YoFixedFrameSpatialVector(prefix + "VelocityNoImpulseB" + identifier, rootFrame, registry);
+            velocityDueToOtherImpulseB = new YoFixedFrameSpatialVector(prefix + "VelocityDueToOtherImpulseB" + identifier, rootFrame, registry);
+            velocityChangeB = new YoFixedFrameSpatialVector(prefix + "VelocityChangeB" + identifier, rootFrame, registry);
+            jointVelocityChangeBList = SubtreeStreams.fromChildren(rootBodyB)
+                                                     .map(joint -> toJointVelocityChange(prefix, "VelocityChangeB", identifier, joint, registry))
+                                                     .collect(Collectors.toList());
+         }
       }
+
       clear();
    }
 
@@ -110,31 +118,51 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 
    public void clear()
    {
-      isContactClosing.set(false);
-      collisionAxis.setToNaN();
-      accumulatedSlip.setToNaN();
+      if (isContactClosing != null)
+         isContactClosing.set(false);
+      if (collisionAxis != null)
+         collisionAxis.setToNaN();
 
-      pointA.setToNaN();
-      pointB.setToNaN();
+      if (pointA != null)
+         pointA.setToNaN();
+      if (pointB != null)
+         pointB.setToNaN();
 
-      velocityRelative.setToNaN();
+      if (velocityRelative != null)
+         velocityRelative.setToNaN();
+      if (velocitySolverInput != null)
+         velocitySolverInput.setToNaN();
 
-      impulseA.setToNaN();
-      velocityInitialA.setToNaN();
-      velocityNoImpulseA.setToNaN();
-      velocityDueToOtherImpulseA.setToNaN();
-      velocityChangeA.setToNaN();
-      jointVelocityChangeAList.forEach(JointVelocityChange::setToNaN);
+      if (collisionMatrix != null)
+         collisionMatrix.setToNaN(3, 3);
+      if (collisionMatrixDet != null)
+         collisionMatrixDet.setToNaN();
+
+      if (impulseA != null)
+         impulseA.setToNaN();
+      if (velocityInitialA != null)
+         velocityInitialA.setToNaN();
+      if (velocityNoImpulseA != null)
+         velocityNoImpulseA.setToNaN();
+      if (velocityDueToOtherImpulseA != null)
+         velocityDueToOtherImpulseA.setToNaN();
+      if (velocityChangeA != null)
+         velocityChangeA.setToNaN();
+      if (jointVelocityChangeAList != null)
+         jointVelocityChangeAList.forEach(JointVelocityChange::setToNaN);
 
       if (impulseB != null)
-      {
          impulseB.setToNaN();
+      if (velocityInitialB != null)
          velocityInitialB.setToNaN();
+      if (velocityNoImpulseB != null)
          velocityNoImpulseB.setToNaN();
+      if (velocityDueToOtherImpulseB != null)
          velocityDueToOtherImpulseB.setToNaN();
+      if (velocityChangeB != null)
          velocityChangeB.setToNaN();
+      if (jointVelocityChangeBList != null)
          jointVelocityChangeBList.forEach(JointVelocityChange::setToNaN);
-      }
    }
 
    @Override
@@ -142,13 +170,12 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    {
       super.setCollision(collisionResult);
 
-      collisionAxis.set(collisionResult.getCollisionAxisForA());
-      if (collisionResult.getAccumulatedSlipForA() != null)
-         accumulatedSlip.set(collisionResult.getAccumulatedSlipForA());
-      else
-         accumulatedSlip.setToZero();
-      pointA.setMatchingFrame(collisionResult.getPointOnARootFrame());
-      pointB.setMatchingFrame(collisionResult.getPointOnBRootFrame());
+      if (collisionAxis != null)
+         collisionAxis.set(collisionResult.getCollisionAxisForA());
+      if (pointA != null)
+         pointA.setMatchingFrame(collisionResult.getPointOnARootFrame());
+      if (pointB != null)
+         pointB.setMatchingFrame(collisionResult.getPointOnBRootFrame());
    }
 
    private final FrameVector3D mutableFrameVector = new FrameVector3D();
@@ -158,16 +185,21 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    {
       super.initialize(dt);
 
-      getContactingBodyA().getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(getPointA(), mutableFrameVector);
-      velocityInitialA.setMatchingFrame(mutableFrameVector);
-      velocityNoImpulseA.setMatchingFrame(getVelocityNoImpulseA());
+      if (velocityInitialA != null)
+      {
+         getContactingBodyA().getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(getPointA(), mutableFrameVector);
+         velocityInitialA.getLinearPart().setMatchingFrame(mutableFrameVector);
+      }
+      if (velocityNoImpulseA != null)
+         velocityNoImpulseA.setMatchingFrame(getVelocityNoImpulseA());
 
-      if (impulseB != null)
+      if (velocityInitialB != null)
       {
          getContactingBodyB().getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(getPointB(), mutableFrameVector);
-         velocityInitialB.setMatchingFrame(mutableFrameVector);
-         velocityNoImpulseB.setMatchingFrame(getVelocityNoImpulseB());
+         velocityInitialB.getLinearPart().setMatchingFrame(mutableFrameVector);
       }
+      if (velocityNoImpulseB != null)
+         velocityNoImpulseB.setMatchingFrame(getVelocityNoImpulseB());
    }
 
    @Override
@@ -175,25 +207,43 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    {
       super.finalizeImpulse();
 
-      isContactClosing.set(isContactClosing());
-      impulseA.setMatchingFrame(getImpulseA().getLinearPart());
+      if (isContactClosing != null)
+         isContactClosing.set(isContactClosing());
+      if (impulseA != null)
+         impulseA.setMatchingFrame(getImpulseA().getLinearPart());
 
-      velocityRelative.setMatchingFrame(getVelocityRelative());
-      velocityDueToOtherImpulseA.setMatchingFrame(getVelocityDueToOtherImpulseA());
+      if (velocityRelative != null)
+         velocityRelative.setMatchingFrame(getVelocityRelative());
+      if (velocitySolverInput != null)
+         velocitySolverInput.setMatchingFrame(getVelocitySolverInput());
+      if (collisionMatrix != null)
+         collisionMatrix.set(getCollisionMatrix());
+      if (collisionMatrixDet != null)
+         collisionMatrixDet.set(CommonOps_DDRM.det(getCollisionMatrix()));
+      if (velocityDueToOtherImpulseA != null)
+         velocityDueToOtherImpulseA.setMatchingFrame(getVelocityDueToOtherImpulseA());
 
-      velocityChangeA.setMatchingFrame(getResponseCalculatorA().getTwistChangeProvider().getLinearVelocityOfBodyFixedPoint(getContactingBodyA(), getPointA()));
+      if (velocityChangeA != null)
+         velocityChangeA.getLinearPart().setMatchingFrame(getResponseCalculatorA().getTwistChangeProvider()
+                                                                                  .getLinearVelocityOfBodyFixedPoint(getContactingBodyA(), getPointA()));
 
-      if (getJointVelocityChange(0) != null)
-         jointVelocityChangeAList.forEach(holder -> holder.updateVelocity(getResponseCalculatorA()));
-      else
-         jointVelocityChangeAList.forEach(JointVelocityChange::setToZero);
+      if (jointVelocityChangeAList != null)
+      {
+         if (getJointVelocityChange(0) != null)
+            jointVelocityChangeAList.forEach(holder -> holder.updateVelocity(getResponseCalculatorA()));
+         else
+            jointVelocityChangeAList.forEach(JointVelocityChange::setToZero);
+      }
 
       if (impulseB != null)
-      {
          impulseB.setMatchingFrame(getImpulseB().getLinearPart());
+      if (velocityDueToOtherImpulseB != null)
          velocityDueToOtherImpulseB.setMatchingFrame(getVelocityDueToOtherImpulseB());
-         velocityChangeB.setMatchingFrame(getResponseCalculatorB().getTwistChangeProvider().getLinearVelocityOfBodyFixedPoint(getContactingBodyB(),
-                                                                                                                              getPointB()));
+      if (velocityChangeB != null)
+         velocityChangeB.getLinearPart().setMatchingFrame(getResponseCalculatorB().getTwistChangeProvider()
+                                                                                  .getLinearVelocityOfBodyFixedPoint(getContactingBodyB(), getPointB()));
+      if (jointVelocityChangeBList != null)
+      {
          if (getJointVelocityChange(1) != null)
             jointVelocityChangeBList.forEach(holder -> holder.updateVelocity(getResponseCalculatorB()));
          else
@@ -201,18 +251,18 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       }
    }
 
+   private static JointVelocityChange toJointVelocityChange(String prefix, String suffix, int identifier, JointReadOnly joint, YoVariableRegistry registry)
+   {
+      if (joint instanceof SixDoFJointReadOnly)
+         return new SixDoFJointVelocityChange(prefix, suffix, identifier, (SixDoFJointReadOnly) joint, registry);
+      else if (joint instanceof OneDoFJointReadOnly)
+         return new OneDoFJointVelocityChange(prefix, suffix, identifier, (OneDoFJointReadOnly) joint, registry);
+      else
+         throw new IllegalStateException("Unexpected joint type: " + joint.getClass().getSimpleName());
+   }
+
    private static interface JointVelocityChange
    {
-      public static JointVelocityChange toJointVelocityChange(String prefix, String suffix, int identifier, JointReadOnly joint, YoVariableRegistry registry)
-      {
-         if (joint instanceof SixDoFJointReadOnly)
-            return new SixDoFJointVelocityChange(prefix, suffix, identifier, (SixDoFJointReadOnly) joint, registry);
-         else if (joint instanceof OneDoFJointReadOnly)
-            return new OneDoFJointVelocityChange(prefix, suffix, identifier, (OneDoFJointReadOnly) joint, registry);
-         else
-            throw new IllegalStateException("Unexpected joint type: " + joint.getClass().getSimpleName());
-      }
-
       void setToZero();
 
       void setToNaN();

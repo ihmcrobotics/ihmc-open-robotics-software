@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -30,7 +29,6 @@ public class RandomICPSLAM extends SLAMBasics
    public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
-   private final AtomicBoolean enableNormalEstimation = new AtomicBoolean(true);
 
    private final GradientDescentModule optimizer;
    private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
@@ -40,7 +38,6 @@ public class RandomICPSLAM extends SLAMBasics
    private static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    private static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
-   private final AtomicDouble latestComputationTime = new AtomicDouble();
    private Point3D[] sourcePointsToWorld;
 
    public static boolean ENABLE_YAW_CORRECTION = false;
@@ -77,44 +74,6 @@ public class RandomICPSLAM extends SLAMBasics
       optimizer.setStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
       optimizer.setReducingStepSizeRatio(2);
-
-      octree.enableParallelComputationForNormals(true);
-      octree.enableParallelInsertionOfMisses(true);
-      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
-
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
-      octree.setNormalEstimationParameters(normalEstimationParameters);
-   }
-
-   private void insertNewPointCloud(SLAMFrame frame)
-   {
-      Point3DReadOnly[] pointCloud = frame.getPointCloud();
-      RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
-
-      ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = getLatestFrame().getPointCloud().length;
-
-      scanCollection.setSubSampleSize(numberOfPoints);
-      RandomICPSLAMParameters parameters = this.parameters.get();
-      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), parameters.getMinimumDepth(), parameters.getMaximumDepth()));
-
-      octree.insertScanCollection(scanCollection, false);
-   }
-
-   public void clearNormals()
-   {
-      octree.clearNormals();
-   }
-
-   public void updateOcTree()
-   {
-      octree.updateNormals();
-   }
-
-   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
-   {
-      octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
    @Override
@@ -181,8 +140,7 @@ public class RandomICPSLAM extends SLAMBasics
          {
             int numberOfInliers = SLAMTools.countNumberOfInliers(octree,
                                                                  transformWorldToSensorPose,
-                                                                 sourcePointsToSensor,
-                                                                 parameters.getMaximumICPSearchingSize());
+                                                                 sourcePointsToSensor);
             if (numberOfInliers > parameters.getMinimumInliersRatioOfKeyFrame() * sourcePointsToSensor.length)
             {
                if (DEBUG)
@@ -194,7 +152,6 @@ public class RandomICPSLAM extends SLAMBasics
             optimizer.redefineModule(costFunction);
             optimizer.setStepSize(-1.0);
             int run = optimizer.run();
-            latestComputationTime.set((double) Math.round(optimizer.getComputationTime() * 100) / 100);
             if (DEBUG)
                System.out.println("optimization result # [" + run + "], #" + optimizer.getComputationTime() + " sec # " + "Init Q: " + initialQuery
                      + ", Opt Q: " + optimizer.getOptimalQuery());
@@ -215,11 +172,6 @@ public class RandomICPSLAM extends SLAMBasics
             return transformer;
          }
       }
-   }
-
-   public double getComputationTimeForLatestFrame()
-   {
-      return latestComputationTime.get();
    }
 
    public Point3DReadOnly[] getSourcePointsToWorldLatestFrame()
@@ -282,7 +234,7 @@ public class RandomICPSLAM extends SLAMBasics
             newSensorPose.transform(newSourcePointToWorld);
 
             int maximumICPSearchingSize = parameters.get().getMaximumICPSearchingSize();
-            double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumICPSearchingSize);
+            double distance = SLAMTools.computeDistancePointToNormalOctree(octree, newSourcePointToWorld);
 
             if (distance < 0)
             {
