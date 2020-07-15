@@ -51,6 +51,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       runTest(start, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
    }
 
+   @Disabled
    @Test
    public void testLongStep()
    {
