@@ -21,8 +21,6 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
    private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<SurfaceElementICPSLAMParameters>(new SurfaceElementICPSLAMParameters());
 
-   private final SLAMHistory history = null;
-
    public SurfaceElementICPSLAM(double octreeResolution)
    {
       super(octreeResolution);

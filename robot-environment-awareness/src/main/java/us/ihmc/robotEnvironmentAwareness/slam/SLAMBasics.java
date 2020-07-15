@@ -23,6 +23,8 @@ public class SLAMBasics implements SLAMInterface
    private final AtomicInteger mapSize = new AtomicInteger();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
+   
+   private final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
 
    public SLAMBasics(double octreeResolution)
    {
@@ -67,16 +69,16 @@ public class SLAMBasics implements SLAMInterface
       SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
 
       long startTime = System.nanoTime();
-      RigidBodyTransformReadOnly optimizedMultiplier = computeFrameCorrectionTransformer(frame);
+      RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);
       latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
 
-      if (optimizedMultiplier == null)
+      if (driftCorrectionTransformer == null)
       {
          return false;
       }
       else
       {
-         frame.updateOptimizedCorrection(optimizedMultiplier);
+         frame.updateOptimizedCorrection(driftCorrectionTransformer);
          setLatestFrame(frame);
          insertNewPointCloud(frame);
 

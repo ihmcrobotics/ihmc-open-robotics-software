@@ -23,6 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
 {
+   private final Long timestamp;
    private final SLAMFrame previousFrame;
 
    /**
@@ -53,6 +54,7 @@ public class SLAMFrame
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {
+      timestamp = message.getTimestamp();
       previousFrame = null;
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
@@ -71,6 +73,7 @@ public class SLAMFrame
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
+      timestamp = message.getTimestamp();
       previousFrame = frame;
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
@@ -212,6 +215,11 @@ public class SLAMFrame
          return true;
       else
          return false;
+   }
+   
+   public Long getTimeStamp()
+   {
+      return timestamp;
    }
 
    public SLAMFrame getPreviousFrame()
