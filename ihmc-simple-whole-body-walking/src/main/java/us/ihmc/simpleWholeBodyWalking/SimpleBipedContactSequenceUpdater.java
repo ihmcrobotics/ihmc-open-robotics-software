@@ -16,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -95,8 +97,9 @@ public class SimpleBipedContactSequenceUpdater implements ContactSequenceProvide
       return contactSequenceInAbsoluteTime;
    }
 
-   public void update(List<? extends BipedTimedStep> stepSequence, List<RobotSide> currentFeetInContact, double currentTime)
+   public void update(List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, List<RobotSide> currentFeetInContact, double currentTime)
    {
+      
       // initialize contact state and sole positions
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -108,7 +111,7 @@ public class SimpleBipedContactSequenceUpdater implements ContactSequenceProvide
          feetInContact.add(currentFeetInContact.get(footIndex));
       }
 
-      BipedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitionsInAbsoluteTime, currentTime, stepSequence, stepsToConsider);
+      BipedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitionsInAbsoluteTime, currentTime, footstepList, footstepTimingList, stepsToConsider);
       BipedContactSequenceTools.trimPastContactSequences(contactSequenceInAbsoluteTime, currentTime, currentFeetInContact, solePoses);
 
       computeContactPhasesFromStepTransitionsOther();
@@ -352,4 +355,5 @@ public class SimpleBipedContactSequenceUpdater implements ContactSequenceProvide
 
       return true;
    }
+   
 }
