@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
@@ -7,61 +9,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface FeedbackControllerDataReadOnly
 {
-   public enum Type
-   {
-      DESIRED("Desired"),
-      CURRENT("Current"),
-      FEEDFORWARD("FeedForward"),
-      FEEDBACK("Feedback"),
-      ACHIEVED("Achieved"),
-      ERROR("Error"),
-      ERROR_CUMULATED("ErrorCumulated"),
-      ERROR_INTEGRATED("ErrorIntegrated");
-
-      private final String name;
-
-      private Type(String name)
-      {
-         this.name = name;
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-   }
-
-   public enum Space
-   {
-      POSITION("Position"),
-      ORIENTATION("Orientation"),
-      ROTATION_VECTOR("RotationVector"),
-      LINEAR_VELOCITY("LinearVelocity"),
-      ANGULAR_VELOCITY("AngularVelocity"),
-      LINEAR_ACCELERATION("LinearAcceleration"),
-      ANGULAR_ACCELERATION("AngularAcceleration"),
-      LINEAR_FORCE("LinearForce"),
-      ANGULAR_TORQUE("AngularTorque");
-
-      private final String name;
-
-      private Space(String name)
-      {
-         this.name = name;
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-
-      @Override
-      public String toString()
-      {
-         return name;
-      }
-   }
-
    /**
    * Retrieves if possible the position data about the center of mass.
     * <p>
