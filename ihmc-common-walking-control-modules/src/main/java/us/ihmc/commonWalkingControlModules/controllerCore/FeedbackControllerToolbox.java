@@ -89,7 +89,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       parentRegistry.addChild(registry);
    }
 
-   private SingleFeedbackControllerDataPool getCenterOfMassDataPool()
+   private SingleFeedbackControllerDataPool getOrCreateCenterOfMassDataPool()
    {
       if (centerOfMassDataPool == null)
       {
@@ -106,9 +106,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoMutableFramePoint3D} matching the search criterion.
     */
-   public YoMutableFramePoint3D getCenterOfMassPosition(Type type, YoBoolean enabled)
+   public YoMutableFramePoint3D getOrCreateCenterOfMassPositionData(Type type, YoBoolean enabled)
    {
-      PositionData3D positionData = getCenterOfMassDataPool().getPositionData(type);
+      PositionData3D positionData = getOrCreateCenterOfMassDataPool().getOrCreatePositionData(type);
       positionData.addActiveFlag(enabled);
       return positionData;
    }
@@ -121,9 +121,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoMutableFrameVector3D} matching the search criteria.
     */
-   public YoMutableFrameVector3D getCenterOfMassDataVector(Type type, Space space, YoBoolean enabled)
+   public YoMutableFrameVector3D getOrCreateCenterOfMassVectorData(Type type, Space space, YoBoolean enabled)
    {
-      VectorData3D vectorData = getCenterOfMassDataPool().getVectorData(type, space);
+      VectorData3D vectorData = getOrCreateCenterOfMassDataPool().getOrCreateVectorData(type, space);
       vectorData.addActiveFlag(enabled);
       return vectorData;
    }
@@ -143,10 +143,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
     * @return the unique {@code AlphaFilteredYoMutableFrameVector3D} matching the search criteria.
     */
-   public AlphaFilteredYoMutableFrameVector3D getCenterOfMassAlphaFilteredDataVector(Type rawDataType, Space space, double dt,
-                                                                                     DoubleProvider breakFrequencyProvider, YoBoolean enabled)
+   public AlphaFilteredYoMutableFrameVector3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType, Space space, double dt,
+                                                                                             DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
-      AlphaFilteredVectorData3D filteredVectorData = getCenterOfMassDataPool().getAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
+      AlphaFilteredVectorData3D filteredVectorData = getOrCreateCenterOfMassDataPool().getOrCreateAlphaFilteredVectorData(rawDataType,
+                                                                                                                          space,
+                                                                                                                          breakFrequencyProvider,
+                                                                                                                          dt);
       filteredVectorData.addActiveFlag(enabled);
       return filteredVectorData;
    }
@@ -165,10 +168,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoMutableFrameVector3D} matching the search criteria.
     */
-   public RateLimitedYoMutableFrameVector3D getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate,
-                                                                                 YoBoolean enabled)
+   public RateLimitedYoMutableFrameVector3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType, Space space, double dt, YoDouble maximumRate,
+                                                                                         YoBoolean enabled)
    {
-      RateLimitedVectorData3D rateLimitedVectorData = getCenterOfMassDataPool().getRateLimitedVectorData(rawDataType, space, maximumRate, dt);
+      RateLimitedVectorData3D rateLimitedVectorData = getOrCreateCenterOfMassDataPool().getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
       rateLimitedVectorData.addActiveFlag(enabled);
       return rateLimitedVectorData;
    }
@@ -180,12 +183,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
     */
-   public YoPID3DGains getCenterOfMassGains(boolean useIntegrator)
+   public YoPID3DGains getOrCreateCenterOfMassGains(boolean useIntegrator)
    {
-      return getCenterOfMassDataPool().getPositionGains(useIntegrator);
+      return getOrCreateCenterOfMassDataPool().getOrCreatePositionGains(useIntegrator);
    }
 
-   private SingleFeedbackControllerDataPool getEndEffectorDataPool(RigidBodyBasics endEffector)
+   private SingleFeedbackControllerDataPool getOrCreateEndEffectorDataPool(RigidBodyBasics endEffector)
    {
       SingleFeedbackControllerDataPool endEffectorDataPool = endEffectorDataPoolMap.get(endEffector);
       if (endEffectorDataPool == null)
@@ -212,9 +215,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type        the type of the data to retrieve.
     * @return the unique {@code YoMutableFramePoint3D} matching the search criteria.
     */
-   public YoMutableFramePoint3D getPosition(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
+   public YoMutableFramePoint3D getOrCreatePositionData(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      PositionData3D positionData = getEndEffectorDataPool(endEffector).getPositionData(type);
+      PositionData3D positionData = getOrCreateEndEffectorDataPool(endEffector).getOrCreatePositionData(type);
       positionData.addActiveFlag(enabled);
       return positionData;
    }
@@ -234,9 +237,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type        the type of the data to retrieve.
     * @return the unique {@code YoMutableFrameQuaternion} matching the search criteria.
     */
-   public YoMutableFrameQuaternion getOrientation(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
+   public YoMutableFrameQuaternion getOrCreateOrientationData(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      QuaternionData3D orientationData = getEndEffectorDataPool(endEffector).getOrientationData(type);
+      QuaternionData3D orientationData = getOrCreateEndEffectorDataPool(endEffector).getOrCreateOrientationData(type);
       orientationData.addActiveFlag(enabled);
       return orientationData;
    }
@@ -256,9 +259,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param space       the space of the data to retrieve.
     * @return the unique {@code YoMutableFrameVector3D} matching the search criteria.
     */
-   public YoMutableFrameVector3D getDataVector(RigidBodyBasics endEffector, Type type, Space space, YoBoolean enabled)
+   public YoMutableFrameVector3D getOrCreateVectorData(RigidBodyBasics endEffector, Type type, Space space, YoBoolean enabled)
    {
-      VectorData3D vectorData = getEndEffectorDataPool(endEffector).getVectorData(type, space);
+      VectorData3D vectorData = getOrCreateEndEffectorDataPool(endEffector).getOrCreateVectorData(type, space);
       vectorData.addActiveFlag(enabled);
       return vectorData;
    }
@@ -284,10 +287,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoMutableFrameVector3D} matching the search criteria.
     */
-   public RateLimitedYoMutableFrameVector3D getRateLimitedDataVector(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
-                                                                     YoDouble maximumRate, YoBoolean enabled)
+   public RateLimitedYoMutableFrameVector3D getOrCreateRateLimitedVectorData(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
+                                                                             YoDouble maximumRate, YoBoolean enabled)
    {
-      RateLimitedVectorData3D rateLimitedVectorData = getEndEffectorDataPool(endEffector).getRateLimitedVectorData(rawDataType, space, maximumRate, dt);
+      RateLimitedVectorData3D rateLimitedVectorData = getOrCreateEndEffectorDataPool(endEffector).getOrCreateRateLimitedVectorData(rawDataType,
+                                                                                                                                   space,
+                                                                                                                                   maximumRate,
+                                                                                                                                   dt);
       rateLimitedVectorData.addActiveFlag(enabled);
       return rateLimitedVectorData;
    }
@@ -314,13 +320,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
     * @return the unique {@code AlphaFilteredYoMutableFrameVector3D} matching the search criteria.
     */
-   public AlphaFilteredYoMutableFrameVector3D getAlphaFilteredDataVector(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
-                                                                         DoubleProvider breakFrequencyProvider, YoBoolean enabled)
+   public AlphaFilteredYoMutableFrameVector3D getOrCreateAlphaFilteredVectorData(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
+                                                                                 DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
-      AlphaFilteredVectorData3D alphaFilteredVectorData = getEndEffectorDataPool(endEffector).getAlphaFilteredVectorData(rawDataType,
-                                                                                                                         space,
-                                                                                                                         breakFrequencyProvider,
-                                                                                                                         dt);
+      AlphaFilteredVectorData3D alphaFilteredVectorData = getOrCreateEndEffectorDataPool(endEffector).getOrCreateAlphaFilteredVectorData(rawDataType,
+                                                                                                                                         space,
+                                                                                                                                         breakFrequencyProvider,
+                                                                                                                                         dt);
       alphaFilteredVectorData.addActiveFlag(enabled);
       return alphaFilteredVectorData;
    }
@@ -333,9 +339,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type        the type of the data to retrieve.
     * @return the unique {@code YoMutableFramePose3D} matching the search criteria.
     */
-   public YoMutableFramePose3D getPose(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
+   public YoMutableFramePose3D getOrCreatePoseData(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      return new YoMutableFramePose3D(getPosition(endEffector, type, enabled), getOrientation(endEffector, type, enabled));
+      return new YoMutableFramePose3D(getOrCreatePositionData(endEffector, type, enabled), getOrCreateOrientationData(endEffector, type, enabled));
    }
 
    /**
@@ -347,10 +353,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type        the type of the data to retrieve.
     * @return the unique {@code YoMutableFrameSpatialVector} matching the search criteria.
     */
-   public YoMutableFrameSpatialVector getVelocity(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
+   public YoMutableFrameSpatialVector getOrCreateSpatialVelocityData(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      return new YoMutableFrameSpatialVector(getDataVector(endEffector, type, Space.ANGULAR_VELOCITY, enabled),
-                                             getDataVector(endEffector, type, Space.LINEAR_VELOCITY, enabled));
+      return new YoMutableFrameSpatialVector(getOrCreateVectorData(endEffector, type, Space.ANGULAR_VELOCITY, enabled),
+                                             getOrCreateVectorData(endEffector, type, Space.LINEAR_VELOCITY, enabled));
    }
 
    /**
@@ -362,10 +368,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type        the type of the data to retrieve.
     * @return the unique {@code YoMutableFrameSpatialVector} matching the search criteria.
     */
-   public YoMutableFrameSpatialVector getAcceleration(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
+   public YoMutableFrameSpatialVector getOrCreateSpatialAccelerationData(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      return new YoMutableFrameSpatialVector(getDataVector(endEffector, type, Space.ANGULAR_ACCELERATION, enabled),
-                                             getDataVector(endEffector, type, Space.LINEAR_ACCELERATION, enabled));
+      return new YoMutableFrameSpatialVector(getOrCreateVectorData(endEffector, type, Space.ANGULAR_ACCELERATION, enabled),
+                                             getOrCreateVectorData(endEffector, type, Space.LINEAR_ACCELERATION, enabled));
    }
 
    /**
@@ -377,10 +383,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type        the type of the data to retrieve.
     * @return the unique {@code YoMutableFrameSpatialVector} matching the search criteria.
     */
-   public YoMutableFrameSpatialVector getWrench(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
+   public YoMutableFrameSpatialVector getOrCreateSpatialForceData(RigidBodyBasics endEffector, Type type, YoBoolean enabled)
    {
-      return new YoMutableFrameSpatialVector(getDataVector(endEffector, type, Space.ANGULAR_TORQUE, enabled),
-                                             getDataVector(endEffector, type, Space.LINEAR_FORCE, enabled));
+      return new YoMutableFrameSpatialVector(getOrCreateVectorData(endEffector, type, Space.ANGULAR_TORQUE, enabled),
+                                             getOrCreateVectorData(endEffector, type, Space.LINEAR_FORCE, enabled));
    }
 
    /**
@@ -399,11 +405,22 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumLinearRate  the maximum linear rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoMutableSpatialVector getRateLimitedVelocity(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
-                                                                   YoDouble maximumLinearRate, YoBoolean enabled)
+   public RateLimitedYoMutableSpatialVector getOrCreateRateLimitedSpatialVelocityData(RigidBodyBasics endEffector, Type rawDataType, double dt,
+                                                                                      YoDouble maximumAngularRate, YoDouble maximumLinearRate,
+                                                                                      YoBoolean enabled)
    {
-      return new RateLimitedYoMutableSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate, enabled),
-                                                   getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate, enabled));
+      return new RateLimitedYoMutableSpatialVector(getOrCreateRateLimitedVectorData(endEffector,
+                                                                                    rawDataType,
+                                                                                    Space.ANGULAR_VELOCITY,
+                                                                                    dt,
+                                                                                    maximumAngularRate,
+                                                                                    enabled),
+                                                   getOrCreateRateLimitedVectorData(endEffector,
+                                                                                    rawDataType,
+                                                                                    Space.LINEAR_VELOCITY,
+                                                                                    dt,
+                                                                                    maximumLinearRate,
+                                                                                    enabled));
    }
 
    /**
@@ -424,22 +441,22 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     *                                  error. Not modified.
     * @return the unique {@code AlphaFilteredYoMutableFrameSpatialVector} matching the search criteria.
     */
-   public AlphaFilteredYoMutableFrameSpatialVector getAlphaFilteredVelocity(RigidBodyBasics endEffector, Type rawDataType, double dt,
-                                                                            DoubleProvider breakFrequencyAngularPart, DoubleProvider breakFrequencyLinearPart,
-                                                                            YoBoolean enabled)
+   public AlphaFilteredYoMutableFrameSpatialVector getOrCreateAlphaFilteredSpatialVelocityData(RigidBodyBasics endEffector, Type rawDataType, double dt,
+                                                                                               DoubleProvider breakFrequencyAngularPart,
+                                                                                               DoubleProvider breakFrequencyLinearPart, YoBoolean enabled)
    {
-      return new AlphaFilteredYoMutableFrameSpatialVector(getAlphaFilteredDataVector(endEffector,
-                                                                                     rawDataType,
-                                                                                     Space.ANGULAR_VELOCITY,
-                                                                                     dt,
-                                                                                     breakFrequencyAngularPart,
-                                                                                     enabled),
-                                                          getAlphaFilteredDataVector(endEffector,
-                                                                                     rawDataType,
-                                                                                     Space.LINEAR_VELOCITY,
-                                                                                     dt,
-                                                                                     breakFrequencyLinearPart,
-                                                                                     enabled));
+      return new AlphaFilteredYoMutableFrameSpatialVector(getOrCreateAlphaFilteredVectorData(endEffector,
+                                                                                             rawDataType,
+                                                                                             Space.ANGULAR_VELOCITY,
+                                                                                             dt,
+                                                                                             breakFrequencyAngularPart,
+                                                                                             enabled),
+                                                          getOrCreateAlphaFilteredVectorData(endEffector,
+                                                                                             rawDataType,
+                                                                                             Space.LINEAR_VELOCITY,
+                                                                                             dt,
+                                                                                             breakFrequencyLinearPart,
+                                                                                             enabled));
    }
 
    /**
@@ -458,21 +475,22 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumLinearRate  the maximum linear rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoMutableSpatialVector getRateLimitedAcceleration(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
-                                                                       YoDouble maximumLinearRate, YoBoolean enabled)
+   public RateLimitedYoMutableSpatialVector getOrCreateRateLimitedSpatialAccelerationData(RigidBodyBasics endEffector, Type rawDataType, double dt,
+                                                                                          YoDouble maximumAngularRate, YoDouble maximumLinearRate,
+                                                                                          YoBoolean enabled)
    {
-      return new RateLimitedYoMutableSpatialVector(getRateLimitedDataVector(endEffector,
-                                                                            rawDataType,
-                                                                            Space.ANGULAR_ACCELERATION,
-                                                                            dt,
-                                                                            maximumAngularRate,
-                                                                            enabled),
-                                                   getRateLimitedDataVector(endEffector,
-                                                                            rawDataType,
-                                                                            Space.LINEAR_ACCELERATION,
-                                                                            dt,
-                                                                            maximumLinearRate,
-                                                                            enabled));
+      return new RateLimitedYoMutableSpatialVector(getOrCreateRateLimitedVectorData(endEffector,
+                                                                                    rawDataType,
+                                                                                    Space.ANGULAR_ACCELERATION,
+                                                                                    dt,
+                                                                                    maximumAngularRate,
+                                                                                    enabled),
+                                                   getOrCreateRateLimitedVectorData(endEffector,
+                                                                                    rawDataType,
+                                                                                    Space.LINEAR_ACCELERATION,
+                                                                                    dt,
+                                                                                    maximumLinearRate,
+                                                                                    enabled));
    }
 
    /**
@@ -491,11 +509,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumLinearRate  the maximum linear rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoMutableSpatialVector getRateLimitedWrench(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
-                                                                 YoDouble maximumLinearRate, YoBoolean enabled)
+   public RateLimitedYoMutableSpatialVector getOrCreateRateLimitedSpatialForceData(RigidBodyBasics endEffector, Type rawDataType, double dt,
+                                                                                   YoDouble maximumAngularRate, YoDouble maximumLinearRate, YoBoolean enabled)
    {
-      return new RateLimitedYoMutableSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_TORQUE, dt, maximumAngularRate, enabled),
-                                                   getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_FORCE, dt, maximumLinearRate, enabled));
+      return new RateLimitedYoMutableSpatialVector(getOrCreateRateLimitedVectorData(endEffector,
+                                                                                    rawDataType,
+                                                                                    Space.ANGULAR_TORQUE,
+                                                                                    dt,
+                                                                                    maximumAngularRate,
+                                                                                    enabled),
+                                                   getOrCreateRateLimitedVectorData(endEffector,
+                                                                                    rawDataType,
+                                                                                    Space.LINEAR_FORCE,
+                                                                                    dt,
+                                                                                    maximumLinearRate,
+                                                                                    enabled));
    }
 
    /**
@@ -506,9 +534,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
-   public YoPID3DGains getOrientationGains(RigidBodyBasics endEffector, boolean useIntegrator)
+   public YoPID3DGains getOrCreateOrientationGains(RigidBodyBasics endEffector, boolean useIntegrator)
    {
-      return getEndEffectorDataPool(endEffector).getOrientationGains(useIntegrator);
+      return getOrCreateEndEffectorDataPool(endEffector).getOrCreateOrientationGains(useIntegrator);
    }
 
    /**
@@ -519,9 +547,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
-   public YoPID3DGains getPositionGains(RigidBodyBasics endEffector, boolean useIntegrator)
+   public YoPID3DGains getOrCreatePositionGains(RigidBodyBasics endEffector, boolean useIntegrator)
    {
-      return getEndEffectorDataPool(endEffector).getPositionGains(useIntegrator);
+      return getOrCreateEndEffectorDataPool(endEffector).getOrCreatePositionGains(useIntegrator);
    }
 
    /**
@@ -532,10 +560,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPIDSE3Gains} associated with the given end-effector.
     */
-   public YoPIDSE3Gains getSE3PIDGains(RigidBodyBasics endEffector, boolean useIntegrator)
+   public YoPIDSE3Gains getOrCreateSE3PIDGains(RigidBodyBasics endEffector, boolean useIntegrator)
    {
-      YoPID3DGains positionGains = getPositionGains(endEffector, useIntegrator);
-      YoPID3DGains orientationGains = getOrientationGains(endEffector, useIntegrator);
+      YoPID3DGains positionGains = getOrCreatePositionGains(endEffector, useIntegrator);
+      YoPID3DGains orientationGains = getOrCreateOrientationGains(endEffector, useIntegrator);
       return new DefaultYoPIDSE3Gains(positionGains, orientationGains);
    }
 
@@ -546,9 +574,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param endEffector the end-effector to which the control frame is associated.
     * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given end-effector.
     */
-   public YoSE3OffsetFrame getControlFrame(RigidBodyBasics endEffector)
+   public YoSE3OffsetFrame getOrCreateControlFrame(RigidBodyBasics endEffector)
    {
-      return getEndEffectorDataPool(endEffector).getControlFrame(endEffector.getBodyFixedFrame());
+      return getOrCreateEndEffectorDataPool(endEffector).getOrCreateControlFrame(endEffector.getBodyFixedFrame());
    }
 
    /**
@@ -569,7 +597,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    @Override
    public boolean getCenterOfMassPositionData(FramePoint3DBasics positionDataToPack, Type type)
    {
-      PositionData3D positionData = getCenterOfMassDataPool().positionDataMap.get(type);
+      PositionData3D positionData = getOrCreateCenterOfMassDataPool().positionDataMap.get(type);
 
       if (positionData == null || !positionData.isActive())
          return false;
@@ -581,7 +609,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    @Override
    public boolean getCenterOfMassVectorData(FrameVector3DBasics vectorDataToPack, Type type, Space space)
    {
-      EnumMap<Space, VectorData3D> endEffectorDataTyped = getCenterOfMassDataPool().vectorDataMap.get(type);
+      EnumMap<Space, VectorData3D> endEffectorDataTyped = getOrCreateCenterOfMassDataPool().vectorDataMap.get(type);
 
       if (endEffectorDataTyped == null)
          return false;
@@ -598,7 +626,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    @Override
    public boolean getPositionData(RigidBodyBasics endEffector, FramePoint3DBasics positionDataToPack, Type type)
    {
-      EnumMap<Type, PositionData3D> endEffectorData = getEndEffectorDataPool(endEffector).positionDataMap;
+      EnumMap<Type, PositionData3D> endEffectorData = getOrCreateEndEffectorDataPool(endEffector).positionDataMap;
 
       if (endEffectorData == null)
          return false;
@@ -615,7 +643,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    @Override
    public boolean getOrientationData(RigidBodyBasics endEffector, FrameQuaternionBasics orientationDataToPack, Type type)
    {
-      EnumMap<Type, QuaternionData3D> endEffectorData = getEndEffectorDataPool(endEffector).orientationDataMap;
+      EnumMap<Type, QuaternionData3D> endEffectorData = getOrCreateEndEffectorDataPool(endEffector).orientationDataMap;
 
       if (endEffectorData == null)
          return false;
@@ -632,7 +660,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    @Override
    public boolean getVectorData(RigidBodyBasics endEffector, FrameVector3DBasics vectorDataToPack, Type type, Space space)
    {
-      EnumMap<Type, EnumMap<Space, VectorData3D>> endEffectorData = getEndEffectorDataPool(endEffector).vectorDataMap;
+      EnumMap<Type, EnumMap<Space, VectorData3D>> endEffectorData = getOrCreateEndEffectorDataPool(endEffector).vectorDataMap;
 
       if (endEffectorData == null)
          return false;
@@ -654,17 +682,6 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
    {
       return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
-   }
-
-   private static <K, E extends Enum<E>, V> EnumMap<E, V> getSubEnumMap(Map<K, EnumMap<E, V>> enclosingMap, K key, Class<E> subMapEnumType)
-   {
-      EnumMap<E, V> subMap = enclosingMap.get(key);
-      if (subMap == null)
-      {
-         subMap = new EnumMap<>(subMapEnumType);
-         enclosingMap.put(key, subMap);
-      }
-      return subMap;
    }
 
    private static class SingleFeedbackControllerDataPool
@@ -697,7 +714,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          }
       }
 
-      public PositionData3D getPositionData(Type type)
+      public PositionData3D getOrCreatePositionData(Type type)
       {
          PositionData3D positionData = positionDataMap.get(type);
 
@@ -711,7 +728,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return positionData;
       }
 
-      public QuaternionData3D getOrientationData(Type type)
+      public QuaternionData3D getOrCreateOrientationData(Type type)
       {
          QuaternionData3D orientationData = orientationDataMap.get(type);
 
@@ -725,7 +742,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return orientationData;
       }
 
-      public VectorData3D getVectorData(Type type, Space space)
+      public VectorData3D getOrCreateVectorData(Type type, Space space)
       {
          EnumMap<Space, VectorData3D> vectorDataSubMap = getSubEnumMap(vectorDataMap, type, Space.class);
          VectorData3D vectorData = vectorDataSubMap.get(space);
@@ -740,14 +757,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return vectorData;
       }
 
-      public AlphaFilteredVectorData3D getAlphaFilteredVectorData(Type type, Space space, DoubleProvider breakFrequency, double dt)
+      public AlphaFilteredVectorData3D getOrCreateAlphaFilteredVectorData(Type type, Space space, DoubleProvider breakFrequency, double dt)
       {
          EnumMap<Space, AlphaFilteredVectorData3D> filteredVectorDataSubMap = getSubEnumMap(filteredVectorDataMap, type, Space.class);
          AlphaFilteredVectorData3D filteredVectorData = filteredVectorDataSubMap.get(space);
 
          if (filteredVectorData == null)
          {
-            VectorData3D rawVectorData = getVectorData(type, space);
+            VectorData3D rawVectorData = getOrCreateVectorData(type, space);
             filteredVectorData = new AlphaFilteredVectorData3D(namePrefix, type, space, breakFrequency, dt, rawVectorData, registry);
             filteredVectorDataSubMap.put(space, filteredVectorData);
             clearableData.add(filteredVectorData);
@@ -756,14 +773,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return filteredVectorData;
       }
 
-      public RateLimitedVectorData3D getRateLimitedVectorData(Type type, Space space, DoubleProvider maximumRate, double dt)
+      public RateLimitedVectorData3D getOrCreateRateLimitedVectorData(Type type, Space space, DoubleProvider maximumRate, double dt)
       {
          EnumMap<Space, RateLimitedVectorData3D> rateLimitedVectorDataSubMap = getSubEnumMap(rateLimitedVectorDataMap, type, Space.class);
          RateLimitedVectorData3D rateLimitedVectorData = rateLimitedVectorDataSubMap.get(space);
 
          if (rateLimitedVectorData == null)
          {
-            VectorData3D rawVectorData = getVectorData(type, space);
+            VectorData3D rawVectorData = getOrCreateVectorData(type, space);
             rateLimitedVectorData = new RateLimitedVectorData3D(namePrefix, type, space, maximumRate, dt, rawVectorData, registry);
             rateLimitedVectorDataSubMap.put(space, rateLimitedVectorData);
             clearableData.add(rateLimitedVectorData);
@@ -772,25 +789,36 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return rateLimitedVectorData;
       }
 
-      public YoPID3DGains getOrientationGains(boolean useIntegrator)
+      public YoPID3DGains getOrCreateOrientationGains(boolean useIntegrator)
       {
          if (orientationGains == null)
             orientationGains = new DefaultYoPID3DGains(namePrefix + "Orientation", GainCoupling.NONE, useIntegrator, registry);
          return orientationGains;
       }
 
-      public YoPID3DGains getPositionGains(boolean useIntegrator)
+      public YoPID3DGains getOrCreatePositionGains(boolean useIntegrator)
       {
          if (positionGains == null)
             positionGains = new DefaultYoPID3DGains(namePrefix + "Position", GainCoupling.NONE, useIntegrator, registry);
          return positionGains;
       }
 
-      public YoSE3OffsetFrame getControlFrame(ReferenceFrame parentFrame)
+      public YoSE3OffsetFrame getOrCreateControlFrame(ReferenceFrame parentFrame)
       {
          if (controlFrame == null)
             controlFrame = new YoSE3OffsetFrame(namePrefix + "BodyFixedControlFrame", parentFrame, registry);
          return controlFrame;
+      }
+
+      private static <K, E extends Enum<E>, V> EnumMap<E, V> getSubEnumMap(Map<K, EnumMap<E, V>> enclosingMap, K key, Class<E> subMapEnumType)
+      {
+         EnumMap<E, V> subMap = enclosingMap.get(key);
+         if (subMap == null)
+         {
+            subMap = new EnumMap<>(subMapEnumType);
+            enclosingMap.put(key, subMap);
+         }
+         return subMap;
       }
    }
 }
