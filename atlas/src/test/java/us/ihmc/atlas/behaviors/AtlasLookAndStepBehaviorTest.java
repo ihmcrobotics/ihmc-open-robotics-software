@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviors;
 
 import org.junit.jupiter.api.Test;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -8,6 +9,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -22,6 +24,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
+import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -29,6 +32,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
@@ -59,9 +64,9 @@ public class AtlasLookAndStepBehaviorTest
    private void runTheTest()
    {
       ThreadTools.startAsDaemon(this::reaModule, "REAModule");
-      ThreadTools.startAsDaemon(this::kinematicSimulation, "KinematicsSimulation");
+//      ThreadTools.startAsDaemon(this::kinematicSimulation, "KinematicsSimulation");
       Notification finishedDynamicsSimulationSetup = new Notification();
-//      ThreadTools.startAsDaemon(() -> dynamicsSimulation(finishedDynamicsSimulationSetup), "DynamicsSimulation");
+      ThreadTools.startAsDaemon(() -> dynamicsSimulation(finishedDynamicsSimulationSetup), "DynamicsSimulation");
 
       BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), createRobotModel());
       Ros2Node ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, "Helper");
@@ -72,29 +77,33 @@ public class AtlasLookAndStepBehaviorTest
       AtomicReference<String> currentState = behaviorMessager.createInput(LookAndStepBehaviorAPI.CurrentState);
       behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
 
-//      finishedDynamicsSimulationSetup.blockingPoll();
+      finishedDynamicsSimulationSetup.blockingPoll();
 
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
+      TypedNotification<Empty> reachedGoal = new ROS2Input<>(ros2Node, Empty.class, LookAndStepBehaviorAPI.REACHED_GOAL).getMessageNotification();
       goalInputPublisher.publish(new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0));
 
       Notification atTheTop = new Notification();
       Notification reachedOtherSide = new Notification();
+      RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
       PausablePeriodicThread monitorThread = new PausablePeriodicThread(
             "RobotStatusThread",
             0.5,
-            () -> monitorThread(currentState, robot.newSyncedRobot(), atTheTop, reachedOtherSide));
+            () -> monitorThread(currentState, syncedRobot, atTheTop, reachedOtherSide));
       monitorThread.start();
 
       if (VISUALIZE)
       {
-         new RobotAndMapViewer(createRobotModel(), ros2Node);
+         new LookAndStepRemoteVisualizer(createRobotModel(), ros2Node, behaviorMessager);
       }
 
-      atTheTop.blockingPoll();
+      reachedGoal.blockingPoll();
+      assertTrue(atTheTop.poll(), "Not at the top");
       LogTools.info("REACHED THE TOP");
       goalInputPublisher.publish(new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-      reachedOtherSide.blockingPoll();
+      reachedGoal.blockingPoll();
+      assertTrue(reachedOtherSide.poll(), "Not reached the other side");
       LogTools.info("REACHED OTHER SIDE");
    }
 
@@ -111,7 +120,7 @@ public class AtlasLookAndStepBehaviorTest
       {
          atTheTop.set();
       }
-      if (pelvisPose.getPosition().getX() > 6.0)
+      if (pelvisPose.getPosition().getX() > 5.5)
       {
          reachedOtherSide.set();
       }
