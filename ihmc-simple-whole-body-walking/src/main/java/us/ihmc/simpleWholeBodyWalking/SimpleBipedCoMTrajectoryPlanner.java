@@ -157,5 +157,11 @@ public class SimpleBipedCoMTrajectoryPlanner
    {
       return comTrajectoryPlanner.getDesiredVRPPosition();
    }
+
+   public List<Trajectory3D> getVRPTrajectories()
+   {
+      return ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).getVRPTrajectories();
+   }
+   
 }
 
