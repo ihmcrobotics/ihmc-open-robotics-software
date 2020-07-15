@@ -58,7 +58,7 @@ public class AtlasLookAndStepBehaviorTest
    @Test
    public void testLookAndStepOverStairs()
    {
-      assertTimeoutPreemptively(Duration.ofMinutes(10), this::runTheTest);
+      assertTimeoutPreemptively(Duration.ofMinutes(5), this::runTheTest);
    }
 
    private void runTheTest()
