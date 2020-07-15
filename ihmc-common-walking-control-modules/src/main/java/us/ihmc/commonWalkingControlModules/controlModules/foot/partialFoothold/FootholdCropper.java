@@ -32,7 +32,7 @@ import java.util.List;
 public class FootholdCropper
 {
    private static final double defaultThresholdForMeasuredCellActivation = 1.0;
-   private static final double defaultMeasuredDecayRatePerSecond = 0.001;// 0.2;
+   private static final double defaultMeasuredDecayRatePerSecond = 0.0;// 0.2;
 
    private final FootholdRotationParameters rotationParameters;
 

@@ -205,7 +205,6 @@
                         </registry>
                         <registry name="FeetManager">
                             <registry name="SupportStateParameters">
-<parameter name="avoidFootRotations" type="BooleanParameter" value="false"/>
 <parameter name="dampFootRotations" type="BooleanParameter" value="false"/>
 <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
                             </registry>
