@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.ClearableData;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FeedbackControllerData;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData3D;
@@ -63,7 +63,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final List<Pair<? extends Clearable, List<YoBoolean>>> clearableDataOld = new ArrayList<>();
-   private final List<ClearableData> clearableData = new ArrayList<>();
+   private final List<FeedbackControllerData> clearableData = new ArrayList<>();
 
    private final Map<RigidBodyBasics, EnumMap<Type, PositionData3D>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBodyBasics, EnumMap<Type, QuaternionData3D>> endEffectorOrientations = new HashMap<>();

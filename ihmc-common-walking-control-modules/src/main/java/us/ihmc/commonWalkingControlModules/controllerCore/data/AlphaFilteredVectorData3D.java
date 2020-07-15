@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class AlphaFilteredVectorData3D extends AlphaFilteredYoMutableFrameVector3D implements ClearableData
+public class AlphaFilteredVectorData3D extends AlphaFilteredYoMutableFrameVector3D implements FeedbackControllerData
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
@@ -19,7 +19,7 @@ public class AlphaFilteredVectorData3D extends AlphaFilteredYoMutableFrameVector
    public AlphaFilteredVectorData3D(String namePrefix, Type type, Space space, DoubleProvider breakFrequency, double dt, FrameVector3DReadOnly rawVector,
                                     YoVariableRegistry registry)
    {
-      super(ClearableData.createNamePrefix(namePrefix + "Filtered", type, space), "", registry, toAlpha(breakFrequency, dt), rawVector);
+      super(FeedbackControllerData.createNamePrefix(namePrefix + "Filtered", type, space), "", registry, toAlpha(breakFrequency, dt), rawVector);
 
       this.type = type;
       this.space = space;

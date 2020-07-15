@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.data;
 
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
-public interface ClearableData
+public interface FeedbackControllerData
 {
    void addActiveFlag(BooleanProvider activeFlag);
 
