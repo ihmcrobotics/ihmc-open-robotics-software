@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalTools;
@@ -42,31 +44,35 @@ public class BipedContactSequenceTools
     * WARNING: This method generates garbage.
     * </p>
     */
+   
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
-                                                             List<? extends BipedTimedStep> stepSequence, int stepsToConsider)
+                                                             List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, int stepsToConsider)
    {
       stepTransitionsToPack.clear();
-      for (int i = 0; i < Math.min(stepSequence.size(), stepsToConsider); i++)
+      for (int i = 0; i < Math.min(footstepList.size(), stepsToConsider); i++)
       {
-         BipedTimedStep step = stepSequence.get(i);
+         Footstep step = footstepList.get(i);
+         FootstepTiming stepTiming = footstepTimingList.get(i);
+         double swingStartTime = stepTiming.getExecutionStartTime() + stepTiming.getSwingStartTime();
+         double swingEndTime = swingStartTime + stepTiming.getSwingTime();
 
-         if (step.getTimeInterval().getStartTime() >= currentTime)
+         if (swingStartTime >= currentTime)
          {
             BipedStepTransition stepTransition = stepTransitionsToPack.add();
             stepTransition.reset();
 
-            stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
+            stepTransition.setTransitionTime(swingStartTime);
 
-            stepTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getGoalPose());
+            stepTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getFootstepPose());
          }
 
-         if (step.getTimeInterval().getEndTime() >= currentTime)
+         if (swingEndTime >= currentTime)
          {
             BipedStepTransition stepTransition = stepTransitionsToPack.add();
             stepTransition.reset();
 
-            stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
-            stepTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getGoalPose());
+            stepTransition.setTransitionTime(swingEndTime);
+            stepTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getFootstepPose());
          }
       }
 
@@ -144,4 +150,6 @@ public class BipedContactSequenceTools
       for (int sequence = 0; sequence < contactSequenceToPack.size(); sequence++)
          contactSequenceToPack.get(sequence).getTimeInterval().shiftInterval(shiftTime);
    }
+
+
 }
