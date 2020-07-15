@@ -58,6 +58,8 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       super.testWalkingInAForwardLeftCircle();
    }
 
+   // Flaky
+   @Disabled
    @Tag("quadruped-xgait-slow-2")
    @Override
    @Test
