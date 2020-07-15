@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.POSITION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_CUMULATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -211,8 +211,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoDesiredAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, DESIRED, isEnabled);
             yoFeedForwardAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, FEEDFORWARD, isEnabled);
             yoFeedbackAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, FEEDBACK, isEnabled);
-            rateLimitedFeedbackAcceleration = feedbackControllerToolbox.getRateLimitedAcceleration(endEffector, FEEDBACK, dt, maximumAngularRate,
-                                                                                                   maximumLinearRate, isEnabled);
+            rateLimitedFeedbackAcceleration = feedbackControllerToolbox.getRateLimitedAcceleration(endEffector,
+                                                                                                   FEEDBACK,
+                                                                                                   dt,
+                                                                                                   maximumAngularRate,
+                                                                                                   maximumLinearRate,
+                                                                                                   isEnabled);
             yoAchievedAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, ACHIEVED, isEnabled);
          }
          else
@@ -229,7 +233,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoDesiredWrench = feedbackControllerToolbox.getWrench(endEffector, DESIRED, isEnabled);
             yoFeedForwardWrench = feedbackControllerToolbox.getWrench(endEffector, FEEDFORWARD, isEnabled);
             yoFeedbackWrench = feedbackControllerToolbox.getWrench(endEffector, FEEDBACK, isEnabled);
-            rateLimitedFeedbackWrench = feedbackControllerToolbox.getRateLimitedWrench(endEffector, FEEDBACK, dt, maximumAngularRate, maximumLinearRate,
+            rateLimitedFeedbackWrench = feedbackControllerToolbox.getRateLimitedWrench(endEffector,
+                                                                                       FEEDBACK,
+                                                                                       dt,
+                                                                                       maximumAngularRate,
+                                                                                       maximumLinearRate,
                                                                                        isEnabled);
          }
          else
@@ -262,7 +270,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoFeedbackVelocity = feedbackControllerToolbox.getVelocity(endEffector, FEEDBACK, isEnabled);
          yoFeedForwardVelocity = feedbackControllerToolbox.getVelocity(endEffector, FEEDFORWARD, isEnabled);
-         rateLimitedFeedbackVelocity = feedbackControllerToolbox.getRateLimitedVelocity(endEffector, FEEDBACK, dt, maximumAngularRate, maximumLinearRate,
+         rateLimitedFeedbackVelocity = feedbackControllerToolbox.getRateLimitedVelocity(endEffector,
+                                                                                        FEEDBACK,
+                                                                                        dt,
+                                                                                        maximumAngularRate,
+                                                                                        maximumLinearRate,
                                                                                         isEnabled);
       }
       else
@@ -460,7 +472,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       ReferenceFrame trajectoryFrame = yoDesiredPose.getReferenceFrame();
 
-      feedForwardLinearAction.setIncludingFrame(yoFeedForwardWrench. getLinearPart());
+      feedForwardLinearAction.setIncludingFrame(yoFeedForwardWrench.getLinearPart());
       feedForwardAngularAction.setIncludingFrame(yoFeedForwardWrench.getAngularPart());
       feedForwardLinearAction.changeFrame(controlFrame);
       feedForwardAngularAction.changeFrame(controlFrame);
@@ -523,10 +535,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     * {@link #yoErrorOrientation}.
     * </p>
     *
-    * @param linearFeedbackTermToPack the value of the feedback term x<sub>FB</sub><sup>linear</sup>.
-    *           Modified.
+    * @param linearFeedbackTermToPack  the value of the feedback term x<sub>FB</sub><sup>linear</sup>.
+    *                                  Modified.
     * @param angularFeedbackTermToPack the value of the feedback term x<sub>FB</sub><sup>angular</sup>.
-    *           Modified.
+    *                                  Modified.
     */
    private void computeProportionalTerm(FrameVector3D linearFeedbackTermToPack, FrameVector3D angularFeedbackTermToPack)
    {
@@ -587,10 +599,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     * This method also updates {@link #yoCurrentVelocity} and {@link #yoErrorVelocity}.
     * </p>
     *
-    * @param linearFeedbackTermToPack the value of the feedback term x<sub>FB</sub><sup>linear</sup>.
-    *           Modified.
+    * @param linearFeedbackTermToPack  the value of the feedback term x<sub>FB</sub><sup>linear</sup>.
+    *                                  Modified.
     * @param angularFeedbackTermToPack the value of the feedback term x<sub>FB</sub><sup>angular</sup>.
-    *           Modified.
+    *                                  Modified.
     */
    private void computeDerivativeTerm(FrameVector3D linearFeedbackTermToPack, FrameVector3D angularFeedbackTermToPack)
    {
@@ -668,10 +680,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     * {@link #yoErrorOrientationCumulated}, and {@link #yoErrorRotationVectorIntegrated}.
     * </p>
     *
-    * @param linearFeedbackTermToPack the value of the feedback term x<sub>FB</sub><sup>linear</sup>.
-    *           Modified.
+    * @param linearFeedbackTermToPack  the value of the feedback term x<sub>FB</sub><sup>linear</sup>.
+    *                                  Modified.
     * @param angularFeedbackTermToPack the value of the feedback term x<sub>FB</sub><sup>angular</sup>.
-    *           Modified.
+    *                                  Modified.
     */
    private void computeIntegralTerm(FrameVector3D linearFeedbackTermToPack, FrameVector3D angularFeedbackTermToPack)
    {
@@ -774,7 +786,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     * </p>
     *
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
-    *           subtracted. Its frame is changed to {@code controlFrame}. Modified.
+    *                                   subtracted. Its frame is changed to {@code controlFrame}.
+    *                                   Modified.
     */
    private void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
@@ -801,7 +814,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     * </p>
     *
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
-    *           added. Its frame is changed to {@code worldFrame}. Modified.
+    *                                   added. Its frame is changed to {@code worldFrame}. Modified.
     */
    private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {

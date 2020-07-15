@@ -1,18 +1,17 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_FORCE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.LINEAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.POSITION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.LINEAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.LINEAR_FORCE;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.LINEAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -21,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;

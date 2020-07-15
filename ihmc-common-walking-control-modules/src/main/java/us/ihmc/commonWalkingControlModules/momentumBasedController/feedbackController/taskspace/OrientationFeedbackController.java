@@ -1,17 +1,17 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_TORQUE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_CUMULATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.ANGULAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.ANGULAR_TORQUE;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.ANGULAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
