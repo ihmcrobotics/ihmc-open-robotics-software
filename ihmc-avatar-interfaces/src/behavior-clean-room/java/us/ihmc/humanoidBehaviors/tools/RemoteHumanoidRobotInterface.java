@@ -51,7 +51,7 @@ public class RemoteHumanoidRobotInterface
    private final ROS2Input<HighLevelStateChangeStatusMessage> controllerStateInput;
    private final ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
 
-   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    private final ROS2Topic<?> topicName;
 
@@ -73,7 +73,7 @@ public class RemoteHumanoidRobotInterface
       controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.withOutput(), initialState, this::acceptStatusChange);
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.withOutput());
 
-      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
    }
 
    // TODO: Somehow wrap HumanoidMessageTools
@@ -98,9 +98,9 @@ public class RemoteHumanoidRobotInterface
       }
    }
 
-   public RemoteSyncedHumanoidRobotState newSyncedRobot()
+   public RemoteSyncedRobotModel newSyncedRobot()
    {
-      return new RemoteSyncedHumanoidRobotState(robotModel, ros2Node); // TODO: Is using the existing robotModel okay?
+      return new RemoteSyncedRobotModel(robotModel, ros2Node); // TODO: Is using the existing robotModel okay?
    }
 
    public ROS2Callback<FootstepStatusMessage> createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
@@ -187,12 +187,12 @@ public class RemoteHumanoidRobotInterface
 
    public void pitchHeadWithRespectToChest(double headPitch)
    {
-      HumanoidReferenceFrames humanoidReferenceFrames = remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
-      
-      ReferenceFrame chestFrame = humanoidReferenceFrames.getChestFrame();
+      syncedRobot.update();
+
+      ReferenceFrame chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
       FrameQuaternion headOrientation = new FrameQuaternion(chestFrame, 0.0, headPitch, 0.0);
       headOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      requestHeadOrientationTrajectory(1.0, headOrientation, ReferenceFrame.getWorldFrame(), humanoidReferenceFrames.getPelvisZUpFrame());
+      requestHeadOrientationTrajectory(1.0, headOrientation, ReferenceFrame.getWorldFrame(), syncedRobot.getReferenceFrames().getPelvisZUpFrame());
    }
 
    public void pitchHeadWithRespectToChest(double headPitch, HumanoidReferenceFrames humanoidReferenceFrames)

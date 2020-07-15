@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.*;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
 import us.ihmc.log.LogTools;
@@ -39,7 +39,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final BehaviorStateReference<State> behaviorStateReference;
    private final StatusLogger statusLogger;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
-   private final RemoteSyncedHumanoidRobotState syncedRobot;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -153,7 +153,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                         footstepPlanReview::review,
                                         robotMotionModule::acceptFootstepPlan);
 
-      robotMotionModule.setRobotStateSupplier(robotInterface.newSyncedRobot());
+      robotMotionModule.setSyncedRobotSupplier(robotInterface.newSyncedRobot());
       robotMotionModule.setRobotConnectedSupplier(this::robotConnected);
       robotMotionModule.setLastSteppedSolePoses(lastSteppedSolePoses);
       robotMotionModule.setLookAndStepBehaviorParameters(lookAndStepParameters);

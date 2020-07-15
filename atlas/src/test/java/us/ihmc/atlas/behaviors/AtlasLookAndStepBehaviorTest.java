@@ -19,6 +19,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
@@ -79,9 +80,10 @@ public class AtlasLookAndStepBehaviorTest
 
       Notification atTheTop = new Notification();
       Notification reachedOtherSide = new Notification();
-      PausablePeriodicThread monitorThread = new PausablePeriodicThread("RobotStatusThread",
-                                                                        0.5,
-                                                                        () -> monitorThread(currentState, robot, atTheTop, reachedOtherSide));
+      PausablePeriodicThread monitorThread = new PausablePeriodicThread(
+            "RobotStatusThread",
+            0.5,
+            () -> monitorThread(currentState, robot.newSyncedRobot(), atTheTop, reachedOtherSide));
       monitorThread.start();
 
       if (VISUALIZE)
@@ -97,11 +99,12 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    private void monitorThread(AtomicReference<String> currentState,
-                              RemoteHumanoidRobotInterface robot,
+                              RemoteSyncedRobotModel syncedRobot,
                               Notification atTheTop,
                               Notification reachedOtherSide)
    {
-      FramePose3DReadOnly pelvisPose = robot.newSyncedRobot().quickPollPoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame);
+      syncedRobot.update();
+      FramePose3DReadOnly pelvisPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame);
       LogTools.info("{} pose: {}", currentState.get(), pelvisPose);
 
       if (pelvisPose.getPosition().getX() > 2.5 && pelvisPose.getPosition().getZ() > 1.3)
@@ -128,8 +131,9 @@ public class AtlasLookAndStepBehaviorTest
    private void dynamicsSimulation(Notification finishedSettingUp)
    {
       LogTools.info("Creating dynamics simulation");
-      int recordFrequencySpeedup = 10; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
-      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), INTRAPROCESS, recordFrequencySpeedup).simulate();
+      int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
+      int scsDataBufferSize = 10;
+      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), INTRAPROCESS, recordFrequencySpeedup, scsDataBufferSize).simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();
    }

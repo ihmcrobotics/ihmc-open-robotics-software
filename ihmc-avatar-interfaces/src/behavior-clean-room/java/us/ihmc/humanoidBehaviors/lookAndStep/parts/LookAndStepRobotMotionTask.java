@@ -23,7 +23,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
@@ -44,7 +44,7 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    protected final Field<BehaviorStateReference<LookAndStepBehavior.State>> behaviorStateReference = required();
 
    private FootstepPlan footstepPlan;
-   private HumanoidRobotState robotState;
+   private RemoteSyncedRobotModel syncedRobot;
    private long previousStepMessageId = 0L;
 
    LookAndStepRobotMotionTask(StatusLogger statusLogger)
@@ -52,11 +52,10 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       this.statusLogger = statusLogger;
    }
 
-   protected void update(FootstepPlan footstepPlan,
-                         HumanoidRobotState robotState)
+   protected void update(FootstepPlan footstepPlan, RemoteSyncedRobotModel syncedRobot)
    {
       this.footstepPlan = footstepPlan;
-      this.robotState = robotState;
+      this.syncedRobot = syncedRobot;
    }
 
    private boolean evaluateEntry()

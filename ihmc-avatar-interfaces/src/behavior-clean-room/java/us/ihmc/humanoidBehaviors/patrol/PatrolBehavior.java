@@ -24,7 +24,7 @@ import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
@@ -70,7 +70,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private final BehaviorHelper helper;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedHumanoidRobotState syncedRobot;
+   private final RemoteSyncedRobotModel syncedRobot;
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private final RemoteREAInterface rea;
 
@@ -206,7 +206,8 @@ public class PatrolBehavior implements BehaviorInterface
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry(syncedRobot.pollHumanoidRobotState());
+         syncedRobot.update();
+         upDownExplorer.onNavigateEntry(syncedRobot);
       }
    }
 
@@ -245,7 +246,8 @@ public class PatrolBehavior implements BehaviorInterface
 
       footstepPlannerToolbox.abortPlanning();
 
-      FramePose3DReadOnly midFeetZUpPose = syncedRobot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      syncedRobot.update();
+      FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasValue())
       {
@@ -349,7 +351,7 @@ public class PatrolBehavior implements BehaviorInterface
       FootstepDataListMessage footstepDataListMessage = footstepPlanResultNotification.read().getFootstepDataListMessage();
       Boolean swingOverPlanarRegions = swingOvers.get();
 
-      HumanoidReferenceFrames humanoidReferenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
 //      swingOverPlanarRegions &= decidePlanDistance(footstepDataListMessage, humanoidReferenceFrames) == PlanTravelDistance.FAR;
 
@@ -392,7 +394,8 @@ public class PatrolBehavior implements BehaviorInterface
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            FramePose3DReadOnly midFeetZUpPose = syncedRobot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+            syncedRobot.update();
+            FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
             PlanTravelDistance planType = decidePlanType(midFeetZUpPose, waypointManager.peekAfterNextPose());
 
@@ -427,7 +430,8 @@ public class PatrolBehavior implements BehaviorInterface
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
-      upDownExplorer.setMidFeetZUpPose(syncedRobot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
+      syncedRobot.update();
+      upDownExplorer.setMidFeetZUpPose(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)

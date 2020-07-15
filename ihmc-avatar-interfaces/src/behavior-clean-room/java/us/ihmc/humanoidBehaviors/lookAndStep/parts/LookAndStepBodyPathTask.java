@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.lookAndStep.BehaviorStateReference;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -46,7 +46,7 @@ class LookAndStepBodyPathTask
 
    private PlanarRegionsList mapRegions;
    private Pose3D goal;
-   private HumanoidRobotState humanoidRobotState;
+   private RemoteSyncedRobotModel syncedRobot;
    private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
    private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    private LookAndStepBehavior.State behaviorState;
@@ -71,7 +71,7 @@ class LookAndStepBodyPathTask
 
    protected void update(PlanarRegionsList mapRegions,
                          Pose3D goal,
-                         HumanoidRobotState humanoidRobotState,
+                         RemoteSyncedRobotModel humanoidRobotState,
                          TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot,
                          TimerSnapshotWithExpiration planningFailureTimerSnapshot,
                          LookAndStepBehavior.State behaviorState,
@@ -79,7 +79,7 @@ class LookAndStepBodyPathTask
    {
       this.mapRegions = mapRegions;
       this.goal = goal;
-      this.humanoidRobotState = humanoidRobotState;
+      this.syncedRobot = humanoidRobotState;
       this.mapRegionsReceptionTimerSnapshot = mapRegionsReceptionTimerSnapshot;
       this.planningFailureTimerSnapshot = planningFailureTimerSnapshot;
       this.behaviorState = behaviorState;
@@ -178,9 +178,9 @@ class LookAndStepBodyPathTask
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);
       FramePose3D leftFootPoseTemp = new FramePose3D();
-      leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
+      leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
       FramePose3D rightFootPoseTemp = new FramePose3D();
-      rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
+      rightFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
       leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);

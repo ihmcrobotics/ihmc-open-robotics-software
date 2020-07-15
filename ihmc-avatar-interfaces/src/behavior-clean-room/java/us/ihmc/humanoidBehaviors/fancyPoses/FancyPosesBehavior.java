@@ -17,7 +17,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -57,7 +57,7 @@ public class FancyPosesBehavior implements BehaviorInterface
    private final double trajectoryTime = 3.0;
    private final PausablePeriodicThread mainThread;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedHumanoidRobotState syncedRobot;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    public FancyPosesBehavior(BehaviorHelper helper)
    {
@@ -115,9 +115,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    private void goToSingleSupport()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      ReferenceFrame ankleZUpFrame = syncedRobot.getReferenceFrames().getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
       anklePose.prependTranslation(0.0, supportSide.negateIfLeftSide(0.25), 0.15);
       anklePose.changeFrame(worldFrame);
@@ -138,9 +138,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    private void goToDoubleSupport()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      ReferenceFrame ankleZUpFrame = syncedRobot.getReferenceFrames().getAnkleZUpFrame(supportSide);
       FramePose3D anklePose = new FramePose3D(ankleZUpFrame);
       anklePose.prependTranslation(0.0, supportSide.negateIfLeftSide(0.25), 0.0);
       anklePose.changeFrame(worldFrame);
@@ -158,9 +158,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToRunningManPose()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      ReferenceFrame supportAnkleZUpFrame = syncedRobot.getReferenceFrames().getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.getPosition().set(-0.40, supportSide.negateIfLeftSide(0.25), 0.40);
       footPose.getOrientation().setYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
@@ -169,7 +169,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(20.0), 0.0);
       chestOrientation.changeFrame(worldFrame);
-      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(10.0), 0.0);
       pelvisOrientation.changeFrame(worldFrame);
@@ -184,9 +184,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToKarateKid1Pose()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      ReferenceFrame supportAnkleZUpFrame = syncedRobot.getReferenceFrames().getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.getPosition().set(0.10, supportSide.negateIfLeftSide(0.25), 0.20);
       footPose.changeFrame(worldFrame);
@@ -204,9 +204,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToKarateKid2Pose()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      ReferenceFrame supportAnkleZUpFrame = syncedRobot.getReferenceFrames().getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.getPosition().set(0.6, supportSide.negateIfLeftSide(0.25), 0.25);
       footPose.getOrientation().setYawPitchRoll(0.0, -Math.PI / 4.0, 0.0);
@@ -215,7 +215,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(-5.0), 0.0);
       chestOrientation.changeFrame(worldFrame);
-      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, Math.toRadians(-15), 0.0);
       pelvisOrientation.changeFrame(worldFrame);
@@ -230,9 +230,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToKarateKid3Pose()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
+      ReferenceFrame supportAnkleZUpFrame = syncedRobot.getReferenceFrames().getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
       footPose.getPosition().set(0.00, supportSide.negateIfLeftSide(0.65), 0.2);
       footPose.getOrientation().setYawPitchRoll(0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(40.0)));
@@ -241,7 +241,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       FrameQuaternion chestOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(30.0)));
       chestOrientation.changeFrame(worldFrame);
-      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(supportAnkleZUpFrame, 0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(20.0)));
       pelvisOrientation.changeFrame(worldFrame);
@@ -256,9 +256,9 @@ public class FancyPosesBehavior implements BehaviorInterface
 
    public void goToPresentPose()
    {
-      HumanoidReferenceFrames referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame soleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);
+      ReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT);
       double trajectoryTime = 5.0;
 
       FramePose3D footPose = new FramePose3D(soleFrame);
@@ -272,7 +272,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       FrameQuaternion chestOrientation = new FrameQuaternion(soleFrame, 0.039, 0.147, 0.398, 0.905);
       chestOrientation.changeFrame(worldFrame);
-      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
 
       FrameQuaternion pelvisOrientation = new FrameQuaternion(soleFrame, 0.014, 0.156, 0.175, 0.972);
       FramePoint3D pelvisPosition = new FramePoint3D(soleFrame, -0.158, -0.048, 0.739);
@@ -314,8 +314,8 @@ public class FancyPosesBehavior implements BehaviorInterface
          {
             LogTools.info("Sending steps");
 
-            FullHumanoidRobotModel fullRobotModel = syncedRobot.pollFullRobotModel();
-            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
+            syncedRobot.update();
+            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(syncedRobot.getFullRobotModel());
             robotInterface.requestWalk(footstepList);
          }
       }
