@@ -141,40 +141,50 @@ public class PointFeedbackController implements FeedbackControllerInterface
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
       dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getPositionGains(endEffector, computeIntegralTerm);
+      gains = feedbackControllerToolbox.getOrCreatePositionGains(endEffector, computeIntegralTerm);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
-      controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
+      controlFrame = feedbackControllerToolbox.getOrCreateControlFrame(endEffector);
 
       isEnabled = new YoBoolean(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, DESIRED, isEnabled);
-      yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, CURRENT, isEnabled);
-      yoErrorPosition = feedbackControllerToolbox.getDataVector(endEffector, ERROR, POSITION, isEnabled);
+      yoDesiredPosition = feedbackControllerToolbox.getOrCreatePositionData(endEffector, DESIRED, isEnabled);
+      yoCurrentPosition = feedbackControllerToolbox.getOrCreatePositionData(endEffector, CURRENT, isEnabled);
+      yoErrorPosition = feedbackControllerToolbox.getOrCreateVectorData(endEffector, ERROR, POSITION, isEnabled);
 
-      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled) : null;
+      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getOrCreateVectorData(endEffector, ERROR_INTEGRATED, POSITION, isEnabled)
+            : null;
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_VELOCITY, isEnabled);
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateVectorData(endEffector, DESIRED, LINEAR_VELOCITY, isEnabled);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, CURRENT, LINEAR_VELOCITY, isEnabled);
-         yoErrorLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, ERROR, LINEAR_VELOCITY, isEnabled);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateVectorData(endEffector, CURRENT, LINEAR_VELOCITY, isEnabled);
+         yoErrorLinearVelocity = feedbackControllerToolbox.getOrCreateVectorData(endEffector, ERROR, LINEAR_VELOCITY, isEnabled);
          DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
          if (breakFrequency != null)
-            yoFilteredErrorLinearVelocity = feedbackControllerToolbox.getAlphaFilteredDataVector(endEffector, ERROR, LINEAR_VELOCITY, dt, breakFrequency, isEnabled);
+            yoFilteredErrorLinearVelocity = feedbackControllerToolbox.getOrCreateAlphaFilteredVectorData(endEffector,
+                                                                                                         ERROR,
+                                                                                                         LINEAR_VELOCITY,
+                                                                                                         dt,
+                                                                                                         breakFrequency,
+                                                                                                         isEnabled);
          else
             yoFilteredErrorLinearVelocity = null;
 
          if (toolbox.isEnableInverseDynamicsModule())
          {
-            yoDesiredLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_ACCELERATION, isEnabled);
-            yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, LINEAR_ACCELERATION, isEnabled);
-            yoFeedbackLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, LINEAR_ACCELERATION, isEnabled);
-            rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox
-                  .getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_ACCELERATION, dt, maximumRate, isEnabled);
-            yoAchievedLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, LINEAR_ACCELERATION, isEnabled);
+            yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateVectorData(endEffector, DESIRED, LINEAR_ACCELERATION, isEnabled);
+            yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateVectorData(endEffector, FEEDFORWARD, LINEAR_ACCELERATION, isEnabled);
+            yoFeedbackLinearAcceleration = feedbackControllerToolbox.getOrCreateVectorData(endEffector, Type.FEEDBACK, LINEAR_ACCELERATION, isEnabled);
+            rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getOrCreateRateLimitedVectorData(endEffector,
+                                                                                                               FEEDBACK,
+                                                                                                               LINEAR_ACCELERATION,
+                                                                                                               dt,
+                                                                                                               maximumRate,
+                                                                                                               isEnabled);
+            yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateVectorData(endEffector, Type.ACHIEVED, LINEAR_ACCELERATION, isEnabled);
          }
          else
          {
@@ -187,11 +197,15 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
          if (toolbox.isEnableVirtualModelControlModule())
          {
-            yoDesiredLinearForce = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_FORCE, isEnabled);
-            yoFeedForwardLinearForce = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, LINEAR_FORCE, isEnabled);
-            yoFeedbackLinearForce = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, LINEAR_FORCE, isEnabled);
-            rateLimitedFeedbackLinearForce = feedbackControllerToolbox
-                  .getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_FORCE, dt, maximumRate, isEnabled);
+            yoDesiredLinearForce = feedbackControllerToolbox.getOrCreateVectorData(endEffector, DESIRED, LINEAR_FORCE, isEnabled);
+            yoFeedForwardLinearForce = feedbackControllerToolbox.getOrCreateVectorData(endEffector, FEEDFORWARD, LINEAR_FORCE, isEnabled);
+            yoFeedbackLinearForce = feedbackControllerToolbox.getOrCreateVectorData(endEffector, Type.FEEDBACK, LINEAR_FORCE, isEnabled);
+            rateLimitedFeedbackLinearForce = feedbackControllerToolbox.getOrCreateRateLimitedVectorData(endEffector,
+                                                                                                        FEEDBACK,
+                                                                                                        LINEAR_FORCE,
+                                                                                                        dt,
+                                                                                                        maximumRate,
+                                                                                                        isEnabled);
          }
          else
          {
@@ -221,10 +235,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, LINEAR_VELOCITY, isEnabled);
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, LINEAR_VELOCITY, isEnabled);
-         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox
-               .getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_VELOCITY, dt, maximumRate, isEnabled);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateVectorData(endEffector, FEEDBACK, LINEAR_VELOCITY, isEnabled);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateVectorData(endEffector, FEEDFORWARD, LINEAR_VELOCITY, isEnabled);
+         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateRateLimitedVectorData(endEffector,
+                                                                                                        FEEDBACK,
+                                                                                                        LINEAR_VELOCITY,
+                                                                                                        dt,
+                                                                                                        maximumRate,
+                                                                                                        isEnabled);
       }
       else
       {
@@ -474,8 +492,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
     * Computes the feedback term resulting from the error in linear velocity:<br>
     * x<sub>FB</sub> = kd * (xDot<sub>desired</sub> - xDot<sub>current</sub>)
     * <p>
-    * The desired linear velocity of the {@code controlFrame}'s origin relative to the {@code base}
-    * is obtained from {@link #yoDesiredLinearVelocity}.
+    * The desired linear velocity of the {@code controlFrame}'s origin relative to the {@code base} is
+    * obtained from {@link #yoDesiredLinearVelocity}.
     * </p>
     * <p>
     * This method also updates {@link #yoCurrentLinearVelocity} and {@link #yoErrorLinearVelocity}.
@@ -584,19 +602,20 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    /**
-    * Computes and adds the bias acceleration resulting from the combination of the current linear
-    * and angular velocity of the control frame.
+    * Computes and adds the bias acceleration resulting from the combination of the current linear and
+    * angular velocity of the control frame.
     * <p>
-    * This is needed when going from a linear acceleration expressed in an inertial frame to a
-    * moving frame attached to the end-effector.
+    * This is needed when going from a linear acceleration expressed in an inertial frame to a moving
+    * frame attached to the end-effector.
     * </p>
     * <p>
-    * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a
-    * moving frame, here a frame attache to the end-effector.
+    * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a moving
+    * frame, here a frame attache to the end-effector.
     * </p>
     *
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
-    *           subtracted. Its frame is changed to {@code controlFrame}. Modified.
+    *                                   subtracted. Its frame is changed to {@code controlFrame}.
+    *                                   Modified.
     */
    private void addCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
@@ -611,19 +630,19 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    /**
-    * Computes and subtracts the bias acceleration resulting from the combination of the current
-    * linear and angular velocity of the control frame.
+    * Computes and subtracts the bias acceleration resulting from the combination of the current linear
+    * and angular velocity of the control frame.
     * <p>
-    * This is needed when going from a linear acceleration expressed in a moving frame attached to
-    * the end-effector to an inertial frame.
+    * This is needed when going from a linear acceleration expressed in a moving frame attached to the
+    * end-effector to an inertial frame.
     * </p>
     * <p>
-    * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a
-    * moving frame, here a frame attache to the end-effector.
+    * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a moving
+    * frame, here a frame attache to the end-effector.
     * </p>
     *
     * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
-    *           added. Its frame is changed to {@code worldFrame}. Modified.
+    *                                   added. Its frame is changed to {@code worldFrame}. Modified.
     */
    private void subtractCoriolisAcceleration(FrameVector3D linearAccelerationToModify)
    {
