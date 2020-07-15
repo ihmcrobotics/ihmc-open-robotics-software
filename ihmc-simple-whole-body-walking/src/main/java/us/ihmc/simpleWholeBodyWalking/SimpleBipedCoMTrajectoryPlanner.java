@@ -67,26 +67,19 @@ import java.util.List;
 public class SimpleBipedCoMTrajectoryPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   protected final String namePrefix = "";
-   
-   private final BipedContactSequenceUpdater sequenceUpdater;
-   private final SimpleCoMTrajectoryPlanner comTrajectoryPlanner;
 
-   private final YoDouble timeInContactPhase = new YoDouble(namePrefix + "timeInContactPhase", registry);
+   private final SimpleBipedContactSequenceUpdater sequenceUpdater;
+   private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
 
-   private final List<ContactStateProvider> InputstepSequence = new ArrayList<>();
-   private final List<ContactStateProvider> ControlStepSequence = new ArrayList<>();
-   private final List<BipedTimedStep> stepSequence = new ArrayList<>();
+   private final YoDouble timeInContactPhase = new YoDouble("timeInContactPhase", registry);
    
    private final List<Footstep> footstepList = new ArrayList<>();
    private final List<FootstepTiming> footstepTimingList = new ArrayList<>();
    private final List<RobotSide> feetInContact = new ArrayList<>();
    
-   private final boolean UseConvertedCSP = true;
-   
-   protected final YoEnum<RobotSide> transferToSide = new YoEnum<>(namePrefix + "TransferToSide", registry, RobotSide.class, true);
-   protected final YoEnum<RobotSide> previousTransferToSide = new YoEnum<>(namePrefix + "PreviousTransferToSide", registry, RobotSide.class, true);
-   protected final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> transferToSide = new YoEnum<>("TransferToSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> previousTransferToSide = new YoEnum<>("PreviousTransferToSide", registry, RobotSide.class, true);
+   protected final YoEnum<RobotSide> supportSide = new YoEnum<>("SupportSide", registry, RobotSide.class, true);
    
    //protected final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
    
@@ -94,7 +87,7 @@ public class SimpleBipedCoMTrajectoryPlanner
    public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, double gravityZ, double nominalCoMHeight,
                                           DoubleProvider omega0, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      sequenceUpdater = new BipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
+      sequenceUpdater = new SimpleBipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new SimpleCoMTrajectoryPlanner(omega0);
       comTrajectoryPlanner.setNominalCoMHeight(nominalCoMHeight);
       ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
@@ -102,116 +95,39 @@ public class SimpleBipedCoMTrajectoryPlanner
       parentRegistry.addChild(registry);
    }
    
-   
-   
-   public void clearInputStepSequence()
-   {
-      InputstepSequence.clear();
-   }
-   
-   public void clearConvertedStepSequence()
-   {
-      stepSequence.clear();
-      footstepList.clear();
-      footstepTimingList.clear();
-   }
-   
-   // TODO: correct footstep inputs
-   public void addStepToSequence(Footstep footstep, FootstepTiming timing)
-   {
-      /*
-       * the list of footsteps are the timings and final positions of the footsteps. 
-       * To create the contact states the first state must go from zero position to the first footstep, 
-       * then the last state goes from the last footstep to the end position.
-       */
-      /*
-       * BipedTimed Steps use the same information as footsteps and footsteptimings. There is already a tool to 
-       * convert a list of Biped Timed steps to ContactStateProviders. THe  BipedContactSequenceUpdater
-       * THis uses the soleframes input in the planner to get current position when planning for the beginning of the plan
-       */
-      
-      addStepToSequence(footstep, timing, new FootstepShiftFractions(), 0);
-      
-   }
-   
-   
    public void addStepToSequence(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions, double CurrentTime)
    {
       footstepList.add(footstep);
       footstepTimingList.add(timing);
    }
    
-   
-   public void addStepToSequence(ContactStateProvider step)
+   public void clearStepSequence()
    {
-      InputstepSequence.add(step);
+      footstepList.clear();
+      footstepTimingList.clear();
    }
 
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
       comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, centerOfMassVelocity);
    }
-   
+
    public void initialize()
    {
       sequenceUpdater.initialize();
    }
-   
-   //TODO: what list is input? - look at previous use of bipedCOMTrajectoryPlanner
-   //feetInContact is a list of RobotSides that lists all the feet in contact for the current state
-   public void solveForTrajectory(double currentTime,FramePoint3DReadOnly centerOfMassPosition)
-   {
-      comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, new FrameVector3D());
-      if (UseConvertedCSP)
-      {
-         convertFootstepToBTS(currentTime);
-      }
-      else
-      {
-         ControlStepSequence.clear();
-         ControlStepSequence.addAll(InputstepSequence);
-         comTrajectoryPlanner.solveForTrajectory(ControlStepSequence);
-      }
-      compute(currentTime, centerOfMassPosition);
-   }
-   
-   public void convertFootstepToBTS(double currentTime)
-   {
-      stepSequence.clear();
-      double StepStartTime = currentTime;
 
-      for(int i = 0; i<footstepList.size(); i++) 
-      {
-         BipedTimedStep step = new BipedTimedStep();
-         step.getTimeInterval().setInterval(StepStartTime, StepStartTime + footstepTimingList.get(i).getSwingTime());
-         step.setRobotSide(footstepList.get(i).getRobotSide());
-         step.setGoalPose(footstepList.get(i).getFootstepPose());
-         stepSequence.add(step);
-  
-         StepStartTime += footstepTimingList.get(i).getStepTime();
-      }  
-   }
-   
-   public void compute(double currentTime, FramePoint3DReadOnly centerOfMassPosition)
+   void computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
    {
-      if (UseConvertedCSP)
-      {
-         feetInContact.clear();
-         for (RobotSide robotSide : RobotSide.values)
-            feetInContact.add(robotSide);
-         //feetInContact.add(RobotSide.RIGHT);
-         sequenceUpdater.update(stepSequence, feetInContact, currentTime);
-         ControlStepSequence.addAll(sequenceUpdater.getContactSequence());
-         comTrajectoryPlanner.setInitialCenterOfMassState(centerOfMassPosition, new FrameVector3D());
-         comTrajectoryPlanner.solveForTrajectory(ControlStepSequence);
-      }
-      int Curri = getSegmentNumber(currentTime);
-      double timeInPhase = currentTime - ControlStepSequence.get(0).getTimeInterval().getStartTime();
+      sequenceUpdater.update(footstepList, footstepTimingList, currentFeetInContact, currentTime);
+
+      double timeInPhase = currentTime - sequenceUpdater.getAbsoluteContactSequence().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
-      comTrajectoryPlanner.compute(Curri, timeInContactPhase.getDoubleValue());
+
+      comTrajectoryPlanner.solveForTrajectory(sequenceUpdater.getContactSequence());
+      comTrajectoryPlanner.compute(timeInContactPhase.getDoubleValue());
    }
-   
-   
+
    public FramePoint3DReadOnly getDesiredDCMPosition()
    {
       return comTrajectoryPlanner.getDesiredDCMPosition();
@@ -241,173 +157,5 @@ public class SimpleBipedCoMTrajectoryPlanner
    {
       return comTrajectoryPlanner.getDesiredVRPPosition();
    }
-   
-   public List<Trajectory3D> getVRPTrajectories()
-   {
-      return comTrajectoryPlanner.getVRPTrajectories();
-   }
-   
-   public int getSegmentNumber(double currentTime)
-   {
-      for (int i = 0; i < ControlStepSequence.size(); i++)
-      {
-         if (ControlStepSequence.get(i).getTimeInterval().intervalContains(currentTime))
-            return i;
-      }
-
-      return ControlStepSequence.size() - 1;
-   }
-   
-   public double getTimeInPhase(double currentTime, int phase)
-   {
-      return currentTime - ControlStepSequence.get(phase).getTimeInterval().getStartTime();
-   }
-   
-   /*
-   public void setSupportLeg(RobotSide robotSide)
-   {
-      supportSide.set(robotSide);
-   }
-   
-   public void setTransferToSide(RobotSide robotSide)
-   {
-      previousTransferToSide.set(transferToSide.getEnumValue());
-      transferToSide.set(robotSide);
-   }
-   
-   public void setTransferFromSide(RobotSide robotSide)
-   {
-      if (robotSide != null)
-      {
-         previousTransferToSide.set(transferToSide.getEnumValue());
-         transferToSide.set(robotSide.getOppositeSide());
-      }
-      else
-      {
-         transferToSide.set(null);
-      }
-   }
-   
-   public void endTick()
-   {
-      
-   }
-   
-   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition)
-   {
-      if (isDone())
-         return 0.0;
-
-      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(actualCapturePointPosition);
-
-      if (Double.isNaN(deltaTimeToBeAccounted))
-         return 0.0;
-
-      double estimatedTimeRemaining = getTimeInCurrentStateRemaining() - deltaTimeToBeAccounted;
-      estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
-
-      return estimatedTimeRemaining;
-   }
-   
-   private final FramePoint2D desiredICP2d = new FramePoint2D();
-   private final FramePoint2D finalICP2d = new FramePoint2D();
-   private final FrameLine2D desiredICPToFinalICPLine = new FrameLine2D();
-   private final FrameLineSegment2D desiredICPToFinalICPLineSegment = new FrameLineSegment2D();
-   private final FramePoint2D actualICP2d = new FramePoint2D();
-   
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2DReadOnly actualCapturePointPosition)
-   {
-      desiredICP2d.setIncludingFrame(getDesiredDCMPosition());
-      finalICP2d.setIncludingFrame(stepSequence.);
-
-      if (desiredICP2d.distance(finalICP2d) < 1.0e-10)
-         return Double.NaN;
-
-      desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
-      actualICP2d.setIncludingFrame(actualCapturePointPosition);
-      double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
-      if (percentAlongLineSegmentICP < 0.0)
-      {
-         desiredICPToFinalICPLine.set(desiredICP2d, finalICP2d);
-         desiredICPToFinalICPLine.orthogonalProjection(actualICP2d);
-      }
-      else
-      {
-         desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
-      }
-
-      double actualDistanceDueToDisturbance = desiredCMPPosition.distanceXY(actualICP2d);
-      double expectedDistanceAccordingToPlan = desiredCMPPosition.distanceXY(desiredICPPosition);
-
-      double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
-
-      if (distanceRatio < 1.0e-3)
-         return 0.0;
-      else
-         return Math.log(distanceRatio) / omega0.getDoubleValue();
-   
-      return 0;
-   }
-   
-   public double getTimeInCurrentStateRemaining()
-   {
-      return 0;
-   }
-   
-   public void initializeForStanding(double time)
-   {
-      
-   }
-   
-   public void initializeForSingleSupport(double time)
-   {
-      
-   }
-   
-   public void initializeForTransfer(double time)
-   {
-      
-   }
-   
-   public void holdCurrentICP(FramePoint3D tempCapturePoint)
-   {
-      
-   }
-   
-   public void getFinalDesiredCapturePointPosition(YoFramePoint2D yoFinalDesiredICP)
-   {
-      
-   }
-   
-   public void getFinalDesiredCenterOfMassPosition(YoFramePoint3D yoFinalDesiredCoM)
-   {
-      
-   }
-   
-   public void setFinalTransferWeightDistribution(double weightDistribution)
-   {
-      
-   }
-   
-   public void setFinalTransferDurationAlpha(double finalTransferSplitFraction)
-   {
-      
-   }
-   
-   public void setFinalTransferDuration(double finalTransferDuration)
-   {
-      
-   }
-   
-   public void updateCurrentPlan()
-   {
-      
-   }
-   
-   public boolean isDone()
-   {
-      return true;
-   }
-   */
-   
 }
+
