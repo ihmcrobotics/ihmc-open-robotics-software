@@ -58,7 +58,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    private final AtomicReference<NormalOcTree> ocTree = new AtomicReference<>(null);
    private final AtomicReference<Tuple3DReadOnly> sensorPosition;
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
