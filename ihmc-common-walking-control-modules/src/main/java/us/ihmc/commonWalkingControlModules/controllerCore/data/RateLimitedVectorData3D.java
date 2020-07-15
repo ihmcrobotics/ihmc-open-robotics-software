@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class RateLimitedVectorData3D extends RateLimitedYoMutableFrameVector3D implements ClearableData
+public class RateLimitedVectorData3D extends RateLimitedYoMutableFrameVector3D implements FeedbackControllerData
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
@@ -18,7 +18,7 @@ public class RateLimitedVectorData3D extends RateLimitedYoMutableFrameVector3D i
    public RateLimitedVectorData3D(String namePrefix, Type type, Space space, DoubleProvider maximumRate, double dt, FrameVector3DReadOnly rawVector,
                                   YoVariableRegistry registry)
    {
-      super(ClearableData.createNamePrefix(namePrefix + "RateLimited", type, space), "", registry, maximumRate, dt, rawVector);
+      super(FeedbackControllerData.createNamePrefix(namePrefix + "RateLimited", type, space), "", registry, maximumRate, dt, rawVector);
 
       this.type = type;
       this.space = space;

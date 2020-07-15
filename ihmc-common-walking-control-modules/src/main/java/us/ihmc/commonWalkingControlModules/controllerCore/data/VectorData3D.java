@@ -7,7 +7,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class VectorData3D extends YoMutableFrameVector3D implements ClearableData
+public class VectorData3D extends YoMutableFrameVector3D implements FeedbackControllerData
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
@@ -15,7 +15,7 @@ public class VectorData3D extends YoMutableFrameVector3D implements ClearableDat
 
    public VectorData3D(String namePrefix, Type type, Space space, YoVariableRegistry registry)
    {
-      super(ClearableData.createNamePrefix(namePrefix, type, space), "", registry);
+      super(FeedbackControllerData.createNamePrefix(namePrefix, type, space), "", registry);
 
       this.type = type;
       this.space = space;
