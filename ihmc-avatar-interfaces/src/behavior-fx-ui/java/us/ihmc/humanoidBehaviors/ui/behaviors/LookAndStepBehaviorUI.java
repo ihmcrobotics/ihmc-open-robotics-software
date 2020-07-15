@@ -118,7 +118,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
       behaviorMessager.registerTopicListener(MapRegionsForUI, planarRegions -> {
-//         behaviorState.setText("" + planarRegions.hashCode());
          livePlanarRegionsGraphic.acceptPlanarRegions(planarRegions);
       });
 
