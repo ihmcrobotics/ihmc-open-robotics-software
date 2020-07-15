@@ -56,7 +56,7 @@ import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
  *
  * @author Sylvain Bertrand
  */
-public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
+public class FeedbackControllerToolbox implements FeedbackControllerDataHolderReadOnly
 {
    public static final String centerOfMassName = "centerOfMass";
 

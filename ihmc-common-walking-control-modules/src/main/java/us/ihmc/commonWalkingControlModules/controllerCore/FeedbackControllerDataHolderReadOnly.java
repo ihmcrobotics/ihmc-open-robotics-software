@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
-public interface FeedbackControllerDataReadOnly
+public interface FeedbackControllerDataHolderReadOnly
 {
    /**
    * Retrieves if possible the position data about the center of mass.
