@@ -20,8 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.lookAndStep.*;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -62,7 +61,7 @@ public class LookAndStepFootstepPlanningPart
    public static class TaskSetup extends LookAndStepFootstepPlanningPart
    {
       private final SingleThreadSizeOneQueueExecutor executor;
-      private final Supplier<HumanoidRobotState> robotStateSupplier;
+      private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
       private final WalkingFootstepTracker walkingFootstepTracker;
 
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
@@ -80,7 +79,7 @@ public class LookAndStepFootstepPlanningPart
                        FootstepPlanningModule footstepPlanningModule,
                        AtomicReference<RobotSide> lastStanceSideReference,
                        Supplier<Boolean> operatorReviewEnabledSupplier,
-                       RemoteSyncedHumanoidRobotState syncedRobot,
+                       RemoteSyncedRobotModel syncedRobot,
                        BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
                        Supplier<Boolean> robotConnectedSupplier,
                        WalkingFootstepTracker walkingFootstepTracker)
@@ -95,7 +94,11 @@ public class LookAndStepFootstepPlanningPart
          this.footstepPlanningModule = footstepPlanningModule;
          this.lastStanceSideReference = lastStanceSideReference;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
-         this.robotStateSupplier = syncedRobot::pollHumanoidRobotState;
+         this.robotStateSupplier = () ->
+         {
+            syncedRobot.update();
+            return syncedRobot;
+         };
          this.behaviorStateReference = behaviorStateReference;
          this.robotConnectedSupplier = robotConnectedSupplier;
          this.walkingFootstepTracker = walkingFootstepTracker;
@@ -139,7 +142,7 @@ public class LookAndStepFootstepPlanningPart
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
          bodyPathPlan = bodyPathPlanInput.get();
-         robotState = robotStateSupplier.get();
+         syncedRobot = robotStateSupplier.get();
          lastStanceSide = lastStanceSideReference.get();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
@@ -156,7 +159,7 @@ public class LookAndStepFootstepPlanningPart
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
-   protected HumanoidRobotState robotState;
+   protected RemoteSyncedRobotModel syncedRobot;
    protected RobotSide lastStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
@@ -228,12 +231,12 @@ public class LookAndStepFootstepPlanningPart
       uiPublisher.publishToUI(MapRegionsForUI, planarRegions);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
-      initialPoseBetweenFeet.setToZero(robotState.getMidFeetZUpFrame());
+      initialPoseBetweenFeet.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
       double midFeetZ = initialPoseBetweenFeet.getZ();
 
       FramePose3D pelvisPose = new FramePose3D();
-      pelvisPose.setToZero(robotState.getPelvisFrame());
+      pelvisPose.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D goalPoseBetweenFeet = new FramePose3D();
@@ -279,7 +282,7 @@ public class LookAndStepFootstepPlanningPart
          FramePose3DReadOnly lastSteppedSolePose = lastSteppedSolePoses.get(side);
          if (lastSteppedSolePose == null)
          {
-            FramePose3D soleFrameZUpPose = new FramePose3D(robotState.getSoleZUpFrame(side));
+            FramePose3D soleFrameZUpPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(side));
             soleFrameZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
             lastSteppedSolePose = soleFrameZUpPose;
             lastSteppedSolePoses.put(side, lastSteppedSolePose);

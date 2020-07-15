@@ -5,8 +5,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.lookAndStep.*;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
@@ -18,7 +17,7 @@ import java.util.function.Supplier;
 
 public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 {
-   private final Supplier<HumanoidRobotState> robotStateSupplier;
+   private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
    private final WalkingFootstepTracker walkingFootstepTracker;
 
    private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
@@ -33,7 +32,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
                                     VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                                     LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                                     Supplier<Boolean> operatorReviewEnabled,
-                                    RemoteSyncedHumanoidRobotState syncedRobot,
+                                    RemoteSyncedRobotModel syncedRobot,
                                     BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
                                     Supplier<Boolean> robotConnectedSupplier,
                                     WalkingFootstepTracker walkingFootstepTracker)
@@ -46,7 +45,10 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
             behaviorStateReference,
             robotConnectedSupplier);
 
-      this.robotStateSupplier = syncedRobot::pollHumanoidRobotState;
+      this.robotStateSupplier = () -> {
+         syncedRobot.update();
+         return syncedRobot;
+      };
       this.walkingFootstepTracker = walkingFootstepTracker;
 
       // don't run two body path plans at the same time
@@ -67,7 +69,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
    public void acceptGoal(Pose3D goal)
    {
       goalInput.set(goal);
-      LogTools.debug("Body path accept goal: {}", goal);
+      LogTools.info("Body path goal received: {}", goal);
    }
 
    private void evaluateAndRun()

@@ -28,9 +28,8 @@ import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -79,7 +78,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private final List<Point3D> pointsObservedFrom = new ArrayList<>();
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
-   private final RemoteSyncedHumanoidRobotState syncedRobot;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    private int chestYawForLookingAroundIndex = 0;
 
@@ -281,8 +280,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    private void rememberObservationPoint()
    {
       //TODO: Remember the LIDAR pointing at transform instead of just where the robot was at. But how to get that frame?
-      HumanoidRobotState robotState = syncedRobot.pollHumanoidRobotState();
-      MovingReferenceFrame midFeetZUpFrame = robotState.getMidFeetZUpFrame();
+      syncedRobot.update();
+      MovingReferenceFrame midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       FramePoint3D midFeetLocation = new FramePoint3D(midFeetZUpFrame);
       midFeetLocation.changeFrame(worldFrame);
 
@@ -409,7 +408,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          slamParameters.setMaximumPointProjectionDistance(0.10);
 
          hullGotLooped.set(false);
-         RigidBodyTransform referenceTransform = syncedRobot.pollHumanoidRobotState().getIMUFrame().getTransformToWorldFrame();
+         syncedRobot.update();
+         RigidBodyTransform referenceTransform = syncedRobot.getReferenceFrames().getIMUFrame().getTransformToWorldFrame();
          LogTools.info("Doing SLAM with IMU reference Transform \n {} ", referenceTransform);
 
          PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(concatenatedMap, latestPlanarRegionsList, slamParameters, referenceTransform, listener);
@@ -462,9 +462,9 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void publishPoseUpdateForStateEstimator(RigidBodyTransform transformFromIncomingToMap, boolean sendingSlamCorrection)
    {
-      HumanoidRobotState robotState = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      FramePose3D framePose = new FramePose3D(robotState.getPelvisFrame());
+      FramePose3D framePose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisFrame());
       framePose.changeFrame(worldFrame);
       Pose3D pose3D = new Pose3D(framePose);
 
@@ -482,7 +482,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       double confidenceFactor = 1.0;
-      robotInterface.publishPose(pose3D, confidenceFactor, robotState.getTimestamp());
+      robotInterface.publishPose(pose3D, confidenceFactor, syncedRobot.getTimestamp());
    }
 
    private void computeMapBoundingBox3D()
@@ -528,14 +528,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       desiredFramePoses = null;
       determinedNextLocations = false;
 
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
-      FramePose3DReadOnly midFeetZUpPose = syncedRobot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
-
-      determineNextPlacesToWalkTo(referenceFrames);
+      syncedRobot.update();
+      determineNextPlacesToWalkTo(syncedRobot.getReferenceFrames());
       determinedNextLocations = true;
    }
 
-   private void determineNextPlacesToWalkTo(HumanoidRobotState referenceFrames)
+   private void determineNextPlacesToWalkTo(HumanoidReferenceFrames referenceFrames)
    {
       MovingReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       FramePoint3D midFeetPosition = new FramePoint3D(midFeetZUpFrame);
@@ -755,8 +753,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
    {
       resetFootstepPlanning();
 
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
-      FramePose3DReadOnly midFeetZUpPose = syncedRobot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+      syncedRobot.update();
+      FramePose3DReadOnly midFeetZUpPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
       if (!desiredFramePoses.isEmpty())
       {
@@ -866,8 +864,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void onTakeAStepStateEntry()
    {
-      FullHumanoidRobotModel fullRobotModel = syncedRobot.pollFullRobotModel();
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
       FootstepDataMessage footstepDataMessage = footstepDataList.get(footstepIndex);
       takeAStepSwingSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
@@ -898,8 +895,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void doTakeAStepStateAction(double timeInState)
    {
-      FullHumanoidRobotModel fullRobotModel = syncedRobot.pollFullRobotModel();
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
       if (nextFootstepLocation != null)
       {
@@ -967,8 +963,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
       RobotSide swingSide = supportSide.getOppositeSide();
       FootstepDataListMessage footstepDataListMessageToTurnInPlace = new FootstepDataListMessage();
       us.ihmc.idl.IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessageToTurnInPlace.getFootstepDataList();
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
-      ReferenceFrame supportFootFrame = referenceFrames.getSoleFrame(supportSide);
+      syncedRobot.update();
+      ReferenceFrame supportFootFrame = syncedRobot.getReferenceFrames().getSoleFrame(supportSide);
 
       for (Pose3D pose : posesFromThePreviousStep)
       {
@@ -996,30 +992,30 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    public void turnChestWithRespectToMidFeetZUpFrame(double chestYaw, double trajectoryTime)
    {
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      ReferenceFrame midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       FrameQuaternion chestOrientation = new FrameQuaternion(midFeetZUpFrame, chestYaw, 0.0, 0.0);
       chestOrientation.changeFrame(worldFrame);
-      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestChestOrientationTrajectory(trajectoryTime, chestOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
       robotInterface.requestPelvisGoHome(trajectoryTime);
    }
 
    public void pitchHeadWithRespectToChest(double headPitch, double trajectoryTime)
    {
-      HumanoidRobotState referenceFrames = syncedRobot.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+      ReferenceFrame chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
       FrameQuaternion headOrientation = new FrameQuaternion(chestFrame, 0.0, headPitch, 0.0);
       headOrientation.changeFrame(worldFrame);
-      robotInterface.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, referenceFrames.getPelvisZUpFrame());
+      robotInterface.requestHeadOrientationTrajectory(trajectoryTime, headOrientation, worldFrame, syncedRobot.getReferenceFrames().getPelvisZUpFrame());
    }
 
    private void rotateChestAndPitchHeadToLookAtPointInWorld(double timeInState,
                                                             RobotSide swingSide,
                                                             Point3D pointToLookAtInWorld,
                                                             FullHumanoidRobotModel fullRobotModel,
-                                                            HumanoidRobotState referenceFrames)
+                                                            HumanoidReferenceFrames referenceFrames)
    {
       //      ReferenceFrame headBaseFrame = fullRobotModel.getHeadBaseFrame();
       MovingReferenceFrame chestFrame = referenceFrames.getChestFrame();

@@ -32,7 +32,7 @@ public class SimulatedREAModule
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> realsenseSLAMPublisher;
-   private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
+   private RemoteSyncedRobotModel syncedRobot;
 
    private final HashMap<Integer, PlanarRegion> supportRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
@@ -57,8 +57,8 @@ public class SimulatedREAModule
 
       if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
-         remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
-         neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
+         syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+         neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
          double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = 180.0;
          simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
@@ -86,11 +86,11 @@ public class SimulatedREAModule
 
    private void process()
    {
-      remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
+      syncedRobot.update();
       ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
       if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
-         if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
+         if (syncedRobot.hasReceivedFirstMessage())
          {
             combinedRegionsList.addAll(simulatedDepthCamera.filterMapToVisible(map).getPlanarRegionsAsList());
          }

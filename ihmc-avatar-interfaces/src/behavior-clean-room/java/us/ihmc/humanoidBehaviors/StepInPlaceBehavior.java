@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
@@ -39,7 +39,7 @@ public class StepInPlaceBehavior implements BehaviorInterface
    private final AtomicLong footstepID = new AtomicLong();
    private final PausablePeriodicThread mainThread;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedHumanoidRobotState syncedRobot;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    public StepInPlaceBehavior(BehaviorHelper helper)
    {
@@ -100,8 +100,8 @@ public class StepInPlaceBehavior implements BehaviorInterface
          {
             LogTools.info("Sending steps");
 
-            FullHumanoidRobotModel fullRobotModel = syncedRobot.pollFullRobotModel();
-            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(fullRobotModel);
+            syncedRobot.update();
+            FootstepDataListMessage footstepList = createTwoStepInPlaceSteps(syncedRobot.getFullRobotModel());
             robotInterface.requestWalk(footstepList);
          }
       }
