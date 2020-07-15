@@ -7,14 +7,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound.
- * Has a maximum number of rows and columns and an actual number of rows and columns.
- * If you set with a smaller matrix, then the actual size will be the size of the
- * passed in matrix.  extra
- * entries will be set to NaN. If you get the contents the matrix you pack must be the
- * correct size.
+ * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound. Has a
+ * maximum number of rows and columns and an actual number of rows and columns. If you set with a
+ * smaller matrix, then the actual size will be the size of the passed in matrix. extra entries will
+ * be set to NaN. If you get the contents the matrix you pack must be the correct size.
+ * 
  * @author JerryPratt
- *
  */
 public class YoMatrix
 {
@@ -129,6 +127,22 @@ public class YoMatrix
             }
          }
       }
+   }
 
+   public void setToNaN(int numberOfRows, int numberOfColumns)
+   {
+      if (((numberOfRows > maxNumberOfRows) || (numberOfColumns > maxNumberOfColumns)) && (numberOfRows > 0) && (numberOfColumns > 0))
+         throw new RuntimeException("Not enough rows or columns: " + numberOfRows + " by " + numberOfColumns);
+
+      this.numberOfRows.set(numberOfRows);
+      this.numberOfColumns.set(numberOfColumns);
+
+      for (int row = 0; row < maxNumberOfRows; row++)
+      {
+         for (int column = 0; column < maxNumberOfColumns; column++)
+         {
+            variables[row][column].set(Double.NaN);
+         }
+      }
    }
 }

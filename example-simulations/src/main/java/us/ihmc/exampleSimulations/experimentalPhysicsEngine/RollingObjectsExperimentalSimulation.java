@@ -30,10 +30,14 @@ public class RollingObjectsExperimentalSimulation
    private static final String CAPSULE_BODY_NAME = CAPSULE_NAME + "Link";
    private static final String CYLINDER_BODY_NAME = CYLINDER_NAME + "Link";
 
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.001, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public RollingObjectsExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setErrorReductionParameter(0.001);
+
       double ballRadius = 0.2;
       double ballMass = 1.0;
       double ballRadiusOfGyrationPercent = 1.0;

@@ -25,7 +25,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    public ObjectDetectorToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
                                       PubSubImplementation pubSubImplementation)
    {
-      super(robotName, desiredFullRobotModel, modelProvider, false, 50, pubSubImplementation);
+      super(robotName, desiredFullRobotModel, modelProvider, false, 250, pubSubImplementation);
       controller = new ObjectDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(1.2e+6);
    }

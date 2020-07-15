@@ -24,9 +24,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
@@ -200,11 +198,6 @@ public class SLAMModule
          success = addFrame(pointCloudToCompute);
       }
 
-      slam.setNormalEstimationParameters(normalEstimationParameters.get());
-      if (clearNormals.getAndSet(false))
-         slam.clearNormals();
-      if (enableNormalEstimation.get())
-         slam.updateOcTree();
       dequeue();
 
       return success;
@@ -228,8 +221,8 @@ public class SLAMModule
    protected void publishResults()
    {
       String stringToReport = "";
-      reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getSensorPoses().size() + "]");
-      stringToReport = stringToReport + " " + slam.getSensorPoses().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
+      reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
+      stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
       NormalOcTree octreeMap = slam.getOctree();

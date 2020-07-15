@@ -152,7 +152,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3D minLocationCorruption = new Vector3D(0.0, 0.0, 0.0);
-      Vector3D maxLocationCorruption = new Vector3D(0.0, 0.0, 0.05);
+      Vector3D maxLocationCorruption = new Vector3D(0.0, 0.0, 0.04);
       double maxRotationCorruption = getMaxRotationCorruption();
       FootstepDataListCorruptor footstepDataListCorruptor = new FootstepDataListCorruptor(minLocationCorruption, maxLocationCorruption, maxRotationCorruption);
 
