@@ -36,6 +36,12 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 
+
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList; 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TranslationMovingReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+
 import java.util.HashMap;
 
 /*
@@ -72,6 +78,9 @@ public class SimpleSphereRobot
 
 
    private final SCSRobotFromInverseDynamicsRobotModel scsRobot;
+   
+   private final SideDependentList<TranslationMovingReferenceFrame> soleFramesForModifying = createSoleFrames();
+   private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final double totalMass;
    private final double controlDT;
@@ -144,6 +153,9 @@ public class SimpleSphereRobot
       scsRobot.update();
 
       totalMass = TotalMassCalculator.computeSubTreeMass(body);
+      
+      soleFrames = new SideDependentList<>();
+      soleFrames.putAll(soleFramesForModifying);
    }
 
    public SCSRobotFromInverseDynamicsRobotModel getScsRobot()
@@ -316,5 +328,37 @@ public class SimpleSphereRobot
    public void updateJointTorques_ID_to_SCS()
    {
       scsRobot.updateJointTorques_ID_to_SCS();
+   }
+   
+   //Create SoleFrames to feed into the Planner
+   private static SideDependentList<TranslationMovingReferenceFrame> createSoleFrames()
+   {
+      double stepWidth = 0.3;
+      
+      SideDependentList<TranslationMovingReferenceFrame> soleFrames = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         TranslationMovingReferenceFrame soleFrame = new TranslationMovingReferenceFrame(robotSide + "SoleFrame", worldFrame);
+         Vector3D translation = new Vector3D();
+         translation.setY(robotSide.negateIfRightSide(stepWidth / 2));
+         soleFrame.updateTranslation(translation);
+
+         soleFrames.put(robotSide, soleFrame);
+      }
+
+      return soleFrames;
+   }
+   
+   public SideDependentList<MovingReferenceFrame> getSoleFrames()
+   {
+      return soleFrames;
+   }
+   
+   public void updateSoleFrame(RobotSide robotSide, FramePoint3DReadOnly newPosition)
+   {
+      if (newPosition != null)
+      {         
+         this.soleFramesForModifying.get(robotSide).updateTranslation(newPosition);
+      }
    }
 }

@@ -92,7 +92,7 @@ public class SimpleLQRMomentumControllerSimulation
          robots.add(sphereRobot1.getScsRobot());
 
          YoVariableRegistry registry = sphereRobot1.getScsRobot().getRobotsYoVariableRegistry();
-         SimpleBipedCoMTrajectoryPlanner dcmPlan1 = new SimpleBipedCoMTrajectoryPlanner(createSoleFrames(),
+         SimpleBipedCoMTrajectoryPlanner dcmPlan1 = new SimpleBipedCoMTrajectoryPlanner(sphereRobot1.getSoleFrames(),
                                                                                        gravity,
                                                                                        sphereRobot1.getDesiredHeight(),
                                                                                        sphereRobot1.getOmega0Provider(),
@@ -120,7 +120,7 @@ public class SimpleLQRMomentumControllerSimulation
          robots.add(sphereRobot2.getScsRobot());
 
          YoVariableRegistry registry = sphereRobot2.getScsRobot().getRobotsYoVariableRegistry();
-         SimpleBipedCoMTrajectoryPlanner dcmPlan2 = new SimpleBipedCoMTrajectoryPlanner(createSoleFrames(),
+         SimpleBipedCoMTrajectoryPlanner dcmPlan2 = new SimpleBipedCoMTrajectoryPlanner(sphereRobot2.getSoleFrames(),
                                                                                         gravity,
                                                                                         sphereRobot2.getDesiredHeight(),
                                                                                         sphereRobot2.getOmega0Provider(),
@@ -167,23 +167,6 @@ public class SimpleLQRMomentumControllerSimulation
       scs.setSimulateDuration(10);
       
       scs.startOnAThread();
-   }
-
-   //Create SoleFrames to feed into the Planner
-   private static SideDependentList<MovingReferenceFrame> createSoleFrames()
-   {
-      SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         TranslationMovingReferenceFrame soleFrame = new TranslationMovingReferenceFrame(robotSide + "SoleFrame", worldFrame);
-         Vector3D translation = new Vector3D();
-         translation.setY(robotSide.negateIfRightSide(stepWidth / 2));
-         soleFrame.updateTranslation(translation);
-
-         soleFrames.put(robotSide, soleFrame);
-      }
-
-      return soleFrames;
    }
 
 
