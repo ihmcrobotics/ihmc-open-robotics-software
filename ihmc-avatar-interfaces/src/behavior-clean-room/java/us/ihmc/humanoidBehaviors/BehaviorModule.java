@@ -1,11 +1,13 @@
 package us.ihmc.humanoidBehaviors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -24,7 +26,6 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
-   private enum CommunicationMode { INTERPROCESS, INTRAPROCESS }
 
    private final MessagerAPI messagerAPI;
    private final Messager messager;
@@ -40,7 +41,7 @@ public class BehaviorModule
       return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS);
    }
 
-   private BehaviorModule(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, CommunicationMode communicationMode)
+   public BehaviorModule(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, CommunicationMode communicationMode)
    {
       LogTools.info("Starting behavior module in {} mode", communicationMode.name());
 
@@ -98,7 +99,7 @@ public class BehaviorModule
       private static final MessagerAPIFactory.CategoryTheme BehaviorModuleTheme = apiFactory.createCategoryTheme("BehaviorModule");
 
       public static final MessagerAPIFactory.Topic<String> BehaviorSelection = topic("BehaviorSelection");
-      public static final MessagerAPIFactory.Topic<Pair<Integer, String>> StatusLog = topic("StatusLog");
+      public static final MessagerAPIFactory.Topic<MutablePair<Integer, String>> StatusLog = topic("StatusLog");
 
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
