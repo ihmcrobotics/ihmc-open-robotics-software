@@ -42,14 +42,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -1003,8 +1003,8 @@ public class KinematicsToolboxController extends ToolboxController
       return null;
    }
 
-   private final FramePoint3D rigidBodyPosition = new FramePoint3D();
-   private final FrameQuaternion rigidBodyOrientation = new FrameQuaternion();
+   private final List<PositionData3D> rigidBodyPositions = new ArrayList<>();
+   private final List<QuaternionData3D> rigidBodyOrientations = new ArrayList<>();
 
    /**
     * Updates the graphic coordinate systems for the end-effectors that are actively controlled during
@@ -1012,40 +1012,38 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private void updateVisualization()
    {
-      boolean hasData;
-
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.DESIRED);
-         if (!hasData)
+         feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.DESIRED);
+         if (rigidBodyPositions.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setPosition(rigidBodyPosition);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setPosition(rigidBodyPositions.get(0));
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.DESIRED);
-         if (!hasData)
+         feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.DESIRED);
+         if (rigidBodyOrientations.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setOrientation(rigidBodyOrientation);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
       }
 
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.CURRENT);
-         if (!hasData)
+         feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.CURRENT);
+         if (rigidBodyPositions.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setPosition(rigidBodyPosition);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setPosition(rigidBodyPositions.get(0));
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.CURRENT);
-         if (!hasData)
+         feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.CURRENT);
+         if (rigidBodyOrientations.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setOrientation(rigidBodyOrientation);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
       }
    }
 

@@ -22,9 +22,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -628,88 +625,88 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    @Override
-   public boolean getCenterOfMassPositionData(FramePoint3DBasics positionDataToPack, Type type)
+   public void getCenterOfMassPositionData(List<PositionData3D> positionDataListToPack, Type type)
    {
+      positionDataListToPack.clear();
       PositionData3D positionData = getOrCreateCenterOfMassDataPool().positionDataMap.get(type);
 
       if (positionData == null || !positionData.isActive())
-         return false;
+         return;
 
-      positionDataToPack.setIncludingFrame(positionData);
-      return true;
+      positionDataListToPack.add(positionData);
    }
 
    @Override
-   public boolean getCenterOfMassVectorData(FrameVector3DBasics vectorDataToPack, Type type, Space space)
+   public void getCenterOfMassVectorData(List<VectorData3D> vectorDataListToPack, Type type, Space space)
    {
+      vectorDataListToPack.clear();
       EnumMap<Space, VectorData3D> endEffectorDataTyped = getOrCreateCenterOfMassDataPool().vectorDataMap.get(type);
 
       if (endEffectorDataTyped == null)
-         return false;
+         return;
 
       VectorData3D vectorData = endEffectorDataTyped.get(space);
 
       if (vectorData == null || !vectorData.isActive())
-         return false;
+         return;
 
-      vectorDataToPack.setIncludingFrame(vectorData);
-      return true;
+      vectorDataListToPack.add(vectorData);
    }
 
    @Override
-   public boolean getPositionData(RigidBodyBasics endEffector, FramePoint3DBasics positionDataToPack, Type type)
+   public void getPositionData(RigidBodyBasics endEffector, List<PositionData3D> positionDataListToPack, Type type)
    {
+      positionDataListToPack.clear();
       EnumMap<Type, PositionData3D> endEffectorData = getOrCreateEndEffectorDataPool(endEffector).positionDataMap;
 
       if (endEffectorData == null)
-         return false;
+         return;
 
       PositionData3D positionData = endEffectorData.get(type);
 
       if (positionData == null || !positionData.isActive())
-         return false;
+         return;
 
-      positionDataToPack.setIncludingFrame(positionData);
-      return true;
+      positionDataListToPack.add(positionData);
    }
 
    @Override
-   public boolean getOrientationData(RigidBodyBasics endEffector, FrameQuaternionBasics orientationDataToPack, Type type)
+   public void getOrientationData(RigidBodyBasics endEffector, List<QuaternionData3D> orientationDataListToPack, Type type)
    {
+      orientationDataListToPack.clear();
       EnumMap<Type, QuaternionData3D> endEffectorData = getOrCreateEndEffectorDataPool(endEffector).orientationDataMap;
 
       if (endEffectorData == null)
-         return false;
+         return;
 
       QuaternionData3D orientationData = endEffectorData.get(type);
 
       if (orientationData == null || !orientationData.isActive())
-         return false;
+         return;
 
-      orientationDataToPack.setIncludingFrame(orientationData);
-      return true;
+      orientationDataListToPack.add(orientationData);
    }
 
    @Override
-   public boolean getVectorData(RigidBodyBasics endEffector, FrameVector3DBasics vectorDataToPack, Type type, Space space)
+   public void getVectorData(RigidBodyBasics endEffector, List<VectorData3D> vectorDataListToPack, Type type, Space space)
    {
+      vectorDataListToPack.clear();
       EnumMap<Type, EnumMap<Space, VectorData3D>> endEffectorData = getOrCreateEndEffectorDataPool(endEffector).vectorDataMap;
 
       if (endEffectorData == null)
-         return false;
+         return;
 
       EnumMap<Space, VectorData3D> endEffectorDataTyped = endEffectorData.get(type);
 
       if (endEffectorDataTyped == null)
-         return false;
+         return;
 
       VectorData3D vectorData = endEffectorDataTyped.get(space);
 
       if (vectorData == null || !vectorData.isActive())
-         return false;
+         return;
 
-      vectorDataToPack.setIncludingFrame(vectorData);
-      return true;
+      vectorDataListToPack.add(vectorData);
    }
 
    @Override
