@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class FeedbackControllerTemplate
 {
+   private boolean allowDynamicControllerConstruction = false;
    private final Map<RigidBodyBasics, Integer> spatialFeedbackControllerTemplate = new HashMap<>();
    private final Map<RigidBodyBasics, Integer> orientationFeedbackControllerTemplate = new HashMap<>();
    private final Map<RigidBodyBasics, Integer> pointFeedbackControllerTemplate = new HashMap<>();
@@ -64,6 +65,11 @@ public class FeedbackControllerTemplate
       }
    }
 
+   public void setAllowDynamicControllerConstruction(boolean allowDynamicControllerConstruction)
+   {
+      this.allowDynamicControllerConstruction = allowDynamicControllerConstruction;
+   }
+
    public void enableSpatialFeedbackController(RigidBodyBasics endEffector)
    {
       enableSpatialFeedbackController(endEffector, 1);
@@ -102,6 +108,11 @@ public class FeedbackControllerTemplate
    public void enableCenterOfMassFeedbackController()
    {
       enableCenterOfMassFeedbackController = true;
+   }
+
+   public boolean isDynamicControllerConstructionAllowed()
+   {
+      return allowDynamicControllerConstruction;
    }
 
    public Map<RigidBodyBasics, Integer> getSpatialFeedbackControllerTemplate()

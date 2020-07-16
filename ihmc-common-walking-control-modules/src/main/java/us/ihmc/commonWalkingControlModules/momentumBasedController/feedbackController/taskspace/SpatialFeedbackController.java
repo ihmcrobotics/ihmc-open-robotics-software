@@ -191,12 +191,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredPose = feedbackControllerToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled);
       yoCurrentPose = feedbackControllerToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled);
       YoMutableFrameVector3D errorPosition = feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
-      YoMutableFrameVector3D errorRotationVector = feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
+      YoMutableFrameVector3D errorRotationVector = feedbackControllerToolbox.getOrCreateVectorData(endEffector,
+                                                                                                   controllerIndex,
+                                                                                                   ERROR,
+                                                                                                   ROTATION_VECTOR,
+                                                                                                   isEnabled);
       yoErrorVector = new YoMutableFrameSpatialVector(errorRotationVector, errorPosition);
       yoErrorOrientation = feedbackControllerToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
-      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled)
+      yoErrorPositionIntegrated = computeIntegralTerm
+            ? feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled)
             : null;
-      yoErrorOrientationCumulated = computeIntegralTerm ? feedbackControllerToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled) : null;
+      yoErrorOrientationCumulated = computeIntegralTerm
+            ? feedbackControllerToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled)
+            : null;
       yoErrorRotationVectorIntegrated = computeIntegralTerm
             ? feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled)
             : null;
@@ -219,7 +226,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                                             ERROR,
                                                                                                             dt,
                                                                                                             breakFrequency,
-                                                                                                            breakFrequency, isEnabled);
+                                                                                                            breakFrequency,
+                                                                                                            isEnabled);
          else
             yoFilteredErrorVelocity = null;
 
@@ -233,7 +241,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                                                       FEEDBACK,
                                                                                                                       dt,
                                                                                                                       maximumAngularRate,
-                                                                                                                      maximumLinearRate, isEnabled);
+                                                                                                                      maximumLinearRate,
+                                                                                                                      isEnabled);
             yoAchievedAcceleration = feedbackControllerToolbox.getOrCreateSpatialAccelerationData(endEffector, controllerIndex, ACHIEVED, isEnabled);
          }
          else
@@ -255,7 +264,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                                          FEEDBACK,
                                                                                                          dt,
                                                                                                          maximumAngularRate,
-                                                                                                         maximumLinearRate, isEnabled);
+                                                                                                         maximumLinearRate,
+                                                                                                         isEnabled);
          }
          else
          {
@@ -292,7 +302,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                                            FEEDBACK,
                                                                                                            dt,
                                                                                                            maximumAngularRate,
-                                                                                                           maximumLinearRate, isEnabled);
+                                                                                                           maximumLinearRate,
+                                                                                                           isEnabled);
       }
       else
       {
