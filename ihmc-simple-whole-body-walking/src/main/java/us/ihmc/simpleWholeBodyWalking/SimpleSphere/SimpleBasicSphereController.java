@@ -160,7 +160,7 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       double currentTime = sphereRobot.getScsRobot().getYoTime().getDoubleValue();
       updateFeetState(currentTime);
       dcmPlan.setInitialCenterOfMassState(sphereRobot.getCenterOfMass(), sphereRobot.getCenterOfMassVelocity());
-      dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
+      double timeInPhase = dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
    }
 
    @Override
