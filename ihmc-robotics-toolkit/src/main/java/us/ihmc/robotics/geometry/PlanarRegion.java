@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -59,70 +58,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   private final Point3DReadOnly origin = new Point3DReadOnly()
-   {
-      @Override
-      public double getX()
-      {
-         return fromLocalToWorldTransform.getM03();
-      }
-
-      @Override
-      public double getY()
-      {
-         return fromLocalToWorldTransform.getM13();
-      }
-
-      @Override
-      public double getZ()
-      {
-         return fromLocalToWorldTransform.getM23();
-      }
-   };
-   private final UnitVector3DReadOnly normal = new UnitVector3DReadOnly()
-   {
-      @Override
-      public double getX()
-      {
-         return getRawX();
-      }
-
-      @Override
-      public double getY()
-      {
-         return getRawY();
-      }
-
-      @Override
-      public double getZ()
-      {
-         return getRawZ();
-      }
-
-      @Override
-      public double getRawX()
-      {
-         return fromLocalToWorldTransform.getM02();
-      }
-
-      @Override
-      public double getRawY()
-      {
-         return fromLocalToWorldTransform.getM12();
-      }
-
-      @Override
-      public double getRawZ()
-      {
-         return fromLocalToWorldTransform.getM22();
-      }
-
-      @Override
-      public boolean isDirty()
-      {
-         return false;
-      }
-   };
+   private final PlanarRegionOrigin origin = new PlanarRegionOrigin(fromLocalToWorldTransform);
+   private final PlanarRegionNormal normal = new PlanarRegionNormal(fromLocalToWorldTransform);
 
    /**
     * Create a new, empty planar region.

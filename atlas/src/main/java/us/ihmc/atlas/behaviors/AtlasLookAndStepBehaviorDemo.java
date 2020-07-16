@@ -5,6 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
@@ -19,7 +20,6 @@ import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -38,8 +38,9 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean LOG_TO_FILE = Boolean.parseBoolean(System.getProperty("log.to.file"));
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
+   private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
 
-   private final PubSubImplementation pubSubMode = PubSubImplementation.INTRAPROCESS;
+   private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
    private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
 
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
@@ -65,16 +66,23 @@ public class AtlasLookAndStepBehaviorDemo
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
-      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(behaviorRegistry, createRobotModel());
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), communicationMode);
 
       LogTools.info("Creating behavior user interface");
-      BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+      if (communicationMode == CommunicationMode.INTERPROCESS)
+      {
+         BehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
+      }
+      else
+      {
+         BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+      }
    }
 
    private void reaModule()
    {
       LogTools.info("Creating simulated multisense stereo regions module");
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA_NODE_NAME);
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), ROS2Tools.REA_NODE_NAME);
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                                    createRobotModel(),
                                                                                    ros2Node);
@@ -103,7 +111,11 @@ public class AtlasLookAndStepBehaviorDemo
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
-      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), pubSubMode, recordFrequencySpeedup, dataBufferSize).simulate();
+      AtlasBehaviorSimulation.create(createRobotModel(),
+                                     createCommonAvatarEnvironment(),
+                                     communicationMode.getPubSubImplementation(),
+                                     recordFrequencySpeedup,
+                                     dataBufferSize).simulate();
    }
 
    private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
@@ -121,7 +133,7 @@ public class AtlasLookAndStepBehaviorDemo
    {
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
-      kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
+      kinematicsSimulationParameters.setPubSubImplementation(communicationMode.getPubSubImplementation());
       kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
       kinematicsSimulationParameters.setInitialGroundHeight(environmentInitialSetup.getGroundZ());

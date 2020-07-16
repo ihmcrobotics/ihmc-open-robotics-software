@@ -233,7 +233,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    public FootstepDataMessage getAsMessage()
    {
       FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
-      footstepDataMessage.setSequenceId(UUID.randomUUID().getLeastSignificantBits());
+      footstepDataMessage.setSequenceId((UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE);
       footstepDataMessage.setRobotSide(robotSide.toByte());
       footstepDataMessage.getLocation().set(footstepPose.getPosition());
       footstepDataMessage.getOrientation().set(footstepPose.getOrientation());

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.tools.interfaces;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
@@ -136,6 +136,6 @@ public class StatusLogger implements LogToolsWriteOnly
 
    private void publishToUI(Level level, String  message)
    {
-      uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), LocalDateTime.now().format(dateFormat) + " " + message));
+      uiPublisher.publishToUI(BehaviorModule.API.StatusLog, MutablePair.of(level.intLevel(), LocalDateTime.now().format(dateFormat) + " " + message));
    }
 }
