@@ -98,6 +98,7 @@ public class SLAMModuleAPI
    public static final Topic<Double> LatestFrameConfidenceFactor = Root.child(UI).child(SensorFrame).topic(Value);
 
    public static final Topic<Boolean> UIRawDataExportRequest = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Request);
+   public static final Topic<Boolean> UISLAMDataExportRequest = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Request);
    
    public static final Topic<String> UIRawDataExportDirectory = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Path);
    public static final Topic<String> UISLAMDataExportDirectory = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Path);

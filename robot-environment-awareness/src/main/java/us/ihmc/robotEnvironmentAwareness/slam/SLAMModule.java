@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -56,6 +58,7 @@ public class SLAMModule
    private final AtomicReference<Boolean> clearNormals;
 
    protected final SLAMBasics slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   //protected final SLAMBasics slam = new SLAMBasics(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
@@ -65,6 +68,9 @@ public class SLAMModule
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
+   
+   private final SLAMHistory history = new SLAMHistory();
+   private final AtomicReference<String> slamDataExportPath;
 
    public SLAMModule(Messager messager)
    {
@@ -90,7 +96,6 @@ public class SLAMModule
       normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters);
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
-
       reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
@@ -104,8 +109,15 @@ public class SLAMModule
 
          reaMessager.registerTopicListener(SLAMModuleAPI.SaveConfiguration, content -> saveConfiguration(filePropertyHelper));
       }
+      slamDataExportPath = reaMessager.createInput(SLAMModuleAPI.UISLAMDataExportDirectory);
+      reaMessager.registerTopicListener(SLAMModuleAPI.UISLAMDataExportRequest, content -> exportSLAMHistory());
 
       sendCurrentState();
+   }
+
+   private void exportSLAMHistory()
+   {
+      history.export(Paths.get(slamDataExportPath.get()));
    }
 
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
@@ -190,12 +202,14 @@ public class SLAMModule
       boolean success;
       if (slam.isEmpty())
       {
+         LogTools.info("addKeyFrame " + pointCloudQueue.size());
          slam.addKeyFrame(pointCloudToCompute);
          success = true;
       }
       else
       {
          success = addFrame(pointCloudToCompute);
+         LogTools.info("addFrame " + pointCloudQueue.size() + " " + success);
       }
 
       dequeue();
@@ -249,6 +263,9 @@ public class SLAMModule
       latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
       reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
       reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
+      
+      history.addLatestFrameHistory(latestFrame);
+      history.addDriftCorrectionHistory(slam.getDriftCorrectionResult());
    }
 
    private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
@@ -304,6 +321,7 @@ public class SLAMModule
       newPointCloud.set(null);
       pointCloudQueue.clear();
       slam.clear();
+      history.clearHistory();
    }
 
    public void loadConfiguration(FilePropertyHelper filePropertyHelper)

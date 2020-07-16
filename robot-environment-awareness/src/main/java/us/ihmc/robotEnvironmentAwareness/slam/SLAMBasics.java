@@ -23,8 +23,8 @@ public class SLAMBasics implements SLAMInterface
    private final AtomicInteger mapSize = new AtomicInteger();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
-   
-   private final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
+
+   protected final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
 
    public SLAMBasics(double octreeResolution)
    {
@@ -48,6 +48,7 @@ public class SLAMBasics implements SLAMInterface
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);
       octree.setNormalEstimationParameters(normalEstimationParameters);
+      updateOctreeMap();
    }
 
    public void updateOctreeMap()
@@ -61,6 +62,8 @@ public class SLAMBasics implements SLAMInterface
       SLAMFrame frame = new SLAMFrame(pointCloudMessage);
       setLatestFrame(frame);
       insertNewPointCloud(frame);
+
+      driftCorrectionResult.setDefault();
    }
 
    @Override
@@ -72,6 +75,7 @@ public class SLAMBasics implements SLAMInterface
       RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);
       latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
 
+      driftCorrectionResult.setComputationTime(latestComputationTime.get());
       if (driftCorrectionTransformer == null)
       {
          return false;
@@ -81,7 +85,6 @@ public class SLAMBasics implements SLAMInterface
          frame.updateOptimizedCorrection(driftCorrectionTransformer);
          setLatestFrame(frame);
          insertNewPointCloud(frame);
-
          return true;
       }
    }
@@ -102,9 +105,9 @@ public class SLAMBasics implements SLAMInterface
    public boolean isEmpty()
    {
       if (mapSize.get() == 0)
-         return false;
-      else
          return true;
+      else
+         return false;
    }
 
    public int getMapSize()
@@ -136,5 +139,10 @@ public class SLAMBasics implements SLAMInterface
    public double getComputationTimeForLatestFrame()
    {
       return latestComputationTime.get();
+   }
+   
+   public DriftCorrectionResult getDriftCorrectionResult()
+   {
+      return driftCorrectionResult;
    }
 }

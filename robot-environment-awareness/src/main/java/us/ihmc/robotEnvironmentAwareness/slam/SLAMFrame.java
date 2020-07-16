@@ -17,7 +17,6 @@ import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
@@ -49,7 +48,7 @@ public class SLAMFrame
    protected final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
    protected final Point3DReadOnly[] pointCloudToSensorFrame;
    protected final Point3D[] optimizedPointCloudToWorld;
-   
+
    private double confidenceFactor = 1.0;
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
@@ -138,7 +137,7 @@ public class SLAMFrame
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);
       frameMap.setNormalEstimationParameters(normalEstimationParameters);
-      if(updateNormal)
+      if (updateNormal)
          frameMap.updateNormals();
 
       OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(frameMap.getRoot());
@@ -216,7 +215,7 @@ public class SLAMFrame
       else
          return false;
    }
-   
+
    public Long getTimeStamp()
    {
       return timestamp;
