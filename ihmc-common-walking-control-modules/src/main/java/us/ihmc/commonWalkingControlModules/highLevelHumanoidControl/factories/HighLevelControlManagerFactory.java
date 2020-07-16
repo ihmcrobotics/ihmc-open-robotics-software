@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -351,7 +352,7 @@ public class HighLevelControlManagerFactory
       }
    }
 
-   public FeedbackControlCommandList createFeedbackControlTemplate()
+   public FeedbackControllerTemplate createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
 
@@ -376,6 +377,6 @@ public class HighLevelControlManagerFactory
          ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());
       }
 
-      return ret;
+      return new FeedbackControllerTemplate(ret);
    }
 }

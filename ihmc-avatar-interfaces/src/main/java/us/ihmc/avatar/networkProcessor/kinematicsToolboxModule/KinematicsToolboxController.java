@@ -25,6 +25,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -552,7 +553,7 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate(controllableRigidBodies);
       controllerCoreTemplate.addCommand(new CenterOfMassFeedbackControlCommand());
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
-      return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
+      return new WholeBodyControllerCore(toolbox, new FeedbackControllerTemplate(controllerCoreTemplate), lowLevelControllerOutput, registry);
    }
 
    /**
