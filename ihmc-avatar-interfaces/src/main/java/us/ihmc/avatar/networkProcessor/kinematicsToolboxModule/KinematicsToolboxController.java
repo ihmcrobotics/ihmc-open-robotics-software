@@ -76,6 +76,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -96,6 +97,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class KinematicsToolboxController extends ToolboxController
 {
+   private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
@@ -112,6 +115,7 @@ public class KinematicsToolboxController extends ToolboxController
    protected final RigidBodyBasics rootBody;
    /** Reference to the desired robot's floating joint. */
    protected final FloatingJointBasics rootJoint;
+   private final double totalRobotMass;
    /**
     * Array containing all the one degree-of-freedom joints of the desired robot except for the finger
     * joints that are not handled by this solver.
@@ -330,6 +334,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
@@ -342,12 +347,12 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      spatialGains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setPositionProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
-      spatialGains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setOrientationProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
-      jointGains.setKp(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      jointGains.setKp(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       jointGains.setMaximumFeedbackAndMaximumFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
@@ -719,8 +724,8 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
-      // Calculating the solution quality based on sum of all the commands' tracking error.
-      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
+      // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
+      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
 
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);

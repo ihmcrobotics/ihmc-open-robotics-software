@@ -185,6 +185,7 @@ public class WholeBodyFeedbackController
             controller.initialize();
          }
       }
+      feedbackControllerToolbox.registerFeedbackControllerOutput(inverseDynamicsOutput);
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -207,6 +208,7 @@ public class WholeBodyFeedbackController
          }
       }
       feedbackControllerToolbox.clearUnusedData();
+      feedbackControllerToolbox.registerFeedbackControllerOutput(inverseKinematicsOutput);
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -229,6 +231,7 @@ public class WholeBodyFeedbackController
          }
       }
       feedbackControllerToolbox.clearUnusedData();
+      feedbackControllerToolbox.registerFeedbackControllerOutput(virtualModelControlOutput);
       feedbackControllerTimer.stopMeasurement();
    }
 
