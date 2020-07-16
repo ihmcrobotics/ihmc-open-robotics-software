@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -14,20 +15,26 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.JoystickControl;
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -46,12 +53,16 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -80,21 +91,42 @@ public class ValkyrieVrSteppingController {
 	private final DoubleProvider stepTime;
 	private final BoundingBoxCollisionDetector collisionDetector;
 	private final SteppingParameters steppingParameters;
+	private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+	private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
 	private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
 	private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
+	private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
+	private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
+	private final AnimationTimer animationTimer;
+
+	private final ValkyrieRobotModel robotModel;
+	private FullHumanoidRobotModel fullRobotModel = null;
 
 	private double swingDuration = 0.5;
 	private double transferDuration = 0.5;
+	private JoystickControl joystickControlMessage = new JoystickControl();
+	private JoystickControl lastJoystickControlMessage = new JoystickControl();
+
+	private FullHumanoidRobotModel getFullRobotModel() {
+		if (fullRobotModel == null) {
+			fullRobotModel = robotModel.createFullRobotModel();
+		}
+		return fullRobotModel;
+	}
 
 	// Need to find a way to get sole frame
 	private MovingReferenceFrame getSoleFrame(RobotSide robotSide) {
-		return null;
+		return getFullRobotModel().getSoleFrame(robotSide);
 	}
 
-	public ValkyrieVrSteppingController(String robotName, WalkingControllerParameters walkingControllerParameters,
-			Ros2Node ros2Node) {
+	public ValkyrieVrSteppingController(ValkyrieRobotModel robotModel, String robotName,
+			WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
+			SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons) {
 		// trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
+
+		this.robotModel = robotModel;
+		this.footPolygons = footPolygons;
 		Double trajectoryDurationInSecs = 1.0;
 		trajectoryDuration = new AtomicReference<Double>(trajectoryDurationInSecs);
 
@@ -128,6 +160,10 @@ public class ValkyrieVrSteppingController {
 		ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class, controllerPubGenerator,
 				s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
 
+		// Incoming control messages
+		ROS2Tools.createCallbackSubscription(ros2Node, JoystickControl.class, controllerSubGenerator,
+				s -> joystickControlMessage.set(s.takeNextData()));
+
 		// REA planes
 		ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class,
 				REACommunicationProperties.publisherTopicNameGenerator,
@@ -137,6 +173,9 @@ public class ValkyrieVrSteppingController {
 		ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerFailureStatusMessage.class,
 				controllerPubGenerator, s -> stopWalking(true));
 
+		pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
+		footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
+
 		double collisionBoxDepth = 0.65;
 		double collisionBoxWidth = 1.15;
 		double collisionBoxHeight = 1.0;
@@ -144,6 +183,39 @@ public class ValkyrieVrSteppingController {
 		collisionDetector = new BoundingBoxCollisionDetector();
 		collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight,
 				collisionXYProximityCheck);
+
+		animationTimer = new AnimationTimer() {
+			@Override
+			public void handle(long now) {
+
+				try {
+					System.out.println("In animation timer");
+					PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
+					if (latestMessage != null) {
+						PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter
+								.convertToPlanarRegionsList(latestMessage);
+						snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+						collisionDetector.setPlanarRegionsList(new PlanarRegionsList(planarRegionsList
+								.getPlanarRegionsAsList().stream().filter(region -> region.getConvexHull()
+										.getArea() >= parameters.getMinPlanarRegionArea())
+								.collect(Collectors.toList())));
+						ValkyrieVrSteppingController.this.planarRegionsList.set(planarRegionsList);
+					}
+
+					JoystickStepParameters stepParameters = stepParametersReference.get();
+					continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(),
+							stepParameters.getTransferDuration());
+					continuousStepGenerator.update(Double.NaN);
+
+					ValkyrieVrSteppingController.this.handleJoystickMessage();
+				} catch (Throwable e) {
+					e.printStackTrace();
+					LogTools.error("Caught exception, stopping animation timer.");
+					stop();
+				}
+			}
+		};
+		System.out.println("End of controller constructor");
 	}
 
 	public double getSwingDuration() {
@@ -226,10 +298,7 @@ public class ValkyrieVrSteppingController {
 		for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++) {
 			FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
 			footstepDataMessage.setSwingHeight(stepParametersReference.get().getSwingHeight());
-			footstepNode.add(createFootstep(footstepDataMessage));
 		}
-		footstepsToVisualizeReference.set(footstepNode);
-		// footstepDataListMessage.setAreFootstepsAdjustable(true);
 		footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
 	}
 
@@ -240,23 +309,6 @@ public class ValkyrieVrSteppingController {
 		}
 		if (!isWalking.get())
 			sendPauseMessage();
-	}
-
-	private Node createFootstep(FootstepDataMessage footstepDataMessage) {
-		RobotSide footSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
-		return createFootstep(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation(),
-				footColors.get(footSide), footPolygons.get(footSide));
-	}
-
-	private Node createFootstep(Point3DReadOnly position, QuaternionReadOnly orientation, Color footColor,
-			ConvexPolygon2DReadOnly footPolygon) {
-		MeshDataHolder polygon = MeshDataGenerator.ExtrudedPolygon(footPolygon, 0.025);
-		polygon = MeshDataHolder.rotate(polygon, orientation);
-		polygon = MeshDataHolder.translate(polygon, position);
-		Mesh mesh = JavaFXMeshDataInterpreter.interpretMeshData(polygon, true);
-		MeshView meshView = new MeshView(mesh);
-		meshView.setMaterial(new PhongMaterial(footColor));
-		return meshView;
 	}
 
 	private boolean isSafeStepHeight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose,
@@ -305,6 +357,11 @@ public class ValkyrieVrSteppingController {
 		PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
 		return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList,
 				tempRegion) != null;
+	}
+
+	protected void handleJoystickMessage() {
+		System.out.printf("Got joystick message (%f, %f, %f)\n", joystickControlMessage.forward_,
+				joystickControlMessage.right_, joystickControlMessage.turn_);
 	}
 
 }
