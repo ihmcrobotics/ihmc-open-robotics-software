@@ -54,8 +54,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoDouble percentageThroughSegment = new YoDouble("percentageThroughSegment", registry);
    private final YoDouble splineQuery = new YoDouble("splineQuery", registry);
 
-   private final YoDouble offsetFromNominalInPlan = new YoDouble("offsetFromNominalInPlan", registry);
-
    private final FramePoint3D transferFromPosition = new FramePoint3D();
    private final FramePoint3D transferToPosition = new FramePoint3D();
    private final YoFramePoint3D yoTransferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -191,7 +189,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       desiredCoMPosition.set(tempFramePoint);
 
-      offsetFromNominalInPlan.set(0.0);
       extraToeOffHeight.set(0.0);
 
       heightOffsetHandler.reset();
@@ -228,7 +225,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       FramePoint3DReadOnly transferToFootstepPosition = transferToAndNextFootstepsData.getTransferToPosition();
-      offsetFromNominalInPlan.set(heightOffsetHandler.getOffsetHeightAboveGround());
       this.extraToeOffHeight.set(extraToeOffHeight);
 
       transferToPosition.setIncludingFrame(transferToFootstepPosition);
@@ -248,7 +244,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       endCoMPosition.setIncludingFrame(transferToFootstepPosition);
       endCoMPosition.changeFrame(frameOfSupportLeg);
       double middleAnkleZ = endCoMPosition.getZ();
-      endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
+      endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue());
 
       double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
       startCoMPosition.setY(midstanceY);
@@ -419,7 +415,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       endWaypoint.setMinMax(endMinHeight, endMaxHeight);
 
       //      startWaypoint.setHeight(MathTools.clamp(startCoMPosition.getZ(), startMinHeight, startMaxHeight));
-      startWaypoint.setHeight(startCoMPosition.getZ());
+      startWaypoint.setHeight(startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       endWaypoint.setHeight(MathTools.clamp(endCoMPosition.getZ(), endMinHeight, endMaxHeight));
    }
 
@@ -464,12 +460,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       heightOffsetHandler.update(splinedHeightTrajectory.getHeightSplineSetpoint());
 
-      handleInitializeToCurrent(point.getY() + heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
+      handleInitializeToCurrent(point.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
 
-      point.addY(heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
+      point.addY(heightOffsetHandler.getOffsetHeightAboveGround());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
-                                                         comHeightPartialDerivativesDataToPack.getComHeight() + heightOffsetHandler.getOffsetHeightAboveGround()
-                                                         - offsetFromNominalInPlan.getDoubleValue());
+                                                         comHeightPartialDerivativesDataToPack.getComHeight() + heightOffsetHandler.getOffsetHeightAboveGround());
 
       this.splineQuery.set(point.getX());
       this.desiredCoMHeight.set(point.getY());
@@ -485,7 +480,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.setToZero(centerOfMassFrame);
       tempFramePoint.changeFrame(frameOfSupportLeg);
 
-      double heightOffset = tempFramePoint.getZ() - normalDesiredHeight;
+      double heightOffset = tempFramePoint.getZ() - normalDesiredHeight + heightOffsetHandler.getOffsetHeightAboveGround();
 
       heightOffsetHandler.initializeToCurrent(heightOffset);
    }
