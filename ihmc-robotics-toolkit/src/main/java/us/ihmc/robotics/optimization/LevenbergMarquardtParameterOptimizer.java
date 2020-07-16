@@ -124,7 +124,10 @@ public class LevenbergMarquardtParameterOptimizer
       }
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
-      return currentOutputSpace.computeCorrespondence();
+      boolean result = currentOutputSpace.computeCorrespondence();
+      currentOutputSpace.computeQuality();
+      
+      return result;
    }
 
    public double iterate()
