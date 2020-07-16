@@ -8,6 +8,9 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FeedbackControllerData;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
@@ -66,6 +69,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
 
+   private final InverseDynamicsCommandList lastFeedbackControllerInverseDynamicsOutput = new InverseDynamicsCommandList();
+   private final InverseKinematicsCommandList lastFeedbackControllerInverseKinematicsOutput = new InverseKinematicsCommandList();
+   private final VirtualModelControlCommandList lastFeedbackControllerVirtualModelControlOutput = new VirtualModelControlCommandList();
+
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
       this(FeedbackControllerSettings.getDefault(), parentRegistry);
@@ -87,6 +94,27 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void registerFeedbackControllerOutput(InverseDynamicsCommandList output)
+   {
+      lastFeedbackControllerInverseDynamicsOutput.set(output);
+      lastFeedbackControllerInverseKinematicsOutput.clear();
+      lastFeedbackControllerVirtualModelControlOutput.clear();
+   }
+
+   public void registerFeedbackControllerOutput(InverseKinematicsCommandList output)
+   {
+      lastFeedbackControllerInverseDynamicsOutput.clear();
+      lastFeedbackControllerInverseKinematicsOutput.set(output);
+      lastFeedbackControllerVirtualModelControlOutput.clear();
+   }
+
+   public void registerFeedbackControllerOutput(VirtualModelControlCommandList output)
+   {
+      lastFeedbackControllerInverseDynamicsOutput.clear();
+      lastFeedbackControllerInverseKinematicsOutput.clear();
+      lastFeedbackControllerVirtualModelControlOutput.set(output);
    }
 
    private SingleFeedbackControllerDataPool getOrCreateCenterOfMassDataPool()
@@ -594,6 +622,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       }
    }
 
+   public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
+   {
+      return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
+   }
+
    @Override
    public boolean getCenterOfMassPositionData(FramePoint3DBasics positionDataToPack, Type type)
    {
@@ -679,9 +712,22 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return true;
    }
 
-   public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
+   @Override
+   public InverseDynamicsCommandList getLastFeedbackControllerInverseDynamicsOutput()
    {
-      return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
+      return lastFeedbackControllerInverseDynamicsOutput;
+   }
+
+   @Override
+   public InverseKinematicsCommandList getLastFeedbackControllerInverseKinematicsOutput()
+   {
+      return lastFeedbackControllerInverseKinematicsOutput;
+   }
+
+   @Override
+   public VirtualModelControlCommandList getLastFeedbackControllerVirtualModelControlOutput()
+   {
+      return lastFeedbackControllerVirtualModelControlOutput;
    }
 
    private static class SingleFeedbackControllerDataPool
