@@ -20,10 +20,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  */
 public class InverseKinematicsCommandList implements InverseKinematicsCommand<InverseKinematicsCommandList>
 {
+   private int commandId;
    /**
     * Internal storage of the commands.
     */
@@ -43,7 +43,7 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
     * </p>
     * 
     * @param command the command to register. The command's reference is saved, no copy is done. Not
-    *           modified.
+    *                modified.
     */
    public void addCommand(InverseKinematicsCommand<?> command)
    {
@@ -60,8 +60,8 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
     * Adds the commands contained in the given list to this list using the method
     * {@link #addCommand(InverseKinematicsCommand)} for each element.
     * 
-    * @param commandList the list of commands to register. The command's reference is saved, no copy
-    *           is done. Not modified.
+    * @param commandList the list of commands to register. The command's reference is saved, no copy is
+    *                    done. Not modified.
     */
    public void addCommandList(InverseKinematicsCommandList commandList)
    {
@@ -77,6 +77,7 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
     */
    public void clear()
    {
+      commandId = 0;
       commandList.clear();
    }
 
@@ -132,6 +133,9 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
    public void set(InverseKinematicsCommandList other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
    }
@@ -148,6 +152,18 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -158,6 +174,8 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
       {
          InverseKinematicsCommandList other = (InverseKinematicsCommandList) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfCommands() != other.getNumberOfCommands())
             return false;
          for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)
