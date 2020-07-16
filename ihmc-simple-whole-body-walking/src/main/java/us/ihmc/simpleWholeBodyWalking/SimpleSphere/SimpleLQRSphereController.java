@@ -73,7 +73,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
       updateFeetState(currentTime);
       updateFeetYoVar();
       dcmPlan.setInitialCenterOfMassState(sphereRobot.getCenterOfMass(), sphereRobot.getCenterOfMassVelocity());
-      dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
+      double timeInPhase = dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
 
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
@@ -81,7 +81,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
       lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
       sphereRobot.getCenterOfMass().get(currentState);
       sphereRobot.getCenterOfMassVelocity().get(3, currentState);
-      lqrMomentumController.computeControlInput(currentState, currentTime);
+      lqrMomentumController.computeControlInput(currentState, timeInPhase);
 
       lqrForce.set(lqrMomentumController.getU());
       lqrForce.addZ(sphereRobot.getGravityZ());
@@ -115,28 +115,30 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
       List<Footstep> footstepList= dcmPlan.getFootstepList();
       List<FootstepTiming> footstepTimingList= dcmPlan.getFootstepTimingList();
       
-      if(currentTime < footstepTimingList.get(0).getExecutionStartTime())
+      if(!(footstepTimingList.size()==0))
       {
-         for (RobotSide robotSide : RobotSide.values)
-            currentFeetInContact.add(robotSide);
-         //Simulation is in transfer prior to beginning steps, keep initial footstepPose
-         return;
-      }
-      for (int i = 0; i < footstepTimingList.size(); i++)
-      {
-         double swingStartTime = footstepTimingList.get(i).getExecutionStartTime() + footstepTimingList.get(i).getSwingStartTime();
-         double swingEndTime = swingStartTime + footstepTimingList.get(i).getSwingTime();
-         //Note: if current time = a transition time then it should be in the next state, as that is what the CSPUpdater does
-         if (MathTools.intervalContains(currentTime, swingStartTime, swingEndTime, 0.00001, true, false))
+         if(currentTime < footstepTimingList.get(0).getExecutionStartTime())
          {
-            //Robot is in swing
-            currentFeetInContact.add(footstepList.get(i).getRobotSide().getOppositeSide());
-            sphereRobot.updateSoleFrame(footstepList.get(i).getRobotSide(), footstepList.get(i).getFootstepPose().getPosition());               
+            for (RobotSide robotSide : RobotSide.values)
+               currentFeetInContact.add(robotSide);
+            //Simulation is in transfer prior to beginning steps, keep initial footstepPose
             return;
          }
-            
+         for (int i = 0; i < footstepTimingList.size(); i++)
+         {
+            double swingStartTime = footstepTimingList.get(i).getExecutionStartTime() + footstepTimingList.get(i).getSwingStartTime();
+            double swingEndTime = swingStartTime + footstepTimingList.get(i).getSwingTime();
+            //Note: if current time = a transition time then it should be in the next state, as that is what the CSPUpdater does
+            if (MathTools.intervalContains(currentTime, swingStartTime, swingEndTime, 0.00001, true, false))
+            {
+               //Robot is in swing
+               currentFeetInContact.add(footstepList.get(i).getRobotSide().getOppositeSide());
+               sphereRobot.updateSoleFrame(footstepList.get(i).getRobotSide(), footstepList.get(i).getFootstepPose().getPosition());               
+               return;
+            }
+         }         
       }
-      //Simulation has finished all planned steps or is in transfer
+      //Simulation is in transfer, has finished all planned steps or has no planned steps
       for (RobotSide robotSide : RobotSide.values)
          currentFeetInContact.add(robotSide);
       return;

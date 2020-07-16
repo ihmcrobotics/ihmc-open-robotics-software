@@ -57,13 +57,6 @@ import java.util.List;
  * </p>
  */
 
-/*
- * 1. instantiated with a sideDependentList of SoleFrames (  ), gravity, nominal height, omega0, parent Registry, and yographics registry
- * 2. Add footsteps (footstep and footsteptiming) to the step sequence
- * 3. List of contact state providers created for the SimpleBipedCoMTrajectoryPlanner
- * 4. Solve for trajectory in the planner
- * 5. Compute the planner to get the desired vrp and such
- */
 public class SimpleBipedCoMTrajectoryPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -110,8 +103,9 @@ public class SimpleBipedCoMTrajectoryPlanner
       sequenceUpdater.initialize();
    }
 
-   public void computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
+   public double computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
    {
+      trimPastSteps(currentTime);
       sequenceUpdater.update(footstepList, footstepTimingList, currentFeetInContact, currentTime);
 
       double timeInPhase = currentTime - sequenceUpdater.getAbsoluteContactSequence().get(0).getTimeInterval().getStartTime();
@@ -119,6 +113,28 @@ public class SimpleBipedCoMTrajectoryPlanner
 
       comTrajectoryPlanner.solveForTrajectory(sequenceUpdater.getContactSequence());
       comTrajectoryPlanner.compute(timeInContactPhase.getDoubleValue());
+      
+      return timeInPhase;
+   }
+
+   private void trimPastSteps(double currentTime)
+   {
+      int i = 0;
+      while (i<footstepList.size())
+      {
+         double stepEndTime = footstepTimingList.get(i).getExecutionStartTime() + footstepTimingList.get(i).getSwingStartTime()
+               + footstepTimingList.get(i).getStepTime();
+         if (stepEndTime < currentTime)
+         {
+            footstepList.remove(i);
+            footstepTimingList.remove(i);
+         }
+         else
+         {
+            i++;
+         }
+      }
+      
    }
 
    public FramePoint3DReadOnly getDesiredDCMPosition()
