@@ -261,7 +261,7 @@ public class SimpleSphereRobot
    }
 
 
-   public void initRobot(Vector3DReadOnly initialPosition, Vector3DReadOnly initialVelocity)
+   public void initRobot(Vector3DReadOnly initialPosition, double initialStancewidth, Vector3DReadOnly initialVelocity)
    {
       scsRobot.getYoTime().set(0.0);
 
@@ -288,9 +288,9 @@ public class SimpleSphereRobot
       qd_y.set(initialVelocity.getY());
       qd_z.set(initialVelocity.getZ());
 
-      q_qs.set(0.707106);
+      q_qs.set(1);
       q_qx.set(0.0);
-      q_qy.set(0.707106);
+      q_qy.set(0.0);
       q_qz.set(0.0);
 
       qd_wx.set(0.0);
@@ -303,6 +303,14 @@ public class SimpleSphereRobot
       updateJointVelocities_SCS_to_ID();
 
       updateFrames();
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Vector3D translation = new Vector3D();
+         translation.setX(initialPosition.getX());
+         translation.setY(initialPosition.getY() + robotSide.negateIfRightSide(initialStancewidth / 2));
+         soleFramesForModifying.get(robotSide).updateTranslation(translation);
+      }
    }
 
    public void updateJointPositions_SCS_to_ID()
@@ -331,7 +339,7 @@ public class SimpleSphereRobot
    }
    
    //Create SoleFrames to feed into the Planner
-   private static SideDependentList<TranslationMovingReferenceFrame> createSoleFrames()
+   public SideDependentList<TranslationMovingReferenceFrame> createSoleFrames()
    {
       double stepWidth = 0.3;
       
@@ -352,6 +360,11 @@ public class SimpleSphereRobot
    public SideDependentList<MovingReferenceFrame> getSoleFrames()
    {
       return soleFrames;
+   }
+   
+   public SideDependentList<TranslationMovingReferenceFrame> getSoleFramesForModifying()
+   {
+      return soleFramesForModifying;
    }
    
    public void updateSoleFrame(RobotSide robotSide, FramePoint3DReadOnly newPosition)

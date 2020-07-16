@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,6 +14,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -38,6 +42,8 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
    private final YoFrameVector3D vrpForces = new YoFrameVector3D("vrpForces", ReferenceFrame.getWorldFrame(), registry);
 
    private final SimpleBipedCoMTrajectoryPlanner dcmPlan;
+   
+   private final List<RobotSide> currentFeetInContact = new ArrayList<>();
 
    public SimpleBasicSphereController(SimpleSphereRobot sphereRobot, SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -72,7 +78,10 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
 
       sphereRobot.updateFrames();
 
-      dcmPlan.compute(sphereRobot.getScsRobot().getYoTime().getDoubleValue(), sphereRobot.getCenterOfMass());
+      double currentTime = sphereRobot.getScsRobot().getYoTime().getDoubleValue();
+      updateFeetState(currentTime);
+      dcmPlan.setInitialCenterOfMassState(sphereRobot.getCenterOfMass(), sphereRobot.getCenterOfMassVelocity());
+      dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
       
       double check = 0;
       if(sphereRobot.getScsRobot().getYoTime().getDoubleValue()>=1.65)
@@ -106,6 +115,40 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       sphereRobot.updateJointTorques_ID_to_SCS();
    }
 
+   private void updateFeetState(double currentTime)
+   {
+      currentFeetInContact.clear();
+      
+      List<Footstep> footstepList= dcmPlan.getFootstepList();
+      List<FootstepTiming> footstepTimingList= dcmPlan.getFootstepTimingList();
+      
+      if(currentTime < footstepTimingList.get(0).getExecutionStartTime())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+            currentFeetInContact.add(robotSide);
+         //Simulation is in transfer prior to beginning steps, keep initial footstepPose
+         return;
+      }
+      for (int i = 0; i < footstepTimingList.size(); i++)
+      {
+         double swingStartTime = footstepTimingList.get(i).getExecutionStartTime() + footstepTimingList.get(i).getSwingStartTime();
+         double swingEndTime = swingStartTime + footstepTimingList.get(i).getSwingTime();
+         //Note: if current time = a transition time then it should be in the next state, as that is what the CSPUpdater does
+         if (MathTools.intervalContains(currentTime, swingStartTime, swingEndTime, 0.00001, true, false))
+         {
+            //Robot is in swing
+            currentFeetInContact.add(footstepList.get(i).getRobotSide().getOppositeSide());
+            sphereRobot.updateSoleFrame(footstepList.get(i).getRobotSide(), footstepList.get(i).getFootstepPose().getPosition());               
+            return;
+         }
+            
+      }
+      //Simulation has finished all planned steps or is in transfer
+      for (RobotSide robotSide : RobotSide.values)
+         currentFeetInContact.add(robotSide);
+      return;
+   }
+   
    @Override
    public void initialize()
    {
@@ -114,7 +157,10 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
    public void solveForTrajectory()
    {
       dcmPlan.initialize();
-      dcmPlan.solveForTrajectory(sphereRobot.getScsRobot().getYoTime().getDoubleValue(), sphereRobot.getCenterOfMass());
+      double currentTime = sphereRobot.getScsRobot().getYoTime().getDoubleValue();
+      updateFeetState(currentTime);
+      dcmPlan.setInitialCenterOfMassState(sphereRobot.getCenterOfMass(), sphereRobot.getCenterOfMassVelocity());
+      dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
    }
 
    @Override

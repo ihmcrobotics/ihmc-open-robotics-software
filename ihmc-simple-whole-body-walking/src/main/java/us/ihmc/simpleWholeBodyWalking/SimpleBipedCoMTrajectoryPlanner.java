@@ -75,14 +75,7 @@ public class SimpleBipedCoMTrajectoryPlanner
    
    private final List<Footstep> footstepList = new ArrayList<>();
    private final List<FootstepTiming> footstepTimingList = new ArrayList<>();
-   private final List<RobotSide> feetInContact = new ArrayList<>();
-   
-   protected final YoEnum<RobotSide> transferToSide = new YoEnum<>("TransferToSide", registry, RobotSide.class, true);
-   protected final YoEnum<RobotSide> previousTransferToSide = new YoEnum<>("PreviousTransferToSide", registry, RobotSide.class, true);
-   protected final YoEnum<RobotSide> supportSide = new YoEnum<>("SupportSide", registry, RobotSide.class, true);
-   
-   //protected final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
-   
+     
    //Sole frames pass in the reference frames attached to the center of the bottom of the foot. Can be used to get the current 
    public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, double gravityZ, double nominalCoMHeight,
                                           DoubleProvider omega0, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -117,7 +110,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       sequenceUpdater.initialize();
    }
 
-   void computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
+   public void computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
    {
       sequenceUpdater.update(footstepList, footstepTimingList, currentFeetInContact, currentTime);
 
@@ -163,5 +156,14 @@ public class SimpleBipedCoMTrajectoryPlanner
       return ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).getVRPTrajectories();
    }
    
+   public List<Footstep> getFootstepList()
+   {
+      return footstepList;
+   }
+   
+   public List<FootstepTiming> getFootstepTimingList()
+   {
+      return footstepTimingList;
+   }
 }
 
