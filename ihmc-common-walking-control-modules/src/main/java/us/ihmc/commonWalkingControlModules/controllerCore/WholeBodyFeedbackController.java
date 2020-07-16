@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WholeBodyFeedbackController
 {
@@ -36,10 +37,12 @@ public class WholeBodyFeedbackController
 
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
+   private final YoBoolean dynamicControllerConstructionEnabled = new YoBoolean("dynamicControllerConstructionEnabled", registry);
+
    private CenterOfMassFeedbackController centerOfMassFeedbackController;
-   private final Map<RigidBodyBasics, SpatialFeedbackController> spatialFeedbackControllerMap = new HashMap<>();
-   private final Map<RigidBodyBasics, PointFeedbackController> pointFeedbackControllerMap = new HashMap<>();
-   private final Map<RigidBodyBasics, OrientationFeedbackController> orientationFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, List<SpatialFeedbackController>> spatialFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, List<PointFeedbackController>> pointFeedbackControllerMap = new HashMap<>();
+   private final Map<RigidBodyBasics, List<OrientationFeedbackController>> orientationFeedbackControllerMap = new HashMap<>();
    private final Map<OneDoFJointBasics, OneDoFJointFeedbackController> oneDoFJointFeedbackControllerMap = new HashMap<>();
 
    private final WholeBodyControlCoreToolbox coreToolbox;
@@ -52,7 +55,7 @@ public class WholeBodyFeedbackController
                                       YoVariableRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
-      this.feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);
+      feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);
 
       if (feedbackControllerTemplate == null)
          return;
@@ -64,6 +67,7 @@ public class WholeBodyFeedbackController
 
    private void registerControllers(FeedbackControllerTemplate template)
    {
+      dynamicControllerConstructionEnabled.set(template.isDynamicControllerConstructionAllowed());
       template.getSpatialFeedbackControllerTemplate().forEach(this::registerSpatialControllers);
       template.getPointFeedbackControllerTemplate().forEach(this::registerPointControllers);
       template.getOrientationFeedbackControllerTemplate().forEach(this::registerOrientationControllers);
@@ -74,39 +78,49 @@ public class WholeBodyFeedbackController
 
    private void registerSpatialControllers(RigidBodyBasics endEffector, int numberOfControllers)
    {
-      if (spatialFeedbackControllerMap.containsKey(endEffector))
-         return;
+      List<SpatialFeedbackController> endEffectorControllers = new ArrayList<>();
+      spatialFeedbackControllerMap.put(endEffector, endEffectorControllers);
 
-      SpatialFeedbackController controller = new SpatialFeedbackController(endEffector, coreToolbox, feedbackControllerToolbox, registry);
-      spatialFeedbackControllerMap.put(endEffector, controller);
-      allControllers.add(controller);
+      for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
+      {
+         SpatialFeedbackController controller = new SpatialFeedbackController(endEffector, controllerIndex, coreToolbox, feedbackControllerToolbox, registry);
+         endEffectorControllers.add(controller);
+         allControllers.add(controller);
+      }
    }
 
    private void registerPointControllers(RigidBodyBasics endEffector, int numberOfControllers)
    {
-      if (pointFeedbackControllerMap.containsKey(endEffector))
-         return;
+      List<PointFeedbackController> endEffectorControllers = new ArrayList<>();
+      pointFeedbackControllerMap.put(endEffector, endEffectorControllers);
 
-      PointFeedbackController controller = new PointFeedbackController(endEffector, coreToolbox, feedbackControllerToolbox, registry);
-      pointFeedbackControllerMap.put(endEffector, controller);
-      allControllers.add(controller);
+      for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
+      {
+         PointFeedbackController controller = new PointFeedbackController(endEffector, controllerIndex, coreToolbox, feedbackControllerToolbox, registry);
+         endEffectorControllers.add(controller);
+         allControllers.add(controller);
+      }
    }
 
    private void registerOrientationControllers(RigidBodyBasics endEffector, int numberOfControllers)
    {
-      if (orientationFeedbackControllerMap.containsKey(endEffector))
-         return;
+      List<OrientationFeedbackController> endEffectorControllers = new ArrayList<>();
+      orientationFeedbackControllerMap.put(endEffector, endEffectorControllers);
 
-      OrientationFeedbackController controller = new OrientationFeedbackController(endEffector, coreToolbox, feedbackControllerToolbox, registry);
-      orientationFeedbackControllerMap.put(endEffector, controller);
-      allControllers.add(controller);
+      for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
+      {
+         OrientationFeedbackController controller = new OrientationFeedbackController(endEffector,
+                                                                                      controllerIndex,
+                                                                                      coreToolbox,
+                                                                                      feedbackControllerToolbox,
+                                                                                      registry);
+         endEffectorControllers.add(controller);
+         allControllers.add(controller);
+      }
    }
 
    private void registerOneDoFJointControllers(OneDoFJointBasics joint)
    {
-      if (oneDoFJointFeedbackControllerMap.containsKey(joint))
-         return;
-
       OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, feedbackControllerToolbox, registry);
       oneDoFJointFeedbackControllerMap.put(joint, controller);
       allControllers.add(controller);
@@ -247,7 +261,7 @@ public class WholeBodyFeedbackController
                submitFeedbackControlCommandList(activeControlMode, (FeedbackControlCommandList) feedbackControlCommand);
                break;
             default:
-               throw new RuntimeException("The command type: " + commandType + " is not handled.");
+               throw new IllegalStateException("The command type: " + commandType + " is not handled.");
          }
       }
    }
@@ -256,33 +270,186 @@ public class WholeBodyFeedbackController
    {
       checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
-      SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
-      if (controller.isEnabled())
-         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
-      controller.submitFeedbackControlCommand(feedbackControlCommand);
-      controller.setEnabled(true);
+      List<SpatialFeedbackController> endEffectorControllers = spatialFeedbackControllerMap.get(endEffector);
+
+      SpatialFeedbackController nextControllerAvailable = null;
+
+      for (int controllerIndex = 0; controllerIndex < endEffectorControllers.size(); controllerIndex++)
+      {
+         SpatialFeedbackController controller = endEffectorControllers.get(controllerIndex);
+         if (controller.isEnabled())
+            continue;
+
+         if (isOrientationControllerCreatedAndEnabled(endEffector, controllerIndex))
+            continue; // The orientation controller and the spatial controller share data => cannot be used at the same time.
+         if (isPointControllerCreatedAndEnabled(endEffector, controllerIndex))
+            continue; // The point controller and the spatial controller share data => cannot be used at the same time.
+
+         nextControllerAvailable = controller;
+      }
+
+      if (nextControllerAvailable == null)
+      {
+         if (!dynamicControllerConstructionEnabled.getValue())
+         {
+            throw new IllegalStateException("Could not find a controller available for the end-effector: " + endEffector.getName() + ", number of controllers: "
+                  + endEffectorControllers.size());
+         }
+         else
+         {
+            while (nextControllerAvailable == null)
+            {
+               int controllerIndex = endEffectorControllers.size();
+               SpatialFeedbackController controller = new SpatialFeedbackController(endEffector,
+                                                                                    controllerIndex,
+                                                                                    coreToolbox,
+                                                                                    feedbackControllerToolbox,
+                                                                                    registry);
+               endEffectorControllers.add(controller);
+               allControllers.add(controller);
+
+               if (isOrientationControllerCreatedAndEnabled(endEffector, controllerIndex))
+                  continue; // The orientation controller and the spatial controller share data => cannot be used at the same time.
+               if (isPointControllerCreatedAndEnabled(endEffector, controllerIndex))
+                  continue; // The point controller and the spatial controller share data => cannot be used at the same time.
+
+               nextControllerAvailable = controller;
+            }
+         }
+      }
+
+      nextControllerAvailable.submitFeedbackControlCommand(feedbackControlCommand);
+      nextControllerAvailable.setEnabled(true);
    }
 
    private void submitPointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, PointFeedbackControlCommand feedbackControlCommand)
    {
       checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
-      PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
-      if (controller.isEnabled())
-         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
-      controller.submitFeedbackControlCommand(feedbackControlCommand);
-      controller.setEnabled(true);
+      List<PointFeedbackController> endEffectorControllers = pointFeedbackControllerMap.get(endEffector);
+
+      PointFeedbackController nextControllerAvailable = null;
+
+      for (int controllerIndex = 0; controllerIndex < endEffectorControllers.size(); controllerIndex++)
+      {
+         PointFeedbackController controller = endEffectorControllers.get(controllerIndex);
+         if (controller.isEnabled())
+            continue;
+
+         if (isSpatialControllerCreatedAndEnabled(endEffector, controllerIndex))
+            continue; // The point controller and the spatial controller share data => cannot be used at the same time.
+
+         nextControllerAvailable = controller;
+      }
+
+      if (nextControllerAvailable == null)
+      {
+         if (!dynamicControllerConstructionEnabled.getValue())
+         {
+            throw new IllegalStateException("Could not find a controller available for the end-effector: " + endEffector.getName() + ", number of controllers: "
+                  + endEffectorControllers.size());
+         }
+         else
+         {
+            while (nextControllerAvailable == null)
+            {
+               int controllerIndex = endEffectorControllers.size();
+               PointFeedbackController controller = new PointFeedbackController(endEffector, controllerIndex, coreToolbox, feedbackControllerToolbox, registry);
+               endEffectorControllers.add(controller);
+               allControllers.add(controller);
+
+               if (isSpatialControllerCreatedAndEnabled(endEffector, controllerIndex))
+                  continue; // The point controller and the spatial controller share data => cannot be used at the same time.
+
+               nextControllerAvailable = controller;
+            }
+         }
+      }
+
+      nextControllerAvailable.submitFeedbackControlCommand(feedbackControlCommand);
+      nextControllerAvailable.setEnabled(true);
    }
 
    private void submitOrientationFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OrientationFeedbackControlCommand feedbackControlCommand)
    {
       checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
-      OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
-      if (controller.isEnabled())
-         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
-      controller.submitFeedbackControlCommand(feedbackControlCommand);
-      controller.setEnabled(true);
+      List<OrientationFeedbackController> endEffectorControllers = orientationFeedbackControllerMap.get(endEffector);
+
+      OrientationFeedbackController nextControllerAvailable = null;
+
+      for (int controllerIndex = 0; controllerIndex < endEffectorControllers.size(); controllerIndex++)
+      {
+         OrientationFeedbackController controller = endEffectorControllers.get(controllerIndex);
+         if (controller.isEnabled())
+            continue;
+
+         if (isSpatialControllerCreatedAndEnabled(endEffector, controllerIndex))
+            continue; // The orientation controller and the spatial controller share data => cannot be used at the same time.
+
+         nextControllerAvailable = controller;
+      }
+
+      if (nextControllerAvailable == null)
+      {
+         if (!dynamicControllerConstructionEnabled.getValue())
+         {
+            throw new IllegalStateException("Could not find a controller available for the end-effector: " + endEffector.getName() + ", number of controllers: "
+                  + endEffectorControllers.size());
+         }
+         else
+         {
+            while (nextControllerAvailable == null)
+            {
+               int controllerIndex = endEffectorControllers.size();
+               OrientationFeedbackController controller = new OrientationFeedbackController(endEffector,
+                                                                                            controllerIndex,
+                                                                                            coreToolbox,
+                                                                                            feedbackControllerToolbox,
+                                                                                            registry);
+               endEffectorControllers.add(controller);
+               allControllers.add(controller);
+
+               if (isSpatialControllerCreatedAndEnabled(endEffector, controllerIndex))
+                  continue; // The orientation controller and the spatial controller share data => cannot be used at the same time.
+
+               nextControllerAvailable = controller;
+            }
+         }
+      }
+
+      nextControllerAvailable.submitFeedbackControlCommand(feedbackControlCommand);
+      nextControllerAvailable.setEnabled(true);
+   }
+
+   private boolean isSpatialControllerCreatedAndEnabled(RigidBodyBasics endEffector, int controllerIndex)
+   {
+      List<SpatialFeedbackController> endEffectorControllers = spatialFeedbackControllerMap.get(endEffector);
+      if (endEffectorControllers == null)
+         return false;
+      if (endEffectorControllers.size() <= controllerIndex)
+         return false;
+      return endEffectorControllers.get(controllerIndex).isEnabled();
+   }
+
+   private boolean isPointControllerCreatedAndEnabled(RigidBodyBasics endEffector, int controllerIndex)
+   {
+      List<PointFeedbackController> endEffectorControllers = pointFeedbackControllerMap.get(endEffector);
+      if (endEffectorControllers == null)
+         return false;
+      if (endEffectorControllers.size() <= controllerIndex)
+         return false;
+      return endEffectorControllers.get(controllerIndex).isEnabled();
+   }
+
+   private boolean isOrientationControllerCreatedAndEnabled(RigidBodyBasics endEffector, int controllerIndex)
+   {
+      List<OrientationFeedbackController> endEffectorControllers = orientationFeedbackControllerMap.get(endEffector);
+      if (endEffectorControllers == null)
+         return false;
+      if (endEffectorControllers.size() <= controllerIndex)
+         return false;
+      return endEffectorControllers.get(controllerIndex).isEnabled();
    }
 
    private void submitOneDoFJointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OneDoFJointFeedbackControlCommand feedbackControlCommand)
