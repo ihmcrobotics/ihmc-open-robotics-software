@@ -49,7 +49,7 @@ import java.util.List;
 public class SimpleLQRMomentumControllerSimulation
 {
    // From previous simulation
-   private static final boolean include1 = true;
+   private static final boolean include1 = false;
    private static final boolean include2 = true;
 
    private final static double desiredHeight = 0.75;
@@ -73,8 +73,6 @@ public class SimpleLQRMomentumControllerSimulation
    
    private final SimpleSphereControllerInterface controller1;
    private final SimpleSphereControllerInterface controller2;
-
-   private static List<Vector3D> initialPositions = new ArrayList<>();
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -84,14 +82,12 @@ public class SimpleLQRMomentumControllerSimulation
       YoGraphicsListRegistry yoGraphicsListRegistry1, yoGraphicsListRegistry2;
       if (include1)
       {
-         initialPositions.get(0).set(new Vector3D(0.0, 0.0, desiredHeight));
+         Vector3D initialPosition1 = new Vector3D(0.0, 0.0, desiredHeight);
          yoGraphicsListRegistry1 = new YoGraphicsListRegistry();
          SimpleSphereRobot sphereRobot1 = new SimpleSphereRobot(0,"SphereRobot1", gravity, controlDT, desiredHeight, yoGraphicsListRegistry1);
-         sphereRobot1.initRobot(initialPositions.get(0), new Vector3D());
+         sphereRobot1.initRobot(initialPosition1, stepWidth, new Vector3D());
 
          robots.add(sphereRobot1.getScsRobot());
-
-         YoVariableRegistry registry = sphereRobot1.getScsRobot().getRobotsYoVariableRegistry();
          SimpleBipedCoMTrajectoryPlanner dcmPlan1 = new SimpleBipedCoMTrajectoryPlanner(sphereRobot1.getSoleFrames(),
                                                                                        gravity,
                                                                                        sphereRobot1.getDesiredHeight(),
@@ -99,7 +95,7 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                        sphereRobot1.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry1);
          //This step actually add the footstep plan to the BipedPlanner
-         AddFootstepAndTimingStepsToDCMPlan(dcmPlan1, initialPositions.get(0));
+         addFootstepandTimingStepsToDCMPlan(dcmPlan1, initialPosition1);
          controller1 = new SimpleBasicSphereController(sphereRobot1, dcmPlan1, yoGraphicsListRegistry1);
          controller1.solveForTrajectory();
          setupGroundContactModel(sphereRobot1.getScsRobot());
@@ -112,14 +108,12 @@ public class SimpleLQRMomentumControllerSimulation
 
       if (include2)
       {
-         initialPositions.get(1).set(new Vector3D(0.0, 0.5, desiredHeight));
+         Vector3D initialPosition2 = new Vector3D(0.0, 0.5, desiredHeight);
          yoGraphicsListRegistry2 = new YoGraphicsListRegistry();
          SimpleSphereRobot sphereRobot2 = new SimpleSphereRobot(1, "SphereRobot2", gravity, controlDT, desiredHeight, yoGraphicsListRegistry2);
-         sphereRobot2.initRobot(initialPositions.get(1), new Vector3D());
+         sphereRobot2.initRobot(initialPosition2, stepWidth, new Vector3D());
 
          robots.add(sphereRobot2.getScsRobot());
-
-         YoVariableRegistry registry = sphereRobot2.getScsRobot().getRobotsYoVariableRegistry();
          SimpleBipedCoMTrajectoryPlanner dcmPlan2 = new SimpleBipedCoMTrajectoryPlanner(sphereRobot2.getSoleFrames(),
                                                                                         gravity,
                                                                                         sphereRobot2.getDesiredHeight(),
@@ -127,7 +121,7 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                         sphereRobot2.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                         yoGraphicsListRegistry2);
          //This step actually add the footstep plan to the BipedPlanner
-         AddFootstepAndTimingStepsToDCMPlan(dcmPlan2, initialPositions.get(1));
+         addFootstepandTimingStepsToDCMPlan(dcmPlan2, initialPosition2);
          
          controller2 = new SimpleLQRSphereController(sphereRobot2, dcmPlan2, yoGraphicsListRegistry2);
          controller2.solveForTrajectory();
@@ -195,7 +189,7 @@ public class SimpleLQRMomentumControllerSimulation
     * this swing foot. The swing takes swingDuration time, then the double support takes transitionDuration where
     * the COP moves from previous foot to new (formerly swinging) foot.
     */
-   private static void AddFootstepAndTimingStepsToDCMPlan(SimpleBipedCoMTrajectoryPlanner dcmPlan, Vector3DReadOnly shift)
+   private static void addFootstepandTimingStepsToDCMPlan(SimpleBipedCoMTrajectoryPlanner dcmPlan, Vector3DReadOnly shift)
    {
       FootstepShiftFractions newShiftFractions = 
             new FootstepShiftFractions(swingDurationShiftFraction,swingSplitFraction,
