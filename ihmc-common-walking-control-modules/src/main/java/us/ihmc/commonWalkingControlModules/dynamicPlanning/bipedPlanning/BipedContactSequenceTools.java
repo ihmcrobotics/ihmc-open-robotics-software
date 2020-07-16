@@ -85,6 +85,49 @@ public class BipedContactSequenceTools
       // remove any transitions that already happened
       stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() < currentTime);
    }
+   
+   /**
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    */
+   public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
+                                                             List<? extends BipedTimedStep> stepSequence, int stepsToConsider)
+   {
+      stepTransitionsToPack.clear();
+      for (int i = 0; i < Math.min(stepSequence.size(), stepsToConsider); i++)
+      {
+         BipedTimedStep step = stepSequence.get(i);
+
+         if (step.getTimeInterval().getStartTime() >= currentTime)
+         {
+            BipedStepTransition stepTransition = stepTransitionsToPack.add();
+            stepTransition.reset();
+
+            stepTransition.setTransitionTime(step.getTimeInterval().getStartTime());
+
+            stepTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getGoalPose());
+         }
+
+         if (step.getTimeInterval().getEndTime() >= currentTime)
+         {
+            BipedStepTransition stepTransition = stepTransitionsToPack.add();
+            stepTransition.reset();
+
+            stepTransition.setTransitionTime(step.getTimeInterval().getEndTime());
+            stepTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getGoalPose());
+         }
+      }
+
+      // sort step transitions in ascending order as a function of time
+      stepTransitionsToPack.sort(Comparator.comparingDouble(BipedStepTransition::getTransitionTime));
+
+      // collapse the transitions that occur at the same time
+      BipedContactSequenceTools.collapseTransitionEvents(stepTransitionsToPack);
+
+      // remove any transitions that already happened
+      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() < currentTime);
+   }
 
    public static void trimPastContactSequences(RecyclingArrayList<SimpleBipedContactPhase> contactSequenceToPack, double currentTime,
                                                List<RobotSide> currentFeetInContact, SideDependentList<? extends FramePose3DReadOnly> currentSolePoses)
