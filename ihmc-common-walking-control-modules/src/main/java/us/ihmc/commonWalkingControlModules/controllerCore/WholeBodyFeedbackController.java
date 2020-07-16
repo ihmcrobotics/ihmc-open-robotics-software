@@ -48,56 +48,32 @@ public class WholeBodyFeedbackController
    private final ExecutionTimer feedbackControllerTimer = new ExecutionTimer("wholeBodyFeedbackControllerTimer", 1.0, registry);
    private final ExecutionTimer achievedComputationTimer = new ExecutionTimer("achievedComputationTimer", 1.0, registry);
 
-   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControlCommandList allPossibleCommands,
+   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControllerTemplate feedbackControllerTemplate,
                                       YoVariableRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
       this.feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);
 
-      if (allPossibleCommands == null)
+      if (feedbackControllerTemplate == null)
          return;
 
-      registerControllers(allPossibleCommands);
+      registerControllers(feedbackControllerTemplate);
 
       parentRegistry.addChild(registry);
    }
 
-   private void registerControllers(FeedbackControlCommandList allPossibleCommands)
+   private void registerControllers(FeedbackControllerTemplate template)
    {
-      for (int i = 0; i < allPossibleCommands.getNumberOfCommands(); i++)
-      {
-         FeedbackControlCommand<?> commandExample = allPossibleCommands.getCommand(i);
-         ControllerCoreCommandType commandType = commandExample.getCommandType();
-         switch (commandType)
-         {
-         case TASKSPACE:
-            registerSpatialControllers((SpatialFeedbackControlCommand) commandExample);
-            break;
-         case POINT:
-            registerPointControllers((PointFeedbackControlCommand) commandExample);
-            break;
-         case ORIENTATION:
-            registerOrientationControllers((OrientationFeedbackControlCommand) commandExample);
-            break;
-         case JOINTSPACE:
-            registerOneDoFJointControllers((OneDoFJointFeedbackControlCommand) commandExample);
-            break;
-         case MOMENTUM:
-            registerCenterOfMassController((CenterOfMassFeedbackControlCommand) commandExample);
-            break;
-         case COMMAND_LIST:
-            registerControllers((FeedbackControlCommandList) commandExample);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + commandExample.getCommandType() + " is not handled.");
-         }
-      }
+      template.getSpatialFeedbackControllerTemplate().forEach(this::registerSpatialControllers);
+      template.getPointFeedbackControllerTemplate().forEach(this::registerPointControllers);
+      template.getOrientationFeedbackControllerTemplate().forEach(this::registerOrientationControllers);
+      template.getOneDoFJointFeedbackControllerTemplate().forEach(this::registerOneDoFJointControllers);
+      if (template.isCenterOfMassFeedbackControllerEnabled())
+         registerCenterOfMassController();
    }
 
-   private void registerSpatialControllers(SpatialFeedbackControlCommand commandExample)
+   private void registerSpatialControllers(RigidBodyBasics endEffector, int numberOfControllers)
    {
-      RigidBodyBasics endEffector = commandExample.getEndEffector();
-
       if (spatialFeedbackControllerMap.containsKey(endEffector))
          return;
 
@@ -106,10 +82,8 @@ public class WholeBodyFeedbackController
       allControllers.add(controller);
    }
 
-   private void registerPointControllers(PointFeedbackControlCommand commandExample)
+   private void registerPointControllers(RigidBodyBasics endEffector, int numberOfControllers)
    {
-      RigidBodyBasics endEffector = commandExample.getEndEffector();
-
       if (pointFeedbackControllerMap.containsKey(endEffector))
          return;
 
@@ -118,10 +92,8 @@ public class WholeBodyFeedbackController
       allControllers.add(controller);
    }
 
-   private void registerOrientationControllers(OrientationFeedbackControlCommand commandExample)
+   private void registerOrientationControllers(RigidBodyBasics endEffector, int numberOfControllers)
    {
-      RigidBodyBasics endEffector = commandExample.getEndEffector();
-
       if (orientationFeedbackControllerMap.containsKey(endEffector))
          return;
 
@@ -130,9 +102,8 @@ public class WholeBodyFeedbackController
       allControllers.add(controller);
    }
 
-   private void registerOneDoFJointControllers(OneDoFJointFeedbackControlCommand commandExample)
+   private void registerOneDoFJointControllers(OneDoFJointBasics joint)
    {
-      OneDoFJointBasics joint = commandExample.getJoint();
       if (oneDoFJointFeedbackControllerMap.containsKey(joint))
          return;
 
@@ -141,7 +112,7 @@ public class WholeBodyFeedbackController
       allControllers.add(controller);
    }
 
-   private void registerCenterOfMassController(CenterOfMassFeedbackControlCommand commandExample)
+   private void registerCenterOfMassController()
    {
       if (centerOfMassFeedbackController != null)
          return;
@@ -257,26 +228,26 @@ public class WholeBodyFeedbackController
          ControllerCoreCommandType commandType = feedbackControlCommand.getCommandType();
          switch (commandType)
          {
-         case TASKSPACE:
-            submitSpatialFeedbackControlCommand(activeControlMode, (SpatialFeedbackControlCommand) feedbackControlCommand);
-            break;
-         case POINT:
-            submitPointFeedbackControlCommand(activeControlMode, (PointFeedbackControlCommand) feedbackControlCommand);
-            break;
-         case ORIENTATION:
-            submitOrientationFeedbackControlCommand(activeControlMode, (OrientationFeedbackControlCommand) feedbackControlCommand);
-            break;
-         case JOINTSPACE:
-            submitOneDoFJointFeedbackControlCommand(activeControlMode, (OneDoFJointFeedbackControlCommand) feedbackControlCommand);
-            break;
-         case MOMENTUM:
-            submitCenterOfMassFeedbackControlCommand(activeControlMode, (CenterOfMassFeedbackControlCommand) feedbackControlCommand);
-            break;
-         case COMMAND_LIST:
-            submitFeedbackControlCommandList(activeControlMode, (FeedbackControlCommandList) feedbackControlCommand);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + commandType + " is not handled.");
+            case TASKSPACE:
+               submitSpatialFeedbackControlCommand(activeControlMode, (SpatialFeedbackControlCommand) feedbackControlCommand);
+               break;
+            case POINT:
+               submitPointFeedbackControlCommand(activeControlMode, (PointFeedbackControlCommand) feedbackControlCommand);
+               break;
+            case ORIENTATION:
+               submitOrientationFeedbackControlCommand(activeControlMode, (OrientationFeedbackControlCommand) feedbackControlCommand);
+               break;
+            case JOINTSPACE:
+               submitOneDoFJointFeedbackControlCommand(activeControlMode, (OneDoFJointFeedbackControlCommand) feedbackControlCommand);
+               break;
+            case MOMENTUM:
+               submitCenterOfMassFeedbackControlCommand(activeControlMode, (CenterOfMassFeedbackControlCommand) feedbackControlCommand);
+               break;
+            case COMMAND_LIST:
+               submitFeedbackControlCommandList(activeControlMode, (FeedbackControlCommandList) feedbackControlCommand);
+               break;
+            default:
+               throw new RuntimeException("The command type: " + commandType + " is not handled.");
          }
       }
    }
