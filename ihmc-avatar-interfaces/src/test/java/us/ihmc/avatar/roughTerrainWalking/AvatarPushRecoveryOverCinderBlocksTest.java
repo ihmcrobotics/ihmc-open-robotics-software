@@ -211,7 +211,6 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    @Test
    public void testNoPushTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       int numberOfSteps = setUpTiltedBlockTest();
 
       double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
