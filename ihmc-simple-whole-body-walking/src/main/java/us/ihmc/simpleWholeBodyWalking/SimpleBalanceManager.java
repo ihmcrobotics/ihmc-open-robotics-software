@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
+import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -59,6 +60,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
+
 
 public class SimpleBalanceManager
 {
@@ -69,6 +72,7 @@ public class SimpleBalanceManager
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
+   private final LQRMomentumController lqrMomentumController;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -119,6 +123,7 @@ public class SimpleBalanceManager
 
    private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
+   private final SimpleBipedCoMTrajectoryPlanner comPlanner;
 
    private boolean initializeForStanding = false;
    private boolean initializeForSingleSupport = false;
@@ -163,6 +168,11 @@ public class SimpleBalanceManager
       this.smoothCMPPlanner.setOmega0(controllerToolbox.getOmega0());
       this.smoothCMPPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
+      comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
+                                                       0.75, controllerToolbox.getOmega0Provider(), 
+                                                       registry);
+      lqrMomentumController = new LQRMomentumController(controllerToolbox.getOmega0Provider(), registry);
+      
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());

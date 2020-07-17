@@ -71,12 +71,19 @@ public class SimpleBipedCoMTrajectoryPlanner
      
    //Sole frames pass in the reference frames attached to the center of the bottom of the foot. Can be used to get the current 
    public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, double gravityZ, double nominalCoMHeight,
+                                          DoubleProvider omega0, YoVariableRegistry parentRegistry)
+   {
+      this(soleFrames, gravityZ, nominalCoMHeight, omega0, parentRegistry, null);
+   }
+   
+   public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, double gravityZ, double nominalCoMHeight,
                                           DoubleProvider omega0, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       sequenceUpdater = new SimpleBipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new SimpleCoMTrajectoryPlanner(omega0);
       comTrajectoryPlanner.setNominalCoMHeight(nominalCoMHeight);
-      ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
+      if (yoGraphicsListRegistry != null)
+         ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
 
       parentRegistry.addChild(registry);
    }
