@@ -2,6 +2,7 @@ package us.ihmc.avatar.stepAdjustment;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.stepConstraintModule.StepConstraintViewerApplication;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -1123,6 +1124,8 @@ public class SteppableRegionsCalculatorTest
       SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, stepConstraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
+   // Flaky when run remotely
+   @Disabled
    @Test
    public void testTiltedCinderBlockEnvironment()
    {

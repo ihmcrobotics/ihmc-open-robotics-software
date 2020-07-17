@@ -63,6 +63,13 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       return true;
    }
 
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return 0.5;
+   }
+
+
    /** {@inheritDoc} */
    @Override
    public double getStepLengthThresholdForExitCoPOnToesWhenSteppingDown()

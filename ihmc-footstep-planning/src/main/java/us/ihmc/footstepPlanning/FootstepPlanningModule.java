@@ -113,6 +113,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                                    splitFractionParameters,
                                                                    walkingControllerParameters,
                                                                    footPolygons);
+      registry.addChild(postProcessHandler.getYoVariableRegistry());
       aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
@@ -402,6 +403,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepPlanPostProcessHandler getPostProcessHandler()
    {
       return postProcessHandler;
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    @Override

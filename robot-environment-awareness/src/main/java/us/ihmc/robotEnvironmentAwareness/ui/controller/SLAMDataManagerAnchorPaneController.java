@@ -46,10 +46,10 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    private final DirectoryChooser importRawDataDirectoryChooser = new DirectoryChooser();
    private final DirectoryChooser importPlanarRegionsDirectoryChooser = new DirectoryChooser();
 
-   private final File defaultExportRawDataFile = new File("Data/SLAM/RawData/");
-   private final File defaultExportSLAMDataFile = new File("Data/SLAM/SLAMData/");
-   private final File defaultImportRawDataFile = new File("Data/SLAM/RawData/");
-   private final File defaultImportPlanarRegionsFile = new File("Data/SLAM/PlanarRegion/");
+   private final File defaultExportRawDataFile = new File("../robot-environment-awareness/Data/");
+   private final File defaultExportSLAMDataFile = new File("../robot-environment-awareness/Data/");
+   private final File defaultImportRawDataFile = new File("../robot-environment-awareness/Data/");
+   private final File defaultImportPlanarRegionsFile = new File("../robot-environment-awareness/Data/PlanarRegion");
 
    private Window ownerWindow;
 
