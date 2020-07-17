@@ -29,7 +29,7 @@ import java.util.List;
 
 public class SimpleBasicSphereController implements SimpleSphereControllerInterface
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
+   private final YoVariableRegistry registry = new YoVariableRegistry("SphereBasicController");
 
    private final SimpleSphereRobot sphereRobot;
    private final ExternalForcePoint externalForcePoint;
@@ -44,6 +44,8 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
    private final SimpleBipedCoMTrajectoryPlanner dcmPlan;
    
    private final List<RobotSide> currentFeetInContact = new ArrayList<>();
+   
+   private final SimpleSphereVisualizer vizSphere;
 
    public SimpleBasicSphereController(SimpleSphereRobot sphereRobot, SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -64,6 +66,10 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       heightController = new SimpleBasicHeightController(sphereRobot, registry);
 
       sphereRobot.getScsRobot().setController(this);
+      
+      vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot, registry);
+      updateFeetState(0);
+      vizSphere.updateVizFeet(0, currentFeetInContact);
    }
 
 
@@ -113,6 +119,9 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       sphereRobot.updateJointPositions_ID_to_SCS();
       sphereRobot.updateJointVelocities_ID_to_SCS();
       sphereRobot.updateJointTorques_ID_to_SCS();
+      
+      vizSphere.updateVizPoints(currentTime, vrpForces);
+      vizSphere.updateVizFeet(currentTime, currentFeetInContact);
    }
 
    private void updateFeetState(double currentTime)

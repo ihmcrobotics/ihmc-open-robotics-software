@@ -49,7 +49,7 @@ import java.util.List;
 public class SimpleLQRMomentumControllerSimulation
 {
    // From previous simulation
-   private static final boolean include1 = false;
+   private static final boolean include1 = true;
    private static final boolean include2 = true;
 
    private final static double desiredHeight = 0.75;
@@ -108,7 +108,7 @@ public class SimpleLQRMomentumControllerSimulation
 
       if (include2)
       {
-         Vector3D initialPosition2 = new Vector3D(0.0, 0.5, desiredHeight);
+         Vector3D initialPosition2 = new Vector3D(0.0, NextRobotOffset, desiredHeight);
          yoGraphicsListRegistry2 = new YoGraphicsListRegistry();
          SimpleSphereRobot sphereRobot2 = new SimpleSphereRobot(1, "SphereRobot2", gravity, controlDT, desiredHeight, yoGraphicsListRegistry2);
          sphereRobot2.initRobot(initialPosition2, stepWidth, new Vector3D());
@@ -137,7 +137,7 @@ public class SimpleLQRMomentumControllerSimulation
       
       //Create Simulatiion Construction Set
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize(160000);
+      parameters.setDataBufferSize(16000);
       scs = new SimulationConstructionSet(robotArray, parameters);
 
       // Create Plotter Factory

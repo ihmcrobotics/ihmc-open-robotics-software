@@ -6,24 +6,16 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TranslationMovingReferenceFrame;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
 
@@ -46,7 +38,6 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
    
    private final List<RobotSide> currentFeetInContact = new ArrayList<>();
    
-   private final boolean visualize = true;
    private final SimpleSphereVisualizer vizSphere;
 
    public SimpleLQRSphereController(SimpleSphereRobot sphereRobot, SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -61,7 +52,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
 
       lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
       
-      vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot);
+      vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot, registry);
       updateFeetState(0);
       vizSphere.updateVizFeet(0, currentFeetInContact);
       
