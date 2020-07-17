@@ -23,7 +23,7 @@ public class PlanarRegionsTopicViewer extends Application
       view3dFactory.addWorldCoordinateSystem(0.3);
       view3dFactory.addDefaultLighting();
 
-      LivePlanarRegionsGraphic regionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
+      LivePlanarRegionsGraphic regionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, false);
       view3dFactory.addNodeToView(regionsGraphic);
 
       primaryStage.setTitle(getClass().getSimpleName());
