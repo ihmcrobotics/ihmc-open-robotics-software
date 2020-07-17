@@ -59,7 +59,7 @@ public class PlanarRegionSegmentationRawData
       this.regionId = regionId;
       this.normal = new Vector3D(normal);
       this.origin = new Point3D(origin);
-      this.pointCloud = streamToConvert.map(Point3D::new).collect(Collectors.toList());
+      this.pointCloud = streamToConvert.filter(point -> !point.containsNaN()).map(Point3D::new).collect(Collectors.toList());
       orientation = PolygonizerTools.getQuaternionFromZUpToVector(normal);
       if (intersections != null)
          intersections.forEach(this::addIntersection);
