@@ -109,7 +109,8 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
                                                                                                                     swingTime,
                                                                                                                     transferTime);
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      ExecutionMode executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
       long messageId = UUID.randomUUID().getLeastSignificantBits();
       footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
       footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
