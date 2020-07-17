@@ -86,8 +86,8 @@ public class DirectRobotUI
                                                                                        .withInput());
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
-      pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
       pumpPSI.getSelectionModel().select(1);
+      pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
 
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
 
