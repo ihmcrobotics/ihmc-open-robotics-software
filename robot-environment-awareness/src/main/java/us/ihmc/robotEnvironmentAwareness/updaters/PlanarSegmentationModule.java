@@ -1,14 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.google.common.util.concurrent.AtomicDouble;
-
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -16,7 +8,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -37,6 +28,13 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanarSegmentationModule implements OcTreeConsumer
 {
@@ -159,42 +157,13 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
-   @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
-      checkOcTree(ocTree);
-      if (sensorPosition.containsNaN())
-      {
-         throw new RuntimeException("NaN in sensorPosition");
-      }
       this.ocTree.set(ocTree);
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
       reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
    }
 
-   private void checkOcTree(NormalOcTree ocTree)
-   {
-      checkNode(ocTree.getRoot());
-   }
-
-   private void checkNode(NormalOcTreeNode node)
-   {
-      if (node.hasAtLeastOneChild())
-      {
-         for (int i = 0; i < node.getNumberOfNonNullChildren(); i++)
-            checkNode(node.getChild(i));
-      }
-      else
-      {
-         if (node.getHitLocationCopy().containsNaN())
-            throw new RuntimeException("Hit contains NaN");
-         if (node.getNormalCopy().containsNaN())
-            throw new RuntimeException("Normal contains NaN");
-         if (Double.isNaN(node.getNormalConsensusSize()) || Double.isNaN(node.getNormalAverageDeviation()))
-            throw new RuntimeException("Bad normal quality");
-      }
-   }
-   
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
    {
       PlanarRegionsListMessage message = subscriber.takeNextData();
