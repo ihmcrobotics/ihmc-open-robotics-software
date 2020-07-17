@@ -198,6 +198,7 @@ public class SLAMModule
          success = addFrame(pointCloudToCompute);
       }
 
+      slam.updatePlanarRegionsMap();
       dequeue();
 
       return success;
