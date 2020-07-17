@@ -11,10 +11,11 @@ public class QuaternionData3D extends YoMutableFrameQuaternion implements Feedba
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
+   private int commandId;
 
    public QuaternionData3D(String namePrefix, Type type, YoVariableRegistry registry)
    {
-      super(FeedbackControllerData.createNamePrefix(namePrefix, type, Space.ORIENTATION), "", registry);
+      super(FeedbackControllerData.createNamePrefix(namePrefix, type, SpaceData3D.ORIENTATION), "", registry);
 
       this.type = type;
    }
@@ -22,7 +23,13 @@ public class QuaternionData3D extends YoMutableFrameQuaternion implements Feedba
    @Override
    public void addActiveFlag(BooleanProvider activeFlag)
    {
-      this.activeFlags.add(activeFlag);
+      if (!activeFlags.contains(activeFlag))
+         activeFlags.add(activeFlag);
+   }
+
+   public void setCommandId(int commandId)
+   {
+      this.commandId = commandId;
    }
 
    @Override
@@ -47,15 +54,19 @@ public class QuaternionData3D extends YoMutableFrameQuaternion implements Feedba
       return false;
    }
 
-   @Override
-   public Space getSpace()
+   public SpaceData3D getSpace()
    {
-      return Space.ORIENTATION;
+      return SpaceData3D.ORIENTATION;
    }
 
-   @Override
    public Type getType()
    {
       return type;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 }

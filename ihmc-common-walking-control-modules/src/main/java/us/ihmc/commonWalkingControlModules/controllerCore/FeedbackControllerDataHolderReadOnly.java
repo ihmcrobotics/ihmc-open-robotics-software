@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -53,9 +53,9 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param type             specifies the data type requested. Look up the options available in
     *                         {@link Type}.
     * @param space            specifies the physical quantity requested. Look up the options available
-    *                         in {@link Space}.
+    *                         in {@link SpaceData3D}.
     */
-   void getCenterOfMassVectorData(List<VectorData3D> vectorDataListToPack, Type type, Space space);
+   void getCenterOfMassVectorData(List<VectorData3D> vectorDataListToPack, Type type, SpaceData3D space);
 
    /**
     * Retrieves if possible the position data about a specific end-effector.
@@ -121,9 +121,9 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param type             specifies the data type requested. Look up the options available in
     *                         {@link Type}.
     * @param space            specifies the physical quantity requested. Look up the options available
-    *                         in {@link Space}.
+    *                         in {@link SpaceData3D}.
     */
-   void getVectorData(RigidBodyBasics endEffector, List<VectorData3D> vectorDataListToPack, Type type, Space space);
+   void getVectorData(RigidBodyBasics endEffector, List<VectorData3D> vectorDataListToPack, Type type, SpaceData3D space);
 
    /**
     * Retrieves when applicable, the output calculated by the feedback controller feeding the inverse

@@ -11,10 +11,11 @@ public class PositionData3D extends YoMutableFramePoint3D implements FeedbackCon
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
+   private int commandId;
 
    public PositionData3D(String namePrefix, Type type, YoVariableRegistry registry)
    {
-      super(FeedbackControllerData.createNamePrefix(namePrefix, type, Space.POSITION), "", registry);
+      super(FeedbackControllerData.createNamePrefix(namePrefix, type, SpaceData3D.POSITION), "", registry);
 
       this.type = type;
    }
@@ -22,7 +23,13 @@ public class PositionData3D extends YoMutableFramePoint3D implements FeedbackCon
    @Override
    public void addActiveFlag(BooleanProvider activeFlag)
    {
-      this.activeFlags.add(activeFlag);
+      if (!activeFlags.contains(activeFlag))
+         activeFlags.add(activeFlag);
+   }
+
+   public void setCommandId(int commandId)
+   {
+      this.commandId = commandId;
    }
 
    @Override
@@ -47,15 +54,19 @@ public class PositionData3D extends YoMutableFramePoint3D implements FeedbackCon
       return false;
    }
 
-   @Override
-   public Space getSpace()
+   public SpaceData3D getSpace()
    {
-      return Space.POSITION;
+      return SpaceData3D.POSITION;
    }
 
-   @Override
    public Type getType()
    {
       return type;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 }

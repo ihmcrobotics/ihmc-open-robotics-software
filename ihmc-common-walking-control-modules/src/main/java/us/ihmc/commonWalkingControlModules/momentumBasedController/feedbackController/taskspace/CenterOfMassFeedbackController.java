@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.LINEAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.LINEAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
