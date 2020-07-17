@@ -457,8 +457,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public FBVector6D getOrCreateVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData6D space, BooleanProvider activeFlag)
    {
-      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getAngular(), activeFlag),
-                            getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getLinear(), activeFlag));
+      SpaceData3D angularSpace = space == SpaceData6D.POSE ? SpaceData3D.ROTATION_VECTOR : space.getAngular();
+      SpaceData3D linearSpace = space.getLinear();
+      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, angularSpace, activeFlag),
+                            getOrCreateVectorData3D(endEffector, controllerIndex, type, linearSpace, activeFlag));
    }
 
    /**
@@ -488,17 +490,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                        double dt, DoubleProvider breakFrequencyAngularPart,
                                                                        DoubleProvider breakFrequencyLinearPart, BooleanProvider activeFlag)
    {
+      SpaceData3D angularSpace = space == SpaceData6D.POSE ? SpaceData3D.ROTATION_VECTOR : space.getAngular();
+      SpaceData3D linearSpace = space.getLinear();
       return new FBAlphaFilteredVector6D(getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
-                                                                              space.getAngular(),
+                                                                              angularSpace,
                                                                               dt,
                                                                               breakFrequencyAngularPart,
                                                                               activeFlag),
                                          getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
-                                                                              space.getLinear(),
+                                                                              linearSpace,
                                                                               dt,
                                                                               breakFrequencyLinearPart,
                                                                               activeFlag));
@@ -529,17 +533,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                    double dt, YoDouble maximumAngularRate, YoDouble maximumLinearRate,
                                                                    BooleanProvider activeFlag)
    {
+      SpaceData3D angularSpace = space == SpaceData6D.POSE ? SpaceData3D.ROTATION_VECTOR : space.getAngular();
+      SpaceData3D linearSpace = space.getLinear();
       return new FBRateLimitedVector6D(getOrCreateRateLimitedVectorData3D(endEffector,
                                                                           controllerIndex,
                                                                           rawDataType,
-                                                                          space.getAngular(),
+                                                                          angularSpace,
                                                                           dt,
                                                                           maximumAngularRate,
                                                                           activeFlag),
                                        getOrCreateRateLimitedVectorData3D(endEffector,
                                                                           controllerIndex,
                                                                           rawDataType,
-                                                                          space.getLinear(),
+                                                                          linearSpace,
                                                                           dt,
                                                                           maximumLinearRate,
                                                                           activeFlag));
