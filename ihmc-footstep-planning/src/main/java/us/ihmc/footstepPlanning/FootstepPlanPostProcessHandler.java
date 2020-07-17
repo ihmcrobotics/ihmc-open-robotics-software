@@ -73,6 +73,11 @@ public class FootstepPlanPostProcessHandler
       this.positionBasedSplitFractionCalculator = new PositionBasedSplitFractionCalculator(splitFractionParameters);
    }
 
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput output)
    {
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
