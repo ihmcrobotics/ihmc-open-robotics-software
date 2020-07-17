@@ -356,7 +356,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
     * @return the unique {@code AlphaFilteredVectorData3D} matching the search criteria.
     */
-   public AlphaFilteredVectorData3D getOrCreateAlphaFilteredVectorData(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
+   public AlphaFilteredVectorData3D getOrCreateAlphaFilteredVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
                                                                        double dt, DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
@@ -418,14 +418,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                          double dt, DoubleProvider breakFrequencyAngularPart,
                                                                          DoubleProvider breakFrequencyLinearPart, YoBoolean enabled)
    {
-      return new AlphaFilteredVectorData6D(getOrCreateAlphaFilteredVectorData(endEffector,
+      return new AlphaFilteredVectorData6D(getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
                                                                               space.getAngular(),
                                                                               dt,
                                                                               breakFrequencyAngularPart,
                                                                               enabled),
-                                           getOrCreateAlphaFilteredVectorData(endEffector,
+                                           getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
                                                                               space.getLinear(),

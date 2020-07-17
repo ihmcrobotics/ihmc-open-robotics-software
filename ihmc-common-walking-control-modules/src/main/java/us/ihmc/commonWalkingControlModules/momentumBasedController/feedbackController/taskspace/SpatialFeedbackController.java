@@ -145,6 +145,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final boolean computeIntegralTerm;
 
    private final int controllerIndex;
+   private int currentCommandId;
 
    public SpatialFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
                                     YoVariableRegistry parentRegistry)
@@ -196,12 +197,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       VectorData3D errorRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
       yoErrorVector = new VectorData6D(errorRotationVector, errorPosition);
       yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
-      yoErrorPositionIntegrated = computeIntegralTerm ? fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled)
-            : null;
-      yoErrorOrientationCumulated = computeIntegralTerm ? fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled) : null;
-      yoErrorRotationVectorIntegrated = computeIntegralTerm
-            ? fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled)
-            : null;
+
+      if (computeIntegralTerm)
+      {
+         yoErrorPositionIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled);
+         yoErrorOrientationCumulated = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled);
+         yoErrorRotationVectorIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled);
+      }
+      else
+      {
+         yoErrorPositionIntegrated = null;
+         yoErrorOrientationCumulated = null;
+         yoErrorRotationVectorIntegrated = null;
+      }
 
       yoDesiredRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ROTATION_VECTOR, isEnabled);
       yoCurrentRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ROTATION_VECTOR, isEnabled);
@@ -323,6 +331,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (command.getEndEffector() != endEffector)
          throw new FeedbackControllerException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
+      currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
@@ -339,22 +348,27 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredPose.setIncludingFrame(command.getReferencePosition(), command.getReferenceOrientation());
       yoDesiredPose.getOrientation().getRotationVector(yoDesiredRotationVector);
+      yoDesiredPose.setCommandId(currentCommandId);
       yoDesiredVelocity.setIncludingFrame(command.getReferenceAngularVelocity(), command.getReferenceLinearVelocity());
       yoDesiredVelocity.checkReferenceFrameMatch(yoDesiredPose);
+      yoDesiredVelocity.setCommandId(currentCommandId);
       if (yoFeedForwardVelocity != null)
       {
          yoFeedForwardVelocity.setIncludingFrame(command.getReferenceAngularVelocity(), command.getReferenceLinearVelocity());
          yoFeedForwardVelocity.checkReferenceFrameMatch(yoDesiredPose);
+         yoFeedForwardVelocity.setCommandId(currentCommandId);
       }
       if (yoFeedForwardAcceleration != null)
       {
          yoFeedForwardAcceleration.setIncludingFrame(command.getReferenceAngularAcceleration(), command.getReferenceLinearAcceleration());
          yoFeedForwardAcceleration.checkReferenceFrameMatch(yoDesiredPose);
+         yoFeedForwardAcceleration.setCommandId(currentCommandId);
       }
       if (yoFeedForwardWrench != null)
       {
          yoFeedForwardWrench.setIncludingFrame(command.getReferenceTorque(), command.getReferenceForce());
          yoFeedForwardWrench.checkReferenceFrameMatch(yoDesiredPose);
+         yoFeedForwardWrench.setCommandId(currentCommandId);
       }
    }
 
@@ -367,6 +381,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    @Override
    public void initialize()
    {
+      /*
+       * TODO This seems like a potential bug: the WholeBodyFeedbackController calls initialize on all
+       * inactive controller, if this controller is inactive but the PointFeedbackController or
+       * OrientationFeedbackController (sharing some of the data) is active, this action can affect the
+       * other controller.
+       */
       if (rateLimitedFeedbackAcceleration != null)
          rateLimitedFeedbackAcceleration.reset();
       if (rateLimitedFeedbackVelocity != null)
@@ -417,8 +437,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedbackAcceleration.setIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
       yoFeedbackAcceleration.changeFrame(trajectoryFrame);
+      yoFeedbackAcceleration.setCommandId(currentCommandId);
       rateLimitedFeedbackAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAcceleration.update();
+      rateLimitedFeedbackAcceleration.setCommandId(currentCommandId);
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackAcceleration.getLinearPart());
       desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAcceleration.getAngularPart());
 
@@ -430,6 +452,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredAcceleration.setIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
       yoDesiredAcceleration.changeFrame(trajectoryFrame);
+      yoDesiredAcceleration.setCommandId(currentCommandId);
 
       addCoriolisAcceleration(desiredLinearAcceleration);
 
@@ -460,8 +483,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedbackVelocity.setIncludingFrame(desiredAngularVelocity, desiredLinearVelocity);
       yoFeedbackVelocity.changeFrame(trajectoryFrame);
+      yoFeedbackVelocity.setCommandId(currentCommandId);
       rateLimitedFeedbackVelocity.changeFrame(trajectoryFrame);
       rateLimitedFeedbackVelocity.update();
+      rateLimitedFeedbackVelocity.setCommandId(currentCommandId);
       desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackVelocity.getLinearPart());
       desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackVelocity.getAngularPart());
 
@@ -470,6 +495,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredVelocity.setIncludingFrame(desiredAngularVelocity, desiredLinearVelocity);
       yoDesiredVelocity.changeFrame(trajectoryFrame);
+      yoDesiredVelocity.setCommandId(currentCommandId);
 
       desiredLinearVelocity.changeFrame(controlFrame);
       desiredAngularVelocity.changeFrame(controlFrame);
@@ -523,8 +549,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedbackWrench.setIncludingFrame(desiredAngularTorque, desiredLinearForce);
       yoFeedbackWrench.changeFrame(trajectoryFrame);
+      yoFeedbackWrench.setCommandId(currentCommandId);
       rateLimitedFeedbackWrench.changeFrame(trajectoryFrame);
       rateLimitedFeedbackWrench.update();
+      rateLimitedFeedbackWrench.setCommandId(currentCommandId);
       desiredLinearForce.setIncludingFrame(rateLimitedFeedbackWrench.getLinearPart());
       desiredAngularTorque.setIncludingFrame(rateLimitedFeedbackWrench.getAngularPart());
 
@@ -536,6 +564,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredWrench.setIncludingFrame(desiredAngularTorque, desiredLinearForce);
       yoDesiredWrench.changeFrame(trajectoryFrame);
+      yoDesiredWrench.setCommandId(currentCommandId);
    }
 
    @Override
@@ -550,6 +579,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoAchievedAcceleration.setReferenceFrame(yoDesiredPose.getReferenceFrame());
       yoAchievedAcceleration.getAngularPart().setMatchingFrame(achievedAngularAcceleration);
       yoAchievedAcceleration.getLinearPart().setMatchingFrame(achievedLinearAcceleration);
+      yoAchievedAcceleration.setCommandId(currentCommandId);
    }
 
    /**
@@ -577,7 +607,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoCurrentPose.setToZero(controlFrame);
       yoCurrentPose.changeFrame(trajectoryFrame);
+      yoCurrentPose.setCommandId(currentCommandId);
       yoCurrentPose.getOrientation().getRotationVector(yoCurrentRotationVector);
+      yoCurrentRotationVector.setCommandId(currentCommandId);
 
       desiredPose.setIncludingFrame(yoDesiredPose);
       desiredPose.changeFrame(controlFrame);
@@ -594,7 +626,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoErrorVector.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
       yoErrorVector.changeFrame(trajectoryFrame);
+      yoErrorVector.setCommandId(currentCommandId);
       yoErrorOrientation.setRotationVectorIncludingFrame(yoErrorVector.getAngularPart());
+      yoErrorOrientation.setCommandId(currentCommandId);
 
       if (linearGainsFrame != null)
          linearFeedbackTermToPack.changeFrame(linearGainsFrame);
@@ -642,6 +676,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       yoCurrentVelocity.setIncludingFrame(currentTwist.getAngularPart(), currentTwist.getLinearPart());
       yoCurrentVelocity.changeFrame(trajectoryFrame);
+      yoCurrentVelocity.setCommandId(currentCommandId);
 
       linearFeedbackTermToPack.setToZero(trajectoryFrame);
       angularFeedbackTermToPack.setToZero(trajectoryFrame);
@@ -667,6 +702,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.changeFrame(trajectoryFrame);
          yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
          yoFilteredErrorVelocity.update();
+         yoFilteredErrorVelocity.setCommandId(currentCommandId);
          linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
          angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
       }
@@ -675,6 +711,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
       }
       yoErrorVelocity.changeFrame(trajectoryFrame);
+      yoErrorVelocity.setCommandId(currentCommandId);
 
       if (linearGainsFrame != null)
          linearFeedbackTermToPack.changeFrame(linearGainsFrame);
@@ -733,6 +770,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          linearFeedbackTermToPack.setToZero(controlFrame);
          yoErrorPositionIntegrated.setToZero(trajectoryFrame);
+         yoErrorPositionIntegrated.setCommandId(currentCommandId);
       }
       else
       {
@@ -750,6 +788,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          linearFeedbackTermToPack.clipToMaxLength(maximumLinearIntegralError);
          yoErrorPositionIntegrated.setIncludingFrame(linearFeedbackTermToPack);
          yoErrorPositionIntegrated.changeFrame(trajectoryFrame);
+         yoErrorPositionIntegrated.setCommandId(currentCommandId);
 
          if (linearGainsFrame != null)
             linearFeedbackTermToPack.changeFrame(linearGainsFrame);
@@ -768,7 +807,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          angularFeedbackTermToPack.setToZero(controlFrame);
          yoErrorOrientationCumulated.setToZero(trajectoryFrame);
+         yoErrorOrientationCumulated.setCommandId(currentCommandId);
          yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
+         yoErrorRotationVectorIntegrated.setCommandId(currentCommandId);
       }
       else
       {
@@ -782,6 +823,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
          errorOrientationCumulated.multiply(yoErrorOrientation);
          yoErrorOrientationCumulated.set(errorOrientationCumulated);
+         yoErrorOrientationCumulated.setCommandId(currentCommandId);
          errorOrientationCumulated.normalizeAndLimitToPi();
 
          errorOrientationCumulated.getRotationVector(angularFeedbackTermToPack);
@@ -791,6 +833,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.clipToMaxLength(maximumAngularIntegralError);
          yoErrorRotationVectorIntegrated.setIncludingFrame(angularFeedbackTermToPack);
          yoErrorRotationVectorIntegrated.changeFrame(trajectoryFrame);
+         yoErrorRotationVectorIntegrated.setCommandId(currentCommandId);
 
          if (angularGainsFrame != null)
             angularFeedbackTermToPack.changeFrame(angularGainsFrame);
