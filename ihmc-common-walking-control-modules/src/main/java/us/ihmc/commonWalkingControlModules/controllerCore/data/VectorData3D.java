@@ -11,9 +11,10 @@ public class VectorData3D extends YoMutableFrameVector3D implements FeedbackCont
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
-   private final Space space;
+   private final SpaceData3D space;
+   private int commandId;
 
-   public VectorData3D(String namePrefix, Type type, Space space, YoVariableRegistry registry)
+   public VectorData3D(String namePrefix, Type type, SpaceData3D space, YoVariableRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix, type, space), "", registry);
 
@@ -24,7 +25,13 @@ public class VectorData3D extends YoMutableFrameVector3D implements FeedbackCont
    @Override
    public void addActiveFlag(BooleanProvider activeFlag)
    {
-      this.activeFlags.add(activeFlag);
+      if (!activeFlags.contains(activeFlag))
+         activeFlags.add(activeFlag);
+   }
+
+   public void setCommandId(int commandId)
+   {
+      this.commandId = commandId;
    }
 
    @Override
@@ -49,15 +56,19 @@ public class VectorData3D extends YoMutableFrameVector3D implements FeedbackCont
       return false;
    }
 
-   @Override
-   public Space getSpace()
+   public SpaceData3D getSpace()
    {
       return space;
    }
 
-   @Override
    public Type getType()
    {
       return type;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 }

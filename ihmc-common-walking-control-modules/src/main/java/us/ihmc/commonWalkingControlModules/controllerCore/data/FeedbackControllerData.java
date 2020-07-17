@@ -10,11 +10,9 @@ public interface FeedbackControllerData
 
    boolean clearIfInactive();
 
-   Space getSpace();
+   int getCommandId();
 
-   Type getType();
-
-   static String createNamePrefix(String namePrefix, Type type, Space space)
+   static String createNamePrefix(String namePrefix, Type type, SpaceData3D space)
    {
       return namePrefix + type.getName() + space.getName();
    }

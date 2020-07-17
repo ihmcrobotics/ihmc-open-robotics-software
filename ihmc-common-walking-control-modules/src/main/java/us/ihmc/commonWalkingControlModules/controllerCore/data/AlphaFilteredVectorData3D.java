@@ -14,9 +14,10 @@ public class AlphaFilteredVectorData3D extends AlphaFilteredYoMutableFrameVector
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
-   private final Space space;
+   private final SpaceData3D space;
+   private int commandId;
 
-   public AlphaFilteredVectorData3D(String namePrefix, Type type, Space space, DoubleProvider breakFrequency, double dt, FrameVector3DReadOnly rawVector,
+   public AlphaFilteredVectorData3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider breakFrequency, double dt, FrameVector3DReadOnly rawVector,
                                     YoVariableRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix + "Filtered", type, space), "", registry, toAlpha(breakFrequency, dt), rawVector);
@@ -33,7 +34,13 @@ public class AlphaFilteredVectorData3D extends AlphaFilteredYoMutableFrameVector
    @Override
    public void addActiveFlag(BooleanProvider activeFlag)
    {
-      this.activeFlags.add(activeFlag);
+      if (!activeFlags.contains(activeFlag))
+         activeFlags.add(activeFlag);
+   }
+
+   public void setCommandId(int commandId)
+   {
+      this.commandId = commandId;
    }
 
    @Override
@@ -58,15 +65,19 @@ public class AlphaFilteredVectorData3D extends AlphaFilteredYoMutableFrameVector
       return false;
    }
 
-   @Override
-   public Space getSpace()
+   public SpaceData3D getSpace()
    {
       return space;
    }
 
-   @Override
    public Type getType()
    {
       return type;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 }

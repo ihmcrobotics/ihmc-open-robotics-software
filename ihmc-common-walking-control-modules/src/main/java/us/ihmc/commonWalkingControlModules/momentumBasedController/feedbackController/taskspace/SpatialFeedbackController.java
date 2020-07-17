@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.POSITION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Space.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.FORCE;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.VELOCITY;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
@@ -22,6 +25,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.PoseData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData6D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -30,25 +39,17 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameSpatialVector;
-import us.ihmc.robotics.math.filters.RateLimitedYoMutableSpatialVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class SpatialFeedbackController implements FeedbackControllerInterface
 {
@@ -58,37 +59,37 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoBoolean isEnabled;
 
-   private final FramePose3DBasics yoDesiredPose;
-   private final FramePose3DBasics yoCurrentPose;
+   private final PoseData3D yoDesiredPose;
+   private final PoseData3D yoCurrentPose;
 
-   private final SpatialVectorBasics yoErrorVector;
-   private final FrameQuaternionBasics yoErrorOrientation;
+   private final VectorData6D yoErrorVector;
+   private final QuaternionData3D yoErrorOrientation;
 
-   private final FrameVector3DBasics yoErrorPositionIntegrated;
-   private final FrameQuaternionBasics yoErrorOrientationCumulated;
-   private final FrameVector3DBasics yoErrorRotationVectorIntegrated;
+   private final VectorData3D yoErrorPositionIntegrated;
+   private final QuaternionData3D yoErrorOrientationCumulated;
+   private final VectorData3D yoErrorRotationVectorIntegrated;
 
-   private final SpatialVectorBasics yoDesiredVelocity;
-   private final SpatialVectorBasics yoCurrentVelocity;
-   private final SpatialVectorBasics yoErrorVelocity;
-   private final AlphaFilteredYoMutableFrameSpatialVector yoFilteredErrorVelocity;
-   private final SpatialVectorBasics yoFeedForwardVelocity;
-   private final SpatialVectorBasics yoFeedbackVelocity;
-   private final RateLimitedYoMutableSpatialVector rateLimitedFeedbackVelocity;
+   private final VectorData6D yoDesiredVelocity;
+   private final VectorData6D yoCurrentVelocity;
+   private final VectorData6D yoErrorVelocity;
+   private final AlphaFilteredVectorData6D yoFilteredErrorVelocity;
+   private final VectorData6D yoFeedForwardVelocity;
+   private final VectorData6D yoFeedbackVelocity;
+   private final RateLimitedVectorData6D rateLimitedFeedbackVelocity;
 
-   private final SpatialVectorBasics yoDesiredAcceleration;
-   private final SpatialVectorBasics yoFeedForwardAcceleration;
-   private final SpatialVectorBasics yoFeedbackAcceleration;
-   private final RateLimitedYoMutableSpatialVector rateLimitedFeedbackAcceleration;
-   private final SpatialVectorBasics yoAchievedAcceleration;
+   private final VectorData6D yoDesiredAcceleration;
+   private final VectorData6D yoFeedForwardAcceleration;
+   private final VectorData6D yoFeedbackAcceleration;
+   private final RateLimitedVectorData6D rateLimitedFeedbackAcceleration;
+   private final VectorData6D yoAchievedAcceleration;
 
-   private final SpatialVectorBasics yoDesiredWrench;
-   private final SpatialVectorBasics yoFeedForwardWrench;
-   private final SpatialVectorBasics yoFeedbackWrench;
-   private final RateLimitedYoMutableSpatialVector rateLimitedFeedbackWrench;
+   private final VectorData6D yoDesiredWrench;
+   private final VectorData6D yoFeedForwardWrench;
+   private final VectorData6D yoFeedbackWrench;
+   private final RateLimitedVectorData6D rateLimitedFeedbackWrench;
 
-   private final FrameVector3DBasics yoDesiredRotationVector;
-   private final FrameVector3DBasics yoCurrentRotationVector;
+   private final VectorData3D yoDesiredRotationVector;
+   private final VectorData3D yoCurrentRotationVector;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
@@ -145,26 +146,26 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final int controllerIndex;
 
-   public SpatialFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
+   public SpatialFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
                                     YoVariableRegistry parentRegistry)
    {
-      this(endEffector, 0, toolbox, feedbackControllerToolbox, parentRegistry);
+      this(endEffector, 0, ccToolbox, fbToolbox, parentRegistry);
    }
 
-   public SpatialFeedbackController(RigidBodyBasics endEffector, int controllerIndex, WholeBodyControlCoreToolbox toolbox,
-                                    FeedbackControllerToolbox feedbackControllerToolbox, YoVariableRegistry parentRegistry)
+   public SpatialFeedbackController(RigidBodyBasics endEffector, int controllerIndex, WholeBodyControlCoreToolbox ccToolbox,
+                                    FeedbackControllerToolbox fbToolbox, YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       this.controllerIndex = controllerIndex;
-      FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
+      FeedbackControllerSettings settings = ccToolbox.getFeedbackControllerSettings();
       if (settings != null)
          computeIntegralTerm = settings.enableIntegralTerm();
       else
          computeIntegralTerm = true;
 
-      if (toolbox.getRootJoint() != null)
+      if (ccToolbox.getRootJoint() != null)
       {
-         this.rootBody = toolbox.getRootJoint().getSuccessor();
+         this.rootBody = ccToolbox.getRootJoint().getSuccessor();
          isRootBody = this.endEffector.getName().equals(rootBody.getName());
       }
       else
@@ -173,78 +174,77 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rootBody = null;
       }
 
-      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
+      rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(appendIndex(endEffectorName, controllerIndex) + "SpatialFBController");
-      dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, computeIntegralTerm);
+      dt = ccToolbox.getControlDT();
+      gains = fbToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, computeIntegralTerm);
       positionGains = gains.getPositionGains();
       orientationGains = gains.getOrientationGains();
       YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
       YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
-      controlFrame = feedbackControllerToolbox.getOrCreateControlFrame(endEffector, controllerIndex);
+      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex);
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPose = feedbackControllerToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled);
-      yoCurrentPose = feedbackControllerToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled);
-      YoMutableFrameVector3D errorPosition = feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
-      YoMutableFrameVector3D errorRotationVector = feedbackControllerToolbox.getOrCreateVectorData(endEffector,
-                                                                                                   controllerIndex,
-                                                                                                   ERROR,
-                                                                                                   ROTATION_VECTOR,
-                                                                                                   isEnabled);
-      yoErrorVector = new YoMutableFrameSpatialVector(errorRotationVector, errorPosition);
-      yoErrorOrientation = feedbackControllerToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
-      yoErrorPositionIntegrated = computeIntegralTerm
-            ? feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled)
+      yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled);
+      yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled);
+      VectorData3D errorPosition = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
+      VectorData3D errorRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
+      yoErrorVector = new VectorData6D(errorRotationVector, errorPosition);
+      yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
+      yoErrorPositionIntegrated = computeIntegralTerm ? fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled)
             : null;
-      yoErrorOrientationCumulated = computeIntegralTerm
-            ? feedbackControllerToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled)
-            : null;
+      yoErrorOrientationCumulated = computeIntegralTerm ? fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled) : null;
       yoErrorRotationVectorIntegrated = computeIntegralTerm
-            ? feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled)
+            ? fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled)
             : null;
 
-      yoDesiredRotationVector = feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, DESIRED, ROTATION_VECTOR, isEnabled);
-      yoCurrentRotationVector = feedbackControllerToolbox.getOrCreateVectorData(endEffector, controllerIndex, CURRENT, ROTATION_VECTOR, isEnabled);
+      yoDesiredRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ROTATION_VECTOR, isEnabled);
+      yoCurrentRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ROTATION_VECTOR, isEnabled);
 
-      yoDesiredVelocity = feedbackControllerToolbox.getOrCreateSpatialVelocityData(endEffector, controllerIndex, DESIRED, isEnabled);
+      yoDesiredVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, VELOCITY, isEnabled);
 
-      if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
+      if (ccToolbox.isEnableInverseDynamicsModule() || ccToolbox.isEnableVirtualModelControlModule())
       {
 
-         yoCurrentVelocity = feedbackControllerToolbox.getOrCreateSpatialVelocityData(endEffector, controllerIndex, CURRENT, isEnabled);
-         yoErrorVelocity = feedbackControllerToolbox.getOrCreateSpatialVelocityData(endEffector, controllerIndex, ERROR, isEnabled);
+         yoCurrentVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, CURRENT, VELOCITY, isEnabled);
+         yoErrorVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, VELOCITY, isEnabled);
 
-         DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
+         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
          if (breakFrequency != null)
-            yoFilteredErrorVelocity = feedbackControllerToolbox.getOrCreateAlphaFilteredSpatialVelocityData(endEffector,
-                                                                                                            controllerIndex,
-                                                                                                            ERROR,
-                                                                                                            dt,
-                                                                                                            breakFrequency,
-                                                                                                            breakFrequency,
-                                                                                                            isEnabled);
-         else
-            yoFilteredErrorVelocity = null;
-
-         if (toolbox.isEnableInverseDynamicsModule())
          {
-            yoDesiredAcceleration = feedbackControllerToolbox.getOrCreateSpatialAccelerationData(endEffector, controllerIndex, DESIRED, isEnabled);
-            yoFeedForwardAcceleration = feedbackControllerToolbox.getOrCreateSpatialAccelerationData(endEffector, controllerIndex, FEEDFORWARD, isEnabled);
-            yoFeedbackAcceleration = feedbackControllerToolbox.getOrCreateSpatialAccelerationData(endEffector, controllerIndex, FEEDBACK, isEnabled);
-            rateLimitedFeedbackAcceleration = feedbackControllerToolbox.getOrCreateRateLimitedSpatialAccelerationData(endEffector,
-                                                                                                                      controllerIndex,
-                                                                                                                      FEEDBACK,
-                                                                                                                      dt,
-                                                                                                                      maximumAngularRate,
-                                                                                                                      maximumLinearRate,
-                                                                                                                      isEnabled);
-            yoAchievedAcceleration = feedbackControllerToolbox.getOrCreateSpatialAccelerationData(endEffector, controllerIndex, ACHIEVED, isEnabled);
+            yoFilteredErrorVelocity = fbToolbox.getOrCreateAlphaFilteredVectorData6D(endEffector,
+                                                                                     controllerIndex,
+                                                                                     ERROR,
+                                                                                     VELOCITY,
+                                                                                     dt,
+                                                                                     breakFrequency,
+                                                                                     breakFrequency,
+                                                                                     isEnabled);
+         }
+         else
+         {
+            yoFilteredErrorVelocity = null;
+         }
+
+         if (ccToolbox.isEnableInverseDynamicsModule())
+         {
+            yoDesiredAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, ACCELERATION, isEnabled);
+            yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled);
+            yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled);
+            rateLimitedFeedbackAcceleration = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
+                                                                                           controllerIndex,
+                                                                                           FEEDBACK,
+                                                                                           ACCELERATION,
+                                                                                           dt,
+                                                                                           maximumAngularRate,
+                                                                                           maximumLinearRate,
+                                                                                           isEnabled);
+            yoAchievedAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ACHIEVED, ACCELERATION, isEnabled);
          }
          else
          {
@@ -255,18 +255,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoAchievedAcceleration = null;
          }
 
-         if (toolbox.isEnableVirtualModelControlModule())
+         if (ccToolbox.isEnableVirtualModelControlModule())
          {
-            yoDesiredWrench = feedbackControllerToolbox.getOrCreateSpatialForceData(endEffector, controllerIndex, DESIRED, isEnabled);
-            yoFeedForwardWrench = feedbackControllerToolbox.getOrCreateSpatialForceData(endEffector, controllerIndex, FEEDFORWARD, isEnabled);
-            yoFeedbackWrench = feedbackControllerToolbox.getOrCreateSpatialForceData(endEffector, controllerIndex, FEEDBACK, isEnabled);
-            rateLimitedFeedbackWrench = feedbackControllerToolbox.getOrCreateRateLimitedSpatialForceData(endEffector,
-                                                                                                         controllerIndex,
-                                                                                                         FEEDBACK,
-                                                                                                         dt,
-                                                                                                         maximumAngularRate,
-                                                                                                         maximumLinearRate,
-                                                                                                         isEnabled);
+            yoDesiredWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, FORCE, isEnabled);
+            yoFeedForwardWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, FORCE, isEnabled);
+            yoFeedbackWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, FORCE, isEnabled);
+            rateLimitedFeedbackWrench = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
+                                                                                     controllerIndex,
+                                                                                     FEEDBACK,
+                                                                                     FORCE,
+                                                                                     dt,
+                                                                                     maximumAngularRate,
+                                                                                     maximumLinearRate,
+                                                                                     isEnabled);
          }
          else
          {
@@ -294,17 +295,18 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackWrench = null;
       }
 
-      if (toolbox.isEnableInverseKinematicsModule())
+      if (ccToolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackVelocity = feedbackControllerToolbox.getOrCreateSpatialVelocityData(endEffector, controllerIndex, FEEDBACK, isEnabled);
-         yoFeedForwardVelocity = feedbackControllerToolbox.getOrCreateSpatialVelocityData(endEffector, controllerIndex, FEEDFORWARD, isEnabled);
-         rateLimitedFeedbackVelocity = feedbackControllerToolbox.getOrCreateRateLimitedSpatialVelocityData(endEffector,
-                                                                                                           controllerIndex,
-                                                                                                           FEEDBACK,
-                                                                                                           dt,
-                                                                                                           maximumAngularRate,
-                                                                                                           maximumLinearRate,
-                                                                                                           isEnabled);
+         yoFeedbackVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, VELOCITY, isEnabled);
+         yoFeedForwardVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, VELOCITY, isEnabled);
+         rateLimitedFeedbackVelocity = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
+                                                                                    controllerIndex,
+                                                                                    FEEDBACK,
+                                                                                    VELOCITY,
+                                                                                    dt,
+                                                                                    maximumAngularRate,
+                                                                                    maximumLinearRate,
+                                                                                    isEnabled);
       }
       else
       {

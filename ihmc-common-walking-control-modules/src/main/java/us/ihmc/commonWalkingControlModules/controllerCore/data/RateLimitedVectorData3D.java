@@ -13,9 +13,10 @@ public class RateLimitedVectorData3D extends RateLimitedYoMutableFrameVector3D i
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
-   private final Space space;
+   private final SpaceData3D space;
+   private int commandId;
 
-   public RateLimitedVectorData3D(String namePrefix, Type type, Space space, DoubleProvider maximumRate, double dt, FrameVector3DReadOnly rawVector,
+   public RateLimitedVectorData3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider maximumRate, double dt, FrameVector3DReadOnly rawVector,
                                   YoVariableRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix + "RateLimited", type, space), "", registry, maximumRate, dt, rawVector);
@@ -27,7 +28,13 @@ public class RateLimitedVectorData3D extends RateLimitedYoMutableFrameVector3D i
    @Override
    public void addActiveFlag(BooleanProvider activeFlag)
    {
-      this.activeFlags.add(activeFlag);
+      if (!activeFlags.contains(activeFlag))
+         activeFlags.add(activeFlag);
+   }
+
+   public void setCommandId(int commandId)
+   {
+      this.commandId = commandId;
    }
 
    @Override
@@ -52,15 +59,19 @@ public class RateLimitedVectorData3D extends RateLimitedYoMutableFrameVector3D i
       return false;
    }
 
-   @Override
-   public Space getSpace()
+   public SpaceData3D getSpace()
    {
       return space;
    }
 
-   @Override
    public Type getType()
    {
       return type;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 }
