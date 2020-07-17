@@ -23,7 +23,7 @@ public enum SpaceData3D
       @Override
       public SpaceData6D getSpaceData6D()
       {
-         return null;
+         return SpaceData6D.POSE;
       }
    },
    LINEAR_VELOCITY("LinearVelocity")

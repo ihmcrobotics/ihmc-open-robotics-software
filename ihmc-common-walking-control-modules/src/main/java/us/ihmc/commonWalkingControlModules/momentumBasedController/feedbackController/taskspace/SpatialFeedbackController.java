@@ -5,6 +5,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.ACCELERATION;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.FORCE;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.POSE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.VELOCITY;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
@@ -193,9 +194,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled);
       yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled);
-      FBVector3D errorPosition = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
-      FBVector3D errorRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
-      yoErrorVector = new FBVector6D(errorRotationVector, errorPosition);
+      yoErrorVector = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, POSE, isEnabled);
       yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
 
       if (computeIntegralTerm)
