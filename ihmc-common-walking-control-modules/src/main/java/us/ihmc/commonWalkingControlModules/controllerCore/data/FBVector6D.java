@@ -4,13 +4,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerExce
 import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
-public class RateLimitedVectorData6D extends YoMutableFrameSpatialVector implements FeedbackControllerData
+/**
+ * @see FeedbackControllerData
+ */
+public class FBVector6D extends YoMutableFrameSpatialVector implements FeedbackControllerData
 {
    private final SpaceData6D space;
-   private final RateLimitedVectorData3D angularPart;
-   private final RateLimitedVectorData3D linearPart;
+   private final FBVector3D angularPart;
+   private final FBVector3D linearPart;
 
-   public RateLimitedVectorData6D(RateLimitedVectorData3D angularPart, RateLimitedVectorData3D linearPart)
+   public FBVector6D(FBVector3D angularPart, FBVector3D linearPart)
    {
       super(angularPart, linearPart);
       if (angularPart.getSpace().getSpaceData6D() != linearPart.getSpace().getSpaceData6D())
@@ -20,18 +23,6 @@ public class RateLimitedVectorData6D extends YoMutableFrameSpatialVector impleme
       this.space = angularPart.getSpace().getSpaceData6D();
       this.angularPart = angularPart;
       this.linearPart = linearPart;
-   }
-
-   public void reset()
-   {
-      angularPart.reset();
-      linearPart.reset();
-   }
-
-   public void update()
-   {
-      angularPart.update();
-      linearPart.update();
    }
 
    @Override

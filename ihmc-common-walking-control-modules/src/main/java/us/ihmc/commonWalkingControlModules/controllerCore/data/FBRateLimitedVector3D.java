@@ -3,20 +3,26 @@ package us.ihmc.commonWalkingControlModules.controllerCore.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class VectorData3D extends YoMutableFrameVector3D implements FeedbackControllerData
+/**
+ * @see FeedbackControllerData
+ */
+public class FBRateLimitedVector3D extends RateLimitedYoMutableFrameVector3D implements FeedbackControllerData
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
    private final SpaceData3D space;
    private int commandId;
 
-   public VectorData3D(String namePrefix, Type type, SpaceData3D space, YoVariableRegistry registry)
+   public FBRateLimitedVector3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider maximumRate, double dt, FrameVector3DReadOnly rawVector,
+                                  YoVariableRegistry registry)
    {
-      super(FeedbackControllerData.createNamePrefix(namePrefix, type, space), "", registry);
+      super(FeedbackControllerData.createNamePrefix(namePrefix + "RateLimited", type, space), "", registry, maximumRate, dt, rawVector);
 
       this.type = type;
       this.space = space;
@@ -51,6 +57,7 @@ public class VectorData3D extends YoMutableFrameVector3D implements FeedbackCont
       if (!isActive())
       {
          setToNaN();
+         commandId = -1;
          return true;
       }
       return false;

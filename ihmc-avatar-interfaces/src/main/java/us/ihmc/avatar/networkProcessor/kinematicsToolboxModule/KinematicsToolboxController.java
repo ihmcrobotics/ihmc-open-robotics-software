@@ -43,8 +43,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -1004,8 +1004,8 @@ public class KinematicsToolboxController extends ToolboxController
       return null;
    }
 
-   private final List<PositionData3D> rigidBodyPositions = new ArrayList<>();
-   private final List<QuaternionData3D> rigidBodyOrientations = new ArrayList<>();
+   private final List<FBPoint3D> rigidBodyPositions = new ArrayList<>();
+   private final List<FBQuaternion3D> rigidBodyOrientations = new ArrayList<>();
 
    /**
     * Updates the graphic coordinate systems for the end-effectors that are actively controlled during

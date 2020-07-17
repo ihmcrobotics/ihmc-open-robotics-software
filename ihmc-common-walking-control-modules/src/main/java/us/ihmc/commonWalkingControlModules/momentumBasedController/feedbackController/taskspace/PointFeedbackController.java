@@ -22,11 +22,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -52,30 +52,30 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final YoBoolean isEnabled;
 
-   private final PositionData3D yoDesiredPosition;
-   private final PositionData3D yoCurrentPosition;
-   private final VectorData3D yoErrorPosition;
+   private final FBPoint3D yoDesiredPosition;
+   private final FBPoint3D yoCurrentPosition;
+   private final FBVector3D yoErrorPosition;
 
-   private final VectorData3D yoErrorPositionIntegrated;
+   private final FBVector3D yoErrorPositionIntegrated;
 
-   private final VectorData3D yoDesiredLinearVelocity;
-   private final VectorData3D yoCurrentLinearVelocity;
-   private final VectorData3D yoErrorLinearVelocity;
-   private final AlphaFilteredVectorData3D yoFilteredErrorLinearVelocity;
-   private final VectorData3D yoFeedForwardLinearVelocity;
-   private final VectorData3D yoFeedbackLinearVelocity;
-   private final RateLimitedVectorData3D rateLimitedFeedbackLinearVelocity;
+   private final FBVector3D yoDesiredLinearVelocity;
+   private final FBVector3D yoCurrentLinearVelocity;
+   private final FBVector3D yoErrorLinearVelocity;
+   private final FBAlphaFilteredVector3D yoFilteredErrorLinearVelocity;
+   private final FBVector3D yoFeedForwardLinearVelocity;
+   private final FBVector3D yoFeedbackLinearVelocity;
+   private final FBRateLimitedVector3D rateLimitedFeedbackLinearVelocity;
 
-   private final VectorData3D yoDesiredLinearAcceleration;
-   private final VectorData3D yoFeedForwardLinearAcceleration;
-   private final VectorData3D yoFeedbackLinearAcceleration;
-   private final RateLimitedVectorData3D rateLimitedFeedbackLinearAcceleration;
-   private final VectorData3D yoAchievedLinearAcceleration;
+   private final FBVector3D yoDesiredLinearAcceleration;
+   private final FBVector3D yoFeedForwardLinearAcceleration;
+   private final FBVector3D yoFeedbackLinearAcceleration;
+   private final FBRateLimitedVector3D rateLimitedFeedbackLinearAcceleration;
+   private final FBVector3D yoAchievedLinearAcceleration;
 
-   private final VectorData3D yoDesiredLinearForce;
-   private final VectorData3D yoFeedForwardLinearForce;
-   private final VectorData3D yoFeedbackLinearForce;
-   private final RateLimitedVectorData3D rateLimitedFeedbackLinearForce;
+   private final FBVector3D yoDesiredLinearForce;
+   private final FBVector3D yoFeedForwardLinearForce;
+   private final FBVector3D yoFeedbackLinearForce;
+   private final FBRateLimitedVector3D rateLimitedFeedbackLinearForce;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
 
