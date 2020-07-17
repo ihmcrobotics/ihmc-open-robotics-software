@@ -2,6 +2,7 @@ package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.referenceFrame.FrameBoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -219,6 +220,11 @@ public class Collidable
    public FrameShape3DReadOnly getShape()
    {
       return shape;
+   }
+
+   public FrameBoundingBox3DReadOnly getBoundingBox()
+   {
+      return boundingBox;
    }
 
    public RigidBodyBasics getRootBody()
