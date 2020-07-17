@@ -35,14 +35,13 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SimpleSphereVisualizer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SphereVisualizer");
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double footLengthForControl = 0.2;
    private static final double toeWidthForControl = 0.15;
    private static final double footWidthForControl = 0.15;
    
-   private final YoDouble omega = new YoDouble("omega", registry);
+   private final YoDouble omega;
    private final double gravity;
    
    private final YoFramePoint3D desiredCoMPosition;
@@ -63,26 +62,27 @@ public class SimpleSphereVisualizer
    private final List<YoFramePoseUsingYawPitchRoll> nextFootstepPoses = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> nextFootstepPolygons = new ArrayList<>();
    
-   private final YoFramePoseUsingYawPitchRoll leftFootPose = new YoFramePoseUsingYawPitchRoll("leftFootPose", worldFrame, registry);
-   private final YoFramePoseUsingYawPitchRoll rightFootPose = new YoFramePoseUsingYawPitchRoll("rightFootPose", worldFrame, registry);
-   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
-   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
-   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
-   private final YoFrameConvexPolygon2D leftFoot = new YoFrameConvexPolygon2D("leftFoot", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2D rightFoot = new YoFrameConvexPolygon2D("rightFoot", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2D yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
-   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFramePoseUsingYawPitchRoll leftFootPose;
+   private final YoFramePoseUsingYawPitchRoll rightFootPose;
+   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose;
+   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose;
+   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose;
+   private final YoFrameConvexPolygon2D leftFoot;
+   private final YoFrameConvexPolygon2D rightFoot;
+   private final YoFrameConvexPolygon2D yoNextFootstepPolygon;
+   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon;
+   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon;
    
    private final SimpleBipedCoMTrajectoryPlanner dcmPlan;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final SimpleSphereRobot sphereRobot;
    
    public SimpleSphereVisualizer(SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry, 
-                                 SimpleSphereRobot sphereRobot)
+                                 SimpleSphereRobot sphereRobot, YoVariableRegistry registry)
    {
       this.dcmPlan = comTrajectoryProvider;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      omega = new YoDouble("omega", registry);
       omega.set(sphereRobot.getOmega0());
       gravity = sphereRobot.getGravityZ();
       this.sphereRobot = sphereRobot;
@@ -134,6 +134,17 @@ public class SimpleSphereVisualizer
       Graphics3DObject stanceFootGraphics = new Graphics3DObject();
       footstepGraphics.addExtrudedPolygon(contactPointsInSoleFrame, 0.02, YoAppearance.Color(Color.blue));
       stanceFootGraphics.addExtrudedPolygon(contactPointsInSoleFrame, 0.02, YoAppearance.Color(Color.green));
+      
+      leftFootPose = new YoFramePoseUsingYawPitchRoll("leftFootPose", worldFrame, registry);
+      rightFootPose = new YoFramePoseUsingYawPitchRoll("rightFootPose", worldFrame, registry);
+      yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
+      yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
+      yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
+      leftFoot = new YoFrameConvexPolygon2D("leftFoot", "", worldFrame, 4, registry);
+      rightFoot = new YoFrameConvexPolygon2D("rightFoot", "", worldFrame, 4, registry);
+      yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
+      yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
+      yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
       
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("leftFootPose", stanceFootGraphics, leftFootPose, 1.0));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("rightFootPose", stanceFootGraphics, rightFootPose, 1.0));
