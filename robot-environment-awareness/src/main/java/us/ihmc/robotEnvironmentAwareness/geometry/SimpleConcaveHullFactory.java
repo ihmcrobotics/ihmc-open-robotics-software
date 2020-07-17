@@ -112,8 +112,6 @@ public abstract class SimpleConcaveHullFactory
 
       for (Point2DReadOnly point : pointCloud2d)
       {
-         if (point.containsNaN())
-            continue;
          if (!isTooCloseToConstraintSegments(point, lineConstraints, tolerance))
             filteredPointCloud2d.add(point);
       }

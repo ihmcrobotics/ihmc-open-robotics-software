@@ -217,9 +217,7 @@ public class PlanarRegionSegmentationCalculator
 
       for (NormalOcTreeNode node : nodesWithoutRegion)
       {
-         if (Double.isNaN(node.getNormalAverageDeviation()) ||  node.getNormalAverageDeviation() > minNormalQuality)
-            continue;
-         if (node.getHitLocationCopy().containsNaN())
+         if (node.getNormalAverageDeviation() > minNormalQuality)
             continue;
 
          int regionId = PlanarRegion.NO_REGION_ID;
@@ -255,7 +253,6 @@ public class PlanarRegionSegmentationCalculator
    {
       double searchRadius = parameters.getSearchRadius();
 
-      Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>();
       Set<NormalOcTreeNode> newSetToExplore = new HashSet<>();
 
       NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore,
@@ -278,30 +275,17 @@ public class PlanarRegionSegmentationCalculator
                                .filter(node -> isNodeInBoundingBox(node, boundingBox))
                                .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
       }
-      for (NormalOcTreeNode node : newSetToExplore)
-      {
-         if (!node.getHitLocationCopy().containsNaN())
-//            throw new IllegalArgumentException("what?");
-//         else
-            nodesToExplore.add(node);
-      }
+      Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>(newSetToExplore);
 
       while (!nodesToExplore.isEmpty())
       {
          NormalOcTreeNode currentNode = nodesToExplore.poll();
-         if (currentNode.getHitLocationCopy().containsNaN())
-            continue;
-//            throw new RuntimeException("Shouldn't get here.");
          if (!ocTreeNodePlanarRegion.addNode(currentNode)) // TODO This updates the region normal based on the average of the nodes' normals, can very likely be improved.
             continue;
          allRegionNodes.add(currentNode);
          newSetToExplore.clear();
          OcTreeNearestNeighborTools.findRadiusNeighbors(root, currentNode, searchRadius, extendSearchRule);
-         for (NormalOcTreeNode node : newSetToExplore)
-         {
-            if (!node.getHitLocationCopy().containsNaN())
-               nodesToExplore.add(node);
-         }
+         nodesToExplore.addAll(newSetToExplore);
       }
    }
 
@@ -316,8 +300,6 @@ public class PlanarRegionSegmentationCalculator
          return;
       if (!neighborNode.isNormalSet() || !neighborNode.isHitLocationSet())
          return;
-      if (neighborNode.getHitLocationCopy().containsNaN() || neighborNode.getNormalCopy().containsNaN())
-         throw new IllegalArgumentException("Shouldnt be here.");
 
       newSetToExplore.add(neighborNode);
    }
