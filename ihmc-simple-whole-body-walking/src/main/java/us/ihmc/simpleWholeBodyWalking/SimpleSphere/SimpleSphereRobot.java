@@ -141,9 +141,9 @@ public class SimpleSphereRobot
 
       String graphicListName = getClass().getSimpleName();
 
-      YoGraphicPosition desiredICPViz = new YoGraphicPosition(name + "Desired DCM", desiredDCM, 0.01, YoAppearance.Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredICPViz = new YoGraphicPosition(name + "Desired DCM", desiredDCM, 0.01, YoAppearance.DarkRed(), GraphicType.SOLID_BALL);
       YoGraphicPosition icpViz = new YoGraphicPosition(name + "DCM", dcm, 0.01, YoAppearance.Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition comViz = new YoGraphicPosition(name + "Center of Mass", yoCenterOfMass, 0.01, YoAppearance.Grey(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition comViz = new YoGraphicPosition(name + "Center of Mass", yoCenterOfMass, 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
 
       yoGraphicsListRegistry.registerArtifact(graphicListName, desiredICPViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact(graphicListName, icpViz.createArtifact());

@@ -45,6 +45,9 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
    private final YoBoolean RightInContact = new YoBoolean("RightInContact", registry);
    
    private final List<RobotSide> currentFeetInContact = new ArrayList<>();
+   
+   private final boolean visualize = true;
+   private final SimpleSphereVisualizer vizSphere;
 
    public SimpleLQRSphereController(SimpleSphereRobot sphereRobot, SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -57,6 +60,11 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
       sphereRobot.getScsRobot().setController(this);
 
       lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
+      
+      vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot);
+      updateFeetState(0);
+      vizSphere.updateVizFeet(0, currentFeetInContact);
+      
    }
 
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
@@ -92,6 +100,9 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
       scsRobot.updateJointPositions_ID_to_SCS();
       scsRobot.updateJointVelocities_ID_to_SCS();
       scsRobot.updateJointTorques_ID_to_SCS();
+      
+      vizSphere.updateVizPoints(currentTime, lqrForce);
+      vizSphere.updateVizFeet(currentTime, currentFeetInContact);
    }
 
   private void updateFeetYoVar()
