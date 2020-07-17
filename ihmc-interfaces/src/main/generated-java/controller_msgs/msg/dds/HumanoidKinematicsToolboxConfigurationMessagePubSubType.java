@@ -85,7 +85,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       cdr.write_type_7(data.getHoldCurrentCenterOfMassXyPosition());
 
-      cdr.write_type_7(data.getHoldSupportFootPositions());
+      cdr.write_type_7(data.getHoldSupportRigidBodies());
 
    }
 
@@ -97,7 +97,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       	
       data.setHoldCurrentCenterOfMassXyPosition(cdr.read_type_7());
       	
-      data.setHoldSupportFootPositions(cdr.read_type_7());
+      data.setHoldSupportRigidBodies(cdr.read_type_7());
       	
 
    }
@@ -108,7 +108,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("enable_support_polygon_constraint", data.getEnableSupportPolygonConstraint());
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
-      ser.write_type_7("hold_support_foot_positions", data.getHoldSupportFootPositions());
+      ser.write_type_7("hold_support_rigid_bodies", data.getHoldSupportRigidBodies());
    }
 
    @Override
@@ -117,7 +117,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setEnableSupportPolygonConstraint(ser.read_type_7("enable_support_polygon_constraint"));
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
-      data.setHoldSupportFootPositions(ser.read_type_7("hold_support_foot_positions"));
+      data.setHoldSupportRigidBodies(ser.read_type_7("hold_support_rigid_bodies"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage dest)

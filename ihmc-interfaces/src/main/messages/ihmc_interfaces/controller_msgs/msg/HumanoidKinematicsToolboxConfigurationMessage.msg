@@ -11,5 +11,7 @@ bool enable_support_polygon_constraint true
 # of mass. By 'current', it means that the solver will use the robot configuration data
 # broadcasted by the controller to obtain the center of mass position.
 bool hold_current_center_of_mass_xy_position true
-# When set to true, the solver will hold the pose of the active support foot/feet.
-bool hold_support_foot_positions true
+# When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+# - when the walking controller is running, the rigid-bodies in question are the feet.
+# - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+bool hold_support_rigid_bodies true

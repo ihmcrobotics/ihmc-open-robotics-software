@@ -9,7 +9,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    private long sequenceId;
    private boolean enableSupportPolygonConstraint = true;
    private boolean holdCurrentCenterOfMassXYPosition = true;
-   private boolean holdSupportFootPositions = true;
+   private boolean holdSupportRigidBodies = true;
 
    @Override
    public void clear()
@@ -17,7 +17,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       sequenceId = 0;
       enableSupportPolygonConstraint = true;
       holdCurrentCenterOfMassXYPosition = true;
-      holdSupportFootPositions = true;
+      holdSupportRigidBodies = true;
    }
 
    @Override
@@ -26,7 +26,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       sequenceId = other.sequenceId;
       enableSupportPolygonConstraint = other.enableSupportPolygonConstraint;
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
-      holdSupportFootPositions = other.holdSupportFootPositions;
+      holdSupportRigidBodies = other.holdSupportRigidBodies;
    }
 
    @Override
@@ -35,7 +35,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       sequenceId = message.getSequenceId();
       enableSupportPolygonConstraint = message.getEnableSupportPolygonConstraint();
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
-      holdSupportFootPositions = message.getHoldSupportFootPositions();
+      holdSupportRigidBodies = message.getHoldSupportRigidBodies();
    }
 
    public boolean enableSupportPolygonConstraint()
@@ -48,9 +48,9 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       return holdCurrentCenterOfMassXYPosition;
    }
 
-   public boolean holdSupportFootPositions()
+   public boolean holdSupportRigidBodies()
    {
-      return holdSupportFootPositions;
+      return holdSupportRigidBodies;
    }
 
    @Override
