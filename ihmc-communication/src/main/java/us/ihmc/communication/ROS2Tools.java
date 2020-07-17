@@ -388,7 +388,7 @@ public class ROS2Tools
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
-      return createPublisher(realtimeROS2Node, messageType, topicName.toString());
+      return createPublisher(realtimeROS2Node, topicName.withType(messageType));
    }
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, String topicName)
