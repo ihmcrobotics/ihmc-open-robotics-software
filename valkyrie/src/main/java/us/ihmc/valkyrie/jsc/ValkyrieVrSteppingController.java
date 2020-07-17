@@ -1,10 +1,14 @@
 package us.ihmc.valkyrie.jsc;
 
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.SteppingParameters;
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -16,16 +20,8 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.JoystickControl;
-import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Mesh;
-import javafx.scene.shape.MeshView;
-import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -42,32 +38,26 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("restriction")
 public class ValkyrieVrSteppingController {
 
 	private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
@@ -98,7 +88,7 @@ public class ValkyrieVrSteppingController {
 	private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
 	private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 	private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
-	private final AnimationTimer animationTimer;
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
 	private final ValkyrieRobotModel robotModel;
 	private FullHumanoidRobotModel fullRobotModel = null;
@@ -184,37 +174,49 @@ public class ValkyrieVrSteppingController {
 		collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight,
 				collisionXYProximityCheck);
 
-		animationTimer = new AnimationTimer() {
+		final Runnable task = new Runnable() {
 			@Override
-			public void handle(long now) {
-
+			public void run() {
 				try {
-					System.out.println("In animation timer");
-					PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
-					if (latestMessage != null) {
-						PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter
-								.convertToPlanarRegionsList(latestMessage);
-						snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
-						collisionDetector.setPlanarRegionsList(new PlanarRegionsList(planarRegionsList
-								.getPlanarRegionsAsList().stream().filter(region -> region.getConvexHull()
-										.getArea() >= parameters.getMinPlanarRegionArea())
-								.collect(Collectors.toList())));
-						ValkyrieVrSteppingController.this.planarRegionsList.set(planarRegionsList);
-					}
+//					System.out.println("In task timer");
+					ValkyrieVrSteppingController.this.handleJoystickMessage();
+//					PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
+//					if (latestMessage != null) {
+//						PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter
+//								.convertToPlanarRegionsList(latestMessage);
+//						snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+//						collisionDetector.setPlanarRegionsList(new PlanarRegionsList(planarRegionsList
+//								.getPlanarRegionsAsList().stream().filter(region -> region.getConvexHull()
+//										.getArea() >= parameters.getMinPlanarRegionArea())
+//								.collect(Collectors.toList())));
+//						ValkyrieVrSteppingController.this.planarRegionsList.set(planarRegionsList);
+//					}
 
 					JoystickStepParameters stepParameters = stepParametersReference.get();
 					continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(),
 							stepParameters.getTransferDuration());
 					continuousStepGenerator.update(Double.NaN);
 
-					ValkyrieVrSteppingController.this.handleJoystickMessage();
 				} catch (Throwable e) {
 					e.printStackTrace();
-					LogTools.error("Caught exception, stopping animation timer.");
-					stop();
+					LogTools.error("Caught exception, stopping timer.");
 				}
 			}
 		};
+		final ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(task, 0, 1000, TimeUnit.MILLISECONDS);
+		scheduler.execute(new Runnable() {
+			@Override
+			public void run() {
+    			try {
+					future.get();
+				} catch (InterruptedException | ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					future.cancel(true);
+				}
+			}
+		});
+		
 		System.out.println("End of controller constructor");
 	}
 
@@ -294,7 +296,6 @@ public class ValkyrieVrSteppingController {
 	}
 
 	private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage) {
-		List<Node> footstepNode = new ArrayList<>();
 		for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++) {
 			FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
 			footstepDataMessage.setSwingHeight(stepParametersReference.get().getSwingHeight());
@@ -360,8 +361,11 @@ public class ValkyrieVrSteppingController {
 	}
 
 	protected void handleJoystickMessage() {
-		System.out.printf("Got joystick message (%f, %f, %f)\n", joystickControlMessage.forward_,
-				joystickControlMessage.right_, joystickControlMessage.turn_);
+//		System.out.printf("Got joystick message (%f, %f, %f)\n", joystickControlMessage.forward_,
+//				joystickControlMessage.right_, joystickControlMessage.turn_);
+		updateForwardVelocity(joystickControlMessage.forward_);
+		updateLateralVelocity(joystickControlMessage.right_);
+		updateTurningVelocity(joystickControlMessage.turn_);
 	}
 
 }
