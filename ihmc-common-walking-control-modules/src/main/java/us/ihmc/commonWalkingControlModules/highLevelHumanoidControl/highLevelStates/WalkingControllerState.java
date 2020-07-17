@@ -93,6 +93,8 @@ public class WalkingControllerState extends HighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
+      // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
+      template.setAllowDynamicControllerConstruction(false);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
