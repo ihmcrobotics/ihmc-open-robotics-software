@@ -25,12 +25,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData6D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.PoseData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData6D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -59,37 +59,37 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoBoolean isEnabled;
 
-   private final PoseData3D yoDesiredPose;
-   private final PoseData3D yoCurrentPose;
+   private final FBPose3D yoDesiredPose;
+   private final FBPose3D yoCurrentPose;
 
-   private final VectorData6D yoErrorVector;
-   private final QuaternionData3D yoErrorOrientation;
+   private final FBVector6D yoErrorVector;
+   private final FBQuaternion3D yoErrorOrientation;
 
-   private final VectorData3D yoErrorPositionIntegrated;
-   private final QuaternionData3D yoErrorOrientationCumulated;
-   private final VectorData3D yoErrorRotationVectorIntegrated;
+   private final FBVector3D yoErrorPositionIntegrated;
+   private final FBQuaternion3D yoErrorOrientationCumulated;
+   private final FBVector3D yoErrorRotationVectorIntegrated;
 
-   private final VectorData6D yoDesiredVelocity;
-   private final VectorData6D yoCurrentVelocity;
-   private final VectorData6D yoErrorVelocity;
-   private final AlphaFilteredVectorData6D yoFilteredErrorVelocity;
-   private final VectorData6D yoFeedForwardVelocity;
-   private final VectorData6D yoFeedbackVelocity;
-   private final RateLimitedVectorData6D rateLimitedFeedbackVelocity;
+   private final FBVector6D yoDesiredVelocity;
+   private final FBVector6D yoCurrentVelocity;
+   private final FBVector6D yoErrorVelocity;
+   private final FBAlphaFilteredVector6D yoFilteredErrorVelocity;
+   private final FBVector6D yoFeedForwardVelocity;
+   private final FBVector6D yoFeedbackVelocity;
+   private final FBRateLimitedVector6D rateLimitedFeedbackVelocity;
 
-   private final VectorData6D yoDesiredAcceleration;
-   private final VectorData6D yoFeedForwardAcceleration;
-   private final VectorData6D yoFeedbackAcceleration;
-   private final RateLimitedVectorData6D rateLimitedFeedbackAcceleration;
-   private final VectorData6D yoAchievedAcceleration;
+   private final FBVector6D yoDesiredAcceleration;
+   private final FBVector6D yoFeedForwardAcceleration;
+   private final FBVector6D yoFeedbackAcceleration;
+   private final FBRateLimitedVector6D rateLimitedFeedbackAcceleration;
+   private final FBVector6D yoAchievedAcceleration;
 
-   private final VectorData6D yoDesiredWrench;
-   private final VectorData6D yoFeedForwardWrench;
-   private final VectorData6D yoFeedbackWrench;
-   private final RateLimitedVectorData6D rateLimitedFeedbackWrench;
+   private final FBVector6D yoDesiredWrench;
+   private final FBVector6D yoFeedForwardWrench;
+   private final FBVector6D yoFeedbackWrench;
+   private final FBRateLimitedVector6D rateLimitedFeedbackWrench;
 
-   private final VectorData3D yoDesiredRotationVector;
-   private final VectorData3D yoCurrentRotationVector;
+   private final FBVector3D yoDesiredRotationVector;
+   private final FBVector3D yoCurrentRotationVector;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
@@ -193,9 +193,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled);
       yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled);
-      VectorData3D errorPosition = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
-      VectorData3D errorRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
-      yoErrorVector = new VectorData6D(errorRotationVector, errorPosition);
+      FBVector3D errorPosition = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
+      FBVector3D errorRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ROTATION_VECTOR, isEnabled);
+      yoErrorVector = new FBVector6D(errorRotationVector, errorPosition);
       yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
 
       if (computeIntegralTerm)

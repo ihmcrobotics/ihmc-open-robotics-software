@@ -23,10 +23,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -52,36 +52,36 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final YoBoolean isEnabled;
 
-   private final QuaternionData3D yoDesiredOrientation;
-   private final QuaternionData3D yoCurrentOrientation;
-   private final QuaternionData3D yoErrorOrientation;
+   private final FBQuaternion3D yoDesiredOrientation;
+   private final FBQuaternion3D yoCurrentOrientation;
+   private final FBQuaternion3D yoErrorOrientation;
 
-   private final QuaternionData3D yoErrorOrientationCumulated;
+   private final FBQuaternion3D yoErrorOrientationCumulated;
 
-   private final VectorData3D yoDesiredRotationVector;
-   private final VectorData3D yoCurrentRotationVector;
-   private final VectorData3D yoErrorRotationVector;
+   private final FBVector3D yoDesiredRotationVector;
+   private final FBVector3D yoCurrentRotationVector;
+   private final FBVector3D yoErrorRotationVector;
 
-   private final VectorData3D yoErrorRotationVectorIntegrated;
+   private final FBVector3D yoErrorRotationVectorIntegrated;
 
-   private final VectorData3D yoDesiredAngularVelocity;
-   private final VectorData3D yoCurrentAngularVelocity;
-   private final VectorData3D yoErrorAngularVelocity;
-   private final AlphaFilteredVectorData3D yoFilteredErrorAngularVelocity;
-   private final VectorData3D yoFeedForwardAngularVelocity;
-   private final VectorData3D yoFeedbackAngularVelocity;
-   private final RateLimitedVectorData3D rateLimitedFeedbackAngularVelocity;
+   private final FBVector3D yoDesiredAngularVelocity;
+   private final FBVector3D yoCurrentAngularVelocity;
+   private final FBVector3D yoErrorAngularVelocity;
+   private final FBAlphaFilteredVector3D yoFilteredErrorAngularVelocity;
+   private final FBVector3D yoFeedForwardAngularVelocity;
+   private final FBVector3D yoFeedbackAngularVelocity;
+   private final FBRateLimitedVector3D rateLimitedFeedbackAngularVelocity;
 
-   private final VectorData3D yoDesiredAngularAcceleration;
-   private final VectorData3D yoFeedForwardAngularAcceleration;
-   private final VectorData3D yoFeedbackAngularAcceleration;
-   private final RateLimitedVectorData3D rateLimitedFeedbackAngularAcceleration;
-   private final VectorData3D yoAchievedAngularAcceleration;
+   private final FBVector3D yoDesiredAngularAcceleration;
+   private final FBVector3D yoFeedForwardAngularAcceleration;
+   private final FBVector3D yoFeedbackAngularAcceleration;
+   private final FBRateLimitedVector3D rateLimitedFeedbackAngularAcceleration;
+   private final FBVector3D yoAchievedAngularAcceleration;
 
-   private final VectorData3D yoDesiredAngularTorque;
-   private final VectorData3D yoFeedForwardAngularTorque;
-   private final VectorData3D yoFeedbackAngularTorque;
-   private final RateLimitedVectorData3D rateLimitedFeedbackAngularTorque;
+   private final FBVector3D yoDesiredAngularTorque;
+   private final FBVector3D yoFeedForwardAngularTorque;
+   private final FBVector3D yoFeedbackAngularTorque;
+   private final FBRateLimitedVector3D rateLimitedFeedbackAngularTorque;
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();

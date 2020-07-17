@@ -5,19 +5,24 @@ import java.util.List;
 
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
-public class PositionData3D extends YoMutableFramePoint3D implements FeedbackControllerData
+/**
+ * @see FeedbackControllerData
+ */
+public class FBVector3D extends YoMutableFrameVector3D implements FeedbackControllerData
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
+   private final SpaceData3D space;
    private int commandId;
 
-   public PositionData3D(String namePrefix, Type type, YoVariableRegistry registry)
+   public FBVector3D(String namePrefix, Type type, SpaceData3D space, YoVariableRegistry registry)
    {
-      super(FeedbackControllerData.createNamePrefix(namePrefix, type, SpaceData3D.POSITION), "", registry);
+      super(FeedbackControllerData.createNamePrefix(namePrefix, type, space), "", registry);
 
       this.type = type;
+      this.space = space;
    }
 
    @Override
@@ -49,6 +54,7 @@ public class PositionData3D extends YoMutableFramePoint3D implements FeedbackCon
       if (!isActive())
       {
          setToNaN();
+         commandId = -1;
          return true;
       }
       return false;
@@ -56,7 +62,7 @@ public class PositionData3D extends YoMutableFramePoint3D implements FeedbackCon
 
    public SpaceData3D getSpace()
    {
-      return SpaceData3D.POSITION;
+      return space;
    }
 
    public Type getType()

@@ -5,11 +5,11 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface FeedbackControllerDataHolderReadOnly
@@ -32,7 +32,7 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param type               whether the current or desired position is requested, the other values
     *                           in {@link Type} are not applicable.
     */
-   void getCenterOfMassPositionData(List<PositionData3D> positionDataListToPack, Type type);
+   void getCenterOfMassPositionData(List<FBPoint3D> positionDataListToPack, Type type);
 
    /**
     * Retrieves if possible the vector data about the center of mass.
@@ -55,7 +55,7 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param space            specifies the physical quantity requested. Look up the options available
     *                         in {@link SpaceData3D}.
     */
-   void getCenterOfMassVectorData(List<VectorData3D> vectorDataListToPack, Type type, SpaceData3D space);
+   void getCenterOfMassVectorData(List<FBVector3D> vectorDataListToPack, Type type, SpaceData3D space);
 
    /**
     * Retrieves if possible the position data about a specific end-effector.
@@ -77,7 +77,7 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param type               whether the current or desired position is requested, the other values
     *                           in {@link Type} are not applicable.
     */
-   void getPositionData(RigidBodyBasics endEffector, List<PositionData3D> positionDataListToPack, Type type);
+   void getPositionData(RigidBodyBasics endEffector, List<FBPoint3D> positionDataListToPack, Type type);
 
    /**
     * Retrieves if possible the orientation data about a specific end-effector.
@@ -99,7 +99,7 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param type                  whether the current or desired orientation is requested, the other
     *                              values in {@link Type} are not applicable.
     */
-   void getOrientationData(RigidBodyBasics endEffector, List<QuaternionData3D> orientationDataListToPack, Type type);
+   void getOrientationData(RigidBodyBasics endEffector, List<FBQuaternion3D> orientationDataListToPack, Type type);
 
    /**
     * Retrieves if possible the vector data about a specific end-effector.
@@ -123,7 +123,7 @@ public interface FeedbackControllerDataHolderReadOnly
     * @param space            specifies the physical quantity requested. Look up the options available
     *                         in {@link SpaceData3D}.
     */
-   void getVectorData(RigidBodyBasics endEffector, List<VectorData3D> vectorDataListToPack, Type type, SpaceData3D space);
+   void getVectorData(RigidBodyBasics endEffector, List<FBVector3D> vectorDataListToPack, Type type, SpaceData3D space);
 
    /**
     * Retrieves when applicable, the output calculated by the feedback controller feeding the inverse

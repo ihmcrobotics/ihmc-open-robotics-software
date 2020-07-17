@@ -5,17 +5,20 @@ import java.util.List;
 
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 
-public class QuaternionData3D extends YoMutableFrameQuaternion implements FeedbackControllerData
+/**
+ * @see FeedbackControllerData
+ */
+public class FBPoint3D extends YoMutableFramePoint3D implements FeedbackControllerData
 {
    private final List<BooleanProvider> activeFlags = new ArrayList<>();
    private final Type type;
    private int commandId;
 
-   public QuaternionData3D(String namePrefix, Type type, YoVariableRegistry registry)
+   public FBPoint3D(String namePrefix, Type type, YoVariableRegistry registry)
    {
-      super(FeedbackControllerData.createNamePrefix(namePrefix, type, SpaceData3D.ORIENTATION), "", registry);
+      super(FeedbackControllerData.createNamePrefix(namePrefix, type, SpaceData3D.POSITION), "", registry);
 
       this.type = type;
    }
@@ -49,6 +52,7 @@ public class QuaternionData3D extends YoMutableFrameQuaternion implements Feedba
       if (!isActive())
       {
          setToNaN();
+         commandId = -1;
          return true;
       }
       return false;
@@ -56,7 +60,7 @@ public class QuaternionData3D extends YoMutableFrameQuaternion implements Feedba
 
    public SpaceData3D getSpace()
    {
-      return SpaceData3D.ORIENTATION;
+      return SpaceData3D.POSITION;
    }
 
    public Type getType()

@@ -4,12 +4,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerExce
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePose3D;
 
-public class PoseData3D extends YoMutableFramePose3D implements FeedbackControllerData
+/**
+ * @see FeedbackControllerData
+ */
+public class FBPose3D extends YoMutableFramePose3D implements FeedbackControllerData
 {
-   private final PositionData3D position;
-   private final QuaternionData3D orientation;
+   private final FBPoint3D position;
+   private final FBQuaternion3D orientation;
 
-   public PoseData3D(PositionData3D position, QuaternionData3D orientation)
+   public FBPose3D(FBPoint3D position, FBQuaternion3D orientation)
    {
       super(position, orientation);
       if (position.getType() != orientation.getType())

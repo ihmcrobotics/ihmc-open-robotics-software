@@ -11,19 +11,19 @@ import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.AlphaFilteredVectorData6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FeedbackControllerData;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.PoseData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.PositionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.QuaternionData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.RateLimitedVectorData6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.VectorData6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -127,10 +127,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type the type of the data to retrieve.
     * @return the unique {@code PositionData3D} matching the search criterion.
     */
-   public PositionData3D getOrCreateCenterOfMassPositionData(Type type, YoBoolean enabled)
+   public FBPoint3D getOrCreateCenterOfMassPositionData(Type type, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      PositionData3D positionData = dataPool.getOrCreatePositionData(type);
+      FBPoint3D positionData = dataPool.getOrCreatePositionData(type);
       positionData.addActiveFlag(enabled);
       return positionData;
    }
@@ -143,10 +143,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param space the space of the data to retrieve.
     * @return the unique {@code VectorData3D} matching the search criteria.
     */
-   public VectorData3D getOrCreateCenterOfMassVectorData(Type type, SpaceData3D space, YoBoolean enabled)
+   public FBVector3D getOrCreateCenterOfMassVectorData(Type type, SpaceData3D space, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      VectorData3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
+      FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
       vectorData.addActiveFlag(enabled);
       return vectorData;
    }
@@ -166,11 +166,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
     * @return the unique {@code AlphaFilteredVectorData3D} matching the search criteria.
     */
-   public AlphaFilteredVectorData3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType, SpaceData3D space, double dt,
+   public FBAlphaFilteredVector3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType, SpaceData3D space, double dt,
                                                                                    DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      AlphaFilteredVectorData3D filteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
+      FBAlphaFilteredVector3D filteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
       filteredVectorData.addActiveFlag(enabled);
       return filteredVectorData;
    }
@@ -189,11 +189,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedVectorData3D} matching the search criteria.
     */
-   public RateLimitedVectorData3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType, SpaceData3D space, double dt, YoDouble maximumRate,
+   public FBRateLimitedVector3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType, SpaceData3D space, double dt, YoDouble maximumRate,
                                                                                YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      RateLimitedVectorData3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
+      FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
       rateLimitedVectorData.addActiveFlag(enabled);
       return rateLimitedVectorData;
    }
@@ -246,10 +246,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type            the type of the data to retrieve.
     * @return the unique {@code PositionData3D} matching the search criteria.
     */
-   public PositionData3D getOrCreatePositionData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
+   public FBPoint3D getOrCreatePositionData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      PositionData3D positionData = dataPool.getOrCreatePositionData(type);
+      FBPoint3D positionData = dataPool.getOrCreatePositionData(type);
       positionData.addActiveFlag(enabled);
       return positionData;
    }
@@ -270,10 +270,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type            the type of the data to retrieve.
     * @return the unique {@code QuaternionData3D} matching the search criteria.
     */
-   public QuaternionData3D getOrCreateOrientationData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
+   public FBQuaternion3D getOrCreateOrientationData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      QuaternionData3D orientationData = dataPool.getOrCreateOrientationData(type);
+      FBQuaternion3D orientationData = dataPool.getOrCreateOrientationData(type);
       orientationData.addActiveFlag(enabled);
       return orientationData;
    }
@@ -294,10 +294,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param space           the space of the data to retrieve.
     * @return the unique {@code VectorData3D} matching the search criteria.
     */
-   public VectorData3D getOrCreateVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData3D space, YoBoolean enabled)
+   public FBVector3D getOrCreateVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData3D space, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      VectorData3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
+      FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
       vectorData.addActiveFlag(enabled);
       return vectorData;
    }
@@ -324,11 +324,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumRate     the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedVectorData3D} matching the search criteria.
     */
-   public RateLimitedVectorData3D getOrCreateRateLimitedVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
+   public FBRateLimitedVector3D getOrCreateRateLimitedVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
                                                                      double dt, YoDouble maximumRate, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      RateLimitedVectorData3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
+      FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
       rateLimitedVectorData.addActiveFlag(enabled);
       return rateLimitedVectorData;
    }
@@ -356,11 +356,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
     * @return the unique {@code AlphaFilteredVectorData3D} matching the search criteria.
     */
-   public AlphaFilteredVectorData3D getOrCreateAlphaFilteredVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
+   public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
                                                                        double dt, DoubleProvider breakFrequencyProvider, YoBoolean enabled)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      AlphaFilteredVectorData3D alphaFilteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
+      FBAlphaFilteredVector3D alphaFilteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
       alphaFilteredVectorData.addActiveFlag(enabled);
       return alphaFilteredVectorData;
    }
@@ -374,9 +374,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type            the type of the data to retrieve.
     * @return the unique {@code PoseData3D} matching the search criteria.
     */
-   public PoseData3D getOrCreatePoseData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
+   public FBPose3D getOrCreatePoseData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
    {
-      return new PoseData3D(getOrCreatePositionData(endEffector, controllerIndex, type, enabled),
+      return new FBPose3D(getOrCreatePositionData(endEffector, controllerIndex, type, enabled),
                             getOrCreateOrientationData(endEffector, controllerIndex, type, enabled));
    }
 
@@ -389,9 +389,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param type            the type of the data to retrieve.
     * @return the unique {@code VectorData6D} matching the search criteria.
     */
-   public VectorData6D getOrCreateVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData6D space, YoBoolean enabled)
+   public FBVector6D getOrCreateVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData6D space, YoBoolean enabled)
    {
-      return new VectorData6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getAngular(), enabled),
+      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getAngular(), enabled),
                               getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getLinear(), enabled));
    }
 
@@ -414,11 +414,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     *                                  error. Not modified.
     * @return the unique {@code AlphaFilteredVectorData6D} matching the search criteria.
     */
-   public AlphaFilteredVectorData6D getOrCreateAlphaFilteredVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
+   public FBAlphaFilteredVector6D getOrCreateAlphaFilteredVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
                                                                          double dt, DoubleProvider breakFrequencyAngularPart,
                                                                          DoubleProvider breakFrequencyLinearPart, YoBoolean enabled)
    {
-      return new AlphaFilteredVectorData6D(getOrCreateAlphaFilteredVectorData3D(endEffector,
+      return new FBAlphaFilteredVector6D(getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
                                                                               space.getAngular(),
@@ -451,10 +451,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param maximumLinearRate  the maximum linear rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedVectorData6D getOrCreateRateLimitedVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
+   public FBRateLimitedVector6D getOrCreateRateLimitedVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
                                                                      double dt, YoDouble maximumAngularRate, YoDouble maximumLinearRate, YoBoolean enabled)
    {
-      return new RateLimitedVectorData6D(getOrCreateRateLimitedVectorData3D(endEffector,
+      return new FBRateLimitedVector6D(getOrCreateRateLimitedVectorData3D(endEffector,
                                                                             controllerIndex,
                                                                             rawDataType,
                                                                             space.getAngular(),
@@ -548,10 +548,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    @Override
-   public void getCenterOfMassPositionData(List<PositionData3D> positionDataListToPack, Type type)
+   public void getCenterOfMassPositionData(List<FBPoint3D> positionDataListToPack, Type type)
    {
       positionDataListToPack.clear();
-      PositionData3D positionData = getOrCreateCenterOfMassDataPool().positionDataMap.get(type);
+      FBPoint3D positionData = getOrCreateCenterOfMassDataPool().positionDataMap.get(type);
 
       if (positionData == null || !positionData.isActive())
          return;
@@ -560,15 +560,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    @Override
-   public void getCenterOfMassVectorData(List<VectorData3D> vectorDataListToPack, Type type, SpaceData3D space)
+   public void getCenterOfMassVectorData(List<FBVector3D> vectorDataListToPack, Type type, SpaceData3D space)
    {
       vectorDataListToPack.clear();
-      EnumMap<SpaceData3D, VectorData3D> endEffectorDataTyped = getOrCreateCenterOfMassDataPool().vectorDataMap.get(type);
+      EnumMap<SpaceData3D, FBVector3D> endEffectorDataTyped = getOrCreateCenterOfMassDataPool().vectorDataMap.get(type);
 
       if (endEffectorDataTyped == null)
          return;
 
-      VectorData3D vectorData = endEffectorDataTyped.get(space);
+      FBVector3D vectorData = endEffectorDataTyped.get(space);
 
       if (vectorData == null || !vectorData.isActive())
          return;
@@ -577,7 +577,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    @Override
-   public void getPositionData(RigidBodyBasics endEffector, List<PositionData3D> positionDataListToPack, Type type)
+   public void getPositionData(RigidBodyBasics endEffector, List<FBPoint3D> positionDataListToPack, Type type)
    {
       positionDataListToPack.clear();
       List<SingleFeedbackControllerDataPool> dataPoolList = endEffectorDataPoolMap.get(endEffector);
@@ -587,8 +587,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       for (int i = 0; i < dataPoolList.size(); i++)
       {
-         EnumMap<Type, PositionData3D> positionDataMap = dataPoolList.get(i).positionDataMap;
-         PositionData3D positionData = positionDataMap.get(type);
+         EnumMap<Type, FBPoint3D> positionDataMap = dataPoolList.get(i).positionDataMap;
+         FBPoint3D positionData = positionDataMap.get(type);
          if (positionData == null || !positionData.isActive())
             continue;
 
@@ -597,7 +597,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    @Override
-   public void getOrientationData(RigidBodyBasics endEffector, List<QuaternionData3D> orientationDataListToPack, Type type)
+   public void getOrientationData(RigidBodyBasics endEffector, List<FBQuaternion3D> orientationDataListToPack, Type type)
    {
       orientationDataListToPack.clear();
       List<SingleFeedbackControllerDataPool> dataPoolList = endEffectorDataPoolMap.get(endEffector);
@@ -607,8 +607,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       for (int i = 0; i < dataPoolList.size(); i++)
       {
-         EnumMap<Type, QuaternionData3D> orientationDataMap = dataPoolList.get(i).orientationDataMap;
-         QuaternionData3D orientationData = orientationDataMap.get(type);
+         EnumMap<Type, FBQuaternion3D> orientationDataMap = dataPoolList.get(i).orientationDataMap;
+         FBQuaternion3D orientationData = orientationDataMap.get(type);
          if (orientationData == null || !orientationData.isActive())
             continue;
 
@@ -617,7 +617,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    @Override
-   public void getVectorData(RigidBodyBasics endEffector, List<VectorData3D> vectorDataListToPack, Type type, SpaceData3D space)
+   public void getVectorData(RigidBodyBasics endEffector, List<FBVector3D> vectorDataListToPack, Type type, SpaceData3D space)
    {
       vectorDataListToPack.clear();
       List<SingleFeedbackControllerDataPool> dataPoolList = endEffectorDataPoolMap.get(endEffector);
@@ -627,12 +627,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       for (int i = 0; i < dataPoolList.size(); i++)
       {
-         EnumMap<Type, EnumMap<SpaceData3D, VectorData3D>> vectorDataMap = dataPoolList.get(i).vectorDataMap;
-         EnumMap<SpaceData3D, VectorData3D> vectorDataSubMap = vectorDataMap.get(type);
+         EnumMap<Type, EnumMap<SpaceData3D, FBVector3D>> vectorDataMap = dataPoolList.get(i).vectorDataMap;
+         EnumMap<SpaceData3D, FBVector3D> vectorDataSubMap = vectorDataMap.get(type);
          if (vectorDataSubMap == null)
             continue;
 
-         VectorData3D vectorData = vectorDataSubMap.get(space);
+         FBVector3D vectorData = vectorDataSubMap.get(space);
 
          if (vectorData == null || !vectorData.isActive())
             continue;
@@ -671,11 +671,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    {
       private final YoVariableRegistry registry;
       private final String namePrefix;
-      private final EnumMap<Type, PositionData3D> positionDataMap = new EnumMap<>(Type.class);
-      private final EnumMap<Type, QuaternionData3D> orientationDataMap = new EnumMap<>(Type.class);
-      private final EnumMap<Type, EnumMap<SpaceData3D, VectorData3D>> vectorDataMap = new EnumMap<>(Type.class);
-      private final EnumMap<Type, EnumMap<SpaceData3D, RateLimitedVectorData3D>> rateLimitedVectorDataMap = new EnumMap<>(Type.class);
-      private final EnumMap<Type, EnumMap<SpaceData3D, AlphaFilteredVectorData3D>> filteredVectorDataMap = new EnumMap<>(Type.class);
+      private final EnumMap<Type, FBPoint3D> positionDataMap = new EnumMap<>(Type.class);
+      private final EnumMap<Type, FBQuaternion3D> orientationDataMap = new EnumMap<>(Type.class);
+      private final EnumMap<Type, EnumMap<SpaceData3D, FBVector3D>> vectorDataMap = new EnumMap<>(Type.class);
+      private final EnumMap<Type, EnumMap<SpaceData3D, FBRateLimitedVector3D>> rateLimitedVectorDataMap = new EnumMap<>(Type.class);
+      private final EnumMap<Type, EnumMap<SpaceData3D, FBAlphaFilteredVector3D>> filteredVectorDataMap = new EnumMap<>(Type.class);
 
       private YoPID3DGains orientationGains;
       private YoPID3DGains positionGains;
@@ -697,13 +697,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          }
       }
 
-      public PositionData3D getOrCreatePositionData(Type type)
+      public FBPoint3D getOrCreatePositionData(Type type)
       {
-         PositionData3D positionData = positionDataMap.get(type);
+         FBPoint3D positionData = positionDataMap.get(type);
 
          if (positionData == null)
          {
-            positionData = new PositionData3D(namePrefix, type, registry);
+            positionData = new FBPoint3D(namePrefix, type, registry);
             positionDataMap.put(type, positionData);
             clearableData.add(positionData);
          }
@@ -711,13 +711,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return positionData;
       }
 
-      public QuaternionData3D getOrCreateOrientationData(Type type)
+      public FBQuaternion3D getOrCreateOrientationData(Type type)
       {
-         QuaternionData3D orientationData = orientationDataMap.get(type);
+         FBQuaternion3D orientationData = orientationDataMap.get(type);
 
          if (orientationData == null)
          {
-            orientationData = new QuaternionData3D(namePrefix, type, registry);
+            orientationData = new FBQuaternion3D(namePrefix, type, registry);
             orientationDataMap.put(type, orientationData);
             clearableData.add(orientationData);
          }
@@ -725,14 +725,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return orientationData;
       }
 
-      public VectorData3D getOrCreateVectorData3D(Type type, SpaceData3D space)
+      public FBVector3D getOrCreateVectorData3D(Type type, SpaceData3D space)
       {
-         EnumMap<SpaceData3D, VectorData3D> vectorDataSubMap = getSubEnumMap(vectorDataMap, type, SpaceData3D.class);
-         VectorData3D vectorData = vectorDataSubMap.get(space);
+         EnumMap<SpaceData3D, FBVector3D> vectorDataSubMap = getSubEnumMap(vectorDataMap, type, SpaceData3D.class);
+         FBVector3D vectorData = vectorDataSubMap.get(space);
 
          if (vectorData == null)
          {
-            vectorData = new VectorData3D(namePrefix, type, space, registry);
+            vectorData = new FBVector3D(namePrefix, type, space, registry);
             vectorDataSubMap.put(space, vectorData);
             clearableData.add(vectorData);
          }
@@ -740,15 +740,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return vectorData;
       }
 
-      public AlphaFilteredVectorData3D getOrCreateAlphaFilteredVectorData(Type type, SpaceData3D space, DoubleProvider breakFrequency, double dt)
+      public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData(Type type, SpaceData3D space, DoubleProvider breakFrequency, double dt)
       {
-         EnumMap<SpaceData3D, AlphaFilteredVectorData3D> filteredVectorDataSubMap = getSubEnumMap(filteredVectorDataMap, type, SpaceData3D.class);
-         AlphaFilteredVectorData3D filteredVectorData = filteredVectorDataSubMap.get(space);
+         EnumMap<SpaceData3D, FBAlphaFilteredVector3D> filteredVectorDataSubMap = getSubEnumMap(filteredVectorDataMap, type, SpaceData3D.class);
+         FBAlphaFilteredVector3D filteredVectorData = filteredVectorDataSubMap.get(space);
 
          if (filteredVectorData == null)
          {
-            VectorData3D rawVectorData = getOrCreateVectorData3D(type, space);
-            filteredVectorData = new AlphaFilteredVectorData3D(namePrefix, type, space, breakFrequency, dt, rawVectorData, registry);
+            FBVector3D rawVectorData = getOrCreateVectorData3D(type, space);
+            filteredVectorData = new FBAlphaFilteredVector3D(namePrefix, type, space, breakFrequency, dt, rawVectorData, registry);
             filteredVectorDataSubMap.put(space, filteredVectorData);
             clearableData.add(filteredVectorData);
          }
@@ -756,15 +756,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return filteredVectorData;
       }
 
-      public RateLimitedVectorData3D getOrCreateRateLimitedVectorData(Type type, SpaceData3D space, DoubleProvider maximumRate, double dt)
+      public FBRateLimitedVector3D getOrCreateRateLimitedVectorData(Type type, SpaceData3D space, DoubleProvider maximumRate, double dt)
       {
-         EnumMap<SpaceData3D, RateLimitedVectorData3D> rateLimitedVectorDataSubMap = getSubEnumMap(rateLimitedVectorDataMap, type, SpaceData3D.class);
-         RateLimitedVectorData3D rateLimitedVectorData = rateLimitedVectorDataSubMap.get(space);
+         EnumMap<SpaceData3D, FBRateLimitedVector3D> rateLimitedVectorDataSubMap = getSubEnumMap(rateLimitedVectorDataMap, type, SpaceData3D.class);
+         FBRateLimitedVector3D rateLimitedVectorData = rateLimitedVectorDataSubMap.get(space);
 
          if (rateLimitedVectorData == null)
          {
-            VectorData3D rawVectorData = getOrCreateVectorData3D(type, space);
-            rateLimitedVectorData = new RateLimitedVectorData3D(namePrefix, type, space, maximumRate, dt, rawVectorData, registry);
+            FBVector3D rawVectorData = getOrCreateVectorData3D(type, space);
+            rateLimitedVectorData = new FBRateLimitedVector3D(namePrefix, type, space, maximumRate, dt, rawVectorData, registry);
             rateLimitedVectorDataSubMap.put(space, rateLimitedVectorData);
             clearableData.add(rateLimitedVectorData);
          }
