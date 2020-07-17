@@ -17,7 +17,6 @@ import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
@@ -130,7 +129,7 @@ public class SLAMFrame
       scanCollection.addScan(SLAMTools.toScan(getOriginalPointCloud(), getOriginalPointCloudToSensorPose(), getOriginalSensorPose(), map, windowMargin));
 
       frameMap.insertScanCollection(scanCollection, false);
-      frameMap.enableParallelComputationForNormals(false);
+      frameMap.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);

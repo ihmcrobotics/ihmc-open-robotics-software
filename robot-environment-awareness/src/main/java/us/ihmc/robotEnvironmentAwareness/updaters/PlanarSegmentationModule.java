@@ -45,7 +45,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    private final TimeReporter timeReporter = new TimeReporter();
 
-   private static final int THREAD_PERIOD_MILLISECONDS = 500;
+   private static final int THREAD_PERIOD_MILLISECONDS = 200;
 
    protected static final boolean DEBUG = true;
 

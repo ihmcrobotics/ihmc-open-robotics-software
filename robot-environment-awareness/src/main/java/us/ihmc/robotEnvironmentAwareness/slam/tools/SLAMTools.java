@@ -9,7 +9,6 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.interfaces.Plane3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -126,7 +125,7 @@ public class SLAMTools
 
       octree.insertScanCollection(scanCollection, false);
 
-      octree.enableParallelComputationForNormals(false);
+      octree.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
@@ -151,7 +150,7 @@ public class SLAMTools
 
       octree.insertScanCollection(scanCollection, false);
 
-      octree.enableParallelComputationForNormals(false);
+      octree.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
