@@ -253,7 +253,6 @@ public class PlanarRegionSegmentationCalculator
    {
       double searchRadius = parameters.getSearchRadius();
 
-      Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>();
       Set<NormalOcTreeNode> newSetToExplore = new HashSet<>();
 
       NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore,
@@ -276,7 +275,7 @@ public class PlanarRegionSegmentationCalculator
                                .filter(node -> isNodeInBoundingBox(node, boundingBox))
                                .forEach(regionNode -> OcTreeNearestNeighborTools.findRadiusNeighbors(root, regionNode, searchRadius, extendSearchRule));
       }
-      nodesToExplore.addAll(newSetToExplore);
+      Deque<NormalOcTreeNode> nodesToExplore = new ArrayDeque<>(newSetToExplore);
 
       while (!nodesToExplore.isEmpty())
       {
