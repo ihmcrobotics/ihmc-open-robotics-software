@@ -26,6 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
@@ -59,6 +60,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame = new PoseReferenceFrame("desiredPositionFrame", worldFrame);
    private final PoseReferenceFrame startOfSwingReferenceFrame = new PoseReferenceFrame("startOfSwingFrame", worldFrame);
    private final PoseReferenceFrame endOfSwingReferenceFrame = new PoseReferenceFrame("endOfSwingFrame", worldFrame);
+   private final ZUpFrame endOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), endOfSwingReferenceFrame, "endOfSwingZUpFrame");
+   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), startOfSwingReferenceFrame, "startOfSwingZUpFrame");
 
    private static final int numberOfTrajectorySegmentsToCalculateLength = 10;
    private final YoDouble initialTrajectoryLength;
@@ -274,6 +277,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       startOfSwingReferenceFrame.setPoseAndUpdate(swingStartPose);
       endOfSwingReferenceFrame.setPoseAndUpdate(swingEndPose);
+      startOfSwingZUpFrame.update();
+      endOfSwingZUpFrame.update();
+
       stepRelativeToStart.setIncludingFrame(swingEndPosition);
       stepRelativeToStart.changeFrame(startOfSwingReferenceFrame);
 
@@ -676,9 +682,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          return false;
 
       FramePoint3D collisionInEnd = new FramePoint3D(worldFrame, collisionPoint);
-      collisionInEnd.changeFrame(endOfSwingReferenceFrame);
+      collisionInEnd.changeFrame(endOfSwingZUpFrame);
 
-      return Math.abs(endOfSwingReferenceFrame.getZ()) < minimumHeightAboveFloorForCollision.getDoubleValue();
+      return collisionInEnd.getZ() < minimumHeightAboveFloorForCollision.getDoubleValue();
    }
 
    /**
