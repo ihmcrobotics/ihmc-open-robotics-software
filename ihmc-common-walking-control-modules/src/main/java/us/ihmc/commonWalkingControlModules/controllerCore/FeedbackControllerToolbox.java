@@ -13,19 +13,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector6D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FeedbackControllerData;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FeedbackControllerData;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -34,9 +33,9 @@ import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -89,6 +88,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       parentRegistry.addChild(registry);
    }
 
+   /**
+    * Stores the feedback controllers' output for later access to the user.
+    * 
+    * @param output the output of the controller.
+    */
    public void registerFeedbackControllerOutput(InverseDynamicsCommandList output)
    {
       lastFeedbackControllerInverseDynamicsOutput.set(output);
@@ -96,6 +100,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       lastFeedbackControllerVirtualModelControlOutput.clear();
    }
 
+   /**
+    * Stores the feedback controllers' output for later access to the user.
+    * 
+    * @param output the output of the controller.
+    */
    public void registerFeedbackControllerOutput(InverseKinematicsCommandList output)
    {
       lastFeedbackControllerInverseDynamicsOutput.clear();
@@ -103,6 +112,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       lastFeedbackControllerVirtualModelControlOutput.clear();
    }
 
+   /**
+    * Stores the feedback controllers' output for later access to the user.
+    * 
+    * @param output the output of the controller.
+    */
    public void registerFeedbackControllerOutput(VirtualModelControlCommandList output)
    {
       lastFeedbackControllerInverseDynamicsOutput.clear();
@@ -121,39 +135,45 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    /**
-    * Retrieves and returns the {@code PositionData3D} for the center of mass associated with the given
+    * Retrieves and returns the {@code FBPoint3D} for the center of mass associated with the given
     * {@code type}, if it does not exist it is created.
     *
-    * @param type the type of the data to retrieve.
-    * @return the unique {@code PositionData3D} matching the search criterion.
+    * @param type       the type of the data to retrieve.
+    * @param activeFlag boolean provider that should reflect the active state of the controller calling
+    *                   this factory. Used to determine whether the returned data is up-to-date or not
+    *                   at runtime.
+    * @return the unique {@code FBPoint3D} matching the search criterion.
     */
-   public FBPoint3D getOrCreateCenterOfMassPositionData(Type type, YoBoolean enabled)
+   public FBPoint3D getOrCreateCenterOfMassPositionData(Type type, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
       FBPoint3D positionData = dataPool.getOrCreatePositionData(type);
-      positionData.addActiveFlag(enabled);
+      positionData.addActiveFlag(activeFlag);
       return positionData;
    }
 
    /**
-    * Retrieves and returns the {@code VectorData3D} for the center of mass associated with the given
+    * Retrieves and returns the {@code FBVector3D} for the center of mass associated with the given
     * {@code type}, and {@code space}, if it does not exist it is created.
     *
-    * @param type  the type of the data to retrieve.
-    * @param space the space of the data to retrieve.
-    * @return the unique {@code VectorData3D} matching the search criteria.
+    * @param type       the type of the data to retrieve.
+    * @param space      the space of the data to retrieve.
+    * @param activeFlag boolean provider that should reflect the active state of the controller calling
+    *                   this factory. Used to determine whether the returned data is up-to-date or not
+    *                   at runtime.
+    * @return the unique {@code FBVector3D} matching the search criteria.
     */
-   public FBVector3D getOrCreateCenterOfMassVectorData(Type type, SpaceData3D space, YoBoolean enabled)
+   public FBVector3D getOrCreateCenterOfMassVectorData(Type type, SpaceData3D space, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
       FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
-      vectorData.addActiveFlag(enabled);
+      vectorData.addActiveFlag(activeFlag);
       return vectorData;
    }
 
    /**
-    * Retrieves and returns the {@code AlphaFilteredVectorData3D} for the center of mass associated
-    * with the given {@code type} and {@code space}, if it does not exist it is created.
+    * Retrieves and returns the {@code FBAlphaFilteredVector3D} for the center of mass associated with
+    * the given {@code type} and {@code space}, if it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt} and {@code breakFrequencyProvider} are only used if the data does
     * not exist yet.
@@ -164,19 +184,22 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     *                               applied.
     * @param dt                     the duration of a control tick.
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
-    * @return the unique {@code AlphaFilteredVectorData3D} matching the search criteria.
+    * @param activeFlag             boolean provider that should reflect the active state of the
+    *                               controller calling this factory. Used to determine whether the
+    *                               returned data is up-to-date or not at runtime.
+    * @return the unique {@code FBAlphaFilteredVector3D} matching the search criteria.
     */
    public FBAlphaFilteredVector3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType, SpaceData3D space, double dt,
-                                                                                   DoubleProvider breakFrequencyProvider, YoBoolean enabled)
+                                                                                 DoubleProvider breakFrequencyProvider, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
       FBAlphaFilteredVector3D filteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
-      filteredVectorData.addActiveFlag(enabled);
+      filteredVectorData.addActiveFlag(activeFlag);
       return filteredVectorData;
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedVectorData3D} for the center of mass associated with
+    * Retrieves and returns the {@code FBRateLimitedVector3D} for the center of mass associated with
     * the given {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not exist
@@ -187,23 +210,26 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt          the duration of a control tick.
     * @param maximumRate the maximum rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedVectorData3D} matching the search criteria.
+    * @param activeFlag  boolean provider that should reflect the active state of the controller
+    *                    calling this factory. Used to determine whether the returned data is
+    *                    up-to-date or not at runtime.
+    * @return the unique {@code FBRateLimitedVector3D} matching the search criteria.
     */
    public FBRateLimitedVector3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType, SpaceData3D space, double dt, YoDouble maximumRate,
-                                                                               YoBoolean enabled)
+                                                                             BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
       FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
-      rateLimitedVectorData.addActiveFlag(enabled);
+      rateLimitedVectorData.addActiveFlag(activeFlag);
       return rateLimitedVectorData;
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} for the center of
-    * mass, if it does not exist it is created.
+    * Retrieves and returns the set of gains {@code YoPID3DGains} for the center of mass, if it does
+    * not exist it is created.
     *
     * @param useIntegrator whether to create the gains necessary to compute the integral term.
-    * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
+    * @return the unique {@code YoPID3DGains} for the center of mass.
     */
    public YoPID3DGains getOrCreateCenterOfMassGains(boolean useIntegrator)
    {
@@ -231,172 +257,212 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    /**
-    * Retrieves and returns the {@code PositionData3D} associated with the given end-effector and
+    * Retrieves and returns the {@code FBPoint3D} associated with the given end-effector and
     * {@code type}, if it does not exist it is created.
     * <p>
-    * The name prefix of the created variable is created as follows:<br>
-    * {@code namePrefix = endEffector.getName() + type.getName() +}
-    * {@link SpaceData3D#POSITION}{@code .getName()}<br>
+    * The name prefix of the created variable is created as follows:
+    * 
+    * <pre>
+    * namePrefix = endEffector.getName() + type.getName() + SpaceData3D.POSITION.getName()
+    * </pre>
+    * 
     * Such that the desired position for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredPosition".
     * </p>
     *
     * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param type            the type of the data to retrieve.
-    * @return the unique {@code PositionData3D} matching the search criteria.
+    * @param activeFlag      boolean provider that should reflect the active state of the controller
+    *                        calling this factory. Used to determine whether the returned data is
+    *                        up-to-date or not at runtime.
+    * @return the unique {@code FBPoint3D} matching the search criteria.
     */
-   public FBPoint3D getOrCreatePositionData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
+   public FBPoint3D getOrCreatePositionData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       FBPoint3D positionData = dataPool.getOrCreatePositionData(type);
-      positionData.addActiveFlag(enabled);
+      positionData.addActiveFlag(activeFlag);
       return positionData;
    }
 
    /**
-    * Retrieves and returns the {@code QuaternionData3D} associated with the given end-effector and
+    * Retrieves and returns the {@code FBQuaternion3D} associated with the given end-effector and
     * {@code type}, if it does not exist it is created.
     * <p>
-    * The name prefix of the created variable is created as follows:<br>
-    * {@code namePrefix = endEffector.getName() + type.getName() +}
-    * {@link SpaceData3D#ORIENTATION}{@code .getName()}<br>
+    * The name prefix of the created variable is created as follows:
+    * 
+    * <pre>
+    * namePrefix = endEffector.getName() + type.getName() + SpaceData3D.ORIENTATION.getName()
+    * </pre>
+    * 
     * Such that the current orientation for the rigid-body 'rightHand' will have the prefix:
     * "rightHandCurrentOrientation".
     * </p>
     *
     * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param type            the type of the data to retrieve.
-    * @return the unique {@code QuaternionData3D} matching the search criteria.
+    * @param activeFlag      boolean provider that should reflect the active state of the controller
+    *                        calling this factory. Used to determine whether the returned data is
+    *                        up-to-date or not at runtime.
+    * @return the unique {@code FBQuaternion3D} matching the search criteria.
     */
-   public FBQuaternion3D getOrCreateOrientationData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
+   public FBQuaternion3D getOrCreateOrientationData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       FBQuaternion3D orientationData = dataPool.getOrCreateOrientationData(type);
-      orientationData.addActiveFlag(enabled);
+      orientationData.addActiveFlag(activeFlag);
       return orientationData;
    }
 
    /**
-    * Retrieves and returns the {@code VectorData3D} associated with the given end-effector,
+    * Retrieves and returns the {@code FBVector3D} associated with the given end-effector,
     * {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
-    * The name prefix of the created variable is created as follows:<br>
-    * {@code namePrefix = endEffector.getName() + type.getName() + space.getName()}<br>
+    * The name prefix of the created variable is created as follows:
+    * 
+    * <pre>
+    * namePrefix = endEffector.getName() + type.getName() + space.getName()
+    * </pre>
+    * 
     * Such that the desired linear velocity for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredLinearVelocity".
     * </p>
     *
     * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param type            the type of the data to retrieve.
     * @param space           the space of the data to retrieve.
-    * @return the unique {@code VectorData3D} matching the search criteria.
+    * @param activeFlag      boolean provider that should reflect the active state of the controller
+    *                        calling this factory. Used to determine whether the returned data is
+    *                        up-to-date or not at runtime.
+    * @return the unique {@code FBVector3D} matching the search criteria.
     */
-   public FBVector3D getOrCreateVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData3D space, YoBoolean enabled)
+   public FBVector3D getOrCreateVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData3D space, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
-      vectorData.addActiveFlag(enabled);
+      vectorData.addActiveFlag(activeFlag);
       return vectorData;
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedVectorData3D} associated with the given end-effector,
+    * Retrieves and returns the {@code FBRateLimitedVector3D} associated with the given end-effector,
     * {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not exist
     * yet.
     * </p>
     * <p>
-    * The name prefix of the created variable is created as follows:<br>
-    * {@code namePrefix = endEffector.getName() + "RateLimited" + rawDataType.getName() + space.getName()}<br>
+    * The name prefix of the created variable is created as follows:
+    * 
+    * <pre>
+    * namePrefix = endEffector.getName() + "RateLimited" + type.getName() + space.getName()
+    * </pre>
+    * 
     * Such that the rate-limited vector of the desired linear acceleration for the rigid-body
     * 'rightHand' will have the prefix: "rightHandRateLimitedDesiredLinearAcceleration".
     * </p>
     *
     * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param rawDataType     the type of the raw vector onto which the rate limit is to be applied.
     * @param space           the space of the data to retrieve.
     * @param dt              the duration of a control tick.
     * @param maximumRate     the maximum rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedVectorData3D} matching the search criteria.
+    * @param activeFlag      boolean provider that should reflect the active state of the controller
+    *                        calling this factory. Used to determine whether the returned data is
+    *                        up-to-date or not at runtime.
+    * @return the unique {@code FBRateLimitedVector3D} matching the search criteria.
     */
    public FBRateLimitedVector3D getOrCreateRateLimitedVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
-                                                                     double dt, YoDouble maximumRate, YoBoolean enabled)
+                                                                   double dt, YoDouble maximumRate, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
-      rateLimitedVectorData.addActiveFlag(enabled);
+      rateLimitedVectorData.addActiveFlag(activeFlag);
       return rateLimitedVectorData;
    }
 
    /**
-    * Retrieves and returns the {@code AlphaFilteredVectorData3D} associated with the given
-    * end-effector, {@code type}, and {@code space}, if it does not exist it is created.
+    * Retrieves and returns the {@code FBAlphaFilteredVector3D} associated with the given end-effector,
+    * {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt} and {@code breakFrequencyProvider} are only used if the data does
     * not exist yet.
     * </p>
     * <p>
-    * The name prefix of the created variable is created as follows:<br>
-    * {@code namePrefix = endEffector.getName() + "Filtered" + rawDataType.getName() + space.getName()}<br>
+    * The name prefix of the created variable is created as follows:
+    * 
+    * <pre>
+    * namePrefix = endEffector.getName() + "Filtered" + type.getName() + space.getName()
+    * </pre>
+    * 
     * Such that the filtered vector of the linear velocity error for the rigid-body 'rightHand' will
     * have the prefix: "rightHandFilteredErrorLinearVelocity".
     * </p>
     *
     * @param endEffector            the end-effector to which the returned data is associated.
-    * @param controllerIndex        TODO
+    * @param controllerIndex        the index of the feedback controller requesting the data.
     * @param rawDataType            the type of the raw vector onto which the rate limit is to be
     *                               applied.
     * @param space                  the space of the data to retrieve.
     * @param dt                     the duration of a control tick.
     * @param breakFrequencyProvider the break frequency to use for the low-pass filter. Not modified.
-    * @return the unique {@code AlphaFilteredVectorData3D} matching the search criteria.
+    * @param activeFlag             boolean provider that should reflect the active state of the
+    *                               controller calling this factory. Used to determine whether the
+    *                               returned data is up-to-date or not at runtime.
+    * @return the unique {@code FBAlphaFilteredVector3D} matching the search criteria.
     */
    public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
-                                                                       double dt, DoubleProvider breakFrequencyProvider, YoBoolean enabled)
+                                                                       double dt, DoubleProvider breakFrequencyProvider, BooleanProvider activeFlag)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
       FBAlphaFilteredVector3D alphaFilteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
-      alphaFilteredVectorData.addActiveFlag(enabled);
+      alphaFilteredVectorData.addActiveFlag(activeFlag);
       return alphaFilteredVectorData;
    }
 
    /**
-    * Retrieves and returns the {@code PoseData3D} associated with the given end-effector and
+    * Retrieves and returns the {@code FBPose3D} associated with the given end-effector and
     * {@code type}, if it does not exist it is created.
     *
     * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param type            the type of the data to retrieve.
-    * @return the unique {@code PoseData3D} matching the search criteria.
+    * @param activeFlag      boolean provider that should reflect the active state of the controller
+    *                        calling this factory. Used to determine whether the returned data is
+    *                        up-to-date or not at runtime.
+    * @return the unique {@code FBPose3D} matching the search criteria.
     */
-   public FBPose3D getOrCreatePoseData(RigidBodyBasics endEffector, int controllerIndex, Type type, YoBoolean enabled)
+   public FBPose3D getOrCreatePoseData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag)
    {
-      return new FBPose3D(getOrCreatePositionData(endEffector, controllerIndex, type, enabled),
-                            getOrCreateOrientationData(endEffector, controllerIndex, type, enabled));
+      return new FBPose3D(getOrCreatePositionData(endEffector, controllerIndex, type, activeFlag),
+                          getOrCreateOrientationData(endEffector, controllerIndex, type, activeFlag));
    }
 
    /**
-    * Retrieves and returns the {@code VectorData6D} associated with the given end-effector,
+    * Retrieves and returns the {@code FBVector6D} associated with the given end-effector,
     * {@code type}, and {@code space}, if it does not exist it is created.
     *
     * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param type            the type of the data to retrieve.
-    * @return the unique {@code VectorData6D} matching the search criteria.
+    * @param space           the space of the data to retrieve.
+    * @param activeFlag      boolean provider that should reflect the active state of the controller
+    *                        calling this factory. Used to determine whether the returned data is
+    *                        up-to-date or not at runtime.
+    * @return the unique {@code FBVector6D} matching the search criteria.
     */
-   public FBVector6D getOrCreateVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData6D space, YoBoolean enabled)
+   public FBVector6D getOrCreateVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData6D space, BooleanProvider activeFlag)
    {
-      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getAngular(), enabled),
-                              getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getLinear(), enabled));
+      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getAngular(), activeFlag),
+                            getOrCreateVectorData3D(endEffector, controllerIndex, type, space.getLinear(), activeFlag));
    }
 
    /**
-    * Retrieves and returns the {@code AlphaFilteredVectorData6D} for the filtered angular and linear
+    * Retrieves and returns the {@code FBAlphaFilteredVector6D} for the filtered angular and linear
     * velocity errors of the given end-effector. If it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt}, {@code breakFrequencyLinearPart}, and
@@ -404,19 +470,23 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * </p>
     *
     * @param endEffector               the end-effector to which the returned data is associated.
-    * @param controllerIndex           TODO
+    * @param controllerIndex           the index of the feedback controller requesting the data.
     * @param rawDataType               the type of the raw vector onto which the filter is to be
     *                                  applied.
+    * @param space                     the space of the data to retrieve.
     * @param dt                        the duration of a control tick.
     * @param breakFrequencyAngularPart the break frequency to use for the angular part of the velocity
     *                                  error. Not modified.
     * @param breakFrequencyLinearPart  the break frequency to use for the linear part of the velocity
     *                                  error. Not modified.
-    * @return the unique {@code AlphaFilteredVectorData6D} matching the search criteria.
+    * @param activeFlag                boolean provider that should reflect the active state of the
+    *                                  controller calling this factory. Used to determine whether the
+    *                                  returned data is up-to-date or not at runtime.
+    * @return the unique {@code FBAlphaFilteredVector6D} matching the search criteria.
     */
    public FBAlphaFilteredVector6D getOrCreateAlphaFilteredVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
-                                                                         double dt, DoubleProvider breakFrequencyAngularPart,
-                                                                         DoubleProvider breakFrequencyLinearPart, YoBoolean enabled)
+                                                                       double dt, DoubleProvider breakFrequencyAngularPart,
+                                                                       DoubleProvider breakFrequencyLinearPart, BooleanProvider activeFlag)
    {
       return new FBAlphaFilteredVector6D(getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
@@ -424,50 +494,55 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                               space.getAngular(),
                                                                               dt,
                                                                               breakFrequencyAngularPart,
-                                                                              enabled),
-                                           getOrCreateAlphaFilteredVectorData3D(endEffector,
+                                                                              activeFlag),
+                                         getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
                                                                               space.getLinear(),
                                                                               dt,
                                                                               breakFrequencyLinearPart,
-                                                                              enabled));
+                                                                              activeFlag));
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedYoMutableSpatialVector} for the rate-limited angular
-    * and linear accelerations of the given end-effector. The data type of the vector is defined by
-    * {@code type}. If it does not exist it is created.
+    * Retrieves and returns the {@code FBRateLimitedVector6D} for the rate-limited angular and linear
+    * accelerations of the given end-effector. The data type of the vector is defined by {@code type}.
+    * If it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
     * only used if the data does not exist yet.
     * </p>
     *
     * @param endEffector        the end-effector to which the returned data is associated.
-    * @param controllerIndex    TODO
+    * @param controllerIndex    the index of the feedback controller requesting the data.
     * @param rawDataType        the type of the raw vector onto which the rate limit is to be applied.
+    * @param space              the space of the data to retrieve.
     * @param dt                 the duration of a control tick.
     * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @param maximumLinearRate  the maximum linear rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @return the unique {@code FBRateLimitedVector6D} matching the search criteria.
     */
    public FBRateLimitedVector6D getOrCreateRateLimitedVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
-                                                                     double dt, YoDouble maximumAngularRate, YoDouble maximumLinearRate, YoBoolean enabled)
+                                                                   double dt, YoDouble maximumAngularRate, YoDouble maximumLinearRate,
+                                                                   BooleanProvider activeFlag)
    {
       return new FBRateLimitedVector6D(getOrCreateRateLimitedVectorData3D(endEffector,
-                                                                            controllerIndex,
-                                                                            rawDataType,
-                                                                            space.getAngular(),
-                                                                            dt,
-                                                                            maximumAngularRate,
-                                                                            enabled),
-                                         getOrCreateRateLimitedVectorData3D(endEffector,
-                                                                            controllerIndex,
-                                                                            rawDataType,
-                                                                            space.getLinear(),
-                                                                            dt,
-                                                                            maximumLinearRate,
-                                                                            enabled));
+                                                                          controllerIndex,
+                                                                          rawDataType,
+                                                                          space.getAngular(),
+                                                                          dt,
+                                                                          maximumAngularRate,
+                                                                          activeFlag),
+                                       getOrCreateRateLimitedVectorData3D(endEffector,
+                                                                          controllerIndex,
+                                                                          rawDataType,
+                                                                          space.getLinear(),
+                                                                          dt,
+                                                                          maximumLinearRate,
+                                                                          activeFlag));
    }
 
    /**
@@ -475,7 +550,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector     the end-effector to which the gains are associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param useIntegrator   whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
@@ -489,7 +564,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector     the end-effector to which the gains are associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param useIntegrator   whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
@@ -503,7 +578,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector     the end-effector to which the gains are associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @param useIntegrator   whether to create the gains necessary to compute the integral term.
     * @return the unique {@code YoPIDSE3Gains} associated with the given end-effector.
     */
@@ -519,7 +594,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector     the end-effector to which the control frame is associated.
-    * @param controllerIndex TODO
+    * @param controllerIndex the index of the feedback controller requesting the data.
     * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given end-effector.
     */
    public YoSE3OffsetFrame getOrCreateControlFrame(RigidBodyBasics endEffector, int controllerIndex)
@@ -528,7 +603,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    /**
-    * Calls {@link Clearable#setToNaN()} to all the register objects used by the feedback controllers.
+    * Calls {@link FeedbackControllerData#clearIfInactive()} to all the register objects used by the
+    * feedback controllers.
     * <p>
     * The method should be called at the beginning of the controller core tick such that the unused
     * part of the data will be {@link Double#NaN} making it clear what it is used and what is not.
