@@ -7,7 +7,9 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -160,6 +162,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       this.ocTree.set(ocTree);
+
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
       reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
    }
@@ -197,18 +200,21 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
       try
       {
-         NormalOcTree mainOctree = ocTree.get();
-         Tuple3DReadOnly sensorPose = this.sensorPosition.get();
+         NormalOcTree latestOcTree = ocTree.getAndSet(null);
+         Tuple3DReadOnly latestSensorPose = this.sensorPosition.getAndSet(null);
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();
          }
-         else if (mainOctree != null)
+         else if (latestOcTree != null)
          {
             if (isThreadInterrupted())
                return;
 
-            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose), planarRegionsTimeReport);
+            Point3D sensorPose = new Point3D(latestSensorPose);
+            NormalOcTree mainOcTree = new NormalOcTree(latestOcTree);
+
+            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOcTree, sensorPose), planarRegionsTimeReport);
             reaMessager.submitMessage(SegmentationModuleAPI.UISegmentationDuration, timeReporter.getStringToReport());
 
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);

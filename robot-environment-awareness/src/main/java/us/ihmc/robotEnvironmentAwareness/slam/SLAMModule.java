@@ -198,6 +198,7 @@ public class SLAMModule
          success = addFrame(pointCloudToCompute);
       }
 
+      slam.updatePlanarRegionsMap();
       dequeue();
 
       return success;
@@ -219,7 +220,7 @@ public class SLAMModule
    }
 
    protected void publishResults()
-   {
+   {     
       String stringToReport = "";
       reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
       stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
@@ -229,6 +230,11 @@ public class SLAMModule
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
+      
+      for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
+      {
+         ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
+      }
 
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
@@ -244,11 +250,6 @@ public class SLAMModule
       latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
       reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
       reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
-
-      for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
-      {
-         ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
-      }
    }
 
    private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
