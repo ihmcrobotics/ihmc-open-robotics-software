@@ -39,7 +39,7 @@ public class SLAMBasics implements SLAMInterface
       scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
 
       octree.insertScanCollection(scanCollection, true);
-      octree.enableParallelComputationForNormals(true);
+      octree.enableParallelComputationForNormals(false);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);

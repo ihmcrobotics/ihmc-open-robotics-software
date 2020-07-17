@@ -45,7 +45,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    private final TimeReporter timeReporter = new TimeReporter();
 
-   private static final int THREAD_PERIOD_MILLISECONDS = 200;
+   private static final int THREAD_PERIOD_MILLISECONDS = 500;
 
    protected static final boolean DEBUG = true;
 
@@ -159,6 +159,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
+   @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       this.ocTree.set(ocTree);
@@ -206,7 +207,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
          {
             planarRegionFeatureUpdater.clearOcTree();
          }
-         else if (latestOcTree != null)
+         else if (latestOcTree != null && latestSensorPose != null)
          {
             if (isThreadInterrupted())
                return;
