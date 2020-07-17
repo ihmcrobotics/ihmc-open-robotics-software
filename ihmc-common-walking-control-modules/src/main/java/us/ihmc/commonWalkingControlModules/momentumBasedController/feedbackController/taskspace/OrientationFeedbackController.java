@@ -14,6 +14,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -304,7 +305,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public void submitFeedbackControlCommand(OrientationFeedbackControlCommand command)
    {
       if (command.getEndEffector() != endEffector)
-         throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
+         throw new FeedbackControllerException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
@@ -662,7 +663,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public SpatialAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseDynamicsOutput;
    }
 
@@ -670,7 +671,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public SpatialVelocityCommand getInverseKinematicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseKinematicsOutput;
    }
 
@@ -678,7 +679,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    public VirtualModelControlCommand<?> getVirtualModelControlOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return (isRootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 

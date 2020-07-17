@@ -11,6 +11,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -463,7 +464,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    public MomentumRateCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseDynamicsOutput;
    }
 
@@ -471,7 +472,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    public MomentumCommand getInverseKinematicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseKinematicsOutput;
    }
 
@@ -479,7 +480,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    public MomentumRateCommand getVirtualModelControlOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return virtualModelControlOutput;
    }
 }
