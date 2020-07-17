@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -33,31 +33,40 @@ public class BehaviorModule
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS);
    }
 
    public static BehaviorModule createIntraprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS);
    }
 
-   public BehaviorModule(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, CommunicationMode communicationMode)
+   public BehaviorModule(BehaviorRegistry behaviorRegistry, 
+                         DRCRobotModel robotModel, 
+                         CommunicationMode ros2CommunicationMode, 
+                         CommunicationMode messagerCommunicationMode)
    {
-      LogTools.info("Starting behavior module in {} mode", communicationMode.name());
+      LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
 
       messagerAPI = behaviorRegistry.getMessagerAPI();
 
       PubSubImplementation pubSubImplementation;
-      if (communicationMode == CommunicationMode.INTERPROCESS)
+      if (ros2CommunicationMode == CommunicationMode.INTERPROCESS)
       {
          pubSubImplementation = PubSubImplementation.FAST_RTPS;
+      }
+      else // intraprocess
+      {
+         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+      }
+      if (messagerCommunicationMode == CommunicationMode.INTERPROCESS)
+      {
          messager = KryoMessager.createServer(messagerAPI,
                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                               new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
       }
       else // intraprocess
       {
-         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
          messager = new SharedMemoryMessager(messagerAPI);
       }
 
