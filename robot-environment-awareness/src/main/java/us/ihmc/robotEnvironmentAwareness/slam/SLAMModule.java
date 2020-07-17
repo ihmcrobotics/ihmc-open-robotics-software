@@ -68,7 +68,7 @@ public class SLAMModule
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
-   
+
    private final SLAMHistory history = new SLAMHistory();
    private final AtomicReference<String> slamDataExportPath;
 
@@ -249,6 +249,11 @@ public class SLAMModule
       {
          ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
       }
+
+      for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
+      {
+         ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
+      }
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
       Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
@@ -263,7 +268,6 @@ public class SLAMModule
       latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
       reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
       reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
-      
       history.addLatestFrameHistory(latestFrame);
       history.addDriftCorrectionHistory(slam.getDriftCorrectionResult());
    }

@@ -28,8 +28,8 @@
                   <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exportSLAMData" text="Export SLAM Data" GridPane.rowIndex="1" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseRawDataOutputFolder" text="..." GridPane.columnIndex="2" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseSLAMDataOutputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <TextField fx:id="currentRawDataOutputFolderTextField" editable="false" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
-                  <TextField fx:id="currentSLAMDataOutputFolderTextField" editable="false" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="currentRawDataOutputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
+                  <TextField fx:id="currentSLAMDataOutputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <ToggleButton fx:id="exportRawData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Export Raw Data" />
                </children>
             </GridPane>
@@ -47,8 +47,8 @@
                   <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importRawData" text="Import Raw Data" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseRawDataInputFolder" text="..." GridPane.columnIndex="2" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browsePlanarRegionsInputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <TextField fx:id="currentRawDataInputFolderTextField" editable="false" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
-                  <TextField fx:id="currentPlanarRegionsInputFolderTextField" editable="false" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="currentRawDataInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
+                  <TextField fx:id="currentPlanarRegionsInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" GridPane.rowIndex="1">
                      <children>
                         <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importPlanarRegions" prefHeight="25.0" prefWidth="150.0" text="Import Planar Regions" />

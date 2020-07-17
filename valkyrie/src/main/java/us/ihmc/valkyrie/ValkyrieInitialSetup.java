@@ -9,7 +9,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,7 +41,6 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    {
       setActuatorPositions(robot, jointMap);
       positionRobotInWorld(robot);
-      LogTools.error("Robot position " + robot.getRootJoint().getQz());
    }
 
    private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)

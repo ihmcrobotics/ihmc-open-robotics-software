@@ -203,7 +203,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       Point3D center = new Point3D(3.35, 0.0, 1.0893768421917251);
-      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      Vector3D plusMinusVector = new Vector3D(0.4, 0.4, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
@@ -216,8 +216,8 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
-      Point3D center = new Point3D(7.55, 0.0, 1.0893768421917251);
-      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(7.75, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.4, 0.4, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
@@ -634,7 +634,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       footstep.setSwingHeight(swingHeight);
       message.getFootstepDataList().add().set(footstep);
 
-      location = new Point3D(2.15, -0.15, 0.16);
+      location = new Point3D(2.25, -0.15, 0.16);
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.getFootstepDataList().add().set(footstep);
