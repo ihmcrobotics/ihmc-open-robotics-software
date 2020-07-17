@@ -1,8 +1,5 @@
 package us.ihmc.valkyrie.jsc;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
@@ -17,15 +14,21 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
-public class ValkyrieVrSteppingApplication extends Application {
-	private ValkyrieVrSteppingController ui;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Parameter;
+import com.martiansoftware.jsap.SimpleJSAP;
+import com.martiansoftware.jsap.StringParser;
+import com.martiansoftware.jsap.JSAP;
+
+public class ValkyrieVrSteppingApplication {
+	private ValkyrieVrSteppingController controller;
 	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS,
 			"ihmc_valkyrie_vr_joystick_control");
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		String robotTargetString = getParameters().getNamed().getOrDefault("robotTarget", "REAL_ROBOT");
-		String workingDirectory = getParameters().getNamed().get("workingDir");
+	public void start(JSAPResult jsapResult) {
+		String robotTargetString = jsapResult.getString("robotTarget");
 		RobotTarget robotTarget = RobotTarget.valueOf(robotTargetString);
 		LogTools.info("-------------------------------------------------------------------");
 		LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
@@ -46,15 +49,12 @@ public class ValkyrieVrSteppingApplication extends Application {
 
 		SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(footPolygon, footPolygon);
 
-		ui = new ValkyrieVrSteppingController(robotModel, robotName, walkingControllerParameters, ros2Node, footPolygons);
+		controller = new ValkyrieVrSteppingController(robotModel, robotName, walkingControllerParameters, ros2Node, footPolygons);
 	}
 
-	@Override
-	public void stop() throws Exception {
-		super.stop();
+	public void stop() {
 		ros2Node.destroy();
-
-		Platform.exit();
+		System.exit(0);
 	}
 
 	/**
@@ -69,7 +69,21 @@ public class ValkyrieVrSteppingApplication extends Application {
 	 * 
 	 * @param args the array of arguments to use for this run.
 	 */
-	public static void main(String[] args) {
-		launch(args);
+    public static void main(String[] args) {
+		// TODO: Add support for profiles/working directory
+		JSAPResult jsapResult = null;
+		try {
+			final SimpleJSAP jsap = new SimpleJSAP("ValkyrieVrSteppingApplication", "Make the robot walk",
+					new Parameter[] 
+						{ new FlaggedOption("robotTarget", JSAP.STRING_PARSER, "REAL_ROBOT", JSAP.NOT_REQUIRED, 'r', "robotTarget", "Robot target (REAL_ROBOT, SCS)") });
+			jsapResult = jsap.parse(args);
+		} catch (JSAPException e) {
+			System.out.println("Invalid option: " + e);
+			System.exit(0);
+		}
+		ValkyrieVrSteppingApplication app = new ValkyrieVrSteppingApplication();
+		app.start(jsapResult);
+//		app.stop();
+		
 	}
 }
