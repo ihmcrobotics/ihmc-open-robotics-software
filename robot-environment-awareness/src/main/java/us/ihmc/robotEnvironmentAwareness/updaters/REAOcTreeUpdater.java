@@ -68,7 +68,7 @@ public class REAOcTreeUpdater
    public void initializeReferenceOctree(double octreeResolution)
    {
       referenceOctree = new NormalOcTree(octreeResolution);
-      referenceOctree.enableParallelComputationForNormals(true);
+      referenceOctree.enableParallelComputationForNormals(false);
       referenceOctree.enableParallelInsertionOfMisses(true);
       referenceOctree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
    }

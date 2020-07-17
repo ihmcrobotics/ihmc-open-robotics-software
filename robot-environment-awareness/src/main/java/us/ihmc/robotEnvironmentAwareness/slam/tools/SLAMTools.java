@@ -126,7 +126,7 @@ public class SLAMTools
 
       octree.insertScanCollection(scanCollection, false);
 
-      octree.enableParallelComputationForNormals(true);
+      octree.enableParallelComputationForNormals(false);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
@@ -151,7 +151,7 @@ public class SLAMTools
 
       octree.insertScanCollection(scanCollection, false);
 
-      octree.enableParallelComputationForNormals(true);
+      octree.enableParallelComputationForNormals(false);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);

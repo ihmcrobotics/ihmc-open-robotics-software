@@ -130,7 +130,7 @@ public class SLAMFrame
       scanCollection.addScan(SLAMTools.toScan(getOriginalPointCloud(), getOriginalPointCloudToSensorPose(), getOriginalSensorPose(), map, windowMargin));
 
       frameMap.insertScanCollection(scanCollection, false);
-      frameMap.enableParallelComputationForNormals(true);
+      frameMap.enableParallelComputationForNormals(false);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);
