@@ -28,9 +28,11 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
             */
    public boolean hold_current_center_of_mass_xy_position_ = true;
    /**
-            * When set to true, the solver will hold the pose of the active support foot/feet.
+            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+            * - when the walking controller is running, the rigid-bodies in question are the feet.
+            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
             */
-   public boolean hold_support_foot_positions_ = true;
+   public boolean hold_support_rigid_bodies_ = true;
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
@@ -50,7 +52,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       hold_current_center_of_mass_xy_position_ = other.hold_current_center_of_mass_xy_position_;
 
-      hold_support_foot_positions_ = other.hold_support_foot_positions_;
+      hold_support_rigid_bodies_ = other.hold_support_rigid_bodies_;
 
    }
 
@@ -108,18 +110,22 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    }
 
    /**
-            * When set to true, the solver will hold the pose of the active support foot/feet.
+            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+            * - when the walking controller is running, the rigid-bodies in question are the feet.
+            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
             */
-   public void setHoldSupportFootPositions(boolean hold_support_foot_positions)
+   public void setHoldSupportRigidBodies(boolean hold_support_rigid_bodies)
    {
-      hold_support_foot_positions_ = hold_support_foot_positions;
+      hold_support_rigid_bodies_ = hold_support_rigid_bodies;
    }
    /**
-            * When set to true, the solver will hold the pose of the active support foot/feet.
+            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+            * - when the walking controller is running, the rigid-bodies in question are the feet.
+            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
             */
-   public boolean getHoldSupportFootPositions()
+   public boolean getHoldSupportRigidBodies()
    {
-      return hold_support_foot_positions_;
+      return hold_support_rigid_bodies_;
    }
 
 
@@ -146,7 +152,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_current_center_of_mass_xy_position_, other.hold_current_center_of_mass_xy_position_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_foot_positions_, other.hold_support_foot_positions_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_rigid_bodies_, other.hold_support_rigid_bodies_, epsilon)) return false;
 
 
       return true;
@@ -167,7 +173,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.hold_current_center_of_mass_xy_position_ != otherMyClass.hold_current_center_of_mass_xy_position_) return false;
 
-      if(this.hold_support_foot_positions_ != otherMyClass.hold_support_foot_positions_) return false;
+      if(this.hold_support_rigid_bodies_ != otherMyClass.hold_support_rigid_bodies_) return false;
 
 
       return true;
@@ -185,8 +191,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append(this.enable_support_polygon_constraint_);      builder.append(", ");
       builder.append("hold_current_center_of_mass_xy_position=");
       builder.append(this.hold_current_center_of_mass_xy_position_);      builder.append(", ");
-      builder.append("hold_support_foot_positions=");
-      builder.append(this.hold_support_foot_positions_);
+      builder.append("hold_support_rigid_bodies=");
+      builder.append(this.hold_support_rigid_bodies_);
       builder.append("}");
       return builder.toString();
    }
