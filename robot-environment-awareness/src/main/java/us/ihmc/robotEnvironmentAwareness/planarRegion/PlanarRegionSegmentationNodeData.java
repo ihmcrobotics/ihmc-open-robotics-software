@@ -92,7 +92,12 @@ public class PlanarRegionSegmentationNodeData implements Iterable<NormalOcTreeNo
    public void recomputeNormalAndOrigin()
    {
       pca.clear();
-      nodes.stream().forEach(node -> pca.addPoint(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ()));
+      nodes.forEach(node ->
+                    {
+                       if (node.getHitLocationCopy().containsNaN())
+                          return;
+                       pca.addPoint(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ());
+                    });
       pca.compute();
 
       Point3D mean = new Point3D();

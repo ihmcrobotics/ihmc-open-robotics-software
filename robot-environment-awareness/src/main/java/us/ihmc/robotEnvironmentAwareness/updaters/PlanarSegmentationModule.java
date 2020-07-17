@@ -8,6 +8,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -160,8 +161,47 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       this.ocTree.set(ocTree);
+
+      checkOcTree(ocTree);
+      if (sensorPosition.containsNaN())
+         throw new IllegalArgumentException("bad.");
+
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
       reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
+   }
+
+   private void checkOcTree(NormalOcTree ocTree)
+   {
+      checkNode(ocTree.getRoot());
+   }
+
+   private void checkNode(NormalOcTreeNode node)
+   {
+      if (node.hasAtLeastOneChild())
+      {
+         int childrenAdded = 0;
+         int i = 0;
+         while (childrenAdded < node.getNumberOfNonNullChildren())
+         {
+            NormalOcTreeNode child = node.getChild(i);
+            if (child != null)
+            {
+               checkNode(child);
+               childrenAdded++;
+            }
+
+            i++;
+         }
+      }
+      else
+      {
+         if (node.getHitLocationCopy().containsNaN())
+            throw new RuntimeException("Hit contains NaN");
+         if (node.getNormalCopy().containsNaN())
+            throw new RuntimeException("Normal contains NaN");
+         if (Double.isNaN(node.getNormalConsensusSize()) || Double.isNaN(node.getNormalAverageDeviation()))
+            throw new RuntimeException("Bad normal quality");
+      }
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -197,8 +237,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
       try
       {
-         NormalOcTree mainOctree = ocTree.get();
-         Tuple3DReadOnly sensorPose = this.sensorPosition.get();
+         NormalOcTree mainOctree = ocTree.getAndSet(null);
+         Tuple3DReadOnly sensorPose = this.sensorPosition.getAndSet(null);
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();
