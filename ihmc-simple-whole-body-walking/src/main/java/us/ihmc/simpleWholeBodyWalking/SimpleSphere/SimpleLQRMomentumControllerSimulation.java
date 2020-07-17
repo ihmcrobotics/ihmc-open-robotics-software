@@ -62,7 +62,7 @@ public class SimpleLQRMomentumControllerSimulation
    private static final double stepDuration = 0.7;
    private static final double swingDuration = 0.5;
    private static final double stanceDuration = 0.2;
-   private static final double stepLength = 0.5;
+   private static final double stepLength = 0.75;
    private static final double stepWidth = 0.3;
    private static final int numberOfSteps = 10;
 
@@ -158,7 +158,8 @@ public class SimpleLQRMomentumControllerSimulation
       scs.setCameraDolly(false, true, true, false);
       
       scs.setupGraph("t");
-      scs.setSimulateDuration(10);
+      scs.setSimulateDuration(12);
+      scs.setSimulateNoFasterThanRealTime(true);
       
       scs.startOnAThread();
    }
@@ -211,7 +212,7 @@ public class SimpleLQRMomentumControllerSimulation
       {
          contactX += stepLength;
          width = -width;
-         contactY += width;
+         contactY += width + 0.1;
          currentSide = currentSide.getOppositeSide();
 
          Footstep newStep = new Footstep();
@@ -226,9 +227,12 @@ public class SimpleLQRMomentumControllerSimulation
       }
       
       //Final Position
+      width = -width;
+      contactY += width + 0.1;
+      
       Footstep finStep = new Footstep();
       finStep.setRobotSide(currentSide);
-      finStep.setPose(new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(contactX, 0, 0), unitQuaternion));
+      finStep.setPose(new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(contactX, contactY, 0), unitQuaternion));
       
       FootstepTiming finTiming = new FootstepTiming(swingDuration, finalTransferDuration);
       finTiming.setAbsoluteTime(0, stepStartTime);

@@ -9,6 +9,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -19,6 +20,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
@@ -45,12 +48,12 @@ public class SimpleSphereVisualizer
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
    private final YoFrameVector3D desiredCoMAcceleration;
-   private final YoFrameVector3D desiredForce;
    private final YoFramePoint3D desiredDCMPosition;
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
-   private final YoFramePoint3D desiredECMPPosition;
-   private final YoFramePoint3D desiredCoPPosition;
+   private final YoFrameVector3D Force;
+   private final YoFramePoint3D ECMPPosition;
+   private final YoFramePoint3D CoPPosition;
    
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
@@ -73,44 +76,49 @@ public class SimpleSphereVisualizer
    
    private final SimpleBipedCoMTrajectoryPlanner dcmPlan;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
+   private final SimpleSphereRobot sphereRobot;
    
    public SimpleSphereVisualizer(SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry, 
-                                 DoubleProvider omega0Provider, double gravityZ)
+                                 SimpleSphereRobot sphereRobot)
    {
       this.dcmPlan = comTrajectoryProvider;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      omega.set(omega0Provider.getValue());
-      gravity = gravityZ;
+      omega.set(sphereRobot.getOmega0());
+      gravity = sphereRobot.getGravityZ();
+      this.sphereRobot = sphereRobot;
       
+      //Plot Desired COM, DCM, VRP
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), 
                                                        YoGraphicPosition.GraphicType.SOLID_BALL);
-      yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
+      //yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       
       desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
+      //yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       
       desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
       YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
+      //yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
       
-      desiredECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
-      desiredForce = new YoFrameVector3D("desiredForce", worldFrame, registry);
-      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", desiredECMPPosition, desiredForce, 0.1,YoAppearance.Red());
+      //Plot Force Vector
+      ECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
+      CoPPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
+      Force = new YoFrameVector3D("desiredForce", worldFrame, registry);
+      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", CoPPosition, Force, 0.1,YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", forceVector);
       
-      desiredCoPPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
+      
       desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
       desiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
       desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
       
       //set bag of balls
-      dcmTrajectory = new BagOfBalls(100, 0.01, "dcmTrajectory", YoAppearance.Yellow(), registry, yoGraphicsListRegistry);
-      comTrajectory = new BagOfBalls(100, 0.01, "comTrajectory", YoAppearance.Black(), registry, yoGraphicsListRegistry);
-      vrpTrajectory = new BagOfBalls(100, 0.01, "vrpTrajectory", YoAppearance.Green(), registry, yoGraphicsListRegistry);
+      dcmTrajectory = new BagOfBalls(100, 0.005, "dcmTrajectory", YoAppearance.Yellow(), registry, yoGraphicsListRegistry);
+      comTrajectory = new BagOfBalls(100, 0.005, "comTrajectory", YoAppearance.Black(), registry, yoGraphicsListRegistry);
+      vrpTrajectory = new BagOfBalls(100, 0.005, "vrpTrajectory", YoAppearance.Green(), registry, yoGraphicsListRegistry);
       
       //Add Foot Visualations 
       List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
@@ -150,8 +158,9 @@ public class SimpleSphereVisualizer
    }
    
    
-
-
+   // update Ball Loop every updateFrame ticks
+   private int updateFrame = 20;
+   private int updateCounter = 0;
    private final PoseReferenceFrame stepPoseFrame = new PoseReferenceFrame("stepPoseFrame", worldFrame);
    
    public void updateVizPoints(double currentTime, YoFrameVector3D controlForce)
@@ -163,125 +172,110 @@ public class SimpleSphereVisualizer
       desiredDCMVelocity.set(dcmPlan.getDesiredDCMVelocity());
       desiredVRPPosition.set(dcmPlan.getDesiredVRPPosition());
       
-      desiredECMPPosition.set(desiredVRPPosition);
-      desiredECMPPosition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
-
-      desiredCoPPosition.set(desiredECMPPosition);
-      desiredCoPPosition.setZ(0.0);
-
-      desiredForce.set(controlForce);
       
-      dcmTrajectory.setBallLoop(desiredDCMPosition);
-      comTrajectory.setBallLoop(desiredCoMPosition);
-      vrpTrajectory.setBallLoop(desiredVRPPosition);
+      
+      //Calc real ecmp
+      ECMPPosition.set(desiredVRPPosition);
+      ECMPPosition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
+
+      //desiredCoPPosition.set(desiredECMPPosition);
+      //desiredCoPPosition.setZ(0.0);
+
+      //calculate scale for force to reach ground
+      double scale = sphereRobot.getCenterOfMass().getZ() / controlForce.getZ();
+      FrameVector3D COPtoCOM = new FrameVector3D();
+      COPtoCOM.set(controlForce);
+      COPtoCOM.scale(scale);
+      CoPPosition.set(sphereRobot.getCenterOfMass());
+      CoPPosition.sub(COPtoCOM);
+      
+      Force.set(controlForce);
+      
+      
+      updateCounter++;
+      if (updateCounter == updateFrame)
+      {
+         updateCounter = 0;
+         dcmTrajectory.setBallLoop(desiredDCMPosition);
+         comTrajectory.setBallLoop(desiredCoMPosition);
+         vrpTrajectory.setBallLoop(desiredVRPPosition);
+      }
    }
-   
-   public void updateFeetStates(double currentTime)
+
+   public void updateVizFeet(double currentTime, List<RobotSide> currentFeetInContact)
    {
-      List<RobotSide> feetInContact = dcmPlan.getFeetInContact();
+      List<Footstep> footstepList= dcmPlan.getFootstepList();
+      List<FootstepTiming> footstepTimingList= dcmPlan.getFootstepTimingList();
       
-      feetInContact.clear();
-      for (RobotSide robotSide : RobotSide.values)
-         feetInContact.add(robotSide);
-
-      int stepNumber = 0;
-      while (stepNumber < steps.size())
-      {
-         BipedTimedStep step = steps.get(stepNumber);
-         if (currentTime > step.getTimeInterval().getEndTime() && steps.size() > 1)
-         {
-            steps.remove(stepNumber);
-            stepsInProgress.remove(step);
-            planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
-         }
-         else
-         {
-            stepNumber++;
-         }
-
-         if (currentTime > step.getTimeInterval().getStartTime() && !stepsInProgress.contains(step))
-         {
-            stepsInProgress.add(step);
-            planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
-         }
-
-      }
-
-      for (int i = 0; i < steps.size(); i++)
-      {
-         BipedTimedStep step = steps.get(i);
-
-         if (step.getTimeInterval().intervalContains(currentTime))
-         {
-            soleFramesForModifying.get(step.getRobotSide()).updateTranslation(step.getGoalPose().getPosition());
-            feetInContact.remove(step.getRobotSide());
-         }
-      }
-
-      int nextStepIndex = 0;
-
+      if (footstepList.size() == 0)
+         return;
+      
       int stepIndex = 0;
-      while (stepIndex < steps.size() && nextStepIndex < nextFootstepPoses.size() && nextStepIndex < nextFootstepPolygons.size())
+      double step0SwingStartTime = footstepTimingList.get(stepIndex).getExecutionStartTime()+footstepTimingList.get(stepIndex).getSwingStartTime();
+      double step0SwingEndTIme = step0SwingStartTime + footstepTimingList.get(stepIndex).getSwingTime();
+      
+      //check if update is needed
+      if (currentTime > step0SwingStartTime )
       {
-         BipedTimedStep step = steps.get(stepIndex);
-         nextFootstepPoses.get(nextStepIndex).set(step.getGoalPose());
-
-         stepPoseFrame.setPoseAndUpdate(step.getGoalPose());
-         FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
-         tempPolygon.setReferenceFrame(stepPoseFrame);
-         tempPolygon.set(footPolygon);
-         tempPolygon.changeFrame(worldFrame);
-         nextFootstepPolygons.get(nextStepIndex).set(tempPolygon);
-
-         stepIndex++;
-         nextStepIndex++;
+         Footstep step = footstepList.get(0);
+         FootstepTiming timing = footstepTimingList.get(0);
+         //if swing has finished, step(0) is a current foot, if not it is the next foot
+         if (currentTime > step0SwingEndTIme)
+         {
+            stepIndex++;
+            if (step.getRobotSide() == RobotSide.LEFT)
+            {
+               leftFootPose.set(step.getFootstepPose());
+               stepPoseFrame.setPoseAndUpdate(step.getFootstepPose());
+               FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+               tempPolygon.setReferenceFrame(stepPoseFrame);
+               tempPolygon.set(footPolygon);
+               tempPolygon.changeFrame(worldFrame);
+               leftFoot.set(tempPolygon);
+            }
+            else
+            {
+               rightFootPose.set(step.getFootstepPose());
+               stepPoseFrame.setPoseAndUpdate(step.getFootstepPose());
+               FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+               tempPolygon.setReferenceFrame(stepPoseFrame);
+               tempPolygon.set(footPolygon);
+               tempPolygon.changeFrame(worldFrame);
+               rightFoot.set(tempPolygon);
+            }
+            
+         }
+         
+         for (int nextStepIndex = 0; nextStepIndex < nextFootstepPoses.size(); nextStepIndex++)
+         {
+            if (stepIndex < footstepList.size())
+            {
+               Footstep nextStep = footstepList.get(stepIndex);
+               FootstepTiming nextTiming = footstepTimingList.get(stepIndex);
+               
+               nextFootstepPoses.get(nextStepIndex).set(nextStep.getFootstepPose());
+               
+               stepPoseFrame.setPoseAndUpdate(nextStep.getFootstepPose());
+               FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+               tempPolygon.setReferenceFrame(stepPoseFrame);
+               tempPolygon.set(footPolygon);
+               tempPolygon.changeFrame(worldFrame);
+               nextFootstepPolygons.get(nextStepIndex).set(tempPolygon);
+               stepIndex++;          
+            }
+            else
+            {
+               nextFootstepPoses.get(nextStepIndex).setToNaN();
+               nextFootstepPolygons.get(nextStepIndex).setToNaN();
+            }
+         }
+         
+         //leftFootPose.setToNaN();
+         //rightFootPose.setToNaN();
+         //leftFoot.clearAndUpdate();
+         //rightFoot.clearAndUpdate();
+ 
       }
-      while (nextStepIndex < nextFootstepPoses.size() && nextStepIndex < nextFootstepPolygons.size())
-      {
-         nextFootstepPoses.get(nextStepIndex).setToNaN();
-         nextFootstepPolygons.get(nextStepIndex).setToNaN();
-         nextStepIndex++;
-      }
-
-      leftFootPose.setToNaN();
-      rightFootPose.setToNaN();
-      leftFoot.clearAndUpdate();
-      rightFoot.clearAndUpdate();
-      combinedFeet.clear();
-      if (feetInContact.contains(RobotSide.LEFT))
-      {
-         FramePose3D pose = new FramePose3D(soleFramesForModifying.get(RobotSide.LEFT));
-         pose.changeFrame(worldFrame);
-         stepPoseFrame.setPoseAndUpdate(pose);
-         FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
-         tempPolygon.setReferenceFrame(stepPoseFrame);
-         tempPolygon.set(footPolygon);
-         tempPolygon.changeFrame(worldFrame);
-
-         leftFoot.set(tempPolygon);
-         leftFootPose.setMatchingFrame(pose);
-         combinedFeet.addVertices(leftFoot);
-      }
-      if (feetInContact.contains(RobotSide.RIGHT))
-      {
-         FramePose3D pose = new FramePose3D(soleFramesForModifying.get(RobotSide.RIGHT));
-         pose.changeFrame(worldFrame);
-         stepPoseFrame.setPoseAndUpdate(pose);
-         FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
-         tempPolygon.setReferenceFrame(stepPoseFrame);
-         tempPolygon.set(footPolygon);
-         tempPolygon.changeFrame(worldFrame);
-
-         rightFoot.set(tempPolygon);
-         rightFootPose.setMatchingFrame(pose);
-         combinedFeet.addVertices(rightFoot);
-      }
-      combinedFeet.update();
-   }
-
-   public void plotVRPTrajectory()
-   {
-      //dcmPlan.getVRPTrajectories()
       
    }
 
