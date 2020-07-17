@@ -13,6 +13,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDB
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -318,7 +319,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public void submitFeedbackControlCommand(SpatialFeedbackControlCommand command)
    {
       if (command.getEndEffector() != endEffector)
-         throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
+         throw new FeedbackControllerException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
@@ -868,7 +869,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public SpatialAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseDynamicsOutput;
    }
 
@@ -876,7 +877,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public SpatialVelocityCommand getInverseKinematicsOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return inverseKinematicsOutput;
    }
 
@@ -884,7 +885,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    public VirtualModelControlCommand<?> getVirtualModelControlOutput()
    {
       if (!isEnabled())
-         throw new RuntimeException("This controller is disabled.");
+         throw new FeedbackControllerException("This controller is disabled.");
       return (isRootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 
