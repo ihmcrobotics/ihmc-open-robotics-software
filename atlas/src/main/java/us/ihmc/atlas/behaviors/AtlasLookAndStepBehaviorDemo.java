@@ -66,7 +66,7 @@ public class AtlasLookAndStepBehaviorDemo
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
-      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), communicationMode);
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), communicationMode, communicationMode);
 
       LogTools.info("Creating behavior user interface");
       if (communicationMode == CommunicationMode.INTERPROCESS)
