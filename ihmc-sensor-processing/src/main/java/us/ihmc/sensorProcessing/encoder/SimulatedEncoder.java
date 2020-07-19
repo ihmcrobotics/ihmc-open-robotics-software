@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.encoder;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -10,12 +10,12 @@ public class SimulatedEncoder
    private YoDouble positionFromEncoder;
    private YoInteger encoderTicks;
 
-   public SimulatedEncoder(double encoderTicksPerUnitOfPosition, String name, YoVariableRegistry parentRegistry)
+   public SimulatedEncoder(double encoderTicksPerUnitOfPosition, String name, YoRegistry parentRegistry)
    {
       if (encoderTicksPerUnitOfPosition <= 0.0)
          throw new RuntimeException("encoderTicksPerUnitOfPosition must be > 0.0");
 
-      YoVariableRegistry registry = new YoVariableRegistry("simulatedEncoder_" + name);
+      YoRegistry registry = new YoRegistry("simulatedEncoder_" + name);
 
       positionFromEncoder = new YoDouble("positionFromEncoder_" + name, registry);
       encoderTicks = new YoInteger("encoderTicks_" + name, registry);

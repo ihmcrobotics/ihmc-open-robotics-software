@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -26,7 +26,7 @@ public class WalkingFailureDetectionControlModule
    private final FrameConvexPolygon2D nextFootstepPolygon = new FrameConvexPolygon2D();
    private final SideDependentList<FrameConvexPolygon2D> footPolygonsInWorldFrame = new SideDependentList<>();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isUsingNextFootstep;
    private final YoBoolean isFallDetectionActivated;
@@ -36,7 +36,7 @@ public class WalkingFailureDetectionControlModule
    private final FrameVector2D fallingDirection2D = new FrameVector2D();
    private final FrameVector3D fallingDirection3D = new FrameVector3D();
 
-   public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
+   public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoRegistry parentRegistry)
    {
 
       for (RobotSide robotSide : RobotSide.values)

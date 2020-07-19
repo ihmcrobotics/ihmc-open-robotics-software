@@ -23,11 +23,11 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.stateEstimation.head.EKFHeadPoseEstimator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.YoPoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoPoint3D;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -95,7 +95,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
 
       headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
-      YoVariableRegistry registry = getYoVariableRegistry();
+      YoRegistry registry = getYoRegistry();
 
       String prefix = "MicroStrainData";
       imuAngularVelocity = new YoFrameVector3D(prefix, "AngularVelocity", ReferenceFrame.getWorldFrame(), registry);

@@ -10,14 +10,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
 import us.ihmc.robotics.physics.MultiBodySystemStateReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimulationEnergyStatistics
 {
    public static void setupSimulationEnergyStatistics(Vector3DReadOnly gravity, ExperimentalPhysicsEngine physicsEngine)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(SimulationEnergyStatistics.class.getSimpleName());
+      YoRegistry registry = new YoRegistry(SimulationEnergyStatistics.class.getSimpleName());
       physicsEngine.getPhysicsEngineRegistry().addChild(registry);
 
       for (String robotName : physicsEngine.getRobotNames())
@@ -34,7 +34,7 @@ public class SimulationEnergyStatistics
       private final Vector3DReadOnly gravity;
       private List<? extends RigidBodyReadOnly> allRigidBodies;
 
-      public RobotEnergyStatistics(String robotName, Vector3DReadOnly gravity, YoVariableRegistry registry)
+      public RobotEnergyStatistics(String robotName, Vector3DReadOnly gravity, YoRegistry registry)
       {
          this.gravity = gravity;
          kineticEnergy = new YoDouble(robotName + "KineticEnergy", registry);

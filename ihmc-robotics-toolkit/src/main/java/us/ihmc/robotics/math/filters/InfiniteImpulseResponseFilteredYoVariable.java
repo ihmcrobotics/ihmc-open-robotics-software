@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -28,7 +28,7 @@ public class InfiniteImpulseResponseFilteredYoVariable extends YoDouble
    // @todo: YoVariablize these states to make rewindable.
    private final double[] previousX, previousY;
 
-   public InfiniteImpulseResponseFilteredYoVariable(String name, int numPoles, int numZeros, YoVariableRegistry registry)
+   public InfiniteImpulseResponseFilteredYoVariable(String name, int numPoles, int numZeros, YoRegistry registry)
    {
       super(name, registry);
 

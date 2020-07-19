@@ -4,14 +4,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RateLimitedYoSpatialVector extends YoFixedFrameSpatialVector
 {
    private final RateLimitedYoFrameVector rateLimitedAngularPart;
    private final RateLimitedYoFrameVector rateLimitedLinearPart;
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumAngularRate,
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maximumAngularRate,
                                      DoubleProvider maximumLinearRate, double dt, FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
       super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawAngularPart),
@@ -20,7 +20,7 @@ public class RateLimitedYoSpatialVector extends YoFixedFrameSpatialVector
       this.rateLimitedLinearPart = (RateLimitedYoFrameVector) getLinearPart();
    }
 
-   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maximumAngularRate,
+   public RateLimitedYoSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maximumAngularRate,
                                      DoubleProvider maximumLinearRate, double dt, YoFixedFrameSpatialVector rawSpatialVector)
    {
       super(new RateLimitedYoFrameVector(namePrefix, nameSuffix, registry, maximumAngularRate, dt, rawSpatialVector.getAngularPart()),

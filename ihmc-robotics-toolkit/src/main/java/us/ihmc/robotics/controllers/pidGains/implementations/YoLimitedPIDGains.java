@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoLimitedPIDGains extends YoPIDGains
@@ -14,7 +14,7 @@ public class YoLimitedPIDGains extends YoPIDGains
    private final YoDouble maxKiRate;
    private final YoDouble maxKdRate;
 
-   public YoLimitedPIDGains(String suffix, double controlDT, YoVariableRegistry registry)
+   public YoLimitedPIDGains(String suffix, double controlDT, YoRegistry registry)
    {
       super(suffix, registry);
 

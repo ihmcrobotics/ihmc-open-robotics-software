@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedEncoderTest
 {
@@ -32,7 +32,7 @@ public class SimulatedEncoderTest
    public void testConstructor()
    {
       double ticksPerPosition = 1.0;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
    }
 
@@ -40,7 +40,7 @@ public class SimulatedEncoderTest
    public void testGetTicksOne()
    {
       double ticksPerPosition = 10.0;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 50.0;
@@ -55,7 +55,7 @@ public class SimulatedEncoderTest
    public void testGetTicksTwo()
    {
       double ticksPerPosition = 0.5;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 50.0;
@@ -77,7 +77,7 @@ public class SimulatedEncoderTest
    public void testGetTicksThree()
    {
       double ticksPerPosition = 0.5;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 0.9;
@@ -99,7 +99,7 @@ public class SimulatedEncoderTest
    public void testGetTicksFour()
    {
       double ticksPerPosition = 10.0;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 0.5;
@@ -116,7 +116,7 @@ public class SimulatedEncoderTest
    public void testGetPositionFromEncoder()
    {
       double ticksPerPosition = 0.5;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 0.9;
@@ -140,7 +140,7 @@ public class SimulatedEncoderTest
    public void testGetPositionFromEncoderTwo()
    {
       double ticksPerPosition = 10;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 4.0;
@@ -157,7 +157,7 @@ public class SimulatedEncoderTest
    public void testGetPositionFromEncoderThree()
    {
       double ticksPerPosition = 100;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 1.0;
@@ -172,7 +172,7 @@ public class SimulatedEncoderTest
    public void testGetPositionFromEncoderFour()
    {
       double ticksPerPosition = 100;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       double jointPosition = 5.0;
@@ -187,7 +187,7 @@ public class SimulatedEncoderTest
    public void testConverTicksToDistance()
    {
       double ticksPerPosition = 100;
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
+      YoRegistry parentRegistry = new YoRegistry("parent");
       SimulatedEncoder simulatedEncoder = new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
 
       int ticks = 100;

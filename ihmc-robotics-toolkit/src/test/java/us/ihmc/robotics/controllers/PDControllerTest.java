@@ -8,14 +8,14 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PDControllerTest
 {
    @Test
    public void testComputerForAngles()
    {
-      PDController pdController = new PDController("suffix", new YoVariableRegistry("testRegistry"));
+      PDController pdController = new PDController("suffix", new YoRegistry("testRegistry"));
 
       pdController.setDerivativeGain(0.0);
       pdController.setProportionalGain(0.0);
@@ -48,7 +48,7 @@ public class PDControllerTest
    @Test
    public void testAngleBoundaries()
    {
-      PDController pdController = new PDController("suffix", new YoVariableRegistry("testRegistry"));
+      PDController pdController = new PDController("suffix", new YoRegistry("testRegistry"));
       pdController.setDerivativeGain(1.0);
       pdController.setProportionalGain(1.0);
       

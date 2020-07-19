@@ -12,14 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -59,11 +52,11 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInterface
@@ -207,7 +200,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    {
       double epsilon = 3.0e-3;
 
-      drcSimulationTestHelper.getSimulationConstructionSet().getVariable(PelvisOrientationManager.class.getSimpleName(), "doPreparePelvisForLocomotion").setValueFromDouble(0.0);
+      drcSimulationTestHelper.getSimulationConstructionSet().findVariable(PelvisOrientationManager.class.getSimpleName(), "doPreparePelvisForLocomotion").setValueFromDouble(0.0);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       testSingleTrajectoryPoint();
@@ -391,10 +384,10 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -452,7 +445,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }
@@ -495,7 +488,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private PelvisOrientationControlMode findCurrentControlMode()
    {
       String managerName = PelvisOrientationManager.class.getSimpleName();
-      YoVariable<?> variable = scs.getVariable(managerName, managerName + "CurrentState");
+      YoVariable variable = scs.findVariable(managerName, managerName + "CurrentState");
       return ((YoEnum<PelvisOrientationControlMode>) variable).getEnumValue();
    }
 

@@ -9,15 +9,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPProportionalController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector2D tempControl = new FrameVector2D(worldFrame);
    private final YoFrameVector2D icpError = new YoFrameVector2D("icpError", "", worldFrame, registry);
@@ -43,7 +43,7 @@ public class ICPProportionalController
 
    private final FrameVector2D tempICPErrorIntegrated = new FrameVector2D(worldFrame);
 
-   public ICPProportionalController(ICPControlGainsProvider gains, double controlDT, YoVariableRegistry parentRegistry)
+   public ICPProportionalController(ICPControlGainsProvider gains, double controlDT, YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 

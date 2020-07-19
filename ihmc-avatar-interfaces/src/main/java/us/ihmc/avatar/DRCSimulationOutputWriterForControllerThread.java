@@ -11,14 +11,14 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DRCSimulationOutputWriterForControllerThread implements DRCOutputProcessor
 {
    private static final int TICKS_TO_DELAY = 0;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FloatingRootJointRobot robot;
    private final ArrayList<OutputDataSet> revoluteJoints = new ArrayList<>();
@@ -123,7 +123,7 @@ public class DRCSimulationOutputWriterForControllerThread implements DRCOutputPr
    }
 
    @Override
-   public YoVariableRegistry getControllerYoVariableRegistry()
+   public YoRegistry getControllerYoVariableRegistry()
    {
       return registry;
    }

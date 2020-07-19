@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
@@ -27,10 +27,10 @@ public class PartialFootholdCropperModule
                                        List<? extends FramePoint2DReadOnly> defaultContactPoints,
                                        FootholdRotationParameters rotationParameters,
                                        double dt,
-                                       YoVariableRegistry parentRegistry,
+                                       YoRegistry parentRegistry,
                                        YoGraphicsListRegistry graphicsRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
       shouldShrinkFoothold = new YoBoolean(side.getLowerCaseName() + "ShouldShrinkFoothold", registry);

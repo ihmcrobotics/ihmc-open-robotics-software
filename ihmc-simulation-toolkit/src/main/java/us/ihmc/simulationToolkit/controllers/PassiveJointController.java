@@ -2,21 +2,21 @@ package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class PassiveJointController implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final PDController jointController;
 
    private final OneDegreeOfFreedomJoint simulatedJoint;
 
    public PassiveJointController(OneDegreeOfFreedomJoint simulatedJoint, YoPDGains gains)
    {
-      registry = new YoVariableRegistry(simulatedJoint.getName() + name);
+      registry = new YoRegistry(simulatedJoint.getName() + name);
       jointController = new PDController(gains.getYoKp(), gains.getYoKd(), simulatedJoint.getName() + "PassiveController", registry);
 
       this.simulatedJoint = simulatedJoint;
@@ -42,7 +42,7 @@ public class PassiveJointController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

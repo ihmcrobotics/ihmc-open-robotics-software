@@ -1,11 +1,7 @@
 package us.ihmc.robotics.graphics;
 
 import java.awt.Color;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -15,11 +11,7 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.GraphicsUpdatable;
-import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
-import us.ihmc.graphicsDescription.TexCoord2f;
+import us.ihmc.graphicsDescription.*;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
@@ -29,13 +21,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicJob;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -138,7 +130,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @param meshBufferSize
     * @param registry
     */
-   public YoGraphicPlanarRegionsList(String name, int vertexBufferSize, int meshBufferSize, YoVariableRegistry registry)
+   public YoGraphicPlanarRegionsList(String name, int vertexBufferSize, int meshBufferSize, YoRegistry registry)
    {
       this(name, vertexBufferSize, meshBufferSize, false, -1, registry);
    }
@@ -151,7 +143,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @param meshBufferSize
     * @param registry
     */
-   public YoGraphicPlanarRegionsList(String name, int vertexBufferSize, int meshBufferSize, boolean useCustomColors, int numberOfPlanarRegions, YoVariableRegistry registry)
+   public YoGraphicPlanarRegionsList(String name, int vertexBufferSize, int meshBufferSize, boolean useCustomColors, int numberOfPlanarRegions, YoRegistry registry)
    {
       super(name);
 
@@ -209,7 +201,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @param constants the list of constants (variables that will never change) needed for this YoGraphic expected to be in the same order as packed in {@link #getConstants()}.
     * @return a YoGraphic setup for remote visualization.
     */
-   public static YoGraphicPlanarRegionsList createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, double[] constants)
+   public static YoGraphicPlanarRegionsList createAsRemoteYoGraphic(String name, YoVariable[] yoVariables, double[] constants)
    {
       return new YoGraphicPlanarRegionsList(name, yoVariables, constants);
    }
@@ -219,7 +211,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * It is automatically handled and should not be used for creating a new YoGraphic.
     * For the latter, use the other constructor(s).
     */
-   private YoGraphicPlanarRegionsList(String name, YoVariable<?>[] yoVariables, double[] constants)
+   private YoGraphicPlanarRegionsList(String name, YoVariable[] yoVariables, double[] constants)
    {
       super(name);
 
@@ -749,9 +741,9 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @return The YoVariables needed to create a remote version of this YoGraphic.
     */
    @Override
-   public YoVariable<?>[] getVariables()
+   public YoVariable[] getVariables()
    {
-      List<YoVariable<?>> allVariables = new ArrayList<>();
+      List<YoVariable> allVariables = new ArrayList<>();
 
       allVariables.add(waitForReader);
       allVariables.add(hasReaderProcessedMesh);
@@ -815,7 +807,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
    /** {@inheritDoc} */
    @Override
-   public YoGraphicPlanarRegionsList duplicate(YoVariableRegistry newRegistry)
+   public YoGraphicPlanarRegionsList duplicate(YoRegistry newRegistry)
    {
       return new YoGraphicPlanarRegionsList(getName(), getVariables(), getConstants());
    }

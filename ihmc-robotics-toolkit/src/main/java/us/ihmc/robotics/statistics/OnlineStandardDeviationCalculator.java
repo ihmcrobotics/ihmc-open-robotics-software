@@ -2,7 +2,7 @@ package us.ihmc.robotics.statistics;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -21,12 +21,12 @@ public class OnlineStandardDeviationCalculator
 
    private final DoubleProvider variable;
 
-   public OnlineStandardDeviationCalculator(String prefix, YoVariableRegistry registry)
+   public OnlineStandardDeviationCalculator(String prefix, YoRegistry registry)
    {
       this(prefix, null, registry);
    }
 
-   public OnlineStandardDeviationCalculator(String prefix, DoubleProvider variable, YoVariableRegistry registry)
+   public OnlineStandardDeviationCalculator(String prefix, DoubleProvider variable, YoRegistry registry)
    {
       this.variable = variable;
 

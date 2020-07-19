@@ -18,7 +18,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcesso
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +144,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters.get());
       VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters.get(),
                                                                                   pathPostProcessor,
-                                                                                  new YoVariableRegistry(LookAndStepBodyPathModule.class.getSimpleName()));
+                                                                                  new YoRegistry(LookAndStepBodyPathModule.class.getSimpleName()));
 
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);

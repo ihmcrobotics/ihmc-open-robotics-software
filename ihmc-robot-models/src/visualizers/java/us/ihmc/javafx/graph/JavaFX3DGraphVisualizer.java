@@ -26,7 +26,7 @@ public class JavaFX3DGraphVisualizer
       DataEntryHolder dataEntryHolder = new DataEntryHolder()
       {
          @Override
-         public DataEntry getEntry(YoVariable<?> yoVariable)
+         public DataEntry getEntry(YoVariable yoVariable)
          {
             return null;
          }

@@ -8,7 +8,7 @@ import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -17,7 +17,7 @@ public class YoRobotJointLimitImpulseBasedCalculator extends RobotJointLimitImpu
    private final YoInteger numberOfJointsAtLimit;
    private final Map<OneDoFJointReadOnly, YoJointLimitImpulseData> yoJointDataMap;
 
-   public YoRobotJointLimitImpulseBasedCalculator(RigidBodyBasics rootBody, ForwardDynamicsCalculator forwardDynamicsCalculator, YoVariableRegistry registry)
+   public YoRobotJointLimitImpulseBasedCalculator(RigidBodyBasics rootBody, ForwardDynamicsCalculator forwardDynamicsCalculator, YoRegistry registry)
    {
       super(rootBody, forwardDynamicsCalculator);
 
@@ -72,7 +72,7 @@ public class YoRobotJointLimitImpulseBasedCalculator extends RobotJointLimitImpu
       private final YoDouble jointVelocityDueToOtherImpulse;
       private final YoDouble jointVelocityChange;
 
-      public YoJointLimitImpulseData(OneDoFJointReadOnly joint, YoVariableRegistry registry)
+      public YoJointLimitImpulseData(OneDoFJointReadOnly joint, YoRegistry registry)
       {
          this.joint = joint;
          impulse = new YoDouble(joint.getName() + "Impulse", registry);

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.posePlayback;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -9,7 +9,7 @@ public class PoseInterpolatorPlaybacker
 {
    public static void playASequence(HumanoidFloatingRootJointRobot sdfRobot, PlaybackPoseSequence sequence, boolean showGui, PoseCheckerCallback poseCheckerCallback)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("PoseInterpolatorPlaybacker");
+      YoRegistry registry = new YoRegistry("PoseInterpolatorPlaybacker");
       PlaybackPoseInterpolator interpolator = new PlaybackPoseInterpolator(registry);
 
       double simulateDT = 0.005;
@@ -20,7 +20,7 @@ public class PoseInterpolatorPlaybacker
       {
          int recordFrequency = 1;
          scs.setDT(simulateDT, recordFrequency);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
 

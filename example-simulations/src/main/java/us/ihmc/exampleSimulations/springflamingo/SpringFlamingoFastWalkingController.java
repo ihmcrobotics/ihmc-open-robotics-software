@@ -14,7 +14,7 @@ import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -38,7 +38,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
    private final double CONTROL_DT = 0.001;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FastWalkingController");
+   private final YoRegistry registry = new YoRegistry("FastWalkingController");
 
    private final double LPF_DOWN_TAU = (1.0 - 10.0 * CONTROL_DT);
 
@@ -351,7 +351,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          createStateMachineWindow();
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

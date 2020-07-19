@@ -1,17 +1,20 @@
 package us.ihmc.quadrupedBasics.supportPolygon;
 
-import com.google.caliper.Benchmark;
-import com.google.caliper.api.VmOptions;
-import com.google.caliper.runner.CaliperMain;
+import static us.ihmc.robotics.Assert.*;
+
+import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import com.google.caliper.Benchmark;
+import com.google.caliper.api.VmOptions;
+import com.google.caliper.runner.CaliperMain;
+
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RunnableThatThrows;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -26,13 +29,9 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 @VmOptions("-XX:-TieredCompilation")
 public class QuadrupedSupportPolygonTest
@@ -1066,7 +1065,7 @@ public class QuadrupedSupportPolygonTest
    public void testPackPointIntoMultipleStructuresAndCompare()
    {
       QuadrantDependentList<ReferenceFrame> frames = new QuadrantDependentList<>();
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       QuadrantDependentList<YoFramePoint3D> quadrantDependentList = new QuadrantDependentList<YoFramePoint3D>();
 
       for (RobotQuadrant robotQuadrant2 : RobotQuadrant.values)
@@ -1113,7 +1112,7 @@ public class QuadrupedSupportPolygonTest
    {
       QuadrupedSupportPolygon poly = createSimplePolygon();
       YoFrameConvexPolygon2D yoFrameConvexPolygon2d = new YoFrameConvexPolygon2D("boo", "yaw", ReferenceFrame.getWorldFrame(), 4,
-                                                                                 new YoVariableRegistry("bah"));
+                                                                                 new YoRegistry("bah"));
       yoFrameConvexPolygon2d.set(poly);
 
       for (int i = 0; i < 4; i++)

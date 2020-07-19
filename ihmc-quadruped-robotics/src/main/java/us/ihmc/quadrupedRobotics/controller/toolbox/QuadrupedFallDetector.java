@@ -15,7 +15,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -26,7 +26,7 @@ public class QuadrupedFallDetector
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    public enum FallDetectionType
    {
@@ -61,15 +61,15 @@ public class QuadrupedFallDetector
 
    private final YoDouble yoDcmDistanceOutsideSupportPolygon = new YoDouble("dcmDistanceOutsideSupportPolygon", registry);
    private final YoDouble yoDcmDistanceOutsideUpcomingPolygon = new YoDouble("dcmDistanceOutsideUpcomingPolygon", registry);
-   private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
-   private final YoEnum<FallDetectionType> fallDetectionReason = YoEnum.create("fallDetectionReason", "", FallDetectionType.class, registry, true);
+   private final YoEnum<FallDetectionType> fallDetectionType = new YoEnum<>("fallDetectionType", registry, FallDetectionType.class);
+   private final YoEnum<FallDetectionType> fallDetectionReason = new YoEnum<>("fallDetectionReason", "", registry, FallDetectionType.class, true);
    private final GlitchFilteredYoBoolean isFallDetected;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
    public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
                                 DivergentComponentOfMotionEstimator dcmPositionEstimator, QuadrupedFallDetectionParameters fallDetectionParameters,
-                                YoVariableRegistry parentRegistry)
+                                YoRegistry parentRegistry)
    {
       this.bodyFrame = bodyFrame;
       this.soleFrames = soleFrames;

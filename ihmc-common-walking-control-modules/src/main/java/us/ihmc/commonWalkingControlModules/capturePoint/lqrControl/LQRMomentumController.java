@@ -17,10 +17,10 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
 import us.ihmc.robotics.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
 import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This LQR controller tracks the CoM dynamics of the robot, using a VRP output.
@@ -38,7 +38,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
  */
 public class LQRMomentumController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D relativeCoMPosition = new YoFramePoint3D("relativeCoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -123,7 +123,7 @@ public class LQRMomentumController
       this(omega, null);
    }
 
-   public LQRMomentumController(DoubleProvider omega, YoVariableRegistry parentRegistry)
+   public LQRMomentumController(DoubleProvider omega, YoRegistry parentRegistry)
    {
       computeDynamicsMatrix(omega.getValue());
 

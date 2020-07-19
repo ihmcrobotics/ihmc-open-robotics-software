@@ -1,5 +1,9 @@
 package us.ihmc.avatar.stepAdjustment;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -15,14 +19,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CapturabilityBasedPlanarRegionDecider
 {
@@ -56,7 +56,7 @@ public class CapturabilityBasedPlanarRegionDecider
 
    public CapturabilityBasedPlanarRegionDecider(ReferenceFrame centerOfMassFrame,
                                                 double gravityZ,
-                                                YoVariableRegistry registry,
+                                                YoRegistry registry,
                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);

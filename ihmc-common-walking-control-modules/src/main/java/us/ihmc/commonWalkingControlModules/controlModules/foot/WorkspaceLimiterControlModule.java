@@ -31,12 +31,12 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WorkspaceLimiterControlModule
 {
@@ -52,7 +52,7 @@ public class WorkspaceLimiterControlModule
    private final ReferenceFrame endEffectorFrame;
    private final ReferenceFrame virtualLegTangentialFrameHipCentered, virtualLegTangentialFrameAnkleCentered;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean checkVelocityForSwingSingularityAvoidance;
 
@@ -137,9 +137,9 @@ public class WorkspaceLimiterControlModule
                                         final RobotSide robotSide,
                                         WalkingControllerParameters walkingControllerParameters,
                                         final HighLevelHumanoidControllerToolbox controllerToolbox,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       unachievedSwingTranslation = new YoFrameVector3D(namePrefix + "UnachievedSwingTranslation", worldFrame, registry);

@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.lang.reflect.Field;
 import java.util.AbstractList;
@@ -8,17 +8,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.reflect.RecursiveObjectComparer;
 import us.ihmc.tools.reflect.StringFieldMatcher;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.listener.YoRegistryChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableList;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * SimulationComparer wrapper around RecursiveObjectComparer
@@ -165,7 +165,7 @@ public class ReflectionSimulationComparer implements SimulationComparer
    {
       comparer.addClassToIgnore(DataBuffer.class);
       comparer.addClassToIgnore(YoVariableList.class);
-      comparer.addClassToIgnore(YoVariableRegistryChangedListener.class);    // to break the link from a controller to the SCS object
+      comparer.addClassToIgnore(YoRegistryChangedListener.class);    // to break the link from a controller to the SCS object
 
       try
       {

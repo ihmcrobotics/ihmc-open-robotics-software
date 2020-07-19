@@ -34,8 +34,8 @@ import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ExternalWrenchEstimatorTest
 {
@@ -43,7 +43,7 @@ public class ExternalWrenchEstimatorTest
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = false;
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private Robot robot;
    private OneDoFJointBasics[] joints;
@@ -63,7 +63,7 @@ public class ExternalWrenchEstimatorTest
    @BeforeEach
    public void setup()
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       externalForcePointOffset = new Vector3D();
       externalForcePoint = new ExternalForcePoint("efp", registry);
@@ -108,7 +108,7 @@ public class ExternalWrenchEstimatorTest
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
 
       scs.setFastSimulate(true, 15);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
       scs.setDT(controlDT, 50);
       scs.setGroundVisible(false);

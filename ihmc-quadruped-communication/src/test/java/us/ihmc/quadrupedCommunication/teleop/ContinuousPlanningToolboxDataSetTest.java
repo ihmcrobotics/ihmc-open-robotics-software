@@ -83,7 +83,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ContinuousPlanningToolboxDataSetTest
@@ -212,10 +212,10 @@ public class ContinuousPlanningToolboxDataSetTest
                                                      false,
                                                      false,
                                                      pubSubImplementation);
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
+      YoRegistry testRegistry = new YoRegistry("testRegistry");
       continuousPlanningModule = new QuadrupedContinuousPlanningModule(robotName, null, xGaitSettings, null, false, false, pubSubImplementation);
       continuousPlanningModule.setRootRegistry(testRegistry, null);
-      planningFailed = ((YoBoolean) testRegistry.getVariable("planningFailed"));
+      planningFailed = ((YoBoolean) testRegistry.findVariable("planningFailed"));
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 

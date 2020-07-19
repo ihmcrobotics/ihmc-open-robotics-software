@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -37,7 +37,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
    private DoubleProvider omega;
    private QuadrantDependentList<DummyContactState> contactStates;
    private static final double controlDt = 0.01;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
@@ -60,7 +60,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
          contactStates.put(robotQuadrant, new DummyContactState());
       }
       omega = () -> 3.0;
-      registry = new YoVariableRegistry("testRegistry");
+      registry = new YoRegistry("testRegistry");
       stepDelayer = new QuadrupedBalanceBasedStepDelayer(soleFrames, midFeetZUpFrame, omega, contactStates, controlDt, registry, null);
 
       DefaultParameterReader reader = new DefaultParameterReader();
@@ -466,9 +466,9 @@ public class QuadrupedBalanceBasedStepDelayerTest
       }
    }
 
-   private YoParameter<?> getParameter(String name)
+   private YoParameter getParameter(String name)
    {
-      for (YoParameter<?> parameter : registry.getAllParameters())
+      for (YoParameter parameter : registry.subtreeParameters())
       {
          if (parameter.getName().equals(name))
             return parameter;

@@ -1,10 +1,14 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -15,21 +19,20 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedBalanceBasedStepDelayer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final QuadrantDependentList<? extends PlaneContactState> contactStates;
 
    private final FrameVector2D icpError = new FrameVector2D();
@@ -78,7 +81,7 @@ public class QuadrupedBalanceBasedStepDelayer
 
    private final double controlDt;
 
-   public QuadrupedBalanceBasedStepDelayer(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedBalanceBasedStepDelayer(QuadrupedControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       this(controllerToolbox.getReferenceFrames().getSoleFrames(), controllerToolbox.getSupportPolygons().getMidFeetZUpFrame(),
            controllerToolbox.getLinearInvertedPendulumModel().getYoNaturalFrequency(), controllerToolbox.getFootContactStates(),
@@ -87,7 +90,7 @@ public class QuadrupedBalanceBasedStepDelayer
 
    public QuadrupedBalanceBasedStepDelayer(QuadrantDependentList<MovingReferenceFrame> soleFrames, ReferenceFrame midZUpFrame, DoubleProvider omega,
                                            QuadrantDependentList<? extends PlaneContactState> contactStates, double controlDt,
-                                           YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+                                           YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrames = soleFrames;
       this.midZUpFrame = midZUpFrame;

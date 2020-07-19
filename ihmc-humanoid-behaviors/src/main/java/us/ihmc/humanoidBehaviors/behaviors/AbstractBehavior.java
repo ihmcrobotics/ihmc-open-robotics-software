@@ -22,7 +22,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -53,7 +53,7 @@ public abstract class AbstractBehavior implements RobotController
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be
     * visualized in SCS.
     */
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
 
    protected final YoEnum<BehaviorStatus> yoBehaviorStatus;
    protected final YoBoolean hasBeenInitialized;
@@ -87,7 +87,7 @@ public abstract class AbstractBehavior implements RobotController
       this.ros2Node = ros2Node;
 
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName()+"-"+behaviorUniqID++);
-      registry = new YoVariableRegistry(behaviorName);
+      registry = new YoRegistry(behaviorName);
 
       yoBehaviorStatus = new YoEnum<BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
@@ -299,7 +299,7 @@ public abstract class AbstractBehavior implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

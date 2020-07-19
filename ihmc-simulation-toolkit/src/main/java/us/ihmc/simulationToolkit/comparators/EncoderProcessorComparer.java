@@ -3,7 +3,7 @@ package us.ihmc.simulationToolkit.comparators;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class EncoderProcessorComparer
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
@@ -53,7 +53,7 @@ public class EncoderProcessorComparer
                                    double encoderTicksPerUnitOfPosition)
    {
       Robot nullRobot = new Robot("nullRobot");
-      registry = nullRobot.getRobotsYoVariableRegistry();
+      registry = nullRobot.getRobotsYoRegistry();
       rawTicks = new YoInteger("rawTicks", registry);
       rawPosition = new YoDouble("rawPosition", registry);
       time = nullRobot.getYoTime();

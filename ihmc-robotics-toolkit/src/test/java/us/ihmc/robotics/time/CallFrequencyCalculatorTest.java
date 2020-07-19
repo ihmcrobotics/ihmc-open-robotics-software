@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CallFrequencyCalculatorTest
 {
    @Test
    public void testDetermineCallFrequency()
    {
-      CallFrequencyCalculator callFrequencyCalculator = new CallFrequencyCalculator(new YoVariableRegistry("test"), "");
+      CallFrequencyCalculator callFrequencyCalculator = new CallFrequencyCalculator(new YoRegistry("test"), "");
       callFrequencyCalculator.setNumberOfSamples(12);
 
       int desiredFreq = 20;

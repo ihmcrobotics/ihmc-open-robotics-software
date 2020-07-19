@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,14 +11,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPProportionalController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FrameVector3D tempControl = new FrameVector3D(worldFrame);
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
@@ -41,7 +40,7 @@ public class ICPProportionalController
 
    private final FrameVector3D tempICPErrorIntegrated = new FrameVector3D(worldFrame);
 
-   public ICPProportionalController(ICPControlGainsProvider gains, double controlDT, YoVariableRegistry parentRegistry)
+   public ICPProportionalController(ICPControlGainsProvider gains, double controlDT, YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 

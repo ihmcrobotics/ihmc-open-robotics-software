@@ -74,10 +74,10 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -451,7 +451,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       // Since the control frame is moved down below the foot this assert makes sure the singularity escape uses the desired ankle position, not the desired control point position.
       String namePrefix = fullRobotModel.getFoot(robotSide).getName();
       String className = LegSingularityAndKneeCollapseAvoidanceControlModule.class.getSimpleName();
-      YoBoolean singularityEscape = (YoBoolean) scs.getVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
+      YoBoolean singularityEscape = (YoBoolean) scs.findVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
       assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
 
       drcSimulationTestHelper.createVideo(robotModel.getSimpleRobotName(), 2);
@@ -746,12 +746,12 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       Random random = new Random(595161);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -829,7 +829,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }

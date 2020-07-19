@@ -17,14 +17,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class RigidBodyControlState implements State
 {
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    protected final String warningPrefix;
 
    protected final YoBoolean trajectoryDone;
@@ -36,13 +36,13 @@ public abstract class RigidBodyControlState implements State
    protected final ArrayList<YoGraphic> graphics = new ArrayList<>();
    private final RigidBodyControlMode controlMode;
 
-   public RigidBodyControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoRegistry parentRegistry)
    {
       this.controlMode = controlMode;
       this.yoTime = yoTime;
 
       warningPrefix = getClass().getSimpleName() + " for " + bodyName + ": ";
-      registry = new YoVariableRegistry(createRegistryName(bodyName, controlMode));
+      registry = new YoRegistry(createRegistryName(bodyName, controlMode));
 
       String prefix;
       if (controlMode != null)

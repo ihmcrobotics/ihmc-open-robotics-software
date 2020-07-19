@@ -9,13 +9,13 @@ import static us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator.getRadi
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class CylindricalCoordinatesPositionController implements PositionController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble positionErrorRadial;
    private final YoDouble positionErrorAngle;
@@ -37,11 +37,11 @@ public class CylindricalCoordinatesPositionController implements PositionControl
    private final ReferenceFrame cylinderFrame;
    private final FramePoint3D currentPosition;
 
-   public CylindricalCoordinatesPositionController(String prefix, ReferenceFrame bodyFrame, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry)
+   public CylindricalCoordinatesPositionController(String prefix, ReferenceFrame bodyFrame, ReferenceFrame cylinderFrame, YoRegistry parentRegistry)
    {
       this.bodyFrame = bodyFrame;
       this.currentPosition = new FramePoint3D(bodyFrame);
-      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       positionErrorRadial = new YoDouble(prefix + "RadialPositionError", registry);
       positionErrorAngle = new YoDouble(prefix + "AnglePositionError", registry);

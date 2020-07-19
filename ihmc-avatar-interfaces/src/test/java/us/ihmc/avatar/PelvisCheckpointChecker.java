@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class PelvisCheckpointChecker extends SimpleRobotController
@@ -23,7 +23,7 @@ public class PelvisCheckpointChecker extends SimpleRobotController
    private Point3D position;
    private int footStepCheckPointIndex;
 
-   private YoVariableRegistry circleWalkRegistry;
+   private YoRegistry circleWalkRegistry;
 
    public PelvisCheckpointChecker(DRCSimulationTestHelper drcSimulationTestHelper)
    {
@@ -31,7 +31,7 @@ public class PelvisCheckpointChecker extends SimpleRobotController
       position = new Point3D();
       footStepCheckPointIndex = 0;
 
-      circleWalkRegistry = new YoVariableRegistry("WalkingTest");
+      circleWalkRegistry = new YoRegistry("WalkingTest");
       drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
    }
 

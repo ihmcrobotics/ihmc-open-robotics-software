@@ -79,7 +79,7 @@ public class ExampleContactSimulationWithBoxesOnATable
          double alphaSlip = 0.5;
          
          GroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(contactableBoxRobot, 
-               kXY, bXY, kZ, bZ, alphaSlip, alphaStick, contactableBoxRobot.getRobotsYoVariableRegistry());  
+               kXY, bXY, kZ, bZ, alphaSlip, alphaStick, contactableBoxRobot.getRobotsYoRegistry());  
          
          groundContactModel.setGroundProfile3D(exampleTerrainWithTable);
          contactableBoxRobot.setGroundContactModel(groundContactModel);

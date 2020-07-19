@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoVariableListComparer
 {
    private final double epsilon;
-   private final List<YoVariable<?>[]> differences = new ArrayList<YoVariable<?>[]>();
+   private final List<YoVariable[]> differences = new ArrayList<YoVariable[]>();
    private List<String> exceptions = new ArrayList<String>();
 
    public YoVariableListComparer(double epsilon)
@@ -19,16 +19,16 @@ public class YoVariableListComparer
       this.epsilon = epsilon;
    }
 
-   public boolean compare(List<YoVariable<?>> allVariables0, List<YoVariable<?>> allVariables1)
+   public boolean compare(List<YoVariable> allVariables0, List<YoVariable> allVariables1)
    {
       differences.clear();
 
-      Comparator<YoVariable<?>> alphabeticOrderComparator = new Comparator<YoVariable<?>>()
+      Comparator<YoVariable> alphabeticOrderComparator = new Comparator<YoVariable>()
       {
       @Override
-      public int compare(YoVariable<?> arg0, YoVariable<?> arg1) 
+      public int compare(YoVariable arg0, YoVariable arg1) 
       {
-         return arg0.getFullNameWithNameSpace().compareTo(arg1.getFullNameWithNameSpace());
+         return arg0.getFullNameString().compareTo(arg1.getFullNameString());
       }
       };
       
@@ -45,13 +45,13 @@ public class YoVariableListComparer
       
       while((index0 < size0) && (index1 < size1))
       {
-         YoVariable<?> var0 = allVariables0.get(index0);
-         YoVariable<?> var1 = allVariables1.get(index1);
+         YoVariable var0 = allVariables0.get(index0);
+         YoVariable var1 = allVariables1.get(index1);
 
          double val0 = var0.getValueAsDouble();
          double val1 = var1.getValueAsDouble();
          
-         if(!var0.getFullNameWithNameSpace().equals(var1.getFullNameWithNameSpace()))
+         if(!var0.getFullNameString().equals(var1.getFullNameString()))
          {
           addDifference(var0, var1);
          }
@@ -89,13 +89,13 @@ public class YoVariableListComparer
       return differences.isEmpty();
    }
 
-   private List<YoVariable<?>> removeExceptionalVariables(List<YoVariable<?>> variables) 
+   private List<YoVariable> removeExceptionalVariables(List<YoVariable> variables) 
    {
-      List<YoVariable<?>> variablesWithoutExceptions = new ArrayList<YoVariable<?>>();
+      List<YoVariable> variablesWithoutExceptions = new ArrayList<YoVariable>();
 
       for (int i=0; i<variables.size(); i++)
       {
-         YoVariable<?> variable = variables.get(i);
+         YoVariable variable = variables.get(i);
          if (!isException(exceptions, variable))
          {
             variablesWithoutExceptions.add(variable);
@@ -105,13 +105,13 @@ public class YoVariableListComparer
       return variablesWithoutExceptions;
    }
 
-   private void addDifference(YoVariable<?> var0, YoVariable<?> var1)
+   private void addDifference(YoVariable var0, YoVariable var1)
    {
-      YoVariable<?>[] difference = {var0, var1};
+      YoVariable[] difference = {var0, var1};
       differences.add(difference);
    }
 
-   public List<YoVariable<?>[]> getDifferences()
+   public List<YoVariable[]> getDifferences()
    {
       return differences;
    }
@@ -122,7 +122,7 @@ public class YoVariableListComparer
       StringBuffer buf = new StringBuffer();
       buf.append("Differences:\n");
 
-      for (YoVariable<?>[] difference : differences)
+      for (YoVariable[] difference : differences)
       {
          buf.append(difference[0]);
          buf.append("\n");
@@ -138,7 +138,7 @@ public class YoVariableListComparer
       exceptions.add(exception);
    }
 
-   private static boolean isException(List<String> exceptions, YoVariable<?> variable)
+   private static boolean isException(List<String> exceptions, YoVariable variable)
    {
       boolean isException = false;
 
@@ -146,7 +146,7 @@ public class YoVariableListComparer
       {
          for (String exceptionName : exceptions)
          {
-            String lowerCaseVariableName = variable.getFullNameWithNameSpace().toLowerCase();
+            String lowerCaseVariableName = variable.getFullNameString().toLowerCase();
             String lowerCaseExceptionString = exceptionName.toLowerCase();
             isException = (lowerCaseVariableName.contains(lowerCaseExceptionString));
 

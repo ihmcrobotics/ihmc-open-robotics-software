@@ -2,7 +2,7 @@ package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
@@ -21,12 +21,12 @@ public class ExecutionTimer
 
    private long startTime;
 
-   public ExecutionTimer(String name, YoVariableRegistry registry)
+   public ExecutionTimer(String name, YoRegistry registry)
    {
       this(name, 0.0, registry);
    }
    
-   public ExecutionTimer(String name, double measurementDelayInSeconds, YoVariableRegistry registry)
+   public ExecutionTimer(String name, double measurementDelayInSeconds, YoRegistry registry)
    {
       this.measurementDelay = Conversions.secondsToNanoseconds(measurementDelayInSeconds);
 

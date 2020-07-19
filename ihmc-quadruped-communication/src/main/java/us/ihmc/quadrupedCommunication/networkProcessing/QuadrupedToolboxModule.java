@@ -24,7 +24,7 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.*;
@@ -43,7 +43,7 @@ public abstract class QuadrupedToolboxModule
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   protected final YoRegistry registry = new YoRegistry(name);
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final String robotName;
    protected final FullQuadrupedRobotModel fullRobotModel;
@@ -141,7 +141,7 @@ public abstract class QuadrupedToolboxModule
       realtimeRos2Node.spin();
    }
 
-   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
    {
       rootRegistry.addChild(registry);
       if (rootGraphicsListRegistry != null)

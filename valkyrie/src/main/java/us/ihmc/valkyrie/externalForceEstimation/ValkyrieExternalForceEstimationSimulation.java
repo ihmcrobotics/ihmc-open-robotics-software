@@ -32,8 +32,8 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieExternalForceEstimationSimulation
 {
@@ -54,7 +54,7 @@ public class ValkyrieExternalForceEstimationSimulation
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_sim");
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry scsRootRegistry = simulationStarter.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
+      YoRegistry scsRootRegistry = simulationStarter.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
 
       HumanoidFloatingRootJointRobot scsRobot = simulationStarter.getSDFRobot();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();

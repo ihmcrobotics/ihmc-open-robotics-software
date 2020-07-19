@@ -14,15 +14,15 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.trajectories.StraightLineCartesianTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class HexapodMomentumController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoFrameVector3D yoLinearMomentumRateOfChange;
    private final YoFrameVector3D yoAngularMomentumRateOfChange;
    
@@ -48,7 +48,7 @@ public class HexapodMomentumController
    
    private double dt;
 
-   public HexapodMomentumController(String prefix, HexapodReferenceFrames referenceFrames, FullRobotModel fullRobotModel, double dt, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public HexapodMomentumController(String prefix, HexapodReferenceFrames referenceFrames, FullRobotModel fullRobotModel, double dt, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.dt = dt;

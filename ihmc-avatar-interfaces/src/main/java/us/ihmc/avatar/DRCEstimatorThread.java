@@ -67,7 +67,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.Kinematic
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -81,7 +81,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    /** Set this to true to use the EKF estimator */
    private static final boolean USE_EKF_ESTIMATOR = false;
 
-   private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
+   private final YoRegistry estimatorRegistry = new YoRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
@@ -256,7 +256,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       firstTick.set(true);
       controllerDataValid.set(false);
 
-      estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
+      estimatorRegistry.addChild(estimatorController.getYoRegistry());
 
       this.outputWriter = outputWriter;
       if (this.outputWriter != null)
@@ -298,7 +298,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             {
                throw new RuntimeException("Did not find parameter file for EKF.");
             }
-            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoRegistry());
 
             estimatorController.addRobotController(ekfStateEstimator);
          }
@@ -327,7 +327,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             {
                throw new RuntimeException("Did not find parameter file for EKF.");
             }
-            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoRegistry());
 
             estimatorController.addRobotController(ekfStateEstimator);
          }
@@ -373,7 +373,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return estimatorRegistry;
    }

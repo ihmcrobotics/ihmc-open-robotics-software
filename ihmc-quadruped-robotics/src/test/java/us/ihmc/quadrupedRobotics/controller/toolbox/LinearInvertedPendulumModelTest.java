@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
 public class LinearInvertedPendulumModelTest
@@ -24,7 +24,7 @@ public class LinearInvertedPendulumModelTest
    public void testLinearInvertedPendulumModelGettersAndSetters()
    {
       TranslationReferenceFrame comZUpFrame = new TranslationReferenceFrame("comZUpFrame", ReferenceFrame.getWorldFrame());
-      YoVariableRegistry registry = new YoVariableRegistry("testLinearInvertedPendulumModelGettersAndSetters");
+      YoRegistry registry = new YoRegistry("testLinearInvertedPendulumModelGettersAndSetters");
       
       double mass = 100.0;
       double gravity = 9.81;

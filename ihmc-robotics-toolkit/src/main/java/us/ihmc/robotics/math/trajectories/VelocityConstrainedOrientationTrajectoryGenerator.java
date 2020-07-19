@@ -15,13 +15,13 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 /**
  * This trajectory generator aims at interpolating between two orientations q0 and qf for given angular velocities at the limits w0 and wf.
@@ -51,7 +51,7 @@ import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 public class VelocityConstrainedOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
    private static final double PI = 1.0 * Math.PI;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
    private final YoPolynomial parameterPolynomial;
@@ -85,9 +85,9 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
     */
    private final double dtForFiniteDifference = 1.0e-4;
 
-   public VelocityConstrainedOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public VelocityConstrainedOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentTime = new YoDouble(namePrefix + "Time", registry);
       parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);

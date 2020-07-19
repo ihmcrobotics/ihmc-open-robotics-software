@@ -24,17 +24,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBodyPathProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int numberOfVisualizationPoints = 20;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final AtomicReference<QuadrupedBodyPathPlan> bodyPathPlan = new AtomicReference<>();
    private final YoDouble timestamp;
@@ -49,7 +49,7 @@ public class QuadrupedWaypointBasedBodyPathProvider implements QuadrupedPlanarBo
    private final ReferenceFrame supportFrame;
    private final FramePose3D supportPose = new FramePose3D();
 
-   public QuadrupedWaypointBasedBodyPathProvider(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedWaypointBasedBodyPathProvider(QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       this.timestamp = timestamp;
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();

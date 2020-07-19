@@ -3,12 +3,12 @@ package us.ihmc.sensorProcessing.diagnostic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final DoubleYoVariableValidityChecker positionChecker;
    private final DoubleYoVariableValidityChecker velocityChecker;
    private final DoubleYoVariableValidityChecker tauChecker;
@@ -19,13 +19,13 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
    private final boolean hasYoVariables;
 
    public OneDoFJointSensorValidityChecker(OneDoFJointBasics jointToCheck, JointDesiredOutputReadOnly outputDataToCheck, YoDouble position, YoDouble velocity, YoDouble tau,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       hasYoVariables = true;
       this.joint = jointToCheck;
       this.output = outputDataToCheck;
       String jointName = jointToCheck.getName();
-      registry = new YoVariableRegistry(jointName + "JointSensorValidityChecker");
+      registry = new YoRegistry(jointName + "JointSensorValidityChecker");
       parentRegistry.addChild(registry);
 
       verifyYoVariableNames(jointName, position, velocity, tau);
@@ -35,14 +35,14 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
       tauChecker = new DoubleYoVariableValidityChecker(tau, registry);
    }
 
-   public OneDoFJointSensorValidityChecker(OneDoFJointBasics jointToCheck, JointDesiredOutput outputDataToCheck, YoVariableRegistry parentRegistry)
+   public OneDoFJointSensorValidityChecker(OneDoFJointBasics jointToCheck, JointDesiredOutput outputDataToCheck, YoRegistry parentRegistry)
    {
       hasYoVariables = false;
       this.joint = jointToCheck;
       this.output = outputDataToCheck;
       String jointName = jointToCheck.getName();
 
-      registry = new YoVariableRegistry(jointName + "SensorValidityChecker");
+      registry = new YoRegistry(jointName + "SensorValidityChecker");
       parentRegistry.addChild(registry);
 
       positionChecker = new DoubleYoVariableValidityChecker(jointName + "Position", registry);

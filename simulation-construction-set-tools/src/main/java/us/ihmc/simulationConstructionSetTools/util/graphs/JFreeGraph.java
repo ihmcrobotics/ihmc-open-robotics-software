@@ -47,7 +47,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
@@ -489,7 +489,7 @@ public class JFreeGraph extends JPanel
    {      
       int numberOfPoints = 1000;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Registry");
+      YoRegistry registry = new YoRegistry("Registry");
       YoDouble variableOne = new YoDouble("variableOne", registry);
       YoDouble variableTwo = new YoDouble("variableTwo", registry);
       

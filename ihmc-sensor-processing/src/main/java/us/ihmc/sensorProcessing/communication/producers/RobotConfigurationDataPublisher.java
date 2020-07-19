@@ -18,7 +18,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
@@ -153,7 +153,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return null;
    }

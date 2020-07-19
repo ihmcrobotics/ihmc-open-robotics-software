@@ -6,11 +6,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedControlManagerFactory
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrupedPhysicalProperties physicalProperties;
    private final QuadrupedControllerToolbox toolbox;
@@ -22,7 +22,7 @@ public class QuadrupedControlManagerFactory
    private QuadrupedJointSpaceManager jointSpaceManager;
 
    public QuadrupedControlManagerFactory(QuadrupedControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties,
-                                         YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                         YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       this.toolbox = toolbox;
       this.physicalProperties = physicalProperties;

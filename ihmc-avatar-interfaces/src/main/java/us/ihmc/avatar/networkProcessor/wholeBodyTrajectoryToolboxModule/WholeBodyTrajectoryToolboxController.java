@@ -37,11 +37,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
@@ -153,7 +153,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final CommandInputManager commandInputManager;
 
    public WholeBodyTrajectoryToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
-                                               StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
+                                               StatusMessageOutputManager statusOutputManager, YoRegistry registry,
                                                YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
    {
       super(statusOutputManager, registry);

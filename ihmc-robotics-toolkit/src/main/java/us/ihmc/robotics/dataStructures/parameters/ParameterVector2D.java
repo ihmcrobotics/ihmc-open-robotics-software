@@ -2,19 +2,19 @@ package us.ihmc.robotics.dataStructures.parameters;
 
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterVector2D implements Vector2DReadOnly
 {
    private final DoubleParameter x;
    private final DoubleParameter y;
 
-   public ParameterVector2D(String prefix, YoVariableRegistry registry)
+   public ParameterVector2D(String prefix, YoRegistry registry)
    {
       this(prefix, null, registry);
    }
 
-   public ParameterVector2D(String prefix, Vector2DReadOnly defaults, YoVariableRegistry registry)
+   public ParameterVector2D(String prefix, Vector2DReadOnly defaults, YoRegistry registry)
    {
       if (defaults == null)
       {

@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 
@@ -29,7 +29,7 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
    @Test
    public void testCompareWithSimple()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       double trajectoryTime = 1.0;
       double dt = 0.0001;

@@ -87,7 +87,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       double[] qdd_ds = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + armJoints[i].getName()).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + armJoints[i].getName()).getValueAsDouble();
       }
       return qdd_ds;
    }
@@ -100,7 +100,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       for (int i = 0; i < armJoints.length; i++)
       {
          String variable = bodyName + "UserMode_" + armJoints[i].getName() + "_qdd_d";
-         qdd_ds[i] = scs.getVariable(nameSpace, variable).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(nameSpace, variable).getValueAsDouble();
       }
       return qdd_ds;
    }

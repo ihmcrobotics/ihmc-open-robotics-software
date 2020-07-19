@@ -29,7 +29,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CentroidProjectionToeOffCalculatorTest
 {
@@ -40,7 +40,7 @@ public class CentroidProjectionToeOffCalculatorTest
    private static final double toeWidthForControl = 0.0825;
 
    private ToeOffCalculator toeOffCalculator;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -48,7 +48,7 @@ public class CentroidProjectionToeOffCalculatorTest
    @BeforeEach
    public void setUp()
    {
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
 
       for (RobotSide robotSide : RobotSide.values)
       {

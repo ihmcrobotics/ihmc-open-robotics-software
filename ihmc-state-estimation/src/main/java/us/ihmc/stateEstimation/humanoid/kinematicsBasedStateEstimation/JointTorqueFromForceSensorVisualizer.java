@@ -14,19 +14,19 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointTorqueFromForceSensorVisualizer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<RigidBodyBasics> allRigidBodies;
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, GeometricJacobian> jacobians;
    private final Map<OneDoFJointBasics, YoDouble> jointTorques;
 
-   public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoVariableRegistry parentRegistry)
+   public JointTorqueFromForceSensorVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches, YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
 

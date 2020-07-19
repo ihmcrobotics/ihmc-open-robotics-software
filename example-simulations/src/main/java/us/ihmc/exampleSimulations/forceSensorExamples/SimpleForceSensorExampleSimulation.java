@@ -11,7 +11,7 @@ public class SimpleForceSensorExampleSimulation
    {
       SimpleForceSensorRobot robot = new SimpleForceSensorRobot();
       
-      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoRegistry());
       robot.setGroundContactModel(groundContactModel);
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);

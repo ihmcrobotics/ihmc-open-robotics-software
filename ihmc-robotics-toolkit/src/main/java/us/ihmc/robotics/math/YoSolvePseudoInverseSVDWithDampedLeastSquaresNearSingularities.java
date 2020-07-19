@@ -7,7 +7,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities implements LinearSolverDense<DMatrixRMaj>
@@ -15,7 +15,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    private final SingularValueDecomposition_F64<DMatrixRMaj> svd;
    private final DMatrixRMaj pseudoInverse = new DMatrixRMaj(1, 1);
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble mu;
    private final YoDouble firstSingularValueThreshold;
    private final YoDouble secondSingularValueThreshold;
@@ -26,12 +26,12 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
 
    private final DMatrixRMaj tempV;
    
-   public YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(String namePrefix, int maxRows, int maxCols, YoVariableRegistry parentRegistry)
+   public YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(String namePrefix, int maxRows, int maxCols, YoRegistry parentRegistry)
    {
       svd = DecompositionFactory_DDRM.svd(maxRows, maxCols, true, true, true);
       tempV = new DMatrixRMaj(maxCols, maxCols);
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       mu = new YoDouble(namePrefix + "Mu", registry);
       firstSingularValueThreshold = new YoDouble(namePrefix + "FirstSingularValueThreshold", registry);

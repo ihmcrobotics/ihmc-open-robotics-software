@@ -338,9 +338,9 @@ public abstract class DRCPushRecoveryTest
       }
 
       // get rid of this once push recovery is enabled by default
-      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
       enable.set(enablePushRecoveryControlModule);
-      YoBoolean enableOnFailure = (YoBoolean) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+      YoBoolean enableOnFailure = (YoBoolean) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
             "enablePushRecoveryOnFailure");
       enableOnFailure.set(enablePushRecoveryOnFailure);
 
@@ -349,10 +349,10 @@ public abstract class DRCPushRecoveryTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule",
                footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController",
                "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));

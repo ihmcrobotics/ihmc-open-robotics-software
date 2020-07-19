@@ -12,14 +12,15 @@ import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.NameSpace;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableList;
+import us.ihmc.yoVariables.tools.YoFactories;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class GUISideCommandListener implements GUISideAbstractCommandListener
 {
-   private final YoVariableRegistry rootRegistry;
+   private final YoRegistry rootRegistry;
 
    private YoVariableList allVariables;
    private final CreatedNewVariablesListener createdNewVariablesListener;
@@ -27,11 +28,11 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    private final List<DoDisconnectListener> doDisconnectListeners = new ArrayList<DoDisconnectListener>();
    private final List<CreatedNewRegistriesListener> createdNewRegistryListeners = new ArrayList<CreatedNewRegistriesListener>();
 
-   private final LinkedHashMap<YoVariable<?>, Integer> allVariablesIndexMap = new LinkedHashMap<>();
-   private final List<YoVariable<?>> sendVariables = new ArrayList<>();
+   private final LinkedHashMap<YoVariable, Integer> allVariablesIndexMap = new LinkedHashMap<>();
+   private final List<YoVariable> sendVariables = new ArrayList<>();
 
-   private final LinkedHashMap<YoVariableRegistry, Integer> registryIndexMap = new LinkedHashMap<YoVariableRegistry, Integer>();
-   private final List<YoVariableRegistry> allRegistries = new ArrayList<YoVariableRegistry>();
+   private final LinkedHashMap<YoRegistry, Integer> registryIndexMap = new LinkedHashMap<YoRegistry, Integer>();
+   private final List<YoRegistry> allRegistries = new ArrayList<YoRegistry>();
 
    private boolean connected = false;
    private boolean doneReceivingAllRegistriesAndVariables = false;
@@ -44,7 +45,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    private int logVarsCount;
    DataBuffer dataBuffer;
 
-   public GUISideCommandListener(DataBuffer dataBuffer, YoVariableRegistry rootRegistry, CreatedNewVariablesListener createdNewVariablesListener,
+   public GUISideCommandListener(DataBuffer dataBuffer, YoRegistry rootRegistry, CreatedNewVariablesListener createdNewVariablesListener,
          ReceivedDataListener receivedDataListener)
    {
       this.dataBuffer = dataBuffer;
@@ -85,18 +86,18 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       {
          String registryName = registryNames[i];
          NameSpace fullNameSpace = new NameSpace(registryName);
-         YoVariableRegistry registry = rootRegistry.getOrCreateAndAddRegistry(fullNameSpace);
+         YoRegistry registry = YoFactories.getOrCreateAndAddRegistry(rootRegistry, fullNameSpace);
 
-         if (registry.getNumberOfYoVariables() != variableNames[i].length)
+         if (registry.getNumberOfVariables() != variableNames[i].length)
          {
-            String error = "registry.getNumberOfYoVariables() = " + registry.getNumberOfYoVariables() + "!= variableNames[i].length = " + variableNames[i].length;
+            String error = "registry.getNumberOfYoVariables() = " + registry.getNumberOfVariables() + "!= variableNames[i].length = " + variableNames[i].length;
             error = error + "\nregistry.getName() = " + registry.getName();
             error = error + "\n\n registry variables:\n";
 
-            List<YoVariable<?>> registryVariables = registry.getAllVariablesInThisListOnly();
+            List<YoVariable> registryVariables = registry.getVariables();
             for (int j=0; j<registryVariables.size(); j++)
             {
-               error = error + registryVariables.get(j).getFullNameWithNameSpace() + "\n";
+               error = error + registryVariables.get(j).getFullNameString() + "\n";
             }
 
             error = error + "\n\n variableNames:\n";
@@ -123,7 +124,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       {
          String registryName = registryNames[i];
          NameSpace fullNameSpace = new NameSpace(registryName);
-         YoVariableRegistry registry = rootRegistry.getOrCreateAndAddRegistry(fullNameSpace);
+         YoRegistry registry = YoFactories.getOrCreateAndAddRegistry(rootRegistry, fullNameSpace);
          registryIndexMap.put(registry, i);
          allRegistries.add(registry);
          //       System.out.println(i + " " + registry.getNameSpace().getName());
@@ -138,9 +139,9 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    {
       for (int i = 0; i < allVariables.size(); i++)
       {
-         YoVariable<?> v = allVariables.getVariable(i);
+         YoVariable v = allVariables.getVariable(i);
          allVariablesIndexMap.put(v, i);
-         System.out.println(i + " " + v.getFullNameWithNameSpace());
+         System.out.println(i + " " + v.getFullNameString());
       }
    }
 
@@ -151,9 +152,9 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
          // System.out.println("Looking for var " + vars[i]);
          String fullVariableName = vars[i];
 
-         YoVariable<?> v = rootRegistry.getVariable(fullVariableName);
+         YoVariable v = rootRegistry.findVariable(fullVariableName);
 
-         if (allVariables.getVariable(fullVariableName) != null)
+         if (allVariables.findVariable(fullVariableName) != null)
          {
             System.err.println("Robot has repeat variable names! Already registered " + fullVariableName);
             System.err.flush();
@@ -174,10 +175,9 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
 
    private void createAndAddVariableAndSetInitialValue(float initialValue, String fullVariableName)
    {
-      NameSpace fullNameSpace = NameSpace.createNameSpaceFromAFullVariableName(fullVariableName);
-      YoVariableRegistry registry = rootRegistry.getRegistry(fullNameSpace);
-      String shortVariableName = NameSpace.stripOffNameSpaceToGetVariableName(fullVariableName);
-      YoDouble newVar = new YoDouble(shortVariableName, "", registry);
+      NameSpace fullName = new NameSpace(fullVariableName);
+      YoRegistry registry = rootRegistry.findRegistry(fullName.getParent());
+      YoDouble newVar = new YoDouble(fullName.getShortName(), "", registry);
 
       allVariables.addVariable(newVar);
 
@@ -187,7 +187,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       
    }
 
-   private void addVariableAndSetInitialValue(float initialValue, String fullVariableName, YoVariable<?> variable)
+   private void addVariableAndSetInitialValue(float initialValue, String fullVariableName, YoVariable variable)
    {
       System.out.println("Found var: " + fullVariableName);
       allVariables.addVariable(variable);
@@ -197,40 +197,6 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    @Override
    public void doRegistrySettingsProcessed(int[] registryIndices, boolean[] isSent, boolean[] isDisallowSendingSet, boolean[] isLogged, int registrySettingsIdentifier)
    {
-      if (registrySettingsIdentifier == expectedRegistrySettingsIdentifier)
-      {
-         for (int i=0; i<registryIndices.length; i++)
-         {
-            int index = registryIndices[i];
-            
-            YoVariableRegistry registry = allRegistries.get(index);
-            
-            if ((isSent[index]) && registry.isDisallowSendingSet())
-            {
-               // Robot is trying to say set Sending, yet GUI side has disallowed Sending. 
-               // This isn't good since the robot side must be obeyed or else the data expecting won't be right.
-               // So might as well throw exception here and make sure this gets fixed.
-               throw new RuntimeException("GUI is not allowing sending to be set, yet robot is asking for it! Registry = " + registry.getName());
-            }
-            
-            registry.setSending(isSent[index]);
-
-            if (isDisallowSendingSet[index]) 
-            {
-               registry.setDisallowSending();
-               registry.setSending(false);
-               
-               if (isSent[index]) throw new RuntimeException("disallowSending = true, yet setSending = true!");
-               
-            }
-            registry.setLogging(isLogged[index]);
-         }
-         
-         updateSendVars(); 
-         updateLogVarsCount();
-        
-         registrySettingsProcessed = true;
-      }
    }
 
    public YoVariableList getAllVariables()
@@ -238,7 +204,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       return allVariables;
    }
 
-   public HashMap<YoVariableRegistry, Integer> getRegistryIndexMap()
+   public HashMap<YoRegistry, Integer> getRegistryIndexMap()
    {
       return registryIndexMap;
    }
@@ -365,7 +331,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       return registrySettingsProcessed;
    }
 
-   public int getIndex(YoVariable<?> variable)
+   public int getIndex(YoVariable variable)
    {
       Integer ret = allVariablesIndexMap.get(variable);
 
@@ -375,12 +341,12 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       return ret;
    }
 
-   public int getIndex(YoVariableRegistry registry)
+   public int getIndex(YoRegistry registry)
    {
       Integer ret = registryIndexMap.get(registry);
 
       if (ret == null)
-         throw new RuntimeException("YoVariableRegistry not found: " + registry.getNameSpace());
+         throw new RuntimeException("YoRegistry not found: " + registry.getNameSpace());
 
       return ret;
    }
@@ -393,10 +359,10 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       
       for (int i=0; i<numberToIterate; i++)
       {
-         YoVariable<?> var = allVariables.getVariable(i);
+         YoVariable var = allVariables.getVariable(i);
       
-         YoVariableRegistry registry = var.getYoVariableRegistry();
-         if (registry.isSent())
+         YoRegistry registry = var.getRegistry();
+//         if (registry.isSent())
          {
             sendVariables.add(var);
          }
@@ -411,8 +377,8 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       
       for (int i=0; i<numberToIterate; i++)
       {
-         YoVariable<?> var = allVariables.getVariable(i);
-         if (var.getYoVariableRegistry().isLogged())
+         YoVariable var = allVariables.getVariable(i);
+//         if (var.getRegistry().isLogged())
             logVarsCount++;
       }
    }
@@ -430,7 +396,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       }
    }
    
-   private void notifyCreatedNewVariablesListeners(YoVariable<?> newVariable)
+   private void notifyCreatedNewVariablesListeners(YoVariable newVariable)
    {
       createdNewVariablesListener.createdNewVariable(newVariable);
    }
@@ -440,7 +406,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       return expectedRegistrySettingsIdentifier;
    }
 
-   public List<YoVariableRegistry> getAllRegistries()
+   public List<YoRegistry> getAllRegistries()
    {
       return allRegistries;
    }

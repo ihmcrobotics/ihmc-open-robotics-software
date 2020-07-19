@@ -32,7 +32,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTestInterface
 {
@@ -64,7 +64,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();

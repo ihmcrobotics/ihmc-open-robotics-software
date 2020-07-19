@@ -12,7 +12,7 @@ import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -46,12 +46,12 @@ public class CropVerifier
                        ReferenceFrame soleFrame,
                        double resolution,
                        FootholdRotationParameters explorationParameters,
-                       YoVariableRegistry parentRegistry,
+                       YoRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       occupancyGrid = new OccupancyGrid(namePrefix + "DesiredCoPOccupancy", soleFrame, registry);
       occupancyGrid.setCellSize(resolution);

@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -57,7 +57,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private final static String DISCONNECT_DISCONNECT = "Disconnect";
    private final static String DISCONNECT_RECONNECT = "Reconnect";
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private SimulationConstructionSet scs;
 
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
@@ -374,9 +374,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       loggerStatusVisualizer.addToSimulationConstructionSet(scs);
 
-      YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
+      YoRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
-      this.registry.addChild(debugRegistry.getYoVariableRegistry());
+      this.registry.addChild(debugRegistry.getYoRegistry());
       scs.setParameterRootPath(yoVariableRegistry);
 
       List<JointState> jointStates = handshakeParser.getJointStates();
@@ -397,7 +397,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       for (String yoVariableName : buttons.keySet())
       {
-         final YoVariable<?> var = registry.getVariable(yoVariableName);
+         final YoVariable var = registry.findVariable(yoVariableName);
          final JButton button = new JButton(yoVariableName);
          final double newValue = buttons.get(yoVariableName);
          scs.addButton(button);
@@ -416,13 +416,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       new Thread(scs, "SCSVisualizer").start();
    }
 
-   public static Predicate<YoVariable<?>> createFrameFilter()
+   public static Predicate<YoVariable> createFrameFilter()
    {
       return v -> v instanceof YoLong && StringUtils.containsIgnoreCase(v.getName(), "frame");
    }
 
    @Override
-   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
+   public void starting(SimulationConstructionSet scs, Robot robot, YoRegistry registry)
    {
    }
 

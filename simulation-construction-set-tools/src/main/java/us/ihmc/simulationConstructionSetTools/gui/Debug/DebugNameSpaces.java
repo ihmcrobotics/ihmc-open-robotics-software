@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.gui.Debug;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -17,7 +17,7 @@ public class DebugNameSpaces
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
-      YoDouble variable1 = (YoDouble)scs.getVariable("variable1");
+      YoDouble variable1 = (YoDouble)scs.findVariable("variable1");
 
       Thread thread = new Thread(scs);
       thread.start();
@@ -50,12 +50,12 @@ public class DebugNameSpaces
          super("DebugNameSpacesRobot");
 
 
-         YoVariableRegistry registry = new YoVariableRegistry("DebugNameSpacesRobot");
+         YoRegistry registry = new YoRegistry("DebugNameSpacesRobot");
 
          variable1 = new YoDouble("variable1", registry);
          variable2 = new YoDouble("variable2", registry);
 
-         this.addYoVariableRegistry(registry);
+         this.addYoRegistry(registry);
 
       }
    }
@@ -63,7 +63,7 @@ public class DebugNameSpaces
 
    private class DebugNameSpacesController implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry("DebugNameSpacesController");
+      private final YoRegistry registry = new YoRegistry("DebugNameSpacesController");
       @SuppressWarnings("unused")
       private final YoDouble variable1 = new YoDouble("variable1", registry);
 
@@ -81,7 +81,7 @@ public class DebugNameSpaces
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

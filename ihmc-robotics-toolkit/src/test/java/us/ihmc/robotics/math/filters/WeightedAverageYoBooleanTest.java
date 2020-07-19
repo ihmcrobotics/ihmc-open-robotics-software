@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -11,7 +11,7 @@ import static us.ihmc.robotics.Assert.*;
 
 public class WeightedAverageYoBooleanTest
 {
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoBoolean yoVariable1ToAverage;
    private YoBoolean yoVariable2ToAverage;
    private YoDouble yoVariable1Weight;
@@ -22,7 +22,7 @@ public class WeightedAverageYoBooleanTest
    @BeforeEach
    public void setUp()
    {
-      registry = new YoVariableRegistry("testRegistry");
+      registry = new YoRegistry("testRegistry");
       yoVariable1ToAverage = new YoBoolean("variable1ToFilter", registry);
       yoVariable2ToAverage = new YoBoolean("variable2ToFilter", registry);
       yoVariable1Weight = new YoDouble("variable1Weight", registry);

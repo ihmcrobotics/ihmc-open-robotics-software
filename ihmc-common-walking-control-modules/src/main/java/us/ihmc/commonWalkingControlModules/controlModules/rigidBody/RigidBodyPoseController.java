@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandCon
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -51,7 +51,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
    public RigidBodyPoseController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
                                   ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
-                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
       String bodyName = bodyToControl.getName();

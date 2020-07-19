@@ -3,12 +3,12 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.YoVariableLimitChecker;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RobotJointLimitWatcher implements RobotController
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry("JointLimits");
+   protected final YoRegistry registry = new YoRegistry("JointLimits");
 
    protected final YoDouble[] variablesToTrack;
    protected final YoVariableLimitChecker[] limitCheckers;
@@ -16,7 +16,7 @@ public class RobotJointLimitWatcher implements RobotController
    protected final OneDoFJointBasics[] oneDoFJoints;
    private SensorOutputMapReadOnly rawSensorOutputMap;
    
-   protected YoVariableRegistry doNotRegister = new YoVariableRegistry("DoNotRegister");
+   protected YoRegistry doNotRegister = new YoRegistry("DoNotRegister");
 
    public RobotJointLimitWatcher(OneDoFJointBasics[] oneDoFJoints, SensorOutputMapReadOnly rawSensorOutputMap)
    {
@@ -73,7 +73,7 @@ public class RobotJointLimitWatcher implements RobotController
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
