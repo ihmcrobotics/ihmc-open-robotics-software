@@ -66,7 +66,7 @@ public class ComCopResidual implements FunctionNtoM
       System.out.println("target link " + targetLink.getName() + "mass " + targetLink.getMass() + "kg, com " + getCurrentLinkCom());
 
       //select subframes
-      List<Integer> keyPoints = dataBuffer.getKeyPoints();
+      List<Integer> keyPoints = dataBuffer.getKeyPointsHandler().getKeyPoints();
       if (numSubsampleBetweenInOut < 0)
       {
          System.out.println("Using key frames");

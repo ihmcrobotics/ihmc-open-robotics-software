@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 
 public class LinkComIDActionListener implements ActionListener
 {
@@ -63,7 +63,7 @@ public class LinkComIDActionListener implements ActionListener
             }
             System.out.println("IN/out" + dataBuffer.getInPoint() + " out " + dataBuffer.getOutPoint() + " " + dataBuffer.getBufferInOutLength());
 
-            ComCopResidual residual = new ComCopResidual(localRobot, targetLink, dataBuffer, dataBuffer.getKeyPoints().size() > 0 ? -1 : 1000);
+            ComCopResidual residual = new ComCopResidual(localRobot, targetLink, dataBuffer, dataBuffer.getKeyPointsHandler().getKeyPoints().size() > 0 ? -1 : 1000);
             LinkComID optimizer = new LinkComID(residual);
             residual.showSample(20, "PreOpt CoM: " + residual.getCurrentLinkCom());
 
