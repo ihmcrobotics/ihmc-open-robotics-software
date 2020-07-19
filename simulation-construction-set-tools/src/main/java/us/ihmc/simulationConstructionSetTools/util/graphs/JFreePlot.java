@@ -30,7 +30,7 @@ public class JFreePlot extends XYSeries
    
    public JFreePlot(DataBufferEntry xPlot, DataBufferEntry yPlot)
    {
-      this(xPlot.getData(), yPlot.getData());
+      this(xPlot.getBuffer(), yPlot.getBuffer());
    }
 
    public JFreePlot(double[] xPlot, double[] yPlot)
@@ -40,7 +40,7 @@ public class JFreePlot extends XYSeries
 
    public JFreePlot(DataBufferEntry xPlot, DataBufferEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
    {
-      this(xPlot.getData(), yPlot.getData(), autoSort, allowDuplicateXValues);
+      this(xPlot.getBuffer(), yPlot.getBuffer(), autoSort, allowDuplicateXValues);
    }
 
    public JFreePlot(double[] xPlot, double[] yPlot, boolean autoSort, boolean allowDuplicateXValues)
@@ -50,7 +50,7 @@ public class JFreePlot extends XYSeries
 
    public JFreePlot(String name, DataBufferEntry xPlot, DataBufferEntry yPlot)
    {
-      this(name, xPlot.getData(), yPlot.getData());
+      this(name, xPlot.getBuffer(), yPlot.getBuffer());
    }
 
    public JFreePlot(String name, double[] xPlot, double[] yPlot)
@@ -60,7 +60,7 @@ public class JFreePlot extends XYSeries
 
    public JFreePlot(String name, DataBufferEntry xPlot, DataBufferEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
    {
-      this(name, xPlot.getData(), yPlot.getData(), autoSort, allowDuplicateXValues);
+      this(name, xPlot.getBuffer(), yPlot.getBuffer(), autoSort, allowDuplicateXValues);
    }
 
    public JFreePlot(String name, double[] xPlot, double[] yPlot, boolean autoSort, boolean allowDuplicateXValues)

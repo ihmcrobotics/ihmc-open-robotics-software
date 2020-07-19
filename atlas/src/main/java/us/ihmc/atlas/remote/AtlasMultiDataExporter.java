@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -550,7 +552,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
          DataBuffer dataBuffer = exportData.scs.getDataBuffer();
 
-         List<YoVariable> varsYo = exportData.scs.getVars(vars, new String[0]);
+         List<YoVariable> varsYo = Stream.of(vars).map(varName -> exportData.scs.findVariable(varName)).collect(Collectors.toList());
          writeSpreadsheetFormattedData(chosenFile, dataBuffer, varsYo, timeVariable);
       }
 
@@ -615,12 +617,12 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
             {
                DataBufferEntry entry = entries.get(i);
                YoVariable variable = entry.getVariable();
-               entry.getData();
+               entry.getBuffer();
 
                if (vars.contains(variable))
                {
                   varnamesToWrite[vars.indexOf(variable)] = entry.getVariable().getName();
-                  double[] allData = entry.getData();
+                  double[] allData = entry.getBuffer();
                   double[] data = getWindowedData(dataBuffer.getInPoint(), allData, bufferLength);
                   if (entry.getVariable().getName().equals(timeVariable))
                   {

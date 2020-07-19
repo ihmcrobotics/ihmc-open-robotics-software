@@ -276,9 +276,9 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       scs.setInPoint();
       scs.cropBuffer();
 
-      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getData();
-      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getData();
-      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getData();
+      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getBuffer();
+      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getBuffer();
+      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getBuffer();
 
       double maxChangePerTick = dt * 0.75;
       boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);
@@ -496,9 +496,9 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       scs.setInPoint();
       scs.cropBuffer();
 
-      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getData();
-      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getData();
-      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getData();
+      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getBuffer();
+      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getBuffer();
+      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getBuffer();
 
       double maxChangePerTick = dt * 0.75;
       boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);

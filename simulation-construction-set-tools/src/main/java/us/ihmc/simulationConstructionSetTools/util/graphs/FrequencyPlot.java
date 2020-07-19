@@ -9,7 +9,7 @@ public class FrequencyPlot extends JFreePlot
 
    public FrequencyPlot(String name, DataBufferEntry time, DataBufferEntry data)
    {
-      this(name, time.getData(), data.getData());
+      this(name, time.getBuffer(), data.getBuffer());
    }
 
    public FrequencyPlot(String name, double[] time, double[] data)

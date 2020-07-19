@@ -269,11 +269,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       scs.setInPoint();
 
       scs.cropBuffer();
-      double[] desiredICPXData = scs.getDataBuffer().getEntry(desiredICPX).getData();
-      double[] desiredICPYData = scs.getDataBuffer().getEntry(desiredICPY).getData();
+      double[] desiredICPXData = scs.getDataBuffer().getEntry(desiredICPX).getBuffer();
+      double[] desiredICPYData = scs.getDataBuffer().getEntry(desiredICPY).getBuffer();
 
 
-      double[] tValues = scs.getDataBuffer().getEntry(t).getData();
+      double[] tValues = scs.getDataBuffer().getEntry(t).getBuffer();
       double dt = tValues[1] - tValues[0];
 
       // Setting max velocity of desired ICP to 3.0.
