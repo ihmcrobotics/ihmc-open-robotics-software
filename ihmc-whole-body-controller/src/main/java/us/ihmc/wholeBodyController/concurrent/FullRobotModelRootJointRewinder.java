@@ -6,9 +6,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.simulationconstructionset.RewoundListener;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FullRobotModelRootJointRewinder implements RewoundListener
