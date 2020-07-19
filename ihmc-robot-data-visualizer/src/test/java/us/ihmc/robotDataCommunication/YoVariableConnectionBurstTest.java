@@ -93,7 +93,7 @@ public class YoVariableConnectionBurstTest
       final int nCheck=20;
       DataBuffer buffer=scsYoVariablesUpdatedListener.getDataBuffer();
       YoLong seq =  (YoLong)buffer.findVariable("seq_id");
-      buffer.setSafeToChangeIndex(true);
+      buffer.setLockIndex(true);
       long lastSeq = seq.getLongValue();
       int lastIndex = buffer.getIndex();
       
