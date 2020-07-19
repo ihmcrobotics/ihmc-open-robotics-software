@@ -47,7 +47,6 @@ public class Example_Mocap_SCS implements MocapRigidbodiesListener
             mocapDataClient.registerRigidBodiesListener(Example_Mocap_SCS.this);
 
             scs = new SimulationConstructionSet(robot);
-            scs.setMaxBufferSize(64000);
             //            scs.setDT(0.0001, 75);
             JToggleButton pauseButton = new JToggleButton("Pause");
             scs.addButton(pauseButton);
