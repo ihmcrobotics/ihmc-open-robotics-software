@@ -11,7 +11,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CollidableListVisualizer
 {
@@ -19,14 +19,14 @@ public class CollidableListVisualizer
 
    private final String groupName;
    private final AppearanceDefinition appearanceDefinition;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private int staticCollidableCounter = 0;
    private final TObjectIntHashMap<RigidBodyBasics> rigidBodyCollidableCounterMap = new TObjectIntHashMap<>();
    private final Map<Collidable, CollidableVisualizer> collidableVisualizerMap = new HashMap<>();
 
-   public CollidableListVisualizer(String groupName, AppearanceDefinition appearanceDefinition, YoVariableRegistry registry,
+   public CollidableListVisualizer(String groupName, AppearanceDefinition appearanceDefinition, YoRegistry registry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.groupName = groupName;

@@ -31,7 +31,7 @@ public class SphereSimulation
       ExternalForcePoint externalForcePoint = sphereRobot.getAllExternalForcePoints().get(0);
 
       SphereControlToolbox sphereControlToolbox = new SphereControlToolbox(sphereRobotModel, controlDT, desiredHeight, gravity, sphereRobot.getYoTime(),
-            sphereRobot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+            sphereRobot.getRobotsYoRegistry(), yoGraphicsListRegistry);
       SphereController controller = new SphereController(sphereRobot, sphereControlToolbox, externalForcePoint);
       sphereRobot.setController(controller);
 
@@ -65,7 +65,7 @@ public class SphereSimulation
       double bXY = 100.0; //150.6;
       double kZ = 20.0; //50.0;
       double bZ = 50.0; //1000.0;
-      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, kXY, bXY, kZ, bZ, robot.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, kXY, bXY, kZ, bZ, robot.getRobotsYoRegistry());
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
       groundContactModel.setGroundProfile3D(groundProfile);

@@ -10,7 +10,7 @@ import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -27,7 +27,7 @@ public class HexapodGamePadManager implements JoystickEventListener
    private final YoDouble desiredAngularVelocityZ;
    private final YoDouble desiredBodyHeight;
    
-   public HexapodGamePadManager(Joystick device, YoVariableRegistry registry)
+   public HexapodGamePadManager(Joystick device, YoRegistry registry)
    {
       device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1, 1.0));
       device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1, 1.0));
@@ -38,15 +38,15 @@ public class HexapodGamePadManager implements JoystickEventListener
       
       device.setPollInterval(10);
       
-     desiredLinearVelocityX = (YoDouble) registry.getVariable("BODYdesiredLinearVelocityX");
-     desiredLinearVelocityY = (YoDouble) registry.getVariable("BODYdesiredLinearVelocityY");
-     desiredLinearVelocityZ = (YoDouble) registry.getVariable("BODYdesiredLinearVelocityZ");
-     desiredBodyHeight = (YoDouble) registry.getVariable("BODYdesiredBodyHeight");
+     desiredLinearVelocityX = (YoDouble) registry.findVariable("BODYdesiredLinearVelocityX");
+     desiredLinearVelocityY = (YoDouble) registry.findVariable("BODYdesiredLinearVelocityY");
+     desiredLinearVelocityZ = (YoDouble) registry.findVariable("BODYdesiredLinearVelocityZ");
+     desiredBodyHeight = (YoDouble) registry.findVariable("BODYdesiredBodyHeight");
      
-     currentOrientationPitch = (YoDouble) registry.getVariable("BODYdesiredOrientationPitch");
-     currentOrientationRoll = (YoDouble) registry.getVariable("BODYdesiredOrientationRoll");
-     desiredAngularVelocityZ = (YoDouble) registry.getVariable("BODYdesiredAngularVelocityZ");
-     controllerCoreMode = (YoEnum<WholeBodyControllerCoreMode>) registry.getVariable("controllerCoreMode");
+     currentOrientationPitch = (YoDouble) registry.findVariable("BODYdesiredOrientationPitch");
+     currentOrientationRoll = (YoDouble) registry.findVariable("BODYdesiredOrientationRoll");
+     desiredAngularVelocityZ = (YoDouble) registry.findVariable("BODYdesiredAngularVelocityZ");
+     controllerCoreMode = (YoEnum<WholeBodyControllerCoreMode>) registry.findVariable("controllerCoreMode");
      
      
       

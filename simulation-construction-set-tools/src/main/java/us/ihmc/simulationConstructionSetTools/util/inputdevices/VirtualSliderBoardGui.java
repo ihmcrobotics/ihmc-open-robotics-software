@@ -18,7 +18,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -45,7 +45,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
    private static final int sliderHeight = 300;
 
    private MidiSliderBoard sliderBoard;
-   private VariableChangedListener listener;
+   private YoVariableChangedListener listener;
    private final Object slidersLock = new Object();
    private ReentrantLock controlsLock = new ReentrantLock();
 
@@ -79,10 +79,10 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
          }
       });
 
-      listener = new VariableChangedListener()
+      listener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             synchronized (VirtualSliderBoardGui.this)
             {
@@ -140,7 +140,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
    private synchronized void addSlider(MidiControl ctrl)
    {
       virtualMidiControls.add(ctrl);
-      ctrl.var.addVariableChangedListener(listener);
+      ctrl.var.addListener(listener);
       setUpGui(closeableAndDisposableRegistry);
    }
 
@@ -149,10 +149,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       controlsLock.lock();
       virtualMidiControls.remove(midiControl);
 
-      if (midiControl.var.getVariableChangedListeners().contains(listener))
-      {
-         midiControl.var.removeVariableChangedListener(listener);
-      }
+         midiControl.var.removeListener(listener);
 
       setUpGui(closeableAndDisposableRegistry);
    }
@@ -194,7 +191,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
                sliderPanel.setBorder(new TitledBorder(slider.midiControl.var.getName()));
             }
             sliderPanel.add(slider, BorderLayout.CENTER);
-            slider.value = new JTextField(slider.midiControl.var.getNumericValueAsAString());
+            slider.value = new JTextField(slider.midiControl.var.getValueAsString());
             sliders.add(slider);
             slider.value.addActionListener(new textFieldListener(slider));
             sliderPanel.add(slider.value, BorderLayout.SOUTH);
@@ -243,9 +240,9 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
          slider.lock();
          slider.midiControl.var.setValueFromDouble(sliderVal);
 
-         for (VariableChangedListener listener : sliderBoard.getVariableChangedListeners())
+         for (YoVariableChangedListener listener : sliderBoard.getVariableChangedListeners())
          {
-            listener.notifyOfVariableChange(slider.midiControl.var);
+            listener.changed(slider.midiControl.var);
          }
 
          // System.out.println(slider.ctrl.var.getValueAsDouble()+" " +SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.ctrl, slider.sliderMax));

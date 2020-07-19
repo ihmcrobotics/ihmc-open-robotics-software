@@ -65,8 +65,8 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AvatarSimulationFactory
 {
@@ -350,11 +350,11 @@ public class AvatarSimulationFactory
       // If running with server setup the server registries and their updates.
       if (yoVariableServer != null)
       {
-         yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(),
+         yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
                                           estimatorThread.getFullRobotModel().getElevator(),
                                           estimatorThread.getYoGraphicsListRegistry());
          estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
-                                                                             estimatorThread.getYoVariableRegistry()));
+                                                                             estimatorThread.getYoRegistry()));
 
          yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
@@ -362,19 +362,19 @@ public class AvatarSimulationFactory
       }
 
       // Add registry and graphics to SCS.
-      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer(estimatorThread.getYoVariableRegistry(),
+      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer(estimatorThread.getYoRegistry(),
                                                                                          estimatorThread.getYoGraphicsListRegistry());
       SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer(controllerThread.getYoVariableRegistry(),
                                                                                           controllerThread.getYoGraphicsListRegistry());
       estimatorTask.addRunnableOnSchedulerThread(() -> estimatorRobotVisualizer.update());
       controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
-      addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
-      addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
+      addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
+      addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
       if (handControlTask != null)
-         robotController.getYoVariableRegistry().addChild(handControlTask.getRegistry());
+         robotController.getYoRegistry().addChild(handControlTask.getRegistry());
    }
 
-   private static void addRegistryAndGraphics(SimulationRobotVisualizer visualizer, YoVariableRegistry registry, SimulationConstructionSet scs)
+   private static void addRegistryAndGraphics(SimulationRobotVisualizer visualizer, YoRegistry registry, SimulationConstructionSet scs)
    {
       registry.addChild(visualizer.getRegistry());
       if (visualizer.getGraphicsListRegistry() != null)
@@ -482,7 +482,7 @@ public class AvatarSimulationFactory
 
    private void setupPassiveJoints()
    {
-      YoVariableRegistry robotsYoVariableRegistry = humanoidFloatingRootJointRobot.getRobotsYoVariableRegistry();
+      YoRegistry robotsYoVariableRegistry = humanoidFloatingRootJointRobot.getRobotsYoRegistry();
       List<ImmutablePair<String, YoPDGains>> passiveJointNameWithGains = robotModel.get().getJointMap().getPassiveJointNameWithGains(robotsYoVariableRegistry);
       if (passiveJointNameWithGains != null)
       {
@@ -521,7 +521,7 @@ public class AvatarSimulationFactory
 
    private void initializeSimulationConstructionSet()
    {
-      simulationConstructionSet.setParameterRootPath(robotController.getYoVariableRegistry());
+      simulationConstructionSet.setParameterRootPath(robotController.getYoRegistry());
 
       humanoidFloatingRootJointRobot.setDynamicIntegrationMethod(scsInitialSetup.get().getDynamicIntegrationMethod());
       scsInitialSetup.get().initializeSimulation(simulationConstructionSet);

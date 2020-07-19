@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SimpleToeOffCalculator implements ToeOffCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final String namePrefix = "simple";
 
    private final SideDependentList<ContactableFoot> feet;
@@ -23,7 +23,7 @@ public class SimpleToeOffCalculator implements ToeOffCalculator
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
 
-   public SimpleToeOffCalculator(SideDependentList<ContactableFoot> feet, YoVariableRegistry parentRegistry)
+   public SimpleToeOffCalculator(SideDependentList<ContactableFoot> feet, YoRegistry parentRegistry)
    {
       this.feet = feet;
 

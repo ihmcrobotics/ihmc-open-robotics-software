@@ -6,7 +6,7 @@ import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -27,11 +27,11 @@ public class FootCoPOccupancyCalculator
    public FootCoPOccupancyCalculator(String namePrefix,
                                      OccupancyGrid occupancyGrid,
                                      FootholdRotationParameters explorationParameters,
-                                     YoVariableRegistry parentRegistry)
+                                     YoRegistry parentRegistry)
    {
       this.occupancyGrid = occupancyGrid;
       String name = getClass().getSimpleName();
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
+      YoRegistry registry = new YoRegistry(namePrefix + name);
       sideOfFootToCrop = new YoEnum<>(namePrefix + "OccupancySideOfFootToCrop", registry, RobotSide.class, true);
 
       thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();

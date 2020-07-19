@@ -4,7 +4,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -19,9 +19,9 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
     private static final long serialVersionUID = -7398771951537758129L;
 
-    private final YoVariableRegistry registry = new YoVariableRegistry("RobotRegistry");
+    private final YoRegistry registry = new YoRegistry("RobotRegistry");
     
-    private final YoVariableRegistry paramsReg  = new YoVariableRegistry("RobotParameters");
+    private final YoRegistry paramsReg  = new YoRegistry("RobotParameters");
     private final YoDouble thighLength  = new YoDouble("thighLength" , paramsReg);
     private final YoDouble shinLength   = new YoDouble("shinLength"  , paramsReg);
     private final YoDouble bodyToWheel  = new YoDouble("bodyToWheel" , paramsReg);
@@ -50,7 +50,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
     
     public SelfStablePlanarRunner_Robot(String name, double pendulumComZ, double q_y0) {
 	super(name);
-	this.getYoVariableRegistry().addChild(paramsReg);
+	this.getYoRegistry().addChild(paramsReg);
 	
 	this.pendulumComZ.set(pendulumComZ);
 	thighLength .set(  1.5);
@@ -343,7 +343,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
     public void initialize() {
     }
 
-    public YoVariableRegistry getYoVariableRegistry() {
+    public YoRegistry getYoRegistry() {
 	return registry;
     }
 

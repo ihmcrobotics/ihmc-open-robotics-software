@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RateLimitedYoVariableTest
 {
-   YoVariableRegistry registry = new YoVariableRegistry("registry");
+   YoRegistry registry = new YoRegistry("registry");
    RateLimitedYoVariable rateLimitedYoVariable1, rateLimitedYoVariable2, rateLimitedYoVariable3, rateLimitedYoVariable4;
    YoDouble maxRate2, maxRate4;
    YoDouble position3, position4;

@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieRosControlPositionJointControlCommandCalculator
 {
@@ -10,12 +10,12 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
 
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
 
-   public ValkyrieRosControlPositionJointControlCommandCalculator(YoPositionJointHandleHolder yoPositionJointHandleHolder, YoVariableRegistry parentRegistry)
+   public ValkyrieRosControlPositionJointControlCommandCalculator(YoPositionJointHandleHolder yoPositionJointHandleHolder, YoRegistry parentRegistry)
    {
       this.yoPositionJointHandleHolder = yoPositionJointHandleHolder;
 
       String positionJumpLimiterBaseName = yoPositionJointHandleHolder.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(positionJumpLimiterBaseName + "Command");
+      YoRegistry registry = new YoRegistry(positionJumpLimiterBaseName + "Command");
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(positionJumpLimiterBaseName + "PositionStepSizeLimiter", registry, 0.15);
 

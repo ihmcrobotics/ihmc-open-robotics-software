@@ -1,7 +1,11 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.math3.util.Precision;
+
+import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -20,18 +24,14 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
 {
@@ -40,7 +40,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private static final double defaultTimeout = 5.0;
    private static final double defaultBestEffortTimeout = 0.0;
 
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
 
    private final YoDouble timeout;
    private final YoDouble bestEffortTimeout;
@@ -60,9 +60,9 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
    private static final int bodyPathPointsForVisualization = 100;
    private final List<YoFramePoint3D> bodyPathPoints = new ArrayList<>();
 
-   public BodyPathAndPawPlannerWrapper(String prefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public BodyPathAndPawPlannerWrapper(String prefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       timeout = new YoDouble("timeout", registry);
       bestEffortTimeout = new YoDouble("bestEffortTimeout", registry);
@@ -83,7 +83,7 @@ public class BodyPathAndPawPlannerWrapper implements BodyPathAndPawPlanner
       parentRegistry.addChild(registry);
    }
 
-   private void setupVisualization(String prefix, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   private void setupVisualization(String prefix, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(prefix + "VisGraph");
 

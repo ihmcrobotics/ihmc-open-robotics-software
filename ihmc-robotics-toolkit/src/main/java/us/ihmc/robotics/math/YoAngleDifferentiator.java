@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 
@@ -11,7 +11,7 @@ public class YoAngleDifferentiator
    private double output = Double.NaN;
    private double dt;
 
-   public YoAngleDifferentiator(String name, double dt, YoVariableRegistry registry)
+   public YoAngleDifferentiator(String name, double dt, YoRegistry registry)
    {
       this.previous = new YoDouble(name, registry);
       this.dt = dt;

@@ -1,5 +1,9 @@
 package us.ihmc.stateEstimation.head;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
@@ -23,14 +27,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoLong;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * An estimator for the head pose based on the EKF package. The inputs to the estimation algorithm are:
@@ -51,7 +51,7 @@ import java.util.List;
  */
 public class EKFHeadPoseEstimator implements StateEstimatorController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble confirmedDt = new YoDouble("confirmedDt", registry);
    private final YoLong previousCallNanos = new YoLong("previousCallNanos", registry);
@@ -154,7 +154,7 @@ public class EKFHeadPoseEstimator implements StateEstimatorController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

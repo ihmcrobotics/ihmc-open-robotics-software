@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
+import java.awt.Color;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -18,17 +20,15 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.awt.*;
 
 public class GradientDescentStepConstraintSolver
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private int maximumIterations = 1000;
    private double alpha = 0.125;
@@ -66,7 +66,7 @@ public class GradientDescentStepConstraintSolver
       this.yoGraphicPlanarRegionsList = null;
    }
 
-   public GradientDescentStepConstraintSolver(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   public GradientDescentStepConstraintSolver(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
       registry.addChild(this.registry);
       this.tickAndUpdatable = tickAndUpdatable;

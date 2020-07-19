@@ -56,7 +56,7 @@ public class LinkComIDActionListener implements ActionListener
                return;
             }
 
-            if (dataBuffer.getVariable("sensedCoPX") == null)
+            if (dataBuffer.findVariable("sensedCoPX") == null)
             {
                System.err.println("data must contain sensedCoPX,Y,Z for calibration");
                return;

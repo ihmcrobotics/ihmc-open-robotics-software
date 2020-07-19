@@ -34,7 +34,7 @@ public class DataExporterGraphCreator
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
 
-   public void createDataVsTimeGraph(File directory, String fileHeader, YoVariable<?> variable, boolean createJPG, boolean createPDF, Color color)
+   public void createDataVsTimeGraph(File directory, String fileHeader, YoVariable variable, boolean createJPG, boolean createPDF, Color color)
    {
       DataBufferEntry dataBufferEntry = dataBuffer.getEntry(variable);
       createDataVsTimeGraph(directory, fileHeader, dataBufferEntry, createJPG, createPDF, color);
@@ -56,7 +56,7 @@ public class DataExporterGraphCreator
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
    
-   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoVariable<?> variableOne, YoVariable<?> variableTwo, boolean createJPG,
+   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoVariable variableOne, YoVariable variableTwo, boolean createJPG,
          boolean createPDF, Color color)
    {
       DataBufferEntry dataOneEntry = dataBuffer.getEntry(variableOne);

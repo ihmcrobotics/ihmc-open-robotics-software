@@ -89,13 +89,13 @@ public class SimulationTestTools
 //       throw new RuntimeException("times not equal.");
 //    }
 
-      String message = createFailMessage(scs.getAllVariables(), variableDifferences);
+      String message = createFailMessage(scs.getVariables(), variableDifferences);
 
       scs = null;
       assertEquals(message, true, variableDifferences.isEmpty());
    }
 
-   private static String createFailMessage(List<YoVariable<?>> allVariables, List<VariableDifference> variableDifferences)
+   private static String createFailMessage(List<YoVariable> allVariables, List<VariableDifference> variableDifferences)
    {
       String numberOfVarsChangedString = variableDifferences.size() + " out of " + allVariables.size() + " YoVariables changed.\n";
       String changedVarsString = "Changed vars:\n" + VariableDifference.allVariableDifferencesToString(variableDifferences);

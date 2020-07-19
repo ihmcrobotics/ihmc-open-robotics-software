@@ -17,11 +17,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPJumpi
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -40,12 +36,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.trajectoryOptimization.DiscreteOptimizationData;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -74,7 +70,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
    private final SimulationConstructionSet scs;
    private final YoDouble yoTime;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
+   private final YoRegistry registry = new YoRegistry("ICPViz");
 
    private final List<YoFramePoseUsingYawPitchRoll> yoNextFootstepPoses = new ArrayList<>();
    private final List<YoFramePoseUsingYawPitchRoll> yoNextNextFootstepPoses = new ArrayList<>();
@@ -140,10 +136,10 @@ public class SLIPJumpingDDPCalculatorVisualizer
       }
 
       updatesPerRequest.set(10);
-      trajectoryDT.addVariableChangedListener(new VariableChangedListener()
+      trajectoryDT.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             for (int i = 0; i < numberOfJumps * numberOfHeights; i++)
                ddpSolvers.get(i).setDeltaT(trajectoryDT.getDoubleValue());
@@ -170,7 +166,7 @@ public class SLIPJumpingDDPCalculatorVisualizer
       Robot robot = new Robot("Dummy");
       yoTime = robot.getYoTime();
       scs = new SimulationConstructionSet(robot, scsParameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.025);
       Graphics3DObject linkGraphics = new Graphics3DObject();

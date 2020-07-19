@@ -9,7 +9,7 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 
 public class UC33Receiver implements Receiver
 {
@@ -19,11 +19,11 @@ public class UC33Receiver implements Receiver
 
    protected Hashtable<Integer, MidiControl> controlsHashTable;
    protected ArrayList<MidiSliderBoard.SliderListener> internalListeners;
-   private ArrayList<VariableChangedListener> variableChangedListeners;
+   private ArrayList<YoVariableChangedListener> variableChangedListeners;
    private boolean debug = false;
 
    public UC33Receiver(Hashtable<Integer, MidiControl> controlsHashTable, ArrayList<MidiSliderBoard.SliderListener> internalListeners,
-         ArrayList<VariableChangedListener> variableChangedListeners, int SliderBoardMax)
+         ArrayList<YoVariableChangedListener> variableChangedListeners, int SliderBoardMax)
    {
       this.sliderBoardMax = SliderBoardMax;
       this.controlsHashTable = controlsHashTable;
@@ -113,8 +113,8 @@ public class UC33Receiver implements Receiver
          {
             for (int i = 0; i < variableChangedListeners.size(); i++)
             {
-               VariableChangedListener listener = variableChangedListeners.get(i);
-               listener.notifyOfVariableChange(ctrl.var);
+               YoVariableChangedListener listener = variableChangedListeners.get(i);
+               listener.changed(ctrl.var);
             }
          }
          if (debug)

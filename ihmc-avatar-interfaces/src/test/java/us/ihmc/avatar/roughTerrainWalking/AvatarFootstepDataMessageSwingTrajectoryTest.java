@@ -35,7 +35,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,6 +45,7 @@ import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -106,9 +106,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       message.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
       message.setAreFootstepsAdjustable(pushAndAdjust);
 
-      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("controllerSwingSpeedUpEnabled")).set(false);
-      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("leftFootSwingIsSpeedUpEnabled")).set(false);
-      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("rightFootSwingIsSpeedUpEnabled")).set(false);
+      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("controllerSwingSpeedUpEnabled")).set(false);
+      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("leftFootSwingIsSpeedUpEnabled")).set(false);
+      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("rightFootSwingIsSpeedUpEnabled")).set(false);
 
       FootstepDataMessage footstep = message.getFootstepDataList().add();
       footstep.setRobotSide(robotSide.toByte());
@@ -150,7 +150,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       touchdown.getLinearVelocity().set(0.0, 0.0, touchdownVelocity);
       touchdown.getAngularVelocity().setToZero();
 
-      YoVariable<?> desiredVelocity = drcSimulationTestHelper.getSimulationConstructionSet().getVariable("leftFootControlModule",
+      YoVariable desiredVelocity = drcSimulationTestHelper.getSimulationConstructionSet().findVariable("leftFootControlModule",
                                                                                                          "leftFootSwingDesiredSoleLinearVelocityInWorldZ");
 
       // Push the robot to trigger footstep adjustment.
@@ -296,8 +296,8 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       String typeName = sidePrefix + "FootSwing" + TrajectoryType.class.getSimpleName();
 
       @SuppressWarnings("unchecked")
-      YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) scs.getVariable(swingStateNamespace, typeName);
-      YoVariable<?> currentWaypointIndex = scs.getVariable(linearNamespace, currentIndexName);
+      YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) scs.findVariable(swingStateNamespace, typeName);
+      YoVariable currentWaypointIndex = scs.findVariable(linearNamespace, currentIndexName);
 
       assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(swingTime + transferTime));

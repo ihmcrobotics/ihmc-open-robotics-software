@@ -4,7 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.statistics.OnlineCovarianceCalculator;
 import us.ihmc.robotics.statistics.OnlineStandardDeviationCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -20,9 +20,9 @@ public class OnlineLeastSquaresRegression
 
    private final OnlineCovarianceCalculator covarianceCalculator;
 
-   public OnlineLeastSquaresRegression(String prefix, YoVariableRegistry parentRegistry)
+   public OnlineLeastSquaresRegression(String prefix, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       intercept = new YoDouble(prefix + "_Intercept", registry);
       slope = new YoDouble(prefix + "_Slope", registry);

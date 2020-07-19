@@ -11,11 +11,11 @@ import us.ihmc.simulationconstructionset.NewDataListener;
 import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class RobotSocketConnection implements RobotConnection, VariableChangedListener, DoDisconnectListener, RegistrySettingsChangedListener
+public class RobotSocketConnection implements RobotConnection, YoVariableChangedListener, DoDisconnectListener, RegistrySettingsChangedListener
 {
    private Socket ethernetConnection;
 
@@ -30,13 +30,13 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
 
    private GUISideCommandListener commandListener;
 
-   public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoVariableRegistry rootRegistry)
+   public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoRegistry rootRegistry)
    {
       this.host = host;
       this.commandListener = commandListener;
    }
 
-   public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoVariableRegistry rootRegistry,
+   public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoRegistry rootRegistry,
                                 List<NewDataListener> newDataListeners)
    {
       this(host, commandListener, rootRegistry);
@@ -44,7 +44,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
          this.addNewDataListeners(newDataListeners);
    }
 
-   public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoVariableRegistry rootRegistry, NewDataListener newDataListener)
+   public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoRegistry rootRegistry, NewDataListener newDataListener)
    {
       this(host, commandListener, rootRegistry);
       if (newDataListener != null)
@@ -216,7 +216,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       return commandListener.getRegistrySettingsProcessed();
    }
 
-   private void sendRegistrySettings(List<YoVariableRegistry> registriesToSendSettingsOf)
+   private void sendRegistrySettings(List<YoRegistry> registriesToSendSettingsOf)
    {
       registrySettingsIdentifier++;
 
@@ -225,8 +225,8 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
 //         commandListener.updateSendVars(); 
 //         commandListener.updateLogVarsCount();
          
-         LinkedHashMap<YoVariableRegistry, Integer> registryIndexMapSubset = new LinkedHashMap<YoVariableRegistry, Integer>();
-         for (YoVariableRegistry registry : registriesToSendSettingsOf)
+         LinkedHashMap<YoRegistry, Integer> registryIndexMapSubset = new LinkedHashMap<YoRegistry, Integer>();
+         for (YoRegistry registry : registriesToSendSettingsOf)
          {
             try
             {
@@ -305,7 +305,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
    }
 
    @Override
-   public void notifyOfVariableChange(YoVariable<?> variable)
+   public void changed(YoVariable variable)
    {
 //    System.out.println("commandListener.isConnected(): " + commandListener.isConnected());
 //    System.out.println("protocolListener: " + protocolListener);
@@ -317,7 +317,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
    }
 
    @Override
-   public void registrySettingsChanged(List<YoVariableRegistry> changedRegistries)
+   public void registrySettingsChanged(List<YoRegistry> changedRegistries)
    {
 //      sendRegistrySettings();
       if (commandListener.isConnected())

@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -38,7 +38,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
 
    private final ButterworthFilterType butterworthFilterType;
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, ButterworthFilterType butterworthFilterType)
+   public ButterworthFilteredYoVariable(String name, YoRegistry registry, double alpha, ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -54,7 +54,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, YoDouble positionVariable,
+   public ButterworthFilteredYoVariable(String name, YoRegistry registry, double alpha, YoDouble positionVariable,
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
@@ -71,7 +71,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, ButterworthFilterType butterworthFilterType)
+   public ButterworthFilteredYoVariable(String name, YoRegistry registry, YoDouble alphaVariable, ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -87,7 +87,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoVariableRegistry registry, YoDouble alphaVariable, YoDouble positionVariable,
+   public ButterworthFilteredYoVariable(String name, YoRegistry registry, YoDouble alphaVariable, YoDouble positionVariable,
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
@@ -180,7 +180,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
 
    public static void testButterWorth()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       double alpha = .99;
 
       ButterworthFilteredYoVariable butterworthFilteredYoVariable = new ButterworthFilteredYoVariable("test", registry, alpha, ButterworthFilterType.LOW_PASS);
@@ -256,7 +256,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
 
    private static double plotBodeForAlpha(double alpha, double deltaT)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
 
       ButterworthFilteredYoVariable butterworthFilteredYoVariable = new ButterworthFilteredYoVariable("test", registry, alpha, ButterworthFilterType.LOW_PASS);
 

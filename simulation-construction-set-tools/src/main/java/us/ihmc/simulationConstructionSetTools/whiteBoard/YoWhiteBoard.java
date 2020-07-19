@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.NameSpace;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -51,7 +51,7 @@ public abstract class YoWhiteBoard
            boolean[] booleanVariablesToWriteBuffer, int[] enumVariablesToWriteBuffer, int writeIndex)
            throws IOException;
 
-   public YoWhiteBoard(String name, YoVariableRegistry registry)
+   public YoWhiteBoard(String name, YoRegistry registry)
    {      
       this.name = name;
       this.variablesToReadHaveBeenSet = new YoBoolean(name + "VariablesToReadHaveBeenSet", registry);
@@ -261,62 +261,62 @@ public abstract class YoWhiteBoard
       yoWhiteBoardListeners.add(yoWhiteBoardListener);
    }
 
-   public void getAllVariablesToWrite(ArrayList<YoVariable<?>> allVariablesToWrite)
+   public void getAllVariablesToWrite(ArrayList<YoVariable> allVariablesToWrite)
    {
-      for (YoVariable<?> yoVariable : doubleVariablesToWrite)
+      for (YoVariable yoVariable : doubleVariablesToWrite)
       {
          allVariablesToWrite.add(yoVariable);
       }
 
-      for (YoVariable<?> yoVariable : intVariablesToWrite)
+      for (YoVariable yoVariable : intVariablesToWrite)
       {
          allVariablesToWrite.add(yoVariable);
       }
 
-      for (YoVariable<?> yoVariable : booleanVariablesToWrite)
+      for (YoVariable yoVariable : booleanVariablesToWrite)
       {
          allVariablesToWrite.add(yoVariable);
       }
 
-      for (YoVariable<?> yoVariable : enumVariablesToWrite)
+      for (YoVariable yoVariable : enumVariablesToWrite)
       {
          allVariablesToWrite.add(yoVariable);
       }
    }
 
-   public void getAllVariablesToRead(ArrayList<YoVariable<?>> allVariablesToRead)
+   public void getAllVariablesToRead(ArrayList<YoVariable> allVariablesToRead)
    {
-      for (YoVariable<?> yoVariable : doubleVariablesToRead)
+      for (YoVariable yoVariable : doubleVariablesToRead)
       {
          allVariablesToRead.add(yoVariable);
       }
 
-      for (YoVariable<?> yoVariable : intVariablesToRead)
+      for (YoVariable yoVariable : intVariablesToRead)
       {
          allVariablesToRead.add(yoVariable);
       }
 
-      for (YoVariable<?> yoVariable : booleanVariablesToRead)
+      for (YoVariable yoVariable : booleanVariablesToRead)
       {
          allVariablesToRead.add(yoVariable);
       }
 
-      for (YoVariable<?> yoVariable : enumVariablesToRead)
+      for (YoVariable yoVariable : enumVariablesToRead)
       {
          allVariablesToRead.add(yoVariable);
       }
    }
 
-   public void setVariablesToWrite(ArrayList<YoVariable<?>> variablesToWrite)
+   public void setVariablesToWrite(ArrayList<YoVariable> variablesToWrite)
    {
       ArrayList<YoDouble> doubleVariablesToWrite = new ArrayList<YoDouble>();
       ArrayList<YoInteger> intVariablesToWrite = new ArrayList<YoInteger>();
       ArrayList<YoBoolean> booleanVariablesToWrite = new ArrayList<YoBoolean>();
       ArrayList<YoEnum<?>> enumVariablesToWrite = new ArrayList<YoEnum<?>>();
 
-      for (YoVariable<?> variableToWrite : variablesToWrite)
+      for (YoVariable variableToWrite : variablesToWrite)
       {
-         YoVariableType yoVariableType = variableToWrite.getYoVariableType();
+         YoVariableType yoVariableType = variableToWrite.getType();
 
          switch (yoVariableType)
          {
@@ -376,16 +376,16 @@ public abstract class YoWhiteBoard
       variablesToWriteHaveBeenSet.set(true);
    }
 
-   public void setVariablesToRead(ArrayList<YoVariable<?>> variablesToRead)
+   public void setVariablesToRead(ArrayList<YoVariable> variablesToRead)
    {
       ArrayList<YoDouble> doubleVariablesToRead = new ArrayList<YoDouble>();
       ArrayList<YoInteger> intVariablesToRead = new ArrayList<YoInteger>();
       ArrayList<YoBoolean> booleanVariablesToRead = new ArrayList<YoBoolean>();
       ArrayList<YoEnum<?>> enumVariablesToRead = new ArrayList<YoEnum<?>>();
 
-      for (YoVariable<?> variableToRead : variablesToRead)
+      for (YoVariable variableToRead : variablesToRead)
       {
-         YoVariableType yoVariableType = variableToRead.getYoVariableType();
+         YoVariableType yoVariableType = variableToRead.getType();
 
          switch (yoVariableType)
          {
@@ -440,8 +440,8 @@ public abstract class YoWhiteBoard
 
    protected void verifyNamesAreConsistent(String fullNameSpaceOne, String fullNameSpaceTwo)
    {
-      final String variableNameOne = NameSpace.stripOffNameSpaceToGetVariableName(fullNameSpaceOne);
-      final String variableNameTwo = NameSpace.stripOffNameSpaceToGetVariableName(fullNameSpaceTwo);
+      final String variableNameOne = new NameSpace(fullNameSpaceOne).getShortName();
+      final String variableNameTwo = new NameSpace(fullNameSpaceTwo).getShortName();
       if (!variableNameOne.equals(variableNameTwo))
       {
          throw new RuntimeException("Variable names are not the same. variableNameOne = \'" + variableNameOne + "\', variableNameTwo = \'" + variableNameTwo

@@ -124,7 +124,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
-      YoVariable<?> numberOfStepsInController = drcSimulationTestHelper.getSimulationConstructionSet().getVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
+      YoVariable numberOfStepsInController = drcSimulationTestHelper.getSimulationConstructionSet().findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
 
       double timeBetweenSendingMessages = nominalTransferTime / messages.size();

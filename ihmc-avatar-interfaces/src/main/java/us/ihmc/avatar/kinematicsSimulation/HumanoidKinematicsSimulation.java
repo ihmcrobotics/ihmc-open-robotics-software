@@ -60,7 +60,7 @@ import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -88,7 +88,7 @@ public class HumanoidKinematicsSimulation
            = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), ExceptionHandlingThreadScheduler.DEFAULT_HANDLER, 5);
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private double yoVariableServerTime = 0.0;
    private ScheduledFuture<?> yoVariableServerScheduled;
@@ -141,11 +141,11 @@ public class HumanoidKinematicsSimulation
 
       // Create registries to match controller so the XML gets loaded properly.
       yoTime = new YoDouble("timeInPreview", registry);
-      YoVariableRegistry drcControllerThreadRegistry = new YoVariableRegistry("DRCControllerThread");
-      YoVariableRegistry drcMomentumBasedControllerRegistry = new YoVariableRegistry("DRCMomentumBasedController");
-      YoVariableRegistry humanoidHighLevelControllerManagerRegistry = new YoVariableRegistry("HumanoidHighLevelControllerManager");
-      YoVariableRegistry managerParentRegistry = new YoVariableRegistry("HighLevelHumanoidControllerFactory");
-      YoVariableRegistry walkingParentRegistry = new YoVariableRegistry("WalkingControllerState");
+      YoRegistry drcControllerThreadRegistry = new YoRegistry("DRCControllerThread");
+      YoRegistry drcMomentumBasedControllerRegistry = new YoRegistry("DRCMomentumBasedController");
+      YoRegistry humanoidHighLevelControllerManagerRegistry = new YoRegistry("HumanoidHighLevelControllerManager");
+      YoRegistry managerParentRegistry = new YoRegistry("HighLevelHumanoidControllerFactory");
+      YoRegistry walkingParentRegistry = new YoRegistry("WalkingControllerState");
       registry.addChild(drcControllerThreadRegistry);
       drcControllerThreadRegistry.addChild(drcMomentumBasedControllerRegistry);
       drcMomentumBasedControllerRegistry.addChild(humanoidHighLevelControllerManagerRegistry);
@@ -288,7 +288,7 @@ public class HumanoidKinematicsSimulation
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
 
-      YoVariable<?> defaultHeight = registry.getVariable(PelvisHeightControlState.class.getSimpleName(),
+      YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
                                                          PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
       if (Double.isNaN(defaultHeight.getValueAsDouble()))
       {

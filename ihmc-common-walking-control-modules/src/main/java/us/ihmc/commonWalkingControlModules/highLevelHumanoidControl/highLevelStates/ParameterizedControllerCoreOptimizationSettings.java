@@ -4,17 +4,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterizedControllerCoreOptimizationSettings
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(ControllerCoreOptimizationSettings.class.getSimpleName());
+   private final YoRegistry registry = new YoRegistry(ControllerCoreOptimizationSettings.class.getSimpleName());
 
    private final DoubleProvider rhoMin;
 
    private final InverseDynamicsOptimizationSettingsCommand command = new InverseDynamicsOptimizationSettingsCommand();
 
-   public ParameterizedControllerCoreOptimizationSettings(ControllerCoreOptimizationSettings defaultOptimizationSettings, YoVariableRegistry parentRegistry)
+   public ParameterizedControllerCoreOptimizationSettings(ControllerCoreOptimizationSettings defaultOptimizationSettings, YoRegistry parentRegistry)
    {
       rhoMin = new DoubleParameter("RhoMin", registry, defaultOptimizationSettings.getRhoMin());
       parentRegistry.addChild(registry);

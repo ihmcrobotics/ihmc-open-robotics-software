@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -16,7 +16,7 @@ public class YoTrajectory
    private YoDouble tFinal;
    private double[] coefficients;
 
-   public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoTrajectory(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       this.name = name;
       tInitial = new YoDouble(name + "t0", registry);

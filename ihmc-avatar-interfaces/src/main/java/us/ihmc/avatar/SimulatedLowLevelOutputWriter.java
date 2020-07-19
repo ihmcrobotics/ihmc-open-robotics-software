@@ -9,7 +9,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
 {
@@ -88,7 +88,7 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return null;
    }

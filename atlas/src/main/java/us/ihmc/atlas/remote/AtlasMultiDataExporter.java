@@ -550,7 +550,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
          DataBuffer dataBuffer = exportData.scs.getDataBuffer();
 
-         List<YoVariable<?>> varsYo = exportData.scs.getVars(vars, new String[0]);
+         List<YoVariable> varsYo = exportData.scs.getVars(vars, new String[0]);
          writeSpreadsheetFormattedData(chosenFile, dataBuffer, varsYo, timeVariable);
       }
 
@@ -596,7 +596,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       }
 
-      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, List<? extends YoVariable<?>> vars, String timeVariable)
+      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, List<? extends YoVariable> vars, String timeVariable)
       {
          List<DataBufferEntry> entries = dataBuffer.getEntries();
 
@@ -614,7 +614,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
             for (int i = 0; i < entries.size(); i++)
             {
                DataBufferEntry entry = entries.get(i);
-               YoVariable<?> variable = entry.getVariable();
+               YoVariable variable = entry.getVariable();
                entry.getData();
 
                if (vars.contains(variable))

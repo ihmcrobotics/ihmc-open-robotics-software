@@ -24,7 +24,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MotionQPInputCalculatorTest
 {
@@ -55,7 +55,7 @@ public class MotionQPInputCalculatorTest
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, ReferenceFrame.getWorldFrame());
       spatialAccelerationCalculator.setGravitionalAcceleration(-0.0);
       JointIndexHandler jointIndexHandler = new JointIndexHandler(joints);
-      YoVariableRegistry registry = new YoVariableRegistry("dummyRegistry");
+      YoRegistry registry = new YoRegistry("dummyRegistry");
       CentroidalMomentumRateCalculator centroidalMomentumHandler = new CentroidalMomentumRateCalculator(rootBody, centerOfMassFrame);
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, jointIndexHandler, null, registry);
 

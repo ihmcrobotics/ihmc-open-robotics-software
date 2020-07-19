@@ -38,7 +38,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -46,7 +46,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean isEnabled;
 
@@ -120,7 +120,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final boolean computeIntegralTerm;
 
    public OrientationFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
@@ -143,7 +143,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
-      registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
+      registry = new YoRegistry(endEffectorName + "OrientationFBController");
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getOrientationGains(endEffector, computeIntegralTerm);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();

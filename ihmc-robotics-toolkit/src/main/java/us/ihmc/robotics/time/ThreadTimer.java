@@ -1,7 +1,7 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -30,7 +30,7 @@ public class ThreadTimer
     * @param expectedDt of the periodic execution for Jitter estimation in seconds
     * @param registry to attach timing variables to
     */
-   public ThreadTimer(String name, double expectedDt, YoVariableRegistry registry)
+   public ThreadTimer(String name, double expectedDt, YoRegistry registry)
    {
       expectedDTNanos = Conversions.secondsToNanoseconds(expectedDt);
 
@@ -50,7 +50,7 @@ public class ThreadTimer
     * @param name prefix for the timing variables in the registry
     * @param registry to attach timing variables to
     */
-   public ThreadTimer(String name, YoVariableRegistry registry)
+   public ThreadTimer(String name, YoRegistry registry)
    {
       expectedDTNanos = 0;
       jitter = null;

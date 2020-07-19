@@ -23,13 +23,13 @@ import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JavaFXHeatmapVisualizer
 {
    private JavaFXHeatmapGraph heatmapGraph;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private SelectedVariableHolder selectedVariableHolder;
    private GraphIndicesHolder graphIndicesHolder;
    private DataBuffer dataBuffer;
@@ -40,7 +40,7 @@ public class JavaFXHeatmapVisualizer
    {
       int dataBufferSize = 20000;
 
-      registry = new YoVariableRegistry("root");
+      registry = new YoRegistry("root");
 
       YoDouble yoTime = new YoDouble("t", registry);
       x = new YoDouble("qd_LEFT_KNEE_PITCH", registry);

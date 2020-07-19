@@ -22,12 +22,12 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class JointTorqueBasedWrenchSensorDriftEstimator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<ForceSensorDefinition> forceSensorDefinitions;
    private final Map<ForceSensorDefinition, WrenchSensorDriftInfo> wrenchSensorDrifInfoMap = new HashMap<>();
@@ -40,7 +40,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
 
    public JointTorqueBasedWrenchSensorDriftEstimator(FloatingJointBasics rootJoint, double updateDT, RobotMotionStatusHolder robotMotionStatusHolder,
                                                      Collection<ForceSensorDefinition> forceSensorDefinitions,
-                                                     ForceSensorDataHolderReadOnly forceSensorDataHolder, YoVariableRegistry parentRegistry)
+                                                     ForceSensorDataHolderReadOnly forceSensorDataHolder, YoRegistry parentRegistry)
    {
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.forceSensorDefinitions = new ArrayList<>(forceSensorDefinitions);
@@ -117,7 +117,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
 
       public WrenchSensorDriftInfo(FloatingJointBasics rootJoint, double updateDT, ForceSensorDefinition forceSensorDefinition,
                                    ForceSensorDataReadOnly forceSensorData, DoubleProvider alphaProvider, DoubleProvider minJacobianDeterminant,
-                                   YoVariableRegistry registry)
+                                   YoRegistry registry)
       {
          this.updateDT = updateDT;
          this.forceSensorData = forceSensorData;

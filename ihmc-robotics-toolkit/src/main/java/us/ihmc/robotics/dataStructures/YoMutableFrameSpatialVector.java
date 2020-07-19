@@ -3,13 +3,13 @@ package us.ihmc.robotics.dataStructures;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.util.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameObject;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameObject;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 /**
  * TODO: this should probably live in mecano?
@@ -27,7 +27,7 @@ public class YoMutableFrameSpatialVector extends YoMutableFrameObject implements
       checkFrameConsistency();
    }
 
-   public YoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       super(namePrefix, nameSuffix, registry);
 

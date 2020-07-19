@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 
@@ -251,7 +251,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    {
    }
 
-   public void allowTopJointAngleOffset(String string, double topJointOffset, YoVariableRegistry parentRegistry)
+   public void allowTopJointAngleOffset(String string, double topJointOffset, YoRegistry parentRegistry)
    {
       pitchAngleOffset = new YoDouble(string + "pitchAngleOffset", parentRegistry);
       pitchAngleOffset.set(topJointOffset);

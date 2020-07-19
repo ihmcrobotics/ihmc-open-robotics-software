@@ -36,11 +36,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -60,7 +60,7 @@ public class FiducialDetectorFromCameraImages
 
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private FiducialDetector<GrayF32> detector;
    private Object expectedFiducialSizeChangedConch = new Object();
 
@@ -91,7 +91,7 @@ public class FiducialDetectorFromCameraImages
    private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(),
                                                                                     registry);
 
-   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry,
+   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoRegistry parentRegistry,
                                            YoGraphicsListRegistry yoGraphicsListRegistry, String prefix)
    {
       this.expectedFiducialSize.set(1.0);
@@ -99,10 +99,10 @@ public class FiducialDetectorFromCameraImages
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
                                               ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
 
-      expectedFiducialSize.addVariableChangedListener(new VariableChangedListener()
+      expectedFiducialSize.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             synchronized (expectedFiducialSizeChangedConch)
             {

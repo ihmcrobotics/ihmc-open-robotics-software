@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
@@ -44,7 +44,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends YoDouble
 	private final double alpha;
 	private final YoDouble alphaVariable;
 
-	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, YoDouble time, YoVariableRegistry registry)
+	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, YoDouble time, YoRegistry registry)
 	{
 		super(name, description, registry);
 		
@@ -67,7 +67,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends YoDouble
 	}
 
 	public FilteredDiscreteVelocityYoVariable3(String name, String description, double alpha, YoDouble positionVariable, YoDouble time,
-			YoVariableRegistry registry)
+			YoRegistry registry)
 	{
 		super(name, description, registry);
 
@@ -90,7 +90,7 @@ public class FilteredDiscreteVelocityYoVariable3 extends YoDouble
 	}
 
 	public FilteredDiscreteVelocityYoVariable3(String name, String description, YoDouble alphaVariable, YoDouble positionVariable,
-			YoDouble time, YoVariableRegistry registry)
+			YoDouble time, YoRegistry registry)
 	{
 		super(name, description, registry);
 

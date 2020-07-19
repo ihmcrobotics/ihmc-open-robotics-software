@@ -6,20 +6,20 @@ import java.util.concurrent.ScheduledFuture;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class ToolboxController
 {
    protected static final boolean DEBUG = false;
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    protected final StatusMessageOutputManager statusOutputManager;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
    private ScheduledFuture<?> futureToListenTo;
 
-   public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+   public ToolboxController(StatusMessageOutputManager statusOutputManager, YoRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
       parentRegistry.addChild(registry);

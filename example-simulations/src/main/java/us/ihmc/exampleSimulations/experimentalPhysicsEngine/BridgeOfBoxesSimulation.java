@@ -24,8 +24,8 @@ import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BridgeOfBoxesSimulation
 {
@@ -61,7 +61,7 @@ public class BridgeOfBoxesSimulation
          return new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), bridgeSize.getX(), bridgeSize.getY(), bridgeSize.getZ()));
       });
 
-      YoVariableRegistry registry = new YoVariableRegistry("controllerInputs");
+      YoRegistry registry = new YoRegistry("controllerInputs");
 
       SideDependentList<YoFramePoseUsingYawPitchRoll> desiredSupportPoses = new SideDependentList<>(robotSide ->
       {

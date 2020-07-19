@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
@@ -15,17 +18,20 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class BetterLookAheadCoMHeightTrajectoryGenerator
 {
@@ -34,7 +40,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private boolean visualize = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean initializeToCurrent = new YoBoolean("initializeCoMHeightToCurrent", registry);
    private final BooleanProvider processGoHome = new BooleanParameter("ProcessGoHome", registry, false);
@@ -93,7 +99,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                       SideDependentList<? extends ReferenceFrame> soleFrames,
                                                       DoubleProvider yoTime,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                      YoVariableRegistry parentRegistry)
+                                                      YoRegistry parentRegistry)
    {
       this(minimumHeightAboveGround,
            nominalHeightAboveGround,
@@ -118,7 +124,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                       SideDependentList<? extends ReferenceFrame> soleFrames,
                                                       DoubleProvider yoTime,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                      YoVariableRegistry parentRegistry)
+                                                      YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.soleFrames = soleFrames;

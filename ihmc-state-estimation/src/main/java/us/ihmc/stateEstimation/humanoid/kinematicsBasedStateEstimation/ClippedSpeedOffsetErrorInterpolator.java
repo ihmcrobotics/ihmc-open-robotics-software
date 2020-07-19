@@ -15,13 +15,13 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ClippedSpeedOffsetErrorInterpolator
@@ -30,7 +30,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private final YoBoolean isRotationCorrectionEnabled;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean hasBeenCalled;
 
@@ -138,14 +138,14 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFrameYawPitchRoll yoGoalOffsetFrameOrientation_Rotation;
    private final YoFrameYawPitchRoll yoInterpolatedOffsetFrameOrientation_Rotation;
 
-   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt)
+   public ClippedSpeedOffsetErrorInterpolator(YoRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt)
    {
       this(parentRegistry, referenceFrame, estimator_dt, new ClippedSpeedOffsetErrorInterpolatorParameters());
    }
 
-   public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt, ClippedSpeedOffsetErrorInterpolatorParameters parameters)
+   public ClippedSpeedOffsetErrorInterpolator(YoRegistry parentRegistry, ReferenceFrame referenceFrame, double estimator_dt, ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
-      this.registry = new YoVariableRegistry(getClass().getSimpleName());
+      this.registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.alphaFilterBreakFrequency = new YoDouble("alphaFilterBreakFrequency", registry);
@@ -222,10 +222,10 @@ public class ClippedSpeedOffsetErrorInterpolator
                                                                               startOffsetErrorReferenceFrame_Rotation,
                                                                               registry);
 
-      this.alphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
+      this.alphaFilterBreakFrequency.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(alphaFilterBreakFrequency.getValue(), dt.getValue()));
          }

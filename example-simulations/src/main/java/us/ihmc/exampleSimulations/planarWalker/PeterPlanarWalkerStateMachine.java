@@ -9,7 +9,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,7 +25,7 @@ public class PeterPlanarWalkerStateMachine
    private double deltaT;
 
    private PeterPlanarWalkerRobot robot;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private SideDependentList<PIDController> kneeControllers = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> hipControllers = new SideDependentList<PIDController>();
 
@@ -60,13 +60,13 @@ public class PeterPlanarWalkerStateMachine
    private final YoDouble timestamp;
 
    public PeterPlanarWalkerStateMachine(PeterPlanarWalkerRobot robot, double deltaT, RobotSide robotSide, YoDouble timestamp,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       String prefix = robotSide.getLowerCaseName();
       this.robot = robot;
       this.deltaT = deltaT;
       this.timestamp = timestamp;
-      this.registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(prefix + getClass().getSimpleName());
       this.desiredPitch = new YoDouble("desiredPitch", registry);
       this.desiredHeight = new YoDouble("desiredHeight", registry);
       this.swingTime = new YoDouble("swingTime", registry);

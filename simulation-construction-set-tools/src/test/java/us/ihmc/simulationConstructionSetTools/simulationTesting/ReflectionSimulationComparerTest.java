@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -160,7 +160,7 @@ public class ReflectionSimulationComparerTest
    
    private class RewindableOrNotRewindableController implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry("RewindableObject");
+      private final YoRegistry registry = new YoRegistry("RewindableObject");
       
       private final YoInteger counter = new YoInteger("counter", registry);
       private int counter2;
@@ -178,7 +178,7 @@ public class ReflectionSimulationComparerTest
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

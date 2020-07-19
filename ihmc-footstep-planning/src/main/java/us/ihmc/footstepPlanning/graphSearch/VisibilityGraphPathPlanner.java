@@ -20,7 +20,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcesso
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class VisibilityGraphPathPlanner
 
    public VisibilityGraphPathPlanner(VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      BodyPathPostProcessor pathPostProcessor,
-                                     YoVariableRegistry parentRegistry)
+                                     YoRegistry parentRegistry)
    {
       this("", visibilityGraphsParameters, pathPostProcessor, parentRegistry);
    }
@@ -53,7 +53,7 @@ public class VisibilityGraphPathPlanner
    public VisibilityGraphPathPlanner(String prefix,
                                      VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      BodyPathPostProcessor postProcessor,
-                                     YoVariableRegistry parentRegistry)
+                                     YoRegistry parentRegistry)
    {
       yoResult = new YoEnum<>(prefix + "PathPlanningResult", parentRegistry, BodyPathPlanningResult.class);
       this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);

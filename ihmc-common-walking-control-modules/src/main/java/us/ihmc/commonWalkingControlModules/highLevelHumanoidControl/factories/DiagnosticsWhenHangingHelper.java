@@ -17,10 +17,10 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class DiagnosticsWhenHangingHelper
 {
@@ -44,13 +44,13 @@ public class DiagnosticsWhenHangingHelper
 
    private final YoDouble torqueCorrectionAlpha;
 
-   public DiagnosticsWhenHangingHelper(OneDoFJointBasics parentJoint, boolean preserveY, YoVariableRegistry registry)
+   public DiagnosticsWhenHangingHelper(OneDoFJointBasics parentJoint, boolean preserveY, YoRegistry registry)
    {
       this(parentJoint, preserveY, false, null, registry);
    }
 
    public DiagnosticsWhenHangingHelper(OneDoFJointBasics parentJoint, boolean preserveY, boolean isSpineJoint,
-         SideDependentList<JointBasics> topLegJointsIfSpine, YoVariableRegistry registry)
+         SideDependentList<JointBasics> topLegJointsIfSpine, YoRegistry registry)
    {
       this.parentJoint = parentJoint;
       this.isSpineJoint = isSpineJoint;

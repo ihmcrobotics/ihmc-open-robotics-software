@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.functionGenerator;
 import java.util.Random;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class YoRandomPulseGenerator
 {
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    private YoDouble time;
 
@@ -31,14 +31,14 @@ public class YoRandomPulseGenerator
 
    private final Random random = new Random();//(1776L);
 
-   public YoRandomPulseGenerator(String name, YoVariableRegistry parentRegistry)
+   public YoRandomPulseGenerator(String name, YoRegistry parentRegistry)
    {
       this(name, null, parentRegistry);
    }
 
-   public YoRandomPulseGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry)
+   public YoRandomPulseGenerator(String name, YoDouble time, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(name + "YoPulseGen");
+      registry = new YoRegistry(name + "YoPulseGen");
 
       percentChancePerSecond = new YoDouble(name + "PercentChancePerSecond", registry);
       amplitudeMax = new YoDouble(name + "AmplitudeMax", registry);

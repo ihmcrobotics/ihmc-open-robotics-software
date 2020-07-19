@@ -11,8 +11,8 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Transmitter;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.ExitActionListener;
@@ -22,9 +22,9 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 {
    private static final boolean printInfo = false;
 
-   private YoVariable<?>[] variables = new YoVariable[16];
+   private YoVariable[] variables = new YoVariable[16];
    private String[] names = new String[16];
-   private YoVariableRegistry holder = null;
+   private YoRegistry holder = null;
 
    private double[] minVals = new double[16];
    private double[] maxVals = new double[16];
@@ -190,12 +190,12 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
    }
 
-   public void setChannel(int channel, String name, YoVariableRegistry holder, double min, double max)
+   public void setChannel(int channel, String name, YoRegistry holder, double min, double max)
    {
       setChannel(channel, name, holder, min, max, 1.0);
    }
 
-   public void setChannel(int channel, String name, YoVariableRegistry holder, double min, double max, double exponent)
+   public void setChannel(int channel, String name, YoRegistry holder, double min, double max, double exponent)
    {
       if ((channel < 1) || (channel > 16))
       {
@@ -206,7 +206,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
       this.holder = holder;
 
-      variables[channel - 1] = holder.getVariable(name);
+      variables[channel - 1] = holder.findVariable(name);
       names[channel - 1] = name;
 
       minVals[channel - 1] = min;
@@ -353,11 +353,11 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
    public void sliderSlid(int channel, int sliderVal)
    {
-	   YoVariable<?> variable = variables[channel];
+	   YoVariable variable = variables[channel];
       if (variable == null)
       {
          if (holder != null)
-            variables[channel] = variable = holder.getVariable(names[channel]);
+            variables[channel] = variable = holder.findVariable(names[channel]);
          if (variable == null)
             return;
       }
@@ -381,8 +381,8 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
       for (int i = 0; i < variableChangedListeners.size(); i++)
       {
-         VariableChangedListener listener = variableChangedListeners.get(i);
-         listener.notifyOfVariableChange(variable);
+         YoVariableChangedListener listener = variableChangedListeners.get(i);
+         listener.changed(variable);
       }
 
    }
@@ -394,9 +394,9 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
    }
 
 
-   private ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
+   private ArrayList<YoVariableChangedListener> variableChangedListeners = new ArrayList<YoVariableChangedListener>();
 
-   public void attachVariableChangedListener(VariableChangedListener listener)
+   public void attachVariableChangedListener(YoVariableChangedListener listener)
    {
       variableChangedListeners.add(listener);
    }

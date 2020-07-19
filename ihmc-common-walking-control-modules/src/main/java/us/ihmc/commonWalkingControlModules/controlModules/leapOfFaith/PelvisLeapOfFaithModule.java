@@ -1,32 +1,29 @@
 package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class PelvisLeapOfFaithModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String yoNamePrefix = "leapOfFaith";
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoFrameYawPitchRoll orientationOffset = new YoFrameYawPitchRoll(yoNamePrefix + "PelvisOrientationOffset", worldFrame, registry);
 
@@ -58,7 +55,7 @@ public class PelvisLeapOfFaithModule
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public PelvisLeapOfFaithModule(SideDependentList<? extends ReferenceFrame> soleZUpFrames, LeapOfFaithParameters parameters,
-                                  YoVariableRegistry parentRegistry)
+                                  YoRegistry parentRegistry)
    {
       this.soleZUpFrames = soleZUpFrames;
 

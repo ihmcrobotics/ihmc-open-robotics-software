@@ -3,19 +3,19 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class StepConstraintRegionHandler
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean hasNewConstraintRegion = new YoBoolean("hasNewConstraintRegion", registry);
    private final StepConstraintRegion stepConstraintRegion = new StepConstraintRegion();
 
    private final YoBoolean waitingOnNewConstraintRegion = new YoBoolean("waitingOnNewConstraintRegion", registry);
 
-   public StepConstraintRegionHandler(YoVariableRegistry parentRegistry)
+   public StepConstraintRegionHandler(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

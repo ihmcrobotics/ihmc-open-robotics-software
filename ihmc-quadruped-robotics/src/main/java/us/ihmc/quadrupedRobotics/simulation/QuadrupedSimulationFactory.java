@@ -69,7 +69,7 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedSimulationFactory
 {
@@ -117,7 +117,7 @@ public class QuadrupedSimulationFactory
 
 
    // TO CONSTRUCT
-   private YoVariableRegistry factoryRegistry;
+   private YoRegistry factoryRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
@@ -141,7 +141,7 @@ public class QuadrupedSimulationFactory
 
    private void setupYoRegistries()
    {
-      factoryRegistry = new YoVariableRegistry("factoryRegistry");
+      factoryRegistry = new YoRegistry("factoryRegistry");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
    }
@@ -273,7 +273,7 @@ public class QuadrupedSimulationFactory
                                                                                                                                                 () -> simulationRobot.getRootJoint()
                                                                                                                                                                      .getJointTransform3D());
          controllerManager.registerHighLevelStateChangedListener(reinilizator);
-         factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
+         factoryRegistry.addChild(stateEstimator.getYoRegistry());
       }
       else
       {
@@ -299,7 +299,7 @@ public class QuadrupedSimulationFactory
       robotMotionStatusFromController = new RobotMotionStatusHolder();
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
-                                                                                       sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
+                                                                                       sdfRobot.get().getRobotsYoRegistry(), yoGraphicsListRegistry,
                                                                                        contactableFeet, contactablePlaneBodies, centerOfMassDataHolder,
                                                                                        controllerFootSwitches, stateEstimatorFootSwitches, gravity.get(),
                                                                                        highLevelControllerParameters.get(), dcmPlannerParameters.get(),
@@ -368,7 +368,7 @@ public class QuadrupedSimulationFactory
          groundProfile3D = providedGroundProfile3D.get();
       }
 
-      groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoVariableRegistry());
+      groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoRegistry());
       groundContactModel.setZStiffness(groundContactParameters.get().getZStiffness());
       groundContactModel.setZDamping(groundContactParameters.get().getZDamping());
       groundContactModel.setXYStiffness(groundContactParameters.get().getXYStiffness());
@@ -380,7 +380,7 @@ public class QuadrupedSimulationFactory
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager, stateEstimator,
                                                                robotConfigurationDataPublisher, yoVariableServer);
-      simulationController.getYoVariableRegistry().addChild(factoryRegistry);
+      simulationController.getYoRegistry().addChild(factoryRegistry);
    }
 
    private void setupSDFRobot()
@@ -535,8 +535,8 @@ public class QuadrupedSimulationFactory
       }
 
       InputStream parameterFile = modelFactory.get().getParameterInputStream();
-      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry(), true);
-      scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoRegistry(), true);
+      scs.setParameterRootPath(simulationController.getYoRegistry().getParent());
 
       if (yoVariableServer != null)
       {

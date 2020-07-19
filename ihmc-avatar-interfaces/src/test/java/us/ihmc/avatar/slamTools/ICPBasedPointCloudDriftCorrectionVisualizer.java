@@ -33,13 +33,13 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPBasedPointCloudDriftCorrectionVisualizer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double trajectoryTime = 100.0;
    private final double dt = 1.0;
@@ -108,7 +108,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       Robot robot = new Robot("dummy");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setDT(dt, recordFrequency);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       Graphics3DObject linkGraphics = new Graphics3DObject();

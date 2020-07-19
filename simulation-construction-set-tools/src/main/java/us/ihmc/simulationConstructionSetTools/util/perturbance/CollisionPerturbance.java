@@ -1,20 +1,20 @@
 package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class CollisionPerturbance implements DirectedPerturbance
 {
    private final String name = "CollisionPerturbance";
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final Collidable collidable;
    private final double ballVelocityMagnitude;
    private final YoDouble disturbanceEnergy = new YoDouble("disturbanceEnergy", registry);
    private final YoDouble coefficientOfRestitution = new YoDouble("coefficientOfRestitution", registry);
 
-   public CollisionPerturbance(Collidable collidable, double ballVelocity, double disturbanceEnergy, double coefficientOfRestitution, YoVariableRegistry parentRegistry)
+   public CollisionPerturbance(Collidable collidable, double ballVelocity, double disturbanceEnergy, double coefficientOfRestitution, YoRegistry parentRegistry)
    {
       this.collidable = collidable;
       this.ballVelocityMagnitude = ballVelocity;

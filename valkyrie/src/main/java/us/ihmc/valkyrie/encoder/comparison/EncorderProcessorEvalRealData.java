@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.encoder.comparison;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class EncorderProcessorEvalRealData
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
@@ -39,7 +39,7 @@ public class EncorderProcessorEvalRealData
    public EncorderProcessorEvalRealData() throws IOException
    {
       Robot nullRobot = new Robot("nullRobot");
-      registry = nullRobot.getRobotsYoVariableRegistry();
+      registry = nullRobot.getRobotsYoRegistry();
       rawTicks = new YoInteger("rawTicks", registry);
       rawPosition = new YoDouble("rawPosition", registry);
       heartBeat = new YoInteger("turboHeartBeat", registry);

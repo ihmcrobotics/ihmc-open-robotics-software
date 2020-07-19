@@ -1,16 +1,11 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
-import static us.ihmc.communication.packets.Packet.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.trajectories.YoFourPointCubicSpline1D;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -24,29 +19,21 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.StringStretcher2d;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * TODO There is not enough HumanoidReferenceFrames in that class, it is pretty fragile
@@ -60,7 +47,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private boolean visualize = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFourPointCubicSpline1D spline = new YoFourPointCubicSpline1D("height", registry);
 
    private final YoBoolean hasBeenInitializedWithNextStep = new YoBoolean("hasBeenInitializedWithNextStep", registry);
@@ -111,7 +98,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                                 double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame,
                                                 ReferenceFrame pelvisFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
                                                 SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, DoubleProvider yoTime,
-                                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                                YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
       this.centerOfMassFrame = centerOfMassFrame;

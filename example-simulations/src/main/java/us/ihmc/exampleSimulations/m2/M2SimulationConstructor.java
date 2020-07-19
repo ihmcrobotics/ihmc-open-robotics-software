@@ -4,7 +4,7 @@ package us.ihmc.exampleSimulations.m2;
 import us.ihmc.exampleSimulations.m2.Output.PerfectProcessedOutputs;
 import us.ihmc.exampleSimulations.m2.Sensors.PerfectSensorProcessing;
 import us.ihmc.exampleSimulations.m2.Sensors.ProcessedSensors;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Simulation;
@@ -32,7 +32,7 @@ public class M2SimulationConstructor implements SimulationConstructor, Simulatio
       M2Parameters m2Parameters = new LittleM2Parameters();
       M2Robot m2 = new M2Robot(m2Parameters);
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       GroundContactModel linearGroundModel = new LinearGroundContactModel(m2, 40000.0, 100.0, 40.0, 500.0, registry );
 
       // HurosotGroundProfile profile = new HurosotGroundProfile(30.0, 1.5);
@@ -58,7 +58,7 @@ public class M2SimulationConstructor implements SimulationConstructor, Simulatio
 
       m2Sim.setSimulateDoneCriterion(this);
 
-      t = (YoDouble) m2Sim.getVariable("t");
+      t = (YoDouble) m2Sim.findVariable("t");
 
       return m2Sim;
    }

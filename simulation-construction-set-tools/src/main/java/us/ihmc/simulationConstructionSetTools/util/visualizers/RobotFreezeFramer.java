@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.visualizers;
 
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Joint;
@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class RobotFreezeFramer implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("RobotFreezeFramer");
+   private final YoRegistry registry = new YoRegistry("RobotFreezeFramer");
    private final YoBoolean doFreezeFrame = new YoBoolean("doFreezeFrame", registry);
    private final YoDouble freezeInterval = new YoDouble("freezeInterval", registry);
    private final YoDouble nextFreezeTime = new YoDouble("nextFreezeTime", registry);
@@ -76,7 +76,7 @@ public class RobotFreezeFramer implements RobotController
 
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

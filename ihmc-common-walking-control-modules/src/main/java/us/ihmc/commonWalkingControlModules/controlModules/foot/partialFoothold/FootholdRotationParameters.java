@@ -6,7 +6,7 @@ import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FootholdRotationParameters
 {
@@ -42,7 +42,7 @@ public class FootholdRotationParameters
    private final BooleanParameter doPartialFootholdDetection;
    private final BooleanParameter applyPartialFootholds;
 
-   public FootholdRotationParameters(YoVariableRegistry registry)
+   public FootholdRotationParameters(YoRegistry registry)
    {
       String namePrefix = "Geometric_";
       geometricDetectionAngleThreshold = new DoubleParameter(namePrefix + "AngleThreshold", registry, Math.toRadians(10.0));

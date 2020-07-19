@@ -4,9 +4,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public abstract class AvatarTestYoVariables
 {
@@ -34,39 +34,39 @@ public abstract class AvatarTestYoVariables
 
    public AvatarTestYoVariables(SimulationConstructionSet scs)
    {
-      yoTime = (YoDouble) scs.getVariable("t");
+      yoTime = (YoDouble) scs.findVariable("t");
 
-      pelvisX = (YoDouble) scs.getVariable("q_x");
-      pelvisY = (YoDouble) scs.getVariable("q_y");
-      pelvisZ = (YoDouble) scs.getVariable("q_z");
-      pelvisYaw = (YoDouble) scs.getVariable("q_yaw");
+      pelvisX = (YoDouble) scs.findVariable("q_x");
+      pelvisY = (YoDouble) scs.findVariable("q_y");
+      pelvisZ = (YoDouble) scs.findVariable("q_z");
+      pelvisYaw = (YoDouble) scs.findVariable("q_yaw");
 
-      midFeetZUpZ = (YoDouble) scs.getVariable("midFeetZUpZ");
+      midFeetZUpZ = (YoDouble) scs.findVariable("midFeetZUpZ");
 
-      if (scs.getVariable("desiredCOMHeight") == null)
+      if (scs.findVariable("desiredCOMHeight") == null)
       {
          // We might be controlling the desired pelvis height in this case.
-         desiredCOMHeight = (YoDouble) scs.getVariable("pelvisDesiredPositionZ");
+         desiredCOMHeight = (YoDouble) scs.findVariable("pelvisDesiredPositionZ");
       }
       else
       {
-         desiredCOMHeight = (YoDouble) scs.getVariable("desiredCOMHeight");
+         desiredCOMHeight = (YoDouble) scs.findVariable("desiredCOMHeight");
       }
 
-      solePositions.set(RobotSide.LEFT, new YoFramePoint3D((YoDouble) scs.getVariable("leftSoleX"), (YoDouble) scs.getVariable("leftSoleY"),
-                                                         (YoDouble) scs.getVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
-      solePositions.set(RobotSide.RIGHT, new YoFramePoint3D((YoDouble) scs.getVariable("rightSoleX"), (YoDouble) scs.getVariable("rightSoleY"),
-                                                         (YoDouble) scs.getVariable("rightSoleZ"), ReferenceFrame.getWorldFrame()));
+      solePositions.set(RobotSide.LEFT, new YoFramePoint3D((YoDouble) scs.findVariable("leftSoleX"), (YoDouble) scs.findVariable("leftSoleY"),
+                                                         (YoDouble) scs.findVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
+      solePositions.set(RobotSide.RIGHT, new YoFramePoint3D((YoDouble) scs.findVariable("rightSoleX"), (YoDouble) scs.findVariable("rightSoleY"),
+                                                         (YoDouble) scs.findVariable("rightSoleZ"), ReferenceFrame.getWorldFrame()));
 
-      angularMomentumX = (YoDouble) scs.getVariable("AngularMomentumX");
-      angularMomentumY = (YoDouble) scs.getVariable("AngularMomentumY");
-      angularMomentumZ = (YoDouble) scs.getVariable("AngularMomentumZ");
+      angularMomentumX = (YoDouble) scs.findVariable("AngularMomentumX");
+      angularMomentumY = (YoDouble) scs.findVariable("AngularMomentumY");
+      angularMomentumZ = (YoDouble) scs.findVariable("AngularMomentumZ");
 
-      icpPlannerDesiredCentroidalAngularMomentumX = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumX");
-      icpPlannerDesiredCentroidalAngularMomentumY = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumY");
-      icpPlannerDesiredCentroidalAngularMomentumZ = (YoDouble) scs.getVariable("icpPlannerDesiredCentroidalAngularMomentumZ");
+      icpPlannerDesiredCentroidalAngularMomentumX = (YoDouble) scs.findVariable("icpPlannerDesiredCentroidalAngularMomentumX");
+      icpPlannerDesiredCentroidalAngularMomentumY = (YoDouble) scs.findVariable("icpPlannerDesiredCentroidalAngularMomentumY");
+      icpPlannerDesiredCentroidalAngularMomentumZ = (YoDouble) scs.findVariable("icpPlannerDesiredCentroidalAngularMomentumZ");
 
-      controllerIsInDoubleSupport = (YoBoolean) scs.getVariable("controllerIsInDoubleSupport");
+      controllerIsInDoubleSupport = (YoBoolean) scs.findVariable("controllerIsInDoubleSupport");
    }
 
    public YoDouble getYoTime()

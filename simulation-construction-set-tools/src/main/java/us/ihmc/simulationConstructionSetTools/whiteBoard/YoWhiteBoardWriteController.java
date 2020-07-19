@@ -2,14 +2,14 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 import java.io.IOException;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class YoWhiteBoardWriteController implements RobotController, OutputProcessor
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoInteger ticksTillNextWrite;
    
    private final YoWhiteBoard yoWhiteBoard;
@@ -19,7 +19,7 @@ public class YoWhiteBoardWriteController implements RobotController, OutputProce
 
    public YoWhiteBoardWriteController(String name, YoWhiteBoard yoWhiteBoard, int writeEveryNTicks, boolean writeOnInitialize)
    {
-      registry = new YoVariableRegistry(name + "YoWhiteBoardWriteController");
+      registry = new YoRegistry(name + "YoWhiteBoardWriteController");
       this.yoWhiteBoard = yoWhiteBoard;
       
       if (writeEveryNTicks < 1) throw new RuntimeException("writeEveryNTicks must be 1 or larger!");
@@ -53,7 +53,7 @@ public class YoWhiteBoardWriteController implements RobotController, OutputProce
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 
 public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
 {
    private final BacklashCompensatingVelocityYoVariable xDot, yDot, zDot;
 
    public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt, YoDouble slopTime,
-           YoVariableRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
+           YoRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
    {
       BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoX(), dt, slopTime,
                                            registry);
@@ -26,7 +26,7 @@ public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
    }
 
    public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt, YoDouble slopTime,
-           YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
+           YoRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
    {
       BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoX(), dt, slopTime,
                                            registry);
@@ -41,7 +41,7 @@ public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
    }
 
    private BacklashCompensatingVelocityYoFrameVector(BacklashCompensatingVelocityYoVariable xDot, BacklashCompensatingVelocityYoVariable yDot, BacklashCompensatingVelocityYoVariable zDot,
-           YoVariableRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
+           YoRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
    {
       super(xDot, yDot, zDot, yoFrameVectorToDifferentiate.getReferenceFrame());
 
@@ -51,7 +51,7 @@ public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
    }
 
    private BacklashCompensatingVelocityYoFrameVector(BacklashCompensatingVelocityYoVariable xDot, BacklashCompensatingVelocityYoVariable yDot, BacklashCompensatingVelocityYoVariable zDot, 
-           YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
+           YoRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
    {
       super(xDot, yDot, zDot, yoFramePointToDifferentiate.getReferenceFrame());
 

@@ -1,10 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,20 +21,16 @@ import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
-import us.ihmc.robotics.math.filters.RateLimitedYoMutableSpatialVector;
+import us.ihmc.robotics.math.filters.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePose3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 /**
  * {@code FeedbackControllerToolbox} is meant to be used only in the
@@ -57,7 +49,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    public static final String centerOfMassName = "centerOfMass";
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<Pair<? extends Clearable, List<YoBoolean>>> clearableData = new ArrayList<>();
 
@@ -80,12 +72,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
 
-   public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
+   public FeedbackControllerToolbox(YoRegistry parentRegistry)
    {
       this(FeedbackControllerSettings.getDefault(), parentRegistry);
    }
 
-   public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoVariableRegistry parentRegistry)
+   public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoRegistry parentRegistry)
    {
       errorVelocityFilterBreakFrequencies = new HashMap<>();
 

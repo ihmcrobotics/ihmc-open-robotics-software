@@ -71,8 +71,8 @@ public abstract class QuadrupedDelayedLiftOffTest implements QuadrupedMultiRobot
    @Test
    public void testWalkingForwardWithPush()
    {
-      YoBoolean swingSpeedUpEnabled = (YoBoolean) conductor.getScs().getRootRegistry().getVariable("isSwingSpeedUpEnabled");
-      YoBoolean delayFootIfItsHelpingButNotNeeded = (YoBoolean) conductor.getScs().getRootRegistry().getVariable("delayFootIfItsHelpingButNotNeeded");
+      YoBoolean swingSpeedUpEnabled = (YoBoolean) conductor.getScs().getRootRegistry().findVariable("isSwingSpeedUpEnabled");
+      YoBoolean delayFootIfItsHelpingButNotNeeded = (YoBoolean) conductor.getScs().getRootRegistry().findVariable("delayFootIfItsHelpingButNotNeeded");
       swingSpeedUpEnabled.set(false);
       delayFootIfItsHelpingButNotNeeded.set(true);
 

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import java.util.List;
+
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -8,11 +10,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.List;
 
 public class ContactSequenceCalculator<T extends TimedContactInterval>
 {
@@ -25,7 +25,7 @@ public class ContactSequenceCalculator<T extends TimedContactInterval>
    private final YoFramePoint3D initialCoPPosition;
 
 
-   public ContactSequenceCalculator(CoPWaypointCalculator<T> copWaypointCalculator, YoVariableRegistry registry)
+   public ContactSequenceCalculator(CoPWaypointCalculator<T> copWaypointCalculator, YoRegistry registry)
    {
       this.copWaypointCalculator = copWaypointCalculator;
 

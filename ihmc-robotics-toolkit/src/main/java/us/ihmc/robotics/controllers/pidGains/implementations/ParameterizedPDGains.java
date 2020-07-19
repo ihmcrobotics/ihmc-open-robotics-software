@@ -4,7 +4,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * {@link YoParameter} based implementation of the {@link PDGainsReadOnly} interface.
@@ -22,12 +22,12 @@ public class ParameterizedPDGains implements PDGainsReadOnly
    private final DoubleParameter maximumFeedbackRate;
    private final DoubleParameter positionDeadband;
 
-   public ParameterizedPDGains(String suffix, YoVariableRegistry registry)
+   public ParameterizedPDGains(String suffix, YoRegistry registry)
    {
       this(suffix, null, registry);
    }
 
-   public ParameterizedPDGains(String suffix, PDGainsReadOnly defaults, YoVariableRegistry registry)
+   public ParameterizedPDGains(String suffix, PDGainsReadOnly defaults, YoRegistry registry)
    {
       if (defaults == null)
       {

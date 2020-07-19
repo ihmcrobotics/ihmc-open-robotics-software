@@ -8,11 +8,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class HighLevelControllerState implements State, JointLoadStatusProvider
 {
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
 
    private final JointSettingsHelper jointSettingsHelper;
 
@@ -28,7 +28,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
                                    OneDoFJointBasics[] controlledJoints)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
       this.controlledJoints = controlledJoints;
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
@@ -36,13 +36,13 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
 
    public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, OneDoFJointBasics[] controlledJoints)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
       this.controlledJoints = controlledJoints;
       jointSettingsHelper = null;
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

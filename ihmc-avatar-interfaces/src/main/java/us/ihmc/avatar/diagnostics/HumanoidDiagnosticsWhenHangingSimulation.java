@@ -192,7 +192,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 
          this.simulationConstructionSet = simulationConstructionSet;
 
-         diagnosticsState = (YoEnum<DiagnosticsWhenHangingState>) simulationConstructionSet.getVariable("DiagnosticsState");
+         diagnosticsState = (YoEnum<DiagnosticsWhenHangingState>) simulationConstructionSet.findVariable("DiagnosticsState");
          this.addActionListener(this);
       }
 

@@ -1,14 +1,14 @@
 package us.ihmc.avatar.posePlayback;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class PlaybackPoseInterpolator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble poseStartTime = new YoDouble("poseStartTime", registry);
    private final YoDouble poseMorphPercentage = new YoDouble("poseMorphPercentage", registry);
@@ -27,7 +27,7 @@ public class PlaybackPoseInterpolator
    private PlaybackPoseSequence sequence;
    private boolean hasBeganInterpolating = false;
 
-   public PlaybackPoseInterpolator(YoVariableRegistry parentRegistry)
+   public PlaybackPoseInterpolator(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 

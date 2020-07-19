@@ -10,13 +10,13 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathPlan;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class QuadrupedTurnWalkTurnPathPlanner
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private enum RobotSpeed
    {
@@ -34,13 +34,13 @@ public class QuadrupedTurnWalkTurnPathPlanner
    private final YoDouble mediumVelocity = new YoDouble("mediumVelocity", registry);
    private final YoDouble slowVelocity = new YoDouble("slowVelocity", registry);
 
-   private final YoEnum<RobotSpeed> robotSpeed = YoEnum.create("robotSpeed", RobotSpeed.class, registry);
+   private final YoEnum<RobotSpeed> robotSpeed = new YoEnum<>("robotSpeed", registry, RobotSpeed.class);
 
    private final QuadrupedBodyPathPlan pathPlan = new QuadrupedBodyPathPlan();
    private final BodyPathPlanHolder bodyPathPlanner;
 
 
-   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, BodyPathPlanHolder bodyPathPlanner, YoVariableRegistry parentRegistry)
+   public QuadrupedTurnWalkTurnPathPlanner(TurnWalkTurnPathParameters pathParameters, BodyPathPlanHolder bodyPathPlanner, YoRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 

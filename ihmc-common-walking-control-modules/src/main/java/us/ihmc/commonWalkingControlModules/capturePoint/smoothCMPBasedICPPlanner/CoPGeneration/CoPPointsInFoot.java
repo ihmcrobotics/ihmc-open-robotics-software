@@ -13,8 +13,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoPPointsInFoot
 {
@@ -32,10 +32,10 @@ public class CoPPointsInFoot
    private final YoMutableFramePoint3D supportFootCentroid;
    private final String name;
 
-   public CoPPointsInFoot(String namePrefix, int stepNumber, YoVariableRegistry registry)
+   public CoPPointsInFoot(String namePrefix, int stepNumber, YoRegistry registry)
    {
       if (registry == null)
-         registry = new YoVariableRegistry("localRegistry");
+         registry = new YoRegistry("localRegistry");
 
       this.name = namePrefix + "Step" + stepNumber;
 
@@ -52,9 +52,9 @@ public class CoPPointsInFoot
 
    private class CoPTrajectoryPointSupplier implements Supplier<YoFrameEuclideanTrajectoryPoint>
    {
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
 
-      public CoPTrajectoryPointSupplier(YoVariableRegistry registry)
+      public CoPTrajectoryPointSupplier(YoRegistry registry)
       {
          this.registry = registry;
       }

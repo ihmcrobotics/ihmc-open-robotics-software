@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ObjectDetectorToolboxController extends ToolboxController
 {
@@ -18,7 +18,7 @@ public class ObjectDetectorToolboxController extends ToolboxController
    private final ConcurrentListeningQueue<DetectedFiducialPacket> fiducialPacketQueue = new ConcurrentListeningQueue<DetectedFiducialPacket>(20);
 
    public ObjectDetectorToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
-                                          YoVariableRegistry parentRegistry)
+                                          YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
    }

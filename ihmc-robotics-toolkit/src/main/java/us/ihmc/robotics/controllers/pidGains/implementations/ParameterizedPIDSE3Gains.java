@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
 {
@@ -36,7 +36,7 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
     * @param registry the registry to which the tuning variables are attached.
     */
    public ParameterizedPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
-                                   boolean useIntegratorOrientation, YoVariableRegistry registry)
+                                   boolean useIntegratorOrientation, YoRegistry registry)
    {
       this(suffix, gainCouplingPosition, gainCouplingOrientation, useIntegratorPosition, useIntegratorOrientation, null, null, registry);
    }
@@ -48,7 +48,7 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
     * @param configuration and default values for the gains.
     * @param registry the registry to which the tuning variables are attached.
     */
-   public ParameterizedPIDSE3Gains(String suffix, PIDSE3Configuration configuration, YoVariableRegistry registry)
+   public ParameterizedPIDSE3Gains(String suffix, PIDSE3Configuration configuration, YoRegistry registry)
    {
       this(suffix, configuration.getPositionConfiguration(), configuration.getOrientationConfiguration(), registry);
    }
@@ -63,7 +63,7 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
     * @param registry the registry to which the tuning variables are attached.
     */
    public ParameterizedPIDSE3Gains(String suffix, PID3DConfiguration positionConfiguration, PID3DConfiguration orientationConfiguration,
-                                   YoVariableRegistry registry)
+                                   YoRegistry registry)
    {
       this(suffix, positionConfiguration.getGainCoupling(), orientationConfiguration.getGainCoupling(), positionConfiguration.isUseIntegrator(),
            orientationConfiguration.isUseIntegrator(), positionConfiguration.getGains(), orientationConfiguration.getGains(), registry);
@@ -84,7 +84,7 @@ public class ParameterizedPIDSE3Gains implements PIDSE3GainsReadOnly
     */
    public ParameterizedPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
                                    boolean useIntegratorOrientation, PID3DGainsReadOnly defaultPositionGains, PID3DGainsReadOnly defaultOrientationGains,
-                                   YoVariableRegistry registry)
+                                   YoRegistry registry)
    {
       positionGains = new ParameterizedPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, defaultPositionGains, registry);
       orientationGains = new ParameterizedPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, defaultOrientationGains,

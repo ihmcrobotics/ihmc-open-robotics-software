@@ -104,7 +104,7 @@ public abstract class AvatarWalkToFiducialsBehaviorTest implements MultiRobotTes
       followFiducialBehavior.initialize();
 
       drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(fiducialDetectorBehaviorService.getYoVariableRegistry());
-      drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(followFiducialBehavior.getYoVariableRegistry());
+      drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry().addChild(followFiducialBehavior.getYoRegistry());
 
       assertTrue(drcBehaviorTestHelper.executeBehaviorUntilDone(followFiducialBehavior));
 

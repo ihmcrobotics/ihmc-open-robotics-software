@@ -30,7 +30,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +39,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String shortName = "CenterOfMassFBController";
-   private final YoVariableRegistry registry = new YoVariableRegistry(shortName);
+   private final YoRegistry registry = new YoRegistry(shortName);
 
    private final YoBoolean isEnabled = new YoBoolean("is" + shortName + "Enabled", registry);
 
@@ -85,7 +85,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final boolean computeIntegralTerm;
 
    public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-                                         YoVariableRegistry parentRegistry)
+                                         YoRegistry parentRegistry)
    {
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       centroidalMomentumHandler = toolbox.getCentroidalMomentumRateCalculator();

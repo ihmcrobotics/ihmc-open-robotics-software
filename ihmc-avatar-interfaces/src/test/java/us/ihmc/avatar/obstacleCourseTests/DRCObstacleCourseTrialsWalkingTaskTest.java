@@ -136,9 +136,9 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      YoBoolean leftDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("leftFootSwingDoToeTouchdownIfPossible");
-      YoBoolean rightDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.getVariable("rightFootSwingDoToeTouchdownIfPossible");
-      YoBoolean doToeOffIfPossibleInSingleSupport = (YoBoolean) simulationConstructionSet.getVariable("doToeOffIfPossibleInSingleSupport");
+      YoBoolean leftDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.findVariable("leftFootSwingDoToeTouchdownIfPossible");
+      YoBoolean rightDoToeTouchdownIfPossible = (YoBoolean) simulationConstructionSet.findVariable("rightFootSwingDoToeTouchdownIfPossible");
+      YoBoolean doToeOffIfPossibleInSingleSupport = (YoBoolean) simulationConstructionSet.findVariable("doToeOffIfPossibleInSingleSupport");
       leftDoToeTouchdownIfPossible.set(true);
       rightDoToeTouchdownIfPossible.set(true);
       doToeOffIfPossibleInSingleSupport.set(true);
@@ -246,7 +246,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
       {
-         private final YoDouble q_y = (YoDouble) scs.getVariable("q_y");
+         private final YoDouble q_y = (YoDouble) scs.findVariable("q_y");
 
          @Override
          public void initializeProcessing()

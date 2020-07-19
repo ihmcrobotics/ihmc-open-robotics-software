@@ -9,9 +9,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.functionApproximation.ProbabilityDensityFunction;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -43,7 +43,7 @@ public class Line2DStatisticsCalculator
 
    private final Point2D previousPositionMean = new Point2D();
 
-   public Line2DStatisticsCalculator(String prefix, Line2DReadOnly lineVariable, YoVariableRegistry registry)
+   public Line2DStatisticsCalculator(String prefix, Line2DReadOnly lineVariable, YoRegistry registry)
    {
       this.lineVariable = lineVariable;
 

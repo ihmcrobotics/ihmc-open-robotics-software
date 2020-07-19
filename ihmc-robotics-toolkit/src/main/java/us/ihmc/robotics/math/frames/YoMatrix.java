@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.frames;
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -21,7 +21,7 @@ public class YoMatrix
    private final YoInteger numberOfRows, numberOfColumns;
    private final YoDouble[][] variables;
 
-   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoVariableRegistry registry)
+   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
    {
       this.maxNumberOfRows = maxNumberOfRows;
       this.maxNumberOfColumns = maxNumberOfColumns;

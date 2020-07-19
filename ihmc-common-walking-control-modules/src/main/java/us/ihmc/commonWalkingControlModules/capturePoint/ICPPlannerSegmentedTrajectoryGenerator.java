@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
-import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCapturePointVelocity;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingConstantCMP;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingCubicICP;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,18 +15,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble omega0;
 
@@ -97,7 +98,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private final VelocityConstrainedPositionTrajectoryGenerator spline;
 
-   public ICPPlannerSegmentedTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoDouble omega0, YoVariableRegistry parentRegistry)
+   public ICPPlannerSegmentedTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoDouble omega0, YoRegistry parentRegistry)
    {
       this.trajectoryFrame = trajectoryFrame;
       initialFrame = trajectoryFrame;
@@ -105,7 +106,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
       this.omega0 = omega0;
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       maximumSplineDuration = new YoDouble(namePrefix + "MaximumSplineDuration", registry);
       minimumSplineDuration = new YoDouble(namePrefix + "MinimumSplineDuration", registry);
       minimumSplineDuration.set(0.1);

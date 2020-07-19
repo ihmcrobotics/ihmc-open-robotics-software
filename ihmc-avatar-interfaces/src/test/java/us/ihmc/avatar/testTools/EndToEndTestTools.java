@@ -5,11 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
@@ -37,24 +33,16 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.variable.*;
 
 public class EndToEndTestTools
 {
@@ -309,7 +297,7 @@ public class EndToEndTestTools
    public static RigidBodyControlMode findRigidBodyControlManagerState(String bodyName, YoVariableHolder yoVariableHolder)
    {
       String managerName = bodyName + "Manager";
-      return ((YoEnum<RigidBodyControlMode>) yoVariableHolder.getVariable(managerName, managerName + "CurrentState")).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) yoVariableHolder.findVariable(managerName, managerName + "CurrentState")).getEnumValue();
    }
 
    public static SO3TrajectoryPoint findSO3TrajectoryPoint(String bodyName, int trajectoryPointIndex, YoVariableHolder yoVariableHolder)
@@ -320,7 +308,7 @@ public class EndToEndTestTools
       String orientationName = bodyName + "Orientation";
       String angularVelocityName = bodyName + "AngularVelocity";
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
-      simpleSO3TrajectoryPoint.setTime(yoVariableHolder.getVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSO3TrajectoryPoint.setTime(yoVariableHolder.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSO3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
       simpleSO3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSO3TrajectoryPoint;
@@ -340,7 +328,7 @@ public class EndToEndTestTools
       String angularVelocityName = bodyName + "AngularVelocity";
 
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
-      simpleSE3TrajectoryPoint.setTime(yoVariableHolder.getVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSE3TrajectoryPoint.setTime(yoVariableHolder.findVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSE3TrajectoryPoint.setPosition(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
       simpleSE3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
       simpleSE3TrajectoryPoint.setLinearVelocity(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
@@ -370,7 +358,7 @@ public class EndToEndTestTools
    public static int findTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, YoVariableHolder yoVariableHolder)
    {
       String variableName = bodyName + postfix + "TaskspaceNumberOfPoints";
-      return (int) yoVariableHolder.getVariable(variableName).getValueAsLongBits();
+      return (int) yoVariableHolder.findVariable(variableName).getValueAsLongBits();
    }
 
    public static int findNumberOfWaypointsInTaskspaceManagerGenerator(String bodyName, YoVariableHolder yoVariableHolder)
@@ -381,7 +369,7 @@ public class EndToEndTestTools
    public static int findNumberOfWaypointsInTaskspaceManagerGenerator(String bodyName, String postfix, YoVariableHolder yoVariableHolder)
    {
       String variableName = bodyName + postfix + "TaskspaceNumberOfPointsInGenerator";
-      return (int) yoVariableHolder.getVariable(variableName).getValueAsLongBits();
+      return (int) yoVariableHolder.findVariable(variableName).getValueAsLongBits();
    }
 
    /**
@@ -392,14 +380,14 @@ public class EndToEndTestTools
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + jointName + "_numberOfPoints";
-      return ((YoInteger) yoVariableHolder.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) yoVariableHolder.findVariable(namespace, variable)).getIntegerValue();
    }
 
    public static int findNumberOfWaypointsInJointspaceManagerGenerator(String bodyName, String jointName, YoVariableHolder yoVariableHolder)
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + jointName + "_numberOfPointsInGenerator";
-      return ((YoInteger) yoVariableHolder.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) yoVariableHolder.findVariable(namespace, variable)).getIntegerValue();
 
    }
 
@@ -407,7 +395,7 @@ public class EndToEndTestTools
    {
       String namespace = bodyName + RigidBodyJointControlHelper.shortName;
       String variable = bodyName + "Jointspace_" + jointName + "_numberOfPointsInQueue";
-      return ((YoInteger) yoVariableHolder.getVariable(namespace, variable)).getIntegerValue();
+      return ((YoInteger) yoVariableHolder.findVariable(namespace, variable)).getIntegerValue();
 
    }
 
@@ -591,9 +579,9 @@ public class EndToEndTestTools
       return findYoVariable(namespace, name, YoBoolean.class, yoVariableHolder);
    }
 
-   public static <T extends YoVariable<T>> T findYoVariable(String namespace, String name, Class<T> clazz, YoVariableHolder yoVariableHolder)
+   public static <T extends YoVariable> T findYoVariable(String namespace, String name, Class<T> clazz, YoVariableHolder yoVariableHolder)
    {
-      YoVariable<?> uncheckedVariable = yoVariableHolder.getVariable(namespace, name);
+      YoVariable uncheckedVariable = yoVariableHolder.findVariable(namespace, name);
       if (uncheckedVariable == null)
          throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
       if (!clazz.isInstance(uncheckedVariable))

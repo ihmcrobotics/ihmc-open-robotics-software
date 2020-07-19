@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GraphTester
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("registry");
+   private final YoRegistry registry = new YoRegistry("registry");
    private final DataBuffer buffer = new DataBuffer(10);
    private final YoDouble xPlot = new YoDouble("xPlot", registry);
    private final YoDouble yPlot = new YoDouble("yPlot", registry);

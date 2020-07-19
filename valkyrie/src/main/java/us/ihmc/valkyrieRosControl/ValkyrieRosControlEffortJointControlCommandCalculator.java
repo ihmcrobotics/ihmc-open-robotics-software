@@ -5,7 +5,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieRosControlEffortJointControlCommandCalculator
@@ -18,14 +18,14 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
    private final double controlDT;
 
    public ValkyrieRosControlEffortJointControlCommandCalculator(YoEffortJointHandleHolder yoEffortJointHandleHolder, double torqueOffset, double controlDT,
-                                                                YoVariableRegistry parentRegistry)
+                                                                YoRegistry parentRegistry)
    {
       this.yoEffortJointHandleHolder = yoEffortJointHandleHolder;
 
       this.controlDT = controlDT;
 
       String pdControllerBaseName = yoEffortJointHandleHolder.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
+      YoRegistry registry = new YoRegistry(pdControllerBaseName + "Command");
 
       pidController = new PIDController(pdControllerBaseName + "LowLevelControl", registry);
       tauOffset = new YoDouble("tau_offset_" + pdControllerBaseName, registry);

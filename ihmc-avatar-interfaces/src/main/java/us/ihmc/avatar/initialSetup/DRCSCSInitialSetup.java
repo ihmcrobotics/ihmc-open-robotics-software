@@ -89,7 +89,7 @@ public class DRCSCSInitialSetup
    {
       robot.setGravity(gravity);
 
-      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoRegistry());
       robotModel.getContactPointParameters().setupGroundContactModelParameters(groundContactModel, simulateDT);
       if (enableGroundSlipping)
          groundContactModel.enableSlipping();

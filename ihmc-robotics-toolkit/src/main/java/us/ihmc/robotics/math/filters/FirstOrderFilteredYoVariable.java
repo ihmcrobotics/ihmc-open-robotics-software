@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FirstOrderFilteredYoVariable extends YoDouble
@@ -23,7 +23,7 @@ public class FirstOrderFilteredYoVariable extends YoDouble
       
       private FirstOrderFilterType highOrLowPass;
             
-      public FirstOrderFilteredYoVariable(String name, String description, double cutoffFrequency_Hz, YoDouble yoTime, FirstOrderFilterType highOrLowPass, YoVariableRegistry registry)
+      public FirstOrderFilteredYoVariable(String name, String description, double cutoffFrequency_Hz, YoDouble yoTime, FirstOrderFilterType highOrLowPass, YoRegistry registry)
       {
          super(name, description, registry);
          
@@ -48,7 +48,7 @@ public class FirstOrderFilteredYoVariable extends YoDouble
          this.highOrLowPass = highOrLowPass;
       }
       
-      public FirstOrderFilteredYoVariable(String name, String description, double cutoffFrequency_Hz, double DT, FirstOrderFilterType highOrLowPass, YoVariableRegistry registry)
+      public FirstOrderFilteredYoVariable(String name, String description, double cutoffFrequency_Hz, double DT, FirstOrderFilterType highOrLowPass, YoRegistry registry)
       {
          this(name, description, cutoffFrequency_Hz, null, highOrLowPass, registry);
          this.dt = DT;

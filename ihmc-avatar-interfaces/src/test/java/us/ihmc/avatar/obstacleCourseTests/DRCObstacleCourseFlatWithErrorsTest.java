@@ -29,8 +29,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisKinematicsBasedLinearStateCalculator;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotTestInterface
 {
@@ -244,9 +244,9 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       {
          String nameSpace = PelvisKinematicsBasedLinearStateCalculator.class.getSimpleName();
          String namePrefix = fullRobotModel.getFoot(robotSide).getName() + "FootPositionInWorld";
-         YoDouble x = (YoDouble) simulationConstructionSet.getVariable(nameSpace, namePrefix + "X");
-         YoDouble y = (YoDouble) simulationConstructionSet.getVariable(nameSpace, namePrefix + "Y");
-         YoDouble z = (YoDouble) simulationConstructionSet.getVariable(nameSpace, namePrefix + "Z");
+         YoDouble x = (YoDouble) simulationConstructionSet.findVariable(nameSpace, namePrefix + "X");
+         YoDouble y = (YoDouble) simulationConstructionSet.findVariable(nameSpace, namePrefix + "Y");
+         YoDouble z = (YoDouble) simulationConstructionSet.findVariable(nameSpace, namePrefix + "Z");
          stateEstimatorFootPosition.put(robotSide, new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()));
       }
 

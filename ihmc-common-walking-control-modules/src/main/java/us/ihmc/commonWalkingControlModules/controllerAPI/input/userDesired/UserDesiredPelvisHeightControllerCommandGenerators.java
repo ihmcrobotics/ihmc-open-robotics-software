@@ -5,15 +5,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class UserDesiredPelvisHeightControllerCommandGenerators
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean userDoPelvisHeight = new YoBoolean("userDesiredPelvisHeightExecute", registry);
    private final YoBoolean userDesiredSetPelvisHeightToActual = new YoBoolean("userDesiredPelvisSetHeightToActual", registry);
@@ -23,15 +23,15 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
    private final YoDouble userDesiredPelvisHeight;
 
    public UserDesiredPelvisHeightControllerCommandGenerators(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel,
-         double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+         double defaultTrajectoryTime, YoRegistry parentRegistry)
    {
       userDesiredPelvisHeight = new YoDouble("userDesiredPelvisHeight", registry);
 
 
-      userDesiredSetPelvisHeightToActual.addVariableChangedListener(new VariableChangedListener()
+      userDesiredSetPelvisHeightToActual.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userDesiredSetPelvisHeightToActual.getBooleanValue())
             {
@@ -46,9 +46,9 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
          }
       });
       
-      userDoPelvisHeight.addVariableChangedListener(new VariableChangedListener()
+      userDoPelvisHeight.addListener(new YoVariableChangedListener()
       {
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userDoPelvisHeight.getBooleanValue())
             {

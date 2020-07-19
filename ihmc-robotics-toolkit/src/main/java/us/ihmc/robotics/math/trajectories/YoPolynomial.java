@@ -8,7 +8,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commons.MathTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.PolynomialVariableHolder;
 import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -28,7 +28,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
 
    private final LinearSolverDense<DMatrixRMaj> solver;
 
-   public YoPolynomial(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoPolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       this.maximumNumberOfCoefficients = maximumNumberOfCoefficients;
 

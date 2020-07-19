@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CoMHeightTimeDerivativesData
@@ -10,7 +10,7 @@ public class CoMHeightTimeDerivativesData
    private ReferenceFrame frameOfCenterOfMassHeight;
    private final YoDouble comHeight, comHeightVelocity, comHeightAcceleration, comHeightJerk;
 
-   public CoMHeightTimeDerivativesData(String namePrefix, YoVariableRegistry registry)
+   public CoMHeightTimeDerivativesData(String namePrefix, YoRegistry registry)
    {
       comHeight = new YoDouble(namePrefix + "CoMHeight", registry);
       comHeightVelocity = new YoDouble(namePrefix + "comHeightVelocity", registry);

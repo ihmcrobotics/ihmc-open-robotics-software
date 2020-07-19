@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class InefficientPushrodTransmissionJacobianTest
@@ -26,7 +26,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new Robot("testPushrodTransmission");
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble pitch = new YoDouble("pitch", registry);
       YoDouble roll = new YoDouble("roll", registry);
 
@@ -48,7 +48,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new Robot("testPushrodTransmission");
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble roll = new YoDouble("roll", registry);
       YoDouble pitch = new YoDouble("pitch", registry);
 
@@ -68,7 +68,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new ValkyrieAnkleRobot();
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble pitch = new YoDouble("pitch", registry);
       YoDouble roll = new YoDouble("roll", registry);
 
@@ -167,7 +167,7 @@ public class InefficientPushrodTransmissionJacobianTest
    {
       Robot robot = new ValkyrieWaistRobot();      
 
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       YoDouble roll = new YoDouble("roll", registry);
       YoDouble pitch = new YoDouble("pitch", registry);
 

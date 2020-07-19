@@ -224,7 +224,7 @@ public class NavigationBehavior implements BehaviorInterface
       goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
 //      LogTools.info("Creating A* planner");
-//      YoVariableRegistry registry = new YoVariableRegistry("registry");
+//      YoRegistry registry = new YoRegistry("registry");
 //      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlannerParameters,
 //                                                              nodeChecker,
 //                                                              heuristics,

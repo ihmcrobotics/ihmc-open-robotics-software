@@ -8,7 +8,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ContactStateRhoRamping<T extends RobotSegment>
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final List<YoContactPoint> contactPoints;
    private final YoPlaneContactState contactState;
@@ -39,14 +39,14 @@ public class ContactStateRhoRamping<T extends RobotSegment>
     * @param dt used to increment the time in duration on update
     * @param parentRegistry
     */
-   public ContactStateRhoRamping(T robotSide, YoPlaneContactState contactState, double finalRhoWeight, YoVariableRegistry parentRegistry)
+   public ContactStateRhoRamping(T robotSide, YoPlaneContactState contactState, double finalRhoWeight, YoRegistry parentRegistry)
    {
       this.contactState = contactState;
       this.contactPoints = contactState.getContactPoints();
       this.contactPointRhoRampingActivated = new boolean[contactPoints.size()];
 
       String prefix = robotSide.getCamelCaseNameForStartOfExpression() + name;
-      this.registry = new YoVariableRegistry(prefix);
+      this.registry = new YoRegistry(prefix);
       this.rhoInitial = new YoDouble(prefix + "rhoInitial", registry);
       this.rhoFinal = new YoDouble(prefix + "rhoFinal", registry);
       this.rhoCurrent = new YoDouble(prefix + "rhoCurrent", registry);

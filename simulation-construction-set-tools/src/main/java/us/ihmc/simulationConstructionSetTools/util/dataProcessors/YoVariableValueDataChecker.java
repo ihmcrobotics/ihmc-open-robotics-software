@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -62,7 +62,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    {
       this.scs = scs;
       
-      YoVariableRegistry registry = scs.getRootRegistry();
+      YoRegistry registry = scs.getRootRegistry();
 
       this.time = time;
       this.variableToCheck = variableToCheck;

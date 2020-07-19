@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.optimization;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.utilities.parameterOptimization.DoubleYoVariableParameterToOptimize;
@@ -8,7 +8,7 @@ import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
 public class SimpleControllerToOptimize implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SimpleControllerToOptimize");
+   private final YoRegistry registry = new YoRegistry("SimpleControllerToOptimize");
    
    private final YoDouble parameterOne = new YoDouble("parameterOne", registry);
    private final YoDouble costFunction = new YoDouble("costFunction", registry);
@@ -34,7 +34,7 @@ public class SimpleControllerToOptimize implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

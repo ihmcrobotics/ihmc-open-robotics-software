@@ -42,8 +42,8 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieExternalForceEstimationTest
 {
@@ -55,7 +55,7 @@ public class ValkyrieExternalForceEstimationTest
    private static final double epsilon = 0.35;
    private static final double forceMagnitude = 15.0;
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private DRCRobotModel robotModel;
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private ExternalForceEstimationToolboxController toolboxController;
@@ -88,7 +88,7 @@ public class ValkyrieExternalForceEstimationTest
    @Test
    public void testExternalForceEstimation() throws Exception
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
 
       testConfigs = new ArrayList<>();
       testConfigs.add(new TestConfig("rightElbowPitch", new Vector3D(0.0, -0.25, 0.0)));
@@ -128,9 +128,9 @@ public class ValkyrieExternalForceEstimationTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
-            return new YoVariableRegistry("toolboxUpdater");
+            return new YoRegistry("toolboxUpdater");
          }
       }, (int) (ExternalForceEstimationToolboxModule.UPDATE_PERIOD_MILLIS / (1000 * robotModel.getSimulateDT())));
       testEnvironment.addEnvironmentRobot(dummyRobot);
@@ -139,7 +139,7 @@ public class ValkyrieExternalForceEstimationTest
       drcSimulationTestHelper.getYoVariableRegistry().addChild(registry);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry scsRootRegistry = drcSimulationTestHelper.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
+      YoRegistry scsRootRegistry = drcSimulationTestHelper.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();
 
       HumanoidFloatingRootJointRobot scsRobot = drcSimulationTestHelper.getRobot();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();

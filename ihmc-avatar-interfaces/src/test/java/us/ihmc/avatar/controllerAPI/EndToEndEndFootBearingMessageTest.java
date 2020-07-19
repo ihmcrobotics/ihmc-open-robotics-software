@@ -78,9 +78,9 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>)scs.getVariable("WalkingHighLevelHumanoidController", "walkingCurrentState")).getEnumValue();
+         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>)scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState")).getEnumValue();
          assertEquals(WalkingStateEnum.STANDING, walkingState);
-         ConstraintType footState = ((YoEnum<ConstraintType>)scs.getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState")).getEnumValue();
+         ConstraintType footState = ((YoEnum<ConstraintType>)scs.findVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState")).getEnumValue();
          assertEquals(ConstraintType.FULL, footState);
       }
    }
