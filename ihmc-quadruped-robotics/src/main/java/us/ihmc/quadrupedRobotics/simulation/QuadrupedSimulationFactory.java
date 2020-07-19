@@ -497,10 +497,6 @@ public class QuadrupedSimulationFactory
       {
          scs.setGroundVisible(false);
       }
-      if (scsBufferSize.hasValue())
-      {
-         scs.setMaxBufferSize(scsBufferSize.get());
-      }
 
       if (providedTerrainObject3D.hasValue())
       {

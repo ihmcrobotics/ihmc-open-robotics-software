@@ -86,7 +86,6 @@ public class AStarPawPlannerVisualizer implements PawStepPlannerListener
       scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setPlaybackRealTimeRate(playbackRate);
-      scs.setMaxBufferSize(64000);
       scs.setCameraFix(0.0, 0.0, 0.0);
       scs.setCameraPosition(-0.001, 0.0, 15.0);
       scs.setGroundVisible(false);

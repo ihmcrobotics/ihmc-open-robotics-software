@@ -78,7 +78,6 @@ public class EncorderProcessorEvalRealData
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot, parameters);
       scs.hideViewport();
       dataBuffer = scs.getDataBuffer();
-      dataBuffer.setWrapBuffer(false);
       simThread = new Thread(scs, "R2Simulation sim thread");
    }
 

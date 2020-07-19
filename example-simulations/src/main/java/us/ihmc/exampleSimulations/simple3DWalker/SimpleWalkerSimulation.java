@@ -49,7 +49,6 @@ public class SimpleWalkerSimulation
 
       scs = new SimulationConstructionSet(robot);
       scs.setDT(simulationDT, 10);
-      scs.setMaxBufferSize(32000);
       scs.startOnAThread();
 
       simulationOverheadPlotter.setDrawHistory(true);

@@ -38,7 +38,6 @@ public class SkippySimulation
       sim = new SimulationConstructionSet(skippy, simulationTestingParameters);
       sim.setGroundVisible(true);
       sim.setDT(DT, recordFrequency);
-      sim.setMaxBufferSize(64000);
       sim.setCameraPosition(10.0, 0.0, 2.0);
 
       boolean showOverheadView = true;

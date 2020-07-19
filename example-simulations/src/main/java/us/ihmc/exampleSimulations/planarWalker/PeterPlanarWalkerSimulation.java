@@ -22,8 +22,6 @@ public class PeterPlanarWalkerSimulation
       
       scs.setDT(simulationDT, 100);
       
-      scs.setMaxBufferSize(32000);
-      
       scs.startOnAThread();
    }
    
