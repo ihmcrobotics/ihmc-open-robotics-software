@@ -214,14 +214,14 @@ public class YoVariableLogVisualizerGUI extends JPanel
 
       for (YoGraph graph : gui.getGraphArrayPanel().getGraphsOnThisPanel())
       {
-         graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getFullVariableNameWithNameSpace()));
+         graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getVariableFullNameString()));
       }
 
       for (GraphArrayWindow graphArrayWindow : gui.getGraphArrayWindows())
       {
          for (YoGraph graph : graphArrayWindow.getGraphArrayPanel().getGraphsOnThisPanel())
          {
-            graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getFullVariableNameWithNameSpace()));
+            graph.getEntriesOnThisGraph().forEach(entry -> varGroup.addVar(entry.getVariableFullNameString()));
          }
       }
 
