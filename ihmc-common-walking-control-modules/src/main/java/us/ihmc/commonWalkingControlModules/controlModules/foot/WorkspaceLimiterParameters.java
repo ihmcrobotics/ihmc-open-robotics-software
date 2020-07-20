@@ -28,14 +28,13 @@ public class WorkspaceLimiterParameters
    {
       String namePrefix = "foot";
       alphaUnreachableFootstep = new YoDouble(namePrefix + "AlphaUnreachableFootstep", registry);
-      alphaUnreachableFootstep.set(0.25);
+      alphaUnreachableFootstep.set(0.75);
 
       correctionAlphaFilter = new YoDouble(namePrefix + "CorrectionAlphaFilter", registry);
       correctionAlphaFilter.set(0.98);
 
       timeToCorrectForUnachievedSwingTranslation = new YoDouble(namePrefix + "TimeToCorrectForUnachievedSwingTranslation", registry);
       timeToCorrectForUnachievedSwingTranslation.set(0.2);
-
 
       maxPercentOfLegLengthForSingularityAvoidanceInSupport = new YoDouble(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSupport", registry);
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot = new YoDouble(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForFoot", registry);
@@ -47,7 +46,7 @@ public class WorkspaceLimiterParameters
 
       maxPercentOfLegLengthForSingularityAvoidanceInSupport.set(0.98);
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.set(0.97);
-      maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.set(0.90);
+      maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.set(0.92);
       minPercentOfLegLengthForSingularityAvoidanceInSwing.set(0.5);
 
       percentOfLegLengthMarginToEnableSingularityAvoidance.set(0.1);
