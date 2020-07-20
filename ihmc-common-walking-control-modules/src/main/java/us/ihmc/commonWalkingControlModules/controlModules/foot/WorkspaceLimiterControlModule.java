@@ -577,8 +577,7 @@ public class WorkspaceLimiterControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(FrameVector2DReadOnly comXYVelocity,
-                                                                          CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                           double zCurrentInWorld,
                                                                           ReferenceFrame pelvisZUpFrame,
                                                                           ConstraintType constraintType)
@@ -650,7 +649,7 @@ public class WorkspaceLimiterControlModule
       }
       else
       {
-         applySingularityAvoidanceInSupport(comXYVelocity, comHeightDataToCorrect, zCurrentInWorld, pelvisZUpFrame);
+         applySingularityAvoidanceInSupport(comHeightDataToCorrect, zCurrentInWorld, pelvisZUpFrame);
       }
    }
 
@@ -700,8 +699,8 @@ public class WorkspaceLimiterControlModule
    }
 
    private final FrameVector2DBasics comVelocity = new FrameVector2D();
-   private void applySingularityAvoidanceInSupport(FrameVector2DReadOnly comXYVelocity,
-                                                   CoMHeightTimeDerivativesData comHeightDataToCorrect,
+
+   private void applySingularityAvoidanceInSupport(CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                    double zCurrent,
                                                    ReferenceFrame pelvisZUpFrame)
    {

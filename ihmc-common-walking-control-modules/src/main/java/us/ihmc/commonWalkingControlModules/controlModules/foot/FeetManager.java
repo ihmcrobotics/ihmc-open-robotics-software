@@ -212,14 +212,14 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeightForSupportSingularityAvoidance(FrameVector2DReadOnly desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForSupportSingularityAvoidance(double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.updateLegSingularityModule();
-         footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
+         footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(comHeightData, zCurrent, pelvisZUpFrame);
       }
    }
 
