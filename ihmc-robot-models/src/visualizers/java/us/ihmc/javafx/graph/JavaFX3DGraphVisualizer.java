@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.simulationconstructionset.gui.MinimalGraphIndicesHolder;
 import us.ihmc.simulationconstructionset.gui.MinimalTimeDataHolder;
-import us.ihmc.yoVariables.dataBuffer.DataEntry;
-import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
+import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntryReader;
+import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntryHolder;
 import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -23,10 +23,10 @@ public class JavaFX3DGraphVisualizer
       primaryStage.setWidth(1920);
       primaryStage.setHeight(1080);
 
-      DataEntryHolder dataEntryHolder = new DataEntryHolder()
+      YoBufferVariableEntryHolder dataEntryHolder = new YoBufferVariableEntryHolder()
       {
          @Override
-         public DataEntry getEntry(YoVariable yoVariable)
+         public YoBufferVariableEntryReader getEntry(YoVariable yoVariable)
          {
             return null;
          }
