@@ -47,7 +47,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
       planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(secondStage);
       segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
                                                                              REACommunicationProperties.subscriberCustomRegionsTopicName,
-                                                                             ROS2Tools.REALSENSE_SLAM_MAP,
+                                                                             ROS2Tools.REALSENSE_SLAM_REGIONS,
                                                                              MODULE_CONFIGURATION_FILE_NAME);
       module.attachOcTreeConsumer(segmentationModule);
 
