@@ -215,8 +215,9 @@ public class SimpleSphereVisualizer
 
    public void updateVizFeet(double currentTime, List<RobotSide> currentFeetInContact)
    {
-      List<Footstep> footstepList= dcmPlan.getFootstepList();
-      List<FootstepTiming> footstepTimingList= dcmPlan.getFootstepTimingList();
+
+      List<Footstep> footstepList= dcmPlan.getUpcomingFootsteps();
+      List<FootstepTiming> footstepTimingList= dcmPlan.getUpcomingFootstepTimings();
       
       if (footstepList.size() == 0)
          return;
