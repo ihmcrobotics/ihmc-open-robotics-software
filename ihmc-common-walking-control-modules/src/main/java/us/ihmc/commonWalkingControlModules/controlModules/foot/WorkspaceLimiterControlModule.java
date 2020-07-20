@@ -446,7 +446,8 @@ public class WorkspaceLimiterControlModule
       correctFootDesiredsWithScaleFactor(desiredFootPositionInAxisFrame,
                                          desiredFootPositionToCorrect,
                                          desiredFootLinearVelocityToCorrect,
-                                         desiredFootLinearAccelerationToCorrect);
+                                         desiredFootLinearAccelerationToCorrect,
+                                         true);
    }
 
    private void correctSwingFootTrajectoryUnderExtensionForSingularityAvoidance(FixedFramePoint3DBasics desiredFootPositionToCorrect,
@@ -476,13 +477,15 @@ public class WorkspaceLimiterControlModule
       correctFootDesiredsWithScaleFactor(desiredFootPositionInAxisFrame,
                                          desiredFootPositionToCorrect,
                                          desiredFootLinearVelocityToCorrect,
-                                         desiredFootLinearAccelerationToCorrect);
+                                         desiredFootLinearAccelerationToCorrect,
+                                         false);
    }
 
    private void correctFootDesiredsWithScaleFactor(double desiredFootPositionInAxisFrame,
                                                    FixedFramePoint3DBasics desiredFootPositionToCorrect,
                                                    FixedFrameVector3DBasics desiredFootLinearVelocityToCorrect,
-                                                   FixedFrameVector3DBasics desiredFootLinearAccelerationToCorrect)
+                                                   FixedFrameVector3DBasics desiredFootLinearAccelerationToCorrect,
+                                                   boolean registerCorrectionsForHeight)
    {
       double desiredLinearVelocityX = desiredFootLinearVelocity.getX();
       double desiredLinearVelocityY = desiredFootLinearVelocity.getY();
@@ -494,26 +497,33 @@ public class WorkspaceLimiterControlModule
                                                                                0.0,
                                                                                alphaSwingSingularityAvoidance.getDoubleValue());
 
-      tempVector.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - desiredFootPositionInAxisFrame);
-      unachievedSwingTranslation.setMatchingFrame(tempVector);
+      double unachievedHeightTranslation = desiredFootPosition.getZ() - desiredFootPositionInAxisFrame;
+      double unachievedHeightVelocity = desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ;
+      double unachievedHeightAcceleration = alphaSwingSingularityAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ();
 
       desiredFootPosition.setZ(desiredFootPositionInAxisFrame);
-
-      tempVector.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ);
-      unachievedSwingVelocity.setMatchingFrame(tempVector);
 
       desiredFootLinearVelocity.setIncludingFrame(virtualLegTangentialFrameAnkleCentered,
                                                   desiredLinearVelocityX,
                                                   desiredLinearVelocityY,
                                                   desiredLinearVelocityZ);
 
-      tempVector.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(),
-                                   0.0,
-                                   0.0,
-                                   alphaSwingSingularityAvoidance.getDoubleValue() * desiredFootLinearAcceleration.getZ());
-      unachievedSwingAcceleration.setMatchingFrame(tempVector);
-
       desiredFootLinearAcceleration.setZ(desiredLinearAccelerationZ);
+
+      if (registerCorrectionsForHeight)
+      {
+         tempVector.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, unachievedHeightTranslation);
+         unachievedSwingTranslation.setMatchingFrame(tempVector);
+
+         tempVector.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, unachievedHeightVelocity);
+         unachievedSwingVelocity.setMatchingFrame(tempVector);
+
+         tempVector.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(),
+                                      0.0,
+                                      0.0,
+                                      unachievedHeightAcceleration);
+         unachievedSwingAcceleration.setMatchingFrame(tempVector);
+      }
 
       desiredFootPositionToCorrect.setMatchingFrame(desiredFootPosition);
       desiredFootLinearVelocityToCorrect.setMatchingFrame(desiredFootLinearVelocity);
