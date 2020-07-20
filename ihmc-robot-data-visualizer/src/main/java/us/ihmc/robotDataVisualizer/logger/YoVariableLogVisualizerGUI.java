@@ -97,7 +97,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
 
             if (multiPlayer != null)
-               multiPlayer.notifyOfIndexChange(0);
+               multiPlayer.indexChanged(0);
 
          }
 
