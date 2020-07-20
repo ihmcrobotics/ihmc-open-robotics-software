@@ -677,7 +677,7 @@ public class WorkspaceLimiterControlModule
       // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...
       else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() && (
             desiredPercentOfLegLength.getDoubleValue()
-            < maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() - percentOfLegLengthMarginToEnableSingularityAvoidance.getDoubleValue()))
+            < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() - percentOfLegLengthMarginToDisableSingularityAvoidance.getDoubleValue()))
       {
          // Call this twice here to smooth faster. Need to get out of singularity avoidance!
          heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
@@ -685,7 +685,7 @@ public class WorkspaceLimiterControlModule
 
          // If leg is bent a lot and singularity avoidance no longer needed, stop smoothing...
          if (desiredPercentOfLegLength.getDoubleValue()
-             < maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() - percentOfLegLengthMarginToAbortSingularityAvoidance.getDoubleValue())
+             < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() - percentOfLegLengthMarginToAbortSingularityAvoidance.getDoubleValue())
          {
             alphaSupportSingularityAvoidance.set(0.0);
             isSupportSingularityAvoidanceUsed.set(false);
