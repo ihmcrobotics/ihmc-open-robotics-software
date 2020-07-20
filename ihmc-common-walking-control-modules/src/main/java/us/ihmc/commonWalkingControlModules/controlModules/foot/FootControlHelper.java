@@ -33,7 +33,6 @@ public class FootControlHelper
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final ToeSlippingDetector toeSlippingDetector;
@@ -78,15 +77,10 @@ public class FootControlHelper
 
       if (walkingControllerParameters.enableLegSingularityAndKneeCollapseAvoidanceModule())
       {
-//         legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-//                                                                                                                       walkingControllerParameters,
-//                                                                                                                       controllerToolbox, registry);
-         legSingularityAndKneeCollapseAvoidanceControlModule = null;
          workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix, contactableFoot, robotSide, walkingControllerParameters, controllerToolbox, registry);
       }
       else
       {
-         legSingularityAndKneeCollapseAvoidanceControlModule = null;
          workspaceLimiterControlModule = null;
       }
 
@@ -170,11 +164,6 @@ public class FootControlHelper
    public FrameVector3D getFullyConstrainedNormalContactVector()
    {
       return fullyConstrainedNormalContactVector;
-   }
-
-   public LegSingularityAndKneeCollapseAvoidanceControlModule getLegSingularityAndKneeCollapseAvoidanceControlModule()
-   {
-      return legSingularityAndKneeCollapseAvoidanceControlModule;
    }
 
    public WorkspaceLimiterControlModule getWorkspaceLimiterControlModule()
