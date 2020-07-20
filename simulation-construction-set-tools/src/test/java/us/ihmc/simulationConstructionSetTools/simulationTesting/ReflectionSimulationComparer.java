@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.reflect.RecursiveObjectComparer;
 import us.ihmc.tools.reflect.StringFieldMatcher;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.yoVariables.listener.YoRegistryChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableList;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -163,7 +163,7 @@ public class ReflectionSimulationComparer implements SimulationComparer
 
    private static void addStandardStuffToIgnore(ReflectionSimulationComparer comparer)
    {
-      comparer.addClassToIgnore(DataBuffer.class);
+      comparer.addClassToIgnore(YoBuffer.class);
       comparer.addClassToIgnore(YoVariableList.class);
       comparer.addClassToIgnore(YoRegistryChangedListener.class);    // to break the link from a controller to the SCS object
 

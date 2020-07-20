@@ -6,7 +6,7 @@ import java.util.List;
 
 import us.ihmc.simulationconstructionset.DataFileReader;
 import us.ihmc.simulationconstructionset.DataFileWriter;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableList;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -33,7 +33,7 @@ public class BinaryToASCIIDataFileConverter
 
       YoVariableList newVars = new YoVariableList("Converter");
 
-      DataBuffer dataBuffer = new DataBuffer(bufferSize);
+      YoBuffer dataBuffer = new YoBuffer(bufferSize);
 
       YoRegistry rootRegistry = new YoRegistry("root");
 

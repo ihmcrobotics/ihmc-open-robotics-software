@@ -49,8 +49,8 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.gui.SwingUtils;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener
@@ -550,7 +550,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       {
          PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
-         DataBuffer dataBuffer = exportData.scs.getDataBuffer();
+         YoBuffer dataBuffer = exportData.scs.getDataBuffer();
 
          List<YoVariable> varsYo = Stream.of(vars).map(varName -> exportData.scs.findVariable(varName)).collect(Collectors.toList());
          writeSpreadsheetFormattedData(chosenFile, dataBuffer, varsYo, timeVariable);
@@ -598,9 +598,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       }
 
-      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, List<? extends YoVariable> vars, String timeVariable)
+      private void writeSpreadsheetFormattedData(File chosenFile, YoBuffer dataBuffer, List<? extends YoVariable> vars, String timeVariable)
       {
-         List<DataBufferEntry> entries = dataBuffer.getEntries();
+         List<YoBufferVariableEntry> entries = dataBuffer.getEntries();
 
          try
          {
@@ -615,7 +615,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
             for (int i = 0; i < entries.size(); i++)
             {
-               DataBufferEntry entry = entries.get(i);
+               YoBufferVariableEntry entry = entries.get(i);
                YoVariable variable = entry.getVariable();
                entry.getBuffer();
 

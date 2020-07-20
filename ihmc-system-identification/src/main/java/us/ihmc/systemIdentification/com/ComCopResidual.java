@@ -22,7 +22,7 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 
 /**
  * Todo
@@ -38,7 +38,7 @@ public class ComCopResidual implements FunctionNtoM
    static boolean lockComY = false;
    private Robot robot;
    private Link targetLink;
-   private DataBuffer dataBuffer;
+   private YoBuffer dataBuffer;
    private int[] selectedFrames;
 
    /**
@@ -47,7 +47,7 @@ public class ComCopResidual implements FunctionNtoM
     * @param dataBuffer                - scs.getDataBuffer();
     * @param numSubsampleBetweenInOut: <0 (use keyPoints) >0 (equally spaced between in/out points);
     */
-   public ComCopResidual(Robot robot, String linkName, DataBuffer dataBuffer, int numSubsampleBetweenInOut)
+   public ComCopResidual(Robot robot, String linkName, YoBuffer dataBuffer, int numSubsampleBetweenInOut)
    {
       this.dataBuffer = dataBuffer;
 
