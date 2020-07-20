@@ -95,11 +95,11 @@ public class YoVariableConnectionBurstTest
       YoLong seq =  (YoLong)buffer.findVariable("seq_id");
       buffer.setLockIndex(true);
       long lastSeq = seq.getLongValue();
-      int lastIndex = buffer.getIndex();
+      int lastIndex = buffer.getCurrentIndex();
       
       for(int j=0;j<nCheck;j++)
       {
-    	  buffer.setIndex(lastIndex-j);
+    	  buffer.setCurrentIndex(lastIndex-j);
     	  assertEquals(seq.getLongValue() , (lastSeq-j));
       }
       

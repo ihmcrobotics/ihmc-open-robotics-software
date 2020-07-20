@@ -71,7 +71,7 @@ public class JavaFXHeatmapVisualizer
             x.set(3 * Math.cos(t));
             y.set(3 * Math.sin(t));
 
-            dataBuffer.tickAndUpdate();
+            dataBuffer.tickAndWriteIntoBuffer();
             graphIndicesHolder.tickLater(1);
 
             heatmapGraph.update();

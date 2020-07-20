@@ -212,12 +212,12 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                   simulationConstructionSet.setInPoint();
                   break;
                }
-               if (simulationConstructionSet.getIndex() == simulationConstructionSet.getOutPoint())
+               if (simulationConstructionSet.getCurrentIndex() == simulationConstructionSet.getOutPoint())
                {
                   return;
                }
 
-               simulationConstructionSet.tick(1);
+               simulationConstructionSet.tickAndReadFromBuffer(1);
             }
 
             while (true)
@@ -228,13 +228,13 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                   simulationConstructionSet.cutBuffer();
                   break;
                }
-               if (simulationConstructionSet.getIndex() == simulationConstructionSet.getOutPoint())
+               if (simulationConstructionSet.getCurrentIndex() == simulationConstructionSet.getOutPoint())
                {
                   simulationConstructionSet.cutBuffer();
                   break;
                }
 
-               simulationConstructionSet.tick(1);
+               simulationConstructionSet.tickAndReadFromBuffer(1);
             }
 
             simulationConstructionSet.setInOutPointFullBuffer();

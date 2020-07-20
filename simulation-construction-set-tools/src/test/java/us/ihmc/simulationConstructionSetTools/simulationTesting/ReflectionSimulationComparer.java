@@ -110,8 +110,8 @@ public class ReflectionSimulationComparer implements SimulationComparer
       System.out.println("Pre-rewind compare done");
 
       script.doFinalAction(scs0, scs1);
-      assertEquals("Indices are not equal after final action. Most likely that you overran the data buffer. Check the data buffer size!", scs0.getIndex(),
-                   scs1.getIndex());
+      assertEquals("Indices are not equal after final action. Most likely that you overran the data buffer. Check the data buffer size!", scs0.getCurrentIndex(),
+                   scs1.getCurrentIndex());
 
       Collection<Field> fieldsToIgnore = new ArrayList<Field>();
       Collection<String> fieldNamesToNeverIgnore = new ArrayList<String>();

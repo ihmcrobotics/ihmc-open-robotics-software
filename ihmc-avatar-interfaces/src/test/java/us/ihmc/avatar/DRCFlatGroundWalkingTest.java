@@ -264,7 +264,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       scs.gotoInPointNow();
       while(Math.abs(desiredICPX.getDoubleValue()) < 1e-4)
       {
-         scs.tick(1);
+         scs.tickAndReadFromBuffer(1);
       }
       scs.setInPoint();
 

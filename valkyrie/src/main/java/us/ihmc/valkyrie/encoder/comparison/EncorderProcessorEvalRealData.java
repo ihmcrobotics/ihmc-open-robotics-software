@@ -108,7 +108,7 @@ public class EncorderProcessorEvalRealData
                processedRates.get(processor).set(processor.getQd());
             }
 
-            dataBuffer.tickAndUpdate();
+            dataBuffer.tickAndWriteIntoBuffer();
             prevPosition=encoder.getPosition();
             encoder.nextTimestep();
       }

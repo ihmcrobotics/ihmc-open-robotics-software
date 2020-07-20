@@ -147,7 +147,7 @@ public class FootstepVisualizer
    private static void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
    {
       scs.gotoInPointNow();
-      scs.tick(1);
+      scs.tickAndReadFromBuffer(1);
       scs.setInPoint();
       scs.cropBuffer();
       scs.gotoOutPointNow();

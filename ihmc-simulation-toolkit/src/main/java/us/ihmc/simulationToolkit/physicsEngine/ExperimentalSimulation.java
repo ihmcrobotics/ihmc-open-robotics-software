@@ -286,7 +286,7 @@ public class ExperimentalSimulation extends Simulation
                numTicks = -1;
          }
 
-         getDataBuffer().tickAndUpdate();
+         getDataBuffer().tickAndWriteIntoBuffer();
          numTicks -= getRecordFreq();
       }
 
