@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 
-public class LogDataProcessorWrapper implements DataProcessingFunction, Script
+public class LogDataProcessorWrapper implements YoBufferProcessor, Script
 {
    private final YoRegistry logDataProcessorRegistry = new YoRegistry("LogDataProcessor");
 
@@ -41,13 +42,13 @@ public class LogDataProcessorWrapper implements DataProcessingFunction, Script
    }
 
    @Override
-   public void initializeProcessing()
+   public void initialize(YoVariableHolder yoVariableHolder)
    {
       saveYoVariablesAsDoubles();
    }
 
    @Override
-   public void processData()
+   public void process(int startIndex, int endIndex, int currentIndex)
    {
       updateIsControllerTick();
       retrieveYoVariablesFromDoubles();

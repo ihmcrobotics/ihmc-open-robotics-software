@@ -36,7 +36,8 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerS
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerStateFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidDiagnosticsWhenHangingAnalyzer;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HumanoidDiagnosticsWhenHangingSimulation
@@ -258,16 +259,16 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+         YoBufferProcessor dataProcessingFunction = new YoBufferProcessor()
          {
             @Override
-            public void processData()
+            public void process(int startIndex, int endIndex, int currentIndex)
             {
                analyzer.copyMeasuredTorqueToAppliedTorque();
             }
 
             @Override
-            public void initializeProcessing()
+            public void initialize(YoVariableHolder yoVariableHolder)
             {
             }
          };
