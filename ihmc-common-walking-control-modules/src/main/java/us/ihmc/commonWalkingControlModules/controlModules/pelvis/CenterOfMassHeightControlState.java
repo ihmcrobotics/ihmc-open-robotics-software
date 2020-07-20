@@ -213,11 +213,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
    private final FrameVector2D comXYVelocity = new FrameVector2D();
    private final FrameVector2D desiredComAcceleration = new FrameVector2D();
-   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData("beforeSmoothing", registry);
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData("afterSmoothing", registry);
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new CoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
-   private final CoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new CoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
-   private final CoMHeightTimeDerivativesData finalComHeightData = new CoMHeightTimeDerivativesData("finalComHeightData", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new YoCoMHeightTimeDerivativesData("beforeSmoothing", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new YoCoMHeightTimeDerivativesData("afterSmoothing", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new YoCoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new YoCoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
+   private final YoCoMHeightTimeDerivativesData finalComHeightData = new YoCoMHeightTimeDerivativesData("finalComHeightData", registry);
 
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D pelvisPosition = new FramePoint3D();

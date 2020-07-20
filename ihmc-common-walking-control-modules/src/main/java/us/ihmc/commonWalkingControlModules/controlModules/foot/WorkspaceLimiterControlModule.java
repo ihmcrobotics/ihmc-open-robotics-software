@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -536,7 +535,7 @@ public class WorkspaceLimiterControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
    {
       isUnreachableFootstepCompensated.set(false);
 
@@ -577,7 +576,7 @@ public class WorkspaceLimiterControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                           double zCurrentInWorld,
                                                                           ReferenceFrame pelvisZUpFrame,
                                                                           ConstraintType constraintType)
@@ -660,7 +659,7 @@ public class WorkspaceLimiterControlModule
       alphaToUpdate.set(MathTools.clamp(alpha, 0.0, 1.0));
    }
 
-   private void smoothTransitionOutOfSingularityAvoidanceInSupport(CoMHeightTimeDerivativesData comHeightDataToCorrect)
+   private void smoothTransitionOutOfSingularityAvoidanceInSupport(YoCoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
       heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
       heightVelocityCorrectedFilteredForSingularityAvoidance.update(comHeightDataToCorrect.getComHeightVelocity());
@@ -700,7 +699,7 @@ public class WorkspaceLimiterControlModule
 
    private final FrameVector2DBasics comVelocity = new FrameVector2D();
 
-   private void applySingularityAvoidanceInSupport(CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   private void applySingularityAvoidanceInSupport(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                    double zCurrent,
                                                    ReferenceFrame pelvisZUpFrame)
    {
