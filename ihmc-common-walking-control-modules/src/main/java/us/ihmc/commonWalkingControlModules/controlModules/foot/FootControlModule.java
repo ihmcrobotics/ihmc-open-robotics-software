@@ -365,25 +365,29 @@ public class FootControlModule
          workspaceLimiterControlModule.update();
    }
 
-   public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public boolean correctCoMHeightTrajectoryForSupportSingularityAvoidance(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                         double zCurrent,
                                                                         ReferenceFrame pelvisZUpFrame)
    {
       if (workspaceLimiterControlModule != null)
       {
-         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comHeightDataToCorrect,
-                                                                                                  zCurrent,
-                                                                                                  pelvisZUpFrame,
-                                                                                                  getCurrentConstraintType());
+         return workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comHeightDataToCorrect,
+                                                                                                         zCurrent,
+                                                                                                         pelvisZUpFrame,
+                                                                                                         getCurrentConstraintType());
       }
+
+      return false;
    }
 
-   public void correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect)
+   public boolean correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
       if (workspaceLimiterControlModule != null)
       {
-         workspaceLimiterControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
+         return workspaceLimiterControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
       }
+
+      return false;
    }
 
    public void setFootstep(Footstep footstep, double swingTime)
