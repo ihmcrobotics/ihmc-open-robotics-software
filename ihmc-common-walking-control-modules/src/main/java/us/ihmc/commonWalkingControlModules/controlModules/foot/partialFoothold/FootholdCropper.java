@@ -34,6 +34,8 @@ public class FootholdCropper
    private static final double defaultThresholdForMeasuredCellActivation = 1.0;
    private static final double defaultMeasuredDecayRatePerSecond = 0.0;// 0.2;
 
+   private final FootholdRotationParameters rotationParameters;
+
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygonInWorld;
@@ -47,6 +49,7 @@ public class FootholdCropper
    private final OccupancyGrid measuredCoPOccupancy;
    private final FootCoPOccupancyCalculator footCoPOccupancyGrid;
    private final FootCoPHullCalculator footCoPHullCropper;
+   private final FootDropCropper footDropCropper;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final BooleanProvider doPartialFootholdDetection;
@@ -67,6 +70,8 @@ public class FootholdCropper
                           YoVariableRegistry parentRegistry,
                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.rotationParameters = rotationParameters;
+
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(defaultContactPoints));
       numberOfFootCornerPoints = defaultContactPoints.size();
 
@@ -85,6 +90,7 @@ public class FootholdCropper
 
       footCoPOccupancyGrid = new FootCoPOccupancyCalculator(namePrefix, measuredCoPOccupancy, rotationParameters, registry);
       footCoPHullCropper = new FootCoPHullCalculator(namePrefix, measuredCoPOccupancy, rotationParameters, registry);
+      footDropCropper = new FootDropCropper(namePrefix, soleFrame, rotationParameters, registry);
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "SideOfFootToCrop", registry, RobotSide.class, true);
 
@@ -137,6 +143,7 @@ public class FootholdCropper
       measuredCoPOccupancy.reset();
       footCoPHullCropper.reset();
       footCoPOccupancyGrid.reset();
+      footDropCropper.reset();
       if (measuredVisualizer != null)
          measuredVisualizer.update();
    }
@@ -158,23 +165,38 @@ public class FootholdCropper
 
    public RobotSide computeSideToCrop(FrameLine2DReadOnly lineOfRotation)
    {
-      RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
-      RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
-
-      boolean sidesAreConsistent = sideOfFootToCropFromOccupancy != null && sideOfFootToCropFromHull != null;
-      sidesAreConsistent &= sideOfFootToCropFromOccupancy == sideOfFootToCropFromHull;
       hasEnoughAreaToCrop.set(shrunkenFootPolygon.getArea() > minAreaToConsider.getValue());
 
-      if (sidesAreConsistent && hasEnoughAreaToCrop.getBooleanValue())
+      RobotSide sideOfFootToCrop = getSideToCrop(lineOfRotation);
+      if (sideOfFootToCrop != null && hasEnoughAreaToCrop.getBooleanValue())
       {
-         sideOfFootToCrop.set(sideOfFootToCropFromOccupancy);
+         this.sideOfFootToCrop.set(sideOfFootToCrop);
       }
       else
       {
-         sideOfFootToCrop.set(null);
+         this.sideOfFootToCrop.set(null);
       }
 
-      return sideOfFootToCrop.getEnumValue();
+      return this.sideOfFootToCrop.getEnumValue();
+   }
+
+   private RobotSide getSideToCrop(FrameLine2DReadOnly lineOfRotation)
+   {
+      RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
+      RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
+      RobotSide sideOfFootToCropFromDrop = footDropCropper.computeSideOfFootholdToCrop(lineOfRotation);
+
+      if (!rotationParameters.getUseCoPOccupancyGridForCropping().getValue())
+         return sideOfFootToCropFromDrop;
+
+      boolean sidesAreConsistent = sideOfFootToCropFromOccupancy != null && sideOfFootToCropFromHull != null;
+      sidesAreConsistent &= sideOfFootToCropFromOccupancy == sideOfFootToCropFromHull;
+      boolean sideIsntBad = sideOfFootToCropFromDrop == null || sideOfFootToCropFromDrop == sideOfFootToCropFromOccupancy;
+
+      if (sidesAreConsistent && sideIsntBad)
+         return sideOfFootToCropFromOccupancy;
+      else
+         return null;
    }
 
    public void computeShrunkenFoothold(FrameLine2DReadOnly lineOfRotation, RobotSide sideOfFootToCrop)
