@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.gui.MinimalGraphIndicesHolder;
 import us.ihmc.simulationconstructionset.gui.MinimalTimeDataHolder;
 import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntryReader;
 import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntryHolder;
-import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
+import us.ihmc.yoVariables.dataBuffer.YoTimeBufferHolder;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class JavaFX3DGraphVisualizer
