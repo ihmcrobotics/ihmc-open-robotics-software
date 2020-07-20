@@ -5,29 +5,29 @@ import java.io.File;
 
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntry;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
 
 public class DataExporterGraphCreator
 {
-   protected final DataBuffer dataBuffer;
-   private final DataBufferEntry timeEntry;
+   protected final YoBuffer dataBuffer;
+   private final YoBufferVariableEntry timeEntry;
 
-   public DataExporterGraphCreator(YoDouble timeYoVariable, DataBuffer dataBuffer)
+   public DataExporterGraphCreator(YoDouble timeYoVariable, YoBuffer dataBuffer)
    {
       this.dataBuffer = dataBuffer;
       this.timeEntry = dataBuffer.getEntry(timeYoVariable);
    }
 
-   public void createDataVsTimeGraph(File directory, String fileHeader, DataBufferEntry dataBufferEntry, boolean createJPG, boolean createPDF, Color color)
+   public void createDataVsTimeGraph(File directory, String fileHeader, YoBufferVariableEntry dataBufferEntry, boolean createJPG, boolean createPDF, Color color)
    {
       JFreeGraph graph = JFreeGraph.createDataVsTimeGraph(timeEntry, dataBufferEntry, color);
       String graphName = fileHeader + "_" + dataBufferEntry.getVariable().getName();
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
 
-   public void createDataVsTimeGraph(File directory, String fileHeader, DataBufferEntry dataBufferEntry, boolean createJPG, boolean createPDF, String xLabel, String yLabel, Color color)
+   public void createDataVsTimeGraph(File directory, String fileHeader, YoBufferVariableEntry dataBufferEntry, boolean createJPG, boolean createPDF, String xLabel, String yLabel, Color color)
    {
       JFreeGraph graph = JFreeGraph.createDataVsTimeGraph(timeEntry, dataBufferEntry, dataBufferEntry.getVariableName(), xLabel, yLabel, color);
       String graphName = fileHeader + "_" + dataBufferEntry.getVariable().getName();
@@ -36,11 +36,11 @@ public class DataExporterGraphCreator
 
    public void createDataVsTimeGraph(File directory, String fileHeader, YoVariable variable, boolean createJPG, boolean createPDF, Color color)
    {
-      DataBufferEntry dataBufferEntry = dataBuffer.getEntry(variable);
+      YoBufferVariableEntry dataBufferEntry = dataBuffer.getEntry(variable);
       createDataVsTimeGraph(directory, fileHeader, dataBufferEntry, createJPG, createPDF, color);
    }
 
-   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry, boolean createJPG,
+   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, boolean createJPG,
          boolean createPDF, Color color)
    {
       JFreeGraph graph = JFreeGraph.createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, color);
@@ -48,7 +48,7 @@ public class DataExporterGraphCreator
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
 
-   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry, boolean createJPG,
+   public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, boolean createJPG,
                                            boolean createPDF, String title, String xLabel, String yLabel, Color color)
    {
       JFreeGraph graph = JFreeGraph.createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, title, xLabel, yLabel, color);
@@ -59,8 +59,8 @@ public class DataExporterGraphCreator
    public void createDataOneVsDataTwoGraph(File directory, String fileHeader, YoVariable variableOne, YoVariable variableTwo, boolean createJPG,
          boolean createPDF, Color color)
    {
-      DataBufferEntry dataOneEntry = dataBuffer.getEntry(variableOne);
-      DataBufferEntry dataTwoEntry = dataBuffer.getEntry(variableTwo);
+      YoBufferVariableEntry dataOneEntry = dataBuffer.getEntry(variableOne);
+      YoBufferVariableEntry dataTwoEntry = dataBuffer.getEntry(variableTwo);
       
       createDataOneVsDataTwoGraph(directory, fileHeader, dataOneEntry, dataTwoEntry, createJPG, createPDF, color);
    }

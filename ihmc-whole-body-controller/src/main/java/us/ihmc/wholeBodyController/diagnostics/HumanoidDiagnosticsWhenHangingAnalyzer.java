@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -390,7 +390,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
          YoDouble estimatedTorque = controller.getEstimatedTorqueYoVariable(oneDoFJoint);
          YoDouble torqueOffset = controller.getTorqueOffsetVariable(oneDoFJoint);
 
-         DataBuffer dataBuffer = simulationConstructionSet.getDataBuffer();
+         YoBuffer dataBuffer = simulationConstructionSet.getDataBuffer();
 
          if (appliedTorque != null)
          {

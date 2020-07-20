@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -168,7 +168,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.closeAndDispose();
    }
 
-   public DataBuffer getDataBuffer()
+   public YoBuffer getDataBuffer()
    {
       return scs.getDataBuffer();
    }

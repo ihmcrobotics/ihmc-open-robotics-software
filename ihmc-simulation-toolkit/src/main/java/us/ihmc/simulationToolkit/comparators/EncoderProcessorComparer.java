@@ -25,7 +25,7 @@ import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProce
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineSimpleEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcessor;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -41,7 +41,7 @@ public class EncoderProcessorComparer
    private final YoDouble time;
    private final YoDouble actualPosition;
    private final YoDouble actualRate, actualRateInTicksPerSecond;
-   private final DataBuffer dataBuffer;
+   private final YoBuffer dataBuffer;
 
    private final ArrayList<EncoderProcessorEvaluationTrajectory> jointTrajectories;
    private final double maxTime;

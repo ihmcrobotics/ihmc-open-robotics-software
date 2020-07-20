@@ -15,7 +15,7 @@ import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProce
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineSimpleEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcessor;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -30,7 +30,7 @@ public class EncorderProcessorEvalRealData
    private final YoDouble rawPosition;
    private final YoDouble time;
    private final YoDouble turboJerryRate,fdRate;
-   private final DataBuffer dataBuffer;
+   private final YoBuffer dataBuffer;
 
    private final double dt;
    private final RealLifeEncoderTrajectory encoder;

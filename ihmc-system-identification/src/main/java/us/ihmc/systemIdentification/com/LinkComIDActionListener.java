@@ -8,16 +8,16 @@ import javax.swing.JOptionPane;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 
 public class LinkComIDActionListener implements ActionListener
 {
 
    private String[] linkNames;
-   private DataBuffer dataBuffer;
+   private YoBuffer dataBuffer;
    private final Robot robot;
 
-   public LinkComIDActionListener(DataBuffer dataBuffer, Robot robot)
+   public LinkComIDActionListener(YoBuffer dataBuffer, Robot robot)
    {
       this.dataBuffer = dataBuffer;
       this.robot = robot;

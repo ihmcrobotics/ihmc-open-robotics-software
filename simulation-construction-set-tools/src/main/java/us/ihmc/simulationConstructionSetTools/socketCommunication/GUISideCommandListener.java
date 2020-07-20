@@ -10,7 +10,7 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableList;
@@ -43,9 +43,9 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
 
    private int numTicks = 0;
    private int logVarsCount;
-   DataBuffer dataBuffer;
+   YoBuffer dataBuffer;
 
-   public GUISideCommandListener(DataBuffer dataBuffer, YoRegistry rootRegistry, CreatedNewVariablesListener createdNewVariablesListener,
+   public GUISideCommandListener(YoBuffer dataBuffer, YoRegistry rootRegistry, CreatedNewVariablesListener createdNewVariablesListener,
          ReceivedDataListener receivedDataListener)
    {
       this.dataBuffer = dataBuffer;

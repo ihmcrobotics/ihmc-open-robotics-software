@@ -1,13 +1,13 @@
 package us.ihmc.simulationConstructionSetTools.util.graphs;
 
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntry;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
 public class FrequencyPlot extends JFreePlot
 {
    private static final long serialVersionUID = 256604511093215927L;
 
-   public FrequencyPlot(String name, DataBufferEntry time, DataBufferEntry data)
+   public FrequencyPlot(String name, YoBufferVariableEntry time, YoBufferVariableEntry data)
    {
       this(name, time.getBuffer(), data.getBuffer());
    }
