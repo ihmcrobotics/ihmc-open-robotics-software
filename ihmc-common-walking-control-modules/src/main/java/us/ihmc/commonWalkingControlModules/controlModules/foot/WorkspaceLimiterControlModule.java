@@ -41,7 +41,6 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class WorkspaceLimiterControlModule
 {
    private static final double epsilon = 5e-3;
-   private static final double defaultMinVelocityDifference = 5e-4;
    private boolean visualize = true;
    private boolean moreVisualizers = true;
 
@@ -589,8 +588,12 @@ public class WorkspaceLimiterControlModule
 
       if (constraintType.isLoadBearing())
       {
-//         return smoothTransitionOutOfHeightCorrectionInSwing(comHeightDataToCorrect, constraintType);
-         return false;
+         return smoothTransitionOutOfHeightCorrectionInSwing(comHeightDataToCorrect, constraintType);
+//         return false;
+      }
+      else
+      {
+         doSmoothTransitionOutOfUnreachableStep.set(false);
       }
 
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
@@ -807,6 +810,7 @@ public class WorkspaceLimiterControlModule
          return false;
 
       unachievedSwingTranslationFiltered.update(0.0);
+
       unachievedSwingVelocityFiltered.update(unachievedSwingTranslationFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getValue());
       unachievedSwingAccelerationFiltered.update(
             unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getValue());

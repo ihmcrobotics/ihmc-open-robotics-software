@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesDataBasics;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
@@ -368,9 +369,9 @@ public class FootControlModule
          workspaceLimiterControlModule.update();
    }
 
-   public boolean correctCoMHeightTrajectoryForSupportSingularityAvoidance(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
-                                                                        double zCurrent,
-                                                                        ReferenceFrame pelvisZUpFrame)
+   public boolean correctCoMHeightTrajectoryForSupportSingularityAvoidance(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect,
+                                                                           double zCurrent,
+                                                                           ReferenceFrame pelvisZUpFrame)
    {
       if (workspaceLimiterControlModule != null)
       {
@@ -383,7 +384,7 @@ public class FootControlModule
       return false;
    }
 
-   public boolean correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect)
+   public boolean correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect)
    {
       if (workspaceLimiterControlModule != null)
       {
