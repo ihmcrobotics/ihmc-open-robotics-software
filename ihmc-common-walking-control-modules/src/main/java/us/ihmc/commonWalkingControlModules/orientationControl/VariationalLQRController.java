@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.orientationControl;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -82,10 +83,12 @@ public class VariationalLQRController
       inertia.getMomentOfInertia().get(this.inertia);
    }
 
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
    public void setDesired(QuaternionReadOnly desiredRotation, Vector3DReadOnly desiredAngularVelocity, Vector3DReadOnly desiredTorque)
    {
       // FIXME check these frames
-      desiredRotation.get(RBd);
+      desiredRotation.get(rotationMatrix);
+      rotationMatrix.get(RBd);
       desiredAngularVelocity.get(wBd);
       desiredTorque.get(tauD);
 
@@ -121,7 +124,7 @@ public class VariationalLQRController
 
    private void assembleBMatrix()
    {
-      MatrixMissingTools.setMatrixBlock(B, 9, 0, B2, 0, 0, 3, 3, 1.0);
+      MatrixMissingTools.setMatrixBlock(B, 3, 0, B2, 0, 0, 3, 3, 1.0);
    }
 
    public void compute(QuaternionReadOnly currentRotation, Vector3DReadOnly currentAngularVelocity)
