@@ -313,7 +313,7 @@ public class LogVisualizer
       return new PlaybackListener()
       {
          @Override
-         public void notifyOfIndexChange(int newIndex)
+         public void indexChanged(int newIndex)
          {
             updateYoGraphics(yoGraphicsListRegistry);
          }
