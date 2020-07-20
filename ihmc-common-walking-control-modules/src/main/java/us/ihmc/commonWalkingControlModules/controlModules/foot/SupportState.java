@@ -112,7 +112,6 @@ public class SupportState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
-   private final BooleanProvider avoidFootRotations;
    private final BooleanProvider dampFootRotations;
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
@@ -211,7 +210,6 @@ public class SupportState extends AbstractFootControlState
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
-      avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
       dampFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "dampFootRotations", registry, false);
       footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
 
@@ -343,16 +341,13 @@ public class SupportState extends AbstractFootControlState
       if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
          contactState.notifyContactStateHasChanged();
 
-      if (footRotationCalculationModule.isRotating() && avoidFootRotations.getValue())
+      if (footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
       {
-         if (dampFootRotations.getValue())
-         {
-            PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
-            PID3DGains localOrientationGains = localGains.getOrientationGains();
-            localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
-            localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
-            dampingRotations = true;
-         }
+         PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
+         PID3DGains localOrientationGains = localGains.getOrientationGains();
+         localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
+         localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
+         dampingRotations = true;
       }
 
       // update the control frame
@@ -445,7 +440,8 @@ public class SupportState extends AbstractFootControlState
       desiredOrientation.changeFrame(soleZUpFrame);
 
       // The z component is always updated as it is never held in place
-      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
+      if (footBarelyLoaded.getBooleanValue()
+          && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
       { // Only the z component is not held
          desiredPosition.setZ(footPosition.getZ());
       }
@@ -511,9 +507,9 @@ public class SupportState extends AbstractFootControlState
     * taken and the desired foot pitch at the start of swing is provided. This method will enable toe
     * or heel contact points depending on the direction of the pitch motion.
     *
-    * @param finalPitchInSoleZUp         is the final desired foot pitch at lift off.
+    * @param finalPitchInSoleZUp is the final desired foot pitch at lift off.
     * @param finalPitchVelocityInSoleZUp is the final desired foot pitch velocity at lift off.
-    * @param duration                    the time until expected foot lift off.
+    * @param duration the time until expected foot lift off.
     */
    public void liftOff(double finalPitchInSoleZUp, double finalPitchVelocityInSoleZUp, double duration)
    {
@@ -541,10 +537,10 @@ public class SupportState extends AbstractFootControlState
     * provided. This method will enable toe or heel contact points depending on the direction of the
     * pitch motion.
     *
-    * @param initialPitchInSoleZUp         is the initial pitch at touchdown.
+    * @param initialPitchInSoleZUp is the initial pitch at touchdown.
     * @param initialPitchVelocityInSoleZUp is the initial pitch velocity at touchdown.
-    * @param finalPitchInSoleZUp           is the final desired foot pitch for full support.
-    * @param duration                      the time until the foot should enter full support.
+    * @param finalPitchInSoleZUp is the final desired foot pitch for full support.
+    * @param duration the time until the foot should enter full support.
     */
    public void touchDown(double initialPitchInSoleZUp, double initialPitchVelocityInSoleZUp, double finalPitchInSoleZUp, double duration)
    {
@@ -621,5 +617,4 @@ public class SupportState extends AbstractFootControlState
       this.angularWeight = angularWeight;
       this.linearWeight = linearWeight;
    }
-
 }
