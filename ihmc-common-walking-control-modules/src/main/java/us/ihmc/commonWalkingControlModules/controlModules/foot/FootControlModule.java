@@ -367,15 +367,13 @@ public class FootControlModule
          workspaceLimiterControlModule.update();
    }
 
-   public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(FrameVector2DReadOnly comXYVelocity,
-                                                                        CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                         double zCurrent,
                                                                         ReferenceFrame pelvisZUpFrame)
    {
       if (workspaceLimiterControlModule != null)
       {
-         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comXYVelocity,
-                                                                                                  comHeightDataToCorrect,
+         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comHeightDataToCorrect,
                                                                                                   zCurrent,
                                                                                                   pelvisZUpFrame,
                                                                                                   getCurrentConstraintType());
