@@ -39,11 +39,11 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WorkspaceLimiterControlModule
 {
+   private static final double epsilon = 5e-3;
    private boolean visualize = true;
    private boolean moreVisualizers = true;
 
    private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = true; // Lower the CoM if a footstep is unreachable
-   private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION = true; // When false, the module will correct only the velocity and acceleration of the CoM height.
 
    private final BooleanParameter useSingularityAvoidanceInSwing;
 
@@ -542,7 +542,7 @@ public class WorkspaceLimiterControlModule
       if (!USE_UNREACHABLE_FOOTSTEP_CORRECTION)
          return;
 
-      if (constraintType != ConstraintType.SWING && constraintType != ConstraintType.MOVE_VIA_WAYPOINTS)
+      if (constraintType.isLoadBearing())
          return;
 
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
@@ -554,19 +554,16 @@ public class WorkspaceLimiterControlModule
          unachievedSwingTranslationFiltered.update(unachievedSwingTranslation.getZ());
          desiredCenterOfMassHeightPoint.addZ(unachievedSwingTranslationFiltered.getDoubleValue());
 
-         if (USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION)
-         {
-            comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
+         comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
 
-            unachievedSwingVelocityFiltered.update(
-                  unachievedSwingTranslationFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
-            unachievedSwingAccelerationFiltered.update(
-                  unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+         unachievedSwingVelocityFiltered.update(
+               unachievedSwingTranslationFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+         unachievedSwingAccelerationFiltered.update(
+               unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
 
-            comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
-            comHeightDataToCorrect.setComHeightAcceleration(
+         comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
+         comHeightDataToCorrect.setComHeightAcceleration(
                   comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
-         }
       }
       else
       {
@@ -670,7 +667,7 @@ public class WorkspaceLimiterControlModule
       comHeightDataToCorrect.setComHeightAcceleration(heightAccelerationCorrectedFilteredForSingularityAvoidance.getDoubleValue());
 
       // If the filtered desired com height caught up to the input one, then stop doing smooth transition.
-      if (MathTools.epsilonEquals(desiredCenterOfMassHeightPoint.getZ() - heightCorrectedFilteredForSingularityAvoidance.getDoubleValue(), 0.0, 5e-3))
+      if (MathTools.epsilonEquals(desiredCenterOfMassHeightPoint.getZ(), heightCorrectedFilteredForSingularityAvoidance.getDoubleValue(), epsilon))
       {
          alphaSupportSingularityAvoidance.set(0.0);
          isSupportSingularityAvoidanceUsed.set(false);
