@@ -12,7 +12,7 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataVisualizer.logger.LogVisualizer;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
 
 public abstract class DRCLogProcessor
 {

@@ -10,9 +10,9 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.simulationconstructionset.gui.MinimalGraphIndicesHolder;
 import us.ihmc.simulationconstructionset.gui.MinimalTimeDataHolder;
-import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntryReader;
-import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntryHolder;
-import us.ihmc.yoVariables.dataBuffer.YoTimeBufferHolder;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferVariableEntryHolder;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferVariableEntryReader;
+import us.ihmc.yoVariables.buffer.interfaces.YoTimeBufferHolder;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class JavaFX3DGraphVisualizer

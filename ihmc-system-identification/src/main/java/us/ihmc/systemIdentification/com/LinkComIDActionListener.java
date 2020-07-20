@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 
 public class LinkComIDActionListener implements ActionListener
 {

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 
 public class RobotAllJointsDataChecker implements YoBufferProcessor

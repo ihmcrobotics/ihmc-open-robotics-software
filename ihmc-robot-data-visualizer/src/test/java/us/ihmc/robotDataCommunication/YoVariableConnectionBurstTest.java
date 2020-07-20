@@ -8,7 +8,7 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;

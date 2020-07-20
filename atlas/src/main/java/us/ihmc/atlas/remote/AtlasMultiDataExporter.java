@@ -49,8 +49,8 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.gui.SwingUtils;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
-import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener

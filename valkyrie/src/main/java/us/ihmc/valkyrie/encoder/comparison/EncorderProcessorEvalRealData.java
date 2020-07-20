@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.encoder.comparison;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -15,7 +16,6 @@ import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProce
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineSimpleEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcessor;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;

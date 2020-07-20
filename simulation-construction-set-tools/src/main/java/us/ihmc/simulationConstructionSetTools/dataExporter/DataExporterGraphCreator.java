@@ -3,10 +3,10 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 import java.awt.Color;
 import java.io.File;
 
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
-import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntry;
 import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
 
 public class DataExporterGraphCreator

@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;

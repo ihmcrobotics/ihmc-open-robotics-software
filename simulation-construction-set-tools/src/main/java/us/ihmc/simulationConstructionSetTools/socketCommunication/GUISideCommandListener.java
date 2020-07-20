@@ -10,7 +10,7 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableList;
