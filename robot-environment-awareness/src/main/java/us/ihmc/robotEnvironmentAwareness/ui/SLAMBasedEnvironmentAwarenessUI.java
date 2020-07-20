@@ -203,7 +203,7 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       }
    }
 
-   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
+   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Messager messager, Stage primaryStage) throws Exception
    {
       Messager moduleMessager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
                                                                 NetworkPorts.SLAM_MODULE_UI_PORT,

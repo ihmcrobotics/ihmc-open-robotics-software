@@ -13,8 +13,8 @@ public class SLAMPerceptionSuiteElement implements PerceptionSuiteElement<SLAMMo
    public SLAMPerceptionSuiteElement(ModuleProvider<SLAMModule> moduleProvider, UIProvider<SLAMBasedEnvironmentAwarenessUI> uiProvider) throws Exception
    {
       stage = new Stage();
-      perceptionModule = moduleProvider.createModule();
-      uiModule = uiProvider.createUI(stage);
+      perceptionModule = moduleProvider.createModule(null);
+      uiModule = uiProvider.createUI(null, stage);
 
       perceptionModule.start();
 

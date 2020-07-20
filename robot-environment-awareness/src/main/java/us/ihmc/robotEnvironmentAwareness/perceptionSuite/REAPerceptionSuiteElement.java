@@ -13,8 +13,8 @@ public class REAPerceptionSuiteElement implements PerceptionSuiteElement<LIDARBa
    public REAPerceptionSuiteElement(ModuleProvider<LIDARBasedREAModule> moduleProvider, UIProvider<LIDARBasedEnvironmentAwarenessUI> uiProvider) throws Exception
    {
       stage = new Stage();
-      perceptionModule = moduleProvider.createModule();
-      uiModule = uiProvider.createUI(stage);
+      perceptionModule = moduleProvider.createModule(null);
+      uiModule = uiProvider.createUI(null, stage);
       perceptionModule.start();
 
       stage.setOnCloseRequest((event) -> hide());

@@ -24,9 +24,9 @@ public class AtlasPerceptionSuite extends PerceptionSuite
    }
 
    @Override
-   protected SLAMModule createSLAMModule() throws Exception
+   protected SLAMModule createSLAMModule(Messager messager)
    {
-      return AtlasSLAMModule.createIntraprocessModule(ros2Node, robotModel);
+      return AtlasSLAMModule.createIntraprocessModule(ros2Node, robotModel, messager);
    }
 
    public static AtlasPerceptionSuite createIntraprocess(Messager messager)

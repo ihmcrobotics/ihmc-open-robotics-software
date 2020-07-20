@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.messager.Messager;
 
 public interface PerceptionSuiteElement<M extends PerceptionModule, U extends PerceptionUI>
 {
@@ -40,11 +41,11 @@ public interface PerceptionSuiteElement<M extends PerceptionModule, U extends Pe
 
    interface ModuleProvider<T>
    {
-      T createModule() throws Exception;
+      T createModule(Messager messager) throws Exception;
    }
 
    interface UIProvider<T>
    {
-      T createUI(Stage stage) throws Exception;
+      T createUI(Messager messager, Stage stage) throws Exception;
    }
 }

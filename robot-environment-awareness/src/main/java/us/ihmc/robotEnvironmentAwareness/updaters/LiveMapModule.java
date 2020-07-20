@@ -242,19 +242,8 @@ public class LiveMapModule implements PerceptionModule
       }
    }
 
-   public static LiveMapModule createIntraprocess(Ros2Node ros2Node) throws Exception
+   public static LiveMapModule createIntraprocess(Ros2Node ros2Node, Messager messager)
    {
-      Messager messager = createKryoMessager();
       return new LiveMapModule(ros2Node, messager);
-   }
-
-   private static Messager createKryoMessager() throws Exception
-   {
-      KryoMessager messager = KryoMessager.createIntraprocess(LiveMapModuleAPI.API,
-                                                              NetworkPorts.LIVEMAP_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      messager.startMessager();
-      return messager;
    }
 }
