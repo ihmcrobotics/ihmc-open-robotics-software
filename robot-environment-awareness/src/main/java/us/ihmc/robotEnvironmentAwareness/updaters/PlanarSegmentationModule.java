@@ -159,6 +159,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
+   @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       this.ocTree.set(ocTree);
@@ -201,7 +202,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       try
       {
          NormalOcTree latestOcTree = ocTree.getAndSet(null);
-         Tuple3DReadOnly latestSensorPose = this.sensorPosition.getAndSet(null);
+         Tuple3DReadOnly latestSensorPose = this.sensorPosition.get();
+         if (latestOcTree != null)
+         {
+            this.sensorPosition.set(null); // only set it to null when the other is not and it's been "read"
+         }
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();
