@@ -300,7 +300,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
 
       if (record)
       {
-         dataBuffer.setIndex(dataBuffer.getOutPoint() - 1);
+         dataBuffer.setCurrentIndex(dataBuffer.getOutPoint() - 1);
       }
       GUISideCommandListener.record = record;
    }

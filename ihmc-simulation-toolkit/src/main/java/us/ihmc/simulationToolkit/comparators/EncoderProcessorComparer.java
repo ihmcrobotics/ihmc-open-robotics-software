@@ -133,7 +133,7 @@ public class EncoderProcessorComparer
                processedRates.get(processor).set(processor.getQd());
             }
 
-            dataBuffer.tickAndUpdate();
+            dataBuffer.tickAndWriteIntoBuffer();
 
             int numJointUpdatesPerEncoderEvent = 20;
             for (int k = 0; k < numJointUpdatesPerEncoderEvent; k++)

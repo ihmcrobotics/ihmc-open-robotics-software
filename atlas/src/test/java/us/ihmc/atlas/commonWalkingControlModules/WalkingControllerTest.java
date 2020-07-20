@@ -609,7 +609,7 @@ public class WalkingControllerTest
    {
       if (showSCS)
       {
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
          scs.play();

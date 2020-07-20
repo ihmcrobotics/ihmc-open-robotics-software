@@ -272,7 +272,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       }
 
       scs.gotoInPointNow();
-      scs.tick(2);
+      scs.tickAndReadFromBuffer(2);
       scs.setInPoint();
       scs.cropBuffer();
 
@@ -492,7 +492,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       }
 
       scs.gotoInPointNow();
-      scs.tick(2);
+      scs.tickAndReadFromBuffer(2);
       scs.setInPoint();
       scs.cropBuffer();
 

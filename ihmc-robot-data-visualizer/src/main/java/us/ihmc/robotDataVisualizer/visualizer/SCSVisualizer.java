@@ -323,7 +323,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                      LogTools.info("Reconnecting. Disabling sliders.");
                      scs.gotoOutPointNow();
                      scs.setScrollGraphsEnabled(false);
-                     scs.tick(0);
+                     scs.tickAndReadFromBuffer(0);
 
                      if (yoVariableClientInterface.reconnect())
                      {

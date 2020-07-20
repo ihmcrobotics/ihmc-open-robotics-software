@@ -49,7 +49,7 @@ public class HumanoidControllerWarmupVisualizer
          e.printStackTrace();
       }
 
-      scs.setIndex(1);
+      scs.setCurrentIndex(1);
       scs.setInPoint();
       scs.cropBuffer();
       scs.play();

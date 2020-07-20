@@ -500,8 +500,8 @@ public class JFreeGraph extends JPanel
       {
          variableOne.set(Math.random());
          variableTwo.set(Math.random());
-         dataOneEntry.setDataAtIndexToYoVariableValue(i);
-         dataTwoEntry.setDataAtIndexToYoVariableValue(i);
+         dataOneEntry.writeIntoBufferAt(i);
+         dataTwoEntry.writeIntoBufferAt(i);
       }
       
       JFreeGraph jFreeGraphOne = JFreeGraph.createDataVsTimeGraph(dataOneEntry, dataTwoEntry, Color.orange);

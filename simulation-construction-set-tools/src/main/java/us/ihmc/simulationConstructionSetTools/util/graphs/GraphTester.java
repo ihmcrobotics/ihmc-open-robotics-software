@@ -26,7 +26,7 @@ public class GraphTester
 
    private void setupData(double divisor)
    {
-      buffer.setIndex(0);
+      buffer.setCurrentIndex(0);
 
       for (double i = 1; i < 150; i++)
       {
@@ -34,7 +34,7 @@ public class GraphTester
          yPlot.set(Math.sin(i / divisor));
 
 
-         buffer.tickAndUpdate();
+         buffer.tickAndWriteIntoBuffer();
       }
 
    }

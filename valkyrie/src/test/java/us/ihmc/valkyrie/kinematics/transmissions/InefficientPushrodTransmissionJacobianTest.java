@@ -153,7 +153,7 @@ public class InefficientPushrodTransmissionJacobianTest
       if (visualizeAndKeepUp)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
@@ -257,7 +257,7 @@ public class InefficientPushrodTransmissionJacobianTest
       if (visualizeAndKeepUp)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 

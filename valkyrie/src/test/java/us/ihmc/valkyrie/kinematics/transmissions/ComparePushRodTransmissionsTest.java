@@ -217,7 +217,7 @@ public class ComparePushRodTransmissionsTest
       if (VISUALIZE)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
@@ -393,7 +393,7 @@ public class ComparePushRodTransmissionsTest
       if (VISUALIZE)
       {
          scs.gotoInPointNow();
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
 
