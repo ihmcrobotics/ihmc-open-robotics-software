@@ -128,8 +128,8 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
    {
       currentFeetInContact.clear();
       
-      List<Footstep> footstepList= dcmPlan.getFootstepList();
-      List<FootstepTiming> footstepTimingList= dcmPlan.getFootstepTimingList();
+      List<Footstep> footstepList= dcmPlan.getUpcomingFootsteps();
+      List<FootstepTiming> footstepTimingList= dcmPlan.getUpcomingFootstepTimings();
       
       if(currentTime < footstepTimingList.get(0).getExecutionStartTime())
       {

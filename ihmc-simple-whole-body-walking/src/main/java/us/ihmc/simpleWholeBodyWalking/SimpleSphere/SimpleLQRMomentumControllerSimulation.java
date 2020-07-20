@@ -95,6 +95,7 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                        sphereRobot1.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry1);
          //This step actually add the footstep plan to the BipedPlanner
+         dcmPlan1.setNumberOfFootstepsToConsider(12);
          addFootstepandTimingStepsToDCMPlan(dcmPlan1, initialPosition1);
          controller1 = new SimpleBasicSphereController(sphereRobot1, dcmPlan1, yoGraphicsListRegistry1);
          controller1.solveForTrajectory();
@@ -121,6 +122,7 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                         sphereRobot2.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                         yoGraphicsListRegistry2);
          //This step actually add the footstep plan to the BipedPlanner
+         dcmPlan2.setNumberOfFootstepsToConsider(12);
          addFootstepandTimingStepsToDCMPlan(dcmPlan2, initialPosition2);
          
          controller2 = new SimpleLQRSphereController(sphereRobot2, dcmPlan2, yoGraphicsListRegistry2);
@@ -222,7 +224,7 @@ public class SimpleLQRMomentumControllerSimulation
          FootstepTiming newTiming = new FootstepTiming(swingDuration, stanceDuration);
          newTiming.setAbsoluteTime(0, stepStartTime);
          
-         dcmPlan.addStepToSequence(newStep, newTiming, newShiftFractions, 0);
+         dcmPlan.addStepToSequence(newStep, newTiming, newShiftFractions);
          stepStartTime += newTiming.getStepTime();
       }
       
@@ -237,7 +239,7 @@ public class SimpleLQRMomentumControllerSimulation
       FootstepTiming finTiming = new FootstepTiming(swingDuration, finalTransferDuration);
       finTiming.setAbsoluteTime(0, stepStartTime);
       
-      dcmPlan.addStepToSequence(finStep, finTiming, newShiftFractions, 0);
+      dcmPlan.addStepToSequence(finStep, finTiming, newShiftFractions);
    }
 
    private static Footstep GenerateFootstep(RobotSide robotSide, Point3D posePoint, Quaternion poseQuaternion)

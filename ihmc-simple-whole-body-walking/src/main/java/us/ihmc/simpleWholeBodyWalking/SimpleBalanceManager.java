@@ -71,8 +71,8 @@ public class SimpleBalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
    private final LQRMomentumController lqrMomentumController;
+   private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -121,7 +121,6 @@ public class SimpleBalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
    private final SimpleBipedCoMTrajectoryPlanner comPlanner;
 
@@ -160,17 +159,14 @@ public class SimpleBalanceManager
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       SideDependentList<MovingReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
-      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet, null, yoTime,
-                                                      registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ(), icpPlannerParameters);
-      smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
-
-
-      this.smoothCMPPlanner.setOmega0(controllerToolbox.getOmega0());
-      this.smoothCMPPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
-                                                       0.75, controllerToolbox.getOmega0Provider(), 
-                                                       registry);
+                                                       walkingControllerParameters.nominalHeightAboveAnkle(), 
+                                                       controllerToolbox.getOmega0Provider(),registry, yoGraphicsListRegistry,
+                                                       yoTime, icpPlannerParameters, bipedSupportPolygons);
+      comPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
+      comPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
+      
       lqrMomentumController = new LQRMomentumController(controllerToolbox.getOmega0Provider(), registry);
       
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -212,13 +208,13 @@ public class SimpleBalanceManager
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
    {
-      smoothCMPPlanner.addFootstepToPlan(footstep, timing, shiftFractions);
+      comPlanner.addStepToSequence(footstep, timing, shiftFractions);
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
    }
 
 
-   public double getCurrentTransferDurationAdjustedForReachability()
+/*   public double getCurrentTransferDurationAdjustedForReachability()
    {
       return smoothCMPPlanner.getTransferDuration(0);
    }
@@ -232,7 +228,7 @@ public class SimpleBalanceManager
    {
       return smoothCMPPlanner.getTransferDuration(1);
    }
-
+*/
    public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
    {
       if (!usingStepAdjustment || initializeForSingleSupport || initializeForTransfer || initializeForStanding)
@@ -245,34 +241,34 @@ public class SimpleBalanceManager
 
    public void clearICPPlan()
    {
-      smoothCMPPlanner.clearPlan();
+      comPlanner.clearStepSequence();
       footsteps.clear();
       footstepTimings.clear();
    }
 
    public void setICPPlanSupportSide(RobotSide supportSide)
    {
-      smoothCMPPlanner.setSupportLeg(supportSide);
+      comPlanner.setSupportLeg(supportSide);
       this.supportSide = supportSide;
    }
 
    public void setICPPlanTransferToSide(RobotSide transferToSide)
    {
-      smoothCMPPlanner.setTransferToSide(transferToSide);
+      comPlanner.setTransferToSide(transferToSide);
       this.transferToSide = transferToSide;
    }
 
    public void setICPPlanTransferFromSide(RobotSide robotSide)
    {
-      smoothCMPPlanner.setTransferFromSide(robotSide);
+      comPlanner.setTransferFromSide(robotSide);
       this.transferToSide = robotSide != null ? robotSide.getOppositeSide() : null;
    }
 
    public void endTick()
    {
-      if (smoothCMPPlanner != null)
+      if (comPlanner != null)
       {
-         smoothCMPPlanner.endTick();
+         comPlanner.endTick();
       }
    }
 
@@ -281,11 +277,12 @@ public class SimpleBalanceManager
    {
       controllerToolbox.getCoP(copEstimate);
 
-      smoothCMPPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
-      smoothCMPPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-      smoothCMPPlanner.getDesiredCenterOfPressurePosition(perfectCoP2d);
-      smoothCMPPlanner.getDesiredCenterOfMassPosition(yoDesiredCoMPosition);
-      smoothCMPPlanner.getDesiredCenterOfMassVelocity(yoDesiredCoMVelocity);
+      desiredCapturePoint2d.setIncludingFrame(comPlanner.getDesiredDCMPosition());
+      desiredCapturePoint2d.setIncludingFrame(comPlanner.getDesiredDCMPosition());
+      desiredCapturePointVelocity2d.setIncludingFrame(comPlanner.getDesiredDCMVelocity());
+      perfectCoP2d.setIncludingFrame(comPlanner.getDesiredCOPPosition());
+      yoDesiredCoMPosition.set(comPlanner.getDesiredCoMPosition());
+      yoDesiredCoMVelocity.set(comPlanner.getDesiredCoMVelocity());
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
@@ -346,8 +343,8 @@ public class SimpleBalanceManager
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
       controllerToolbox.getCoP(copEstimate);
-      smoothCMPPlanner.compute(yoTime.getDoubleValue());
-      icpPlannerDone.set(smoothCMPPlanner.isDone());
+      comPlanner.computeSetpoints(yoTime.getDoubleValue());
+      icpPlannerDone.set(comPlanner.isDone());
    }
 
    public void disablePelvisXYControl()
@@ -364,7 +361,7 @@ public class SimpleBalanceManager
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
 
-      return smoothCMPPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
+      return comPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
    }
 
    public void getDesiredICP(FramePoint2D desiredICPToPack)
@@ -394,12 +391,12 @@ public class SimpleBalanceManager
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
    {
-      smoothCMPPlanner.getNextExitCMP(entryCMPToPack);
+      comPlanner.getNextExitCMP(entryCMPToPack);
    }
 
    public double getTimeRemainingInCurrentState()
    {
-      return smoothCMPPlanner.getTimeInCurrentStateRemaining();
+      return comPlanner.getTimeInCurrentStateRemaining();
    }
 
    public void goHome()
@@ -424,8 +421,8 @@ public class SimpleBalanceManager
       controllerToolbox.getCapturePoint(tempCapturePoint);
       yoDesiredCapturePoint.set(tempCapturePoint);
 
-      smoothCMPPlanner.holdCurrentICP(tempCapturePoint);
-      smoothCMPPlanner.initializeForStanding(yoTime.getDoubleValue());
+      comPlanner.holdCurrentICP(tempCapturePoint);
+      comPlanner.initializeForStanding(yoTime.getDoubleValue());
 
       initializeForStanding = true;
 
@@ -435,12 +432,12 @@ public class SimpleBalanceManager
    public void initializeICPPlanForSingleSupport(double finalTransferTime)
    {
       setFinalTransferTime(finalTransferTime);
-      smoothCMPPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
+      comPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       initializeForSingleSupport = true;
 
 
-      smoothCMPPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      smoothCMPPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
+      comPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      comPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
@@ -453,7 +450,7 @@ public class SimpleBalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      smoothCMPPlanner.initializeForStanding(yoTime.getDoubleValue());
+      comPlanner.initializeForStanding(yoTime.getDoubleValue());
       initializeForStanding = true;
 
       icpPlannerDone.set(false);
@@ -467,7 +464,7 @@ public class SimpleBalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       setFinalTransferTime(finalTransferTime);
-      smoothCMPPlanner.initializeForTransfer(yoTime.getDoubleValue());
+      comPlanner.initializeForTransfer(yoTime.getDoubleValue());
       initializeForStanding = true;
 
       icpPlannerDone.set(false);
@@ -481,12 +478,12 @@ public class SimpleBalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       setFinalTransferTime(finalTransferTime);
-      smoothCMPPlanner.initializeForTransfer(yoTime.getDoubleValue());
+      comPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
       initializeForTransfer = true;
 
-      smoothCMPPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      smoothCMPPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
+      comPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      comPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
@@ -545,33 +542,33 @@ public class SimpleBalanceManager
       centerOfMassPosition.set(centerOfMassPosition2d, 0.0);
 
       centerOfMassPosition.changeFrame(worldFrame);
-      smoothCMPPlanner.holdCurrentICP(centerOfMassPosition);
+      comPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
    public void setFinalTransferWeightDistribution(double weightDistribution)
    {
-      smoothCMPPlanner.setFinalTransferWeightDistribution(weightDistribution);
+      comPlanner.setFinalTransferWeightDistribution(weightDistribution);
    }
 
    public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
    {
-      smoothCMPPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
+      comPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
    }
 
    public void setFinalTransferTime(double finalTransferDuration)
    {
-      smoothCMPPlanner.setFinalTransferDuration(finalTransferDuration);
+      comPlanner.setFinalTransferDuration(finalTransferDuration);
       this.finalTransferDuration = finalTransferDuration;
    }
 
    /**
-    * Update the basics: capture point, omega0, and the support polygons.
+    * Update the basics: capture point, omega0, and the support polygons. This is called before UpdateManagers() -> SimpleBalanceManager.compute()
     */
    public void update()
    {
       computeICPPlan();
-      smoothCMPPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      smoothCMPPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
+      comPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      comPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
@@ -598,7 +595,7 @@ public class SimpleBalanceManager
 
    public void updateCurrentICPPlan()
    {
-      smoothCMPPlanner.updateCurrentPlan();
+      comPlanner.updateCurrentPlan();
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

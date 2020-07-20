@@ -113,9 +113,9 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
  private void updateFeetState(double currentTime)
    {
       currentFeetInContact.clear();
-      
-      List<Footstep> footstepList= dcmPlan.getFootstepList();
-      List<FootstepTiming> footstepTimingList= dcmPlan.getFootstepTimingList();
+
+      List<Footstep> footstepList= dcmPlan.getUpcomingFootsteps();
+      List<FootstepTiming> footstepTimingList= dcmPlan.getUpcomingFootstepTimings();
       
       if(!(footstepTimingList.size()==0))
       {
