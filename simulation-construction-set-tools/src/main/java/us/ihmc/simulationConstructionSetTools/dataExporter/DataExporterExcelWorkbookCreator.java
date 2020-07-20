@@ -30,8 +30,8 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
-import us.ihmc.yoVariables.dataBuffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 
 public class DataExporterExcelWorkbookCreator

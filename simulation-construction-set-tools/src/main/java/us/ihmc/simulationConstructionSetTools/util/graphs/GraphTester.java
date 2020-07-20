@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

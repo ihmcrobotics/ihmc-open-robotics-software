@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SimpleGraphIndicesHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.log.LogTools;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

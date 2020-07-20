@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.reflect.RecursiveObjectComparer;
 import us.ihmc.tools.reflect.StringFieldMatcher;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.listener.YoRegistryChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableList;
 import us.ihmc.yoVariables.variable.YoDouble;

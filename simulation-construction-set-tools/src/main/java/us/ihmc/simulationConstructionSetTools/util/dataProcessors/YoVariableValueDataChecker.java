@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
-import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;

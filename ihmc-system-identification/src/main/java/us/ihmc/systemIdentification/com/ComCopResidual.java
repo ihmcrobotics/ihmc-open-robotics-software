@@ -22,7 +22,7 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.yoVariables.dataBuffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 
 /**
  * Todo
