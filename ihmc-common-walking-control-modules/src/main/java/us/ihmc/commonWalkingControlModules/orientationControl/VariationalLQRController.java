@@ -2,10 +2,14 @@ package us.ihmc.commonWalkingControlModules.orientationControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.robotics.MatrixMissingTools;
@@ -40,7 +44,13 @@ public class VariationalLQRController
    private final DMatrixRMaj wBd = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj wBdHat = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj RBd = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj RB = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj wB = new DMatrixRMaj(3, 1);
+
+   private final DMatrixRMaj RBerror = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj RBerrorVector = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj wBerror = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj state = new DMatrixRMaj(6, 1);
 
    private final DMatrixRMaj RBdTtau = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj RBdTtauHat = new DMatrixRMaj(3, 3);
@@ -52,11 +62,12 @@ public class VariationalLQRController
 
    private final DMatrixRMaj tauD = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj tau = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj deltaTau = new DMatrixRMaj(3, 1);
 
    private final DMatrixRMaj inertia = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj inertiaInverse = new DMatrixRMaj(3, 3);
 
-   public VariationalLQRController(ReferenceFrame bodyFrame)
+   public VariationalLQRController()
    {
       CommonOps_DDRM.setIdentity(eye);
       CommonOps_DDRM.setIdentity(inertia);
@@ -71,7 +82,7 @@ public class VariationalLQRController
       inertia.getMomentOfInertia().get(this.inertia);
    }
 
-   public void setDesired(FrameQuaternionReadOnly desiredRotation, Vector3DReadOnly desiredAngularVelocity, Vector3DReadOnly desiredTorque)
+   public void setDesired(QuaternionReadOnly desiredRotation, Vector3DReadOnly desiredAngularVelocity, Vector3DReadOnly desiredTorque)
    {
       // FIXME check these frames
       desiredRotation.get(RBd);
@@ -113,7 +124,7 @@ public class VariationalLQRController
       MatrixMissingTools.setMatrixBlock(B, 9, 0, B2, 0, 0, 3, 3, 1.0);
    }
 
-   public void compute(FrameQuaternion current, Vector3DReadOnly currentAngularVelocity)
+   public void compute(QuaternionReadOnly currentRotation, Vector3DReadOnly currentAngularVelocity)
    {
       assembleQ();
 
@@ -121,6 +132,29 @@ public class VariationalLQRController
 
       CommonOps_DDRM.multTransA(B, careSolver.getP(), BTP);
       CommonOps_DDRM.mult(RInverse, BTP, K);
+
+      currentRotation.get(RB);
+      currentAngularVelocity.get(wB);
+
+      CommonOps_DDRM.multTransA(-1.0, RB, RBd, RBerror);
+      CommonOps_DDRM.mult(RBerror, wBd, wBerror);
+      CommonOps_DDRM.addEquals(wBerror, wB);
+
+      CommonOps_DDRM.multAddTransA(RBd, RB, RBerror);
+      CommonOps_DDRM.scale(0.5, RBerror);
+
+      fromSkewSymmetric(RBerror, RBerrorVector);
+
+      MatrixTools.setMatrixBlock(state, 0, 0, wBerror, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(state, 3, 0, RBerrorVector, 0, 0, 3, 1, 1.0);
+
+      CommonOps_DDRM.mult(-1.0, K, state, deltaTau);
+      CommonOps_DDRM.add(deltaTau, tauD, tau);
+   }
+
+   public void getDesiredTorque(Vector3DBasics tau)
+   {
+      tau.set(this.tau);
    }
 
    private void assembleQ()
