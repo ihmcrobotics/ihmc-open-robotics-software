@@ -28,7 +28,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -244,17 +245,17 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    private void moveRobotOutOfWayForViz()
    {
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+      YoBufferProcessor dataProcessingFunction = new YoBufferProcessor()
       {
          private final YoDouble q_y = (YoDouble) scs.findVariable("q_y");
 
          @Override
-         public void initializeProcessing()
+         public void initialize(YoVariableHolder yoVariableHolder)
          {
          }
 
          @Override
-         public void processData()
+         public void process(int startIndex, int endIndex, int currentIndex)
          {
             q_y.sub(4.0);
          }

@@ -15,8 +15,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.dataBuffer.YoBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.dataBuffer.YoBufferProcessor;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -408,14 +409,14 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
 
    public void updateCorruptorAndAnalyzeDataInBuffer()
    {
-      DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+      YoBufferProcessor dataProcessingFunction = new YoBufferProcessor()
       {
          private final double[] corruptorVariableValues = new double[corruptorVariables.size()];
          private final double[] torqueOffsetValues = new double[torqueOffsetVariables.size()];
          private final LinkedHashMap<OneDoFJointBasics, Double> torqueScoreValues = new LinkedHashMap<OneDoFJointBasics, Double>();
 
          @Override
-         public void initializeProcessing()
+         public void initialize(YoVariableHolder yoVariableHolder)
          {
             getCurrentCorruptorValues(corruptorVariables, corruptorVariableValues);
             getCurrentTorqueOffsetValues(torqueOffsetVariables, torqueOffsetValues);
@@ -423,7 +424,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
          }
 
          @Override
-         public void processData()
+         public void process(int startIndex, int endIndex, int currentIndex)
          {
             FullRobotModel fullRobotModel = controller.getFullRobotModel();
 
