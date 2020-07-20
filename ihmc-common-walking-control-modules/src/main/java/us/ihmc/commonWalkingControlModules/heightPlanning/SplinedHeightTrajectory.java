@@ -101,7 +101,7 @@ public class SplinedHeightTrajectory
    {
       ListSorter.sort(waypoints, sorter);
       computeHeightsToUseByStretchingString(waypoints);
-//      removeUnnecessaryWaypoints(waypoints);
+      //      removeUnnecessaryWaypoints(waypoints);
 
       int numberOfWaypoints = waypoints.size();
 
@@ -212,11 +212,26 @@ public class SplinedHeightTrajectory
       return MathTools.epsilonEquals(heightOnLine, queryZ, 1e-3);
    }
 
+   private final Point2D tempPoint = new Point2D();
 
-   public double solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
+   public double solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack,
+                       FramePoint3DBasics queryPoint,
+                       Point2DBasics pointOnSplineToPack)
    {
-      EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition, queryPoint);
-      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition);
+      tempPoint.set(queryPoint);
+      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(tempPoint,
+                                                              contactFrameZeroPosition.getX(),
+                                                              contactFrameZeroPosition.getY(),
+                                                              contactFrameOnePosition.getX(),
+                                                              contactFrameOnePosition.getY(),
+                                                              tempPoint);
+      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(tempPoint.getX(),
+                                                                                    tempPoint.getY(),
+                                                                                    contactFrameZeroPosition.getX(),
+                                                                                    contactFrameZeroPosition.getY(),
+                                                                                    contactFrameOnePosition.getX(),
+                                                                                    contactFrameOnePosition.getY());
+      queryPoint.interpolate(contactFrameZeroPosition, contactFrameOnePosition, percentAlongSegment);
 
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
