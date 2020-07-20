@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesDataBasics;
 import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.InterpolationTools;
@@ -111,6 +113,7 @@ public class WorkspaceLimiterControlModule
    private final AlphaFilteredYoVariable unachievedSwingAccelerationFiltered;
 
    private final YoBoolean doSmoothTransitionOutOfSingularityAvoidance;
+   private final YoBoolean doSmoothTransitionOutOfUnreachableStep;
 
    private final YoDouble alphaSupportSingularityAvoidance;
 
@@ -261,6 +264,7 @@ public class WorkspaceLimiterControlModule
       alphaSupportSingularityAvoidance = new YoDouble(namePrefix + "AlphaSupportSingularityAvoidance", registry);
 
       doSmoothTransitionOutOfSingularityAvoidance = new YoBoolean(namePrefix + "DoSmoothTransitionSingularityAvoidance", registry);
+      doSmoothTransitionOutOfUnreachableStep = new YoBoolean(namePrefix + "DoSmoothTransitionUnreachableStep", registry);
 
       isSupportSingularityAvoidanceUsed = new YoBoolean(namePrefix + "IsSupportSingularityAvoidanceUsed", registry);
       useSingularityAvoidanceInSupport = new BooleanParameter(namePrefix + "UseSingularityAvoidanceInSupport",
@@ -545,15 +549,18 @@ public class WorkspaceLimiterControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
+   public boolean correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect, ConstraintType constraintType)
    {
       isUnreachableFootstepCompensated.set(false);
 
       if (!USE_UNREACHABLE_FOOTSTEP_CORRECTION)
-         return;
+         return false;
 
       if (constraintType.isLoadBearing())
-         return;
+      {
+//         smoothTransitionOutOfHeightCorrectionInSwing(comHeightDataToCorrect, constraintType);
+         return false;
+      }
 
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCenterOfMassHeightPoint.changeFrame(worldFrame);
@@ -574,26 +581,30 @@ public class WorkspaceLimiterControlModule
          comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
          comHeightDataToCorrect.setComHeightAcceleration(
                   comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+
+         return true;
       }
       else
       {
          unachievedSwingTranslationFiltered.set(0.0);
          unachievedSwingVelocityFiltered.set(0.0);
          unachievedSwingAccelerationFiltered.set(0.0);
+
+         return false;
       }
    }
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
-                                                                          double zCurrentInWorld,
-                                                                          ReferenceFrame pelvisZUpFrame,
-                                                                          ConstraintType constraintType)
+   public boolean correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect,
+                                                                             double zCurrentInWorld,
+                                                                             ReferenceFrame pelvisZUpFrame,
+                                                                             ConstraintType constraintType)
    {
       if (!useSingularityAvoidanceInSupport.getValue())
       {
          alphaSupportSingularityAvoidance.set(0.0);
          isSupportSingularityAvoidanceUsed.set(false);
          doSmoothTransitionOutOfSingularityAvoidance.set(false);
-         return;
+         return false;
       }
 
       comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
@@ -611,7 +622,7 @@ public class WorkspaceLimiterControlModule
          alphaSupportSingularityAvoidance.set(0.0);
          doSmoothTransitionOutOfSingularityAvoidance.set(isSupportSingularityAvoidanceUsed.getBooleanValue());
          if (!isSupportSingularityAvoidanceUsed.getBooleanValue())
-            return;
+            return false;
       }
 
       double maxPercent = maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue();
@@ -634,7 +645,7 @@ public class WorkspaceLimiterControlModule
       {
          // if we haven't been using singularity avoidance, and we aren't currently transitioning out of it, then the current desired values are good.
          if (!isSupportSingularityAvoidanceUsed.getBooleanValue() && !doSmoothTransitionOutOfSingularityAvoidance.getBooleanValue())
-            return;
+            return false;
       }
       else if (!isSupportSingularityAvoidanceUsed.getBooleanValue())
       {  // The leg is too straight, so we need to use singularity avoidance, but we haven't set it up yet, so set up singularity avoidance and start it.
@@ -657,6 +668,8 @@ public class WorkspaceLimiterControlModule
       {
          applySingularityAvoidanceInSupport(comHeightDataToCorrect, zCurrentInWorld, pelvisZUpFrame);
       }
+
+      return true;
    }
 
    private void updateFractionOfSingularityAvoidanceToUse(YoDouble alphaToUpdate, double percentForMaximum)
@@ -666,7 +679,7 @@ public class WorkspaceLimiterControlModule
       alphaToUpdate.set(MathTools.clamp(alpha, 0.0, 1.0));
    }
 
-   private void smoothTransitionOutOfSingularityAvoidanceInSupport(YoCoMHeightTimeDerivativesData comHeightDataToCorrect)
+   private void smoothTransitionOutOfSingularityAvoidanceInSupport(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect)
    {
       heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
       heightVelocityCorrectedFilteredForSingularityAvoidance.update(comHeightDataToCorrect.getComHeightVelocity());
@@ -706,7 +719,7 @@ public class WorkspaceLimiterControlModule
 
    private final FrameVector2DBasics comVelocity = new FrameVector2D();
 
-   private void applySingularityAvoidanceInSupport(YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
+   private void applySingularityAvoidanceInSupport(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect,
                                                    double zCurrent,
                                                    ReferenceFrame pelvisZUpFrame)
    {
@@ -752,5 +765,41 @@ public class WorkspaceLimiterControlModule
       equivalentDesiredHipPitchAcceleration.changeFrame(worldFrame);
       heightAccelerationCorrectedFilteredForSingularityAvoidance.update(equivalentDesiredHipPitchAcceleration.getZ());
       comHeightDataToCorrect.setComHeightAcceleration(heightAccelerationCorrectedFilteredForSingularityAvoidance.getDoubleValue());
+   }
+
+   private boolean smoothTransitionOutOfHeightCorrectionInSwing(CoMHeightTimeDerivativesDataBasics comHeightDataToCorrect, ConstraintType constraintType)
+   {
+      if (!USE_UNREACHABLE_FOOTSTEP_CORRECTION)
+         return false;
+
+      if (constraintType != ConstraintType.FULL)
+         return false;
+
+      unachievedSwingTranslationFiltered.update(0.0);
+      unachievedSwingVelocityFiltered.update(unachievedSwingTranslationFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+      unachievedSwingAccelerationFiltered.update(
+            unachievedSwingVelocityFiltered.getDoubleValue() / timeToCorrectForUnachievedSwingTranslation.getDoubleValue());
+
+      if (MathTools.epsilonEquals(unachievedSwingVelocityFiltered.getDoubleValue(), 0.0, epsilon))
+      {
+         doSmoothTransitionOutOfUnreachableStep.set(false);
+         return false;
+      }
+      else
+      {
+         doSmoothTransitionOutOfUnreachableStep.set(true);
+      }
+
+      comHeightDataToCorrect.getComHeight(desiredCenterOfMassHeightPoint);
+      desiredCenterOfMassHeightPoint.changeFrame(worldFrame);
+
+      desiredCenterOfMassHeightPoint.addZ(unachievedSwingTranslationFiltered.getDoubleValue());
+
+      comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
+
+      comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
+      comHeightDataToCorrect.setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration() + unachievedSwingAccelerationFiltered.getDoubleValue());
+
+      return true;
    }
 }
