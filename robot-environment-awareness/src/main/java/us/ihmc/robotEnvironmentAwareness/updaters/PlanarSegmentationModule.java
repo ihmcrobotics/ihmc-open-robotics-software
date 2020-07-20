@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import com.jme3.opencl.PlatformChooser;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -17,9 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -36,8 +33,6 @@ import us.ihmc.ros2.Ros2Node;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -319,24 +314,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       }
    }
 
-   public static PlanarSegmentationModule createRemoteModule(String configurationFilePath) throws Exception
-   {
-      KryoMessager messager = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
-                                                                    NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                                    REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      return new PlanarSegmentationModule(messager, new File(configurationFilePath));
-   }
-
    public static PlanarSegmentationModule createIntraprocessModule(ROS2Topic<?> inputTopic,
                                                                    ROS2Topic<?> customRegionTopic,
                                                                    ROS2Topic<?> outputTopic,
-                                                                   String configurationFilePath) throws Exception
+                                                                   String configurationFilePath,
+                                                                   Messager messager) throws Exception
    {
-      KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                                    NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                                    REACommunicationProperties.getPrivateNetClassList());
-      moduleMessager.setAllowSelfSubmit(true);
       File configurationFile = new File(configurationFilePath);
       try
       {
@@ -348,13 +331,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          System.out.println(configurationFile.getAbsolutePath());
          e.printStackTrace();
       }
-      return new PlanarSegmentationModule(inputTopic, customRegionTopic, outputTopic, moduleMessager, configurationFile);
+      return new PlanarSegmentationModule(inputTopic, customRegionTopic, outputTopic, messager, configurationFile);
    }
 
-   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath) throws Exception
+   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Messager messager) throws Exception
    {
-      Messager messager = createKryoMessager();
-
       File configurationFile = new File(configurationFilePath);
       try
       {
@@ -370,10 +351,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       return new PlanarSegmentationModule(messager, configurationFile);
    }
 
-   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
+   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node, Messager messager) throws Exception
    {
-      Messager messager = createKryoMessager();
-
       File configurationFile = new File(configurationFilePath);
       try
       {
@@ -387,14 +366,5 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       }
 
       return new PlanarSegmentationModule(ros2Node, messager, configurationFile);
-   }
-
-   private static Messager createKryoMessager()
-   {
-      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                              NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      return messager;
    }
 }

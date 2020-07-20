@@ -1,6 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.messager.Messager;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
@@ -8,18 +11,35 @@ import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 
 public class SegmentationPerceptionSuiteElement implements PerceptionSuiteElement<PlanarSegmentationModule, PlanarSegmentationUI>
 {
+   private final Messager messager;
    private final Stage stage;
    private final PlanarSegmentationModule perceptionModule;
    private final PlanarSegmentationUI uiModule;
 
    public SegmentationPerceptionSuiteElement(ModuleProvider<PlanarSegmentationModule> moduleProvider, UIProvider<PlanarSegmentationUI> uiProvider) throws Exception
    {
+      messager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
+      messager.startMessager();
+
       stage = new Stage();
-      perceptionModule = moduleProvider.createModule();
-      uiModule = uiProvider.createUI(stage);
+      perceptionModule = moduleProvider.createModule(messager);
+      uiModule = uiProvider.createUI(messager, stage);
       perceptionModule.start();
 
       stage.setOnCloseRequest((event) -> hide());
+   }
+
+   @Override
+   public void stopInternal()
+   {
+      try
+      {
+         messager.closeMessager();
+      }
+      catch (Exception e)
+      {
+
+      }
    }
 
    public PlanarSegmentationModule getPerceptionModule()

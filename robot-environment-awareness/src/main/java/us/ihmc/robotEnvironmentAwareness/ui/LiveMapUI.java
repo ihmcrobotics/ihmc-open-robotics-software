@@ -129,26 +129,10 @@ public class LiveMapUI implements PerceptionUI
       }
    }
 
-   public static LiveMapUI createIntraprocessUI(Stage primaryStage) throws Exception
+   public static LiveMapUI createIntraprocessUI(Messager messager, Stage primaryStage) throws Exception
    {
-      Messager messager = createKryoMessager();
       REAUIMessager uiMessager = new REAUIMessager(messager);
+      uiMessager.startMessager();
       return new LiveMapUI(uiMessager, primaryStage);
-   }
-
-   public static LiveMapUI createRemoteUI(Stage primaryStage) throws Exception
-   {
-      Messager messager = createKryoMessager();
-      REAUIMessager uiMessager = new REAUIMessager(messager);
-      return new LiveMapUI(uiMessager, primaryStage);
-   }
-
-   private static Messager createKryoMessager()
-   {
-      KryoMessager messager = KryoMessager.createIntraprocess(LiveMapModuleAPI.API,
-                                                              NetworkPorts.LIVEMAP_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      return messager;
    }
 }

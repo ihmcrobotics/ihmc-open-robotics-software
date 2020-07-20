@@ -230,17 +230,13 @@ public class AtlasSLAMModule extends SLAMModule
       }
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel) throws IOException
+   public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel, Messager messager)
    {
-      KryoMessager messager = createKryoMessager();
-
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel) throws IOException
+   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager)
    {
-      KryoMessager messager = createKryoMessager();
-
       return new AtlasSLAMModule(ros2Node, messager, drcRobotModel);
    }
 }

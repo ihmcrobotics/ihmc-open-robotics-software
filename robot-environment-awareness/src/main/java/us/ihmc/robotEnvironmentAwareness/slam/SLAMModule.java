@@ -380,27 +380,14 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
-   public static SLAMModule createIntraprocessModule(Ros2Node ros2Node) throws Exception
+   public static SLAMModule createIntraprocessModule(Ros2Node ros2Node, Messager messager)
    {
-      KryoMessager messager = createKryoMessager();
-
       return new SLAMModule(ros2Node, messager);
    }
 
-   public static SLAMModule createIntraprocessModule() throws Exception
+   public static SLAMModule createIntraprocessModule(Messager messager)
    {
-      KryoMessager messager = createKryoMessager();
-
       return new SLAMModule(messager);
    }
 
-   protected static KryoMessager createKryoMessager() throws IOException
-   {
-      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
-                                                              NetworkPorts.SLAM_MODULE_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      messager.startMessager();
-      return messager;
-   }
 }

@@ -185,20 +185,10 @@ public class PlanarSegmentationUI implements PerceptionUI
       }
    }
 
-   public static PlanarSegmentationUI createIntraprocessUI(Stage primaryStage) throws Exception
+   public static PlanarSegmentationUI createIntraprocessUI(Messager messager, Stage primaryStage) throws Exception
    {
-      Messager messager = createKryoMessager();
       REAUIMessager uiMessager = new REAUIMessager(messager);
+      uiMessager.startMessager();
       return new PlanarSegmentationUI(uiMessager, primaryStage);
-   }
-
-
-   private static Messager createKryoMessager()
-   {
-      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                              NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      return messager;
    }
 }
