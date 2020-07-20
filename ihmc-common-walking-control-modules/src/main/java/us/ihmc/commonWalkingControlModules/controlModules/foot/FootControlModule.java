@@ -75,7 +75,6 @@ public class FootControlModule
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final RobotSide robotSide;
 
-   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final SwingState swingState;
@@ -136,7 +135,6 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
       workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
@@ -313,14 +311,8 @@ public class FootControlModule
    {
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction.getValue());
 
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
-      }
       if (workspaceLimiterControlModule != null)
-      {
          workspaceLimiterControlModule.resetSwingParameters();
-      }
 
       footControlHelper.update();
 
@@ -371,14 +363,8 @@ public class FootControlModule
 
    public void updateLegSingularityModule()
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.update();
-      }
       if (workspaceLimiterControlModule != null)
-      {
          workspaceLimiterControlModule.update();
-      }
    }
 
    public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(FrameVector2DReadOnly comXYVelocity,
@@ -386,14 +372,6 @@ public class FootControlModule
                                                                         double zCurrent,
                                                                         ReferenceFrame pelvisZUpFrame)
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity,
-                                                                                                               comHeightDataToCorrect,
-                                                                                                               zCurrent,
-                                                                                                               pelvisZUpFrame,
-                                                                                                               getCurrentConstraintType());
-      }
       if (workspaceLimiterControlModule != null)
       {
          workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comXYVelocity,
@@ -406,11 +384,6 @@ public class FootControlModule
 
    public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect,
-                                                                                                              getCurrentConstraintType());
-      }
       if (workspaceLimiterControlModule != null)
       {
          workspaceLimiterControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
@@ -429,8 +402,6 @@ public class FootControlModule
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-         legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
       if (workspaceLimiterControlModule != null)
          workspaceLimiterControlModule.resetHeightCorrectionParameters();
    }
