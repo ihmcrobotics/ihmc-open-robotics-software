@@ -6,6 +6,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.Constra
 import java.util.Arrays;
 import java.util.EnumMap;
 
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -102,6 +103,7 @@ public class FootControlModule
    public FootControlModule(RobotSide robotSide,
                             ToeOffCalculator toeOffCalculator,
                             WalkingControllerParameters walkingControllerParameters,
+                            WorkspaceLimiterParameters workspaceLimiterParameters,
                             PIDSE3GainsReadOnly swingFootControlGains,
                             PIDSE3GainsReadOnly holdPositionFootControlGains,
                             PIDSE3GainsReadOnly toeOffFootControlGains,
@@ -122,6 +124,7 @@ public class FootControlModule
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide,
                                                 walkingControllerParameters,
+                                                workspaceLimiterParameters,
                                                 controllerToolbox,
                                                 explorationParameters,
                                                 footholdRotationParameters,

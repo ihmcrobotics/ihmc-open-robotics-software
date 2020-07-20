@@ -42,6 +42,7 @@ public class FootControlHelper
 
    public FootControlHelper(RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
+                            WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             FootholdRotationParameters footholdRotationParameters,
@@ -77,7 +78,13 @@ public class FootControlHelper
 
       if (walkingControllerParameters.enableLegSingularityAndKneeCollapseAvoidanceModule())
       {
-         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix, contactableFoot, robotSide, walkingControllerParameters, controllerToolbox, registry);
+         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix,
+                                                                           contactableFoot,
+                                                                           robotSide,
+                                                                           workspaceLimiterParameters,
+                                                                           walkingControllerParameters,
+                                                                           controllerToolbox,
+                                                                           registry);
       }
       else
       {
