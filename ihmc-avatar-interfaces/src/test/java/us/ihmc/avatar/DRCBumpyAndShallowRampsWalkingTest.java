@@ -306,7 +306,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    @Test
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
