@@ -11,12 +11,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -53,7 +53,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
       segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
       segmentationMessager.startMessager();
 
-      ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage, defaultContactPoints);
+      ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
       module = AtlasSLAMModule.createIntraprocessModule(drcRobotModel, slamMessager);
 
       Stage secondStage = new Stage();
