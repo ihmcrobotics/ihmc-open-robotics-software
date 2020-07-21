@@ -117,6 +117,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    {
       walkingController.doAction();
 
+      linearMomentumRateControlModule.updateCurrentState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(), controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
       linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
       if (!linearMomentumRateControlModule.computeControllerCoreCommands())
       {

@@ -515,10 +515,14 @@ public class SimpleBipedCoMTrajectoryPlanner
       return upcomingFootstepTimings.get(stepNumber).getSwingTime();
    }
    
+   public double getTimeInContactPhase()
+   {
+      return timeInContactPhase.getDoubleValue();
+   }
+   
    public double getTimeInCurrentStateRemaining()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      return timeInCurrentStateRemaining.getDoubleValue();
    }
 
    public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D capturePoint2d)

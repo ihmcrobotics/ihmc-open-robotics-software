@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -57,6 +59,16 @@ public class LinearMomentumRateControlModuleInput
     * plan.
     */
    private final FramePoint2D perfectCoP = new FramePoint2D();
+
+   /*
+    * Desired VRP trajectories passed form the SImpleCOMTrajectoryPlanner to the LQR Momentum Controller.
+    */
+   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   
+   /*
+    * Time in the current contact phase of the VRP trajectory
+    */
+   private double timeInContactPhase = 0.0;
 
    /**
     * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
@@ -265,6 +277,27 @@ public class LinearMomentumRateControlModuleInput
    public FramePoint2D getPerfectCoP()
    {
       return perfectCoP;
+   }
+   
+   public void setVRPTrajectories(List<Trajectory3D> vrpTrajectories)
+   {
+      this.vrpTrajectories.clear();
+      this.vrpTrajectories.addAll(vrpTrajectories);
+   }
+   
+   public List<Trajectory3D> getVRPTrajectories()
+   {
+      return vrpTrajectories;
+   }
+   
+   public void setTimeInContactPhase(double timeInContactPhase)
+   {
+      this.timeInContactPhase = timeInContactPhase;
+   }
+   
+   public double getTimeInContactPhase()
+   {
+      return timeInContactPhase;
    }
 
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
