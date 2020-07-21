@@ -1,6 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.google.common.util.concurrent.AtomicDouble;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -9,7 +17,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -30,13 +37,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanarSegmentationModule implements OcTreeConsumer
 {
@@ -159,6 +159,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
+   @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       this.ocTree.set(ocTree);
@@ -201,7 +202,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       try
       {
          NormalOcTree latestOcTree = ocTree.getAndSet(null);
-         Tuple3DReadOnly latestSensorPose = this.sensorPosition.getAndSet(null);
+         Tuple3DReadOnly latestSensorPose = this.sensorPosition.get();
+         if (latestOcTree != null)
+         {
+            this.sensorPosition.set(null); // only set it to null when the other is not and it's been "read"
+         }
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();

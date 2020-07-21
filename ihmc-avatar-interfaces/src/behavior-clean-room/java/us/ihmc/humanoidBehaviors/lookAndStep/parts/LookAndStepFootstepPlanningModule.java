@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
@@ -8,11 +11,9 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Needs to be set up as a machine that:
@@ -41,6 +42,7 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
    public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
    {
+      LogTools.info("HEY I got em.");
       planarRegionsInput.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       planarRegionsExpirationTimer.reset();
    }
