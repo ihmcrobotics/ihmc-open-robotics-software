@@ -14,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
@@ -33,6 +34,8 @@ public class AtlasSLAMModule extends SLAMModule
 
    private final AtomicReference<Boolean> robotStatus;
    private final AtomicReference<Boolean> velocityStatus;
+   
+   private final AtomicReference<Boolean> biasEnable;
 
    /**
     * to update corrected sensor frame for robot state estimation.
@@ -52,7 +55,8 @@ public class AtlasSLAMModule extends SLAMModule
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
+                                                    //ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
+                                                    ROS2Tools.getControllerInputTopic(drcRobotModel.getSimpleRobotName()),
                                                     this::handleFootstepStatusMessage);
 
       estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
@@ -63,6 +67,7 @@ public class AtlasSLAMModule extends SLAMModule
 
       robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
       velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
+      biasEnable = reaMessager.createInput(SLAMModuleAPI.BiasEnable, false);
    }
 
    @Override
@@ -126,11 +131,24 @@ public class AtlasSLAMModule extends SLAMModule
                posePacket.setConfidenceFactor(0.0);
             posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
          }
+         posePacket.setConfidenceFactor(1.0);
          RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
          estimatedPelvisPose.preMultiply(latestFrame.getSensorPose());
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
-         estimatedPelvisPublisher.publish(posePacket);
+
+         LogTools.info(""+latestFrame.getConfidenceFactor() + " " + posePacket.getConfidenceFactor());
+         if(biasEnable.get())
+         {
+            posePacket.getPose().getPosition().addZ(0.5);
+            estimatedPelvisPublisher.publish(posePacket);
+            LogTools.info("publishing biased " + posePacket.getPose().getPosition());
+         }
+         else
+         {
+            estimatedPelvisPublisher.publish(posePacket);
+            LogTools.info("publishing "+ posePacket.getPose().getPosition());
+         }
       }
    }
 

@@ -9,6 +9,9 @@ public class SLAMAnchorPaneController extends REABasicUIController
 {
    @FXML
    private ToggleButton enableSLAMButton;
+   
+   @FXML
+   private ToggleButton biasButton;
 
    @FXML
    private TextField queuedBufferSize;
@@ -69,6 +72,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    public void bindControls()
    {
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMEnable, enableSLAMButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.BiasEnable, biasButton.selectedProperty());
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.QueuedBuffers, queuedBufferSize.textProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMStatus, slamStatus.textProperty());
