@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-public class HeadingAndVelocityEvaluationScriptParameters
+public class SimpleHeadingAndVelocityEvaluationScriptParameters
 {
    private double acceleration = 0.25;
-   private double maxVelocity = 0.4;
+   private double maxVelocity = 0.5;
    private double cruiseVelocity = 0.3;
    private double headingDot = 0.5;
    private double sideStepVelocity = 0.4;
@@ -68,5 +68,4 @@ public class HeadingAndVelocityEvaluationScriptParameters
    {
       this.maxHeadingDot = maxHeadingDot;
    }
-
 }
