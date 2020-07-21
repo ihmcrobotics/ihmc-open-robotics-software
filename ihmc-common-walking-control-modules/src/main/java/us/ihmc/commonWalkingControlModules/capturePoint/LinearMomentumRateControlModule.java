@@ -5,9 +5,15 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ejml.data.DMatrixRMaj;
+
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
+import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -29,6 +35,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -41,6 +49,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -60,6 +69,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class LinearMomentumRateControlModule
 {
    private static final boolean USE_COMBINED_STEP_ADJUSTMENT = false;
+   private static final boolean USE_LQR_MOMENTUM_CONTROLLER = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -101,7 +111,9 @@ public class LinearMomentumRateControlModule
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoPInMidFeet;
-
+   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private double timeInContactPhase = 0;
+   
    private boolean controlHeightWithMomentum;
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
@@ -117,6 +129,8 @@ public class LinearMomentumRateControlModule
 
    private final ICPController icpController;
    private final StepAdjustmentController stepAdjustmentController;
+   private final LQRMomentumController lqrMomentumController;
+   private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
 
    private final ICPOptimizationController icpOptimizationController;
    private final ICPControlPlane icpControlPlane;
@@ -173,7 +187,7 @@ public class LinearMomentumRateControlModule
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
       this.yoTime = yoTime;
-
+      
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
       recoveryLinearMomentumRateWeight = new ParameterVector3D("RecoveryLinearMomentumRateWeight",
@@ -191,7 +205,6 @@ public class LinearMomentumRateControlModule
                                                                      maxMomentumRateWeightChangeRate,
                                                                      controlDT,
                                                                      worldFrame);
-
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
@@ -235,11 +248,27 @@ public class LinearMomentumRateControlModule
                                                                    registry,
                                                                    yoGraphicsListRegistry);
          icpController = null;
+         lqrMomentumController = null;
          stepAdjustmentController = null;
+      }
+      else if (USE_LQR_MOMENTUM_CONTROLLER)
+      {
+         icpOptimizationController = null;
+         icpController = null;
+         lqrMomentumController = new LQRMomentumController(Math.sqrt(gravityZ / walkingControllerParameters.nominalHeightAboveAnkle()), registry);
+         stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
+                                                                 soleZUpFrames,
+                                                                 bipedSupportPolygons,
+                                                                 icpControlPolygons,
+                                                                 contactableFeet,
+                                                                 controlDT,
+                                                                 registry,
+                                                                 yoGraphicsListRegistry);
       }
       else
       {
          icpOptimizationController = null;
+         lqrMomentumController = null;
          icpController = new ICPController(walkingControllerParameters,
                                            bipedSupportPolygons,
                                            icpControlPolygons,
@@ -297,6 +326,9 @@ public class LinearMomentumRateControlModule
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
+      this.vrpTrajectories.clear();
+      this.vrpTrajectories.addAll(input.getVRPTrajectories());
+      this.timeInContactPhase = input.getTimeInContactPhase();
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
@@ -500,6 +532,30 @@ public class LinearMomentumRateControlModule
             icpOptimizationController.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
          }
       }
+      else if (USE_LQR_MOMENTUM_CONTROLLER)
+      {
+         if (initializeForStanding)
+         {
+            stepAdjustmentController.reset();
+         }
+         if (initializeForSingleSupport)
+         {
+            stepAdjustmentController.reset();
+
+            double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
+            stepAdjustmentController.setFootstepToAdjust(footsteps.get(0), swingDurations.get(0), transferDuration);
+            stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
+         }
+         if (initializeForTransfer)
+         {
+            stepAdjustmentController.reset();
+         }
+
+         if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
+            stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
+         if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
+            stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
+      }
       else
       {
          if (initializeForStanding)
@@ -530,6 +586,12 @@ public class LinearMomentumRateControlModule
       }
    }
 
+   public void updateCurrentState(FramePoint3DReadOnly CenterOfMassPosition, FrameVector3DReadOnly CenterOfMassVelocity)
+   {
+      CenterOfMassPosition.get(currentState);
+      CenterOfMassVelocity.get(3, currentState);
+   }
+   
    private void computeICPController()
    {
       if (USE_COMBINED_STEP_ADJUSTMENT)
@@ -559,6 +621,14 @@ public class LinearMomentumRateControlModule
          }
          icpOptimizationController.getDesiredCMP(desiredCMP);
          icpOptimizationController.getDesiredCoP(desiredCoP);
+      }
+      else if (USE_LQR_MOMENTUM_CONTROLLER)
+      {
+         lqrMomentumController.computeDynamicsMatrix(omega0);
+         lqrMomentumController.setVRPTrajectory(vrpTrajectories);
+         lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
+         stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint, new FrameVector2D(), omega0);
+         
       }
       else
       {
@@ -625,12 +695,24 @@ public class LinearMomentumRateControlModule
    {
       boolean success = true;
 
-      double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
-      centerOfMass.setToZero(centerOfMassFrame);
-      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
-      WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);
+      if (USE_LQR_MOMENTUM_CONTROLLER)
+      {
+         //lqr controller u is a COM acceleration (in xy)
+         linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+         //linearMomentumRateOfChange.addZ(gravityZ);
+         linearMomentumRateOfChange.scale(totalMass);
+         linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
+      }
+      else
+      {
+         double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
+         centerOfMass.setToZero(centerOfMassFrame);
+         WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
+         WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);         
+         linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
+      }
       linearMomentumRateOfChange.checkReferenceFrameMatch(centerOfMassFrame);
-      linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
+      
 
       if (linearMomentumRateOfChange.containsNaN())
       {

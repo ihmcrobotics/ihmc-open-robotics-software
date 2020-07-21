@@ -125,7 +125,12 @@ public class LQRMomentumController
 
    public LQRMomentumController(DoubleProvider omega, YoVariableRegistry parentRegistry)
    {
-      computeDynamicsMatrix(omega.getValue());
+      this(omega.getValue(), parentRegistry);
+   }
+   
+   public LQRMomentumController(double omega, YoVariableRegistry parentRegistry)
+   {
+      computeDynamicsMatrix(omega);
 
       computeS1();
 
@@ -147,7 +152,7 @@ public class LQRMomentumController
       shouldUpdateS1 = true;
    }
 
-   private void computeDynamicsMatrix(double omega)
+   public void computeDynamicsMatrix(double omega)
    {
       MatrixTools.setMatrixBlock(A, 0, 3, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(B, 3, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);

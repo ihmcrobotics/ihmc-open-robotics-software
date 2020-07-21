@@ -35,6 +35,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -47,6 +48,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -71,7 +73,6 @@ public class SimpleBalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final LQRMomentumController lqrMomentumController;
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
@@ -160,15 +161,25 @@ public class SimpleBalanceManager
 
       SideDependentList<MovingReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
+      double ankleToGround = Double.NEGATIVE_INFINITY;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+         ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         ankleToGround = Math.max(ankleToGround, Math.abs(ankleToSole.getTranslationZ()));
+      }
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround + 0.2;
+      
       comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
-                                                       walkingControllerParameters.nominalHeightAboveAnkle(), 
+                                                       nominalHeightAboveGround, 
                                                        controllerToolbox.getOmega0Provider(),registry, yoGraphicsListRegistry,
                                                        yoTime, icpPlannerParameters, bipedSupportPolygons);
       comPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       comPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
-      
-      lqrMomentumController = new LQRMomentumController(controllerToolbox.getOmega0Provider(), registry);
-      
+          
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
@@ -321,6 +332,8 @@ public class SimpleBalanceManager
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setVRPTrajectories(comPlanner.getVRPTrajectories());
+      linearMomentumRateControlModuleInput.setTimeInContactPhase(comPlanner.getTimeInContactPhase());
       linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
