@@ -24,8 +24,7 @@ import com.martiansoftware.jsap.JSAP;
 
 public class ValkyrieVrSteppingApplication {
 	private ValkyrieVrSteppingController controller;
-	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS,
-			"ihmc_valkyrie_vr_joystick_control");
+	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_vr_joystick_control");
 
 	public void start(JSAPResult jsapResult) {
 		String robotTargetString = jsapResult.getString("robotTarget");
@@ -75,7 +74,7 @@ public class ValkyrieVrSteppingApplication {
 		try {
 			final SimpleJSAP jsap = new SimpleJSAP("ValkyrieVrSteppingApplication", "Make the robot walk",
 					new Parameter[] 
-						{ new FlaggedOption("robotTarget", JSAP.STRING_PARSER, "REAL_ROBOT", JSAP.NOT_REQUIRED, 'r', "robotTarget", "Robot target (REAL_ROBOT, SCS)") });
+						{ new FlaggedOption("robotTarget", JSAP.STRING_PARSER, "SCS", JSAP.NOT_REQUIRED, 'r', "robotTarget", "Robot target (REAL_ROBOT, SCS)") });
 			jsapResult = jsap.parse(args);
 		} catch (JSAPException e) {
 			System.out.println("Invalid option: " + e);
