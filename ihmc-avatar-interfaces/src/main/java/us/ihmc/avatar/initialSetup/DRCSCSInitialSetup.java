@@ -169,7 +169,7 @@ public class DRCSCSInitialSetup
        * This makes sure that the initial values of all YoVariables that are added to the scs (i.e. at
        * index 0 of the data buffer) are properly stored in the data buffer
        */
-      scs.getDataBuffer().copyValuesThrough();
+      scs.getDataBuffer().fillBuffer();
 
    }
 

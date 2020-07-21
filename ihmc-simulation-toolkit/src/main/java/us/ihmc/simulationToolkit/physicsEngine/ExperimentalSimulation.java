@@ -235,7 +235,7 @@ public class ExperimentalSimulation extends Simulation
             updateGroundContactPointsVelocity(rootBodies.get(i), robot);
          }
 
-         getDataBuffer().copyValuesThrough();
+         getDataBuffer().fillBuffer();
       }
    }
 
