@@ -81,7 +81,7 @@ public abstract class SimpleTransferState extends SimpleWalkingState
          double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
          boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
 
-         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport == 0.0 && isICPInsideNextSupportPolygon))
             return true;
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
             return true;
