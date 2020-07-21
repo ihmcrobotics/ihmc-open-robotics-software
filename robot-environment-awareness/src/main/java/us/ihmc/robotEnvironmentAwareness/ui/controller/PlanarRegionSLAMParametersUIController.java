@@ -11,8 +11,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParam
 public class PlanarRegionSLAMParametersUIController extends REABasicUIController
 {
    private StoredPropertyTableViewWrapper tableViewWrapper;
-   private final PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software",
-                                                                                            "robot-environment-awareness/src/main/resources/liveMap");
+   private final PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
    private final JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(slamParameters);
 
    @FXML
