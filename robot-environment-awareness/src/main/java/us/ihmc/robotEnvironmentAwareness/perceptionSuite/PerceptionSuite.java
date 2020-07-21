@@ -25,11 +25,12 @@ public class PerceptionSuite
    private static final String LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
    private static final String REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultRealSenseREAModuleConfiguration.txt";
 
-   private PerceptionSuiteComponent<SLAMModule, SLAMBasedEnvironmentAwarenessUI> slamModule;
-   private PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
-   private PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> lidarREAModule;
-   private PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
-   private PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
+   private final PerceptionSuiteComponent<SLAMModule, SLAMBasedEnvironmentAwarenessUI> slamModule;
+//   private final PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
+   private final DummyPerceptionSuiteComponent realsenseREAModule;
+   private final PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> lidarREAModule;
+   private final PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
+   private final PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
@@ -47,15 +48,19 @@ public class PerceptionSuite
                                                   PerceptionSuiteAPI.RunRealSenseSLAMUI,
                                                   PerceptionSuiteAPI.GUIRunRealSenseSLAM,
                                                   PerceptionSuiteAPI.GUIRunRealSenseSLAMUI);
-      realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
-                                                          () -> new REAPerceptionSuiteElement(m -> createRealSenseREAModule(),
-                                                                                              (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s,
-                                                                                                                                                             NetworkPorts.REA_MODULE2_UI_PORT)),
-                                                          messager,
-                                                          PerceptionSuiteAPI.RunRealSenseREA,
-                                                          PerceptionSuiteAPI.RunRealSenseREAUI,
-                                                          PerceptionSuiteAPI.GUIRunRealSenseREA,
-                                                          PerceptionSuiteAPI.GUIRunRealSenseREAUI);
+//      realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
+//                                                          () -> new REAPerceptionSuiteElement(m -> createRealSenseREAModule(),
+//                                                                                              (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s,
+//                                                                                                                                                             NetworkPorts.REA_MODULE2_UI_PORT)),
+//                                                          messager,
+//                                                          PerceptionSuiteAPI.RunRealSenseREA,
+//                                                          PerceptionSuiteAPI.RunRealSenseREAUI,
+//                                                          PerceptionSuiteAPI.GUIRunRealSenseREA,
+//                                                          PerceptionSuiteAPI.GUIRunRealSenseREAUI);
+      realsenseREAModule = new DummyPerceptionSuiteComponent("RealSense REA",
+                                                             messager,
+                                                             PerceptionSuiteAPI.RunRealSenseREA,
+                                                             PerceptionSuiteAPI.RunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
                                                       () -> new REAPerceptionSuiteElement(m -> LIDARBasedREAModule.createIntraprocessModule(
                                                             LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME,
