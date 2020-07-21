@@ -34,7 +34,7 @@ public class AtlasSLAMModule extends SLAMModule
 
    private final AtomicReference<Boolean> robotStatus;
    private final AtomicReference<Boolean> velocityStatus;
-   
+
    private final AtomicReference<Boolean> biasEnable;
 
    /**
@@ -48,20 +48,14 @@ public class AtlasSLAMModule extends SLAMModule
    {
       super(messager);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleRobotConfigurationData);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    FootstepStatusMessage.class,
-                                                    //ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    ROS2Tools.getControllerInputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleFootstepStatusMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                    StampedPosePacket.class,
-                                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
+      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StampedPosePacket.class,
+                                                                    ROS2Tools.getControllerInputTopic(drcRobotModel.getSimpleRobotName()));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
@@ -131,27 +125,17 @@ public class AtlasSLAMModule extends SLAMModule
                posePacket.setConfidenceFactor(0.0);
             posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
          }
-         posePacket.setConfidenceFactor(1.0);
+         posePacket.setConfidenceFactor(0.5);
          RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
          estimatedPelvisPose.preMultiply(latestFrame.getSensorPose());
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
 
-         LogTools.info(""+latestFrame.getConfidenceFactor() + " " + posePacket.getConfidenceFactor());
-         if(biasEnable.get())
-         {
-            posePacket.getPose().getPosition().addZ(0.5);
-            estimatedPelvisPublisher.publish(posePacket);
-            LogTools.info("publishing biased " + posePacket.getPose().getPosition());
-         }
-         else
-         {
-            estimatedPelvisPublisher.publish(posePacket);
-            LogTools.info("publishing "+ posePacket.getPose().getPosition());
-         }
+         LogTools.info("" + latestFrame.getConfidenceFactor() + " " + posePacket.getConfidenceFactor());
+         estimatedPelvisPublisher.publish(posePacket);
+         LogTools.info("publishing " + posePacket.getPose().getPosition());
       }
    }
-
 
    @Override
    public void clearSLAM()
@@ -164,7 +148,7 @@ public class AtlasSLAMModule extends SLAMModule
    private void handleRobotConfigurationData(Subscriber<RobotConfigurationData> subscriber)
    {
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
-      latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
+      latestRobotTimeStamp.set(robotConfigurationData.getWallTime());
 
       if (reaMessager.isMessagerOpen())
       {
@@ -211,8 +195,7 @@ public class AtlasSLAMModule extends SLAMModule
 
    public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel) throws Exception
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
-                                                              NetworkPorts.SLAM_MODULE_UI_PORT,
+      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT,
                                                               REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
