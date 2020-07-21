@@ -24,8 +24,6 @@ public class SLAMPerceptionSuiteElement implements PerceptionSuiteElement<SLAMMo
       uiModule = uiProvider.createUI(messager, stage);
 
       perceptionModule.start();
-
-      stage.setOnCloseRequest((event) -> hide());
    }
    
    @Override

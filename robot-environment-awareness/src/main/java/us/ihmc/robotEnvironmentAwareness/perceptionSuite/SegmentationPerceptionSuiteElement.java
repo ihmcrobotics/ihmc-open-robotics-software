@@ -25,8 +25,6 @@ public class SegmentationPerceptionSuiteElement implements PerceptionSuiteElemen
       perceptionModule = moduleProvider.createModule(messager);
       uiModule = uiProvider.createUI(messager, stage);
       perceptionModule.start();
-
-      stage.setOnCloseRequest((event) -> hide());
    }
 
    @Override
