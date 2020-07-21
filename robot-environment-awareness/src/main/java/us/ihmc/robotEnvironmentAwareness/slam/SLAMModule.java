@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -23,8 +21,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
@@ -106,7 +102,7 @@ public class SLAMModule implements PerceptionModule
 
       enableNormalEstimation = reaMessager.createInput(SLAMModuleAPI.NormalEstimationEnable, true);
       clearNormals = reaMessager.createInput(SLAMModuleAPI.NormalEstimationClear, false);
-      normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters);
+      normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
 
@@ -137,6 +133,7 @@ public class SLAMModule implements PerceptionModule
       this.ocTreeConsumers.remove(ocTreeConsumer);
    }
 
+   @Override
    public void start()
    {
       LogTools.info("Starting SLAM Module");
@@ -151,6 +148,7 @@ public class SLAMModule implements PerceptionModule
       }
    }
 
+   @Override
    public void stop()
    {
       LogTools.info("SLAM Module is going down");
