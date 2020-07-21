@@ -6,12 +6,7 @@ import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
-import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
@@ -59,6 +54,7 @@ public class SLAMModuleAPI
    public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
 
    public static final Topic<Boolean> SLAMEnable = Root.child(Module).topic(Enable);
+   public static final Topic<Boolean> BiasEnable = Root.child(Module).child(SensorFrame).topic(Enable);
    public static final Topic<Boolean> SLAMClear = Root.child(Module).topic(Clear);
 
    public static final Topic<Boolean> ShowPlanarRegionsMap = Root.child(UI).child(PlanarRegions).topic(Show);

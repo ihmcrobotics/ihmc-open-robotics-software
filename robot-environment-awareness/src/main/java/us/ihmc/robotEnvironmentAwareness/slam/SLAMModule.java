@@ -209,7 +209,7 @@ public class SLAMModule
       else
       {
          success = addFrame(pointCloudToCompute);
-         LogTools.info("addFrame " + pointCloudQueue.size() + " " + success);
+         LogTools.info("addFrame " + pointCloudQueue.size() + " " + success +" " + slam.getComputationTimeForLatestFrame());
       }
 
       dequeue();
