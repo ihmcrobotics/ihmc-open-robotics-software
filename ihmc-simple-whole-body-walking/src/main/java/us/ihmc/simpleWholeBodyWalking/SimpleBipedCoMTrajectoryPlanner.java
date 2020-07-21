@@ -135,6 +135,7 @@ public class SimpleBipedCoMTrajectoryPlanner
    private final YoDouble defaultTransferWeightDistribution = new YoDouble("DefaultWeightDistribution", registry);
    private final YoDouble finalTransferWeightDistribution = new YoDouble("FinalTransferWeightDistribution", registry);
    protected final YoDouble defaultFinalTransferDuration = new YoDouble("DefaultFinalTransferDuration", registry);
+   protected final YoDouble FinalTransferDuration = new YoDouble("FinalTransferDuration", registry);
    
    
    
@@ -332,14 +333,8 @@ public class SimpleBipedCoMTrajectoryPlanner
       isStanding.set(true);
       isDoubleSupport.set(true);
       isHoldingPosition.set(false);
-      //transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
-      //transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      //referenceICPGenerator.setInitialConditionsForAdjustment();
-      //referenceCoMGenerator.initializeForSwingOrTransfer();
-      //shouldClampDuration.set(true);
+      FinalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
 
-      //updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
-      //skipNextUpdate.set(true);
       updateAbsoluteTimings(currentTime);
    }
 
@@ -351,41 +346,27 @@ public class SimpleBipedCoMTrajectoryPlanner
       isStanding.set(false);
       isDoubleSupport.set(false);
       isHoldingPosition.set(false);
-      //shouldClampDuration.set(upcomingFootstepsData.get(0).getFootstep().getIsAdjustable());
+      
+      FinalTransferDuration.set(upcomingFootstepTimings.get(0).getTransferTime());
 
-      //int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
-      //transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-      //transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-      //referenceICPGenerator.setInitialConditionsForAdjustment();
-      //referenceCoPGenerator.initializeForSwing();
-      //referenceCoMGenerator.initializeForSwingOrTransfer();
-
-      //updateSingleSupportPlan(true);
-      //skipNextUpdate.set(true);
       updateAbsoluteTimings(currentTime);
    }
 
    public void initializeForTransfer(double currentTime)
    {
       this.initialTime.set(currentTime);
-      isInitialTransfer.set(isStanding.getBooleanValue());
+      //coming from standing or just continuing initial Transfer 
+      isInitialTransfer.set(isStanding.getBooleanValue() || isInitialTransfer.getBooleanValue());
       isStanding.set(false);
       isDoubleSupport.set(true);
       isHoldingPosition.set(false);
-      //shouldClampDuration.set(true);
 
       if (isInitialTransfer.getBooleanValue() || isFinalTransfer.getValue())
          previousTransferToSide.set(null);
       
       //int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       //isFinalTransfer.set(numberOfFootstepRegistered == 0);
-      //transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-      //transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-      //referenceICPGenerator.setInitialConditionsForAdjustment();
-      //referenceCoMGenerator.initializeForSwingOrTransfer();
-
-      //updateTransferPlan(true);
-      //skipNextUpdate.set(true);
+      
       updateAbsoluteTimings(currentTime);
    }
    
@@ -402,11 +383,11 @@ public class SimpleBipedCoMTrajectoryPlanner
       if (isInitialTransfer.getBooleanValue())
          trackingTime += defaultFinalTransferDuration.getDoubleValue();
       else if (isDoubleSupport.getBooleanValue())
-         trackingTime += -upcomingFootstepTimings.get(0).getSwingTime();
+         trackingTime += FinalTransferDuration.getDoubleValue();
       
       for (int i = 0; i < upcomingFootstepTimings.size(); i++)
       {
-         upcomingFootstepTimings.get(i).setAbsoluteTime(0, trackingTime);
+         upcomingFootstepTimings.get(i).setAbsoluteTime(0.01, trackingTime);
          trackingTime += upcomingFootstepTimings.get(i).getStepTime();
       }
    }
@@ -523,6 +504,8 @@ public class SimpleBipedCoMTrajectoryPlanner
    {
       if (isStanding.getBooleanValue() || upcomingFootsteps.size() == 0)
          return SUFFICIENTLY_LARGE;
+      else if (isInitialTransfer.getBooleanValue() || isFinalTransfer.getBooleanValue())
+         return defaultFinalTransferDuration.getDoubleValue();
       else
          return upcomingFootstepTimings.get(stepNumber).getTransferTime();
    }
@@ -550,7 +533,8 @@ public class SimpleBipedCoMTrajectoryPlanner
       {
          return true;
       }
-      return timeInCurrentStateRemaining.getDoubleValue() <= 0.001;
+      return timeInCurrentStateRemaining.getDoubleValue() <= 0.0;//02; //Don't fudge it here 
+      //fudge that the footstep is actually planned to be 0.01 longer than the state machine thinks
    }
 
    public void endTick()
