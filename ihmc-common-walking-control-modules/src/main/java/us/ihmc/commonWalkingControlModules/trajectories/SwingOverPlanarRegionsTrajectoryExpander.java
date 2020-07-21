@@ -719,7 +719,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       FramePoint3D collisionInStart = new FramePoint3D(worldFrame, collisionPoint);
       collisionInStart.changeFrame(startOfSwingZUpFrame);
 
-      return collisionInStart.getZ() < minimumHeightAboveFloorForCollision.getDoubleValue() + minimumClearance.getDoubleValue();
+      return collisionIsOnRising && collisionInStart.getZ() < minimumHeightAboveFloorForCollision.getDoubleValue() + minimumClearance.getDoubleValue();
    }
 
    /**
