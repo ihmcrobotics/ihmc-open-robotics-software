@@ -44,12 +44,21 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             String directoryNameToAssumePresent,
                             String subsequentPathToResourceFolder)
    {
+      this(keys, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, "");
+   }
+
+   public StoredPropertySet(StoredPropertyKeyList keys,
+                            Class<?> classForLoading,
+                            String directoryNameToAssumePresent,
+                            String subsequentPathToResourceFolder,
+                            String fileNameSuffix)
+   {
       this.keys = keys;
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + ".ini";
+      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + fileNameSuffix + ".ini";
 
       values = new Object[keys.keys().size()];
 
@@ -401,9 +410,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
          return absoluteWorkingDirectory;
       }
 
-      String s = classForLoading.getPackage().toString();
-      LogTools.debug(s);
-      String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
+      String packageName = classForLoading.getPackage().toString();
+      LogTools.debug(packageName);
+      String packagePath = packageName.split(" ")[1].replaceAll("\\.", "/");
       LogTools.debug(packagePath);
 
       Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);

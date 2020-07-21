@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKeyList;
@@ -33,12 +34,16 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
 
    public PlanarRegionSLAMParameters()
    {
-      this("ihmc-open-robotics-software", "robot-environment-awareness/src/main/resources");
+      this("");
    }
 
-   public PlanarRegionSLAMParameters(String name, String directory)
+   public PlanarRegionSLAMParameters(String fileNameSuffix)
    {
-      super(keys, PlanarRegionSLAMParameters.class, name, directory);
+      super(keys,
+            PlanarRegionSLAMParameters.class,
+            "ihmc-open-robotics-software",
+            "robot-environment-awareness/src/main/resources",
+            fileNameSuffix);
 
       load();
    }
@@ -109,6 +114,10 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    public static void main(String[] args)
    {
       PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
+      LogTools.info(planarRegionSLAMParameters.getMaximumPointProjectionDistance());
       planarRegionSLAMParameters.save();
+      PlanarRegionSLAMParameters planarRegionSLAMParametersForLiveMap = new PlanarRegionSLAMParameters("ForLiveMap");
+      LogTools.info(planarRegionSLAMParametersForLiveMap.getMaximumPointProjectionDistance());
+      planarRegionSLAMParametersForLiveMap.save();
    }
 }
