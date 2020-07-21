@@ -74,6 +74,20 @@ public class RandomICPSLAM extends SLAMBasics
       optimizer.setStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
       optimizer.setReducingStepSizeRatio(2);
+
+      octree.enableParallelComputationForNormals(true);
+      octree.enableParallelInsertionOfMisses(true);
+      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+   }
+
+   public void clearNormals()
+   {
+      octree.clearNormals();
+   }
+
+   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
    @Override
@@ -98,6 +112,11 @@ public class RandomICPSLAM extends SLAMBasics
       }
 
       return success;
+   }
+
+   public void computeOcTreeNormals()
+   {
+      octree.updateNormals();
    }
 
    @Override

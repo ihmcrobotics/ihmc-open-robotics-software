@@ -18,10 +18,11 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
 {
    private final AtomicReference<Integer> sizeOfPointCloud;
 
-   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic)
+   public StereoVisionPointCloudViewer(Topic<StereoVisionPointCloudMessage> messageState, REAUIMessager uiMessager, Topic<Boolean> enableTopic, Topic<Boolean> clearTopic,
+                                       Topic<Integer> sizeTopic)
    {
       super(messageState, uiMessager, enableTopic, clearTopic);
-      sizeOfPointCloud = uiMessager.createInput(REAModuleAPI.UIStereoVisionSize, PointCloudAnchorPaneController.initialSizeOfPointCloud);
+      sizeOfPointCloud = uiMessager.createInput(sizeTopic, PointCloudAnchorPaneController.initialSizeOfPointCloud);
    }
 
    public void render()

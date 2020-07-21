@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.LiveMapAnchorPaneController">
+    <children>
+        <HBox layoutX="10.0" layoutY="10.0" prefHeight="160.0" prefWidth="1098.0" spacing="20.0">
+            <children>
+                <VBox alignment="CENTER" prefHeight="160.0" prefWidth="300.0" spacing="5.0">
+                    <children>
+                        <GridPane>
+                            <ToggleButton fx:id="enableMapFusion" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="200.0"
+                                          text="Enable Map Fusion"/>
+                            <ToggleButton fx:id="enableLidarButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0"
+                                          prefWidth="200.0" text="Enable Lidar" GridPane.rowIndex="1"/>
+                            <ToggleButton fx:id="enableRealSenseButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0"
+                                          prefWidth="200.0" text="Enable RealSense" GridPane.rowIndex="2"/>
+                            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearLidar" text="Clear Lidar"
+                                    GridPane.columnIndex="1"/>
+                            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearRealSense" text="Clear RealSense"
+                                    GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearLocalizedMap" text="Clear Localized Map"
+                                    GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        </GridPane>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
+</AnchorPane>
