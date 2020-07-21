@@ -221,6 +221,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       reaMessager.submitMessage(planarRegionsConcaveHullParametersTopic, concaveHullFactoryParameters.get());
       reaMessager.submitMessage(planarRegionsPolygonizerParametersTopic, polygonizerParameters.get());
       reaMessager.submitMessage(planarRegionsIntersectionParametersTopic, intersectionEstimationParameters.get());
+      reaMessager.submitMessage(surfaceNormalFilterParametersTopic, surfaceNormalFilterParameters.get());
    }
 
    public void loadConfiguration(FilePropertyHelper filePropertyHelper)
@@ -260,6 +261,10 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       String intersectionEstimationParametersFile = filePropertyHelper.loadProperty(planarRegionsIntersectionParametersTopic.getName());
       if (intersectionEstimationParametersFile != null)
          intersectionEstimationParameters.set(IntersectionEstimationParameters.parse(intersectionEstimationParametersFile));
+
+      String surfaceNormalFiltersParameterFile = filePropertyHelper.loadProperty(surfaceNormalFilterParametersTopic.getName());
+      if (surfaceNormalFiltersParameterFile != null)
+         surfaceNormalFilterParameters.set(SurfaceNormalFilterParameters.parse(surfaceNormalFiltersParameterFile));
    }
 
    public void saveConfiguration(FilePropertyHelper filePropertyHelper)
@@ -274,6 +279,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(planarRegionsConcaveHullParametersTopic.getName(), concaveHullFactoryParameters.get().toString());
       filePropertyHelper.saveProperty(planarRegionsPolygonizerParametersTopic.getName(), polygonizerParameters.get().toString());
       filePropertyHelper.saveProperty(planarRegionsIntersectionParametersTopic.getName(), intersectionEstimationParameters.get().toString());
+      filePropertyHelper.saveProperty(surfaceNormalFilterParametersTopic.getName(), surfaceNormalFilterParameters.get().toString());
    }
 
    public void update(NormalOcTree octree, Tuple3DReadOnly sensorPosition)

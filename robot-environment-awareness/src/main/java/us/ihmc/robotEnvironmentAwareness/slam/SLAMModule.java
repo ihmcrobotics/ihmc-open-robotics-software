@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,29 +12,28 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
 import us.ihmc.ros2.Ros2Node;
 
-public class SLAMModule
+public class SLAMModule implements PerceptionModule
 {
    protected final Messager reaMessager;
 
@@ -54,7 +52,6 @@ public class SLAMModule
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
-
    protected final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -62,7 +59,8 @@ public class SLAMModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
-   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   private final boolean manageRosNode;
+   protected final Ros2Node ros2Node;
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
 
@@ -71,9 +69,26 @@ public class SLAMModule
       this(messager, null);
    }
 
+   public SLAMModule(Ros2Node ros2Node, Messager messager)
+   {
+      this(ros2Node, messager, null);
+   }
+
    public SLAMModule(Messager messager, File configurationFile)
    {
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, true);
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile)
+   {
+      this(ros2Node, messager, configurationFile, false);
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, boolean manageRosNode)
+   {
+      this.ros2Node = ros2Node;
       this.reaMessager = messager;
+      this.manageRosNode = manageRosNode;
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud", this::handlePointCloud);
@@ -87,15 +102,16 @@ public class SLAMModule
 
       enableNormalEstimation = reaMessager.createInput(SLAMModuleAPI.NormalEstimationEnable, true);
       clearNormals = reaMessager.createInput(SLAMModuleAPI.NormalEstimationClear, false);
-      normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters);
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
 
       reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
-      reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParameters);
+      NormalEstimationParameters normalEstimationParametersLocal = new NormalEstimationParameters();
+      normalEstimationParametersLocal.setNumberOfIterations(10);
+      normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
+
+      reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
       if (configurationFile != null)
       {
@@ -113,8 +129,15 @@ public class SLAMModule
       this.ocTreeConsumers.add(ocTreeConsumer);
    }
 
-   public void start() throws IOException
+   public void removeOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
    {
+      this.ocTreeConsumers.remove(ocTreeConsumer);
+   }
+
+   @Override
+   public void start()
+   {
+      LogTools.info("Starting SLAM Module");
       if (scheduledMain == null)
       {
          scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -126,15 +149,28 @@ public class SLAMModule
       }
    }
 
-   public void stop() throws Exception
+   @Override
+   public void stop()
    {
-      reaMessager.closeMessager();
+      LogTools.info("SLAM Module is going down");
+
+      try
+      {
+         reaMessager.closeMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       if (scheduledMain != null)
       {
          scheduledMain.cancel(true);
          scheduledMain = null;
       }
+
+      if (manageRosNode)
+         ros2Node.destroy();
 
       if (scheduledSLAM != null)
       {
@@ -198,7 +234,12 @@ public class SLAMModule
          success = addFrame(pointCloudToCompute);
       }
 
-      slam.updatePlanarRegionsMap();
+      slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      if (clearNormals.getAndSet(false))
+         slam.clearNormals();
+      if (enableNormalEstimation.get())
+         slam.computeOcTreeNormals();
+
       dequeue();
 
       return success;
@@ -338,14 +379,14 @@ public class SLAMModule
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
-   public static SLAMModule createIntraprocessModule() throws Exception
+   public static SLAMModule createIntraprocessModule(Ros2Node ros2Node, Messager messager)
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
-                                                              NetworkPorts.SLAM_MODULE_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      messager.startMessager();
+      return new SLAMModule(ros2Node, messager);
+   }
 
+   public static SLAMModule createIntraprocessModule(Messager messager)
+   {
       return new SLAMModule(messager);
    }
+
 }
