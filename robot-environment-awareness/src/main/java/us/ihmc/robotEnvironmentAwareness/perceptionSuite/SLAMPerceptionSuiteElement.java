@@ -31,7 +31,8 @@ public class SLAMPerceptionSuiteElement implements PerceptionSuiteElement<SLAMMo
    {
       try
       {
-         messager.closeMessager();
+         if (messager.isMessagerOpen())
+            messager.closeMessager();
       }
       catch (Exception e)
       {

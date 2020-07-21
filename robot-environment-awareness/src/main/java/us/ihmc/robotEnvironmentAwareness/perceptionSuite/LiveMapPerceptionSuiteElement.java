@@ -33,7 +33,8 @@ public class LiveMapPerceptionSuiteElement implements PerceptionSuiteElement<Liv
    {
       try
       {
-         messager.closeMessager();
+         if (messager.isMessagerOpen())
+            messager.closeMessager();
       }
       catch (Exception e)
       {
