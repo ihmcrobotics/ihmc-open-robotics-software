@@ -28,6 +28,11 @@ public final class FilePropertyHelper
       saveProperty(propertyName, Integer.toString(propertyValue));
    }
 
+   public void saveProperty(String propertyName, long propertyValue)
+   {
+      saveProperty(propertyName, Long.toString(propertyValue));
+   }
+
    public void saveProperty(String propertyName, boolean propertyValue)
    {
       saveProperty(propertyName, Boolean.toString(propertyValue));
@@ -50,7 +55,6 @@ public final class FilePropertyHelper
                return Collections.enumeration(new TreeSet<Object>(super.keySet()));
             }
          };
-
 
          if (configurationFile.exists() && configurationFile.isFile())
          {
@@ -116,7 +120,7 @@ public final class FilePropertyHelper
       else
          return defaultValue;
    }
-   
+
    public Integer loadIntegerProperty(String propertyName)
    {
       return loadIntegerProperty(propertyName, null);
@@ -127,6 +131,20 @@ public final class FilePropertyHelper
       String loadedProperty = loadProperty(propertyName);
       if (loadedProperty != null)
          return Integer.parseInt(loadedProperty);
+      else
+         return defaultValue;
+   }
+
+   public Long loadLongProperty(String propertyName)
+   {
+      return loadLongProperty(propertyName, null);
+   }
+
+   public Long loadLongProperty(String propertyName, Long defaultValue)
+   {
+      String loadedProperty = loadProperty(propertyName);
+      if (loadedProperty != null)
+         return Long.parseLong(loadedProperty);
       else
          return defaultValue;
    }

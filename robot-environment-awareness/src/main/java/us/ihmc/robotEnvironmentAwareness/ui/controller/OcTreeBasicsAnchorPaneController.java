@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import us.ihmc.javaFXToolkit.StringConverterTools;
@@ -29,6 +31,8 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
    private Slider depthSlider;
    @FXML
    private Slider resolutionSlider;
+   @FXML
+   private Spinner<Double> nodeLifetimeSpinner;
    @FXML
    private ComboBox<DisplayType> displayTypeComboBox;
    @FXML
@@ -99,6 +103,8 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 
    public void setupControls()
    {
+      // JFX doesn't like Double.POSITIVE_INFINITY for the upper bound, so just setting it to 1 day.
+      nodeLifetimeSpinner.setValueFactory(new DoubleSpinnerValueFactory(0, 86400.0, 60.0, 5.0));
       ObservableList<DisplayType> displayTypeOptions = FXCollections.observableArrayList(DisplayType.values());
       displayTypeComboBox.setItems(displayTypeOptions);
       displayTypeComboBox.setValue(DisplayType.PLANE);
@@ -129,12 +135,16 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 
       uiMessager.bindBidirectionalGlobal(ocTreeEnableTopic, enableButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeResolution, resolutionSlider.valueProperty(), numberToDoubleConverter);
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeNodeLifetimeMillis,
+                                         nodeLifetimeSpinner.getValueFactory().valueProperty(),
+                                         millisecondToSecondTimeConverter());
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferOcTreeCapacity, lidarBufferSizeSlider.valueProperty(), numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferEnable, enableStereoBufferButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.DepthCloudBufferEnable, enableDepthCloudBufferButton.selectedProperty());
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity, stereoBufferMessageSizeSlider.valueProperty(),
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferMessageCapacity,
+                                         stereoBufferMessageSizeSlider.valueProperty(),
                                          numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferSize, stereoBufferSizeSlider.valueProperty(), numberToIntegerConverter);
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.StereoVisionBufferPreservingEnable, preserveOcTreeHistoryButton.selectedProperty());
@@ -151,11 +161,11 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, showInputLidarScanButton.selectedProperty(), true);
 
-      showInputLidarScanButton.selectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+      showInputLidarScanButton.selectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) ->
+      {
          if (oldValue != newValue && !newValue)
             uiMessager.submitMessageInternal(REAModuleAPI.UILidarScanClear, true);
       });
-
    }
 
    @FXML
@@ -220,5 +230,24 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
       uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+   }
+
+   private PropertyToMessageTypeConverter<Long, Double> millisecondToSecondTimeConverter()
+   {
+      return new PropertyToMessageTypeConverter<Long, Double>()
+      {
+
+         @Override
+         public Long convert(Double lifetimeSeconds)
+         {
+            return (long) (1.0e3 * lifetimeSeconds);
+         }
+
+         @Override
+         public Double interpret(Long lifetimeMillis)
+         {
+            return 1.0e-3 * lifetimeMillis;
+         }
+      };
    }
 }
