@@ -18,13 +18,13 @@ public interface PerceptionSuiteElement<M extends PerceptionModule, U extends Pe
 
    default void stop()
    {
-      stopInternal();
-
       Platform.runLater(() ->
                         {
-                           getPerceptionModule().stop();
                            getPerceptionUI().stop();
+                           getPerceptionModule().stop();
                            getStage().close();
+
+                           this.stopInternal();
                         });
    }
 

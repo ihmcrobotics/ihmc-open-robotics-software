@@ -292,7 +292,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       try
       {
-         reaMessager.closeMessager();
+         if (reaMessager.isMessagerOpen())
+            reaMessager.closeMessager();
       }
       catch (Exception e)
       {

@@ -32,7 +32,8 @@ public class SegmentationPerceptionSuiteElement implements PerceptionSuiteElemen
    {
       try
       {
-         messager.closeMessager();
+         if (messager.isMessagerOpen())
+            messager.closeMessager();
       }
       catch (Exception e)
       {
