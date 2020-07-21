@@ -65,6 +65,11 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
                               try
                               {
                                  element = elementProvider.createElement();
+                                 element.getStage().setOnCloseRequest((event) ->
+                                                                      {
+                                                                         messager.submitMessage(guiShowUITopic, false);
+                                                                         element.getStage().hide();
+                                                                      });
                               }
                               catch (Exception e)
                               {

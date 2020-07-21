@@ -16,8 +16,6 @@ public class REAPerceptionSuiteElement implements PerceptionSuiteElement<LIDARBa
       perceptionModule = moduleProvider.createModule(null);
       uiModule = uiProvider.createUI(null, stage);
       perceptionModule.start();
-
-      stage.setOnCloseRequest((event) -> hide());
    }
 
    public LIDARBasedREAModule getPerceptionModule()

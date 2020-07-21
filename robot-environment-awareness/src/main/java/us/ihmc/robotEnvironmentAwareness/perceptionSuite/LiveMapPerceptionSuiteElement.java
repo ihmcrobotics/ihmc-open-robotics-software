@@ -26,8 +26,6 @@ public class LiveMapPerceptionSuiteElement implements PerceptionSuiteElement<Liv
       uiModule = uiProvider.createUI(messager, stage);
 
       perceptionModule.start();
-
-      stage.setOnCloseRequest((event) -> hide());
    }
 
    @Override
