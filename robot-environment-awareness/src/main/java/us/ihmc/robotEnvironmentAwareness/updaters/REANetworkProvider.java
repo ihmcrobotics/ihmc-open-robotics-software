@@ -9,6 +9,10 @@ public interface REANetworkProvider
 {
    void registerMessager(Messager messager);
 
+   void registerLidarScanHandler(NewMessageListener<LidarScanMessage> lidarScanHandler);
+
+   void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler);
+
    void registerLidarScanHandler(Messager messager, NewMessageListener<LidarScanMessage> lidarScanHandler);
 
    void registerDepthPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> depthPointCloudHandler);
