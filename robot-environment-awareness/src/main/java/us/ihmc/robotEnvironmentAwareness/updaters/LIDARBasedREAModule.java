@@ -64,7 +64,6 @@ public class LIDARBasedREAModule implements PerceptionModule
    protected static final boolean DEBUG = true;
 
    private final boolean manageRosNode;
-   private final Ros2Node ros2Node;
 
    private final AtomicReference<Double> octreeResolution;
 
@@ -78,8 +77,6 @@ public class LIDARBasedREAModule implements PerceptionModule
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final REAModuleStateReporter moduleStateReporter;
-   private final REAPlanarRegionPublicNetworkProvider planarRegionNetworkProvider;
-
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<Boolean> enableStereoBuffer;
    private final AtomicReference<Boolean> enableDepthCloudBuffer;
@@ -93,21 +90,18 @@ public class LIDARBasedREAModule implements PerceptionModule
    private final AtomicReference<Boolean> preserveDepthOcTreeHistory;
    private final FilePropertyHelper filePropertyHelper;
 
-   private LIDARBasedREAModule(Messager reaMessager, File configurationFile)
+   private final REANetworkProvider networkProvider;
+
+   private LIDARBasedREAModule(Messager reaMessager, File configurationFile, REANetworkProvider networkProvider)
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), reaMessager, configurationFile, true);
+      this(reaMessager, configurationFile, networkProvider, true);
    }
 
-   private LIDARBasedREAModule(Ros2Node ros2Node, Messager reaMessager, File configurationFile)
-   {
-      this(ros2Node, reaMessager, configurationFile, false);
-   }
-
-   private LIDARBasedREAModule(Ros2Node ros2Node, Messager reaMessager, File configurationFile, boolean manageRosNode)
+   private LIDARBasedREAModule(Messager reaMessager, File configurationFile, REANetworkProvider networkProvider, boolean manageRosNode)
    {
       this.reaMessager = reaMessager;
-      this.ros2Node = ros2Node;
       this.manageRosNode = manageRosNode;
+      this.networkProvider = networkProvider;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
       lidarBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION,
@@ -149,34 +143,15 @@ public class LIDARBasedREAModule implements PerceptionModule
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
       planarRegionFeatureUpdater.bindControls();
 
-      new REAModuleROS2Subscription<LidarScanMessage>(ros2Node, reaMessager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, this::dispatchLidarScanMessage);
-      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node,
-                                                                   reaMessager,
-                                                                   REASourceType.STEREO_POINT_CLOUD,
-                                                                   StereoVisionPointCloudMessage.class,
-                                                                   this::dispatchStereoVisionPointCloudMessage);
-      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node,
-                                                                   reaMessager,
-                                                                   REASourceType.DEPTH_POINT_CLOUD,
-                                                                   StereoVisionPointCloudMessage.class,
-                                                                   this::dispatchDepthPointCloudMessage);
-      new REAModuleROS2Subscription<StampedPosePacket>(ros2Node,
-                                                       reaMessager,
-                                                       "/ihmc/stamped_pose_T265",
-                                                       StampedPosePacket.class,
-                                                       this::dispatchStampedPosePacket,
-                                                       REAModuleAPI.DepthCloudBufferEnable);
-
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionsListMessage.class,
-                                                    subscriberCustomRegionsTopicName,
-                                                    this::dispatchCustomPlanarRegion);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopic, this::handleRequestPlanarRegionsListMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    REASensorDataFilterParametersMessage.class,
-                                                    inputTopic,
-                                                    this::handleREASensorDataFilterParametersMessage);
+      networkProvider.registerMessager(reaMessager);
+      networkProvider.registerLidarScanHandler(reaMessager, this::dispatchLidarScanMessage);
+      networkProvider.registerDepthPointCloudHandler(reaMessager, this::dispatchDepthPointCloudMessage);
+      networkProvider.registerStereoVisionPointCloudHandler(reaMessager, this::dispatchStereoVisionPointCloudMessage);
+      networkProvider.registerStampedPosePacketHandler(reaMessager, this::dispatchStampedPosePacket);
+      networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
+      networkProvider.registerPlanarRegionsListRequestHandler(this::handleRequestPlanarRegionsListMessage);
+      networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
+      networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
 
       filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
@@ -188,13 +163,6 @@ public class LIDARBasedREAModule implements PerceptionModule
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager,
-                                                                             planarRegionFeatureUpdater,
-                                                                             ros2Node,
-                                                                             outputTopic,
-                                                                             lidarOutputTopic,
-                                                                             stereoOutputTopic,
-                                                                             depthOutputTopic);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
@@ -349,8 +317,8 @@ public class LIDARBasedREAModule implements PerceptionModule
             timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose.getPosition()), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
-            planarRegionNetworkProvider.update(ocTreeUpdateSuccess);
-            planarRegionNetworkProvider.publishCurrentState();
+            networkProvider.update(planarRegionFeatureUpdater, ocTreeUpdateSuccess);
+            networkProvider.publishCurrentState();
          }
 
          if (isThreadInterrupted())
@@ -461,7 +429,7 @@ public class LIDARBasedREAModule implements PerceptionModule
          e.printStackTrace();
       }
       if (manageRosNode)
-         ros2Node.destroy();
+         networkProvider.stop();
 
       if (scheduled != null)
       {
@@ -476,37 +444,18 @@ public class LIDARBasedREAModule implements PerceptionModule
       }
    }
 
-   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws Exception
+   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath, REANetworkProvider networkProvider) throws Exception
    {
       KryoMessager server = createKryoMessager(NetworkPorts.REA_MODULE_UI_PORT);
-      return new LIDARBasedREAModule(server, new File(configurationFilePath));
+      return new LIDARBasedREAModule(server, new File(configurationFilePath), networkProvider);
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, REANetworkProvider networkProvider) throws Exception
    {
-      KryoMessager messager = createKryoMessager(NetworkPorts.REA_MODULE_UI_PORT);
-
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      return new LIDARBasedREAModule(messager, configurationFile);
+      return createIntraprocessModule(configurationFilePath, networkProvider, NetworkPorts.REA_MODULE_UI_PORT);
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
-   {
-      return createIntraprocessModule(configurationFilePath, ros2Node, NetworkPorts.REA_MODULE_UI_PORT);
-   }
-
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node, NetworkPorts networkPorts) throws Exception
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, REANetworkProvider networkProvider, NetworkPorts networkPorts) throws Exception
    {
       KryoMessager messager = createKryoMessager(networkPorts);
 
@@ -522,7 +471,7 @@ public class LIDARBasedREAModule implements PerceptionModule
          e.printStackTrace();
       }
 
-      return new LIDARBasedREAModule(ros2Node, messager, configurationFile);
+      return new LIDARBasedREAModule(messager, configurationFile, networkProvider);
    }
 
    private static KryoMessager createKryoMessager(NetworkPorts networkPorts) throws Exception
