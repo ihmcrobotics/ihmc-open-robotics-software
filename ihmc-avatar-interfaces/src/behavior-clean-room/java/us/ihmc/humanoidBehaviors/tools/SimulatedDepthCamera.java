@@ -13,11 +13,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.perception.FOVPlanesCalculator;
+import us.ihmc.humanoidBehaviors.tools.perception.PointCloudPolygonizer;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
+/**
+ * This class does CPU ray intersections onto planar regions do simulate a depth camera.
+ */
 public class SimulatedDepthCamera
 {
    private final ReferenceFrame cameraFrame;
@@ -28,16 +32,7 @@ public class SimulatedDepthCamera
    private final FramePose3D tempCameraPose = new FramePose3D();
    private final Point2D tempCircleOrigin = new Point2D();
    private final FOVPlanesCalculator fovPlanesCalculator;
-
-   public SimulatedDepthCamera(ReferenceFrame cameraFrame)
-   {
-      this(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, cameraFrame);
-   }
-
-   public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
-   {
-      this(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, cameraFrame);
-   }
+   private final PointCloudPolygonizer polygonizer = new PointCloudPolygonizer();
 
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, double range, ReferenceFrame cameraFrame)
    {
@@ -49,7 +44,38 @@ public class SimulatedDepthCamera
       fovPlanesCalculator = new FOVPlanesCalculator(verticalFOV, horizontalFOV, cameraFrame);
    }
 
-   public synchronized Map<Pair<Point3DReadOnly, Vector3DReadOnly>, List<Point3D>> filterUsingSpherical(PlanarRegionsList map)
+   public PlanarRegionsList computeAndPolygonize(PlanarRegionsList map)
+   {
+      return polygonizer.polygonize(computeRegionPointMapFrame(map));
+   }
+
+   public Map<Pair<Point3DReadOnly, Vector3DReadOnly>, List<Point3D>> computeRegionPointMapFrame(PlanarRegionsList map)
+   {
+      compute(map);
+
+      HashMap<Pair<Point3DReadOnly, Vector3DReadOnly>, List<Point3D>> centersNormalsAndPoints = new HashMap<>();
+      for (PlanarRegion planarRegion : pointsInRegions.keySet())
+      {
+         Point3D center = new Point3D();
+         planarRegion.getBoundingBox3dInWorld().getCenterPoint(center);
+         centersNormalsAndPoints.put(Pair.of(center, new Vector3D(planarRegion.getNormal())), pointsInRegions.get(planarRegion));
+      }
+      return centersNormalsAndPoints;
+   }
+
+   public List<Point3DReadOnly> computePointCloudFrame(PlanarRegionsList map)
+   {
+      compute(map);
+
+      ArrayList<Point3DReadOnly> pointCloud = new ArrayList<>();
+      for (List<Point3D> points : pointsInRegions.values())
+      {
+         pointCloud.addAll(points);
+      }
+      return pointCloud;
+   }
+
+   private synchronized void compute(PlanarRegionsList map)
    {
       pointsInRegions.clear();
 
@@ -114,15 +140,5 @@ public class SimulatedDepthCamera
 
          pointsInRegions.get(region).add(intersection);
       }
-
-      HashMap<Pair<Point3DReadOnly, Vector3DReadOnly>, List<Point3D>> centersNormalsAndPoints = new HashMap<>();
-      for (PlanarRegion planarRegion : pointsInRegions.keySet())
-      {
-         Point3D center = new Point3D();
-         planarRegion.getBoundingBox3dInWorld().getCenterPoint(center);
-         centersNormalsAndPoints.put(Pair.of(center, new Vector3D(planarRegion.getNormal())), pointsInRegions.get(planarRegion));
-      }
-
-      return centersNormalsAndPoints;
    }
 }

@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 {
    private final TransformReferenceFrame realsenseSensorFrame;
-   private final PointCloudPolygonizer polygonizer;
    private volatile PlanarRegionsList map;
 
    private RemoteSyncedRobotModel syncedRobot;
@@ -53,7 +52,6 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       double horizontalFOV = 87.0;
       double range = 1.5;
       simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, realsenseSensorFrame);
-      polygonizer = new PointCloudPolygonizer();
    }
 
    @Override
@@ -63,7 +61,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return polygonizer.polygonize(simulatedDepthCamera.filterUsingSpherical(map));
+         return simulatedDepthCamera.computeAndPolygonize(map);
       }
       else
       {
