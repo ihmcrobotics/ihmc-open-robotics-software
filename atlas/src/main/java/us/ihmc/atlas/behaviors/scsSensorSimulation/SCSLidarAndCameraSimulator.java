@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
@@ -22,8 +23,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
@@ -55,7 +54,7 @@ import java.io.IOException;
 public class SCSLidarAndCameraSimulator
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
-   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames;
+   private final RemoteSyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
@@ -71,7 +70,7 @@ public class SCSLidarAndCameraSimulator
                                                RobotConfigurationData.class,
                                                ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withInput());
 
-      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       Robot robot = new Robot("Robot");
 
@@ -171,8 +170,8 @@ public class SCSLidarAndCameraSimulator
 
    private void doControl()
    {
-      HumanoidRobotState humanoidRobotState = remoteSyncedHumanoidFrames.pollHumanoidRobotState();
-      tempNeckFramePose.setToZero(humanoidRobotState.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+      syncedRobot.update();
+      tempNeckFramePose.setToZero(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
       tempNeckFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       floatingHeadJoint.setPosition(tempNeckFramePose.getPosition());

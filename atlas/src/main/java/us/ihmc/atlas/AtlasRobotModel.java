@@ -280,6 +280,15 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight,
+                                                                                           double initialYaw,
+                                                                                           double initialX,
+                                                                                           double initialY)
+   {
+      return new AtlasSimInitialSetup(groundHeight, initialYaw, initialX, initialY);
+   }
+
+   @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
       return contactPointParameters;

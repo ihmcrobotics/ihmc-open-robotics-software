@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.SimulatedDepthCamera;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -14,7 +14,7 @@ public class Head360Simulator implements Supplier<PlanarRegionsList>
 {
    private volatile PlanarRegionsList map;
 
-   private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
+   private RemoteSyncedRobotModel syncedRobot;
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
@@ -22,17 +22,17 @@ public class Head360Simulator implements Supplier<PlanarRegionsList>
    {
       this.map = map;
 
-      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
-      neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       simulatedDepthCamera = new SimulatedDepthCamera(neckFrame);
    }
 
    @Override
    public PlanarRegionsList get()
    {
-      remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
+      if (syncedRobot.hasReceivedFirstMessage())
       {
          return simulatedDepthCamera.filterMapToVisible(map);
       }

@@ -4,20 +4,17 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
+import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -38,13 +35,18 @@ import java.util.Map;
  */
 public class BehaviorUI
 {
+   private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
+
    private BorderPane mainPane;
    private final Messager behaviorMessager;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
+   private JavaFXLinuxGUIRecorder guiRecorder;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    @FXML private ChoiceBox<String> behaviorSelector;
+   @FXML private Button startRecording;
+   @FXML private Button stopRecording;
    @FXML private DirectRobotUIController directRobotUIController;
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
@@ -60,7 +62,7 @@ public class BehaviorUI
       return new BehaviorUI(behaviorUIRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
    }
 
-   private BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   public BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       this.behaviorMessager = behaviorMessager;
 
@@ -99,6 +101,10 @@ public class BehaviorUI
 //         AnchorPane sideVisualizationArea = new AnchorPane();
          VBox sideVisualizationArea = new VBox();
 
+         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
+
+         stopRecording.setDisable(true);
+
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
 
@@ -120,29 +126,51 @@ public class BehaviorUI
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-         sideVisualizationArea.setPrefWidth(200.0);
+//         sideVisualizationArea.setPrefWidth(200.0);
 //         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
+         mainSplitPane.getItems().add(consoleScrollPane);
 //         mainSplitPane.getItems().add(sideVisualizationArea);
+         mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
-         JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
-         guiRecorder.deleteOldLogs(10);
-
          primaryStage.setScene(mainScene);
          primaryStage.show();
          primaryStage.toFront();
 
-         // TODO: Make a property to toggle video recording
-         ThreadTools.scheduleSingleExecution("DelayRecordingStart", guiRecorder::start, 2.0);
-         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
+         guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
          primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
          Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+
+         if (RECORD_VIDEO)
+         {
+            ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
+            ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
+         }
+
+         // do this last for now in case events starts firing early
+         consoleScrollPane.setupAtEnd();
       });
+   }
+
+   @FXML public void startRecording()
+   {
+      startRecording.setDisable(true);
+      stopRecording.setDisable(false);
+      guiRecorder.deleteOldLogs(10);
+      ThreadTools.startAThread(() -> guiRecorder.start(), "RecordingStart");
+      ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 3600.0);
+   }
+
+   @FXML public void stopRecording()
+   {
+      startRecording.setDisable(false);
+      stopRecording.setDisable(true);
+      ThreadTools.startAThread(() -> guiRecorder.stop(), "RecordingStop");
    }
 
    private void onBehaviorSelection(ObservableValue<? extends String> observable, String oldValue, String newValue)

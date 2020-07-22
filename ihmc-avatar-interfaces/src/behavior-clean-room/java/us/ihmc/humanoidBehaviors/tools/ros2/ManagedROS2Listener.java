@@ -5,27 +5,32 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.SubscriptionMatchedListener;
 
+import java.util.function.Supplier;
+
 public class ManagedROS2Listener<T> implements NewMessageListener<T>, SubscriptionMatchedListener<T>
 {
    private final NewMessageListener<T> listener;
-   private SubscriptionMatchedListener<T> subscriptionMatchedListener;
-   private boolean enabled = true;
+   private final SubscriptionMatchedListener<T> subscriptionMatchedListener;
+   private final Supplier<Boolean> enabled;
 
-   public ManagedROS2Listener(NewMessageListener<T> listener)
+   public ManagedROS2Listener(NewMessageListener<T> listener, Supplier<Boolean> enabled)
    {
       this.listener = listener;
+      this.subscriptionMatchedListener = null;
+      this.enabled = enabled;
    }
 
-   public ManagedROS2Listener(NewMessageListener<T> listener, SubscriptionMatchedListener<T> subscriptionMatchedListener)
+   public ManagedROS2Listener(NewMessageListener<T> listener, SubscriptionMatchedListener<T> subscriptionMatchedListener, Supplier<Boolean> enabled)
    {
       this.listener = listener;
       this.subscriptionMatchedListener = subscriptionMatchedListener;
+      this.enabled = enabled;
    }
 
    @Override
    public void onNewDataMessage(Subscriber<T> subscriber)
    {
-      if (enabled)
+      if (enabled.get())
       {
          listener.onNewDataMessage(subscriber);
       }
@@ -38,7 +43,7 @@ public class ManagedROS2Listener<T> implements NewMessageListener<T>, Subscripti
    @Override
    public void onSubscriptionMatched(Subscriber<T> subscriber, MatchingInfo info)
    {
-      if (enabled)
+      if (enabled.get())
       {
          listener.onSubscriptionMatched(subscriber, info);
 
@@ -47,10 +52,5 @@ public class ManagedROS2Listener<T> implements NewMessageListener<T>, Subscripti
             subscriptionMatchedListener.onSubscriptionMatched(subscriber, info);
          }
       }
-   }
-
-   public void setEnabled(boolean enabled)
-   {
-      this.enabled = enabled;
    }
 }
