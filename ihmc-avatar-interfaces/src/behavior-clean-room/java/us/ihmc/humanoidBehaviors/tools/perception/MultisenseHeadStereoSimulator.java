@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList>
 {
+   private final PointCloudPolygonizer pointCloudPolygonizer;
    private volatile PlanarRegionsList map;
 
    private RemoteSyncedRobotModel syncedRobot;
@@ -28,6 +29,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
       double horizontalFOV = 80.0;
       double range = 20.0;
       simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, neckFrame);
+      pointCloudPolygonizer = new PointCloudPolygonizer();
    }
 
    @Override
@@ -37,7 +39,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
 
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return simulatedDepthCamera.filterMapToVisible(map);
+         return pointCloudPolygonizer.polygonize(simulatedDepthCamera.filterUsingSpherical(map));
       }
       else
       {
