@@ -54,7 +54,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
    
-   protected final SLAMBasics slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   protected final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
    //protected final SLAMBasics slam = new SLAMBasics(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -282,7 +282,8 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
       NormalOcTree octreeMap = slam.getOctree();
-      octreeMap.updateNormals();
+      if (!enableNormalEstimation.get()) // update the normals here, becuase they weren't updated previously
+         octreeMap.updateNormals();
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
@@ -357,9 +358,7 @@ public class SLAMModule implements PerceptionModule
 
    private void updateSLAMParameters()
    {
-      //TODO: do.
-      SurfaceElementICPSLAMParameters parameters = slamParameters.get();
-      //slam.updateParameters(parameters);
+      slam.updateParameters(slamParameters.get());
    }
 
    public void clearSLAM()
