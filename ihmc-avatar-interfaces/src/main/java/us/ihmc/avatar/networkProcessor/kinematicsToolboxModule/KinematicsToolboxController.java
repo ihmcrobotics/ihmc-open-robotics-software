@@ -536,10 +536,9 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
-      FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate(controllableRigidBodies);
-      controllerCoreTemplate.addCommand(new CenterOfMassFeedbackControlCommand());
+      FeedbackControllerTemplate controllerCoreTemplate = createFeedbackControllerTemplate(controllableRigidBodies, 1);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
-      return new WholeBodyControllerCore(toolbox, new FeedbackControllerTemplate(controllerCoreTemplate), lowLevelControllerOutput, registry);
+      return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
    }
 
    /**
@@ -551,9 +550,12 @@ public class KinematicsToolboxController extends ToolboxController
     *                                the robot will be controllable.
     * @return the template for the controller core.
     */
-   private FeedbackControlCommandList createControllerCoreTemplate(Collection<? extends RigidBodyBasics> controllableRigidBodies)
+   private FeedbackControllerTemplate createFeedbackControllerTemplate(Collection<? extends RigidBodyBasics> controllableRigidBodies,
+                                                                       int numberOfControllersPerBody)
    {
-      FeedbackControlCommandList template = new FeedbackControlCommandList();
+      FeedbackControllerTemplate template = new FeedbackControllerTemplate();
+      template.setAllowDynamicControllerConstruction(true);
+      template.enableCenterOfMassFeedbackController();
       Collection<? extends RigidBodyBasics> rigidBodies;
 
       if (controllableRigidBodies != null)
@@ -561,32 +563,10 @@ public class KinematicsToolboxController extends ToolboxController
       else
          rigidBodies = rootBody.subtreeList();
 
-      rigidBodies.stream().map(this::createRigidBodyFeedbackControlCommand).forEach(template::addCommand);
+      rigidBodies.stream().forEach(rigidBody -> template.enableSpatialFeedbackController(rigidBody, numberOfControllersPerBody));
 
-      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).map(this::createJointFeedbackControlCommand).forEach(template::addCommand);
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).forEach(template::enableOneDoFJointFeedbackController);
       return template;
-   }
-
-   /**
-    * Convenience method for pure laziness. Should only be used for
-    * {@link #createControllerCoreTemplate()}.
-    */
-   private SpatialFeedbackControlCommand createRigidBodyFeedbackControlCommand(RigidBodyBasics endEffector)
-   {
-      SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
-      command.set(rootBody, endEffector);
-      return command;
-   }
-
-   /**
-    * Convenience method for pure laziness. Should only be used for
-    * {@link #createControllerCoreTemplate()}.
-    */
-   private OneDoFJointFeedbackControlCommand createJointFeedbackControlCommand(OneDoFJointBasics joint)
-   {
-      OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
-      command.setJoint(joint);
-      return command;
    }
 
    /**
