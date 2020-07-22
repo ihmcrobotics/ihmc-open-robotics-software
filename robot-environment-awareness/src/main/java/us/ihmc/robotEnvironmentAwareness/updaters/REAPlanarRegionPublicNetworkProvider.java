@@ -17,21 +17,27 @@ import us.ihmc.ros2.Ros2Node;
 public class REAPlanarRegionPublicNetworkProvider
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> depthRegionPublisher;
    private final IHMCROS2Publisher<REAStatusMessage> currentStatePublisher;
 
    private final RegionFeaturesProvider regionFeaturesProvider;
 
-   private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision;
+   private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
    private final AtomicReference<Double> minRange;
    private final AtomicReference<Double> maxRange;
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
    private final REAStatusMessage currentState = new REAStatusMessage();
 
    public REAPlanarRegionPublicNetworkProvider(Messager messager, RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
-                                               ROS2Topic outputTopic, ROS2Topic inputTopic)
+                                               ROS2Topic outputTopic, ROS2Topic lidarOutputTopic, ROS2Topic stereoOutputTopic, ROS2Topic depthOutputTopic)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
+      lidarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic);
+      stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
+      depthRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, depthOutputTopic);
 
       if (messager != null)
       {
@@ -41,6 +47,7 @@ public class REAPlanarRegionPublicNetworkProvider
          hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);
          isUsingLidar = messager.createInput(REAModuleAPI.LidarBufferEnable);
          isUsingStereoVision = messager.createInput(REAModuleAPI.StereoVisionBufferEnable);
+         isUsingDepthCloud = messager.createInput(REAModuleAPI.DepthCloudBufferEnable);
          minRange = messager.createInput(REAModuleAPI.LidarMinRange);
          maxRange = messager.createInput(REAModuleAPI.LidarMaxRange);
          boundingBoxParameters = messager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters);
@@ -52,6 +59,7 @@ public class REAPlanarRegionPublicNetworkProvider
          hasCleared = null;
          isUsingLidar = null;
          isUsingStereoVision = null;
+         isUsingDepthCloud = null;
          minRange = null;
          maxRange = null;
          boundingBoxParameters = null;
@@ -72,6 +80,12 @@ public class REAPlanarRegionPublicNetworkProvider
          lastPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
 
       planarRegionPublisher.publish(lastPlanarRegionsListMessage);
+      if (isUsingLidar.get())
+         lidarRegionPublisher.publish(lastPlanarRegionsListMessage);
+      if (isUsingStereoVision.get())
+         stereoRegionPublisher.publish(lastPlanarRegionsListMessage);
+      if (isUsingDepthCloud.get())
+         depthRegionPublisher.publish(lastPlanarRegionsListMessage);
    }
 
    public void publishCurrentState()
@@ -82,6 +96,7 @@ public class REAPlanarRegionPublicNetworkProvider
       currentState.setIsRunning(isRunning.get());
       currentState.setIsUsingLidar(isUsingLidar.get());
       currentState.setIsUsingStereoVision(isUsingStereoVision.get());
+      //currentState.setIsusingDepthCloud(isUsingDepthCloud.get()); // todo
       currentState.setHasCleared(hasCleared.getAndSet(false));
       REASensorDataFilterParametersMessage sensorFilterParameters = currentState.getCurrentSensorFilterParameters();
       sensorFilterParameters.setSensorMinRange(minRange.get());
