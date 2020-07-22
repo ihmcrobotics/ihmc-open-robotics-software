@@ -11,6 +11,7 @@ public class SimpleWalkingControllerStateFactory implements HighLevelControllerS
    private SimpleWalkingControllerState walkingControllerState;
    private SimpleControlManagerFactory managerFactory;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
+   private boolean USE_LQR_MOMENTUM_CONTROLLER = true;
    
    public SimpleWalkingControllerStateFactory(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters) {
       this.capturePointPlannerParameters = capturePointPlannerParameters;
@@ -29,7 +30,7 @@ public class SimpleWalkingControllerStateFactory implements HighLevelControllerS
          walkingControllerState = new SimpleWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
                                                                    managerFactory, controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                                    controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                                   controllerFactoryHelper.getWalkingControllerParameters());
+                                                                   controllerFactoryHelper.getWalkingControllerParameters(), USE_LQR_MOMENTUM_CONTROLLER);
       }
 
       return walkingControllerState;
