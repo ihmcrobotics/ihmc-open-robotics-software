@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.SimulatedDepthCamera;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -16,7 +16,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
    private final TransformReferenceFrame realsenseSensorFrame;
    private volatile PlanarRegionsList map;
 
-   private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
+   private RemoteSyncedRobotModel syncedRobot;
    private MovingReferenceFrame pelvisFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
@@ -43,8 +43,8 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
    {
       this.map = map;
 
-      remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
-      pelvisFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getPelvisFrame();
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
       realsenseSensorFrame = new TransformReferenceFrame("Realsense", pelvisFrame, transform);
 
@@ -57,9 +57,9 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
    @Override
    public PlanarRegionsList get()
    {
-      remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
+      syncedRobot.update();
 
-      if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
+      if (syncedRobot.hasReceivedFirstMessage())
       {
          return simulatedDepthCamera.filterMapToVisible(map);
       }

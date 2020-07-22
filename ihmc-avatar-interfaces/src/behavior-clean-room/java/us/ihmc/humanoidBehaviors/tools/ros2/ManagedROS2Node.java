@@ -4,14 +4,12 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ManagedROS2Node implements Ros2NodeInterface
 {
-   private final List<ManagedROS2Listener<?>> ros2MessageListeners = new ArrayList<>();
-   private final List<ManagedROS2Publisher<?>> ros2Publishers = new ArrayList<>();
    private final Ros2Node ros2Node;
+   private final AtomicBoolean enabled = new AtomicBoolean(true);
 
    public ManagedROS2Node(Ros2Node ros2Node)
    {
@@ -23,14 +21,7 @@ public class ManagedROS2Node implements Ros2NodeInterface
     */
    public void setEnabled(boolean enabled)
    {
-      for (ManagedROS2Listener<?> ros2Listener : ros2MessageListeners)
-      {
-         ros2Listener.setEnabled(enabled);
-      }
-      for (ManagedROS2Publisher<?> ros2Publisher : ros2Publishers)
-      {
-         ros2Publisher.setEnabled(enabled);
-      }
+      this.enabled.set(enabled);
    }
 
    @Override
@@ -47,9 +38,7 @@ public class ManagedROS2Node implements Ros2NodeInterface
 
    private <T> ManagedROS2Publisher<T> createManagedPublisher(Ros2PublisherBasics<T> publisher)
    {
-      ManagedROS2Publisher<T> managedPublisher = new ManagedROS2Publisher<T>(publisher);
-      ros2Publishers.add(managedPublisher);
-      return managedPublisher;
+      return new ManagedROS2Publisher<>(publisher, enabled::get);
    }
 
    @Override
@@ -75,16 +64,13 @@ public class ManagedROS2Node implements Ros2NodeInterface
                                                      String topicName,
                                                      Ros2QosProfile qosProfile) throws IOException
    {
-      ManagedROS2Listener<T> managedListener = new ManagedROS2Listener<T>(newMessageListener, subscriptionMatchedListener);
-      ros2MessageListeners.add(managedListener);
+      ManagedROS2Listener<T> managedListener = new ManagedROS2Listener<T>(newMessageListener, subscriptionMatchedListener, enabled::get);
       return ros2Node.createSubscription(topicDataType, managedListener, managedListener, topicName, qosProfile);
    }
 
    private <T> ManagedROS2Listener<T> createManagedListener(NewMessageListener<T> newMessageListener)
    {
-      ManagedROS2Listener<T> managedListener = new ManagedROS2Listener<T>(newMessageListener);
-      ros2MessageListeners.add(managedListener);
-      return managedListener;
+      return new ManagedROS2Listener<T>(newMessageListener, enabled::get);
    }
 
    @Override

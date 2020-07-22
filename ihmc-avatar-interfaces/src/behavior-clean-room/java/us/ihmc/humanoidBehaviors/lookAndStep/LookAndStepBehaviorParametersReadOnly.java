@@ -9,7 +9,7 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(LookAndStepBehaviorParameters.maxPlanStrayDistance);
    }
 
-   default double getMinimumNumberOfPlannedSteps()
+   default int getMinimumNumberOfPlannedSteps()
    {
       return get(LookAndStepBehaviorParameters.minimumNumberOfPlannedSteps);
    }
@@ -87,5 +87,15 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    default double getPercentSwingToWait()
    {
       return get(LookAndStepBehaviorParameters.percentSwingToWait);
+   }
+
+   default double getRobotConfigurationDataExpiration()
+   {
+      return get(LookAndStepBehaviorParameters.robotConfigurationDataExpiration);
+   }
+
+   default int getAcceptableIncompleteFootsteps()
+   {
+      return get(LookAndStepBehaviorParameters.acceptableIncompleteFootsteps);
    }
 }

@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -64,6 +65,8 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
    private double groundZ;
    private double initialYaw;
+   private double initialX;
+   private double initialY;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
    private final Vector3D positionInWorld = new Vector3D();
    private final Vector3D offset = new Vector3D();
@@ -76,8 +79,15 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
    public AtlasSimInitialSetup(double groundZ, double initialYaw)
    {
+      this(groundZ, initialYaw, 0.0, 0.0);
+   }
+
+   public AtlasSimInitialSetup(double groundZ, double initialYaw, double initialX, double initialY)
+   {
       this.groundZ = groundZ;
       this.initialYaw = initialYaw;
+      this.initialX = initialX;
+      this.initialY = initialY;
    }
 
    @Override
@@ -171,7 +181,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    public Pose3DReadOnly getInitialPelvisPose()
    {
       Pose3D resultPose = new Pose3D();
-      resultPose.appendTranslation(0.0, 0.0, groundZ + PELVIS_POSE.getZ());
+      resultPose.appendTranslation(initialX, initialY, groundZ + PELVIS_POSE.getZ());
       resultPose.appendTranslation(offset);
       resultPose.appendYawRotation(initialYaw);
 
