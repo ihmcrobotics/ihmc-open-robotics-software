@@ -34,7 +34,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final SimpleBalanceManager balanceManager;
-   private final SimpleCenterOfMassHeightManager comHeightManager;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -85,7 +84,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
@@ -121,7 +119,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
 
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
-         updateHeightManager();
       }
 
       // if the footstep was adjusted, shift the CoM plan, if there is one.
@@ -153,8 +150,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
 
-      comHeightManager.setSupportLeg(swingSide.getOppositeSide());
-
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
@@ -185,8 +180,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
 
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(finalTransferTime);
-
-      updateHeightManager();
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime);
 
@@ -276,16 +269,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
    }
 
-   private void updateHeightManager()
-   {
-      balanceManager.getFinalDesiredCoMPosition(desiredCoM);
-
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
-                                                                                                                                                   swingSide);
-      transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
-      double extraToeOffHeight = 0.0;
-      comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-   }
+  
 
    protected boolean hasMinimumTimePassed(double timeInState)
    {
