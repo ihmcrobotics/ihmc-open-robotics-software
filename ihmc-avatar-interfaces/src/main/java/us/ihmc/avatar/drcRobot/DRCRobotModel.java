@@ -42,6 +42,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
+   default DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw, double x, double y)
+   {
+      return getDefaultRobotInitialSetup(groundHeight, initialYaw, 0.0, 0.0);
+   }
+
    public abstract HandModel getHandModel();
 
    public abstract double getSimulateDT();

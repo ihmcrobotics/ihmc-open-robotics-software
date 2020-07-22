@@ -23,16 +23,28 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
-testDependencies {
-
-}
-
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api(ihmc.sourceSetProject("test"))
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:simulation-construction-set:0.19.0")
+}
+
+gdxDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api("us.ihmc:ihmc-interfaces:source")
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-graphics-description:0.18.0")
+   api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.10")
+   api("com.badlogicgames.gdx:gdx-platform:1.9.10:natives-desktop")
+}
+
+testDependencies {
+   api(ihmc.sourceSetProject("visualizers"))
+}
+
+gdxTestDependencies {
+   api(ihmc.sourceSetProject("gdx"))
 }

@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -47,6 +46,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * the plane.
     */
    private final List<ConvexPolygon2D> convexPolygons;
+   /** To detect concave hull separation */
+   private List<Boolean> visited;
 
    private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -57,70 +58,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   private final Point3DReadOnly origin = new Point3DReadOnly()
-   {
-      @Override
-      public double getX()
-      {
-         return fromLocalToWorldTransform.getM03();
-      }
-
-      @Override
-      public double getY()
-      {
-         return fromLocalToWorldTransform.getM13();
-      }
-
-      @Override
-      public double getZ()
-      {
-         return fromLocalToWorldTransform.getM23();
-      }
-   };
-   private final UnitVector3DReadOnly normal = new UnitVector3DReadOnly()
-   {
-      @Override
-      public double getX()
-      {
-         return getRawX();
-      }
-
-      @Override
-      public double getY()
-      {
-         return getRawY();
-      }
-
-      @Override
-      public double getZ()
-      {
-         return getRawZ();
-      }
-
-      @Override
-      public double getRawX()
-      {
-         return fromLocalToWorldTransform.getM02();
-      }
-
-      @Override
-      public double getRawY()
-      {
-         return fromLocalToWorldTransform.getM12();
-      }
-
-      @Override
-      public double getRawZ()
-      {
-         return fromLocalToWorldTransform.getM22();
-      }
-
-      @Override
-      public boolean isDirty()
-      {
-         return false;
-      }
-   };
+   private final PlanarRegionOrigin origin = new PlanarRegionOrigin(fromLocalToWorldTransform);
+   private final PlanarRegionNormal normal = new PlanarRegionNormal(fromLocalToWorldTransform);
 
    /**
     * Create a new, empty planar region.
@@ -1188,6 +1127,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          return;
       }
 
+      visited = new ArrayList<>(); // for concave hull separation detection
+
       int maximumIterations = 0;
 
       double minX = Double.MAX_VALUE;
@@ -1196,6 +1137,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       for (int i = 0; i < convexPolygons.size(); i++)
       {
          ConvexPolygon2D polygon = convexPolygons.get(i);
+         visited.add(false);
 
          // Concave hull generation breaks regions contain empty, point or line sub-polygons
          if (polygon.getNumberOfVertices() < 3)
@@ -1232,6 +1174,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
 
       concaveHullsVertices.add(new Point2D(convexPolygons.get(minXPolygonIndex).getVertex(0)));
+      visited.set(minXPolygonIndex, true);
       int polygonIndex = minXPolygonIndex;
       int vertexIndex = 0;
       int iterations = 0;
@@ -1256,6 +1199,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          else
          {
             concaveHullsVertices.add(new Point2D(convexPolygons.get(polygonIndex).getVertex(vertexIndex)));
+            visited.set(polygonIndex, true);
          }
 
          iterations++;
@@ -1265,6 +1209,20 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       {
          LogTools.error("Unable to solve for concave hull. region " + regionId);
          concaveHullsVertices.clear();
+      }
+   }
+
+   public void checkConcaveHullIsNotSeparated()
+   {
+      boolean allVisited = true;
+      for (Boolean value : visited)
+      {
+         allVisited &= value;
+      }
+      if (!allVisited)
+      {
+         LogTools.error("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
+         throw new RuntimeException("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
       }
    }
 

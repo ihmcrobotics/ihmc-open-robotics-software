@@ -21,9 +21,9 @@ public class Timer
       return  hasBeenSet(getElapsedTime());
    }
 
-   public boolean isExpired(double time)
+   public boolean isExpired(double expirationTime)
    {
-      return isExpired(getElapsedTime(), time);
+      return isExpired(getElapsedTime(), expirationTime);
    }
 
    static boolean hasBeenSet(double timePassedSinceReset)
@@ -31,13 +31,18 @@ public class Timer
       return !Double.isNaN(timePassedSinceReset);
    }
 
-   static boolean isExpired(double timePassedSinceReset, double time)
+   static boolean isExpired(double timePassedSinceReset, double expirationTime)
    {
-      return timePassedSinceReset > time;
+      return timePassedSinceReset > expirationTime;
    }
 
-   public TimerSnapshot createSnapshot(double time)
+   public TimerSnapshotWithExpiration createSnapshot(double expirationTime)
    {
-      return new TimerSnapshot(getElapsedTime(), time);
+      return new TimerSnapshotWithExpiration(getElapsedTime(), expirationTime);
+   }
+
+   public TimerSnapshot createSnapshot()
+   {
+      return new TimerSnapshot(getElapsedTime());
    }
 }

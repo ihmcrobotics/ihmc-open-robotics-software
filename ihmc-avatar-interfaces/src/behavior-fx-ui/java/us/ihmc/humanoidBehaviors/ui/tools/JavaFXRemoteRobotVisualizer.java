@@ -14,7 +14,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class JavaFXRemoteRobotVisualizer extends Group
 {
-   private final RemoteSyncedRobotModel remoteSyncedRobotModel;
+   private final RemoteSyncedRobotModel syncedRobot;
 
    private GraphicsRobot graphicsRobot;
    private JavaFXGraphics3DNode robotRootNode;
@@ -24,7 +24,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
 
    public JavaFXRemoteRobotVisualizer(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
-      remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       new Thread(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()), "RobotVisualizerLoading").start();
 
@@ -40,7 +40,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
             getChildren().add(robotRootNode);
          }
 
-         remoteSyncedRobotModel.pollFullRobotModel();
+         syncedRobot.update();
 
          graphicsRobot.update();
          robotRootNode.update();
@@ -49,7 +49,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
 
    private void loadRobotModelAndGraphics(RobotDescription robotDescription)
    {
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), remoteSyncedRobotModel.getFullRobotModel().getElevator(), robotDescription);
+      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), syncedRobot.getFullRobotModel().getElevator(), robotDescription);
       robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
       robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);

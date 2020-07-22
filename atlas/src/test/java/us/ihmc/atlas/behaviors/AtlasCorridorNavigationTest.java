@@ -35,10 +35,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
-import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
+import us.ihmc.humanoidBehaviors.tools.*;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -184,14 +181,15 @@ public class AtlasCorridorNavigationTest
                                                                             ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
 
       // subscribe to robot pose
-      RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
+      RemoteHumanoidRobotInterface robotInterface = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
+      RemoteSyncedRobotModel syncedRobot = robotInterface.newSyncedRobot();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons();
       //      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
       boolean fullyExpandVisibilityGraph = false;
       FramePose3D robotPose = new FramePose3D();
-      HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
-      robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+      syncedRobot.update();
+      robotPose.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
       robotPose.changeFrame(ReferenceFrame.getWorldFrame());
       List<Point3DReadOnly> pathPoints = null;
       List<? extends Pose3DReadOnly> path = null;
@@ -225,8 +223,8 @@ public class AtlasCorridorNavigationTest
          ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
          LogTools.info("Planning with occlusions");
-         latestHumanoidRobotState = robot.pollHumanoidRobotState();
-         robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+         syncedRobot.update();
+         robotPose.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
          LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
 
@@ -283,10 +281,10 @@ public class AtlasCorridorNavigationTest
          RobotSide initialStanceFootSide = null;
          FramePose3D initialStanceFootPose = null;
          FramePose3D leftSolePose = new FramePose3D();
-         leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
+         leftSolePose.setToZero(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
          leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
          FramePose3D rightSolePose = new FramePose3D();
-         rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
+         rightSolePose.setToZero(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.RIGHT));
          rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
          if (leftSolePose.getPosition().distance(finalPose.getPosition()) <= rightSolePose.getPosition().distance(finalPose.getPosition()))
@@ -385,7 +383,7 @@ public class AtlasCorridorNavigationTest
          }
 
          LogTools.info("Requesting walk");
-         TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
+         TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotInterface.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
                shortenedFootstepPlan,
                1.0,
                0.5));
@@ -395,8 +393,8 @@ public class AtlasCorridorNavigationTest
          double timeout = 3.0;
          while (!walkingStatusNotification.poll() && stopwatch.lapElapsed() < timeout)
          {
-            latestHumanoidRobotState = robot.pollHumanoidRobotState();
-            robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+            syncedRobot.update();
+            robotPose.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
             robotPose.changeFrame(ReferenceFrame.getWorldFrame());
             if (!waypointsToHit.isEmpty() && robotPose.getPosition().distance(waypointsToHit.peekFirst().getPosition()) < 1.0)
             {

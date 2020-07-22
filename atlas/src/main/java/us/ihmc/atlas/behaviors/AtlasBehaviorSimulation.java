@@ -26,19 +26,24 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 public class AtlasBehaviorSimulation
 {
-   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, int recordTicksPerControllerTick)
+   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel,
+                                                               CommonAvatarEnvironmentInterface environment,
+                                                               int recordTicksPerControllerTick,
+                                                               int dataBufferSize)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize);
    }
 
    public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1);
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1, 1024);
    }
 
    public static SimulationConstructionSet create(DRCRobotModel robotModel,
-                                                   CommonAvatarEnvironmentInterface environment,
-                                                   PubSubImplementation pubSubImplementation, int recordTicksPerControllerTick)
+                                                  CommonAvatarEnvironmentInterface environment,
+                                                  PubSubImplementation pubSubImplementation,
+                                                  int recordTicksPerControllerTick,
+                                                  int dataBufferSize)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -47,6 +52,7 @@ public class AtlasBehaviorSimulation
       scsInitialSetup.setInitializeEstimatorToActual(true);
       scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT() * recordTicksPerControllerTick);
       scsInitialSetup.setUsePerfectSensors(true);
+      scsInitialSetup.setSimulationDataBufferSize(dataBufferSize);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
@@ -110,9 +116,11 @@ public class AtlasBehaviorSimulation
    public static void main(String[] args)
    {
       int recordTicksPerControllerTick = 1;
+      int dataBufferSize = 1024;
       SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
                                                           new FlatGroundEnvironment(),
-                                                          recordTicksPerControllerTick);
+                                                          recordTicksPerControllerTick,
+                                                          dataBufferSize);
       scs.simulate();
    }
 }

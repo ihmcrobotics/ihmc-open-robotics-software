@@ -3,17 +3,15 @@ package us.ihmc.communication.util;
 public class TimerSnapshot
 {
    private final double timePassedSinceReset;
-   private final double time;
 
-   public TimerSnapshot(double timePassedSinceReset, double time)
+   public TimerSnapshot(double timePassedSinceReset)
    {
-      this.time = time;
       this.timePassedSinceReset = timePassedSinceReset;
    }
 
-   public boolean isExpired()
+   public boolean isExpired(double expirationTime)
    {
-      return Timer.isExpired(timePassedSinceReset, time);
+      return Timer.isExpired(timePassedSinceReset, expirationTime);
    }
 
    public boolean hasBeenSet()
@@ -26,8 +24,13 @@ public class TimerSnapshot
       return timePassedSinceReset;
    }
 
-   public boolean isRunning()
+   public boolean isRunning(double expirationTime)
    {
-      return hasBeenSet() && !isExpired();
+      return hasBeenSet() && !isExpired(expirationTime);
+   }
+
+   public TimerSnapshotWithExpiration withExpiration(double expirationTime)
+   {
+      return new TimerSnapshotWithExpiration(timePassedSinceReset, expirationTime);
    }
 }
