@@ -1,22 +1,23 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 
 import java.util.function.Supplier;
 
 public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
 {
-   private final Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
-   private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
+   private final Field<Supplier<RemoteSyncedRobotModel>> syncedRobotSupplier = required();
 
    private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
 
-   public LookAndStepRobotMotionModule()
+   public LookAndStepRobotMotionModule(StatusLogger statusLogger)
    {
+      super(statusLogger);
+
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
       footstepPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
@@ -34,19 +35,16 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
       validateNonChanging();
 
       update(footstepPlanInput.get(),
-             robotStateSupplier.get().get(),
-             behaviorStateSupplier.get().get());
+             syncedRobotSupplier.get().get());
 
       run();
    }
 
-   public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
+   public void setSyncedRobotSupplier(RemoteSyncedRobotModel syncedRobot)
    {
-      this.robotStateSupplier.set(robotStateSupplier);
-   }
-
-   public void setBehaviorStateSupplier(Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
-   {
-      this.behaviorStateSupplier.set(behaviorStateSupplier);
+      this.syncedRobotSupplier.set(() -> {
+         syncedRobot.update();
+         return syncedRobot;
+      });
    }
 }

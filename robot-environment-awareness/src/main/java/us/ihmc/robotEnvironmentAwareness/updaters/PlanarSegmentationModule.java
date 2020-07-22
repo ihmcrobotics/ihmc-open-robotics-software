@@ -237,7 +237,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          {
             planarRegionFeatureUpdater.clearOcTree();
          }
-         else if (latestOcTree != null)
+         else if (latestOcTree != null && latestSensorPose != null)
          {
             if (isThreadInterrupted())
                return;

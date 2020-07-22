@@ -93,8 +93,8 @@ public class DirectRobotUIController extends Group
                                                                                        .withInput());
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
-      pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
       pumpPSI.getSelectionModel().select(1);
+      pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
 
       lidarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
       lidarRegionsGraphic.setEnabled(false);

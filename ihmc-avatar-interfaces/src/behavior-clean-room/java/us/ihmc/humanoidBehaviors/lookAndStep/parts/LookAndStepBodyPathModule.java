@@ -4,30 +4,53 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
-import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.lookAndStep.*;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.function.Supplier;
 
 public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 {
-   // TODO: Could optional be used here for some things to make things more flexible?
-   private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
-   private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
+   private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
+   private final WalkingFootstepTracker walkingFootstepTracker;
 
    private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
    private final TypedInput<Pose3D> goalInput = new TypedInput<>();
-   private Timer mapRegionsExpirationTimer = new Timer();
-   private Timer planningFailedTimer = new Timer();
+   private final Timer mapRegionsExpirationTimer = new Timer();
+   private final Timer planningFailedTimer = new Timer();
 
    // hook up inputs and notifications separately.
    // always run again if with latest data
-   public LookAndStepBodyPathModule()
+   public LookAndStepBodyPathModule(StatusLogger statusLogger,
+                                    UIPublisher uiPublisher,
+                                    VisibilityGraphsParametersReadOnly visibilityGraphParameters,
+                                    LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                                    Supplier<Boolean> operatorReviewEnabled,
+                                    RemoteSyncedRobotModel syncedRobot,
+                                    BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                                    Supplier<Boolean> robotConnectedSupplier,
+                                    WalkingFootstepTracker walkingFootstepTracker)
    {
+      super(statusLogger,
+            uiPublisher,
+            visibilityGraphParameters,
+            lookAndStepBehaviorParameters,
+            operatorReviewEnabled,
+            behaviorStateReference,
+            robotConnectedSupplier);
+
+      this.robotStateSupplier = () -> {
+         syncedRobot.update();
+         return syncedRobot;
+      };
+      this.walkingFootstepTracker = walkingFootstepTracker;
+
       // don't run two body path plans at the same time
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -46,30 +69,19 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
    public void acceptGoal(Pose3D goal)
    {
       goalInput.set(goal);
-      LogTools.debug("Body path accept goal: {}", goal);
+      LogTools.info("Body path goal received: {}", goal);
    }
 
    private void evaluateAndRun()
    {
-      validateNonChanging();
-
       update(mapRegionsInput.get(),
              goalInput.get(),
-             robotStateSupplier.get().get(),
-             mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()),
-             planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()),
-             behaviorStateSupplier.get().get());
+             robotStateSupplier.get(),
+             mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration()),
+             planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed()),
+             behaviorStateReference.get(),
+             walkingFootstepTracker.getNumberOfIncompleteFootsteps());
 
       run();
-   }
-
-   public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
-   {
-      this.robotStateSupplier.set(robotStateSupplier);
-   }
-
-   public void setBehaviorStateSupplier(Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
-   {
-      this.behaviorStateSupplier.set(behaviorStateSupplier);
    }
 }

@@ -42,7 +42,6 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
    public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      LogTools.info("HEY I got em.");
       planarRegionsInput.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       planarRegionsExpirationTimer.reset();
    }

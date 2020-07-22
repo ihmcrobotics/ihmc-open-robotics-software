@@ -52,6 +52,8 @@ public class SimulatedDepthCamera
    private final FramePose3D tempCameraPose = new FramePose3D();
    private final Point2D tempCircleOrigin = new Point2D();
 
+   private volatile int id = 0;
+
    public SimulatedDepthCamera(ReferenceFrame cameraFrame)
    {
       this(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, cameraFrame);
@@ -156,7 +158,7 @@ public class SimulatedDepthCamera
 
          Point3D center = new Point3D();
          originalRegion.getBoundingBox3dInWorld().getCenterPoint(center);
-         PlanarRegionSegmentationRawData rawData = new PlanarRegionSegmentationRawData(originalRegion.getRegionId(),
+         PlanarRegionSegmentationRawData rawData = new PlanarRegionSegmentationRawData(id++,
                                                                                        originalRegion.getNormal(),
                                                                                        center,
                                                                                        points);

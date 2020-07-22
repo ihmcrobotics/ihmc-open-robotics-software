@@ -94,7 +94,7 @@ public class AtlasBehaviorUIDemo
          LogTools.info("Creating dynamics simulation");
          AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
                                                      new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
-                                                     recordFrequencySpeedup).simulate();
+                                                     recordFrequencySpeedup, 10).simulate();
       }
    }
 

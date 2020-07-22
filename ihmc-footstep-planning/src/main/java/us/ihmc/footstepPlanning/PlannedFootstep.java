@@ -13,6 +13,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Object holding all information planned for a given step by {@link FootstepPlanningModule}
@@ -232,6 +233,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    public FootstepDataMessage getAsMessage()
    {
       FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
+      footstepDataMessage.setSequenceId((UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE);
       footstepDataMessage.setRobotSide(robotSide.toByte());
       footstepDataMessage.getLocation().set(footstepPose.getPosition());
       footstepDataMessage.getOrientation().set(footstepPose.getOrientation());
