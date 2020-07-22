@@ -15,6 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParame
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
@@ -44,9 +45,21 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
                                                ROS2Topic stereoOutputTopic,
                                                ROS2Topic depthOutputTopic)
    {
-      this.outputTopic = outputTopic;
+      this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+           outputTopic,
+           lidarOutputTopic,
+           stereoOutputTopic,
+           depthOutputTopic);
+   }
 
-      ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   public REAPlanarRegionPublicNetworkProvider(Ros2Node ros2Node,
+                                               ROS2Topic outputTopic,
+                                               ROS2Topic lidarOutputTopic,
+                                               ROS2Topic stereoOutputTopic,
+                                               ROS2Topic depthOutputTopic)
+   {
+      this.ros2Node = ros2Node;
+      this.outputTopic = outputTopic;
 
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
       lidarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic);
@@ -107,6 +120,18 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       sensorFilterParameters.getBoundingBoxMin().set(boundingBoxParameters.get().getMin());
       sensorFilterParameters.getBoundingBoxMax().set(boundingBoxParameters.get().getMax());
       currentStatePublisher.publish(currentState);
+   }
+
+   @Override
+   public void registerLidarScanHandler(NewMessageListener<LidarScanMessage> lidarScanHandler)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, REASourceType.LIDAR_SCAN.getTopicName(), lidarScanHandler);
+   }
+
+   @Override
+   public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
+   {
+      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, REASourceType.STEREO_POINT_CLOUD.getTopicName(), stereoVisionPointCloudHandler);
    }
 
    @Override

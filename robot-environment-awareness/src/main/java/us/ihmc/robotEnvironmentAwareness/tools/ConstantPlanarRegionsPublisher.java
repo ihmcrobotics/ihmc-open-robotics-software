@@ -27,17 +27,12 @@ public class ConstantPlanarRegionsPublisher
    private final REAPlanarRegionPublicNetworkProvider publisher;
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
+   private final RegionFeaturesProvider featuresProvider = new ConstantPlanarRegionProvider();
 
    public ConstantPlanarRegionsPublisher(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      this.publisher = new REAPlanarRegionPublicNetworkProvider(null,
-                                                                new ConstantPlanarRegionProvider(),
-                                                                ros2Node,
-                                                                outputTopic,
-                                                                lidarOutputTopic,
-                                                                stereoOutputTopic,
-                                                                depthOutputTopic);
+      this.publisher = new REAPlanarRegionPublicNetworkProvider(ros2Node, outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
    }
 
    public void start()
@@ -49,7 +44,7 @@ public class ConstantPlanarRegionsPublisher
    {
       if(scheduled == null)
       {
-         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(true), 0, periodMillis, TimeUnit.MILLISECONDS);
+         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(featuresProvider, true), 0, periodMillis, TimeUnit.MILLISECONDS);
       }
    }
 
