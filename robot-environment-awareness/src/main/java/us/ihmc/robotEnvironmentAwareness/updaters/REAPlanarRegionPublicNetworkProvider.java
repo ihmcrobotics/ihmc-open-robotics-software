@@ -1,74 +1,76 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
+import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
+import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
-public class REAPlanarRegionPublicNetworkProvider
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
+
+public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> depthRegionPublisher;
-   private final IHMCROS2Publisher<REAStatusMessage> currentStatePublisher;
 
-   private final RegionFeaturesProvider regionFeaturesProvider;
-
-   private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
-   private final AtomicReference<Double> minRange;
-   private final AtomicReference<Double> maxRange;
-   private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
+   private IHMCROS2Publisher<REAStatusMessage> currentStatePublisher = null;
+   private AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
+   private AtomicReference<Double> minRange, maxRange;
+   private AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
    private final REAStatusMessage currentState = new REAStatusMessage();
 
-   public REAPlanarRegionPublicNetworkProvider(Messager messager, RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
-                                               ROS2Topic outputTopic, ROS2Topic lidarOutputTopic, ROS2Topic stereoOutputTopic, ROS2Topic depthOutputTopic)
+   private final Ros2Node ros2Node;
+
+   private final ROS2Topic<PlanarRegionsListMessage> outputTopic;
+   private PlanarRegionsListMessage lastPlanarRegionsListMessage;
+
+   public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic,
+                                               ROS2Topic lidarOutputTopic,
+                                               ROS2Topic stereoOutputTopic,
+                                               ROS2Topic depthOutputTopic)
    {
-      this.regionFeaturesProvider = regionFeaturesProvider;
+      this.outputTopic = outputTopic;
+
+      ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
       lidarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic);
       stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
       depthRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, depthOutputTopic);
-
-      if (messager != null)
-      {
-         currentStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStatusMessage.class, outputTopic);
-         isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
-         // This should be the only input with a default value, the rest gets populated at the very start.
-         hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);
-         isUsingLidar = messager.createInput(REAModuleAPI.LidarBufferEnable);
-         isUsingStereoVision = messager.createInput(REAModuleAPI.StereoVisionBufferEnable);
-         isUsingDepthCloud = messager.createInput(REAModuleAPI.DepthCloudBufferEnable);
-         minRange = messager.createInput(REAModuleAPI.LidarMinRange);
-         maxRange = messager.createInput(REAModuleAPI.LidarMaxRange);
-         boundingBoxParameters = messager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters);
-      }
-      else
-      { // The ConstantPlanarRegionsPublisher creates this class without the messager.
-         currentStatePublisher = null;
-         isRunning = null;
-         hasCleared = null;
-         isUsingLidar = null;
-         isUsingStereoVision = null;
-         isUsingDepthCloud = null;
-         minRange = null;
-         maxRange = null;
-         boundingBoxParameters = null;
-      }
    }
 
-   private PlanarRegionsListMessage lastPlanarRegionsListMessage;
+   public void registerMessager(Messager messager)
+   {
+      currentStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStatusMessage.class, outputTopic);
+      isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
+      // This should be the only input with a default value, the rest gets populated at the very start.
+      hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);
+      isUsingLidar = messager.createInput(REAModuleAPI.LidarBufferEnable);
+      isUsingStereoVision = messager.createInput(REAModuleAPI.StereoVisionBufferEnable);
+      isUsingDepthCloud = messager.createInput(REAModuleAPI.DepthCloudBufferEnable);
+      minRange = messager.createInput(REAModuleAPI.LidarMinRange);
+      maxRange = messager.createInput(REAModuleAPI.LidarMaxRange);
+      boundingBoxParameters = messager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters);
+   }
 
-   public void update(boolean planarRegionsHaveBeenUpdated)
+
+   @Override
+   public void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated)
    {
       if (regionFeaturesProvider.getPlanarRegionsList() == null)
          return;
@@ -88,6 +90,7 @@ public class REAPlanarRegionPublicNetworkProvider
          depthRegionPublisher.publish(lastPlanarRegionsListMessage);
    }
 
+   @Override
    public void publishCurrentState()
    {
       if (currentStatePublisher == null)
@@ -104,5 +107,64 @@ public class REAPlanarRegionPublicNetworkProvider
       sensorFilterParameters.getBoundingBoxMin().set(boundingBoxParameters.get().getMin());
       sensorFilterParameters.getBoundingBoxMax().set(boundingBoxParameters.get().getMax());
       currentStatePublisher.publish(currentState);
+   }
+
+   @Override
+   public void registerLidarScanHandler(Messager messager, NewMessageListener<LidarScanMessage> lidarScanHandler)
+   {
+      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, lidarScanHandler);
+   }
+
+   @Override
+   public void registerStereoVisionPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
+   {
+      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class, stereoVisionPointCloudHandler);
+   }
+
+   @Override
+   public void registerDepthPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> depthPointCloudHandler)
+   {
+      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class, depthPointCloudHandler);
+   }
+
+   @Override
+   public void registerStampedPosePacketHandler(Messager messager, NewMessageListener<StampedPosePacket> stampedPosePacketHandler)
+   {
+      new REAModuleROS2Subscription<>(ros2Node,
+                                      messager,
+                                      "/ihmc/stamped_pose_T265",
+                                      StampedPosePacket.class,
+                                      stampedPosePacketHandler,
+                                      REAModuleAPI.DepthCloudBufferEnable);
+   }
+
+   @Override
+   public void registerCustomRegionsHandler(NewMessageListener<PlanarRegionsListMessage> customRegionsHandler)
+   {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName, customRegionsHandler);
+   }
+
+   @Override
+   public void registerPlanarRegionsListRequestHandler(NewMessageListener<RequestPlanarRegionsListMessage> requestHandler)
+   {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopic, requestHandler);
+   }
+
+   @Override
+   public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
+   {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
+   }
+
+   @Override
+   public void registerREASensorDataFilterParametersHandler(NewMessageListener<REASensorDataFilterParametersMessage> parametersHandler)
+   {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopic, parametersHandler);
+   }
+
+   @Override
+   public void stop()
+   {
+      ros2Node.destroy();
    }
 }

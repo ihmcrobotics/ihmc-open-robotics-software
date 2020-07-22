@@ -32,6 +32,8 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
@@ -40,6 +42,9 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
 
 public class HumanoidNetworkProcessor implements CloseableAndDisposable
 {
@@ -477,10 +482,15 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       try
       {
          LIDARBasedREAModule module;
+
+         REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(outputTopic,
+                                                                                       lidarOutputTopic,
+                                                                                       stereoOutputTopic,
+                                                                                       depthOutputTopic);
          if (reaConfigurationFilePath == null)
-            module = LIDARBasedREAModule.createRemoteModule(DEFAULT_REA_CONFIG_FILE_PATH);
+            module = LIDARBasedREAModule.createRemoteModule(DEFAULT_REA_CONFIG_FILE_PATH, networkProvider);
          else
-            module = LIDARBasedREAModule.createRemoteModule(reaConfigurationFilePath);
+            module = LIDARBasedREAModule.createRemoteModule(reaConfigurationFilePath, networkProvider);
          modulesToClose.add(module::stop);
          modulesToStart.add(module::start);
          return module;

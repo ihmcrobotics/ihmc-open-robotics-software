@@ -149,7 +149,7 @@ public class StereoREAModule implements Runnable
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
          reaMessager.submitMessage(REAModuleAPI.PlanarRegionsState, planarRegionsListMessage);
 
-         planarRegionNetworkProvider.update(true);
+         planarRegionNetworkProvider.update(planarRegionFeatureUpdater, true);
          planarRegionNetworkProvider.publishCurrentState();
       }
    }
