@@ -8,7 +8,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
@@ -17,7 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
 import java.io.File;
 import java.io.IOException;
 
-public class PlanarSegmentationUI
+public class PlanarSegmentationUI implements PerceptionUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultPlanarSegmentationUIConfiguration.txt";
 
@@ -96,7 +98,7 @@ public class PlanarSegmentationUI
 
    private void refreshModuleState()
    {
-      uiMessager.submitStateRequestToModule(SegmentationModuleAPI.RequestEntireModuleState);
+      uiMessager.submitMessageInternal(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
    private void initializeControllers(REAUIMessager uiMessager)
@@ -125,6 +127,8 @@ public class PlanarSegmentationUI
       ocTreeEssentialsAnchorPaneController.setConfigurationFile(configurationFile);
       ocTreeEssentialsAnchorPaneController.attachREAMessager(uiMessager);
       ocTreeEssentialsAnchorPaneController.bindControls();
+
+      // FIXME the ocTree essentials controller
 
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationEnableTopic(SegmentationModuleAPI.PlanarRegionsSegmentationEnable);
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationClearTopic(SegmentationModuleAPI.PlanarRegionsSegmentationClear);
@@ -161,6 +165,11 @@ public class PlanarSegmentationUI
       primaryStage.show();
    }
 
+   public void hide()
+   {
+      primaryStage.hide();
+   }
+
    public void stop()
    {
       try
@@ -176,24 +185,10 @@ public class PlanarSegmentationUI
       }
    }
 
-   public static PlanarSegmentationUI createIntraprocessUI(Stage primaryStage) throws Exception
+   public static PlanarSegmentationUI createIntraprocessUI(Messager messager, Stage primaryStage) throws Exception
    {
-      KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                                NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      moduleMessager.setAllowSelfSubmit(true);
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
+      REAUIMessager uiMessager = new REAUIMessager(messager);
+      uiMessager.startMessager();
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
-
-   public static PlanarSegmentationUI createRemoteUI(Stage primaryStage) throws Exception
-   {
-      KryoMessager moduleMessager = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
-                                                             NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                             REACommunicationProperties.getPrivateNetClassList());
-      moduleMessager.setAllowSelfSubmit(true);
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new PlanarSegmentationUI(uiMessager, primaryStage);
-   }
-
 }
