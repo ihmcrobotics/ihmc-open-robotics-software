@@ -28,6 +28,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudComp
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
+import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
@@ -97,8 +98,14 @@ public class SLAMModule implements PerceptionModule
       this.manageRosNode = manageRosNode;
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud", this::handlePointCloud);
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud_D435", this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           StereoVisionPointCloudMessage.class,
+                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           StereoVisionPointCloudMessage.class,
+                                           REASourceType.DEPTH_POINT_CLOUD.getTopicName(),
+                                           this::handlePointCloud);
 
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
