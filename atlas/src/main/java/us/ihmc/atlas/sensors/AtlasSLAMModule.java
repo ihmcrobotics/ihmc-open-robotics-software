@@ -1,17 +1,14 @@
 package us.ihmc.atlas.sensors;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -19,9 +16,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
@@ -100,7 +94,7 @@ public class AtlasSLAMModule extends SLAMModule
          reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
       if (velocityStatus != null)
          reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, velocityStatus.get());
-      if (BiasEnable != null)
+      if (biasEnable != null)
          reaMessager.submitMessage(SLAMModuleAPI.BiasEnable, biasEnable.get());
    }
 
@@ -235,11 +229,6 @@ public class AtlasSLAMModule extends SLAMModule
 
    public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel, Messager messager)
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      messager.startMessager();
-      
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
