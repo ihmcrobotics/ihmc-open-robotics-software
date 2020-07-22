@@ -69,7 +69,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class LinearMomentumRateControlModule
 {
    private static final boolean USE_COMBINED_STEP_ADJUSTMENT = false;
-   private static final boolean USE_LQR_MOMENTUM_CONTROLLER = true;
+   private static boolean USE_LQR_MOMENTUM_CONTROLLER = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -184,9 +184,24 @@ public class LinearMomentumRateControlModule
                                           YoVariableRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime, gravityZ, controlDT, parentRegistry, yoGraphicsListRegistry, false);
+   }
+   
+   public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
+                                          SideDependentList<ContactableFoot> contactableFeet,
+                                          RigidBodyBasics elevator,
+                                          WalkingControllerParameters walkingControllerParameters,
+                                          YoDouble yoTime,
+                                          double gravityZ,
+                                          double controlDT,
+                                          YoVariableRegistry parentRegistry,
+                                          YoGraphicsListRegistry yoGraphicsListRegistry,
+                                          boolean USE_LQR_MOMENTUM_CONTROLLER)
+   {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
       this.yoTime = yoTime;
+      this.USE_LQR_MOMENTUM_CONTROLLER = USE_LQR_MOMENTUM_CONTROLLER;
       
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);

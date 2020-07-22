@@ -71,20 +71,15 @@ public class SimpleBipedCoMTrajectoryPlanner
    private final SimpleBipedContactSequenceUpdater sequenceUpdater;
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
    
-   private static final double ZERO_TIME = 0.0;
    public static final double SUFFICIENTLY_LARGE = 100.0;
    
    protected final YoEnum<RobotSide> transferToSide = new YoEnum<>("TransferToSide", registry, RobotSide.class, true);
    protected final YoEnum<RobotSide> previousTransferToSide = new YoEnum<>("PreviousTransferToSide", registry, RobotSide.class, true);
    protected final YoEnum<RobotSide> supportSide = new YoEnum<>("SupportSide", registry, RobotSide.class, true);
    
-   
-   private final YoInteger numberOfUpcomingFootsteps = new YoInteger("NumberOfUpcomingFootsteps", registry);;
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
    private final List<FootstepTiming> upcomingFootstepTimings = new ArrayList<>();
    
-
-   //TODO: CurrentState Management
    protected final YoInteger numberFootstepsToConsider = new YoInteger("NumberFootstepsToConsider", registry);
    protected final YoBoolean isStanding = new YoBoolean("IsStanding", registry);
    protected final YoBoolean isInitialTransfer = new YoBoolean("IsInitialTransfer", registry);
@@ -98,46 +93,23 @@ public class SimpleBipedCoMTrajectoryPlanner
    /** Time remaining before the end of the current state. */
    protected final YoDouble timeInCurrentStateRemaining = new YoDouble("RemainingTime", registry);
    private final YoDouble timeInContactPhase = new YoDouble("timeInContactPhase", registry);
-   private Footstep currentFootstep;
-   private FootstepTiming currentFootstepTiming;
    
-   //TODO: Velocity decay stuff
-   
-   //TODO: Holding Position
    protected final YoBoolean isHoldingPosition = new YoBoolean("IsHoldingPosition", registry);
    protected final YoFramePoint3D icpPositionToHold = new YoFramePoint3D("CapturePointPositionToHold", worldFrame, registry);
-
-   //TODO: Angular Dynamics
-   /** Desired Centroidal Angular Momentum (CAM) */
-   final YoFrameVector3D desiredCentroidalAngularMomentum = new YoFrameVector3D("DesiredCentroidalAngularMomentum", worldFrame, registry);
-   /** Desired Centroidal Torque (CT) */
-   final YoFrameVector3D desiredCentroidalTorque = new YoFrameVector3D("DesiredCentroidalTorque", worldFrame, registry);
    
-   //TODO: Adjusting Plan for Continuity?
-   
-   //TODO: Currently doesn't use Gravity?
-   
-   //TODo: Visualizations
-   private static final boolean VISUALIZE = true;
-   
-   //TODO: Set Up YoTime Here
-   
-   //TODO: InitializeParameters with icpPlannerParameters with default Parameters
    //alpha*SwingDuration is % of swingDuration spend with DCM before exit Corner point
    protected final YoDouble defaultSwingDurationAlpha = new YoDouble("DefaultSwingDurationAlpha",
                                                                      "Repartition of the swing duration around the exit corner point.", registry);
    private final YoDouble defaultSwingDurationShiftFraction = new YoDouble("DefaultSwingDurationShiftFraction", registry);
-   //
    protected final YoDouble defaultTransferDurationAlpha = new YoDouble("DefaultTransferDurationAlpha",
                                                                         "Repartition of the transfer duration around the entry corner point.", registry);
    private final YoDouble finalTransferDurationAlpha = new YoDouble("FinalTransferDurationAlpha", registry);
-   //
    private final YoDouble defaultTransferWeightDistribution = new YoDouble("DefaultWeightDistribution", registry);
    private final YoDouble finalTransferWeightDistribution = new YoDouble("FinalTransferWeightDistribution", registry);
    protected final YoDouble defaultFinalTransferDuration = new YoDouble("DefaultFinalTransferDuration", registry);
    protected final YoDouble FinalTransferDuration = new YoDouble("FinalTransferDuration", registry);
    
-   
+   private static final boolean VISUALIZE = true;
    
    public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleZUpFrames, double gravityZ, double nominalCoMHeight,
                                           DoubleProvider omega0, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -153,7 +125,8 @@ public class SimpleBipedCoMTrajectoryPlanner
       sequenceUpdater = new SimpleBipedContactSequenceUpdater(soleZUpFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new SimpleCoMTrajectoryPlanner(omega0);
       comTrajectoryPlanner.setNominalCoMHeight(nominalCoMHeight);
-      if (yoGraphicsListRegistry != null)
+      
+      if (yoGraphicsListRegistry != null && VISUALIZE)
          ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
 
       if (icpPlannerParameters != null)
@@ -166,25 +139,8 @@ public class SimpleBipedCoMTrajectoryPlanner
       defaultTransferDurationAlpha.set(icpPlannerParameters.getTransferSplitFraction());
       defaultSwingDurationAlpha.set(icpPlannerParameters.getSwingSplitFraction());
       finalTransferDurationAlpha.set(icpPlannerParameters.getTransferSplitFraction());
-
-      //velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
-      //velocityReductionFactor.set(Double.NaN);
-
       numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
-
-      //referenceCoPGenerator.initializeParameters(icpPlannerParameters);
-      //referenceCMPGenerator.setGroundReaction(robotMass * gravityZ);
-      //angularMomentumTrajectoryGenerator.initializeParameters(icpPlannerParameters, robotMass, gravityZ);
       defaultSwingDurationShiftFraction.set(icpPlannerParameters.getSwingDurationShiftFraction());
-
-      //adjustPlanForSSContinuity.set(icpPlannerParameters.adjustCoPPlanForSingleSupportContinuity());
-      //adjustPlanForDSContinuity.set(icpPlannerParameters.adjustEveryCoPPlanForDoubleSupportContinuity());
-      //adjustPlanForInitialDSContinuity.set(icpPlannerParameters.adjustInitialCoPPlanForDoubleSupportContinuity());
-      //adjustPlanForStandingContinuity.set(icpPlannerParameters.adjustCoPPlanForStandingContinuity());
-
-      //doContinuousReplanningForStanding.set(icpPlannerParameters.doContinuousReplanningForStanding());
-      //doContinuousReplanningForTransfer.set(icpPlannerParameters.doContinuousReplanningForTransfer());
-      //doContinuousReplanningForSwing.set(icpPlannerParameters.doContinuousReplanningForSwing());
    }
    
    //TODO: Catch bad steps
@@ -224,7 +180,6 @@ public class SimpleBipedCoMTrajectoryPlanner
    public double computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
    {
       trimPastSteps(currentTime);
-      //Update newest state - note current state refers to swing or trasnfer within the step start and End transfer per step?
       timeInCurrentState.set(currentTime - initialTime.getDoubleValue());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
          
@@ -305,11 +260,6 @@ public class SimpleBipedCoMTrajectoryPlanner
       
    }
    
-   public void updateCurrentPlan()
-   {
-
-   }
-   
    public void holdCurrentICP(FramePoint3D icpPositionToHold)
    { //This state doesn't seem to be really used
       this.icpPositionToHold.set(icpPositionToHold);
@@ -318,7 +268,6 @@ public class SimpleBipedCoMTrajectoryPlanner
       isStanding.set(false);
       isDoubleSupport.set(true);
       isHoldingPosition.set(true);
-      // Asking the CoP and ICP to be the same since we assume that holds can be requested in static conditions only
    }
 
    public void initializeForStanding(double currentTime)
@@ -363,9 +312,6 @@ public class SimpleBipedCoMTrajectoryPlanner
 
       if (isInitialTransfer.getBooleanValue() || isFinalTransfer.getValue())
          previousTransferToSide.set(null);
-      
-      //int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
-      //isFinalTransfer.set(numberOfFootstepRegistered == 0);
       
       updateAbsoluteTimings(currentTime);
    }

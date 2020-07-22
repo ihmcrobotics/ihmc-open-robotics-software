@@ -224,22 +224,6 @@ public class SimpleBalanceManager
       footstepTimings.add().set(timing);
    }
 
-
-/*   public double getCurrentTransferDurationAdjustedForReachability()
-   {
-      return smoothCMPPlanner.getTransferDuration(0);
-   }
-
-   public double getCurrentSwingDurationAdjustedForReachability()
-   {
-      return smoothCMPPlanner.getSwingDuration(0);
-   }
-
-   public double getNextTransferDurationAdjustedForReachability()
-   {
-      return smoothCMPPlanner.getTransferDuration(1);
-   }
-*/
    public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
    {
       if (!usingStepAdjustment || initializeForSingleSupport || initializeForTransfer || initializeForStanding)
@@ -604,11 +588,6 @@ public class SimpleBalanceManager
       }
 
       return capturabilityBasedStatus;
-   }
-
-   public void updateCurrentICPPlan()
-   {
-      comPlanner.updateCurrentPlan();
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

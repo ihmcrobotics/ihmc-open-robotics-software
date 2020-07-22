@@ -54,10 +54,11 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-
+   
    public SimpleWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                        SimpleControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                       HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
+                                       HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters, 
+                                       boolean USE_LQR_MOMENTUM_CONTROLLER)
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
@@ -97,7 +98,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry);
+                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry, USE_LQR_MOMENTUM_CONTROLLER);
       linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
       linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 

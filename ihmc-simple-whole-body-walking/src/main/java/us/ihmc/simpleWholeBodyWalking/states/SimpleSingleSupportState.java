@@ -121,9 +121,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
 
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
-         balanceManager.updateCurrentICPPlan();
-         //legConfigurationManager.prepareForLegBracing(swingSide);
-
          updateHeightManager();
       }
 

@@ -94,7 +94,6 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                        sphereRobot1.getOmega0Provider(),
                                                                                        sphereRobot1.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry1);
-         //This step actually add the footstep plan to the BipedPlanner
          dcmPlan1.setNumberOfFootstepsToConsider(12);
          addFootstepandTimingStepsToDCMPlan(dcmPlan1, initialPosition1);
          controller1 = new SimpleBasicSphereController(sphereRobot1, dcmPlan1, yoGraphicsListRegistry1);
@@ -121,7 +120,6 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                         sphereRobot2.getOmega0Provider(),
                                                                                         sphereRobot2.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                         yoGraphicsListRegistry2);
-         //This step actually add the footstep plan to the BipedPlanner
          dcmPlan2.setNumberOfFootstepsToConsider(12);
          addFootstepandTimingStepsToDCMPlan(dcmPlan2, initialPosition2);
          
@@ -204,9 +202,6 @@ public class SimpleLQRMomentumControllerSimulation
       RobotSide currentSide = RobotSide.LEFT;
       dcmPlan.clearStepSequence();
       Quaternion unitQuaternion = new Quaternion(0, 0, 0, 1);
-      //Initial Position
-      //Footstep InitStep = GenerateFootstep(currentSide, new Point3D(contactX,contactY,0), new Quaternion(0, 0, 0, 1));
-      //dcmPlan.addStepToSequence(InitStep, new FootstepTiming(initialTransferDuration, 0), newShiftFractions, 0);
       contactY += stepWidth / 2; //begin planning ctnctY at pos of left foot
 
       //Main Steps
