@@ -248,11 +248,11 @@ public class SLAMModule implements PerceptionModule
          LogTools.info("addFrame " + pointCloudQueue.size() + " " + success +" " + slam.getComputationTimeForLatestFrame());
       }
 
-      slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      slam.getOctree().setNormalEstimationParameters(normalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
-         slam.clearNormals();
+         slam.clear();
       if (enableNormalEstimation.get())
-         slam.computeOcTreeNormals();
+         slam.updateOctreeMap();
          
       dequeue();
 
