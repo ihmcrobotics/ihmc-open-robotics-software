@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.tools;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.humanoidBehaviors.tools.perception.PointCloudPolygonizer;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -22,9 +23,13 @@ import static us.ihmc.humanoidBehaviors.tools.SimulatedREAModule.SimulatedREAMod
 
 /**
  * Acts as REA, reporting currently visible area as planar regions.
+ * @deprecated Older class. not sure about this abstraction
  */
 public class SimulatedREAModule
 {
+
+   private PointCloudPolygonizer pointCloudPolygonizer;
+
    enum SimulatedREAModuleMode { REPUBLISH_FULL_MAP, REDUCE_TO_VIEWABLE_AREA }
    private final SimulatedREAModuleMode mode;
 
@@ -62,6 +67,7 @@ public class SimulatedREAModule
          double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = 180.0;
          simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
+         pointCloudPolygonizer = new PointCloudPolygonizer();
       }
 
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withInput(), this::acceptSupportRegionsList);
@@ -92,7 +98,7 @@ public class SimulatedREAModule
       {
          if (syncedRobot.hasReceivedFirstMessage())
          {
-            combinedRegionsList.addAll(simulatedDepthCamera.filterMapToVisible(map).getPlanarRegionsAsList());
+            combinedRegionsList.addAll(pointCloudPolygonizer.polygonize(simulatedDepthCamera.filterUsingSpherical(map)).getPlanarRegionsAsList());
          }
          else
          {
