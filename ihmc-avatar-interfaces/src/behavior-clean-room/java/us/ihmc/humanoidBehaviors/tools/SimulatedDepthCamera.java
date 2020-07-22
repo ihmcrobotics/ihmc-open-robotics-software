@@ -12,19 +12,22 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidBehaviors.tools.perception.FOVPlaneHolder;
+import us.ihmc.humanoidBehaviors.tools.perception.FOVPlanesCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
-public class SimulatedDepthCamera extends FOVPlaneHolder
+public class SimulatedDepthCamera
 {
+   private final ReferenceFrame cameraFrame;
+   private final double verticalFOV;
+   private final double horizontalFOV;
    private final double range;
-
    private final HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
    private final FramePose3D tempCameraPose = new FramePose3D();
    private final Point2D tempCircleOrigin = new Point2D();
+   private final FOVPlanesCalculator fovPlanesCalculator;
 
    public SimulatedDepthCamera(ReferenceFrame cameraFrame)
    {
@@ -38,9 +41,12 @@ public class SimulatedDepthCamera extends FOVPlaneHolder
 
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, double range, ReferenceFrame cameraFrame)
    {
-      super(verticalFOV, horizontalFOV, cameraFrame);
-
+      this.cameraFrame = cameraFrame;
       this.range = range;
+      this.verticalFOV = verticalFOV;
+      this.horizontalFOV = horizontalFOV;
+
+      fovPlanesCalculator = new FOVPlanesCalculator(verticalFOV, horizontalFOV, cameraFrame);
    }
 
    public synchronized HashMap<PlanarRegion, List<Point3D>> filterUsingSpherical(PlanarRegionsList map)
@@ -62,11 +68,11 @@ public class SimulatedDepthCamera extends FOVPlaneHolder
       ArrayList<Point3D> pointsInView = new ArrayList<>();;
       if (!Double.isNaN(verticalFOV) && !Double.isNaN(horizontalFOV))
       {
-         updateViewPlanes();
+         fovPlanesCalculator.update();
 
          for (Point3D point3D : pointsOnSphere)
          {
-            if (planeTop.isOnOrAbove(point3D) && planeBottom.isOnOrAbove(point3D) && planeLeft.isOnOrAbove(point3D) && planeRight.isOnOrAbove(point3D))
+            if (fovPlanesCalculator.isPointInView(point3D))
             {
                pointsInView.add(point3D);
             }
