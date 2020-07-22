@@ -1,9 +1,9 @@
 package us.ihmc.robotics.physics;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,14 +54,18 @@ public class CollidableListVisualizer
 
    public void update(CollisionListResult collisionListResult)
    {
-      Set<Collidable> collidableToShow = collisionListResult.stream().filter(collisionResult -> collisionResult.getCollisionData().areShapesColliding())
-                                                            .flatMap(collisionResult -> Stream.of(collisionResult.getCollidableA(),
-                                                                                                  collisionResult.getCollidableB()))
-                                                            .filter(candidate -> collidableVisualizerMap.containsKey(candidate)).collect(Collectors.toSet());
+      update(collisionListResult.stream().filter(collisionResult -> collisionResult.getCollisionData().areShapesColliding())
+                                .flatMap(collisionResult -> Stream.of(collisionResult.getCollidableA(), collisionResult.getCollidableB()))
+                                .collect(Collectors.toList()));
+   }
+
+   public void update(Collection<Collidable> collidablesToShow)
+   {
+      collidablesToShow = collidablesToShow.stream().filter(candidate -> collidableVisualizerMap.containsKey(candidate)).collect(Collectors.toSet());
 
       for (Entry<Collidable, CollidableVisualizer> entry : collidableVisualizerMap.entrySet())
       {
-         if (collidableToShow.contains(entry.getKey()))
+         if (collidablesToShow.contains(entry.getKey()))
          {
             entry.getValue().update();
          }
