@@ -1,17 +1,17 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.perception.FOVPlanesCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -49,7 +49,7 @@ public class SimulatedDepthCamera
       fovPlanesCalculator = new FOVPlanesCalculator(verticalFOV, horizontalFOV, cameraFrame);
    }
 
-   public synchronized HashMap<PlanarRegion, List<Point3D>> filterUsingSpherical(PlanarRegionsList map)
+   public synchronized Map<Pair<Point3DReadOnly, Vector3DReadOnly>, List<Point3D>> filterUsingSpherical(PlanarRegionsList map)
    {
       pointsInRegions.clear();
 
@@ -115,6 +115,14 @@ public class SimulatedDepthCamera
          pointsInRegions.get(region).add(intersection);
       }
 
-      return pointsInRegions;
+      HashMap<Pair<Point3DReadOnly, Vector3DReadOnly>, List<Point3D>> centersNormalsAndPoints = new HashMap<>();
+      for (PlanarRegion planarRegion : pointsInRegions.keySet())
+      {
+         Point3D center = new Point3D();
+         planarRegion.getBoundingBox3dInWorld().getCenterPoint(center);
+         centersNormalsAndPoints.put(Pair.of(center, new Vector3D(planarRegion.getNormal())), pointsInRegions.get(planarRegion));
+      }
+
+      return centersNormalsAndPoints;
    }
 }
