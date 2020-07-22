@@ -44,13 +44,9 @@ public class SLAMBasics implements SLAMInterface
 
       octree.insertScanCollection(scanCollection, true);
       octree.enableParallelComputationForNormals(true);
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(10);
-      octree.setNormalEstimationParameters(normalEstimationParameters);
-      updateOctreeMap();
    }
 
-   public void updateOctreeMap()
+   public void updateSurfaceNormals()
    {
       octree.updateNormals();
    }
@@ -133,6 +129,16 @@ public class SLAMBasics implements SLAMInterface
    public NormalOcTree getOctree()
    {
       return octree;
+   }
+
+   public void clearNormals()
+   {
+      octree.clearNormals();
+   }
+
+   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
    public double getComputationTimeForLatestFrame()
