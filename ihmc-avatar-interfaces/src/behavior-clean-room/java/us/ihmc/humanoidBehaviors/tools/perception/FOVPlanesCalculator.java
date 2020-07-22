@@ -5,24 +5,25 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
-public abstract class FOVPlaneHolder
+public class FOVPlanesCalculator
 {
-   protected final ReferenceFrame cameraFrame;
+   private final ReferenceFrame cameraFrame;
 
-   protected final double verticalFOV;
-   protected final double horizontalFOV;
+   private final double verticalFOV;
+   private final double horizontalFOV;
 
    private final FramePose3D tempFramePose3D = new FramePose3D();
    private final FramePoint3D tempFramePoint3D = new FramePoint3D();
    private final Vector3D tempNormal = new Vector3D();
 
-   protected final Plane3D planeTop;
-   protected final Plane3D planeBottom;
-   protected final Plane3D planeLeft;
-   protected final Plane3D planeRight;
+   private final Plane3D planeTop;
+   private final Plane3D planeBottom;
+   private final Plane3D planeLeft;
+   private final Plane3D planeRight;
 
-   public FOVPlaneHolder(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
+   public FOVPlanesCalculator(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;
@@ -34,7 +35,15 @@ public abstract class FOVPlaneHolder
       planeRight = new Plane3D();
    }
 
-   protected void updateViewPlanes()
+   /**
+    * Must call update first.
+    */
+   public boolean isPointInView(Point3DReadOnly point)
+   {
+      return planeTop.isOnOrAbove(point) && planeBottom.isOnOrAbove(point) && planeLeft.isOnOrAbove(point) && planeRight.isOnOrAbove(point);
+   }
+
+   public void update()
    {
       updatePlaneToFrameWithParameters(planeTop, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
       updatePlaneToFrameWithParameters(planeBottom, verticalFOV / 2.0, 0.0, 0.0, 1.0);
@@ -56,5 +65,25 @@ public abstract class FOVPlaneHolder
       tempNormal.set(0.0, yFace, zFace);
       tempFramePose3D.getOrientation().transform(tempNormal);
       plane.getNormal().set(tempNormal);
+   }
+
+   public Plane3D getTopPlane()
+   {
+      return planeTop;
+   }
+
+   public Plane3D getBottomPlane()
+   {
+      return planeBottom;
+   }
+
+   public Plane3D getLeftPlane()
+   {
+      return planeLeft;
+   }
+
+   public Plane3D getRightPlane()
+   {
+      return planeRight;
    }
 }

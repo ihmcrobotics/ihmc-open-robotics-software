@@ -17,21 +17,26 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-public class PlaneCuttingDepthSensorSimulator extends FOVPlaneHolder
+public class PlanesCuttingDepthSensorSimulator
 {
-   public PlaneCuttingDepthSensorSimulator(ReferenceFrame cameraFrame)
+   private final ReferenceFrame cameraFrame;
+   private final FOVPlanesCalculator fovPlanesCalculator;
+
+   public PlanesCuttingDepthSensorSimulator(ReferenceFrame cameraFrame)
    {
       this(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, cameraFrame);
    }
 
-   public PlaneCuttingDepthSensorSimulator(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
+   public PlanesCuttingDepthSensorSimulator(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
       this(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, cameraFrame);
    }
 
-   public PlaneCuttingDepthSensorSimulator(double verticalFOV, double horizontalFOV, double range, ReferenceFrame cameraFrame)
+   public PlanesCuttingDepthSensorSimulator(double verticalFOV, double horizontalFOV, double range, ReferenceFrame cameraFrame)
    {
-      super(verticalFOV, horizontalFOV, cameraFrame);
+      this.cameraFrame = cameraFrame;
+
+      fovPlanesCalculator = new FOVPlanesCalculator(verticalFOV, horizontalFOV, cameraFrame);
    }
 
    public synchronized PlanarRegionsList filterUsingPlaneCutting(PlanarRegionsList map)
@@ -40,12 +45,12 @@ public class PlaneCuttingDepthSensorSimulator extends FOVPlaneHolder
       // List<PlanarRegion> filteredRegions = PlanarRegionTools
       //            .filterPlanarRegionsWithBoundingCircle(new Point2D(observer), Math.sqrt(rayLengthSquared), regions.getPlanarRegionsAsList());
 
-      updateViewPlanes();
+      fovPlanesCalculator.update();
 
-      map = PlanarRegionsListCutTool.cutByPlane(planeTop, map);
-      map = PlanarRegionsListCutTool.cutByPlane(planeBottom, map);
-      map = PlanarRegionsListCutTool.cutByPlane(planeLeft, map);
-      map = PlanarRegionsListCutTool.cutByPlane(planeRight, map);
+      map = PlanarRegionsListCutTool.cutByPlane(fovPlanesCalculator.getTopPlane(), map);
+      map = PlanarRegionsListCutTool.cutByPlane(fovPlanesCalculator.getBottomPlane(), map);
+      map = PlanarRegionsListCutTool.cutByPlane(fovPlanesCalculator.getLeftPlane(), map);
+      map = PlanarRegionsListCutTool.cutByPlane(fovPlanesCalculator.getRightPlane(), map);
 
 
       // TODO: Remove occlusions
