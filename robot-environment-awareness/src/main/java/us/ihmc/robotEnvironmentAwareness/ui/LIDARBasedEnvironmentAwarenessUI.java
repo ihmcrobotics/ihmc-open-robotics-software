@@ -19,21 +19,15 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.LIDARFilterAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
-public class LIDARBasedEnvironmentAwarenessUI
+public class LIDARBasedEnvironmentAwarenessUI implements PerceptionUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAUIConfiguration.txt";
 
@@ -50,6 +44,8 @@ public class LIDARBasedEnvironmentAwarenessUI
    private PointCloudAnchorPaneController pointCloudAnchorPaneController;
    @FXML
    private OcTreeBasicsAnchorPaneController ocTreeBasicsAnchorPaneController;
+   @FXML
+   private SurfaceNormalFilterAnchorPaneController surfaceNormalFilterAnchorPaneController;
    @FXML
    private LIDARFilterAnchorPaneController lidarFilterAnchorPaneController;
    @FXML
@@ -165,6 +161,10 @@ public class LIDARBasedEnvironmentAwarenessUI
       ocTreeBasicsAnchorPaneController.attachREAMessager(uiMessager);
       ocTreeBasicsAnchorPaneController.bindControls();
 
+      surfaceNormalFilterAnchorPaneController.setConfigurationFile(configurationFile);
+      surfaceNormalFilterAnchorPaneController.attachREAMessager(uiMessager);
+      surfaceNormalFilterAnchorPaneController.bindControls();
+
       lidarFilterAnchorPaneController.setConfigurationFile(configurationFile);
       lidarFilterAnchorPaneController.attachREAMessager(uiMessager);
       lidarFilterAnchorPaneController.bindControls();
@@ -191,7 +191,7 @@ public class LIDARBasedEnvironmentAwarenessUI
       dataExporterAnchorPaneController.bindControls();
    }
 
-   public void show() throws IOException
+   public void show()
    {
       refreshModuleState();
       primaryStage.show();
@@ -218,8 +218,13 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
+      return creatIntraprocessUI(primaryStage, NetworkPorts.REA_MODULE_UI_PORT);
+   }
+
+   public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage, NetworkPorts networkPort) throws Exception
+   {
       Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API,
-                                                                NetworkPorts.REA_MODULE_UI_PORT,
+                                                                networkPort,
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);

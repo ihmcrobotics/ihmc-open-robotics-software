@@ -19,7 +19,9 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    @FXML
    private ToggleButton enableDepthButton;
    @FXML
-   private Spinner<Integer> sizeOfPointCloudSpinner;
+   private Spinner<Integer> stereoVisionSizeSpinner;
+   @FXML
+   private Spinner<Integer> depthCloudSizeSpinner;
    @FXML
    private Slider navigationFramesSlider;
 
@@ -49,13 +51,15 @@ public class PointCloudAnchorPaneController extends REABasicUIController
    public void bindControls()
    {
       load();
-      sizeOfPointCloudSpinner.setValueFactory(createNumberOfPointsValueFactory(initialSizeOfPointCloud));
+      stereoVisionSizeSpinner.setValueFactory(createNumberOfPointsValueFactory(initialSizeOfPointCloud));
+      depthCloudSizeSpinner.setValueFactory(createNumberOfPointsValueFactory(initialSizeOfPointCloud));
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanShow, enableLidarButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider.valueProperty(), numberToIntegerConverter, true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIStereoVisionShow, enableStereoButton.selectedProperty(), true);
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UIDepthCloudShow, enableDepthButton.selectedProperty(), true);
       
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, sizeOfPointCloudSpinner.getValueFactory().valueProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIStereoVisionSize, stereoVisionSizeSpinner.getValueFactory().valueProperty());
+      uiMessager.bindBidirectionalGlobal(REAModuleAPI.UIDepthCloudSize, depthCloudSizeSpinner.getValueFactory().valueProperty());
       uiMessager.bindBidirectionalInternal(REAModuleAPI.UISensorPoseHistoryFrames, navigationFramesSlider.valueProperty(), numberToIntegerConverter, true);
    }
 
@@ -83,6 +87,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       saveUIControlProperty(REAModuleAPI.UILidarScanShow, enableLidarButton);
       saveUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
       saveUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
+      saveUIControlProperty(REAModuleAPI.UIDepthCloudShow, enableDepthButton);
    }
    
    @FXML
@@ -96,6 +101,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, enableLidarButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanSize, scanHistorySizeSlider);
       loadUIControlProperty(REAModuleAPI.UIStereoVisionShow, enableStereoButton);
+      loadUIControlProperty(REAModuleAPI.UIDepthCloudShow, enableDepthButton);
    }
 
    private IntegerSpinnerValueFactory createNumberOfPointsValueFactory(int initialValue)
