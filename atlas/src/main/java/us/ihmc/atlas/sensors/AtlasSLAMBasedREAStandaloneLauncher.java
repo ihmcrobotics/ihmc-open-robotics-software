@@ -11,7 +11,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
@@ -23,6 +27,8 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
 {
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
 
+   private Messager slamMessager;
+   private Messager segmentationMessager;
    private SLAMBasedEnvironmentAwarenessUI ui;
    private AtlasSLAMModule module;
 
@@ -40,15 +46,23 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
       {
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
-      ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage, defaultContactPoints);
-      module = AtlasSLAMModule.createIntraprocessModule(drcRobotModel);
+
+      slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
+      slamMessager.startMessager();
+
+      segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
+      segmentationMessager.startMessager();
+
+      ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
+      module = AtlasSLAMModule.createIntraprocessModule(drcRobotModel, slamMessager);
 
       Stage secondStage = new Stage();
-      planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(secondStage);
+      planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
       segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
                                                                              REACommunicationProperties.subscriberCustomRegionsTopicName,
                                                                              ROS2Tools.REALSENSE_SLAM_REGIONS,
-                                                                             MODULE_CONFIGURATION_FILE_NAME);
+                                                                             MODULE_CONFIGURATION_FILE_NAME,
+                                                                             segmentationMessager);
       module.attachOcTreeConsumer(segmentationModule);
 
       ui.show();
@@ -65,6 +79,9 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
 
       planarSegmentationUI.stop();
       segmentationModule.stop();
+
+      slamMessager.closeMessager();
+      segmentationMessager.closeMessager();
 
       Platform.exit();
    }

@@ -27,6 +27,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -107,12 +108,20 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          RigidBodyTransform ankleToSole = new RigidBodyTransform();
          ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
          ankleToGround = Math.max(ankleToGround, Math.abs(ankleToSole.getTranslationZ()));
       }
+
+      FramePoint3D leftHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      FramePoint3D rightHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      leftHipPitch.changeFrame(controllerToolbox.getPelvisZUpFrame());
+      rightHipPitch.changeFrame(controllerToolbox.getPelvisZUpFrame());
+
+      double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
 
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
@@ -127,7 +136,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                                              maximumHeightAboveGround,
                                                              defaultOffsetHeightAboveGround,
                                                              doubleSupportPercentageIn,
-                                                             0.2,
+                                                             hipWidth,
                                                              pelvisFrame,
                                                              referenceFrames.getSoleZUpFrames(),
                                                              controllerToolbox.getYoTime(),

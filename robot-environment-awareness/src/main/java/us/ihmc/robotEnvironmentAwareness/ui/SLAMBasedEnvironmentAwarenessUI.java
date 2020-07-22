@@ -13,15 +13,13 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
@@ -32,7 +30,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class SLAMBasedEnvironmentAwarenessUI
+public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMUIConfiguration.txt";
 
@@ -173,12 +171,14 @@ public class SLAMBasedEnvironmentAwarenessUI
       normalEstimationAnchorPaneController.bindControls();
    }
 
-   public void show() throws IOException
+   @Override
+   public void show()
    {
       refreshModuleState();
       primaryStage.show();
    }
 
+   @Override
    public void stop()
    {
       try
@@ -201,21 +201,15 @@ public class SLAMBasedEnvironmentAwarenessUI
       }
    }
 
-   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
+   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Messager messager, Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
-                                                                NetworkPorts.SLAM_MODULE_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
+      REAUIMessager uiMessager = new REAUIMessager(messager);
       return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage, null);
    }
 
-   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Messager messager, Stage primaryStage, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
-                                                                NetworkPorts.SLAM_MODULE_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
+      REAUIMessager uiMessager = new REAUIMessager(messager);
       return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage, defaultContactPoints);
    }
 }

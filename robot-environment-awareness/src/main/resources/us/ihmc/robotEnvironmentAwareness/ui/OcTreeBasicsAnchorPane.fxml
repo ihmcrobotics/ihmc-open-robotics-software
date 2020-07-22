@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -18,116 +15,154 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController">
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController">
    <children>
-      <HBox layoutX="10.0" layoutY="10.0" prefHeight="160.0" prefWidth="1098.0" spacing="20.0">
+      <HBox layoutX="37.0" layoutY="10.0" prefHeight="160.0" prefWidth="1165.0" spacing="20.0">
          <children>
-            <VBox alignment="CENTER" prefHeight="156.0" prefWidth="93.0" spacing="5.0">
+            <VBox alignment="CENTER" prefHeight="160.0" prefWidth="180.0" spacing="5.0">
                <children>
-                  <ToggleButton fx:id="enableButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable OcTree" />
+                  <ToggleButton fx:id="enableButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="103.0" text="Enable OcTree" />
                   <Button fx:id="clearButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
                   <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
                   <Button alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#setParametersForStereo" text="Set for Stereo" />
                   <Button alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#setParametersForDepth" text="Set for Depth" />
                </children>
             </VBox>
-            <VBox prefHeight="150.0" prefWidth="266.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="160.0" prefWidth="278.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefWidth="104.0" text="Main OcTree" textAlignment="CENTER">
                      <font>
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <GridPane>
+                  <GridPane prefHeight="120.0" prefWidth="263.0">
                      <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="136.0" minWidth="10.0" prefWidth="136.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="114.0" minWidth="10.0" prefWidth="90.0" />
                      </columnConstraints>
                      <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
                         <Label maxWidth="1.7976931348623157E308" text="Current Depth:" GridPane.rowIndex="1" />
                         <Slider fx:id="depthSlider" blockIncrement="1.0" majorTickUnit="1.0" max="16.0" min="10.0" minorTickCount="0" prefHeight="38.0" prefWidth="146.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="15.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label maxWidth="1.7976931348623157E308" text="Node Display Type:" GridPane.rowIndex="2" />
-                        <ComboBox fx:id="displayTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label maxWidth="1.7976931348623157E308" text="Node Coloring Type:" GridPane.rowIndex="3" />
-                        <ComboBox fx:id="coloringTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label maxWidth="1.7976931348623157E308" text="Current Resolution:" />
+                        <Label maxWidth="1.7976931348623157E308" text="Node Display Type:" GridPane.rowIndex="3" />
+                        <ComboBox fx:id="displayTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label maxWidth="1.7976931348623157E308" text="Node Coloring Type:" GridPane.rowIndex="4" />
+                        <ComboBox fx:id="coloringTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label maxWidth="1.7976931348623157E308" prefWidth="125.0" text="Current Resolution:" />
                         <Slider fx:id="resolutionSlider" blockIncrement="1.0" majorTickUnit="0.005" max="0.06" min="0.01" minorTickCount="1" prefHeight="38.0" prefWidth="146.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.02" GridPane.columnIndex="1" />
+                        <Label maxWidth="1.7976931348623157E308" text="Node lifetime (secs):" GridPane.rowIndex="2" />
+                        <Spinner fx:id="nodeLifetimeSpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                      </children>
                   </GridPane>
                </children>
             </VBox>
-            <VBox prefHeight="146.0" prefWidth="222.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="160.0" prefWidth="204.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Lidar Buffer" textAlignment="CENTER">
                      <font>
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <HBox>
-                     <children>
-                        <Slider fx:id="lidarBufferSizeSlider" blockIncrement="5000.0" majorTickUnit="10000.0" max="50000.0" prefHeight="38.0" prefWidth="218.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10000.0">
-                           <tooltip>
-                              <Tooltip text="Set the capacity of the lidar buffer. When the capacity is reached, the buffer is considered full." />
-                           </tooltip>
-                        </Slider>
-                     </children>
-                  </HBox>
-                  <ToggleButton fx:id="enableLidarBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Lidar Buffer" />
+                  <Slider fx:id="lidarBufferSizeSlider" blockIncrement="5000.0" majorTickUnit="10000.0" max="50000.0" prefHeight="38.0" prefWidth="218.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10000.0">
+                     <tooltip>
+                        <Tooltip text="Set the capacity of the lidar buffer. When the capacity is reached, the buffer is considered full." />
+                     </tooltip>
+                  </Slider>
+                  <ToggleButton fx:id="enableLidarBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Buffer" />
                   <ToggleButton fx:id="showLidarBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show buffer" />
                   <ToggleButton fx:id="showInputLidarScanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show input scan" />
                </children>
             </VBox>
-            <VBox prefHeight="160.0" prefWidth="300.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="160.0" prefWidth="374.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
-                  <GridPane>
+                  <GridPane hgap="5.0" vgap="5.0">
                     <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" />
+                      <ColumnConstraints hgrow="SOMETIMES" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Stereo vision Buffer" textAlignment="CENTER">
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Stereo Vision Buffer" textAlignment="CENTER" GridPane.columnSpan="2">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Surface Normal Filter" textAlignment="CENTER" GridPane.columnIndex="1">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                        <Slider fx:id="stereoBufferMessageSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" GridPane.rowIndex="1" />
-                        <Slider fx:id="stereoBufferSizeSlider" blockIncrement="1000.0" majorTickUnit="5000.0" max="200000.0" min="50000.0" minorTickCount="1000" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0" GridPane.rowIndex="2">
+                        <Slider fx:id="stereoBufferMessageSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Slider fx:id="stereoBufferSizeSlider" blockIncrement="1000.0" majorTickUnit="5000.0" max="200000.0" min="50000.0" minorTickCount="1000" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <tooltip>
                               <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
                            </tooltip>
                         </Slider>
-                        <Slider fx:id="surfaceNormalLowerBoundSlider" blockIncrement="0.01" majorTickUnit="0.1" max="0.0" min="-1.5707963" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="-0.7854" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <ToggleButton fx:id="preserveStereoOcTreeHistoryButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="Preserve History" GridPane.rowIndex="4" />
+                        <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Buffer" GridPane.rowIndex="1" />
+                        <ToggleButton fx:id="showStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Buffer" GridPane.rowIndex="2" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Buffer Capacity" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Buffer Size" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <ToggleButton fx:id="showInputStereoFrameButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Input" GridPane.rowIndex="3" />
+                     </children>
+                  </GridPane>
+               </children>
+            </VBox>
+            <VBox prefHeight="160.0" prefWidth="374.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+               <children>
+                  <GridPane>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Depth Cloud Buffer" textAlignment="CENTER" GridPane.columnSpan="2">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Slider fx:id="depthBufferMessageSizeSlider" blockIncrement="1.0" majorTickUnit="5.0" max="20.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Slider fx:id="depthBufferSizeSlider" blockIncrement="1000.0" majorTickUnit="5000.0" max="200000.0" min="50000.0" minorTickCount="1000" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <tooltip>
-                              <Tooltip text="Set the surface normal lower bound." />
+                              <Tooltip text="Set the capacity of the stereo vision buffer. When the capacity is reached, the buffer is considered full." />
                            </tooltip>
                         </Slider>
-                        <Slider fx:id="surfaceNormalUpperBoundSlider" blockIncrement="0.01" majorTickUnit="0.1" max="1.5707963" min="0.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.7854" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <tooltip>
-                              <Tooltip text="Set the surface normal upper bound" />
-                           </tooltip>
-                        </Slider>
-                        <ToggleButton fx:id="preserveOcTreeHistoryButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="Preserve Buffer History" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <ToggleButton fx:id="enableSurfaceNormalButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable Filter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                        <ToggleButton fx:id="enableStereoBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Stereo Buffer" GridPane.rowIndex="3" />
-                        <ToggleButton fx:id="enableDepthCloudBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Depth Buffer" GridPane.rowIndex="4" />
+                        <ToggleButton fx:id="preserveDepthOcTreeHistoryButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="Preserve History" GridPane.rowIndex="4" />
+                        <ToggleButton fx:id="enableDepthBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable Buffer" GridPane.rowIndex="1" />
+                        <ToggleButton fx:id="showDepthBufferButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Buffer" GridPane.rowIndex="2" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Buffer Capacity" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Buffer Size" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <ToggleButton fx:id="showInputDepthCloudButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Input" GridPane.rowIndex="3" />
                      </children>
                   </GridPane>
                </children>

@@ -44,7 +44,6 @@ public class SLAMBasics implements SLAMInterface
 
       octree.insertScanCollection(scanCollection, true);
       octree.enableParallelComputationForNormals(true);
-
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);
       octree.setNormalEstimationParameters(normalEstimationParameters);
