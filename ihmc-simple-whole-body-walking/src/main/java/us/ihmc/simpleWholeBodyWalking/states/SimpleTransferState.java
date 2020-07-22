@@ -23,7 +23,6 @@ public abstract class SimpleTransferState extends SimpleWalkingState
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   protected final SimpleCenterOfMassHeightManager comHeightManager;
    protected final SimpleBalanceManager balanceManager;
    protected final SimplePelvisOrientationManager pelvisOrientationManager;
    protected final SimpleFeetManager feetManager;
@@ -48,7 +47,6 @@ public abstract class SimpleTransferState extends SimpleWalkingState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
@@ -110,8 +108,6 @@ public abstract class SimpleTransferState extends SimpleWalkingState
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
             transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
-      comHeightManager.setSupportLeg(transferToSide);
-      comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
    protected void updateICPPlan()

@@ -73,7 +73,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
    private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
    private final SimpleBalanceManager balanceManager;
-   private final SimpleCenterOfMassHeightManager comHeightManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
@@ -187,7 +186,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       this.walkingControllerParameters = walkingControllerParameters;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -429,7 +427,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       pelvisOrientationManager.initialize();
       //      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
       feetManager.initialize();
-      comHeightManager.initialize();
    }
 
    private void initializeContacts()
@@ -576,17 +573,10 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
       pelvisOrientationManager.compute();
 
-      comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector,
-                                                                                               desiredCoMVelocityAsFrameVector,
-                                                                                               isInDoubleSupport,
-                                                                                               omega0,
-                                                                                               false));
-
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       RobotSide side = currentState.isDoubleSupportState() ? currentState.getTransferToSide() : currentState.getSupportSide();
-      balanceManager.compute(side, controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, true);
+      balanceManager.compute(side, keepCMPInsideSupportPolygon, true);
    }
 
    private void reportStatusMessages()
@@ -612,7 +602,9 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       }
 
       TaskspaceTrajectoryStatusMessage pelvisXYStatus = balanceManager.pollPelvisXYTranslationStatusToReport();
-      TaskspaceTrajectoryStatusMessage pelvisHeightStatus = comHeightManager.pollStatusToReport();
+      
+      // TODO: Get Pelvis height tracking status from SimpleBalanceManager rather than comHeightManager
+      TaskspaceTrajectoryStatusMessage pelvisHeightStatus = null;
 
       TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisXYStatus, pelvisHeightStatus);
 
@@ -704,7 +696,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
-      controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
    }

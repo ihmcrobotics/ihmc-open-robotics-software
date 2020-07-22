@@ -24,7 +24,6 @@ public class SimpleStandingState extends SimpleWalkingState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final SimpleCenterOfMassHeightManager comHeightManager;
    private final SimpleBalanceManager balanceManager;
    private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
@@ -58,7 +57,6 @@ public class SimpleStandingState extends SimpleWalkingState
          }
       }
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
    }
@@ -66,7 +64,6 @@ public class SimpleStandingState extends SimpleWalkingState
    @Override
    public void doAction(double timeInState)
    {
-      comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
    @Override

@@ -20,7 +20,6 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final SimpleCenterOfMassHeightManager comHeightManager;
    private final SimpleBalanceManager balanceManager;
    private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
@@ -38,7 +37,6 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
@@ -48,7 +46,6 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
    public void doAction(double timeInState)
    {
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
-      comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
    @Override
@@ -87,8 +84,6 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
 
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
             RobotSide.LEFT);
-      double extraToeOffHeight = 0.0;
-      comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();

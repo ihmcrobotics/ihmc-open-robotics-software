@@ -43,7 +43,6 @@ public class SimpleCommandConsumer
 
    private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleBalanceManager balanceManager;
-   private final SimpleCenterOfMassHeightManager comHeightManager;
 
    private final RigidBodyControlManager chestManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
@@ -90,7 +89,6 @@ public class SimpleCommandConsumer
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
       icpErrorThresholdToAbortManipulation.set(walkingControllerParameters.getICPErrorThresholdForManipulationAbort());
@@ -151,7 +149,6 @@ public class SimpleCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
       {
          PelvisHeightTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class);
-         comHeightManager.handlePelvisHeightTrajectoryCommand(command);
       }
    }
 
@@ -181,7 +178,6 @@ public class SimpleCommandConsumer
          {
             pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
             balanceManager.goHome();
-            comHeightManager.goHome(command.getTrajectoryTime());
          }
 
          if (command.getRequest(HumanoidBodyPart.CHEST))
@@ -208,7 +204,6 @@ public class SimpleCommandConsumer
             if (!pelvisOrientationManager.handlePelvisTrajectoryCommand(command))
                return;
             balanceManager.handlePelvisTrajectoryCommand(command);
-            comHeightManager.handlePelvisTrajectoryCommand(command);
          }
       }
    }
@@ -361,7 +356,6 @@ public class SimpleCommandConsumer
          chestManager.handleStopAllTrajectoryCommand(command);
       }
 
-      comHeightManager.handleStopAllTrajectoryCommand(command);
       balanceManager.handleStopAllTrajectoryCommand(command);
    }
 

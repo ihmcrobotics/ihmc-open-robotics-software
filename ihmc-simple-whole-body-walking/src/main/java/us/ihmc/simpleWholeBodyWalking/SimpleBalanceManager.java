@@ -171,7 +171,7 @@ public class SimpleBalanceManager
          ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
          ankleToGround = Math.max(ankleToGround, Math.abs(ankleToSole.getTranslationZ()));
       }
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround + 0.2;
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround + 0.23;
       
       comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
                                                        nominalHeightAboveGround, 
@@ -268,7 +268,7 @@ public class SimpleBalanceManager
    }
 
    private final FramePoint3D copEstimate = new FramePoint3D();
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCoP(copEstimate);
 
@@ -304,7 +304,6 @@ public class SimpleBalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-      linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
