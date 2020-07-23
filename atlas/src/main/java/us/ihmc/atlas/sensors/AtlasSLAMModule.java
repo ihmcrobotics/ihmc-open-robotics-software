@@ -165,9 +165,10 @@ public class AtlasSLAMModule extends SLAMModule
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
 
-         LogTools.info("" + latestFrame.getConfidenceFactor() + " " + posePacket.getConfidenceFactor());
+         LogTools.info("latestFrame.getConfidenceFactor: " + latestFrame.getConfidenceFactor() +
+                       " posePacket.getConfidenceFactor: " + posePacket.getConfidenceFactor());
+         LogTools.info("publishing pose to state estimator: " + posePacket.getPose());
          estimatedPelvisPublisher.publish(posePacket);
-         LogTools.info("publishing " + posePacket.getPose().getPosition());
       }
    }
 

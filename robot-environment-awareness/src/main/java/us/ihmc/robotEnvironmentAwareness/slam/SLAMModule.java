@@ -245,14 +245,21 @@ public class SLAMModule implements PerceptionModule
       boolean success;
       if (slam.isEmpty())
       {
-         LogTools.info("addKeyFrame " + pointCloudQueue.size());
+         LogTools.info("addKeyFrame queueSize: {} pointCloudSize: {} timestamp: {}",
+                       pointCloudQueue.size(),
+                       pointCloudToCompute.getNumberOfPoints(),
+                       pointCloudToCompute.getTimestamp());
          slam.addKeyFrame(pointCloudToCompute);
          success = true;
       }
       else
       {
          success = addFrame(pointCloudToCompute);
-         LogTools.info("addFrame " + pointCloudQueue.size() + " " + success +" " + slam.getComputationTimeForLatestFrame());
+         LogTools.info("addFrame queueSize: {} pointCloudSize: {}, timestamp: {}",
+                       pointCloudQueue.size(),
+                       pointCloudToCompute.getNumberOfPoints(),
+                       pointCloudToCompute.getTimestamp());
+         LogTools.info("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
@@ -404,6 +411,7 @@ public class SLAMModule implements PerceptionModule
    private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
+      LogTools.info("Received point cloud. numberOfPoints: {} timestamp: {}", message.getNumberOfPoints(), message.getTimestamp());
       newPointCloud.set(message);
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
