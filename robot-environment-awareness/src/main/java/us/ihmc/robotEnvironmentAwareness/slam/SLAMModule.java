@@ -254,11 +254,11 @@ public class SLAMModule implements PerceptionModule
       }
       else
       {
-         success = addFrame(pointCloudToCompute);
          LogTools.info("addFrame queueSize: {} pointCloudSize: {}, timestamp: {}",
                        pointCloudQueue.size(),
                        pointCloudToCompute.getNumberOfPoints(),
                        pointCloudToCompute.getTimestamp());
+         success = addFrame(pointCloudToCompute);
          LogTools.info("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
