@@ -193,6 +193,4 @@ public class BipedContactSequenceTools
       for (int sequence = 0; sequence < contactSequenceToPack.size(); sequence++)
          contactSequenceToPack.get(sequence).getTimeInterval().shiftInterval(shiftTime);
    }
-
-
 }

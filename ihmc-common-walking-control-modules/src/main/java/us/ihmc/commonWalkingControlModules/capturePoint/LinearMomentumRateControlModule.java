@@ -220,6 +220,7 @@ public class LinearMomentumRateControlModule
                                                                      maxMomentumRateWeightChangeRate,
                                                                      controlDT,
                                                                      worldFrame);
+      
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
