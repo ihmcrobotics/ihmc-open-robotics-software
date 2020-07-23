@@ -131,7 +131,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
             double swingStartTime = footstepTimingList.get(i).getExecutionStartTime() + footstepTimingList.get(i).getSwingStartTime();
             double swingEndTime = swingStartTime + footstepTimingList.get(i).getSwingTime();
             //Note: if current time = a transition time then it should be in the next state, as that is what the CSPUpdater does
-            if (MathTools.intervalContains(currentTime, swingStartTime, swingEndTime, 0.00001, true, false))
+            if (currentTime >= swingStartTime && currentTime < swingEndTime)
             {
                //Robot is in swing
                currentFeetInContact.add(footstepList.get(i).getRobotSide().getOppositeSide());

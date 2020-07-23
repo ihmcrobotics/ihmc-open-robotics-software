@@ -32,6 +32,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class SimpleBipedContactSequenceUpdater implements ContactSequenceProvider
 {
+   private static final double SUFFICIENTLY_LARGE = 100;
    private static final boolean debug = true;
    private static final int maxCapacity = 7;
    private static final int stepsToConsider = 3;
@@ -99,8 +100,6 @@ public class SimpleBipedContactSequenceUpdater implements ContactSequenceProvide
 
    public void update(List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, List<RobotSide> currentFeetInContact, double currentTime)
    {
-      currentTime+=0.0000001; //TODO: temporary fix for when planning during the timestep that a transition is happening
-
       // initialize contact state and sole positions
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -341,8 +340,7 @@ public class SimpleBipedContactSequenceUpdater implements ContactSequenceProvide
       }
 
       SimpleBipedContactPhase contactPhase = contactSequenceInAbsoluteTime.getLast();
-      //contactPhase.getTimeInterval().setEndTime(Double.POSITIVE_INFINITY);
-      contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime()+1);//temporary
+      contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime() + SUFFICIENTLY_LARGE);
       for (int i = 0; i < feetInContact.size(); i++)
          contactPhase.addEndFoot(feetInContact.get(i), solePoses.get(feetInContact.get(i)));
       contactPhase.update();

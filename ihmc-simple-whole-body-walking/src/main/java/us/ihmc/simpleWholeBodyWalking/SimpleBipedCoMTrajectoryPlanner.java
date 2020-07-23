@@ -333,6 +333,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       
       for (int i = 0; i < upcomingFootstepTimings.size(); i++)
       {
+         //Add .01 as a buffer of one extra tick for isDone() to catch transition to next state
          upcomingFootstepTimings.get(i).setAbsoluteTime(0.01, trackingTime);
          trackingTime += upcomingFootstepTimings.get(i).getStepTime();
       }

@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
 import us.ihmc.simpleWholeBodyWalking.SimpleWalkingControllerStateFactory;
@@ -52,6 +53,9 @@ public class SimpleAtlasFlatGroundWalkingTrack
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
+      HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
+      walkingScriptParameters.setMaxVelocity(0.5);
+      walkingScriptParameters.setCruiseVelocity(0.4);
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup,
                                     guiInitialSetup,
@@ -59,6 +63,7 @@ public class SimpleAtlasFlatGroundWalkingTrack
                                     useVelocityAndHeadingScript,
                                     cheatWithGroundHeightAtForFootstep,
                                     model,
+                                    walkingScriptParameters,
                                     new SimpleWalkingControllerStateFactory(model.getCapturePointPlannerParameters()));
    }
 
