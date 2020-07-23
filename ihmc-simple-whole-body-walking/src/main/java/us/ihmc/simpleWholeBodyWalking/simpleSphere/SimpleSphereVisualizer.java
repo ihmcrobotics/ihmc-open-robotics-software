@@ -1,4 +1,4 @@
-package us.ihmc.simpleWholeBodyWalking.SimpleSphere;
+package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
 import java.awt.Color;
 import java.util.ArrayList;

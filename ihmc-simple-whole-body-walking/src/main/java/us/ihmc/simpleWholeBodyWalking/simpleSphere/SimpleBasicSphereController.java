@@ -1,4 +1,4 @@
-package us.ihmc.simpleWholeBodyWalking.SimpleSphere;
+package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;

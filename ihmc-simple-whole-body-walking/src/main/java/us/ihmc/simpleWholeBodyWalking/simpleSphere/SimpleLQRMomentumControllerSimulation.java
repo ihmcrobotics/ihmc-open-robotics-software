@@ -1,45 +1,25 @@
-package us.ihmc.simpleWholeBodyWalking.SimpleSphere;
+package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.BasicSphereController;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRSphereController;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.PusherController;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.SphereControllerInterface;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.SphereRobot;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
-import us.ihmc.commons.InterpolationTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 
-import javax.swing.*;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /*
@@ -59,7 +39,6 @@ public class SimpleLQRMomentumControllerSimulation
    // from previous simulation footstep planning
    private static final double initialTransferDuration = 1.0;
    private static final double finalTransferDuration = 1.0;
-   private static final double stepDuration = 0.7;
    private static final double swingDuration = 0.5;
    private static final double stanceDuration = 0.2;
    private static final double stepLength = 0.75;
@@ -84,7 +63,7 @@ public class SimpleLQRMomentumControllerSimulation
       {
          Vector3D initialPosition1 = new Vector3D(0.0, 0.0, desiredHeight);
          yoGraphicsListRegistry1 = new YoGraphicsListRegistry();
-         SimpleSphereRobot sphereRobot1 = new SimpleSphereRobot(0,"SphereRobot1", gravity, controlDT, desiredHeight, yoGraphicsListRegistry1);
+         SimpleSphereRobot sphereRobot1 = new SimpleSphereRobot("SphereRobot1", gravity, controlDT, desiredHeight, yoGraphicsListRegistry1, YoAppearance.Red());
          sphereRobot1.initRobot(initialPosition1, stepWidth, new Vector3D());
 
          robots.add(sphereRobot1.getScsRobot());
@@ -110,7 +89,7 @@ public class SimpleLQRMomentumControllerSimulation
       {
          Vector3D initialPosition2 = new Vector3D(0.0, NextRobotOffset, desiredHeight);
          yoGraphicsListRegistry2 = new YoGraphicsListRegistry();
-         SimpleSphereRobot sphereRobot2 = new SimpleSphereRobot(1, "SphereRobot2", gravity, controlDT, desiredHeight, yoGraphicsListRegistry2);
+         SimpleSphereRobot sphereRobot2 = new SimpleSphereRobot("SphereRobot2", gravity, controlDT, desiredHeight, yoGraphicsListRegistry2, YoAppearance.White());
          sphereRobot2.initRobot(initialPosition2, stepWidth, new Vector3D());
 
          robots.add(sphereRobot2.getScsRobot());
