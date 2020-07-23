@@ -306,11 +306,6 @@ public class SLAMModule implements PerceptionModule
       {
          ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
       }
-
-      for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
-      {
-         ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
-      }
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
       Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
