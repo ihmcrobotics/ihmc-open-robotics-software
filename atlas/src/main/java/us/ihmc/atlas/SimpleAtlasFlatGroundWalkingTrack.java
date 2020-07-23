@@ -25,11 +25,11 @@ public class SimpleAtlasFlatGroundWalkingTrack
                                                 false)
       {
          private static final String parameterFile = "/us/ihmc/atlas/parameters/experimental_controller_parameters.xml";
-
+         
          @Override
-         public String getParameterFileName()
+         public InputStream getWholeBodyControllerParametersFile()
          {
-            return parameterFile;
+            return getClass().getResourceAsStream(parameterFile);
          }
 
          @Override

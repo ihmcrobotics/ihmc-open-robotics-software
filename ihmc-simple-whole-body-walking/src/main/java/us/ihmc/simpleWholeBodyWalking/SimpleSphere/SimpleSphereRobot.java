@@ -1,4 +1,4 @@
-package us.ihmc.simpleWholeBodyWalking.SimpleSphere;
+package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -86,14 +86,8 @@ public class SimpleSphereRobot
    private final double controlDT;
    private final double desiredHeight;
    private final double gravityZ;
-
-   private final HashMap<Integer, AppearanceDefinition> hmap = new HashMap<Integer, AppearanceDefinition>();
-   {
-      hmap.put(0, YoAppearance.Red());
-      hmap.put(1, YoAppearance.White());
-   }
    
-   public SimpleSphereRobot(int ColorID, String name, double gravity, double controlDt, double desiredHeight, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimpleSphereRobot(String name, double gravity, double controlDt, double desiredHeight, YoGraphicsListRegistry yoGraphicsListRegistry, AppearanceDefinition sphereColor)
    {
       this.controlDT = controlDt;
       this.desiredHeight = desiredHeight;
@@ -123,7 +117,7 @@ public class SimpleSphereRobot
       Joint floatingJoint = scsRobot.getRootJoints().get(0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addSphere(radius/2.0, hmap.get(ColorID));
+      linkGraphics.addSphere(radius/2.0, sphereColor);
       floatingJoint.getLink().setLinkGraphics(linkGraphics);
 
       String gcName = name + "_GC";
