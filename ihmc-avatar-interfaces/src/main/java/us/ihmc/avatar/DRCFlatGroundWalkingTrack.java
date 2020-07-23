@@ -61,10 +61,10 @@ public class DRCFlatGroundWalkingTrack
    // SimpleAtlas Simulation calls this helper constructor
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model,
-                                    HighLevelControllerStateFactory customControllerState)
+                                    HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters, HighLevelControllerStateFactory customControllerState)
    {
       this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model,
-           WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters(), null, customControllerState); // should always be committed as VELOCITY_HEADING_COMPONENT
+           WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters, null, customControllerState); // should always be committed as VELOCITY_HEADING_COMPONENT
    }
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
