@@ -107,7 +107,7 @@ public class SimpleBipedCoMTrajectoryPlanner
    private final YoDouble defaultTransferWeightDistribution = new YoDouble("DefaultWeightDistribution", registry);
    private final YoDouble finalTransferWeightDistribution = new YoDouble("FinalTransferWeightDistribution", registry);
    protected final YoDouble defaultFinalTransferDuration = new YoDouble("DefaultFinalTransferDuration", registry);
-   protected final YoDouble FinalTransferDuration = new YoDouble("FinalTransferDuration", registry);
+   protected final YoDouble finalTransferDuration = new YoDouble("FinalTransferDuration", registry);
    
    private static final boolean VISUALIZE = true;
    
@@ -282,7 +282,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       isStanding.set(true);
       isDoubleSupport.set(true);
       isHoldingPosition.set(false);
-      FinalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
+      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
 
       updateAbsoluteTimings(currentTime);
    }
@@ -296,7 +296,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       isDoubleSupport.set(false);
       isHoldingPosition.set(false);
       
-      FinalTransferDuration.set(upcomingFootstepTimings.get(0).getTransferTime());
+      finalTransferDuration.set(upcomingFootstepTimings.get(0).getTransferTime());
 
       updateAbsoluteTimings(currentTime);
    }
@@ -329,7 +329,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       if (isInitialTransfer.getBooleanValue())
          trackingTime += defaultFinalTransferDuration.getDoubleValue();
       else if (isDoubleSupport.getBooleanValue())
-         trackingTime += FinalTransferDuration.getDoubleValue();
+         trackingTime += finalTransferDuration.getDoubleValue();
       
       for (int i = 0; i < upcomingFootstepTimings.size(); i++)
       {
