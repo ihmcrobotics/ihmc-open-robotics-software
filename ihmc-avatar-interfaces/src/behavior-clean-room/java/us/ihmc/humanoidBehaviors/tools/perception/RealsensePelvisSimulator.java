@@ -1,7 +1,11 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.SimulatedDepthCamera;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -9,6 +13,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.ros2.Ros2NodeInterface;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
@@ -39,6 +45,8 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       // algorithm operates if X forward frame (same as robot)
    }
 
+   private final FramePose3D tempSensorFramePose = new FramePose3D();
+
    public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, Ros2NodeInterface ros2Node)
    {
       this.map = map;
@@ -52,6 +60,28 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       double horizontalFOV = 87.0;
       double range = 1.5;
       simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, realsenseSensorFrame);
+   }
+
+   public List<Point3DReadOnly> getPointCloud()
+   {
+      syncedRobot.update();
+
+      if (syncedRobot.hasReceivedFirstMessage())
+      {
+         return simulatedDepthCamera.computePointCloudFrame(map);
+      }
+      else
+      {
+         // blank result
+         return new ArrayList<>();
+      }
+   }
+
+   public Pose3DReadOnly getSensorPose()
+   {
+      tempSensorFramePose.setToZero(realsenseSensorFrame);
+      tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      return tempSensorFramePose;
    }
 
    @Override
