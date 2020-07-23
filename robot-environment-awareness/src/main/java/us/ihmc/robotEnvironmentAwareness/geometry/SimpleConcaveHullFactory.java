@@ -87,9 +87,9 @@ public abstract class SimpleConcaveHullFactory
       catch (LocateFailureException locateFailureException)
       {
          // TODO: Save pointCloud2d, lineConstraints, parameters for unit test
-         System.out.println(pointCloud2d);
-         System.out.println(lineConstraints);
-         System.out.println(parameters);
+//         System.out.println(pointCloud2d);
+//         System.out.println(lineConstraints);
+//         System.out.println(parameters);
          throw locateFailureException;
       }
 
