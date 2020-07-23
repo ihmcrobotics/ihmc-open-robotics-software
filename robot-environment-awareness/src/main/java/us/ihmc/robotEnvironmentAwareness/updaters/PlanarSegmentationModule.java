@@ -11,11 +11,14 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
+import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -58,7 +61,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final AtomicReference<Boolean> clearOcTree;
-   private final AtomicReference<NormalOcTree> ocTree = new AtomicReference<>(null);
+   private final AtomicReference<Pair<NormalOcTree, Long>> ocTree = new AtomicReference<>(null);
    private final AtomicReference<Tuple3DReadOnly> sensorPosition;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -166,8 +169,18 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
-      LogTools.info("Received ocTree. size: {} hash: {} sensorPosition: {}", ocTree.size(), ocTree.hashCode(), sensorPosition);
-      this.ocTree.set(ocTree);
+      long latestTimestamp = -2L;
+      for (NormalOcTreeNode node : ocTree)
+      {
+         if (node.getLastHitTimestamp() > latestTimestamp)
+            latestTimestamp = node.getLastHitTimestamp();
+      }
+      LogTools.info("Received ocTree. size: " + ocTree.size()
+                    + " hash: " + ocTree.hashCode()
+                    + " timestamp: " + latestTimestamp
+                    + " sensorPosition: " + sensorPosition
+      );
+      this.ocTree.set(Pair.of(ocTree, latestTimestamp));
 
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
       reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
@@ -206,9 +219,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       try
       {
-         NormalOcTree latestOcTree = ocTree.getAndSet(null);
+         Pair<NormalOcTree, Long> ocTreeTimestamp = ocTree.getAndSet(null);
          Tuple3DReadOnly latestSensorPose = this.sensorPosition.get();
-         if (latestOcTree != null)
+         if (ocTreeTimestamp != null)
          {
             this.sensorPosition.set(null); // only set it to null when the other is not and it's been "read"
          }
@@ -216,8 +229,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          {
             planarRegionFeatureUpdater.clearOcTree();
          }
-         else if (latestOcTree != null && latestSensorPose != null)
+         else if (ocTreeTimestamp != null && latestSensorPose != null)
          {
+            NormalOcTree latestOcTree = ocTreeTimestamp.getLeft();
+            long timestamp = ocTreeTimestamp.getRight();
+
             if (isThreadInterrupted())
                return;
 
@@ -230,8 +246,13 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
             PlanarRegionsList planarRegionsList = planarRegionFeatureUpdater.getPlanarRegionsList();
-            LogTools.info("Publishing {} planar regions on {}", planarRegionsList.getNumberOfPlanarRegions(), outputTopic);
-            planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+            PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+            double lateness = Conversions.nanosecondsToSeconds(System.nanoTime() - timestamp);
+            LogTools.info("Publishing " + planarRegionsList.getNumberOfPlanarRegions()
+                          + " planar regions. timestamp: " + timestamp
+                          + " lateness: " + lateness
+                          + " s (" + outputTopic + ")");
+            planarRegionPublisher.publish(message);
          }
 
          if (isThreadInterrupted())

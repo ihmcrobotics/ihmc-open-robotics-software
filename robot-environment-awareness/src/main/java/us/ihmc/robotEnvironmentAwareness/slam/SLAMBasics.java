@@ -12,7 +12,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMBasics implements SLAMInterface
@@ -40,7 +42,9 @@ public class SLAMBasics implements SLAMInterface
       int numberOfPoints = frame.getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
+      Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
+      scan.getPointCloud().setTimestamp(frame.getTimeStamp());
+      scanCollection.addScan(scan);
 
       octree.insertScanCollection(scanCollection, true);
       octree.enableParallelComputationForNormals(true);
