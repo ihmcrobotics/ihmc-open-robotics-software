@@ -107,7 +107,7 @@ public class AtlasLookAndStepBehaviorDemo
       if (RUN_REALSENSE_SLAM)
       {
          new PeriodicPointCloudPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD, period, realsense::getPointCloud, realsense::getSensorPose).start();
-         new AtlasSLAMBasedREAStandaloneLauncher(false);
+         new AtlasSLAMBasedREAStandaloneLauncher(false, communicationMode.getPubSubImplementation());
       }
       else
       {

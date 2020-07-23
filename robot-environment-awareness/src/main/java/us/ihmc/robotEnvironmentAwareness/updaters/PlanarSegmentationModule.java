@@ -14,7 +14,6 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -49,6 +48,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    protected static final boolean DEBUG = true;
 
+   private final ROS2Topic<?> outputTopic;
    private boolean manageRosNode;
    private final Ros2Node ros2Node;
 
@@ -65,40 +65,25 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws Exception
+   private PlanarSegmentationModule(Messager reaMessager, String configurationFilePath) throws Exception
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
-           REACommunicationProperties.inputTopic,
-           REACommunicationProperties.subscriberCustomRegionsTopicName,
-           ROS2Tools.REALSENSE_SLAM_MAP,
-           reaMessager,
-           configurationFile,
-           true);
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), reaMessager, configurationFilePath, true);
    }
 
-   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, File configurationFile) throws Exception
+   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, String configurationFilePath) throws Exception
+   {
+      this(ros2Node, reaMessager, configurationFilePath, false);
+   }
+
+   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, String configurationFilePath, boolean manageRosNode) throws Exception
    {
       this(ros2Node,
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
-           ROS2Tools.REALSENSE_SLAM_MAP,
+           ROS2Tools.REALSENSE_SLAM_REGIONS,
            reaMessager,
-           configurationFile, false);
-   }
-
-   private PlanarSegmentationModule(ROS2Topic<?> inputTopic,
-                                    ROS2Topic<?> customRegionTopic,
-                                    ROS2Topic<?> outputTopic,
-                                    Messager reaMessager,
-                                    File configurationFile) throws Exception
-   {
-     this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
-          inputTopic,
-          customRegionTopic,
-          outputTopic,
-          reaMessager,
-          configurationFile,
-          true);
+           configurationFilePath,
+           manageRosNode);
    }
 
    private PlanarSegmentationModule(Ros2Node ros2Node,
@@ -106,22 +91,15 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                     ROS2Topic<?> customRegionTopic,
                                     ROS2Topic<?> outputTopic,
                                     Messager reaMessager,
-                                    File configurationFile) throws Exception
-   {
-      this(ros2Node, inputTopic, customRegionTopic, outputTopic, reaMessager, configurationFile, false);
-   }
-
-   private PlanarSegmentationModule(Ros2Node ros2Node,
-                                    ROS2Topic<?> inputTopic,
-                                    ROS2Topic<?> customRegionTopic,
-                                    ROS2Topic<?> outputTopic,
-                                    Messager reaMessager,
-                                    File configurationFile,
+                                    String configurationFilePath,
                                     boolean manageRosNode) throws Exception
    {
+      this.outputTopic = outputTopic;
       this.manageRosNode = manageRosNode;
       this.reaMessager = reaMessager;
       this.ros2Node = ros2Node;
+
+      File configurationFile = setupConfigurationFile(configurationFilePath);
 
       if (!reaMessager.isMessagerOpen())
          reaMessager.startMessager();
@@ -188,6 +166,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
+      LogTools.info("Received ocTree. size: {} hash: {} sensorPosition: {}", ocTree.size(), ocTree.hashCode(), sensorPosition);
       this.ocTree.set(ocTree);
 
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
@@ -250,7 +229,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
-            planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList()));
+            PlanarRegionsList planarRegionsList = planarRegionFeatureUpdater.getPlanarRegionsList();
+            LogTools.info("Publishing {} planar regions on {}", planarRegionsList.getNumberOfPlanarRegions(), outputTopic);
+            planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
          }
 
          if (isThreadInterrupted())
@@ -316,45 +297,18 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       }
    }
 
-   public static PlanarSegmentationModule createIntraprocessModule(ROS2Topic<?> inputTopic,
-                                                                   ROS2Topic<?> customRegionTopic,
-                                                                   ROS2Topic<?> outputTopic,
-                                                                   String configurationFilePath,
-                                                                   Messager messager) throws Exception
-   {
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-      return new PlanarSegmentationModule(inputTopic, customRegionTopic, outputTopic, messager, configurationFile);
-   }
-
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Messager messager) throws Exception
    {
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      return new PlanarSegmentationModule(messager, configurationFile);
+      return new PlanarSegmentationModule(messager, configurationFilePath);
    }
 
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node, Messager messager) throws Exception
    {
+      return new PlanarSegmentationModule(ros2Node, messager, configurationFilePath);
+   }
+
+   private static File setupConfigurationFile(String configurationFilePath)
+   {
       File configurationFile = new File(configurationFilePath);
       try
       {
@@ -366,7 +320,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          System.out.println(configurationFile.getAbsolutePath());
          e.printStackTrace();
       }
-
-      return new PlanarSegmentationModule(ros2Node, messager, configurationFile);
+      return configurationFile;
    }
 }
