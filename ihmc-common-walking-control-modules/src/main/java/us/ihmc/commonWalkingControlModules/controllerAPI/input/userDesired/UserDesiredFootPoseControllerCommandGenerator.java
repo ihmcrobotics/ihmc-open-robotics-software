@@ -50,7 +50,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
          {
             if (userDoFootPose.getBooleanValue())
             {
-               userDesiredFootPose.getFramePose(framePose);
+               framePose.setIncludingFrame(userDesiredFootPose);
                ReferenceFrame soleZUpFrame = ankleZUpFrames.get(userFootPoseSide.getEnumValue());
                soleZUpFrame.update();
                framePose.setIncludingFrame(soleZUpFrame, framePose);

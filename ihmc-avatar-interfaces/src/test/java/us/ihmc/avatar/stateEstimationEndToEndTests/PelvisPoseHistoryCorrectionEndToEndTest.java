@@ -621,7 +621,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
          target.getYawPitchRoll().set(yawPitchRoll);
-         target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
+         target.setPosition(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
@@ -693,7 +693,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
          target.getYawPitchRoll().set(yawPitchRoll);
-         target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
+         target.setPosition(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);

@@ -73,7 +73,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          @Override
          public void changed(YoVariable v)
          {
-            yoPlanePose.getFramePose(planePose);
+            planePose.set(yoPlanePose);
             planeFrame.setPoseAndUpdate(planePose);
          }
       });

@@ -108,9 +108,9 @@ public class ComCopResidual implements FunctionNtoM
          outCom.add(modelCoM);
 
          // sensedCoP
-         Point3D sensedCoP = new Point3D(dataBuffer.findVariableEntry("sensedCoPX").getBufferValueAt(selectedFrames[i]),
-                                         dataBuffer.findVariableEntry("sensedCoPY").getBufferValueAt(selectedFrames[i]),
-                                         dataBuffer.findVariableEntry("sensedCoPZ").getBufferValueAt(selectedFrames[i]));
+         Point3D sensedCoP = new Point3D(dataBuffer.findVariableEntry("sensedCoPX").readBufferAt(selectedFrames[i]),
+                                         dataBuffer.findVariableEntry("sensedCoPY").readBufferAt(selectedFrames[i]),
+                                         dataBuffer.findVariableEntry("sensedCoPZ").readBufferAt(selectedFrames[i]));
          outCop.add(sensedCoP);
       }
    }

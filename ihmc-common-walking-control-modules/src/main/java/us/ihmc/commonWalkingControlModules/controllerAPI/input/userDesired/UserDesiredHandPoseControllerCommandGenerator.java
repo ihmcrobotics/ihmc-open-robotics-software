@@ -77,7 +77,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
          {
             if (userDoHandPose.getBooleanValue())
             {
-               userDesiredHandPose.getFramePoseIncludingFrame(framePose);
+               framePose.setIncludingFrame(userDesiredHandPose);
 
                ReferenceFrame referenceFrameToUse = getReferenceFrameToUse();
                framePose.setIncludingFrame(referenceFrameToUse, framePose);

@@ -135,7 +135,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private void sendPelvisTrajectoryCommand()
    {
-      userDesiredPelvisPose.getFramePoseIncludingFrame(framePose);
+      framePose.setIncludingFrame(userDesiredPelvisPose);
       framePose.changeFrame(worldFrame);
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
@@ -152,7 +152,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private void sendPelvisOrientationTrajectoryCommand()
    {
-      userDesiredPelvisPose.getFramePoseIncludingFrame(framePose);
+      framePose.setIncludingFrame(userDesiredPelvisPose);
       framePose.changeFrame(worldFrame);
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
