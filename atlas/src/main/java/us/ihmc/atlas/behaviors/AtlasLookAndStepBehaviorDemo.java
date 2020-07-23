@@ -2,6 +2,7 @@ package us.ihmc.atlas.behaviors;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.sensors.AtlasSLAMModule;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
@@ -10,16 +11,19 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
-import us.ihmc.humanoidBehaviors.tools.perception.CompositePlanarRegionService;
-import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
-import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
+import us.ihmc.humanoidBehaviors.tools.perception.*;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -39,6 +43,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
    private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
+   private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam"));
 
    private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
    private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
@@ -82,28 +87,48 @@ public class AtlasLookAndStepBehaviorDemo
    private void reaModule()
    {
       LogTools.info("Creating simulated multisense stereo regions module");
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), ROS2Tools.REA_NODE_NAME);
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "look_and_step_perception");
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                                    createRobotModel(),
                                                                                    ros2Node);
-      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(),
-                                                                        createRobotModel(),
-                                                                        ros2Node);
-
-      PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
+      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(), createRobotModel(), ros2Node);
 
       // might be a weird delay with threads at 0.5 hz depending on each other
-
-      ArrayList<String> topicNames = new ArrayList<>();
-      topicNames.add(ROS2Tools.REALSENSE_SLAM_REGIONS.getName());
-      topicNames.add(ROS2Tools.LIDAR_REA_REGIONS.getName());
       double period = 1.0;
-      CompositePlanarRegionService allRegionsPublisher = new CompositePlanarRegionService(ros2Node,
-                                                                                          topicNames,
-                                                                                          period,
-                                                                                          () -> realsenseSLAM.update(realsense.get()),
-                                                                                          multisense);
-      allRegionsPublisher.start();
+      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, period, multisense).start();
+
+      if (RUN_REALSENSE_SLAM)
+      {
+         new PeriodicPointCloudPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD, period, realsense::getPointCloud, realsense::getSensorPose).start();
+
+         try
+         {
+            SharedMemoryJavaFXMessager slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
+            slamMessager.startMessager();
+
+            SharedMemoryJavaFXMessager segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
+            segmentationMessager.startMessager();
+
+            AtlasSLAMModule module = AtlasSLAMModule.createIntraprocessModule(createRobotModel(), slamMessager);
+            PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
+                                                                                                            REACommunicationProperties.subscriberCustomRegionsTopicName,
+                                                                                                            ROS2Tools.REALSENSE_SLAM_REGIONS,
+                                                                                                            "./Configurations/defaultSegmentationModuleConfiguration.txt",
+                                                                                                            segmentationMessager);
+            module.attachOcTreeConsumer(segmentationModule);
+            module.start();
+            segmentationModule.start();
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+      }
+      else
+      {
+         PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
+         new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, period, () -> realsenseSLAM.update(realsense.get())).start();
+      }
    }
 
    private void dynamicsSimulation()
