@@ -39,9 +39,9 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class DRCFlatGroundWalkingTrack
 {
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
-   
+
    private final AvatarSimulation avatarSimulation;
-   
+
    private final RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "flat_ground_walking_track_simulation");
 
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
@@ -106,7 +106,6 @@ public class DRCFlatGroundWalkingTrack
       ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
       ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
 
-      
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
       contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
