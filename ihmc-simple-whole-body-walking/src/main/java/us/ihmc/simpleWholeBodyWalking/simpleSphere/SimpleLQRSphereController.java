@@ -1,4 +1,4 @@
-package us.ihmc.simpleWholeBodyWalking.SimpleSphere;
+package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,8 +33,8 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
 
    private final SimpleBipedCoMTrajectoryPlanner dcmPlan;
    
-   private final YoBoolean LeftInContact = new YoBoolean("LeftInContact", registry);
-   private final YoBoolean RightInContact = new YoBoolean("RightInContact", registry);
+   private final YoBoolean leftInContact = new YoBoolean("LeftInContact", registry);
+   private final YoBoolean rightInContact = new YoBoolean("RightInContact", registry);
    
    private final List<RobotSide> currentFeetInContact = new ArrayList<>();
    
@@ -98,14 +98,14 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
 
   private void updateFeetYoVar()
    {
-     LeftInContact.set(false);
-     RightInContact.set(false);
+     leftInContact.set(false);
+     rightInContact.set(false);
       for(int i=0; i<currentFeetInContact.size(); i++)
       {
          if (currentFeetInContact.get(i) == RobotSide.LEFT)
-            LeftInContact.set(true);
+            leftInContact.set(true);
          if (currentFeetInContact.get(i) == RobotSide.RIGHT)
-            RightInContact.set(true);
+            rightInContact.set(true);
       }
       
    }
