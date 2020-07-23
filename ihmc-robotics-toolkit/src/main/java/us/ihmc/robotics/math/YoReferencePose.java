@@ -70,7 +70,7 @@ public class YoReferencePose extends ReferenceFrame
 
    private void set(Vector3D newTranslation)
    {
-      yoFramePose.setXYZ(newTranslation.getX(), newTranslation.getY(), newTranslation.getZ());
+      yoFramePose.setPosition(newTranslation.getX(), newTranslation.getY(), newTranslation.getZ());
    }
 
    public void interpolate(YoReferencePose start, YoReferencePose goal, double alpha)

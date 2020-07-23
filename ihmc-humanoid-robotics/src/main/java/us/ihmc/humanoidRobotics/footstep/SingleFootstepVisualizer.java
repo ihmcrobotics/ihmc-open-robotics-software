@@ -65,7 +65,7 @@ public class SingleFootstepVisualizer
       footPolygon.set(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(polyPoints)));
 
       soleFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "polygonPose", "", ReferenceFrame.getWorldFrame(), registry);
-      soleFramePose.setXYZ(0.0, 0.0, -1.0);
+      soleFramePose.setPosition(0.0, 0.0, -1.0);
 
       footPolygonViz = new YoGraphicPolygon(namePrefix + "graphicPolygon", footPolygon, soleFramePose, 1.0, footPolygonAppearances.get(robotSide));
 
