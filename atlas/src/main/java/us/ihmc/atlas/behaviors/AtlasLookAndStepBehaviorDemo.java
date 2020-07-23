@@ -1,13 +1,16 @@
 package us.ihmc.atlas.behaviors;
 
+import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.sensors.AtlasSLAMBasedREAStandaloneLauncher;
 import us.ihmc.atlas.sensors.AtlasSLAMModule;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
@@ -23,15 +26,19 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class AtlasLookAndStepBehaviorDemo
@@ -100,29 +107,7 @@ public class AtlasLookAndStepBehaviorDemo
       if (RUN_REALSENSE_SLAM)
       {
          new PeriodicPointCloudPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD, period, realsense::getPointCloud, realsense::getSensorPose).start();
-
-         try
-         {
-            SharedMemoryJavaFXMessager slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
-            slamMessager.startMessager();
-
-            SharedMemoryJavaFXMessager segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
-            segmentationMessager.startMessager();
-
-            AtlasSLAMModule module = AtlasSLAMModule.createIntraprocessModule(createRobotModel(), slamMessager);
-            PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
-                                                                                                            REACommunicationProperties.subscriberCustomRegionsTopicName,
-                                                                                                            ROS2Tools.REALSENSE_SLAM_REGIONS,
-                                                                                                            "./Configurations/defaultSegmentationModuleConfiguration.txt",
-                                                                                                            segmentationMessager);
-            module.attachOcTreeConsumer(segmentationModule);
-            module.start();
-            segmentationModule.start();
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
+         new AtlasSLAMBasedREAStandaloneLauncher(false);
       }
       else
       {
