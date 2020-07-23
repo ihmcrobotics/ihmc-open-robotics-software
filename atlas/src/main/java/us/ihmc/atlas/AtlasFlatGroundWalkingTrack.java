@@ -19,10 +19,10 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 public class AtlasFlatGroundWalkingTrack
 {
    private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-   
+
    private static final boolean USE_BUMPY_GROUND = false;
    private static final boolean USE_FEET_PERTURBER = false;
-   
+
    public static void main(String[] args) throws JSAPException
    {
 
@@ -34,9 +34,9 @@ public class AtlasFlatGroundWalkingTrack
 
       if (model == null)
          throw new RuntimeException("No robot model selected");
-      
+
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      
+
       final double groundHeight = 0.0;
       GroundProfile3D groundProfile;
       if (USE_BUMPY_GROUND)
@@ -47,17 +47,17 @@ public class AtlasFlatGroundWalkingTrack
       {
          groundProfile = new FlatGroundProfile(groundHeight);
       }
-      
+
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
-      
+
       double initialYaw = 0.3;
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
-      
+
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
 
