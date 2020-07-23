@@ -468,6 +468,9 @@ public class LinearMomentumRateControlModuleInput
       desiredICPAtEndOfState.setIncludingFrame(other.desiredICPAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
+      vrpTrajectories.clear();
+      vrpTrajectories.addAll(other.getVRPTrajectories());
+      timeInContactPhase = other.timeInContactPhase;
       controlHeightWithMomentum = other.controlHeightWithMomentum;
       desiredCoMHeightAcceleration = other.desiredCoMHeightAcceleration;
       supportSide = other.supportSide;
@@ -511,6 +514,10 @@ public class LinearMomentumRateControlModuleInput
          if (!perfectCMP.equals(other.perfectCMP))
             return false;
          if (!perfectCoP.equals(other.perfectCoP))
+            return false;
+         if (!vrpTrajectories.equals(other.getVRPTrajectories()))
+            return false;
+         if (timeInContactPhase != other.timeInContactPhase)
             return false;
          if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
             return false;
