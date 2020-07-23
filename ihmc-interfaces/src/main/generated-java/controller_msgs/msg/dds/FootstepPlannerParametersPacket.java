@@ -641,6 +641,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
 
+
    }
 
    public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket other)
