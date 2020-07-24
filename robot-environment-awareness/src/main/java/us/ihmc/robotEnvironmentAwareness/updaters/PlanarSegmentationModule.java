@@ -321,7 +321,16 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private void compute(NormalOcTree latestOcTree, Pose3DReadOnly latestSensorPose)
    {
       Pose3D sensorPose = new Pose3D(latestSensorPose);
-      NormalOcTree mainOcTree = new NormalOcTree(latestOcTree);
+      NormalOcTree mainOcTree;
+      if (currentOcTree.get() == null)
+      {
+         mainOcTree = new NormalOcTree(latestOcTree);
+      }
+      else
+      {
+         mainOcTree = currentOcTree.get();
+         NormalOcTreeSetter.updateOcTree(mainOcTree, latestOcTree);
+      }
 
       handleBoundingBox(mainOcTree, sensorPose);
 
