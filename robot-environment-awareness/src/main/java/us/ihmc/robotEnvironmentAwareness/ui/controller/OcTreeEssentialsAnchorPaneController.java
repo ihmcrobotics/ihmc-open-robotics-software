@@ -19,6 +19,8 @@ public class OcTreeEssentialsAnchorPaneController extends REABasicUIController
    @FXML
    private ToggleButton enableButton;
    @FXML
+   private ToggleButton runAysnchronously;
+   @FXML
    private Button clearButton;
    // Main OcTree options
    @FXML
@@ -76,6 +78,7 @@ public class OcTreeEssentialsAnchorPaneController extends REABasicUIController
       setupControls();
 
       uiMessager.bindBidirectionalGlobal(SegmentationModuleAPI.OcTreeEnable, enableButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(SegmentationModuleAPI.RunAsynchronously, runAysnchronously.selectedProperty());
 
       surfaceNormalFilterParametersProperty.bindBidirectionalBounds(surfaceNormalUpperBoundSlider.valueProperty(),
                                                                     surfaceNormalLowerBoundSlider.valueProperty());
