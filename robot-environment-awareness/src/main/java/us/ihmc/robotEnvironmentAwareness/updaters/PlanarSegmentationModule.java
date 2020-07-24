@@ -74,7 +74,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private final AtomicReference<NormalOcTree> currentOcTree = new AtomicReference<>(null);
    private final AtomicReference<Pose3DReadOnly> sensorPose = new AtomicReference<>(null);
 
-   private final AtomicReference<Boolean> runAsynchronously;
+   private final boolean runAsynchronously;
    private final AtomicReference<Boolean> isOcTreeBoundingBoxRequested;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
    private final AtomicReference<Boolean> useBoundingBox;
@@ -85,7 +85,14 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private PlanarSegmentationModule(Messager reaMessager, String configurationFilePath) throws Exception
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), reaMessager, configurationFilePath, true);
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+           REACommunicationProperties.inputTopic,
+           REACommunicationProperties.subscriberCustomRegionsTopicName,
+           ROS2Tools.REALSENSE_SLAM_MAP,
+           reaMessager,
+           configurationFilePath,
+           true,
+           false);
    }
 
    private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, String configurationFilePath) throws Exception
@@ -101,7 +108,24 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
            ROS2Tools.REALSENSE_SLAM_REGIONS,
            reaMessager,
            configurationFilePath,
-           manageRosNode);
+           manageRosNode,
+           false);
+   }
+
+   private PlanarSegmentationModule(ROS2Topic<?> inputTopic,
+                                    ROS2Topic<?> customRegionTopic,
+                                    ROS2Topic<?> outputTopic,
+                                    Messager reaMessager,
+                                    String configurationFilePath) throws Exception
+   {
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+           inputTopic,
+           customRegionTopic,
+           outputTopic,
+           reaMessager,
+           configurationFilePath,
+           true,
+           false);
    }
 
    private PlanarSegmentationModule(Ros2Node ros2Node,
@@ -112,8 +136,21 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                     String configurationFilePath,
                                     boolean manageRosNode) throws Exception
    {
+      this(ros2Node, inputTopic, customRegionTopic, outputTopic, reaMessager, configurationFilePath, manageRosNode, false);
+   }
+
+   private PlanarSegmentationModule(Ros2Node ros2Node,
+                                    ROS2Topic<?> inputTopic,
+                                    ROS2Topic<?> customRegionTopic,
+                                    ROS2Topic<?> outputTopic,
+                                    Messager reaMessager,
+                                    String configurationFilePath,
+                                    boolean manageRosNode,
+                                    boolean runAsynchronously) throws Exception
+   {
       this.outputTopic = outputTopic;
       this.manageRosNode = manageRosNode;
+      this.runAsynchronously = runAsynchronously;
       this.reaMessager = reaMessager;
       this.ros2Node = ros2Node;
 
@@ -143,7 +180,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       reaMessager.registerTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
 
-      runAsynchronously = reaMessager.createInput(SegmentationModuleAPI.RunAsynchronously, true);
       isOcTreeBoundingBoxRequested = reaMessager.createInput(SegmentationModuleAPI.RequestBoundingBox, false);
 
       useBoundingBox = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxEnable, true);
@@ -155,10 +191,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                                                                                                            2.0f,
                                                                                                                            0.5f));
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionsListMessage.class,
-                                                    customRegionTopic,
-                                                    this::dispatchCustomPlanarRegion);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, customRegionTopic, this::dispatchCustomPlanarRegion);
       // TODO what the heck is this used for?
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
 
@@ -206,14 +239,15 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       this.ocTree.set(Pair.of(ocTree, latestTimestamp));
       this.sensorPose.set(sensorPose);
 
-      if (!runAsynchronously.get())
+      if (!runAsynchronously)
       {
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();
          }
 
-         compute(ocTree, sensorPose);
+         currentOcTree.set(ocTree);
+         compute(ocTree, sensorPose, false);
       }
    }
 
@@ -251,14 +285,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private void saveConfigurationFIle(FilePropertyHelper filePropertyHelper)
    {
       planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper);
-      filePropertyHelper.saveProperty(SegmentationModuleAPI.RunAsynchronously.getName(), runAsynchronously.get());
       filePropertyHelper.saveProperty(SegmentationModuleAPI.OcTreeBoundingBoxParameters.getName(), atomicBoundingBoxParameters.get().toString());
       filePropertyHelper.saveProperty(SegmentationModuleAPI.OcTreeBoundingBoxEnable.getName(), useBoundingBox.get());
    }
 
    private void sendCurrentState()
    {
-      reaMessager.submitMessage(SegmentationModuleAPI.RunAsynchronously, runAsynchronously.get());
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxEnable, useBoundingBox.get());
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxParameters, atomicBoundingBoxParameters.get());
    }
@@ -279,7 +311,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
             this.sensorPose.set(null); // only set it to null when the other is not and it's been "read"
          }
 
-         if (runAsynchronously.get())
+         if (runAsynchronously)
          {
             if (clearOcTree.getAndSet(false))
             {
@@ -288,12 +320,26 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
             if (ocTreeTimestamp != null)
             {
-               compute(ocTreeTimestamp.getLeft(), latestSensorPose);
+               NormalOcTree mainOcTree;
+               if (currentOcTree.get() == null)
+               {
+                  mainOcTree = new NormalOcTree(ocTreeTimestamp.getLeft());
+               }
+               else
+               {
+                  mainOcTree = currentOcTree.get();
+                  NormalOcTreeSetter.updateOcTree(mainOcTree, ocTreeTimestamp.getLeft());
+               }
+
+               Pose3D sensorPose = new Pose3D(latestSensorPose);
+
+               compute(mainOcTree, sensorPose, true);
             }
          }
 
          if (isOcTreeBoundingBoxRequested.getAndSet(false))
-            reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxState, BoundingBoxMessageConverter.convertToMessage(currentOcTree.get().getBoundingBox()));
+            reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxState,
+                                      BoundingBoxMessageConverter.convertToMessage(currentOcTree.get().getBoundingBox()));
       }
       catch (Exception e)
       {
@@ -311,33 +357,20 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       lastCompleteUpdate.set(currentTime);
    }
 
-   private void compute(NormalOcTree latestOcTree, Pose3DReadOnly latestSensorPose)
+   private void compute(NormalOcTree latestOcTree, Pose3DReadOnly latestSensorPose, boolean setBoundingBox)
    {
-      Pose3D sensorPose = new Pose3D(latestSensorPose);
-      NormalOcTree mainOcTree;
-      if (currentOcTree.get() == null)
-      {
-         mainOcTree = new NormalOcTree(latestOcTree);
-      }
-      else
-      {
-         mainOcTree = currentOcTree.get();
-         NormalOcTreeSetter.updateOcTree(mainOcTree, latestOcTree);
-      }
+      if (setBoundingBox)
+         handleBoundingBox(latestOcTree, latestSensorPose);
 
-//      handleBoundingBox(mainOcTree, sensorPose);
-
-      currentOcTree.set(mainOcTree);
-
-      timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOcTree, sensorPose.getPosition()), planarRegionsTimeReport);
+      timeReporter.run(() -> planarRegionFeatureUpdater.update(latestOcTree, latestSensorPose.getPosition()), planarRegionsTimeReport);
       reaMessager.submitMessage(SegmentationModuleAPI.UISegmentationDuration, timeReporter.getStringToReport());
 
       timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
       planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList()));
 
-      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(mainOcTree));
-      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, sensorPose);
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(latestOcTree));
+      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, latestSensorPose);
    }
 
    private boolean isThreadInterrupted()
@@ -384,7 +417,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       }
    }
 
-   private void handleBoundingBox(NormalOcTree referenceOctree, Pose3D sensorPose)
+   private void handleBoundingBox(NormalOcTree referenceOctree, Pose3DReadOnly sensorPose)
    {
       if (!useBoundingBox.get())
       {
@@ -408,10 +441,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       referenceOctree.setBoundingBox(boundingBox);
    }
 
-
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Messager messager) throws Exception
 
-      {
+   {
       return new PlanarSegmentationModule(messager, configurationFilePath);
    }
 
