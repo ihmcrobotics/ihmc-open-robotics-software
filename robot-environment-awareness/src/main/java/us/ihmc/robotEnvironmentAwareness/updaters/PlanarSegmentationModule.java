@@ -163,7 +163,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       this.ros2Node = ros2Node;
 
       File configurationFile = setupConfigurationFile(configurationFilePath);
-
       if (!reaMessager.isMessagerOpen())
          reaMessager.startMessager();
 
@@ -192,16 +191,14 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       useBoundingBox = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxEnable, true);
       atomicBoundingBoxParameters = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxParameters,
-                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f,
-                                                                                                                           -2.0f,
-                                                                                                                           -3.0f,
-                                                                                                                           5.0f,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-0.5f,
+                                                                                                                           -1.0f,
+                                                                                                                           -1.5f,
                                                                                                                            2.0f,
+                                                                                                                           1.0f,
                                                                                                                            0.5f));
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, customRegionTopic, this::dispatchCustomPlanarRegion);
-      // TODO what the heck is this used for?
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
 
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
 
@@ -254,6 +251,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
             planarRegionFeatureUpdater.clearOcTree();
          }
 
+         handleBoundingBox(ocTree, sensorPose);
+
          currentOcTree.set(ocTree);
          compute(ocTree, sensorPose, false);
       }
@@ -264,18 +263,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       PlanarRegionsListMessage message = subscriber.takeNextData();
       PlanarRegionsList customPlanarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
       customPlanarRegions.getPlanarRegionsAsList().forEach(planarRegionFeatureUpdater::registerCustomPlanarRegion);
-   }
-
-   private void handleREAStateRequestMessage(Subscriber<REAStateRequestMessage> subscriber)
-   {
-      REAStateRequestMessage newMessage = subscriber.takeNextData();
-
-      if (newMessage.getRequestResume())
-         reaMessager.submitMessage(SegmentationModuleAPI.OcTreeEnable, true);
-      else if (newMessage.getRequestPause()) // We guarantee to resume if requested, regardless of the pause request.
-         reaMessager.submitMessage(SegmentationModuleAPI.OcTreeEnable, false);
-      if (newMessage.getRequestClear())
-         clearOcTree.set(true);
    }
 
    private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
