@@ -39,14 +39,11 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
-//      SurfaceElementICPSLAMParameters parameters = this.parameters.getAndSet(null);
-//      if (parameters == null)
-//         return null;
+      SurfaceElementICPSLAMParameters surfaceElementICPSLAMParameters = parameters.get();
 
-      // TODO: add diagnosing manager.
-      double surfaceElementResolution = 0.04;
-      double windowMargin = 0.0;
-      int minimumNumberOfHits = 1;
+      double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
+      double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
+      int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
       frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
@@ -83,7 +80,9 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree, surfel.getPoint(), octree.getResolution() * 1.1);
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree,
+                                                                                    surfel.getPoint(),
+                                                                                    octree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
          }
       };
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, 6, numberOfSurfel);
@@ -97,20 +96,35 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       optimizer.setPerturbationVector(purterbationVector);
       boolean initialCondition = optimizer.initialize();
       LogTools.info("initialCondition " + initialCondition);
-      optimizer.setCorrespondenceThreshold(octree.getResolution() * 1.5);
-      driftCorrectionResult.setInitialDistance(optimizer.getQuality());
-      LogTools.info("initial quality " + optimizer.getQuality());
+      if (!initialCondition)
+      {
+         //TODO: Ticket, FB-638.
+         //return null;
+      }
+      optimizer.setCorrespondenceThreshold(surfaceElementICPSLAMParameters.getMinimumCorrespondingDistance()); // Note : (x 1.5) of surfel resolution.
+      double initialQuality = optimizer.getQuality();
+      driftCorrectionResult.setInitialDistance(initialQuality);
+      LogTools.info("initial quality " + initialQuality);
 
-      double qualitySteadyThreshold = 0.001;
-      double translationalSteadyThreshold = 0.001;
-      double rotationalSteadyThreshold = 0.005;
+      if (surfaceElementICPSLAMParameters.isEnableInitialQualityFilter())
+      {
+         if (initialQuality > surfaceElementICPSLAMParameters.getInitialQualityThreshold())
+         {
+            LogTools.warn("initial quality is very bad ! " + initialQuality);
+            return null;
+         }
+      }
+
+      double qualitySteadyThreshold = surfaceElementICPSLAMParameters.getQualityConvergenceThreshold();
+      double translationalSteadyThreshold = surfaceElementICPSLAMParameters.getTranslationalEffortConvergenceThreshold();
+      double rotationalSteadyThreshold = surfaceElementICPSLAMParameters.getRotationalEffortConvergenceThreshold();
 
       SteadyDetector qualitySteady = new SteadyDetector(0.0, qualitySteadyThreshold);
       SteadyDetector translationalSteady = new SteadyDetector(0.0, translationalSteadyThreshold);
       RotationalEffortSteadyDetector rotationalSteady = new RotationalEffortSteadyDetector(rotationalSteadyThreshold);
 
       int numberOfSteadyIterations = 0;
-      int steadyIterationsThreshold = 3;
+      int steadyIterationsThreshold = surfaceElementICPSLAMParameters.getSteadyStateDetectorIterationThreshold();
       // do ICP.
       double quality = 0.0;
       double translationalEffort = 0.0;
@@ -122,7 +136,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          optimizer.iterate();
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
 
-         quality = optimizer.getQuality();
+         quality = initialQuality;
          translationalEffort = icpTransformer.getTranslation().lengthSquared();
          rotationalEffort.set(icpTransformer.getRotation());
 
