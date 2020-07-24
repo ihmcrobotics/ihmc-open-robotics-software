@@ -31,6 +31,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
@@ -70,9 +71,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<Pair<NormalOcTree, Long>> ocTree = new AtomicReference<>(null);
+   private final AtomicReference<NormalOcTree> currentOcTree = new AtomicReference<>(null);
    private final AtomicReference<Pose3DReadOnly> sensorPose;
 
    private final AtomicReference<Boolean> runAsynchronously;
+   private final AtomicReference<Boolean> isOcTreeBoundingBoxRequested;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
    private final AtomicReference<Boolean> useBoundingBox;
 
@@ -141,6 +144,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       reaMessager.registerTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
 
       runAsynchronously = reaMessager.createInput(SegmentationModuleAPI.RunAsynchronously, true);
+      isOcTreeBoundingBoxRequested = reaMessager.createInput(SegmentationModuleAPI.RequestBoundingBox, false);
 
       useBoundingBox = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxEnable, true);
       atomicBoundingBoxParameters = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxParameters,
@@ -294,6 +298,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                compute(ocTreeTimestamp.getLeft(), latestSensorPose);
             }
          }
+
+         if (isOcTreeBoundingBoxRequested.getAndSet(false))
+            reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxState, BoundingBoxMessageConverter.convertToMessage(currentOcTree.get().getBoundingBox()));
       }
       catch (Exception e)
       {
@@ -317,6 +324,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       NormalOcTree mainOcTree = new NormalOcTree(latestOcTree);
 
       handleBoundingBox(mainOcTree, sensorPose);
+
+      currentOcTree.set(mainOcTree);
 
       timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOcTree, sensorPose.getPosition()), planarRegionsTimeReport);
       reaMessager.submitMessage(SegmentationModuleAPI.UISegmentationDuration, timeReporter.getStringToReport());

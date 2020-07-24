@@ -55,7 +55,9 @@ public class SegmentationModuleAPI
    public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = topic("PlanarRegionsIntersectionParameters");
 
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = topic("OcTreeBoundingBoxEnable");
+   public static final Topic<Boolean> RequestBoundingBox = topic("RequestBoundingBox");
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = topic("OcTreeBoundingBoxParameters");
+   public static final Topic<BoxMessage> OcTreeBoundingBoxState = topic("OcTreeBoundingBoxState");
 
    public static final Topic<PlanarRegionsListMessage> PlanarRegionsState = topic("PlanarRegionsState");
 
@@ -71,6 +73,8 @@ public class SegmentationModuleAPI
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = topic("UIPlanarRegionDataExporterDirectory");
 
    public static final Topic<String> UISegmentationDuration = topic("UISegmentationDuration");
+
+   public static final Topic<Boolean> UIOcTreeBoundingBoxShow = topic("UIOcTreeBoundingBoxShow");
 
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
 
