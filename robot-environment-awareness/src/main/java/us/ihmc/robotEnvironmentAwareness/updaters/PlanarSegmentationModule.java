@@ -18,8 +18,11 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxWithCenterAndYaw;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
@@ -28,8 +31,11 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
@@ -65,7 +71,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<Pair<NormalOcTree, Long>> ocTree = new AtomicReference<>(null);
-   private final AtomicReference<Tuple3DReadOnly> sensorPosition;
+   private final AtomicReference<Pose3DReadOnly> sensorPose;
+
+   private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
+   private final AtomicReference<Boolean> useBoundingBox;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
@@ -129,6 +138,17 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       planarRegionFeatureUpdater.setSurfaceNormalFilterParametersTopic(SegmentationModuleAPI.SurfaceNormalFilterParameters);
       planarRegionFeatureUpdater.bindControls();
 
+      reaMessager.registerTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
+
+      useBoundingBox = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxEnable, true);
+      atomicBoundingBoxParameters = reaMessager.createInput(SegmentationModuleAPI.OcTreeBoundingBoxParameters,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f,
+                                                                                                                           -2.0f,
+                                                                                                                           -3.0f,
+                                                                                                                           5.0f,
+                                                                                                                           2.0f,
+                                                                                                                           0.5f));
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
                                                     customRegionTopic,
@@ -141,11 +161,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
 
-      reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration,
-                                        (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
+      reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
 
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
-      sensorPosition = reaMessager.createInput(SegmentationModuleAPI.SensorPosition, null);
+      sensorPose = reaMessager.createInput(SegmentationModuleAPI.SensorPose, null);
 
       PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
@@ -170,7 +189,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    }
 
    @Override
-   public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
+   public void reportOcTree(NormalOcTree ocTree, Pose3DReadOnly sensorPose)
    {
       long latestTimestamp = -2L;
       for (NormalOcTreeNode node : ocTree)
@@ -181,12 +200,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       LogTools.debug("Received ocTree. size: " + ocTree.size()
                     + " hash: " + ocTree.hashCode()
                     + " timestamp: " + latestTimestamp
-                    + " sensorPosition: " + sensorPosition
+                    + " sensorPosition: " + sensorPose
       );
       this.ocTree.set(Pair.of(ocTree, latestTimestamp));
 
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
-      reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
+      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, sensorPose);
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -211,6 +230,26 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
    {
       planarRegionFeatureUpdater.loadConfiguration(filePropertyHelper);
+
+      Boolean useBoundingBoxFile = filePropertyHelper.loadBooleanProperty(SegmentationModuleAPI.OcTreeBoundingBoxEnable.getName());
+      if (useBoundingBoxFile != null)
+         useBoundingBox.set(useBoundingBoxFile);
+      String boundingBoxParametersFile = filePropertyHelper.loadProperty(SegmentationModuleAPI.OcTreeBoundingBoxParameters.getName());
+      if (boundingBoxParametersFile != null)
+         atomicBoundingBoxParameters.set(BoundingBoxMessageConverter.parse(boundingBoxParametersFile));
+   }
+
+   private void saveConfigurationFIle(FilePropertyHelper filePropertyHelper)
+   {
+      planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper);
+      filePropertyHelper.saveProperty(REAModuleAPI.OcTreeBoundingBoxParameters.getName(), atomicBoundingBoxParameters.get().toString());
+      filePropertyHelper.saveProperty(REAModuleAPI.OcTreeBoundingBoxEnable.getName(), useBoundingBox.get());
+   }
+
+   private void sendCurrentState()
+   {
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxEnable, useBoundingBox.get());
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeBoundingBoxParameters, atomicBoundingBoxParameters.get());
    }
 
    private final AtomicDouble lastCompleteUpdate = new AtomicDouble(Double.NaN);
@@ -223,10 +262,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       try
       {
          Pair<NormalOcTree, Long> ocTreeTimestamp = ocTree.getAndSet(null);
-         Tuple3DReadOnly latestSensorPose = this.sensorPosition.get();
+         Pose3DReadOnly latestSensorPose = this.sensorPose.get();
          if (ocTreeTimestamp != null)
          {
-            this.sensorPosition.set(null); // only set it to null when the other is not and it's been "read"
+            this.sensorPose.set(null); // only set it to null when the other is not and it's been "read"
          }
          if (clearOcTree.getAndSet(false))
          {
@@ -242,10 +281,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
             if (isThreadInterrupted())
                return;
 
-            Point3D sensorPose = new Point3D(latestSensorPose);
+            Pose3D sensorPose = new Pose3D(latestSensorPose);
             NormalOcTree mainOcTree = new NormalOcTree(latestOcTree);
 
-            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOcTree, sensorPose), planarRegionsTimeReport);
+            handleBoundingBox(mainOcTree, sensorPose);
+
+            timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOcTree, sensorPose.getPosition()), planarRegionsTimeReport);
             reaMessager.submitMessage(SegmentationModuleAPI.UISegmentationDuration, timeReporter.getStringToReport());
 
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
@@ -324,8 +365,34 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       }
    }
 
-   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Messager messager) throws Exception
+   private void handleBoundingBox(NormalOcTree referenceOctree, Pose3D sensorPose)
    {
+      if (!useBoundingBox.get())
+      {
+         referenceOctree.disableBoundingBox();
+         return;
+      }
+
+      OcTreeBoundingBoxWithCenterAndYaw boundingBox = new OcTreeBoundingBoxWithCenterAndYaw();
+
+      Point3D min = atomicBoundingBoxParameters.get().getMin();
+      Point3D max = atomicBoundingBoxParameters.get().getMax();
+      boundingBox.setLocalMinMaxCoordinates(min, max);
+
+      if (sensorPose != null)
+      {
+         boundingBox.setOffset(sensorPose.getPosition());
+         boundingBox.setYawFromQuaternion(new Quaternion(sensorPose.getOrientation()));
+      }
+
+      boundingBox.update(referenceOctree.getResolution(), referenceOctree.getTreeDepth());
+      referenceOctree.setBoundingBox(boundingBox);
+   }
+
+
+   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Messager messager) throws Exception
+
+      {
       return new PlanarSegmentationModule(messager, configurationFilePath);
    }
 
