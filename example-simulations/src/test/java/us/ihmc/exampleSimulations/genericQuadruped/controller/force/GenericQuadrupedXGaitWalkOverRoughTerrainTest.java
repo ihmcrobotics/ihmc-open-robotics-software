@@ -43,8 +43,9 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
       super.testWalkingOverSingleStepUp(Double.NaN);
    }
 
+   // flaky
    @Tag("quadruped-xgait")
-   @Ignore
+   @Disabled
    @Override
    @Test
    public void testWalkingOverConsecutiveRamps() throws IOException
