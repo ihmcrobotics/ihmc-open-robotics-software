@@ -42,6 +42,12 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 //      SurfaceElementICPSLAMParameters parameters = this.parameters.getAndSet(null);
 //      if (parameters == null)
 //         return null;
+      
+      SurfaceElementICPSLAMParameters surfaceElementICPSLAMParameters = parameters.get();
+      LogTools.info("getBoundRatio "+surfaceElementICPSLAMParameters.getBoundRatio());
+      LogTools.info("getRotationalEffortConvergenceThreshold "+surfaceElementICPSLAMParameters.getRotationalEffortConvergenceThreshold());
+      LogTools.info("getQualityConvergenceThreshold "+surfaceElementICPSLAMParameters.getQualityConvergenceThreshold());
+      LogTools.info("getWindowMargin "+surfaceElementICPSLAMParameters.getWindowMargin());
 
       // TODO: add diagnosing manager.
       double surfaceElementResolution = 0.04;

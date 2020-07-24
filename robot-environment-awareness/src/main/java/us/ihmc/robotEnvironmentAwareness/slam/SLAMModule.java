@@ -57,7 +57,6 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<Boolean> clearNormals;
    
    protected final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
-   //protected final SLAMBasics slam = new SLAMBasics(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;

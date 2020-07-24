@@ -22,17 +22,17 @@
                   <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="surface element resolution" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="surfaceElementResolution" editable="true" maxWidth="1.7976931348623157E308" />
                         <Label fx:id="stationaryFlag" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="window margin" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="windowMargin" editable="true" maxWidth="1.7976931348623157E308" />
                      </children>
                   </VBox>
                   <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="minimum number of hit" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="minimumNumberOfHit" editable="true" maxWidth="1.7976931348623157E308" />
                         <Label fx:id="stationaryFlag1" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="bound ratio" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="boundRatio" editable="true" maxWidth="1.7976931348623157E308" />
                      </children>
                   </VBox>
                </children>
@@ -51,17 +51,17 @@
                   <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="converged iteration threshold" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="steadyStateDetectorIterationThreshold" editable="true" maxWidth="1.7976931348623157E308" />
                         <Label fx:id="stationaryFlag1" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="quality threshold" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="qualityConvergenceThreshold" editable="true" maxWidth="1.7976931348623157E308" />
                      </children>
                   </VBox>
                   <VBox prefHeight="18.0" prefWidth="200.0" spacing="10.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="translational effort threshold" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="translationalEffortConvergenceThreshold" editable="true" maxWidth="1.7976931348623157E308" />
                         <Label fx:id="stationaryFlag11" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="rotational effor threshold" textAlignment="CENTER" />
-                        <Spinner maxWidth="1.7976931348623157E308" />
+                        <Spinner fx:id="rotationalEffortConvergenceThreshold" editable="true" maxWidth="1.7976931348623157E308" />
                      </children>
                   </VBox>
                </children>
@@ -75,9 +75,9 @@
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <ToggleButton maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
+            <ToggleButton fx:id="enableInitialQualityFilter" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
             <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="initial quality threshold" textAlignment="CENTER" />
-            <Spinner maxWidth="1.7976931348623157E308" />
+            <Spinner fx:id="initialQualityThreshold" editable="true" maxWidth="1.7976931348623157E308" />
          </children>
       </VBox>
    </children>
