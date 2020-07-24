@@ -33,7 +33,6 @@ public class SegmentationModuleAPI
    public static final Topic<Pose3DReadOnly> SensorPose = topic("SensorPose");
    public static final Topic<PlanarRegionSegmentationMessage[]> PlanarRegionsSegmentationState = topic("PlanarRegionsSegmentationState");
 
-   public static final Topic<Boolean> RunAsynchronously = topic("RunAysnchronously");
 
    public static final Topic<SurfaceNormalFilterParameters> SurfaceNormalFilterParameters = topic("SurfaceNormalFilterParameters");
 
