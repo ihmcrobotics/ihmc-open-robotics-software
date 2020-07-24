@@ -11,11 +11,15 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -220,20 +224,39 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 
    public void setParametersForStereo()
    {
-      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
-      boundindBoxMessage.setMaxX(1.0f);
-      boundindBoxMessage.setMinX(0.0f);
-      boundindBoxMessage.setMaxY(1.0f);
-      boundindBoxMessage.setMinY(-1.0f);
-      boundindBoxMessage.setMaxZ(1.0f);
-      boundindBoxMessage.setMinZ(-2.0f);
+      BoundingBoxParametersMessage boundingBoxMessage = new BoundingBoxParametersMessage();
+      boundingBoxMessage.setMaxX(1.0f);
+      boundingBoxMessage.setMinX(0.0f);
+      boundingBoxMessage.setMaxY(1.0f);
+      boundingBoxMessage.setMinY(-1.0f);
+      boundingBoxMessage.setMaxZ(1.0f);
+      boundingBoxMessage.setMinZ(-2.0f);
 
       uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, false);
-      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
-      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
-      uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundingBoxMessage);
+
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
+      uiMessager.broadcastMessage(REAModuleAPI.NormalEstimationParameters, normalEstimationParameters);
+
+      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
+      planarRegionSegmentationParameters.setMinRegionSize(150);
+      uiMessager.broadcastMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, planarRegionSegmentationParameters);
+
+      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
+      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
+      uiMessager.broadcastMessage(REAModuleAPI.SurfaceNormalFilterParameters, surfaceNormalFilterParameters);
+
+      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+      polygonizerParameters.setConcaveHullThreshold(0.15);
+      uiMessager.broadcastMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParameters);
    }
 
    public void setParametersForDepth()

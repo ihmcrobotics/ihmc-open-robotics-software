@@ -17,7 +17,10 @@ import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.ros2.Ros2Node;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class PerceptionSuite
 {
@@ -26,8 +29,7 @@ public class PerceptionSuite
    private static final String REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultRealSenseREAModuleConfiguration.txt";
 
    private final PerceptionSuiteComponent<SLAMModule, SLAMBasedEnvironmentAwarenessUI> slamModule;
-//   private final PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
-   private final DummyPerceptionSuiteComponent realsenseREAModule;
+   private final PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
    private final PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> lidarREAModule;
    private final PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
    private final PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
@@ -40,6 +42,8 @@ public class PerceptionSuite
    {
       this.messager = messager;
 
+      REANetworkProvider lidarREANetworkProvider = new LidarREANetworkProvider(ros2Node, outputTopic, lidarOutputTopic);
+      REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoOutputTopic);
       slamModule = new PerceptionSuiteComponent<>("RealSense SLAM",
                                                   () -> new SLAMPerceptionSuiteElement(this::createSLAMModuleInternal,
                                                                                        SLAMBasedEnvironmentAwarenessUI::creatIntraprocessUI),
@@ -48,23 +52,19 @@ public class PerceptionSuite
                                                   PerceptionSuiteAPI.RunRealSenseSLAMUI,
                                                   PerceptionSuiteAPI.GUIRunRealSenseSLAM,
                                                   PerceptionSuiteAPI.GUIRunRealSenseSLAMUI);
-//      realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
-//                                                          () -> new REAPerceptionSuiteElement(m -> createRealSenseREAModule(),
-//                                                                                              (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s,
-//                                                                                                                                                             NetworkPorts.REA_MODULE2_UI_PORT)),
-//                                                          messager,
-//                                                          PerceptionSuiteAPI.RunRealSenseREA,
-//                                                          PerceptionSuiteAPI.RunRealSenseREAUI,
-//                                                          PerceptionSuiteAPI.GUIRunRealSenseREA,
-//                                                          PerceptionSuiteAPI.GUIRunRealSenseREAUI);
-      realsenseREAModule = new DummyPerceptionSuiteComponent("RealSense REA",
-                                                             messager,
-                                                             PerceptionSuiteAPI.RunRealSenseREA,
-                                                             PerceptionSuiteAPI.RunRealSenseREAUI);
+      realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
+                                                          () -> new REAPerceptionSuiteElement(m -> createRealSenseREAModule(realSenseREANetworkProvider),
+                                                                                              (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s,
+                                                                                                                                                             NetworkPorts.REA_MODULE2_UI_PORT)),
+                                                          messager,
+                                                          PerceptionSuiteAPI.RunRealSenseREA,
+                                                          PerceptionSuiteAPI.RunRealSenseREAUI,
+                                                          PerceptionSuiteAPI.GUIRunRealSenseREA,
+                                                          PerceptionSuiteAPI.GUIRunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
                                                       () -> new REAPerceptionSuiteElement(m -> LIDARBasedREAModule.createIntraprocessModule(
                                                             LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME,
-                                                            ros2Node), (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s)),
+                                                            lidarREANetworkProvider), (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s)),
                                                       messager,
                                                       PerceptionSuiteAPI.RunLidarREA,
                                                       PerceptionSuiteAPI.RunLidarREAUI,
@@ -115,10 +115,10 @@ public class PerceptionSuite
       return segmentationModule;
    }
 
-   private LIDARBasedREAModule createRealSenseREAModule() throws Exception
+   private LIDARBasedREAModule createRealSenseREAModule(REANetworkProvider networkProvider) throws Exception
    {
       LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME,
-                                                                                ros2Node,
+                                                                                networkProvider,
                                                                                 NetworkPorts.REA_MODULE2_UI_PORT);
       module.setParametersForStereo();
       module.loadConfigurationsFromFile();
