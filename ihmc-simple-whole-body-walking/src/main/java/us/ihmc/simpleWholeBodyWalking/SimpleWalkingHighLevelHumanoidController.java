@@ -512,7 +512,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
-      balanceManager.endTick();
       firstTick = false;
    }
 

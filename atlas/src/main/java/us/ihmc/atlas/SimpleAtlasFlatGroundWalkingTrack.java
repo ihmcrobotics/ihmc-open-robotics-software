@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -54,8 +55,11 @@ public class SimpleAtlasFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
-      walkingScriptParameters.setMaxVelocity(0.5);
-      walkingScriptParameters.setCruiseVelocity(0.4);
+      walkingScriptParameters.setMaxVelocity(0.45);
+      walkingScriptParameters.setCruiseVelocity(0.35);
+      
+      double currentNominalHeightAboveAnkle = model.getWalkingControllerParameters().nominalHeightAboveAnkle();
+      ((AtlasWalkingControllerParameters) model.getWalkingControllerParameters()).setNominalHeightAboveAnkle(currentNominalHeightAboveAnkle + 0.20);
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup,
                                     guiInitialSetup,

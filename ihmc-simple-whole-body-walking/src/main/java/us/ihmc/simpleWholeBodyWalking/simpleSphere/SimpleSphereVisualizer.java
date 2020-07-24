@@ -4,11 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -25,7 +23,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
@@ -51,8 +48,8 @@ public class SimpleSphereVisualizer
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
    private final YoFrameVector3D Force;
-   private final YoFramePoint3D ECMPPosition;
-   private final YoFramePoint3D CoPPosition;
+   private final YoFramePoint3D ecmpposition;
+   private final YoFramePoint3D copPosition;
    
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
@@ -104,10 +101,10 @@ public class SimpleSphereVisualizer
       //yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
       
       //Plot Force Vector
-      ECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
-      CoPPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
+      ecmpposition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
+      copPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
       Force = new YoFrameVector3D("desiredForce", worldFrame, registry);
-      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", CoPPosition, Force, 0.1,YoAppearance.Red());
+      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", copPosition, Force, 0.1,YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", forceVector);
       
       
@@ -186,19 +183,19 @@ public class SimpleSphereVisualizer
       
       
       //Calc real ecmp
-      ECMPPosition.set(desiredVRPPosition);
-      ECMPPosition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
+      ecmpposition.set(desiredVRPPosition);
+      ecmpposition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
 
       //desiredCoPPosition.set(desiredECMPPosition);
       //desiredCoPPosition.setZ(0.0);
 
       //calculate scale for force to reach ground
       double scale = sphereRobot.getCenterOfMass().getZ() / controlForce.getZ();
-      FrameVector3D COPtoCOM = new FrameVector3D();
-      COPtoCOM.set(controlForce);
-      COPtoCOM.scale(scale);
-      CoPPosition.set(sphereRobot.getCenterOfMass());
-      CoPPosition.sub(COPtoCOM);
+      FrameVector3D copToCOM = new FrameVector3D();
+      copToCOM.set(controlForce);
+      copToCOM.scale(scale);
+      copPosition.set(sphereRobot.getCenterOfMass());
+      copPosition.sub(copToCOM);
       
       Force.set(controlForce);
       
@@ -213,12 +210,8 @@ public class SimpleSphereVisualizer
       }
    }
 
-   public void updateVizFeet(double currentTime, List<RobotSide> currentFeetInContact)
+   public void updateVizFeet(double currentTime, List<RobotSide> currentFeetInContact, List<Footstep> footstepList, List<FootstepTiming> footstepTimingList)
    {
-
-      List<Footstep> footstepList= dcmPlan.getUpcomingFootsteps();
-      List<FootstepTiming> footstepTimingList= dcmPlan.getUpcomingFootstepTimings();
-      
       if (footstepList.size() == 0)
          return;
       
@@ -255,7 +248,6 @@ public class SimpleSphereVisualizer
                tempPolygon.changeFrame(worldFrame);
                rightFoot.set(tempPolygon);
             }
-            
          }
          
          for (int nextStepIndex = 0; nextStepIndex < nextFootstepPoses.size(); nextStepIndex++)
@@ -281,14 +273,6 @@ public class SimpleSphereVisualizer
                nextFootstepPolygons.get(nextStepIndex).setToNaN();
             }
          }
-         
-         //leftFootPose.setToNaN();
-         //rightFootPose.setToNaN();
-         //leftFoot.clearAndUpdate();
-         //rightFoot.clearAndUpdate();
- 
       }
-      
    }
-
 }

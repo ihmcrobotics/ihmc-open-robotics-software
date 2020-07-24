@@ -74,9 +74,8 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                        sphereRobot1.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry1);
          dcmPlan1.setNumberOfFootstepsToConsider(12);
-         addFootstepandTimingStepsToDCMPlan(dcmPlan1, initialPosition1);
          controller1 = new SimpleBasicSphereController(sphereRobot1, dcmPlan1, yoGraphicsListRegistry1);
-         controller1.solveForTrajectory();
+         addFootstepandTimingStepsToPlan(controller1, initialPosition1);
          setupGroundContactModel(sphereRobot1.getScsRobot());
       }
       else
@@ -100,10 +99,8 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                         sphereRobot2.getScsRobot().getRobotsYoVariableRegistry(),
                                                                                         yoGraphicsListRegistry2);
          dcmPlan2.setNumberOfFootstepsToConsider(12);
-         addFootstepandTimingStepsToDCMPlan(dcmPlan2, initialPosition2);
-         
          controller2 = new SimpleLQRSphereController(sphereRobot2, dcmPlan2, yoGraphicsListRegistry2);
-         controller2.solveForTrajectory();
+         addFootstepandTimingStepsToPlan(controller2, initialPosition2);
          setupGroundContactModel(sphereRobot2.getScsRobot());
       }
       else
@@ -158,28 +155,23 @@ public class SimpleLQRMomentumControllerSimulation
       robot.setGroundContactModel(groundContactModel);
    }
 
-   private final static double swingDurationShiftFraction = 0.5;
-   private final static double swingSplitFraction = 0.5;
-   private final static double transferSplitFraction = 0.5;
-   private final static double transferWeightDistribution = 0.5;
-
    /*
     * Footsteps contain information by the position of a planned footstep. The RobotSide of the footstep is the 
     * side that will swing to touch down at the planned position. The footstep timing begins at the lift_off of
     * this swing foot. The swing takes swingDuration time, then the double support takes transitionDuration where
     * the COP moves from previous foot to new (formerly swinging) foot.
     */
-   private static void addFootstepandTimingStepsToDCMPlan(SimpleBipedCoMTrajectoryPlanner dcmPlan, Vector3DReadOnly shift)
+   private static void addFootstepandTimingStepsToPlan(SimpleSphereControllerInterface controller, Vector3DReadOnly shift)
    {
-      FootstepShiftFractions newShiftFractions = 
-            new FootstepShiftFractions(swingDurationShiftFraction,swingSplitFraction,
-                                       transferSplitFraction,transferWeightDistribution);
+      List<Footstep> footstepList = new ArrayList<>();
+      List<FootstepTiming> footstepTimingList = new ArrayList<>();
+      
       double contactX = shift.getX();
       double contactY = shift.getY();
       double width = stepWidth;
       double stepStartTime = initialTransferDuration;
       RobotSide currentSide = RobotSide.LEFT;
-      dcmPlan.clearStepSequence();
+      
       Quaternion unitQuaternion = new Quaternion(0, 0, 0, 1);
       contactY += stepWidth / 2; //begin planning ctnctY at pos of left foot
 
@@ -198,7 +190,9 @@ public class SimpleLQRMomentumControllerSimulation
          FootstepTiming newTiming = new FootstepTiming(swingDuration, stanceDuration);
          newTiming.setAbsoluteTime(0, stepStartTime);
          
-         dcmPlan.addStepToSequence(newStep, newTiming, newShiftFractions);
+         footstepList.add(newStep);
+         footstepTimingList.add(newTiming);
+         
          stepStartTime += newTiming.getStepTime();
       }
       
@@ -213,15 +207,11 @@ public class SimpleLQRMomentumControllerSimulation
       FootstepTiming finTiming = new FootstepTiming(swingDuration, finalTransferDuration);
       finTiming.setAbsoluteTime(0, stepStartTime);
       
-      dcmPlan.addStepToSequence(finStep, finTiming, newShiftFractions);
+      footstepList.add(finStep);
+      footstepTimingList.add(finTiming);
+      
+      controller.setFootstepPlan(footstepList, footstepTimingList);
    }
-
-   private static Footstep GenerateFootstep(RobotSide robotSide, Point3D posePoint, Quaternion poseQuaternion)
-   {
-      FramePose3D newPose = new FramePose3D(ReferenceFrame.getWorldFrame(), posePoint, poseQuaternion);
-      return new Footstep(robotSide, newPose);
-   }
-
 
    public static void main(String[] args)
    {
