@@ -21,6 +21,7 @@
             <VBox alignment="CENTER" prefHeight="160.0" prefWidth="145.0" spacing="5.0">
                <children>
                   <ToggleButton fx:id="enableButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="120.0" text="Enable OcTree" />
+                  <ToggleButton fx:id="runAysnchronously" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="120.0" text="Run Asynchronously" />
                   <Button fx:id="clearButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
                   <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#save" text="Save" />
                </children>
