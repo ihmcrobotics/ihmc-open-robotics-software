@@ -89,7 +89,6 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
    }
 
    @Override
