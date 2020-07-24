@@ -71,6 +71,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private ReferenceFrame frameOfSupportLeg;
    private final ReferenceFrame centerOfMassFrame;
+   private final ReferenceFrame frameOfHeight;
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
    private final FramePoint3D com = new FramePoint3D();
@@ -88,6 +89,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                       double defaultOffsetHeightAboveGround,
                                                       double doubleSupportPercentageIn,
                                                       ReferenceFrame centerOfMassFrame,
+                                                      ReferenceFrame frameOfHeight,
                                                       SideDependentList<? extends ReferenceFrame> soleFrames,
                                                       DoubleProvider yoTime,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -100,6 +102,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
            doubleSupportPercentageIn,
            0.0,
            centerOfMassFrame,
+           frameOfHeight,
            soleFrames,
            yoTime,
            yoGraphicsListRegistry,
@@ -113,12 +116,14 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                       double doubleSupportPercentageIn,
                                                       double hipWidth,
                                                       ReferenceFrame centerOfMassFrame,
+                                                      ReferenceFrame frameOfHeight,
                                                       SideDependentList<? extends ReferenceFrame> soleFrames,
                                                       DoubleProvider yoTime,
                                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                                       YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
+      this.frameOfHeight = frameOfHeight;
       this.soleFrames = soleFrames;
       this.yoTime = yoTime;
 
@@ -181,7 +186,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public void reset()
    {
-      tempFramePoint.setToZero(centerOfMassFrame);
+      tempFramePoint.setToZero(frameOfHeight);
       tempFramePoint.changeFrame(frameOfSupportLeg);
       tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
       desiredCoMHeight.set(nominalHeightAboveGround.getDoubleValue());
@@ -477,7 +482,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       initializeToCurrent.set(false);
 
-      tempFramePoint.setToZero(centerOfMassFrame);
+      tempFramePoint.setToZero(frameOfHeight);
       tempFramePoint.changeFrame(frameOfSupportLeg);
 
       double heightOffset = tempFramePoint.getZ() - normalDesiredHeight + heightOffsetHandler.getOffsetHeightAboveGround();
