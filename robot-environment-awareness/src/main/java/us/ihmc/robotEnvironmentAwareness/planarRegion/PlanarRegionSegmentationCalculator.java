@@ -292,13 +292,13 @@ public class PlanarRegionSegmentationCalculator
    public void recordCandidatesForRegion(NormalOcTreeNode neighborNode, PlanarRegionSegmentationNodeData region, Set<NormalOcTreeNode> newSetToExplore,
                                          OcTreeBoundingBoxInterface boundingBox, PlanarRegionSegmentationParameters parameters)
    {
-      if (allRegionNodes.contains(neighborNode))
-         return;
       if (!isNodeInBoundingBox(neighborNode, boundingBox))
+         return;
+      if (!neighborNode.isNormalSet() || !neighborNode.isHitLocationSet())
          return;
       if (!isNodePartOfRegion(neighborNode, region, parameters.getMaxDistanceFromPlane(), Math.cos(parameters.getMaxAngleFromPlane())))
          return;
-      if (!neighborNode.isNormalSet() || !neighborNode.isHitLocationSet())
+      if (allRegionNodes.contains(neighborNode))
          return;
 
       newSetToExplore.add(neighborNode);
