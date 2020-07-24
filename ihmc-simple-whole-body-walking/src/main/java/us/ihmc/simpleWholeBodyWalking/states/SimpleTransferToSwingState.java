@@ -52,12 +52,8 @@ public class SimpleTransferToSwingState extends SimpleTransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       if (stepsToAdd < 1)

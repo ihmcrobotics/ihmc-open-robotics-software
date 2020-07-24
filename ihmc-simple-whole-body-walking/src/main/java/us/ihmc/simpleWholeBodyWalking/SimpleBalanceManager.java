@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
@@ -40,7 +39,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -49,7 +47,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -62,7 +59,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
 
 
 public class SimpleBalanceManager
@@ -82,6 +78,8 @@ public class SimpleBalanceManager
    private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
    private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
    private final YoFrameVector2D yoDesiredCoMVelocity = new YoFrameVector2D("desiredCoMVelocity", worldFrame, registry);
+   
+   //only used for visualization
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
 
@@ -147,10 +145,8 @@ public class SimpleBalanceManager
                                YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
@@ -171,13 +167,12 @@ public class SimpleBalanceManager
          ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
          ankleToGround = Math.max(ankleToGround, Math.abs(ankleToSole.getTranslationZ()));
       }
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround + 0.23;
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround;
       
       comPlanner = new SimpleBipedCoMTrajectoryPlanner(soleZUpFrames, controllerToolbox.getGravityZ(), 
                                                        nominalHeightAboveGround, 
                                                        controllerToolbox.getOmega0Provider(),registry, yoGraphicsListRegistry,
                                                        yoTime, icpPlannerParameters, bipedSupportPolygons);
-      comPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       comPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
           
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -219,7 +214,6 @@ public class SimpleBalanceManager
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing, FootstepShiftFractions shiftFractions)
    {
-      comPlanner.addStepToSequence(footstep, timing, shiftFractions);
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
    }
@@ -236,7 +230,6 @@ public class SimpleBalanceManager
 
    public void clearICPPlan()
    {
-      comPlanner.clearStepSequence();
       footsteps.clear();
       footstepTimings.clear();
    }
@@ -257,14 +250,6 @@ public class SimpleBalanceManager
    {
       comPlanner.setTransferFromSide(robotSide);
       this.transferToSide = robotSide != null ? robotSide.getOppositeSide() : null;
-   }
-
-   public void endTick()
-   {
-      if (comPlanner != null)
-      {
-         comPlanner.endTick();
-      }
    }
 
    private final FramePoint3D copEstimate = new FramePoint3D();
@@ -328,8 +313,8 @@ public class SimpleBalanceManager
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
-      footstepTimings.clear();
-      footsteps.clear();
+      //footstepTimings.clear();
+      //footsteps.clear();
       supportSide = null;
       transferToSide = null;
       timeRemainingInSwing = Double.NaN;
@@ -339,7 +324,7 @@ public class SimpleBalanceManager
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
       controllerToolbox.getCoP(copEstimate);
-      comPlanner.computeSetpoints(yoTime.getDoubleValue());
+      comPlanner.computeSetpoints(yoTime.getDoubleValue(), footsteps, footstepTimings);
       icpPlannerDone.set(comPlanner.isDone());
    }
 
@@ -351,13 +336,6 @@ public class SimpleBalanceManager
    public void enablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.enable();
-   }
-
-   public double estimateTimeRemainingForSwingUnderDisturbance()
-   {
-      controllerToolbox.getCapturePoint(capturePoint2d);
-
-      return comPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
    }
 
    public void getDesiredICP(FramePoint2D desiredICPToPack)
@@ -383,11 +361,6 @@ public class SimpleBalanceManager
    public void getDesiredCoMVelocity(FixedFrameVector2DBasics desiredCoMVelocityToPack)
    {
       desiredCoMVelocityToPack.set(yoDesiredCoMVelocity);
-   }
-
-   public void getNextExitCMP(FramePoint3D entryCMPToPack)
-   {
-      comPlanner.getNextExitCMP(entryCMPToPack);
    }
 
    public double getTimeRemainingInCurrentState()
@@ -421,8 +394,6 @@ public class SimpleBalanceManager
       comPlanner.initializeForStanding(yoTime.getDoubleValue());
 
       initializeForStanding = true;
-
-      endTick();
    }
 
    public void initializeICPPlanForSingleSupport(double finalTransferTime)
@@ -430,10 +401,6 @@ public class SimpleBalanceManager
       setFinalTransferTime(finalTransferTime);
       comPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       initializeForSingleSupport = true;
-
-
-      comPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      comPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
@@ -477,9 +444,6 @@ public class SimpleBalanceManager
       comPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
       initializeForTransfer = true;
-
-      comPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      comPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
@@ -541,16 +505,6 @@ public class SimpleBalanceManager
       comPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   public void setFinalTransferWeightDistribution(double weightDistribution)
-   {
-      comPlanner.setFinalTransferWeightDistribution(weightDistribution);
-   }
-
-   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
-   {
-      comPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
-   }
-
    public void setFinalTransferTime(double finalTransferDuration)
    {
       comPlanner.setFinalTransferDuration(finalTransferDuration);
@@ -563,8 +517,6 @@ public class SimpleBalanceManager
    public void update()
    {
       computeICPPlan();
-      comPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      comPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()

@@ -38,42 +38,32 @@ public class BipedContactSequenceTools
          }
       }
    }
-
-   /**
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    */
    
-   public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
-                                                             List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, int stepsToConsider)
+   public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double firstSwingStartTime,
+                                                             double currentTime, List<Footstep> footstepList, List<FootstepTiming> footstepTimingList, 
+                                                             int stepsToConsider)
    {
+      double transitionTime = firstSwingStartTime;
+      
       stepTransitionsToPack.clear();
       for (int i = 0; i < Math.min(footstepList.size(), stepsToConsider); i++)
       {
          Footstep step = footstepList.get(i);
          FootstepTiming stepTiming = footstepTimingList.get(i);
-         double swingStartTime = stepTiming.getExecutionStartTime() + stepTiming.getSwingStartTime();
-         double swingEndTime = swingStartTime + stepTiming.getSwingTime();
 
-         if (swingStartTime >= currentTime)
-         {
-            BipedStepTransition stepTransition = stepTransitionsToPack.add();
-            stepTransition.reset();
+         BipedStepTransition liftOffTransition = stepTransitionsToPack.add();
+         liftOffTransition.reset();
+         liftOffTransition.setTransitionTime(transitionTime);
+         liftOffTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getFootstepPose());
 
-            stepTransition.setTransitionTime(swingStartTime);
-
-            stepTransition.addTransition(BipedStepTransitionType.LIFT_OFF, step.getRobotSide(), step.getFootstepPose());
-         }
-
-         if (swingEndTime >= currentTime)
-         {
-            BipedStepTransition stepTransition = stepTransitionsToPack.add();
-            stepTransition.reset();
-
-            stepTransition.setTransitionTime(swingEndTime);
-            stepTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getFootstepPose());
-         }
+         transitionTime += stepTiming.getSwingTime();
+         
+         BipedStepTransition touchDownTransition = stepTransitionsToPack.add();
+         touchDownTransition.reset();
+         touchDownTransition.setTransitionTime(transitionTime);
+         touchDownTransition.addTransition(BipedStepTransitionType.TOUCH_DOWN, step.getRobotSide(), step.getFootstepPose());
+         
+         transitionTime += stepTiming.getTransferTime();
       }
 
       // sort step transitions in ascending order as a function of time
@@ -83,7 +73,7 @@ public class BipedContactSequenceTools
       BipedContactSequenceTools.collapseTransitionEvents(stepTransitionsToPack);
 
       // remove any transitions that already happened
-      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() < currentTime);
+      stepTransitionsToPack.removeIf(transition -> transition.getTransitionTime() <= currentTime);
    }
    
    /**

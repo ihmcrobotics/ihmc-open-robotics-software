@@ -152,9 +152,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
-
       swingTime = walkingMessageHandler.getNextSwingTime();
       walkingMessageHandler.poll(nextFootstep, footstepTiming, footstepShiftFraction);
 
@@ -164,8 +161,6 @@ public class SimpleSingleSupportState extends SimpleWalkingState
       updateFootstepParameters();
 
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
@@ -243,7 +238,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
 
-      double remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
+      double remainingTime = 0;
       estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
 
       if (remainingTime > 1.0e-3)

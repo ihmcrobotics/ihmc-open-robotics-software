@@ -1,6 +1,7 @@
 package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
@@ -46,6 +47,10 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
    private final List<RobotSide> currentFeetInContact = new ArrayList<>();
    
    private final SimpleSphereVisualizer vizSphere;
+   
+   private final List<Footstep> footstepList = new ArrayList<>();
+   private final List<FootstepTiming> footstepTimingList = new ArrayList<>();
+   private boolean isDoubleSupport;
 
    public SimpleBasicSphereController(SimpleSphereRobot sphereRobot, SimpleBipedCoMTrajectoryPlanner comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -68,8 +73,12 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       sphereRobot.getScsRobot().setController(this);
       
       vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot, registry);
-      updateFeetState(0);
-      vizSphere.updateVizFeet(0, currentFeetInContact);
+      
+      dcmPlan.initialize();
+      
+      //start in transfer
+      isDoubleSupport = false;
+      dcmPlan.initializeForStanding(0);
    }
 
 
@@ -87,7 +96,7 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       double currentTime = sphereRobot.getScsRobot().getYoTime().getDoubleValue();
       updateFeetState(currentTime);
       dcmPlan.setInitialCenterOfMassState(sphereRobot.getCenterOfMass(), sphereRobot.getCenterOfMassVelocity());
-      dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
+      dcmPlan.computeSetpoints(currentTime, footstepList, footstepTimingList);
       
       double check = 0;
       if(sphereRobot.getScsRobot().getYoTime().getDoubleValue()>=1.65)
@@ -121,57 +130,85 @@ public class SimpleBasicSphereController implements SimpleSphereControllerInterf
       sphereRobot.updateJointTorques_ID_to_SCS();
       
       vizSphere.updateVizPoints(currentTime, vrpForces);
-      vizSphere.updateVizFeet(currentTime, currentFeetInContact);
+      vizSphere.updateVizFeet(currentTime, currentFeetInContact, footstepList, footstepTimingList);
    }
 
    private void updateFeetState(double currentTime)
    {
       currentFeetInContact.clear();
       
-      List<Footstep> footstepList= dcmPlan.getUpcomingFootsteps();
-      List<FootstepTiming> footstepTimingList= dcmPlan.getUpcomingFootstepTimings();
-      
-      if(currentTime < footstepTimingList.get(0).getExecutionStartTime())
-      {
+      if(footstepList.size() == 0)
+      {//Simulation has finished all planned steps
          for (RobotSide robotSide : RobotSide.values)
             currentFeetInContact.add(robotSide);
-         //Simulation is in transfer prior to beginning steps, keep initial footstepPose
          return;
       }
+      
+      //Simulation is in initial transfer
+      if(currentTime < footstepTimingList.get(0).getExecutionStartTime())
+      {
+         if (!isDoubleSupport)
+         {
+            dcmPlan.initializeForTransfer(currentTime);
+            isDoubleSupport = true;
+         }
+         for (RobotSide robotSide : RobotSide.values)
+            currentFeetInContact.add(robotSide);
+         return;
+      }
+      
       for (int i = 0; i < footstepTimingList.size(); i++)
       {
          double swingStartTime = footstepTimingList.get(i).getExecutionStartTime() + footstepTimingList.get(i).getSwingStartTime();
          double swingEndTime = swingStartTime + footstepTimingList.get(i).getSwingTime();
-         //Note: if current time = a transition time then it should be in the next state, as that is what the CSPUpdater does
+         double footstepEndTime = swingEndTime + footstepTimingList.get(i).getTransferTime();
+         
          if (currentTime >= swingStartTime && currentTime < swingEndTime)
          {
             //Robot is in swing
+            if (isDoubleSupport)
+            {
+               dcmPlan.initializeForSingleSupport(currentTime);
+               dcmPlan.setSupportLeg(footstepList.get(i).getRobotSide().getOppositeSide());
+               isDoubleSupport = false;
+            }
             currentFeetInContact.add(footstepList.get(i).getRobotSide().getOppositeSide());
             sphereRobot.updateSoleFrame(footstepList.get(i).getRobotSide(), footstepList.get(i).getFootstepPose().getPosition());               
             return;
          }
-            
+         else if (currentTime >= swingEndTime && currentTime < footstepEndTime)
+         {
+            //Robot is in transfer after swing
+            if (!isDoubleSupport)
+            {
+               dcmPlan.initializeForTransfer(currentTime);
+               isDoubleSupport = true;
+               footstepList.remove(i);
+               footstepTimingList.remove(i);
+               dcmPlan.setTransferToSide(footstepList.get(i).getRobotSide());
+            }
+            currentFeetInContact.add(footstepList.get(i).getRobotSide().getOppositeSide());
+            sphereRobot.updateSoleFrame(footstepList.get(i).getRobotSide(), footstepList.get(i).getFootstepPose().getPosition());               
+            return;
+         }
       }
-      //Simulation has finished all planned steps or is in transfer
-      for (RobotSide robotSide : RobotSide.values)
-         currentFeetInContact.add(robotSide);
-      return;
+   }
+
+   @Override
+   public void setFootstepPlan(List<Footstep> footstepList, List<FootstepTiming> footstepTimingList)
+   {
+      this.footstepList.clear();
+      this.footstepTimingList.clear();
+      this.footstepList.addAll(footstepList);
+      this.footstepTimingList.addAll(footstepTimingList);
+      dcmPlan.setFinalTransferDuration(footstepTimingList.get(0).getExecutionStartTime());
    }
    
    @Override
    public void initialize()
    {
    }
-
-   public void solveForTrajectory()
-   {
-      dcmPlan.initialize();
-      double currentTime = sphereRobot.getScsRobot().getYoTime().getDoubleValue();
-      updateFeetState(currentTime);
-      dcmPlan.setInitialCenterOfMassState(sphereRobot.getCenterOfMass(), sphereRobot.getCenterOfMassVelocity());
-      double timeInPhase = dcmPlan.computeSetpoints(currentTime, currentFeetInContact);
-   }
-
+   
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
