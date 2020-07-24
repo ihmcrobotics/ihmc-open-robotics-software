@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
+import us.ihmc.commonWalkingControlModules.capturePoint.SimpleLinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
@@ -69,7 +69,7 @@ public class SimpleBalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
+   private final SimpleLinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new SimpleLinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -556,7 +556,7 @@ public class SimpleBalanceManager
       controllerToolbox.getCapturePoint(capturePointToPack);
    }
 
-   public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
+   public SimpleLinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
    {
       return linearMomentumRateControlModuleInput;
    }

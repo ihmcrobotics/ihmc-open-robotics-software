@@ -1,6 +1,7 @@
 package us.ihmc.simpleWholeBodyWalking;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
+import us.ihmc.commonWalkingControlModules.capturePoint.SimpleLinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -41,7 +42,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    private final static FrameVector2D emptyVector = new FrameVector2D();
 
    private final WholeBodyControllerCore controllerCore;
-   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
+   private final SimpleLinearMomentumRateControlModule linearMomentumRateControlModule;
    private final SimpleWalkingHighLevelHumanoidController walkingController;
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
@@ -97,7 +98,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
+      linearMomentumRateControlModule = new SimpleLinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
                                                                             gravityZ, controlDT, registry, yoGraphicsListRegistry, USE_LQR_MOMENTUM_CONTROLLER);
       linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
       linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());

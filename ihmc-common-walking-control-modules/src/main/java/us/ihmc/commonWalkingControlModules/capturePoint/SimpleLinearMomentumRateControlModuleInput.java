@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -12,16 +13,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-/**
- * Command that holds input for the {@link LinearMomentumRateControlModule} coming from the walking controller state
- * machine that might be running at a slower rate then the ICP feedback.
- *
- * @author Georg Wiedebach
- */
-public class LinearMomentumRateControlModuleInput
+public class SimpleLinearMomentumRateControlModuleInput
 {
    /**
     * The time constant for the LIPM model. This might be changed during a run so it is a parameter. Typically the value
@@ -57,6 +53,16 @@ public class LinearMomentumRateControlModuleInput
     * plan.
     */
    private final FramePoint2D perfectCoP = new FramePoint2D();
+
+   /*
+    * Desired VRP trajectories passed form the SImpleCOMTrajectoryPlanner to the LQR Momentum Controller.
+    */
+   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   
+   /*
+    * Time in the current contact phase of the VRP trajectory
+    */
+   private double timeInContactPhase = 0.0;
 
    /**
     * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
@@ -266,6 +272,27 @@ public class LinearMomentumRateControlModuleInput
    {
       return perfectCoP;
    }
+   
+   public void setVRPTrajectories(List<Trajectory3D> vrpTrajectories)
+   {
+      this.vrpTrajectories.clear();
+      this.vrpTrajectories.addAll(vrpTrajectories);
+   }
+   
+   public List<Trajectory3D> getVRPTrajectories()
+   {
+      return vrpTrajectories;
+   }
+   
+   public void setTimeInContactPhase(double timeInContactPhase)
+   {
+      this.timeInContactPhase = timeInContactPhase;
+   }
+   
+   public double getTimeInContactPhase()
+   {
+      return timeInContactPhase;
+   }
 
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
    {
@@ -426,7 +453,7 @@ public class LinearMomentumRateControlModuleInput
       return contactStateCommands;
    }
 
-   public void set(LinearMomentumRateControlModuleInput other)
+   public void set(SimpleLinearMomentumRateControlModuleInput other)
    {
       omega0 = other.omega0;
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
@@ -435,6 +462,9 @@ public class LinearMomentumRateControlModuleInput
       desiredICPAtEndOfState.setIncludingFrame(other.desiredICPAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
+      vrpTrajectories.clear();
+      vrpTrajectories.addAll(other.getVRPTrajectories());
+      timeInContactPhase = other.timeInContactPhase;
       controlHeightWithMomentum = other.controlHeightWithMomentum;
       desiredCoMHeightAcceleration = other.desiredCoMHeightAcceleration;
       supportSide = other.supportSide;
@@ -464,9 +494,9 @@ public class LinearMomentumRateControlModuleInput
       {
          return true;
       }
-      else if (obj instanceof LinearMomentumRateControlModuleInput)
+      else if (obj instanceof SimpleLinearMomentumRateControlModuleInput)
       {
-         LinearMomentumRateControlModuleInput other = (LinearMomentumRateControlModuleInput) obj;
+         SimpleLinearMomentumRateControlModuleInput other = (SimpleLinearMomentumRateControlModuleInput) obj;
          if (Double.compare(omega0, other.omega0) != 0)
             return false;
          if (!desiredCapturePoint.equals(other.desiredCapturePoint))
@@ -478,6 +508,10 @@ public class LinearMomentumRateControlModuleInput
          if (!perfectCMP.equals(other.perfectCMP))
             return false;
          if (!perfectCoP.equals(other.perfectCoP))
+            return false;
+         if (!vrpTrajectories.equals(other.getVRPTrajectories()))
+            return false;
+         if (timeInContactPhase != other.timeInContactPhase)
             return false;
          if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
             return false;
