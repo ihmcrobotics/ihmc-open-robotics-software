@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -62,6 +63,8 @@ public class SLAMModule implements PerceptionModule
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
+
+   private Stopwatch stopwatch = new Stopwatch();
 
    private final boolean manageRosNode;
    protected final Ros2Node ros2Node;
@@ -225,6 +228,7 @@ public class SLAMModule implements PerceptionModule
 
    public void updateSLAM()
    {
+      stopwatch.start();
       if (updateSLAMInternal())
       {
          publishResults();
@@ -302,6 +306,7 @@ public class SLAMModule implements PerceptionModule
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
+      LogTools.info("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());

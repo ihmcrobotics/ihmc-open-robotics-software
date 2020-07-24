@@ -12,7 +12,9 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bytedeco.librealsense.timestamp_data;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -46,6 +48,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private static final String reportPlanarRegionsStateTimeReport = "Reporting Planar Regions state took: ";
 
    private final TimeReporter timeReporter = new TimeReporter();
+   Stopwatch stopwatch = new Stopwatch();
 
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
 
@@ -233,6 +236,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          {
             NormalOcTree latestOcTree = ocTreeTimestamp.getLeft();
             long timestamp = ocTreeTimestamp.getRight();
+            LogTools.info("Starting octree update for timestamp {}", timestamp);
+            stopwatch.start();
 
             if (isThreadInterrupted())
                return;
@@ -251,6 +256,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
             LogTools.info("Publishing " + planarRegionsList.getNumberOfPlanarRegions()
                           + " planar regions. timestamp: " + timestamp
                           + " lateness: " + lateness
+                          + " s computeDuration: " + stopwatch.totalElapsed()
                           + " s (" + outputTopic + ")");
             planarRegionPublisher.publish(message);
          }
