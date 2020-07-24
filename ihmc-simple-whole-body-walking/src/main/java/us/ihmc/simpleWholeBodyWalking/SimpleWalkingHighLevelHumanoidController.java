@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
+import us.ihmc.commonWalkingControlModules.capturePoint.SimpleLinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -704,7 +705,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       return controllerCoreCommand;
    }
 
-   public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
+   public SimpleLinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
    {
       return balanceManager.getLinearMomentumRateControlModuleInput();
    }

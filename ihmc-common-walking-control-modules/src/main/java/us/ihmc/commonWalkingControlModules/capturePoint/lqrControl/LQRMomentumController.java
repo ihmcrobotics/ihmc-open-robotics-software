@@ -19,6 +19,7 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -46,7 +47,8 @@ public class LQRMomentumController
    private final YoFramePoint3D finalVRPPosition = new YoFramePoint3D("finalVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D referenceVRPPosition = new YoFramePoint3D("referenceVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D feedbackVRPPosition = new YoFramePoint3D("feedbackVRPPosition", ReferenceFrame.getWorldFrame(), registry);
-
+   private final YoDouble omega = new YoDouble("omega", registry);
+   
    static final double defaultVrpTrackingWeight = 1e2;
    static final double defaultMomentumRateWeight = 1e-4;
 
@@ -130,9 +132,18 @@ public class LQRMomentumController
    
    public LQRMomentumController(double omega, YoVariableRegistry parentRegistry)
    {
-      computeDynamicsMatrix(omega);
+      this.omega.set(omega);
+      computeDynamicsMatrix(this.omega.getDoubleValue());
+                            
+      this.omega.addVariableChangedListener(v -> {
+         computeDynamicsMatrix(this.omega.getDoubleValue());
+         System.out.println("omega changed");
+      });
+      
+      this.omega.set(omega);
 
       computeS1();
+      
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
