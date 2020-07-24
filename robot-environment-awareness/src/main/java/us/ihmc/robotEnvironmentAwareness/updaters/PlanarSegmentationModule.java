@@ -97,20 +97,28 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, String configurationFilePath) throws Exception
    {
-      this(ros2Node, reaMessager, configurationFilePath, false);
-   }
-
-   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, String configurationFilePath, boolean manageRosNode) throws Exception
-   {
       this(ros2Node,
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
            ROS2Tools.REALSENSE_SLAM_REGIONS,
            reaMessager,
            configurationFilePath,
-           manageRosNode,
+           false,
            false);
    }
+
+   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, String configurationFilePath, boolean runAsynchronously) throws Exception
+   {
+      this(ros2Node,
+           REACommunicationProperties.inputTopic,
+           REACommunicationProperties.subscriberCustomRegionsTopicName,
+           ROS2Tools.REALSENSE_SLAM_MAP,
+           reaMessager,
+           configurationFilePath,
+           false,
+           runAsynchronously);
+   }
+
 
    private PlanarSegmentationModule(ROS2Topic<?> inputTopic,
                                     ROS2Topic<?> customRegionTopic,
@@ -452,7 +460,14 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       return new PlanarSegmentationModule(ros2Node, messager, configurationFilePath);
    }
 
+
+   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node, Messager messager, boolean runAsynchronously) throws Exception
+   {
+      return new PlanarSegmentationModule(ros2Node, messager, configurationFilePath, runAsynchronously);
+
+   }
    private static File setupConfigurationFile(String configurationFilePath)
+
    {
       File configurationFile = new File(configurationFilePath);
       try
@@ -465,6 +480,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          LogTools.info(configurationFile.getAbsolutePath());
          e.printStackTrace();
       }
+
       return configurationFile;
    }
 }
