@@ -94,9 +94,9 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
       bindFieldBidirectionalToNumberProperty(property, rotationalEffortConvergenceThreshold);
    }
 
-   public void bindBidirectionalEnableInitialQualityFilter(Property<? extends Number> property)
+   public void bindBidirectionalEnableInitialQualityFilter(Property<Boolean> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, enableInitialQualityFilter);
+      bindFieldBidirectionalToBooleanProperty(property, enableInitialQualityFilter);
    }
 
    public void bindBidirectionalInitialQualityThreshold(Property<? extends Number> property)
