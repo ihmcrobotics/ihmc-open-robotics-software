@@ -374,7 +374,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
-      LogTools.info("################################################ HI!!!!");
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
