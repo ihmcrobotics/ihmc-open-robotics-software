@@ -2,6 +2,9 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.Scanner;
 
+/**
+ * @see <a href="https://docs.google.com/presentation/d/1GH2QqMLM1cKgll5hcd-nX18c-cGVjB5ABkz_voOZU1w/edit?usp=sharing">20200722_LearningLunch_Inho</a>
+ */
 public class SurfaceElementICPSLAMParameters
 {
    private static final double DEFAULT_SURFACE_ELEMENT_RESOLUTION = 0.04;
