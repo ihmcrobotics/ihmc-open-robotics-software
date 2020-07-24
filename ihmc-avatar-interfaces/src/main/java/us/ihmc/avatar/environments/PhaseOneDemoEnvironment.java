@@ -48,16 +48,19 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
 
    private final PlanarRegionsList debrisRegions = new PlanarRegionsList();
 
-   private final Point3D doorLocation = new Point3D(7.5, -0.5, 0.0);
-   private final Point3D stairsLocation = new Point3D(12.0, 0.0, 0.0);
+   private final Point3D pullDoorLocation = new Point3D(10.0, -0.5 * ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0);
+   private final Point3D pushDoorLocation = new Point3D(7.5, -0.5 * ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0);
+   private final Point3D stairsLocation = new Point3D(13.0, 0.0, 0.0);
    private final double doorYaw = 0.5 * Math.PI;
 
-   public PhaseOneDemoEnvironment(boolean door, boolean debris, boolean barrel, boolean stairs, boolean cinderBlockField)
+   public PhaseOneDemoEnvironment(boolean pushDoor, boolean pullDoor, boolean debris, boolean barrel, boolean stairs, boolean cinderBlockField)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
 
-      if (door)
-         createDoor(false);
+      if (pushDoor)
+         createPushDoor();
+      if (pullDoor)
+         createPullDoor();
       if (barrel)
          createBarrel();
       if (stairs)
@@ -118,34 +121,47 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       addRegions(wallRegionsGenerator.getPlanarRegionsList(), YoAppearance.DarkGray());
    }
 
-   private void createDoor(boolean pushDoor)
+   private void createPushDoor()
    {
-      ContactableDoorRobot door;
-      if (pushDoor)
-      {
-         Point3D pushDoorLocation = new Point3D(doorLocation);
-         Vector3D offset = new Vector3D(ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
-         new AxisAngle(doorYaw, 0.0, 0.0).transform(offset);
-         pushDoorLocation.add(offset);
+      Vector3D offset = new Vector3D(ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
+      new AxisAngle(doorYaw, 0.0, 0.0).transform(offset);
+      pushDoorLocation.add(offset);
 
-         door = new ContactableDoorRobot("doorRobot", pushDoorLocation, doorYaw, Fiducial.FIDUCIAL50);
-         door.getPinJoint().setQ(Math.toRadians(180));
-      }
-      else
-      {
-         door = new ContactableDoorRobot("doorRobot", doorLocation, doorYaw, Fiducial.FIDUCIAL150);
-      }
+      ContactableDoorRobot door = new ContactableDoorRobot("pushDoorRobot", pushDoorLocation, doorYaw, Fiducial.FIDUCIAL50);
+      door.getPinJoint().setQ(Math.PI);
 
       contactableRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
 
       RigidBodyTransform wall1Transform = new RigidBodyTransform();
-      wall1Transform.getTranslation().set(doorLocation);
+      wall1Transform.getTranslation().set(pushDoorLocation);
+      wall1Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
+      wall1Transform.appendTranslation(0.5 * WALL_WIDTH, 0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
+
+      RigidBodyTransform wall2Transform = new RigidBodyTransform();
+      wall2Transform.getTranslation().set(pushDoorLocation);
+      wall2Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
+      wall2Transform.appendTranslation(-ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
+      wall2Transform.appendTranslation(-0.5 * WALL_WIDTH, -0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
+
+      combinedTerrainObject.addRotatableBox(wall1Transform, WALL_WIDTH, WALL_DEPTH, WALL_HEIGHT, YoAppearance.Bisque());
+      combinedTerrainObject.addRotatableBox(wall2Transform, WALL_WIDTH, WALL_DEPTH, WALL_HEIGHT, YoAppearance.Bisque());
+   }
+
+   private void createPullDoor()
+   {
+      ContactableDoorRobot pullDoor = new ContactableDoorRobot("pullDoorRobot", pullDoorLocation, doorYaw, Fiducial.FIDUCIAL150);
+
+      contactableRobots.add(pullDoor);
+      pullDoor.createAvailableContactPoints(0, 15, 15, 0.02, true);
+
+      RigidBodyTransform wall1Transform = new RigidBodyTransform();
+      wall1Transform.getTranslation().set(pullDoorLocation);
       wall1Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
       wall1Transform.appendTranslation(- 0.5 * WALL_WIDTH, - 0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
 
       RigidBodyTransform wall2Transform = new RigidBodyTransform();
-      wall2Transform.getTranslation().set(doorLocation);
+      wall2Transform.getTranslation().set(pullDoorLocation);
       wall2Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
       wall2Transform.appendTranslation(ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
       wall2Transform.appendTranslation(0.5 * WALL_WIDTH, 0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
