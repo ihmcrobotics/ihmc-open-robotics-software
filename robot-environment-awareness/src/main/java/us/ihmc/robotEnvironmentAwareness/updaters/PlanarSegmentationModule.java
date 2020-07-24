@@ -72,7 +72,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<Pair<NormalOcTree, Long>> ocTree = new AtomicReference<>(null);
    private final AtomicReference<NormalOcTree> currentOcTree = new AtomicReference<>(null);
-   private final AtomicReference<Pose3DReadOnly> sensorPose;
+   private final AtomicReference<Pose3DReadOnly> sensorPose = new AtomicReference<>(null);
 
    private final AtomicReference<Boolean> runAsynchronously;
    private final AtomicReference<Boolean> isOcTreeBoundingBoxRequested;
@@ -170,7 +170,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
 
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
-      sensorPose = reaMessager.createInput(SegmentationModuleAPI.SensorPose, null);
 
       PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
@@ -203,15 +202,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          if (node.getLastHitTimestamp() > latestTimestamp)
             latestTimestamp = node.getLastHitTimestamp();
       }
-      LogTools.debug("Received ocTree. size: " + ocTree.size()
-                    + " hash: " + ocTree.hashCode()
-                    + " timestamp: " + latestTimestamp
-                    + " sensorPosition: " + sensorPose
-      );
-      this.ocTree.set(Pair.of(ocTree, latestTimestamp));
 
-      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
-      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, sensorPose);
+      this.ocTree.set(Pair.of(ocTree, latestTimestamp));
+      this.sensorPose.set(sensorPose);
 
       if (!runAsynchronously.get())
       {
@@ -332,7 +325,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          NormalOcTreeSetter.updateOcTree(mainOcTree, latestOcTree);
       }
 
-      handleBoundingBox(mainOcTree, sensorPose);
+//      handleBoundingBox(mainOcTree, sensorPose);
 
       currentOcTree.set(mainOcTree);
 
@@ -342,6 +335,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
       planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList()));
+
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(mainOcTree));
+      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, sensorPose);
    }
 
    private boolean isThreadInterrupted()
