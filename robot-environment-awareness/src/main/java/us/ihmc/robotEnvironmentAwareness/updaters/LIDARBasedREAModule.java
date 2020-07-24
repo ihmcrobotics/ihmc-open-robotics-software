@@ -303,9 +303,9 @@ public class LIDARBasedREAModule implements PerceptionModule
          else
          {
             if (enableStereoBuffer.get() && !preserveStereoOcTreeHistory.get())
-               mainUpdater.clearOcTree();
+               mainUpdater.clearOcTreeOnNextUpdate(stereoVisionBufferUpdater);
             else if (enableDepthCloudBuffer.get() && !preserveDepthOcTreeHistory.get())
-               mainUpdater.clearOcTree();
+               mainUpdater.clearOcTreeOnNextUpdate(depthCloudBufferUpdater);
 
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
@@ -380,6 +380,7 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setMaxAngleFromPlane(Math.toRadians(10.0));
       planarRegionSegmentationParameters.setMinRegionSize(150);
       reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, planarRegionSegmentationParameters);
 
