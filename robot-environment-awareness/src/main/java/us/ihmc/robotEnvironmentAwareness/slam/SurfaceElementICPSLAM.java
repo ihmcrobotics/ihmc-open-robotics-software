@@ -157,11 +157,11 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          }
       }
 
-      LogTools.info("final quality " + initialQuality);
+      LogTools.info("final quality " + optimizer.getQuality());
       // get parameter.
       optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
 
-      driftCorrectionResult.setFinalDistance(initialQuality);
+      driftCorrectionResult.setFinalDistance(optimizer.getQuality());
       driftCorrectionResult.setNumberOfSurfels(numberOfSurfel);
       driftCorrectionResult.setDriftCorrectionTransformer(icpTransformer);
       driftCorrectionResult.setIcpIterations(iterations);
