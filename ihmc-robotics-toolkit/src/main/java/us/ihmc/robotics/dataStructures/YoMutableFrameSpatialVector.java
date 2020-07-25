@@ -7,21 +7,27 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameObject;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 /**
  * TODO: this should probably live in mecano?
  */
-public class YoMutableFrameSpatialVector extends YoMutableFrameObject implements SpatialVectorBasics
+public class YoMutableFrameSpatialVector implements SpatialVectorBasics, YoMutableFrameObject
 {
+   private final YoLong frameId;
+   private final FrameIndexMap frameIndexMap;
+
    private final YoMutableFrameVector3D angularPart;
    private final YoMutableFrameVector3D linearPart;
 
    public YoMutableFrameSpatialVector(YoMutableFrameVector3D angularPart, YoMutableFrameVector3D linearPart)
    {
-      super(angularPart.getYoFrameIndex(), angularPart.getFrameIndexMap());
+      this.frameId = angularPart.getYoFrameIndex();
+      this.frameIndexMap = linearPart.getFrameIndexMap();
       this.angularPart = angularPart;
       this.linearPart = linearPart;
       checkFrameConsistency();
@@ -29,7 +35,8 @@ public class YoMutableFrameSpatialVector extends YoMutableFrameObject implements
 
    public YoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry)
    {
-      super(namePrefix, nameSuffix, registry);
+      frameId = new YoLong(YoFrameVariableNameTools.createName(namePrefix, "frame", nameSuffix), registry);
+      frameIndexMap = new FrameIndexMap.FrameIndexHashMap();
 
       YoDouble xAngular = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, "Angular" + nameSuffix), registry);
       YoDouble yAngular = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, "Angular" + nameSuffix), registry);
@@ -40,6 +47,18 @@ public class YoMutableFrameSpatialVector extends YoMutableFrameObject implements
       YoDouble yLinear = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, "Linear" + nameSuffix), registry);
       YoDouble zLinear = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, "Linear" + nameSuffix), registry);
       linearPart = new YoMutableFrameVector3D(xLinear, yLinear, zLinear, getYoFrameIndex(), getFrameIndexMap());
+   }
+
+   @Override
+   public FrameIndexMap getFrameIndexMap()
+   {
+      return frameIndexMap;
+   }
+
+   @Override
+   public YoLong getYoFrameIndex()
+   {
+      return frameId;
    }
 
    @Override
@@ -60,21 +79,21 @@ public class YoMutableFrameSpatialVector extends YoMutableFrameObject implements
    public ReferenceFrame getReferenceFrame()
    {
       checkFrameConsistency();
-      return super.getReferenceFrame();
+      return YoMutableFrameObject.super.getReferenceFrame();
    }
 
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
       checkFrameConsistency();
-      super.setReferenceFrame(referenceFrame);
+      YoMutableFrameObject.super.setReferenceFrame(referenceFrame);
       // When constructing this with two YoMutableFrameVector3D objects the angular part is updated only by the super implementation.
       linearPart.setReferenceFrame(referenceFrame);
    }
 
    /**
-    * This is a check that should be called every time this object is interacted with. If this
-    * failes it likely means that you created this pose using
+    * This is a check that should be called every time this object is interacted with. If this failes
+    * it likely means that you created this pose using
     * {@link #YoMutableFramePose3D(YoMutableFramePoint3D, YoMutableFrameQuaternion)} and changed the
     * reference frame of one of the passed objects without modifying the other one from outside this
     * class. This will make the data structure in here inconsistent.
