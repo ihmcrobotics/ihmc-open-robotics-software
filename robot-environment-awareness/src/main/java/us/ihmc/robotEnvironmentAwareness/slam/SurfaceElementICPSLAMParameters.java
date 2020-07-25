@@ -24,6 +24,9 @@ public class SurfaceElementICPSLAMParameters
    private static final boolean DEFAULT_ENABLE_INITIAL_QUALITY_FILTER = false;
    private static final double DEFAULT_INITIAL_QUALITY_THRESHOLD = 0.1;
 
+   private static final int DEFAULT_MAX_OPTIMIZATION_ITERATIONS = 40;
+   private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = false;
+
    private double surfaceElementResolution;
    private double windowMargin;
    private int minimumNumberOfHit;
@@ -40,6 +43,9 @@ public class SurfaceElementICPSLAMParameters
 
    private boolean enableInitialQualityFilter;
    private double initialQualityThreshold;
+
+   private int maxOptimizationIterations;
+   private boolean computeSurfaceNormalsInFrame;
 
    public SurfaceElementICPSLAMParameters()
    {
@@ -69,6 +75,9 @@ public class SurfaceElementICPSLAMParameters
 
       enableInitialQualityFilter = other.enableInitialQualityFilter;
       initialQualityThreshold = other.initialQualityThreshold;
+
+      maxOptimizationIterations = other.maxOptimizationIterations;
+      computeSurfaceNormalsInFrame = other.computeSurfaceNormalsInFrame;
    }
 
    public void setDefaultParameters()
@@ -89,6 +98,9 @@ public class SurfaceElementICPSLAMParameters
 
       enableInitialQualityFilter = DEFAULT_ENABLE_INITIAL_QUALITY_FILTER;
       initialQualityThreshold = DEFAULT_INITIAL_QUALITY_THRESHOLD;
+
+      maxOptimizationIterations = DEFAULT_MAX_OPTIMIZATION_ITERATIONS;
+      computeSurfaceNormalsInFrame = DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME;
    }
 
    public double getSurfaceElementResolution()
@@ -156,6 +168,16 @@ public class SurfaceElementICPSLAMParameters
       return initialQualityThreshold;
    }
 
+   public int getMaxOptimizationIterations()
+   {
+      return maxOptimizationIterations;
+   }
+
+   public boolean getComputeSurfaceNormalsInPlane()
+   {
+      return computeSurfaceNormalsInFrame;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -219,6 +241,16 @@ public class SurfaceElementICPSLAMParameters
    public void setInitialQualityThreshold(double initialQualityThreshold)
    {
       this.initialQualityThreshold = initialQualityThreshold;
+   }
+
+   public void setMaxOptimizationIterations(int maximumCorrespondingDistance)
+   {
+      this.maxOptimizationIterations = maximumCorrespondingDistance;
+   }
+
+   public void setComputeSurfaceNormalsInFrame(boolean computeSurfaceNormalsInFrame)
+   {
+      this.computeSurfaceNormalsInFrame = computeSurfaceNormalsInFrame;
    }
 
    @Override
