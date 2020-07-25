@@ -217,7 +217,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizerRotationalEffortDiff.set(rotationalEffortDiff);
          optimizerTranslationalEffort.set(translationalEffort);
          optimizerRotationalEffort.set(rotationalEffort);
-         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorespondingPoints());
+         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorrespondingPoints());
 
          previousIcpTransformer.set(icpTransformer);
          if (isSteady)
@@ -258,7 +258,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
+            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getUncorrectedSensorPoseInWorld());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
 
             Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
