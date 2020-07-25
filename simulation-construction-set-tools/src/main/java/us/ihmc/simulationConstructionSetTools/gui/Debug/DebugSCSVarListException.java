@@ -29,7 +29,7 @@ public class DebugSCSVarListException
          YoDouble foo = new YoDouble("foo_" + count, "", registry);
 
          YoVariableList varList = new YoVariableList("foo_" + count);
-         varList.addVariable(foo);
+         varList.add(foo);
 
          scs.addVarList(varList);
 

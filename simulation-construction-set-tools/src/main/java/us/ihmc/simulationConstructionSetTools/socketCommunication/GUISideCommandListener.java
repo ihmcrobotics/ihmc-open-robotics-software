@@ -139,7 +139,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    {
       for (int i = 0; i < allVariables.size(); i++)
       {
-         YoVariable v = allVariables.getVariable(i);
+         YoVariable v = allVariables.get(i);
          allVariablesIndexMap.put(v, i);
          System.out.println(i + " " + v.getFullNameString());
       }
@@ -179,7 +179,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       YoRegistry registry = rootRegistry.findRegistry(fullName.getParent());
       YoDouble newVar = new YoDouble(fullName.getShortName(), "", registry);
 
-      allVariables.addVariable(newVar);
+      allVariables.add(newVar);
 
       newVar.set(initialValue);
       System.out.println("Didn't Find var: " + fullVariableName);
@@ -190,7 +190,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    private void addVariableAndSetInitialValue(float initialValue, String fullVariableName, YoVariable variable)
    {
       System.out.println("Found var: " + fullVariableName);
-      allVariables.addVariable(variable);
+      allVariables.add(variable);
       variable.setValueFromDouble(initialValue);
    }
 
@@ -359,7 +359,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       
       for (int i=0; i<numberToIterate; i++)
       {
-         YoVariable var = allVariables.getVariable(i);
+         YoVariable var = allVariables.get(i);
       
          YoRegistry registry = var.getRegistry();
 //         if (registry.isSent())
@@ -377,7 +377,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       
       for (int i=0; i<numberToIterate; i++)
       {
-         YoVariable var = allVariables.getVariable(i);
+         YoVariable var = allVariables.get(i);
 //         if (var.getRegistry().isLogged())
             logVarsCount++;
       }
