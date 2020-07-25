@@ -80,7 +80,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       yoRootRegistry = handshakeParser.getRootRegistry();
 
       yoRootRegistry.subtreeParameters().stream().forEach(parameter -> {
-         parameter.addParameterChangedListener(new YoParameterChangedListener()
+         parameter.addListener(new YoParameterChangedListener()
          {
             @Override
             public void changed(YoParameter changedParameter)

@@ -116,7 +116,7 @@ public class QuadrupedBodyICPBasedTranslationManager
       bodyPositionGains.setMaximumIntegralError(0.05);
       bodyPositionGains.setIntegralLeakRatio(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, controlDT));
 
-      manualMode.addParameterChangedListener(v -> initialize());
+      manualMode.addListener(v -> initialize());
 
       String namePrefix = "BodyXYTranslation";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);

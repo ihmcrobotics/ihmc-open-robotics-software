@@ -125,7 +125,7 @@ public class LabelGraphic
 
    private void addParameterListener(DoubleParameter parameter, DoubleConsumer runnable)
    {
-      parameter.addParameterChangedListener(changedParameter ->
+      parameter.addListener(changedParameter ->
       {
          double value = ((DoubleParameter) changedParameter).getValue();
          Platform.runLater(() ->

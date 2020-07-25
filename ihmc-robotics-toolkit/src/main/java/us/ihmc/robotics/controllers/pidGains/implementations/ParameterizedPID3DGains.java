@@ -229,8 +229,8 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       };
 
       updater.changed(null);
-      kp.addParameterChangedListener(updater);
-      zeta.addParameterChangedListener(updater);
+      kp.addListener(updater);
+      zeta.addListener(updater);
    }
 
    @Override
