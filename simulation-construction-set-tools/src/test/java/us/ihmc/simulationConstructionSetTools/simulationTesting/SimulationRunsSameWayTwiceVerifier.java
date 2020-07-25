@@ -72,8 +72,8 @@ public class SimulationRunsSameWayTwiceVerifier
       YoVariableList listOne = new YoVariableList("SimOneList");
       YoVariableList listTwo = new YoVariableList("SimTwoList");
 
-      listOne.addVariables(scsOne.getVariables());
-      listTwo.addVariables(scsTwo.getVariables());
+      listOne.addAll(scsOne.getVariables());
+      listTwo.addAll(scsTwo.getVariables());
 
       ArrayList<VariableDifference> variableDifferences = StateFileComparer.compareVarLists(listOne, listTwo, maxPercentDifference, true, stringsToIgnore);
       if(variableDifferences.isEmpty())
