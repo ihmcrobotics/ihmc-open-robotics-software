@@ -1,5 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import us.ihmc.jOctoMap.tools.ScannerTools;
+
 import java.util.Scanner;
 
 /**
@@ -173,7 +175,7 @@ public class SurfaceElementICPSLAMParameters
       return maxOptimizationIterations;
    }
 
-   public boolean getComputeSurfaceNormalsInPlane()
+   public boolean getComputeSurfaceNormalsInFrame()
    {
       return computeSurfaceNormalsInFrame;
    }
@@ -256,14 +258,37 @@ public class SurfaceElementICPSLAMParameters
    @Override
    public String toString()
    {
-      return "";
+      return "surfaceElementResolution: " + getSurfaceElementResolution() + ", windowMargin: " + getWindowMargin() + ", minimumNumberOfHit: "
+             + getMinimumNumberOfHit() + ", boundRatio: " + getBoundRatio() + ", minimumCorrespondingDistance: " + getMinimumCorrespondingDistance()
+             + ", maximumCorrespondingDistance: " + getMaximumCorrespondingDistance() + ", constantCorrespondingDistanceIteration: "
+             + getConstantCorrespondingDistanceIteration() + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold()
+             + ", qualityConvergenceThreshold: " + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: "
+             + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
+             + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
+             + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
    {
       parametersAsString = parametersAsString.replace(",", "");
       Scanner scanner = new Scanner(parametersAsString);
+
       SurfaceElementICPSLAMParameters parameters = new SurfaceElementICPSLAMParameters();
+      parameters.setSurfaceElementResolution(ScannerTools.readNextDouble(scanner, parameters.getSurfaceElementResolution()));
+      parameters.setWindowMargin(ScannerTools.readNextDouble(scanner, parameters.getWindowMargin()));
+      parameters.setMinimumNumberOfHit(ScannerTools.readNextInt(scanner, parameters.getMinimumNumberOfHit()));
+      parameters.setBoundRatio(ScannerTools.readNextDouble(scanner, parameters.getBoundRatio()));
+      parameters.setMinimumCorrespondingDistance(ScannerTools.readNextDouble(scanner, parameters.getMinimumCorrespondingDistance()));
+      parameters.setMaximumCorrespondingDistance(ScannerTools.readNextDouble(scanner, parameters.getMaximumCorrespondingDistance()));
+      parameters.setConstantCorrespondingDistanceIteration(ScannerTools.readNextInt(scanner, parameters.getConstantCorrespondingDistanceIteration()));
+      parameters.setSteadyStateDetectorIterationThreshold(ScannerTools.readNextInt(scanner, parameters.getSteadyStateDetectorIterationThreshold()));
+      parameters.setQualityConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getQualityConvergenceThreshold()));
+      parameters.setTranslationalEffortConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getTranslationalEffortConvergenceThreshold()));
+      parameters.setRotationalEffortConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getRotationalEffortConvergenceThreshold()));
+      parameters.setEnableInitialQualityFilter(ScannerTools.readNextBoolean(scanner, parameters.isEnableInitialQualityFilter()));
+      parameters.setInitialQualityThreshold(ScannerTools.readNextDouble(scanner, parameters.getInitialQualityThreshold()));
+      parameters.setMaxOptimizationIterations(ScannerTools.readNextInt(scanner, parameters.getMaxOptimizationIterations()));
+      parameters.setComputeSurfaceNormalsInFrame(ScannerTools.readNextBoolean(scanner, parameters.getComputeSurfaceNormalsInFrame()));
       scanner.close();
       return parameters;
    }
