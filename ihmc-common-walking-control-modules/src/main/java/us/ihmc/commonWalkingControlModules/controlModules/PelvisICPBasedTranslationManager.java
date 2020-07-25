@@ -133,7 +133,7 @@ public class PelvisICPBasedTranslationManager
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
 
-      manualMode.addParameterChangedListener(new YoParameterChangedListener()
+      manualMode.addListener(new YoParameterChangedListener()
       {
          @Override
          public void changed(YoParameter v)

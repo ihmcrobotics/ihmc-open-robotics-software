@@ -178,7 +178,7 @@ public class RigidBodyControlManager
       String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
       this.defaultControlMode = new EnumParameter<>(namePrefix
             + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
-      this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
+      this.defaultControlMode.addListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
       parentRegistry.addChild(registry);
