@@ -9,6 +9,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -49,7 +50,7 @@ public class SLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Scan toScan(Point3DReadOnly[] points, Point3DReadOnly[] pointsToSensorFrame, RigidBodyTransformReadOnly sensorPose, NormalOcTree map,
+   public static Scan toScan(Point3DReadOnly[] points, Point3DReadOnly[] pointsToSensorFrame, RigidBodyTransformReadOnly sensorPose, ConvexPolygon2DReadOnly mapHull,
                              double windowMargin)
    {
       if (points.length != pointsToSensorFrame.length)
@@ -58,11 +59,16 @@ public class SLAMTools
          return null;
       }
 
-      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(map, sensorPose);
+      ConvexPolygon2D windowForMap = new ConvexPolygon2D(mapHull);
+      windowForMap.applyInverseTransform(sensorPose, false);
+
       PointCloud pointCloud = new PointCloud();
 
       for (int i = 0; i < points.length; i++)
       {
+         if (!windowForMap.getBoundingBox().isInsideEpsilon(pointsToSensorFrame[i].getX(), pointsToSensorFrame[i].getY(), -windowMargin))
+            continue;
+
          if (windowForMap.isPointInside(pointsToSensorFrame[i].getX(), pointsToSensorFrame[i].getY(), -windowMargin))
          {
             double x = points[i].getX();

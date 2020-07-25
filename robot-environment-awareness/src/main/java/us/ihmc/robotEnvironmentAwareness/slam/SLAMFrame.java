@@ -5,7 +5,9 @@ import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -119,7 +121,7 @@ public class SLAMFrame
    private final List<Plane3DReadOnly> surfaceElementsToSensor = new ArrayList<>();
    private NormalOcTree frameMap;
 
-   public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
+   public void registerSurfaceElements(ConvexPolygon2DReadOnly mapHullInWorld, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
    {
       surfaceElements.clear();
       surfaceElementsToSensor.clear();
@@ -129,7 +131,7 @@ public class SLAMFrame
       int numberOfPoints = getUncorrectedPointCloudInWorld().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getOriginalPointCloudToSensorPose(), getUncorrectedSensorPoseInWorld(), map, windowMargin));
+      scanCollection.addScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getOriginalPointCloudToSensorPose(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin));
 
       frameMap.insertScanCollection(scanCollection, false);
       frameMap.enableParallelComputationForNormals(true);
