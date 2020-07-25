@@ -33,9 +33,6 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       this.parameters.set(parameters);
    }
 
-   /**
-    * see {@link SurfaceElementICPBasedDriftCorrectionVisualizer}
-    */
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
@@ -48,14 +45,15 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
       sourcePoints = new Point3D[numberOfSurfel];
-      LogTools.info("numberOfSurfel " + numberOfSurfel);
+      if (DEBUG)
+         LogTools.info("numberOfSurfel " + numberOfSurfel);
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
+            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getUncorrectedSensorPoseInWorld());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
 
             Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
@@ -86,16 +84,17 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          }
       };
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, 6, numberOfSurfel);
-      DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
-      purterbationVector.set(0, octree.getResolution() * 0.002);
-      purterbationVector.set(1, octree.getResolution() * 0.002);
-      purterbationVector.set(2, octree.getResolution() * 0.002);
-      purterbationVector.set(3, 0.00001);
-      purterbationVector.set(4, 0.00001);
-      purterbationVector.set(5, 0.00001);
-      optimizer.setPerturbationVector(purterbationVector);
+      DMatrixRMaj perturbationVector = new DMatrixRMaj(6, 1);
+      perturbationVector.set(0, octree.getResolution() * 0.002);
+      perturbationVector.set(1, octree.getResolution() * 0.002);
+      perturbationVector.set(2, octree.getResolution() * 0.002);
+      perturbationVector.set(3, 0.00001);
+      perturbationVector.set(4, 0.00001);
+      perturbationVector.set(5, 0.00001);
+      optimizer.setPerturbationVector(perturbationVector);
       boolean initialCondition = optimizer.initialize();
-      LogTools.info("initialCondition " + initialCondition);
+      if (DEBUG)
+         LogTools.info("initialCondition " + initialCondition);
       if (!initialCondition)
       {
          //TODO: Ticket, FB-638.
@@ -104,7 +103,8 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       optimizer.setCorrespondenceThreshold(surfaceElementICPSLAMParameters.getMinimumCorrespondingDistance()); // Note : (x 1.5) of surfel resolution.
       double initialQuality = optimizer.getQuality();
       driftCorrectionResult.setInitialDistance(initialQuality);
-      LogTools.info("initial quality " + initialQuality);
+      if (DEBUG)
+         LogTools.info("initial quality " + initialQuality);
 
       if (surfaceElementICPSLAMParameters.isEnableInitialQualityFilter())
       {
@@ -151,13 +151,15 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
          if (numberOfSteadyIterations >= steadyIterationsThreshold)
          {
-            LogTools.info("################ " + i);
+            if (DEBUG)
+               LogTools.info("################ " + i);
             iterations = i;
             break;
          }
       }
 
-      LogTools.info("final quality " + optimizer.getQuality());
+      if (DEBUG)
+         LogTools.info("final quality " + optimizer.getQuality());
       // get parameter.
       optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
 
@@ -197,7 +199,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       double distance(double value, double other)
       {
-         return Math.abs(previous - other);
+         return Math.abs(value - other);
       }
    }
 

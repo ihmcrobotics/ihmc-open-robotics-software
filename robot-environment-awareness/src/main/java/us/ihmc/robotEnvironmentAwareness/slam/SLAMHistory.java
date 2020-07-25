@@ -55,7 +55,7 @@ public class SLAMHistory
    public void addLatestFrameHistory(SLAMFrame latestFrame)
    {
       timeStamps.add(latestFrame.getTimeStamp());
-      originalSensorFrames.add(latestFrame.getOriginalSensorPose());
+      originalSensorFrames.add(latestFrame.getUncorrectedSensorPoseInWorld());
       sensorFrames.add(latestFrame.getSensorPose());
    }
 
