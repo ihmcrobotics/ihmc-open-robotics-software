@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,6 +10,8 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -29,6 +32,7 @@ public class SLAMBasics implements SLAMInterface
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
    protected Point3DBasics[] sourcePoints;
    protected final NormalOcTree octree;
+   private final ConvexPolygon2D octreeHull;
    private final AtomicInteger mapSize = new AtomicInteger();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
@@ -38,6 +42,7 @@ public class SLAMBasics implements SLAMInterface
    public SLAMBasics(double octreeResolution)
    {
       octree = new NormalOcTree(octreeResolution);
+      octreeHull = new ConvexPolygon2D();
    }
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
@@ -50,6 +55,9 @@ public class SLAMBasics implements SLAMInterface
 
       octree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
       octree.enableParallelComputationForNormals(true);
+
+      Arrays.stream(pointCloud).forEach(octreeHull::addVertex);
+      octreeHull.update();
    }
 
    public void updateSurfaceNormals()
@@ -95,6 +103,7 @@ public class SLAMBasics implements SLAMInterface
    {
       latestSlamFrame.set(null);
       mapSize.set(0);
+      octreeHull.clearAndUpdate();
       octree.clear();
    }
 
@@ -167,6 +176,11 @@ public class SLAMBasics implements SLAMInterface
    public NormalOcTree getOctree()
    {
       return octree;
+   }
+
+   public ConvexPolygon2DReadOnly getOctreeHull()
+   {
+      return octreeHull;
    }
 
    public void clearNormals()
