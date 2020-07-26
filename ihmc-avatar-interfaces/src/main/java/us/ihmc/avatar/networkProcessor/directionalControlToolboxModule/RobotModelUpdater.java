@@ -1,26 +1,18 @@
-package us.ihmc.valkyrie.jsc;
+package us.ihmc.avatar.networkProcessor.directionalControlToolboxModule;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.CRC32;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import javafx.animation.AnimationTimer;
-import javafx.scene.Group;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 /**
  * Class to update a robot model based on RobotConfigurationData messages
@@ -28,20 +20,18 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
  * @author Mark Paterson (adapted from JavaFXRobotVisualizer, without the JFX dependencies)
  *
  */
-public class ValkyrieRobotModelUpdater {
+public class RobotModelUpdater {
 	private final OneDoFJointBasics[] allJoints;
 	private final int jointNameHash;
 	private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
 	private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
 
-	private ValkyrieRobotModel robotModel;
 	private FullHumanoidRobotModel fullRobotModel;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 	private final int CONFIG_UPDATE_RATE_MS = 10; // How often to update the configuration state information in milliseconds 
 
-	public ValkyrieRobotModelUpdater(ValkyrieRobotModel robot) {
-		robotModel = robot;
-		fullRobotModel = robotModel.createFullRobotModel();
+	public RobotModelUpdater(FullHumanoidRobotModel robotModel) {
+		fullRobotModel = robotModel;
 		allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
 		/* Used to ensure our model is compatible with the source model */
