@@ -14,7 +14,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -67,18 +67,18 @@ public class LogDataRawSensorMap
             rawIMUOrientationMap.put(imuName, rawOrientation);
          }
          
-         YoDouble qd_wx = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qd_w", imuName));
-         YoDouble qd_wy = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qd_w", imuName));
-         YoDouble qd_wz = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qd_w", imuName));
+         YoDouble qd_wx = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoGeometryNameTools.createXName("raw_qd_w", imuName));
+         YoDouble qd_wy = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoGeometryNameTools.createYName("raw_qd_w", imuName));
+         YoDouble qd_wz = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoGeometryNameTools.createZName("raw_qd_w", imuName));
          if (qd_wx != null && qd_wy != null && qd_wz != null)
          {
             YoFrameVector3D rawAngularVelocity = new YoFrameVector3D(qd_wx, qd_wy, qd_wz, null);
             rawIMUAngularVelocityMap.put(imuName, rawAngularVelocity);
          }
          
-         YoDouble qdd_x = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoFrameVariableNameTools.createXName("raw_qdd_", imuName));
-         YoDouble qdd_y = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoFrameVariableNameTools.createYName("raw_qdd_", imuName));
-         YoDouble qdd_z = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoFrameVariableNameTools.createZName("raw_qdd_", imuName));
+         YoDouble qdd_x = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoGeometryNameTools.createXName("raw_qdd_", imuName));
+         YoDouble qdd_y = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoGeometryNameTools.createYName("raw_qdd_", imuName));
+         YoDouble qdd_z = (YoDouble) yoVariableHolder.findVariable(sensorProcessingName, YoGeometryNameTools.createZName("raw_qdd_", imuName));
          if (qdd_x != null && qdd_y != null && qdd_z != null)
          {
             YoFrameVector3D rawLinearAcceleration = new YoFrameVector3D(qdd_x, qdd_y, qdd_z, null);

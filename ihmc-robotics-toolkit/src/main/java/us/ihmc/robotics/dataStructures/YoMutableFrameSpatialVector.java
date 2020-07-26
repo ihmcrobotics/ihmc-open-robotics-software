@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -35,17 +35,17 @@ public class YoMutableFrameSpatialVector implements SpatialVectorBasics, YoMutab
 
    public YoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry)
    {
-      frameId = new YoLong(YoFrameVariableNameTools.createName(namePrefix, "frame", nameSuffix), registry);
+      frameId = new YoLong(YoGeometryNameTools.assembleName(namePrefix, "frame", nameSuffix), registry);
       frameIndexMap = new FrameIndexMap.FrameIndexHashMap();
 
-      YoDouble xAngular = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, "Angular" + nameSuffix), registry);
-      YoDouble yAngular = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, "Angular" + nameSuffix), registry);
-      YoDouble zAngular = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, "Angular" + nameSuffix), registry);
+      YoDouble xAngular = new YoDouble(YoGeometryNameTools.createXName(namePrefix, "Angular" + nameSuffix), registry);
+      YoDouble yAngular = new YoDouble(YoGeometryNameTools.createYName(namePrefix, "Angular" + nameSuffix), registry);
+      YoDouble zAngular = new YoDouble(YoGeometryNameTools.createZName(namePrefix, "Angular" + nameSuffix), registry);
       angularPart = new YoMutableFrameVector3D(xAngular, yAngular, zAngular, getYoFrameIndex(), getFrameIndexMap());
 
-      YoDouble xLinear = new YoDouble(YoFrameVariableNameTools.createXName(namePrefix, "Linear" + nameSuffix), registry);
-      YoDouble yLinear = new YoDouble(YoFrameVariableNameTools.createYName(namePrefix, "Linear" + nameSuffix), registry);
-      YoDouble zLinear = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, "Linear" + nameSuffix), registry);
+      YoDouble xLinear = new YoDouble(YoGeometryNameTools.createXName(namePrefix, "Linear" + nameSuffix), registry);
+      YoDouble yLinear = new YoDouble(YoGeometryNameTools.createYName(namePrefix, "Linear" + nameSuffix), registry);
+      YoDouble zLinear = new YoDouble(YoGeometryNameTools.createZName(namePrefix, "Linear" + nameSuffix), registry);
       linearPart = new YoMutableFrameVector3D(xLinear, yLinear, zLinear, getYoFrameIndex(), getFrameIndexMap());
    }
 

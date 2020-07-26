@@ -41,7 +41,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.*;
 
 public class EndToEndTestTools
@@ -467,10 +467,10 @@ public class EndToEndTestTools
 
    public static YoFrameQuaternion findYoFrameQuaternion(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble qx = findYoDouble(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix), yoVariableHolder);
-      YoDouble qy = findYoDouble(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix), yoVariableHolder);
-      YoDouble qz = findYoDouble(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix), yoVariableHolder);
-      YoDouble qs = findYoDouble(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix), yoVariableHolder);
+      YoDouble qx = findYoDouble(nameSpace, YoGeometryNameTools.createQxName(prefix, suffix), yoVariableHolder);
+      YoDouble qy = findYoDouble(nameSpace, YoGeometryNameTools.createQyName(prefix, suffix), yoVariableHolder);
+      YoDouble qz = findYoDouble(nameSpace, YoGeometryNameTools.createQzName(prefix, suffix), yoVariableHolder);
+      YoDouble qs = findYoDouble(nameSpace, YoGeometryNameTools.createQsName(prefix, suffix), yoVariableHolder);
       return new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
    }
 
@@ -521,8 +521,8 @@ public class EndToEndTestTools
 
    public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
       return new YoFramePoint2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
@@ -533,8 +533,8 @@ public class EndToEndTestTools
 
    public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
       return new YoFrameVector2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
@@ -545,9 +545,9 @@ public class EndToEndTestTools
 
    public static YoFramePoint3D findYoFramePoint3D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
-      YoDouble z = findYoDouble(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble z = findYoDouble(nameSpace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
       return new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
    }
 
@@ -558,9 +558,9 @@ public class EndToEndTestTools
 
    public static YoFrameVector3D findYoFrameVector3D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
-      YoDouble z = findYoDouble(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble z = findYoDouble(nameSpace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
       return new YoFrameVector3D(x, y, z, ReferenceFrame.getWorldFrame());
    }
 

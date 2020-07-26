@@ -45,7 +45,7 @@ import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -274,17 +274,17 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
          String suffix = "AtWaypoint" + (i + 1);
 
-         String positionPrefix = YoFrameVariableNameTools.createName(prefix, "position", "");
+         String positionPrefix = YoGeometryNameTools.assembleName(prefix, "position", "");
          Point3D desiredPosition = EndToEndTestTools.findPoint3D(linearNamespace, positionPrefix, suffix, scs);
-         String linearVelocityPrefix = YoFrameVariableNameTools.createName(prefix, "linearVelocity", "");
+         String linearVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "linearVelocity", "");
          Vector3D desiredLinearVelocity = EndToEndTestTools.findVector3D(linearNamespace, linearVelocityPrefix, suffix, scs);
 
          EuclidCoreTestTools.assertTuple3DEquals("Position", waypoint.getPosition(), desiredPosition, 1.0E-10, format);
          EuclidCoreTestTools.assertTuple3DEquals("Linear Velocity", waypoint.getLinearVelocity(), desiredLinearVelocity, 1.0E-10, format);
 
-         String orientationPrefix = YoFrameVariableNameTools.createName(prefix, "orientation", "");
+         String orientationPrefix = YoGeometryNameTools.assembleName(prefix, "orientation", "");
          Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(angularNamespace, orientationPrefix, suffix, scs);
-         String angularVelocityPrefix = YoFrameVariableNameTools.createName(prefix, "angularVelocity", "");
+         String angularVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "angularVelocity", "");
          Vector3D desiredAngularVelocity = EndToEndTestTools.findVector3D(angularNamespace, angularVelocityPrefix, suffix, scs);
 
          EuclidCoreTestTools.assertTuple4DEquals("Orientation", waypoint.getOrientation(), desiredOrientation, 1.0E-10, format);

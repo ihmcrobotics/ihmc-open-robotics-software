@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEucli
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointBasics
@@ -22,7 +22,7 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      time = new YoDouble(YoFrameVariableNameTools.createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
    }
@@ -30,7 +30,7 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry, ReferenceFrame referenceFrame)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      time = new YoDouble(YoFrameVariableNameTools.createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
       setToZero(referenceFrame);

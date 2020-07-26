@@ -5,7 +5,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameTuple3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BacklashProcessingYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
@@ -15,9 +15,9 @@ public class BacklashProcessingYoFrameVector extends YoFrameVector3D implements 
    public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, DoubleProvider slopTime,
            YoRegistry registry, YoFrameTuple3D yoFrameTupleToProcess)
    {
-      String xName = YoFrameVariableNameTools.createXName(namePrefix, nameSuffix);
-      String yName = YoFrameVariableNameTools.createYName(namePrefix, nameSuffix);
-      String zName = YoFrameVariableNameTools.createZName(namePrefix, nameSuffix);
+      String xName = YoGeometryNameTools.createXName(namePrefix, nameSuffix);
+      String yName = YoGeometryNameTools.createYName(namePrefix, nameSuffix);
+      String zName = YoGeometryNameTools.createZName(namePrefix, nameSuffix);
 
       YoDouble xRaw = yoFrameTupleToProcess.getYoX();
       YoDouble yRaw = yoFrameTupleToProcess.getYoY();

@@ -1,12 +1,12 @@
 package us.ihmc.avatar.logProcessor;
 
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createQsName;
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createQxName;
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createQyName;
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createQzName;
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createXName;
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createYName;
-import static us.ihmc.yoVariables.tools.YoFrameVariableNameTools.createZName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQsName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQxName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQyName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createQzName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createXName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createYName;
+import static us.ihmc.yoVariables.tools.YoGeometryNameTools.createZName;
 
 import java.util.ArrayList;
 

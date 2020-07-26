@@ -38,7 +38,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -191,15 +191,15 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
    private static YoFramePose3D findYoFramePose3D(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
-      YoDouble x = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
-      YoDouble y = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
-      YoDouble z = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
+      YoDouble x = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createXName(namePrefix, nameSuffix));
+      YoDouble y = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createYName(namePrefix, nameSuffix));
+      YoDouble z = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createZName(namePrefix, nameSuffix));
       YoFramePoint3D position = new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
 
-      YoDouble qx = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createQxName(namePrefix, nameSuffix));
-      YoDouble qy = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createQyName(namePrefix, nameSuffix));
-      YoDouble qz = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createQzName(namePrefix, nameSuffix));
-      YoDouble qs = (YoDouble) scs.findVariable(nameSpace, YoFrameVariableNameTools.createQsName(namePrefix, nameSuffix));
+      YoDouble qx = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQxName(namePrefix, nameSuffix));
+      YoDouble qy = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQyName(namePrefix, nameSuffix));
+      YoDouble qz = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQzName(namePrefix, nameSuffix));
+      YoDouble qs = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQsName(namePrefix, nameSuffix));
       YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
       return new YoFramePose3D(position, orientation);
    }

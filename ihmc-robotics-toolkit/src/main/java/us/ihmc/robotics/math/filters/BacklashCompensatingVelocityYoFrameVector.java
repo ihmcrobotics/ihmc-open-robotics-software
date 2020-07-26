@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
@@ -13,11 +13,11 @@ public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
    public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt, YoDouble slopTime,
            YoRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate)
    {
-      BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoX(), dt, slopTime,
+      BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoX(), dt, slopTime,
                                            registry);
-      BacklashCompensatingVelocityYoVariable yDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoY(), dt, slopTime,
+      BacklashCompensatingVelocityYoVariable yDot = new BacklashCompensatingVelocityYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoY(), dt, slopTime,
                                            registry);
-      BacklashCompensatingVelocityYoVariable zDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoZ(), dt, slopTime,
+      BacklashCompensatingVelocityYoVariable zDot = new BacklashCompensatingVelocityYoVariable(YoGeometryNameTools.createZName(namePrefix, nameSuffix), "", alpha, yoFrameVectorToDifferentiate.getYoZ(), dt, slopTime,
                                            registry);
 
       BacklashCompensatingVelocityYoFrameVector ret = new BacklashCompensatingVelocityYoFrameVector(xDot, yDot, zDot, registry, yoFrameVectorToDifferentiate);
@@ -28,11 +28,11 @@ public class BacklashCompensatingVelocityYoFrameVector extends YoFrameVector3D
    public static BacklashCompensatingVelocityYoFrameVector createBacklashCompensatingVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble alpha, double dt, YoDouble slopTime,
            YoRegistry registry, YoFramePoint3D yoFramePointToDifferentiate)
    {
-      BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoX(), dt, slopTime,
+      BacklashCompensatingVelocityYoVariable xDot = new BacklashCompensatingVelocityYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoX(), dt, slopTime,
                                            registry);
-      BacklashCompensatingVelocityYoVariable yDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoY(), dt, slopTime, 
+      BacklashCompensatingVelocityYoVariable yDot = new BacklashCompensatingVelocityYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoY(), dt, slopTime, 
                                            registry);
-      BacklashCompensatingVelocityYoVariable zDot = new BacklashCompensatingVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoZ(), dt, slopTime,
+      BacklashCompensatingVelocityYoVariable zDot = new BacklashCompensatingVelocityYoVariable(YoGeometryNameTools.createZName(namePrefix, nameSuffix), "", alpha, yoFramePointToDifferentiate.getYoZ(), dt, slopTime,
                                            registry);
 
       BacklashCompensatingVelocityYoFrameVector ret = new BacklashCompensatingVelocityYoFrameVector(xDot, yDot, zDot, registry, yoFramePointToDifferentiate);

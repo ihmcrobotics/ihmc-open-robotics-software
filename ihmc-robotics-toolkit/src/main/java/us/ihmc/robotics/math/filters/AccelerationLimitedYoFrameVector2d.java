@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 
 public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2D
 {
@@ -25,8 +25,8 @@ public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2D
    public static AccelerationLimitedYoFrameVector2d createAccelerationLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                                              DoubleProvider maxRate, DoubleProvider maxAcceleration, double dt, ReferenceFrame referenceFrame)
    {
-      AccelerationLimitedYoVariable x = new AccelerationLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, dt);
-      AccelerationLimitedYoVariable y = new AccelerationLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, dt);
+      AccelerationLimitedYoVariable x = new AccelerationLimitedYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, dt);
+      AccelerationLimitedYoVariable y = new AccelerationLimitedYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, dt);
 
       AccelerationLimitedYoFrameVector2d ret = new AccelerationLimitedYoFrameVector2d(x, y, referenceFrame);
 
@@ -37,8 +37,8 @@ public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2D
    public static AccelerationLimitedYoFrameVector2d createAccelerationLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                                              DoubleProvider maxRate, DoubleProvider maxAcceleration, double dt, YoFrameVector2D unfilteredVector)
    {
-      AccelerationLimitedYoVariable x = new AccelerationLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, unfilteredVector.getYoX(), dt);
-      AccelerationLimitedYoVariable y = new AccelerationLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, unfilteredVector.getYoY(), dt);
+      AccelerationLimitedYoVariable x = new AccelerationLimitedYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, unfilteredVector.getYoX(), dt);
+      AccelerationLimitedYoVariable y = new AccelerationLimitedYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, maxAcceleration, unfilteredVector.getYoY(), dt);
 
       AccelerationLimitedYoFrameVector2d ret = new AccelerationLimitedYoFrameVector2d(x, y, unfilteredVector.getReferenceFrame());
 

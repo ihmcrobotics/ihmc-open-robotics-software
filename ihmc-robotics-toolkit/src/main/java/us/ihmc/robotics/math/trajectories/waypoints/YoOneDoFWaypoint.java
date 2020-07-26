@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoOneDoFWaypoint implements OneDoFWaypointBasics
@@ -21,8 +21,8 @@ public class YoOneDoFWaypoint implements OneDoFWaypointBasics
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      position = new YoDouble(YoFrameVariableNameTools.createName(namePrefix, "position", nameSuffix), registry);
-      velocity = new YoDouble(YoFrameVariableNameTools.createName(namePrefix, "velocity", nameSuffix), registry);
+      position = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "position", nameSuffix), registry);
+      velocity = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "velocity", nameSuffix), registry);
    }
 
    @Override
