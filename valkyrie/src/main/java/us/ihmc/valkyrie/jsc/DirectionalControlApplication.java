@@ -3,9 +3,12 @@ package us.ihmc.valkyrie.jsc;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
+import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlController;
+import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -13,6 +16,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAPException;
@@ -22,9 +26,8 @@ import com.martiansoftware.jsap.SimpleJSAP;
 import com.martiansoftware.jsap.StringParser;
 import com.martiansoftware.jsap.JSAP;
 
-public class ValkyrieVrSteppingApplication {
-	private ValkyrieVrSteppingController controller;
-	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_vr_joystick_control");
+public class DirectionalControlApplication {
+	private DirectionalControlModule controller;
 
 	public void start(JSAPResult jsapResult) {
 		String robotTargetString = jsapResult.getString("robotTarget");
@@ -36,24 +39,7 @@ public class ValkyrieVrSteppingApplication {
 		String robotName = robotModel.getSimpleRobotName();
 
 		WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-		SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-		double footLength = steppingParameters.getFootLength();
-		double footWidth = steppingParameters.getFootWidth();
-		ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-		footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
-		footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
-		footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
-		footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
-		footPolygon.update();
-
-		SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(footPolygon, footPolygon);
-
-		controller = new ValkyrieVrSteppingController(robotModel, robotName, walkingControllerParameters, ros2Node, footPolygons);
-	}
-
-	public void stop() {
-		ros2Node.destroy();
-		System.exit(0);
+		controller = new DirectionalControlModule(robotModel, false);
 	}
 
 	/**
@@ -80,9 +66,7 @@ public class ValkyrieVrSteppingApplication {
 			System.out.println("Invalid option: " + e);
 			System.exit(0);
 		}
-		ValkyrieVrSteppingApplication app = new ValkyrieVrSteppingApplication();
+		DirectionalControlApplication app = new DirectionalControlApplication();
 		app.start(jsapResult);
-//		app.stop();
-		
 	}
 }

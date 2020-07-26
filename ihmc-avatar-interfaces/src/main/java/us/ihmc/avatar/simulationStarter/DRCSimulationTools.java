@@ -64,6 +64,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.setUseRobotEnvironmentAwerenessModule(startREAModule);
          networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.setUseMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
+         networkProcessorParameters.setUseDirectionalControlModule(modulesToStart.contains(Modules.DIRECTIONAL_CONTROL_TOOLBOX));
       }
       else
       {
@@ -145,6 +146,7 @@ public abstract class DRCSimulationTools
             moduleCheckBoxes.get(Modules.ROS_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.REA_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.REA_UI).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
+            moduleCheckBoxes.get(Modules.DIRECTIONAL_CONTROL_TOOLBOX).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
          }
       };
 
@@ -352,7 +354,8 @@ public abstract class DRCSimulationTools
       MOCAP_MODULE,
       KINEMATICS_TOOLBOX,
       FOOTSTEP_PLANNING_TOOLBOX,
-      WHOLE_BODY_TRAJECTORY_TOOLBOX;
+      WHOLE_BODY_TRAJECTORY_TOOLBOX,
+      DIRECTIONAL_CONTROL_TOOLBOX;
 
       public String getPropertyNameForEnable()
       {
