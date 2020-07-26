@@ -24,7 +24,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -221,10 +221,10 @@ public class AvatarCommonAsserts
 
    private static Quaternion findQuat4d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
    {
-      double x = scs.findVariable(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix)).getValueAsDouble();
-      double y = scs.findVariable(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix)).getValueAsDouble();
-      double z = scs.findVariable(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix)).getValueAsDouble();
-      double s = scs.findVariable(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix)).getValueAsDouble();
+      double x = scs.findVariable(nameSpace, YoGeometryNameTools.createQxName(prefix, suffix)).getValueAsDouble();
+      double y = scs.findVariable(nameSpace, YoGeometryNameTools.createQyName(prefix, suffix)).getValueAsDouble();
+      double z = scs.findVariable(nameSpace, YoGeometryNameTools.createQzName(prefix, suffix)).getValueAsDouble();
+      double s = scs.findVariable(nameSpace, YoGeometryNameTools.createQsName(prefix, suffix)).getValueAsDouble();
       return new Quaternion(x, y, z, s);
    }
 
@@ -236,9 +236,9 @@ public class AvatarCommonAsserts
    private static Tuple3DBasics findTuple3d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
    {
       Tuple3DBasics tuple3d = new Point3D();
-      tuple3d.setX(scs.findVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
-      tuple3d.setY(scs.findVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
-      tuple3d.setZ(scs.findVariable(nameSpace, YoFrameVariableNameTools.createZName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setX(scs.findVariable(nameSpace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setY(scs.findVariable(nameSpace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setZ(scs.findVariable(nameSpace, YoGeometryNameTools.createZName(prefix, suffix)).getValueAsDouble());
       return tuple3d;
    }
 
@@ -250,8 +250,8 @@ public class AvatarCommonAsserts
    private static Tuple2DBasics findTuple2d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
    {
       Tuple2DBasics tuple2d = new Point2D();
-      tuple2d.setX(scs.findVariable(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix)).getValueAsDouble());
-      tuple2d.setY(scs.findVariable(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setX(scs.findVariable(nameSpace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setY(scs.findVariable(nameSpace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
       return tuple2d;
    }
 

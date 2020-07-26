@@ -49,7 +49,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
@@ -916,7 +916,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       String pelvisName = fullRobotModel.getPelvis().getName();
       String namePrefix = pelvisName + FeedbackControllerDataReadOnly.Type.ERROR.getName() + FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR.getName();
-      String varName = YoFrameVariableNameTools.createZName(namePrefix, "");
+      String varName = YoGeometryNameTools.createZName(namePrefix, "");
       return (YoDouble) scs.findVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
    }
 }

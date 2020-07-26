@@ -86,7 +86,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       {
          String registryName = registryNames[i];
          NameSpace fullNameSpace = new NameSpace(registryName);
-         YoRegistry registry = YoFactories.getOrCreateAndAddRegistry(rootRegistry, fullNameSpace);
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
 
          if (registry.getNumberOfVariables() != variableNames[i].length)
          {
@@ -124,7 +124,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       {
          String registryName = registryNames[i];
          NameSpace fullNameSpace = new NameSpace(registryName);
-         YoRegistry registry = YoFactories.getOrCreateAndAddRegistry(rootRegistry, fullNameSpace);
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
          registryIndexMap.put(registry, i);
          allRegistries.add(registry);
          //       System.out.println(i + " " + registry.getNameSpace().getName());

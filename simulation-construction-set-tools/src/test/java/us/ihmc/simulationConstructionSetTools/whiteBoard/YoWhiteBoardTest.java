@@ -398,7 +398,7 @@ public class YoWhiteBoardTest
          NameSpace nameSpace = variable.getNameSpace();
 
          YoVariableType yoVariableType = variable.getType();
-         YoRegistry registry = YoFactories.getOrCreateAndAddRegistry(rootRegistry, nameSpace);
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, nameSpace);
 
          switch (yoVariableType)
          {

@@ -7,7 +7,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 
@@ -26,8 +26,8 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2D
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
            double maxRate, double dt, ReferenceFrame referenceFrame)
    {
-      RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, dt);
-      RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, dt);
+      RateLimitedYoVariable x = new RateLimitedYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, dt);
+      RateLimitedYoVariable y = new RateLimitedYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, dt);
 
       RateLimitedYoFrameVector2d ret = new RateLimitedYoFrameVector2d(x, y, referenceFrame);
 
@@ -37,8 +37,8 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2D
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
            YoDouble maxRate, double dt, ReferenceFrame referenceFrame)
    {
-      RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, dt);
-      RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, dt);
+      RateLimitedYoVariable x = new RateLimitedYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, dt);
+      RateLimitedYoVariable y = new RateLimitedYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, dt);
 
       RateLimitedYoFrameVector2d ret = new RateLimitedYoFrameVector2d(x, y, referenceFrame);
 
@@ -49,8 +49,8 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2D
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
            double maxRate, double dt, YoFrameVector2D unfilteredVector)
    {
-      RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
-      RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);
+      RateLimitedYoVariable x = new RateLimitedYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
+      RateLimitedYoVariable y = new RateLimitedYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);
 
       RateLimitedYoFrameVector2d ret = new RateLimitedYoFrameVector2d(x, y, unfilteredVector.getReferenceFrame());
 
@@ -61,8 +61,8 @@ public class RateLimitedYoFrameVector2d extends YoFrameVector2D
    public static RateLimitedYoFrameVector2d createRateLimitedYoFrameVector2d(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                              DoubleProvider maxRate, double dt, YoFrameVector2D unfilteredVector)
    {
-      RateLimitedYoVariable x = new RateLimitedYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
-      RateLimitedYoVariable y = new RateLimitedYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);
+      RateLimitedYoVariable x = new RateLimitedYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoX(), dt);
+      RateLimitedYoVariable y = new RateLimitedYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), registry, maxRate, unfilteredVector.getYoY(), dt);
 
       RateLimitedYoFrameVector2d ret = new RateLimitedYoFrameVector2d(x, y, unfilteredVector.getReferenceFrame());
 

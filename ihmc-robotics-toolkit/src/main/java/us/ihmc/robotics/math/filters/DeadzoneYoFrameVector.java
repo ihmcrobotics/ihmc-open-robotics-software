@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameTuple3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.tools.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DeadzoneYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
@@ -28,9 +28,9 @@ public class DeadzoneYoFrameVector extends YoFrameVector3D implements Processing
 
    public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, YoDouble deadzoneSize, ReferenceFrame referenceFrame)
    {
-      DeadzoneYoVariable x = new DeadzoneYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), deadzoneSize, registry);
-      DeadzoneYoVariable y = new DeadzoneYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), deadzoneSize, registry);
-      DeadzoneYoVariable z = new DeadzoneYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), deadzoneSize, registry);
+      DeadzoneYoVariable x = new DeadzoneYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), deadzoneSize, registry);
+      DeadzoneYoVariable y = new DeadzoneYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), deadzoneSize, registry);
+      DeadzoneYoVariable z = new DeadzoneYoVariable(YoGeometryNameTools.createZName(namePrefix, nameSuffix), deadzoneSize, registry);
 
       DeadzoneYoFrameVector ret = new DeadzoneYoFrameVector(x, y, z, referenceFrame);
 
@@ -44,9 +44,9 @@ public class DeadzoneYoFrameVector extends YoFrameVector3D implements Processing
 
    public static DeadzoneYoFrameVector createDeadzoneYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, YoDouble deadzoneSize, YoFrameTuple3D rawTuple)
    {
-      DeadzoneYoVariable x = new DeadzoneYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), rawTuple.getYoX(), deadzoneSize, registry);
-      DeadzoneYoVariable y = new DeadzoneYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), rawTuple.getYoY(), deadzoneSize, registry);
-      DeadzoneYoVariable z = new DeadzoneYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), rawTuple.getYoZ(), deadzoneSize, registry);
+      DeadzoneYoVariable x = new DeadzoneYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), rawTuple.getYoX(), deadzoneSize, registry);
+      DeadzoneYoVariable y = new DeadzoneYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), rawTuple.getYoY(), deadzoneSize, registry);
+      DeadzoneYoVariable z = new DeadzoneYoVariable(YoGeometryNameTools.createZName(namePrefix, nameSuffix), rawTuple.getYoZ(), deadzoneSize, registry);
 
       DeadzoneYoFrameVector ret = new DeadzoneYoFrameVector(x, y, z, rawTuple.getReferenceFrame());
 
