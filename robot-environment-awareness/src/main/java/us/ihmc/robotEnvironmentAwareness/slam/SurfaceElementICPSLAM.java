@@ -41,7 +41,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
-      frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
+      frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
       sourcePoints = new Point3D[numberOfSurfel];
@@ -131,7 +131,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       RotationMatrix rotationalEffort = new RotationMatrix();
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
       int iterations = -1;
-      for (int i = 0; i < 40; i++)
+      for (int i = 0; i < surfaceElementICPSLAMParameters.getMaxOptimizationIterations(); i++)
       {
          optimizer.iterate();
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
