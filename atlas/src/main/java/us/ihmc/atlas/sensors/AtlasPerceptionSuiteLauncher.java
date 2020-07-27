@@ -7,7 +7,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PerceptionSuiteUI;
 
-public class AltasPerceptionSuiteLauncher extends Application
+public class AtlasPerceptionSuiteLauncher extends Application
 {
    private SharedMemoryJavaFXMessager messager;
    private AtlasPerceptionSuite module;

@@ -1,11 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
@@ -35,6 +32,7 @@ public class REAOcTreeUpdater
    private Pose3DBasics sensorPose = new Pose3D();
    private final REAOcTreeBuffer[] reaOcTreeBuffers;
    private final Map<REAOcTreeBuffer, AtomicReference<Pose3D>> sensorPoses;
+   private final Map<REAOcTreeBuffer, AtomicBoolean> bufferClearRequest = new HashMap<>();
 
    private final AtomicReference<Boolean> enable;
    private final AtomicReference<Boolean> enableNormalEstimation;
@@ -57,6 +55,11 @@ public class REAOcTreeUpdater
       this.reaOcTreeBuffers = buffers;
       this.sensorPoses = sensorPoses;
       this.reaMessager = reaMessager;
+
+      for (REAOcTreeBuffer buffer : buffers)
+      {
+         bufferClearRequest.put(buffer, new AtomicBoolean(false));
+      }
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
       enableNormalEstimation = reaMessager.createInput(REAModuleAPI.NormalEstimationEnable, true);
@@ -172,6 +175,9 @@ public class REAOcTreeUpdater
 
          if (bufferOctree != null)
          {
+            if (bufferClearRequest.get(buffer).getAndSet(false))
+               referenceOctree.clear();
+
             PointCloud pointCloud = new PointCloud();
             bufferOctree.forEach(node -> pointCloud.add(node.getHitLocationX(), node.getHitLocationY(), node.getHitLocationZ()));
             pointCloud.setTimestamp(TimeUnit.NANOSECONDS.toMillis(System.nanoTime()));
@@ -214,6 +220,11 @@ public class REAOcTreeUpdater
             decayedNodes.add(node);
       }
       decayedNodes.forEach(node -> referenceOctree.deleteNode(node.getKeyCopy()));
+   }
+
+   public void clearOcTreeOnNextUpdate(REAOcTreeBuffer bufferToClear)
+   {
+      bufferClearRequest.get(bufferToClear).set(true);
    }
 
    public void clearOcTree()

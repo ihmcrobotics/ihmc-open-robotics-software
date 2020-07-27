@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -662,8 +662,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-         ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2D comXYVelocity, YoCoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+                                                       ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, constraintType);
 
@@ -673,7 +673,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final FrameVector2D comVelocity = new FrameVector2D();
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2DReadOnly comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2DReadOnly comXYVelocity, YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                  double zCurrent, ReferenceFrame pelvisZUpFrame, ConstraintType constraintType)
    {
       if (!useSingularityAvoidanceInSupport.getValue())
@@ -829,8 +829,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-         ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, YoCoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+                                                              ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       if (!USE_COLLAPSE_AVOIDANCE)
       {
@@ -987,7 +987,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
    {
       isUnreachableFootstepCompensated.set(false);
 
