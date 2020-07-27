@@ -50,26 +50,16 @@ public class SLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Scan toScan(Point3DReadOnly[] points, Point3DReadOnly[] pointsToSensorFrame, RigidBodyTransformReadOnly sensorPose, ConvexPolygon2DReadOnly mapHull,
-                             double windowMargin)
+   public static Scan toScan(Point3DReadOnly[] points, RigidBodyTransformReadOnly sensorPose, ConvexPolygon2DReadOnly mapHull, double windowMargin)
    {
-      if (points.length != pointsToSensorFrame.length)
-      {
-         LogTools.error("size of point cloud are different " + points.length + " " + pointsToSensorFrame.length);
-         return null;
-      }
-
-      ConvexPolygon2D windowForMap = new ConvexPolygon2D(mapHull);
-      windowForMap.applyInverseTransform(sensorPose, false);
-
       PointCloud pointCloud = new PointCloud();
 
       for (int i = 0; i < points.length; i++)
       {
-         if (!windowForMap.getBoundingBox().isInsideEpsilon(pointsToSensorFrame[i].getX(), pointsToSensorFrame[i].getY(), -windowMargin))
+         if (!mapHull.getBoundingBox().isInsideEpsilon(points[i].getX(), points[i].getY(), -windowMargin))
             continue;
 
-         if (windowForMap.isPointInside(pointsToSensorFrame[i].getX(), pointsToSensorFrame[i].getY(), -windowMargin))
+         if (mapHull.isPointInside(points[i].getX(), points[i].getY(), -windowMargin))
          {
             double x = points[i].getX();
             double y = points[i].getY();
