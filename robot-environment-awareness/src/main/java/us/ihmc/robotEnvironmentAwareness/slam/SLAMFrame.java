@@ -127,13 +127,7 @@ public class SLAMFrame
       surfaceElementsToSensor.clear();
       frameMap = new NormalOcTree(surfaceElementResolution);
 
-      ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = getUncorrectedPointCloudInWorld().length;
-
-      scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin));
-
-      frameMap.insertScanCollection(scanCollection, false);
+      frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin), false);
       frameMap.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
