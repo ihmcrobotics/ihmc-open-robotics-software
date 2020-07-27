@@ -227,6 +227,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
                                                                                                               0.0,
                                                                                                               doubleSupportIn,
                                                                                                               comFrame,
+                                                                                                              comFrame,
                                                                                                               soleFrames,
                                                                                                               robot.getYoTime(),
                                                                                                               graphicsListRegistry,
