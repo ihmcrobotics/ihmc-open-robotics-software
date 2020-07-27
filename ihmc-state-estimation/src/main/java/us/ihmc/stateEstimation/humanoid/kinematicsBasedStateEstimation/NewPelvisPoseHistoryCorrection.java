@@ -175,6 +175,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       }
    }
 
+   @Override
    public void doControl(long timestamp)
    {
       if (pelvisPoseCorrectionCommunicator != null)

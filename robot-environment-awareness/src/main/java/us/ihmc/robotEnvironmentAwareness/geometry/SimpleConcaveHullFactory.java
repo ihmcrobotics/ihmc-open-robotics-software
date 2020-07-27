@@ -68,7 +68,8 @@ public abstract class SimpleConcaveHullFactory
       return createConcaveHull(pointCloud2d, Collections.emptyList(), parameters);
    }
 
-   public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d, List<? extends LineSegment2DReadOnly> lineConstraints,
+   public static ConcaveHullFactoryResult createConcaveHull(List<? extends Point2DReadOnly> pointCloud2d,
+                                                            List<? extends LineSegment2DReadOnly> lineConstraints,
                                                             ConcaveHullFactoryParameters parameters)
    {
       if (pointCloud2d.size() <= 3)
@@ -78,7 +79,19 @@ public abstract class SimpleConcaveHullFactory
       MultiPoint sites = filterAndCreateMultiPoint(pointCloud2d, lineConstraints, triangulationTolerance);
       MultiLineString constraintSegments = JTSTools.createMultiLineString(lineConstraints);
       ConcaveHullFactoryResult result = new ConcaveHullFactoryResult();
-      ConcaveHullVariables initialVariables = initializeTriangulation(sites, constraintSegments, triangulationTolerance, result);
+      ConcaveHullVariables initialVariables = null;
+      try
+      {
+         initialVariables = initializeTriangulation(sites, constraintSegments, triangulationTolerance, result);
+      }
+      catch (LocateFailureException locateFailureException)
+      {
+         // TODO: Save pointCloud2d, lineConstraints, parameters for unit test
+//         System.out.println(pointCloud2d);
+//         System.out.println(lineConstraints);
+//         System.out.println(parameters);
+         throw locateFailureException;
+      }
 
       /*
        * This can happen for instance when the pointcloud forms a line 3D. In such case, could return a

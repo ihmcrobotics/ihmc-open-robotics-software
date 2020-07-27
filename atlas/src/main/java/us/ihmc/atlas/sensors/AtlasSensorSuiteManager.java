@@ -58,9 +58,14 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private boolean enableDepthPointCloudPublisher = true;
    private boolean enableFisheyeCameraPublishers = false;
 
-   public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
-                                  RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
-                                  RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
+   public AtlasSensorSuiteManager(String robotName,
+                                  FullHumanoidRobotModelFactory modelFactory,
+                                  CollisionBoxProvider collisionBoxProvider,
+                                  RobotROSClockCalculator rosClockCalculator,
+                                  HumanoidRobotSensorInformation sensorInformation,
+                                  DRCRobotJointMap jointMap,
+                                  RobotPhysicalProperties physicalProperties,
+                                  RobotTarget targetDeployment)
    {
       this.robotName = robotName;
       this.collisionBoxProvider = collisionBoxProvider;
@@ -160,8 +165,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableStereoVisionPointCloudPublisher)
       {
-         ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withType(RobotConfigurationData.class);
-         multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
+         multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD);
          multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
          AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
          multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
@@ -169,10 +173,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableDepthPointCloudPublisher)
       {
-         ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withType(RobotConfigurationData.class);
          pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory,
                                                                     ros2Node,
-                                                                    rcdTopicName,
                                                                     rosClockCalculator,
                                                                     USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING);
          pointCloudSensorManager.setCollisionBoxProvider(collisionBoxProvider);
