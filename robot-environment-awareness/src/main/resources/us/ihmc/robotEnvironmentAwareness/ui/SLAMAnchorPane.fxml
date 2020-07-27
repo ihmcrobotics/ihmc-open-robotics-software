@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="200" prefHeight="1000.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="200" prefHeight="1000.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController">
    <children>
 	      <VBox alignment="TOP_CENTER" layoutX="-5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 	         <children>
@@ -22,7 +22,7 @@
 	                     </font>
 	                  </Label>
 	                  <ToggleButton fx:id="enableSLAMButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable" />
-	                  <ToggleButton fx:id="biasButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="BiasHeihgt" />
+	                  <ToggleButton fx:id="biasButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="BiasHeight" />
 	                  <TextField fx:id="queuedBufferSize" alignment="CENTER" editable="false" text="0" />
 	                  <TextField fx:id="slamStatus" alignment="CENTER" editable="false" />
 	                  <ToggleButton fx:id="latestFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Latest Frame" textAlignment="CENTER" />
