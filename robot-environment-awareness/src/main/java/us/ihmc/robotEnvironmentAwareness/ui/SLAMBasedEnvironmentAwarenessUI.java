@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -24,6 +25,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.SurfaceElementICPPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,6 +45,8 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 
    @FXML
    private SLAMAnchorPaneController slamAnchorPaneController;
+   @FXML
+   private SurfaceElementICPPaneController surfaceElementICPPaneController;
    @FXML
    private SLAMDataManagerAnchorPaneController slamDataManagerAnchorPaneController;
    @FXML
@@ -65,6 +69,7 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
+      view3dFactory.setBackgroundColor(Color.WHITE);
       mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
       // Client
@@ -160,6 +165,9 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       slamDataManagerAnchorPaneController.setConfigurationFile(configurationFile);
       slamDataManagerAnchorPaneController.bindControls();
 
+      surfaceElementICPPaneController.attachREAMessager(uiMessager);
+      surfaceElementICPPaneController.bindControls();
+
       normalEstimationAnchorPaneController.setNormalEstimationEnableTopic(SLAMModuleAPI.NormalEstimationEnable);
       normalEstimationAnchorPaneController.setNormalEstimationClearTopic(SLAMModuleAPI.NormalEstimationClear);
       normalEstimationAnchorPaneController.setSaveMainUpdaterConfigurationTopic(SLAMModuleAPI.SaveConfiguration);
@@ -205,7 +213,9 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage, null);
    }
 
-   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Messager messager, Stage primaryStage, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+   public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Messager messager, Stage primaryStage,
+                                                                     SideDependentList<List<Point2D>> defaultContactPoints)
+         throws Exception
    {
       REAUIMessager uiMessager = new REAUIMessager(messager);
       return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage, defaultContactPoints);

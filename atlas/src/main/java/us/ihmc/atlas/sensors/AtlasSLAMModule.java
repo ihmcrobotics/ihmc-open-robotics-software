@@ -1,26 +1,21 @@
 package us.ihmc.atlas.sensors;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
@@ -37,6 +32,7 @@ public class AtlasSLAMModule extends SLAMModule
 
    private final AtomicBoolean robotStatus = new AtomicBoolean(false);
    private final AtomicBoolean velocityStatus = new AtomicBoolean(true);
+   private final AtomicBoolean biasEnable = new AtomicBoolean(false);
 
    /**
     * to update corrected sensor frame for robot state estimation.
@@ -73,24 +69,20 @@ public class AtlasSLAMModule extends SLAMModule
    {
       super(messager);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleRobotConfigurationData);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleFootstepStatusMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                    StampedPosePacket.class,
-                                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
+      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StampedPosePacket.class,
+                                                                    ROS2Tools.getControllerInputTopic(drcRobotModel.getSimpleRobotName()));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
       reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
+      reaMessager.registerTopicListener(SLAMModuleAPI.BiasEnable, biasEnable::set);
    }
 
    @Override
@@ -102,6 +94,8 @@ public class AtlasSLAMModule extends SLAMModule
          reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
       if (velocityStatus != null)
          reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, velocityStatus.get());
+      if (biasEnable != null)
+         reaMessager.submitMessage(SLAMModuleAPI.BiasEnable, biasEnable.get());
    }
 
    @Override
@@ -165,14 +159,18 @@ public class AtlasSLAMModule extends SLAMModule
                posePacket.setConfidenceFactor(0.0);
             posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
          }
+         posePacket.setConfidenceFactor(0.5);
          RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
          estimatedPelvisPose.preMultiply(latestFrame.getSensorPose());
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
+
+         LogTools.info("latestFrame.getConfidenceFactor: " + latestFrame.getConfidenceFactor() +
+                       " posePacket.getConfidenceFactor: " + posePacket.getConfidenceFactor());
+         LogTools.info("publishing pose to state estimator: " + posePacket.getPose());
          estimatedPelvisPublisher.publish(posePacket);
       }
    }
-
 
    @Override
    public void clearSLAM()
@@ -185,7 +183,7 @@ public class AtlasSLAMModule extends SLAMModule
    private void handleRobotConfigurationData(Subscriber<RobotConfigurationData> subscriber)
    {
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
-      latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
+      latestRobotTimeStamp.set(robotConfigurationData.getWallTime());
 
       if (reaMessager.isMessagerOpen())
       {
