@@ -10,6 +10,7 @@
 # v=0 indicates no change,
 # v>0 indicates forwards/right/clockwise at v*max speed.
 
+uint32 sequence_id
 float64 forward
 float64 right
 float64 clockwise

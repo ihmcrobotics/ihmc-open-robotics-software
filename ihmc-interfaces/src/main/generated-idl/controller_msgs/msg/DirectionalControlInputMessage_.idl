@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__JoystickRemoteInputMessage__idl__
-#define __controller_msgs__msg__JoystickRemoteInputMessage__idl__
+#ifndef __controller_msgs__msg__DirectionalControlInputMessage__idl__
+#define __controller_msgs__msg__DirectionalControlInputMessage__idl__
 
 module controller_msgs
 {
@@ -21,9 +21,10 @@ module controller_msgs
        * v=0 indicates no change,
        * v>0 indicates forwards/right/clockwise at v*max speed.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::JoystickRemoteInputMessage_")
-      struct JoystickRemoteInputMessage
+      @TypeCode(type="controller_msgs::msg::dds_::DirectionalControlInputMessage_")
+      struct DirectionalControlInputMessage
       {
+        unsigned long sequence_id;
         double forward;
         double right;
         double clockwise;
