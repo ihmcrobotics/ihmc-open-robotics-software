@@ -313,6 +313,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       {
          return true;
       }
+     //Give a buffer of .01 s to ensure the controller ends the state within one timestep of the end time 
       return timeInCurrentStateRemaining.getDoubleValue() <= 0.01;
    }
 
