@@ -137,10 +137,7 @@ public class LQRMomentumController
                             
       this.omega.addVariableChangedListener(v -> {
          computeDynamicsMatrix(this.omega.getDoubleValue());
-         System.out.println("omega changed");
       });
-      
-      this.omega.set(omega);
 
       computeS1();
       
@@ -464,5 +461,10 @@ public class LQRMomentumController
       for (int i = 0; i < segment; i++)
          timeOffset += relativeVRPTrajectories.get(i).getDuration();
       return time - timeOffset;
+   }
+   
+   public void setOmega(double omega)
+   {
+      this.omega.set(omega);
    }
 }

@@ -68,9 +68,6 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SimpleLinearMomentumRateControlModule
 {
-   private static final boolean USE_COMBINED_STEP_ADJUSTMENT = false;
-   private boolean USE_LQR_MOMENTUM_CONTROLLER = true;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -127,12 +124,10 @@ public class SimpleLinearMomentumRateControlModule
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
 
-   private final ICPController icpController;
    private final StepAdjustmentController stepAdjustmentController;
    private final LQRMomentumController lqrMomentumController;
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
 
-   private final ICPOptimizationController icpOptimizationController;
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
@@ -173,19 +168,6 @@ public class SimpleLinearMomentumRateControlModule
 
    private PlanarRegionsListHandler planarRegionsListHandler;
    private StepConstraintRegionHandler stepConstraintRegionHandler;
-
-   public SimpleLinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
-                                          SideDependentList<ContactableFoot> contactableFeet,
-                                          RigidBodyBasics elevator,
-                                          WalkingControllerParameters walkingControllerParameters,
-                                          YoDouble yoTime,
-                                          double gravityZ,
-                                          double controlDT,
-                                          YoVariableRegistry parentRegistry,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime, gravityZ, controlDT, parentRegistry, yoGraphicsListRegistry, false);
-   }
    
    public SimpleLinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
@@ -196,12 +178,11 @@ public class SimpleLinearMomentumRateControlModule
                                           double controlDT,
                                           YoVariableRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry,
-                                          boolean USE_LQR_MOMENTUM_CONTROLLER)
+                                          double omega0)
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
       this.yoTime = yoTime;
-      this.USE_LQR_MOMENTUM_CONTROLLER = USE_LQR_MOMENTUM_CONTROLLER;
       
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -253,55 +234,16 @@ public class SimpleLinearMomentumRateControlModule
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane,  registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
-      if (USE_COMBINED_STEP_ADJUSTMENT)
-      {
-         icpOptimizationController = new ICPOptimizationController(walkingControllerParameters,
-                                                                   soleZUpFrames,
-                                                                   bipedSupportPolygons,
-                                                                   icpControlPolygons,
-                                                                   contactableFeet,
-                                                                   controlDT,
-                                                                   registry,
-                                                                   yoGraphicsListRegistry);
-         icpController = null;
-         lqrMomentumController = null;
-         stepAdjustmentController = null;
-      }
-      else if (USE_LQR_MOMENTUM_CONTROLLER)
-      {
-         icpOptimizationController = null;
-         icpController = null;
-         lqrMomentumController = new LQRMomentumController(Math.sqrt(gravityZ / walkingControllerParameters.nominalHeightAboveAnkle()), registry);
-         stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
-                                                                 soleZUpFrames,
-                                                                 bipedSupportPolygons,
-                                                                 icpControlPolygons,
-                                                                 contactableFeet,
-                                                                 controlDT,
-                                                                 registry,
-                                                                 yoGraphicsListRegistry);
-      }
-      else
-      {
-         icpOptimizationController = null;
-         lqrMomentumController = null;
-         icpController = new ICPController(walkingControllerParameters,
-                                           bipedSupportPolygons,
-                                           icpControlPolygons,
-                                           contactableFeet,
-                                           controlDT,
-                                           registry,
-                                           yoGraphicsListRegistry);
-         stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
-                                                                 soleZUpFrames,
-                                                                 bipedSupportPolygons,
-                                                                 icpControlPolygons,
-                                                                 contactableFeet,
-                                                                 controlDT,
-                                                                 registry,
-                                                                 yoGraphicsListRegistry);
-      }
 
+      lqrMomentumController = new LQRMomentumController(omega0, registry);
+      stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
+                                                              soleZUpFrames,
+                                                              bipedSupportPolygons,
+                                                              icpControlPolygons,
+                                                              contactableFeet,
+                                                              controlDT,
+                                                              registry,
+                                                              yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
    }
 
@@ -310,8 +252,6 @@ public class SimpleLinearMomentumRateControlModule
       desiredLinearMomentumRateWeight.set(linearMomentumRateWeight);
 
       capturePointVelocity.reset();
-      if (USE_COMBINED_STEP_ADJUSTMENT)
-         icpOptimizationController.clearPlan();
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
@@ -511,95 +451,27 @@ public class SimpleLinearMomentumRateControlModule
          throw new RuntimeException("Can only initialize once per compute.");
       }
 
-      if (USE_COMBINED_STEP_ADJUSTMENT)
+      if (initializeForStanding)
       {
-         if (initializeForStanding || initializeForTransfer || initializeForSingleSupport)
-         {
-            icpOptimizationController.clearPlan();
-            icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
-            for (int i = 0; i < footsteps.size(); i++)
-            {
-               icpOptimizationController.addFootstepToPlan(footsteps.get(i), swingDurations.get(i), transferDurations.get(i));
-            }
-         }
-
-         if (initializeForStanding)
-         {
-            icpOptimizationController.initializeForStanding(yoTime.getValue());
-         }
-         if (initializeForSingleSupport)
-         {
-            icpOptimizationController.initializeForSingleSupport(yoTime.getValue(), supportSide, omega0);
-         }
-         if (initializeForTransfer)
-         {
-            icpOptimizationController.initializeForTransfer(yoTime.getValue(), transferToSide);
-         }
-
-         icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
-
-         if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-         {
-            icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-         }
-
-         if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
-         {
-            icpOptimizationController.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
-         }
+         stepAdjustmentController.reset();
       }
-      else if (USE_LQR_MOMENTUM_CONTROLLER)
+      if (initializeForSingleSupport)
       {
-         if (initializeForStanding)
-         {
-            stepAdjustmentController.reset();
-         }
-         if (initializeForSingleSupport)
-         {
-            stepAdjustmentController.reset();
+         stepAdjustmentController.reset();
 
-            double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
-            stepAdjustmentController.setFootstepToAdjust(footsteps.get(0), swingDurations.get(0), transferDuration);
-            stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
-         }
-         if (initializeForTransfer)
-         {
-            stepAdjustmentController.reset();
-         }
-
-         if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-            stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-         if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
-            stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
+         double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
+         stepAdjustmentController.setFootstepToAdjust(footsteps.get(0), swingDurations.get(0), transferDuration);
+         stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
       }
-      else
+      if (initializeForTransfer)
       {
-         if (initializeForStanding)
-         {
-            icpController.initializeForStanding();
-            stepAdjustmentController.reset();
-         }
-         if (initializeForSingleSupport)
-         {
-            stepAdjustmentController.reset();
-            icpController.initializeForSingleSupport(supportSide);
-
-            double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
-            stepAdjustmentController.setFootstepToAdjust(footsteps.get(0), swingDurations.get(0), transferDuration);
-            stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
-         }
-         if (initializeForTransfer)
-         {
-            icpController.initializeForTransfer();
-            stepAdjustmentController.reset();
-         }
-
-         icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
-         if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-            stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-         if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
-            stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
+         stepAdjustmentController.reset();
       }
+
+      if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
+         stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
+      if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
+         stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
    }
 
    public void updateCurrentState(FramePoint3DReadOnly CenterOfMassPosition, FrameVector3DReadOnly CenterOfMassVelocity)
@@ -610,59 +482,10 @@ public class SimpleLinearMomentumRateControlModule
    
    private void computeICPController()
    {
-      if (USE_COMBINED_STEP_ADJUSTMENT)
-      {
-         if (perfectCoP.containsNaN())
-         {
-            perfectCMPDelta.setToZero();
-            icpOptimizationController.compute(yoTime.getValue(),
-                                              desiredCapturePoint,
-                                              desiredCapturePointVelocity,
-                                              perfectCMP,
-                                              capturePoint,
-                                              capturePointVelocity,
-                                              omega0);
-         }
-         else
-         {
-            perfectCMPDelta.sub(perfectCMP, perfectCoP);
-            icpOptimizationController.compute(yoTime.getValue(),
-                                              desiredCapturePoint,
-                                              desiredCapturePointVelocity,
-                                              perfectCoP,
-                                              perfectCMPDelta,
-                                              capturePoint,
-                                              capturePointVelocity,
-                                              omega0);
-         }
-         icpOptimizationController.getDesiredCMP(desiredCMP);
-         icpOptimizationController.getDesiredCoP(desiredCoP);
-      }
-      else if (USE_LQR_MOMENTUM_CONTROLLER)
-      {
-         lqrMomentumController.computeDynamicsMatrix(omega0);
+         lqrMomentumController.setOmega(omega0);
          lqrMomentumController.setVRPTrajectory(vrpTrajectories);
          lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
          stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint, new FrameVector2D(), omega0);
-         
-      }
-      else
-      {
-         if (perfectCoP.containsNaN())
-         {
-            perfectCMPDelta.setToZero();
-            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, capturePointVelocity);
-         }
-         else
-         {
-            perfectCMPDelta.sub(perfectCMP, perfectCoP);
-            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, capturePointVelocity);
-         }
-         icpController.getDesiredCMP(desiredCMP);
-         icpController.getDesiredCoP(desiredCoP);
-
-         stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint, icpController.getResidualError(), omega0);
-      }
    }
 
    private void checkAndPackOutputs()
@@ -692,41 +515,20 @@ public class SimpleLinearMomentumRateControlModule
       }
 
       output.setDesiredCMP(desiredCMP);
-      if (USE_COMBINED_STEP_ADJUSTMENT)
-      {
-         output.setEffectiveICPAdjustment(icpOptimizationController.getICPShiftFromStepAdjustment());
-         output.setFootstepSolution(icpOptimizationController.getFootstepSolution());
-         output.setFootstepWasAdjusted(icpOptimizationController.wasFootstepAdjusted());
-         output.setUsingStepAdjustment(icpOptimizationController.useStepAdjustment());
-      }
-      else
-      {
-         output.setFootstepSolution(stepAdjustmentController.getFootstepSolution());
-         output.setFootstepWasAdjusted(stepAdjustmentController.wasFootstepAdjusted());
-         output.setUsingStepAdjustment(stepAdjustmentController.useStepAdjustment());
-      }
+      output.setFootstepSolution(stepAdjustmentController.getFootstepSolution());
+      output.setFootstepWasAdjusted(stepAdjustmentController.wasFootstepAdjusted());
+      output.setUsingStepAdjustment(stepAdjustmentController.useStepAdjustment());
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()
    {
       boolean success = true;
 
-      if (USE_LQR_MOMENTUM_CONTROLLER)
-      {
-         //lqr controller u is a COM acceleration (in xy)
-         linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
-         //linearMomentumRateOfChange.addZ(gravityZ);
-         linearMomentumRateOfChange.scale(totalMass);
-         linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
-      }
-      else
-      {
-         double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
-         centerOfMass.setToZero(centerOfMassFrame);
-         WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
-         WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);         
-         linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
-      }
+      //lqr controller u is a COM acceleration (in xy)
+      linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+      //linearMomentumRateOfChange.addZ(gravityZ);
+      linearMomentumRateOfChange.scale(totalMass);
+      linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
       linearMomentumRateOfChange.checkReferenceFrameMatch(centerOfMassFrame);
       
 
