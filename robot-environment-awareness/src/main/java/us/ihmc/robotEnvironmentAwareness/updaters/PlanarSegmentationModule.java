@@ -178,7 +178,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          if (node.getLastHitTimestamp() > latestTimestamp)
             latestTimestamp = node.getLastHitTimestamp();
       }
-      LogTools.info("Received ocTree. size: " + ocTree.size()
+      LogTools.debug("Received ocTree. size: " + ocTree.size()
                     + " hash: " + ocTree.hashCode()
                     + " timestamp: " + latestTimestamp
                     + " sensorPosition: " + sensorPosition
@@ -236,7 +236,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          {
             NormalOcTree latestOcTree = ocTreeTimestamp.getLeft();
             long timestamp = ocTreeTimestamp.getRight();
-            LogTools.info("Starting octree update for timestamp {}", timestamp);
+            LogTools.debug("Starting octree update for timestamp {}", timestamp);
             stopwatch.start();
 
             if (isThreadInterrupted())
@@ -253,7 +253,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
             PlanarRegionsList planarRegionsList = planarRegionFeatureUpdater.getPlanarRegionsList();
             PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
             double lateness = Conversions.nanosecondsToSeconds(System.nanoTime() - timestamp);
-            LogTools.info("Publishing " + planarRegionsList.getNumberOfPlanarRegions()
+            LogTools.debug("Publishing " + planarRegionsList.getNumberOfPlanarRegions()
                           + " planar regions. timestamp: " + timestamp
                           + " lateness: " + lateness
                           + " s computeDuration: " + stopwatch.totalElapsed()
@@ -344,7 +344,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       }
       catch (IOException e)
       {
-         System.out.println(configurationFile.getAbsolutePath());
+         LogTools.info(configurationFile.getAbsolutePath());
          e.printStackTrace();
       }
       return configurationFile;

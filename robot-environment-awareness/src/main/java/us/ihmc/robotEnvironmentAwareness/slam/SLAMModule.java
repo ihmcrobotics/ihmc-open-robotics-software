@@ -248,7 +248,7 @@ public class SLAMModule implements PerceptionModule
       boolean success;
       if (slam.isEmpty())
       {
-         LogTools.info("addKeyFrame queueSize: {} pointCloudSize: {} timestamp: {}",
+         LogTools.debug("addKeyFrame queueSize: {} pointCloudSize: {} timestamp: {}",
                        pointCloudQueue.size(),
                        pointCloudToCompute.getNumberOfPoints(),
                        pointCloudToCompute.getTimestamp());
@@ -257,12 +257,12 @@ public class SLAMModule implements PerceptionModule
       }
       else
       {
-         LogTools.info("addFrame queueSize: {} pointCloudSize: {}, timestamp: {}",
+         LogTools.debug("addFrame queueSize: {} pointCloudSize: {}, timestamp: {}",
                        pointCloudQueue.size(),
                        pointCloudToCompute.getNumberOfPoints(),
                        pointCloudToCompute.getTimestamp());
          success = addFrame(pointCloudToCompute);
-         LogTools.info("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
+         LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
@@ -305,7 +305,7 @@ public class SLAMModule implements PerceptionModule
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
-      LogTools.info("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
+      LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
@@ -410,7 +410,7 @@ public class SLAMModule implements PerceptionModule
    private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
-      LogTools.info("Received point cloud. numberOfPoints: {} timestamp: {}", message.getNumberOfPoints(), message.getTimestamp());
+      LogTools.trace("Received point cloud. numberOfPoints: {} timestamp: {}", message.getNumberOfPoints(), message.getTimestamp());
       newPointCloud.set(message);
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
