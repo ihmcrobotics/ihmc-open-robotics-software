@@ -27,7 +27,7 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_INITIAL_QUALITY_THRESHOLD = 0.1;
 
    private static final int DEFAULT_MAX_OPTIMIZATION_ITERATIONS = 40;
-   private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = false;
+   private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = true;
 
    private static final boolean DEFAULT_INSERT_MISS_IN_OCTREE = true;
 
