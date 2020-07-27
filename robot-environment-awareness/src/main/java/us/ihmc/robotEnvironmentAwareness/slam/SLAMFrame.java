@@ -131,7 +131,7 @@ public class SLAMFrame
       int numberOfPoints = getUncorrectedPointCloudInWorld().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getOriginalPointCloudToSensorPose(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin));
+      scanCollection.addScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin));
 
       frameMap.insertScanCollection(scanCollection, false);
       frameMap.enableParallelComputationForNormals(true);
