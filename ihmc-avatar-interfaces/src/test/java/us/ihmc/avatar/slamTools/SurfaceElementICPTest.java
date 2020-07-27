@@ -47,7 +47,7 @@ public class SurfaceElementICPTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
-      slam.addKeyFrame(messages.get(0));
+      slam.addKeyFrame(messages.get(0), true);
 
       NormalOcTree map = slam.getOctree();
       map.updateNormals();
@@ -81,7 +81,7 @@ public class SurfaceElementICPTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
-      slam.addKeyFrame(messages.get(0));
+      slam.addKeyFrame(messages.get(0), true);
 
       NormalOcTree map = slam.getOctree();
       map.updateNormals();
@@ -154,7 +154,7 @@ public class SurfaceElementICPTest
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
-      slam.addKeyFrame(messages.get(0));
+      slam.addKeyFrame(messages.get(0), true);
 
       NormalOcTree map = slam.getOctree();
       map.updateNormals();

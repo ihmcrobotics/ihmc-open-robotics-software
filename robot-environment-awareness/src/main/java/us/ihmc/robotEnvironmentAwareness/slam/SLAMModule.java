@@ -51,7 +51,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
-   private final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
+   protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
@@ -252,7 +252,7 @@ public class SLAMModule implements PerceptionModule
                        pointCloudQueue.size(),
                        pointCloudToCompute.getNumberOfPoints(),
                        pointCloudToCompute.getTimestamp());
-         slam.addKeyFrame(pointCloudToCompute);
+         slam.addKeyFrame(pointCloudToCompute, slamParameters.get().getInsertMissInOcTree());
          success = true;
       }
       else
@@ -278,7 +278,7 @@ public class SLAMModule implements PerceptionModule
 
    protected boolean addFrame(StereoVisionPointCloudMessage pointCloudToCompute)
    {
-      return slam.addFrame(pointCloudToCompute);
+      return slam.addFrame(pointCloudToCompute, slamParameters.get().getInsertMissInOcTree());
    }
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)

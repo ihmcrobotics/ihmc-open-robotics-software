@@ -306,7 +306,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       File pointCloudFile = new File(DATA_PATH);
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
-      slam.addKeyFrame(messages.get(0));
+      slam.addKeyFrame(messages.get(0), true);
       octreeMap = slam.getOctree();
       octreeMap.updateNormals();
 
