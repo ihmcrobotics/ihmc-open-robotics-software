@@ -38,6 +38,8 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
                                                                            SurfaceElementICPSLAMParameters::setMaxOptimizationIterations);
    private final BooleanField computeSurfaceNormalsInFrame = new BooleanField(SurfaceElementICPSLAMParameters::getComputeSurfaceNormalsInFrame,
                                                                               SurfaceElementICPSLAMParameters::setComputeSurfaceNormalsInFrame);
+   private final BooleanField insertMissInOcTree = new BooleanField(SurfaceElementICPSLAMParameters::getInsertMissInOcTree,
+                                                                    SurfaceElementICPSLAMParameters::setInsertMissInOcTree);
 
    public SurfaceElementICPSLAMParametersProperty(Object bean, String name)
    {
@@ -117,6 +119,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalComputeSurfaceNormalsInFrame(Property<Boolean> property)
    {
       bindFieldBidirectionalToBooleanProperty(property, computeSurfaceNormalsInFrame);
+   }
+
+   public void bindBidirectionalInsertMissInOcTree(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, insertMissInOcTree);
    }
 
    @Override

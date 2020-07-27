@@ -108,12 +108,12 @@ public class AtlasSLAMModule extends SLAMModule
       {
          if (stationaryFlag)
          {
-            slam.addKeyFrame(pointCloudToCompute);
+            slam.addKeyFrame(pointCloudToCompute, slamParameters.get().getInsertMissInOcTree());
             return true;
          }
          else
          {
-            return slam.addFrame(pointCloudToCompute);
+            return slam.addFrame(pointCloudToCompute, slamParameters.get().getInsertMissInOcTree());
          }
       }
       else
