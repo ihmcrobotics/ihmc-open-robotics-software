@@ -34,6 +34,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    private final DoubleField initialQualityThreshold = new DoubleField(SurfaceElementICPSLAMParameters::getInitialQualityThreshold,
                                                                        SurfaceElementICPSLAMParameters::setInitialQualityThreshold);
 
+   private final IntegerField maxOptimizationIterations = new IntegerField(SurfaceElementICPSLAMParameters::getMaxOptimizationIterations,
+                                                                           SurfaceElementICPSLAMParameters::setMaxOptimizationIterations);
+   private final BooleanField computeSurfaceNormalsInFrame = new BooleanField(SurfaceElementICPSLAMParameters::getComputeSurfaceNormalsInFrame,
+                                                                              SurfaceElementICPSLAMParameters::setComputeSurfaceNormalsInFrame);
+
    public SurfaceElementICPSLAMParametersProperty(Object bean, String name)
    {
       super(bean, name, new SurfaceElementICPSLAMParameters());
@@ -102,6 +107,16 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalInitialQualityThreshold(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, initialQualityThreshold);
+   }
+
+   public void bindBidirectionalMaxOptimizationIterations(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxOptimizationIterations);
+   }
+
+   public void bindBidirectionalComputeSurfaceNormalsInFrame(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, computeSurfaceNormalsInFrame);
    }
 
    @Override

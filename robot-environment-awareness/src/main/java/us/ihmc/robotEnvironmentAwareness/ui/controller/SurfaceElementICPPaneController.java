@@ -40,6 +40,11 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    
    @FXML
    private Spinner<Double> initialQualityThreshold;
+
+   @FXML
+   private Spinner<Integer> maxOptimizationIterations;
+   @FXML
+   private ToggleButton computeSurfaceNormalsInFrame;
    
    private final SurfaceElementICPSLAMParametersProperty surfaceElementICPSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "surfaceElementICPSLAMParametersProperty");
    
@@ -56,6 +61,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       rotationalEffortConvergenceThreshold.setValueFactory(createDoubleValueFactory(0.0004, 0.002, 0.005, 0.0001));
       
       initialQualityThreshold.setValueFactory(createDoubleValueFactory(0.05, 0.3, 0.1, 0.05));
+
+      maxOptimizationIterations.setValueFactory(createIntegerValueFactory(1, 100, 40, 1));
    }
    
    @Override
@@ -74,6 +81,9 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       
       surfaceElementICPSLAMParametersProperty.bindBidirectionalEnableInitialQualityFilter(enableInitialQualityFilter.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInitialQualityThreshold(initialQualityThreshold.getValueFactory().valueProperty());
+
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, surfaceElementICPSLAMParametersProperty);
    }
 
