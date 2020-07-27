@@ -339,6 +339,8 @@ public class SLAMModule implements PerceptionModule
    protected void queue(StereoVisionPointCloudMessage pointCloud)
    {
       pointCloudQueue.add(pointCloud);
+      while (pointCloudQueue.size() > slamParameters.get().getMaximumQueueSize())
+         pointCloudQueue.removeFirst();
    }
 
    protected void dequeue()
