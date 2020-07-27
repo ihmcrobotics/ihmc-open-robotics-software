@@ -15,7 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -28,16 +27,16 @@ public class AtlasPointCloudSensorManager
    private static final String trackingTopicNameToSubscribe = AtlasSensorInformation.trackingCameraTopic;
 
    private final RigidBodyTransform latestTrackingSensorPose = new RigidBodyTransform();
-   
-   public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic rcdTopicName,
-                                       RobotROSClockCalculator rosClockCalculator, boolean useTrackingData)
+
+   public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory,
+                                       Ros2Node ros2Node,
+                                       RobotROSClockCalculator rosClockCalculator,
+                                       boolean useTrackingData)
    {
-      ROS2Topic depthCloudTopicName = ROS2Tools.IHMC_ROOT.withSuffix(ROS2Tools.D435_NAME);
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicName);
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.D435_POINT_CLOUD);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      ROS2Topic trackingCameraTopicName = ROS2Tools.IHMC_ROOT.withSuffix(ROS2Tools.T265_NAME);
-      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicName);
+      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
       trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
 

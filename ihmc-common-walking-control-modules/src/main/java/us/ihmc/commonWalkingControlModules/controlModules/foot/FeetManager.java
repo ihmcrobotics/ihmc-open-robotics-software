@@ -16,14 +16,14 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesDataBasics;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -65,6 +65,10 @@ public class FeetManager
    private final FramePoint3D tempSolePosition = new FramePoint3D();
    private final DoubleParameter blindFootstepsHeightOffset;
 
+   private final CoMHeightTimeDerivativesDataBasics leftLegCoMHeightData = new CoMHeightTimeDerivativesData();
+   private final CoMHeightTimeDerivativesDataBasics rightLegCoMHeightData = new CoMHeightTimeDerivativesData();
+   private final SideDependentList<CoMHeightTimeDerivativesDataBasics> legComHeightData = new SideDependentList<>(leftLegCoMHeightData, rightLegCoMHeightData);
+
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
                       YoVariableRegistry parentRegistry)
@@ -105,11 +109,14 @@ public class FeetManager
       DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
       DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
 
+      WorkspaceLimiterParameters workspaceLimiterParameters = new WorkspaceLimiterParameters(registry);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide,
                                                                      toeOffCalculator,
                                                                      walkingControllerParameters,
+                                                                     workspaceLimiterParameters,
                                                                      swingFootGains,
                                                                      holdFootGains,
                                                                      toeOffFootGains,
@@ -212,25 +219,63 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeightForSupportSingularityAvoidance(FrameVector2DReadOnly desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForSupportSingularityAvoidance(double zCurrent, CoMHeightTimeDerivativesDataBasics comHeightData)
    {
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
+      boolean leftCorrectionApplied = false, rightCorrectionApplied = false;
       for (RobotSide robotSide : RobotSide.values)
       {
+         CoMHeightTimeDerivativesDataBasics sidedCoMHeightData = legComHeightData.get(robotSide);
+         sidedCoMHeightData.set(comHeightData);
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.updateLegSingularityModule();
-         footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
+         boolean correctionApplied = footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(sidedCoMHeightData, zCurrent, pelvisZUpFrame);
+         if (robotSide == RobotSide.LEFT)
+            leftCorrectionApplied = correctionApplied;
+         else
+            rightCorrectionApplied = correctionApplied;
+      }
+
+      if (leftCorrectionApplied != rightCorrectionApplied)
+      {
+         if (leftCorrectionApplied)
+            comHeightData.set(leftLegCoMHeightData);
+         else
+            comHeightData.set(rightLegCoMHeightData);
+      }
+      else
+      {
+         WorkspaceLimiterReconciler.reconcileWorkspaceLimitedData(legComHeightData, comHeightData);
       }
    }
 
-   public void correctCoMHeightForUnreachableFootstep(CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForUnreachableFootstep(CoMHeightTimeDerivativesDataBasics comHeightData)
    {
       // Do that after to make sure the swing foot will land
+      boolean leftCorrectionApplied = false, rightCorrectionApplied = false;
       for (RobotSide robotSide : RobotSide.values)
       {
+         CoMHeightTimeDerivativesDataBasics sidedCoMHeightData = legComHeightData.get(robotSide);
+         sidedCoMHeightData.set(comHeightData);
          FootControlModule footControlModule = footControlModules.get(robotSide);
          footControlModule.updateLegSingularityModule();
-         footControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+         boolean correctionApplied = footControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(sidedCoMHeightData);
+         if (robotSide == RobotSide.LEFT)
+            leftCorrectionApplied = correctionApplied;
+         else
+            rightCorrectionApplied = correctionApplied;
+      }
+
+      if (leftCorrectionApplied != rightCorrectionApplied)
+      {
+         if (leftCorrectionApplied)
+            comHeightData.set(leftLegCoMHeightData);
+         else
+            comHeightData.set(rightLegCoMHeightData);
+      }
+      else
+      {
+         WorkspaceLimiterReconciler.reconcileWorkspaceLimitedData(legComHeightData, comHeightData);
       }
    }
 

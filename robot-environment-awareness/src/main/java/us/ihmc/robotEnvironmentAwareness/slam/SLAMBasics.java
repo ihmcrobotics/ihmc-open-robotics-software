@@ -8,19 +8,25 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMBasics implements SLAMInterface
 {
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
+   protected Point3DBasics[] sourcePoints;
    protected final NormalOcTree octree;
    private final AtomicInteger mapSize = new AtomicInteger();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
+
+   protected final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
 
    public SLAMBasics(double octreeResolution)
    {
@@ -36,13 +42,15 @@ public class SLAMBasics implements SLAMInterface
       int numberOfPoints = frame.getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
+      Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
+      scan.getPointCloud().setTimestamp(frame.getTimeStamp());
+      scanCollection.addScan(scan);
 
       octree.insertScanCollection(scanCollection, true);
       octree.enableParallelComputationForNormals(true);
    }
 
-   public void updatePlanarRegionsMap()
+   public void updateSurfaceNormals()
    {
       octree.updateNormals();
    }
@@ -53,6 +61,8 @@ public class SLAMBasics implements SLAMInterface
       SLAMFrame frame = new SLAMFrame(pointCloudMessage);
       setLatestFrame(frame);
       insertNewPointCloud(frame);
+
+      driftCorrectionResult.setDefault();
    }
 
    @Override
@@ -61,19 +71,19 @@ public class SLAMBasics implements SLAMInterface
       SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
 
       long startTime = System.nanoTime();
-      RigidBodyTransformReadOnly optimizedMultiplier = computeFrameCorrectionTransformer(frame);
+      RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);
       latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
 
-      if (optimizedMultiplier == null)
+      driftCorrectionResult.setComputationTime(latestComputationTime.get());
+      if (driftCorrectionTransformer == null)
       {
          return false;
       }
       else
       {
-         frame.updateOptimizedCorrection(optimizedMultiplier);
+         frame.updateOptimizedCorrection(driftCorrectionTransformer);
          setLatestFrame(frame);
          insertNewPointCloud(frame);
-
          return true;
       }
    }
@@ -86,9 +96,14 @@ public class SLAMBasics implements SLAMInterface
       octree.clear();
    }
 
+   public Point3DReadOnly[] getSourcePoints()
+   {
+      return sourcePoints;
+   }
+
    public boolean isEmpty()
    {
-      if (latestSlamFrame.get() == null)
+      if (mapSize.get() == 0)
          return true;
       else
          return false;
@@ -120,8 +135,23 @@ public class SLAMBasics implements SLAMInterface
       return octree;
    }
 
+   public void clearNormals()
+   {
+      octree.clearNormals();
+   }
+
+   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      octree.setNormalEstimationParameters(normalEstimationParameters);
+   }
+
    public double getComputationTimeForLatestFrame()
    {
       return latestComputationTime.get();
+   }
+   
+   public DriftCorrectionResult getDriftCorrectionResult()
+   {
+      return driftCorrectionResult;
    }
 }
