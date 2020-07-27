@@ -46,7 +46,12 @@ public class SwingOverPlanarRegionsLogViewer
    {
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
       File file = new File(getClass().getClassLoader().getResource(fileName).getFile());
-      logLoader.load(file);
+
+      if (logLoader.load(file) != FootstepPlannerLogLoader.LoadResult.LOADED)
+      {
+         return;
+      }
+
       FootstepPlannerLog log = logLoader.getLog();
 
       FootstepDataListMessage footsteps = log.getStatusPacket().getFootstepDataList();
