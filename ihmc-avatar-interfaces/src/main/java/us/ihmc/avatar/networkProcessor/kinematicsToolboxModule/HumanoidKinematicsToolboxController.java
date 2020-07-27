@@ -348,7 +348,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatusInternal, robotside));
 
          hasMultiContactBalanceStatus = false;
-         multiContactBalanceStatusInternal.set(null);
       }
       else if (hasMultiContactBalanceStatus)
       {
