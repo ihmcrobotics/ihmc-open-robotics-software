@@ -184,14 +184,14 @@ public class FootstepPlannerLogVisualizerController
 
       loadingLog.set(true);
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, "Loading log...");
 
-      if(logLoader.load())
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
+      if(loadResult == FootstepPlannerLogLoader.LoadResult.LOADED)
       {
          footstepPlannerLog = logLoader.getLog();
          loadLog(footstepPlannerLog);
       }
-      else
+      else if (loadResult == FootstepPlannerLogLoader.LoadResult.ERROR)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, "Error loading log");
       }
