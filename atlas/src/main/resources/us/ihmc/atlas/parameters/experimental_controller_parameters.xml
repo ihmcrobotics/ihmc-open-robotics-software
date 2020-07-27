@@ -4,7 +4,7 @@
       <registry name="DRCMomentumBasedController">
          <registry name="HumanoidHighLevelControllerManager">
             <registry name="SimpleWalkingControllerState">
-               <registry name="LinearMomentumRateControlModule">
+               <registry name="SimpleLinearMomentumRateControlModule">
                   <registry name="ICPController">
                      <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
                      <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />

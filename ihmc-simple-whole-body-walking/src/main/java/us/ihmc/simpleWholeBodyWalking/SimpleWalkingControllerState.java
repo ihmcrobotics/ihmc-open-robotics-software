@@ -58,8 +58,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    
    public SimpleWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                        SimpleControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                       HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters, 
-                                       boolean USE_LQR_MOMENTUM_CONTROLLER)
+                                       HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters) 
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
@@ -99,7 +98,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
       linearMomentumRateControlModule = new SimpleLinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry, USE_LQR_MOMENTUM_CONTROLLER);
+                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry, controllerToolbox.getOmega0());
       linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
       linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
