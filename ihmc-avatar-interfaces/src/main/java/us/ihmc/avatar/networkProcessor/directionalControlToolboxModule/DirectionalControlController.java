@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.DirectionalControlConfigurationMessage;
+import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -15,8 +17,6 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.JoystickRemoteInputMessage;
-import controller_msgs.msg.dds.JoystickRemoteControlMessage;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import us.ihmc.avatar.joystickBasedJavaFXController.UserProfileManager;
@@ -93,12 +93,13 @@ public class DirectionalControlController extends ToolboxController {
 	private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
 	private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
+	private final SnapAndWiggleSingleStepParameters snapAndWiggleParameters = new SnapAndWiggleSingleStepParameters();	
 	private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 	private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
-	private final AtomicReference<JoystickRemoteInputMessage> joystickInputMessage = new AtomicReference<>(null);
-	private final AtomicReference<JoystickRemoteControlMessage> joystickControlMessage = new AtomicReference<>(null);
+	private final AtomicReference<DirectionalControlInputMessage> controlInputMessage = new AtomicReference<>(null);
+	private final AtomicReference<DirectionalControlConfigurationMessage> controlConfigurationMessage = new AtomicReference<>(null);
 	
 	private JoystickStepParameters joystickParameters;
 	private UserProfileManager<JoystickStepParameters> userProfileManager;
@@ -112,6 +113,11 @@ public class DirectionalControlController extends ToolboxController {
 
 	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS,
 			"ihmc_valkyrie_vr_joystick_control");
+	
+	public void updateRobotConfigurationData(RobotConfigurationData message)
+	{
+		robotUpdater.updateConfiguration(message);
+	}
 
 	public DirectionalControlController(FullHumanoidRobotModel robotModel,
 			                            DRCRobotModel robot,
@@ -137,9 +143,9 @@ public class DirectionalControlController extends ToolboxController {
 		joystickParameters = userProfileManager.loadProfile("default");
 		stepParametersReference = new AtomicReference<JoystickStepParameters>(joystickParameters);
 
-		SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
-		parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
-		snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
+		
+		snapAndWiggleParameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
+		snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(snapAndWiggleParameters);
 		
 		continuousStepGenerator.setNumberOfFootstepsToPlan(10);
 		continuousStepGenerator.setDesiredTurningVelocityProvider(() -> turningVelocityProperty.get());
@@ -157,27 +163,21 @@ public class DirectionalControlController extends ToolboxController {
 		ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 		ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-		// Subscribe to robot configuration updates so we can update the local robot model
-		ROS2Tools.createCallbackSubscription(ros2Node, 
-				                             RobotConfigurationData.class,
-				                             ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-				                             s -> robotUpdater.updateConfiguration(s.takeNextData()));
-
 		// Status on whether a footstep started/completed
 		ROS2Tools.createCallbackSubscription(ros2Node, 
 				                             FootstepStatusMessage.class, controllerPubGenerator,
 				                             s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
 
-		// Incoming joystick directional messages
+		// Incoming directional input messages
 		ROS2Tools.createCallbackSubscription(ros2Node, 
-				                             JoystickRemoteInputMessage.class, controllerSubGenerator,
-				                             s -> joystickInputMessage.set(s.takeNextData()));
+				                             DirectionalControlInputMessage.class, controllerSubGenerator,
+				                             s -> controlInputMessage.set(s.takeNextData()));
 		
-		// Incoming joystick control messages
+		// Incoming directional configuration messages
 		ROS2Tools.createCallbackSubscription(ros2Node, 
-				                             JoystickRemoteControlMessage.class, 
+				                             DirectionalControlConfigurationMessage.class, 
 				                             controllerSubGenerator,
-				                             s -> joystickControlMessage.set(s.takeNextData()));
+				                             s -> controlConfigurationMessage.set(s.takeNextData()));
 		
 
 		// REA planes
@@ -206,7 +206,13 @@ public class DirectionalControlController extends ToolboxController {
 		double collisionXYProximityCheck = 0.01;
 		collisionDetector = new BoundingBoxCollisionDetector();
 		collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
+		
+		// TODO: need to figure out how to set this up w.r.t the toolbox.
+		setupTasks();
 
+	}
+
+	private void setupTasks() {
 		/*
 		 * Main update task. Duties include: - handling incoming joystick control
 		 * messages to control walking speed and direction - handling planar regions
@@ -217,25 +223,10 @@ public class DirectionalControlController extends ToolboxController {
 			@Override
 			public void run() {
 				try {
-					DirectionalControlController.this.handleJoystickMessages();
-					PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
-					if (latestMessage != null) {
-						PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestMessage);
-						snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
-						collisionDetector.setPlanarRegionsList(
-								new PlanarRegionsList(planarRegionsList.getPlanarRegionsAsList().stream().filter(
-										region -> region.getConvexHull().getArea() >= parameters.getMinPlanarRegionArea()).collect(Collectors.toList())));
-						DirectionalControlController.this.planarRegionsList.set(planarRegionsList);
-					}
-
-					JoystickStepParameters stepParameters = stepParametersReference.get();
-					continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(),
-							stepParameters.getTransferDuration());
-					continuousStepGenerator.update(Double.NaN);
-
-				} catch (Throwable e) {
+					DirectionalControlController.this.updateInternal();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
-					LogTools.error("Caught exception, stopping timer.");
 				}
 			}
 
@@ -259,10 +250,8 @@ public class DirectionalControlController extends ToolboxController {
 
 		// Send current footsteps at a fixed rate, once enabled by startWalking()
 		scheduler.scheduleAtFixedRate(this::publishFootsteps, 0, SEND_FOOTSTEP_RATE_MS, TimeUnit.MILLISECONDS);
-
-//		startWalking(true);
 	}
-
+	
 	private SideDependentList<ConvexPolygon2D> getFootPolygons(
 			WalkingControllerParameters walkingControllerParameters) {
 		SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
@@ -439,8 +428,8 @@ public class DirectionalControlController extends ToolboxController {
 	}
 	
 	protected void updateDirectionalInputs() {
-		// Handle joystick directional inputs
-		JoystickRemoteInputMessage inputMessage = joystickInputMessage.getAndSet(null);
+		// Handle directional inputs
+		DirectionalControlInputMessage inputMessage = controlInputMessage.getAndSet(null);
 		if (inputMessage != null) {
 			updateForwardVelocity(inputMessage.forward_);
 			updateLateralVelocity(-inputMessage.right_);
@@ -449,8 +438,8 @@ public class DirectionalControlController extends ToolboxController {
 	}
 	
 	protected void updateStateInputs() {
-		// Handle joystick control
-		JoystickRemoteControlMessage controlMessage = joystickControlMessage.getAndSet(null);
+		// Handle configuration inputs
+		DirectionalControlConfigurationMessage controlMessage = controlConfigurationMessage.getAndSet(null);
 		if (controlMessage != null) {
 			String profile = controlMessage.getProfileNameAsString();
 			if (profile.length() > 0) {
@@ -494,8 +483,28 @@ public class DirectionalControlController extends ToolboxController {
 
 	@Override
 	public void updateInternal() throws Exception {
-		// TODO Auto-generated method stub
 		
+		try {
+			DirectionalControlController.this.handleJoystickMessages();
+			PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
+			if (latestMessage != null) {
+				PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestMessage);
+				snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+				collisionDetector.setPlanarRegionsList(
+						new PlanarRegionsList(planarRegionsList.getPlanarRegionsAsList().stream().filter(
+								region -> region.getConvexHull().getArea() >= snapAndWiggleParameters.getMinPlanarRegionArea()).collect(Collectors.toList())));
+				DirectionalControlController.this.planarRegionsList.set(planarRegionsList);
+			}
+
+			JoystickStepParameters stepParameters = stepParametersReference.get();
+			continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(),
+					stepParameters.getTransferDuration());
+			continuousStepGenerator.update(Double.NaN);
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+			LogTools.error("Caught exception, stopping timer.");
+		}
 	}
 
 	@Override

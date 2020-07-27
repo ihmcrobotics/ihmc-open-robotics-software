@@ -49,6 +49,7 @@ public class ROS2Tools
    public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
    public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
    public static final String EXTERNAL_FORCE_ESTIMATION_TOOLBOX = "/toolbox/external_force_estimation";
+   public static final String DIRECTIONAL_CONTROL_TOOLBOX = "/toolbox/directional_control";
 
    public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER = "/quadruped_support_region_publisher";

@@ -19,30 +19,42 @@ import us.ihmc.pubsub.TopicDataType;
        * v=0 indicates no change,
        * v>0 indicates forwards/right/clockwise at v*max speed.
        */
-public class JoystickRemoteInputMessage extends Packet<JoystickRemoteInputMessage> implements Settable<JoystickRemoteInputMessage>, EpsilonComparable<JoystickRemoteInputMessage>
+public class DirectionalControlInputMessage extends Packet<DirectionalControlInputMessage> implements Settable<DirectionalControlInputMessage>, EpsilonComparable<DirectionalControlInputMessage>
 {
+   public long sequence_id_;
    public double forward_;
    public double right_;
    public double clockwise_;
 
-   public JoystickRemoteInputMessage()
+   public DirectionalControlInputMessage()
    {
    }
 
-   public JoystickRemoteInputMessage(JoystickRemoteInputMessage other)
+   public DirectionalControlInputMessage(DirectionalControlInputMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(JoystickRemoteInputMessage other)
+   public void set(DirectionalControlInputMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       forward_ = other.forward_;
 
       right_ = other.right_;
 
       clockwise_ = other.clockwise_;
 
+   }
+
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setForward(double forward)
@@ -73,22 +85,24 @@ public class JoystickRemoteInputMessage extends Packet<JoystickRemoteInputMessag
    }
 
 
-   public static Supplier<JoystickRemoteInputMessagePubSubType> getPubSubType()
+   public static Supplier<DirectionalControlInputMessagePubSubType> getPubSubType()
    {
-      return JoystickRemoteInputMessagePubSubType::new;
+      return DirectionalControlInputMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return JoystickRemoteInputMessagePubSubType::new;
+      return DirectionalControlInputMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(JoystickRemoteInputMessage other, double epsilon)
+   public boolean epsilonEquals(DirectionalControlInputMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_, other.forward_, epsilon)) return false;
 
@@ -105,9 +119,11 @@ public class JoystickRemoteInputMessage extends Packet<JoystickRemoteInputMessag
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof JoystickRemoteInputMessage)) return false;
+      if(!(other instanceof DirectionalControlInputMessage)) return false;
 
-      JoystickRemoteInputMessage otherMyClass = (JoystickRemoteInputMessage) other;
+      DirectionalControlInputMessage otherMyClass = (DirectionalControlInputMessage) other;
+
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if(this.forward_ != otherMyClass.forward_) return false;
 
@@ -124,7 +140,9 @@ public class JoystickRemoteInputMessage extends Packet<JoystickRemoteInputMessag
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("JoystickRemoteInputMessage {");
+      builder.append("DirectionalControlInputMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("forward=");
       builder.append(this.forward_);      builder.append(", ");
       builder.append("right=");
