@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 public class Head360Simulator implements Supplier<PlanarRegionsList>
 {
+   private final PointCloudPolygonizer polygonizer;
    private volatile PlanarRegionsList map;
 
    private RemoteSyncedRobotModel syncedRobot;
@@ -24,7 +25,8 @@ public class Head360Simulator implements Supplier<PlanarRegionsList>
 
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-      simulatedDepthCamera = new SimulatedDepthCamera(neckFrame);
+      simulatedDepthCamera = new SimulatedDepthCamera(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, neckFrame);
+      polygonizer = new PointCloudPolygonizer();
    }
 
    @Override
@@ -34,7 +36,7 @@ public class Head360Simulator implements Supplier<PlanarRegionsList>
 
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return simulatedDepthCamera.filterMapToVisible(map);
+         return polygonizer.polygonize(simulatedDepthCamera.computeRegionPointMapFrame(map));
       }
       else
       {

@@ -37,7 +37,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
 
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return simulatedDepthCamera.filterMapToVisible(map);
+         return simulatedDepthCamera.computeAndPolygonize(map);
       }
       else
       {

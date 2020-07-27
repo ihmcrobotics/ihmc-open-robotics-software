@@ -196,7 +196,7 @@ public class SurfaceElementICPTest
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getOriginalSensorPose());
+            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getUncorrectedSensorPoseInWorld());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
 
             Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
@@ -273,7 +273,7 @@ public class SurfaceElementICPTest
          slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
          slamViewer.addPointCloud(frame2.getPointCloud(), Color.GREEN);
          slamViewer.addSensorPose(frame2.getSensorPose(), Color.GREEN);
-         slamViewer.addSensorPose(frame2.getOriginalSensorPose(), Color.BLUE);
+         slamViewer.addSensorPose(frame2.getUncorrectedSensorPoseInWorld(), Color.BLUE);
          slamViewer.start("testDriftCorrection");
 
          assertTrue(0.005 > qualityArray[qualityArray.length - 1], "GOOD!");

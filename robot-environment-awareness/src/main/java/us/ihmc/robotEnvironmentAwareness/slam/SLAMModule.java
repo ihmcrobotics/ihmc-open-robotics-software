@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,6 +29,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudComp
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
+import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
@@ -40,7 +43,7 @@ public class SLAMModule implements PerceptionModule
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
    private static final Color LATEST_ORIGINAL_POINT_CLOUD_COLOR = Color.BEIGE;
-   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.BLACK;
+   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.RED;
    private static final Color LATEST_POINT_CLOUD_COLOR = Color.LIME;
 
    protected final AtomicReference<Boolean> enable;
@@ -48,21 +51,27 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
-   private final AtomicReference<RandomICPSLAMParameters> slamParameters;
+   private final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
-   protected final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   
+   protected final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
+   private Stopwatch stopwatch = new Stopwatch();
+
    private final boolean manageRosNode;
    protected final Ros2Node ros2Node;
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
+
+   private final SLAMHistory history = new SLAMHistory();
+   private final AtomicReference<String> slamDataExportPath;
 
    public SLAMModule(Messager messager)
    {
@@ -91,20 +100,25 @@ public class SLAMModule implements PerceptionModule
       this.manageRosNode = manageRosNode;
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud", this::handlePointCloud);
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud_D435", this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           StereoVisionPointCloudMessage.class,
+                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           StereoVisionPointCloudMessage.class,
+                                           REASourceType.DEPTH_POINT_CLOUD.getTopicName(),
+                                           this::handlePointCloud);
 
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
       enable = reaMessager.createInput(SLAMModuleAPI.SLAMEnable, true);
 
-      slamParameters = reaMessager.createInput(SLAMModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
+      slamParameters = reaMessager.createInput(SLAMModuleAPI.SLAMParameters, new SurfaceElementICPSLAMParameters());
 
       enableNormalEstimation = reaMessager.createInput(SLAMModuleAPI.NormalEstimationEnable, true);
       clearNormals = reaMessager.createInput(SLAMModuleAPI.NormalEstimationClear, false);
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
-
       reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
       NormalEstimationParameters normalEstimationParametersLocal = new NormalEstimationParameters();
@@ -120,8 +134,15 @@ public class SLAMModule implements PerceptionModule
 
          reaMessager.registerTopicListener(SLAMModuleAPI.SaveConfiguration, content -> saveConfiguration(filePropertyHelper));
       }
+      slamDataExportPath = reaMessager.createInput(SLAMModuleAPI.UISLAMDataExportDirectory);
+      reaMessager.registerTopicListener(SLAMModuleAPI.UISLAMDataExportRequest, content -> exportSLAMHistory());
 
       sendCurrentState();
+   }
+
+   private void exportSLAMHistory()
+   {
+      history.export(Paths.get(slamDataExportPath.get()));
    }
 
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
@@ -206,6 +227,7 @@ public class SLAMModule implements PerceptionModule
 
    public void updateSLAM()
    {
+      stopwatch.start();
       if (updateSLAMInternal())
       {
          publishResults();
@@ -226,20 +248,29 @@ public class SLAMModule implements PerceptionModule
       boolean success;
       if (slam.isEmpty())
       {
+         LogTools.debug("addKeyFrame queueSize: {} pointCloudSize: {} timestamp: {}",
+                       pointCloudQueue.size(),
+                       pointCloudToCompute.getNumberOfPoints(),
+                       pointCloudToCompute.getTimestamp());
          slam.addKeyFrame(pointCloudToCompute);
          success = true;
       }
       else
       {
+         LogTools.debug("addFrame queueSize: {} pointCloudSize: {}, timestamp: {}",
+                       pointCloudQueue.size(),
+                       pointCloudToCompute.getNumberOfPoints(),
+                       pointCloudToCompute.getTimestamp());
          success = addFrame(pointCloudToCompute);
+         LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
          slam.clearNormals();
       if (enableNormalEstimation.get())
-         slam.computeOcTreeNormals();
-
+         slam.updateSurfaceNormals();
+         
       dequeue();
 
       return success;
@@ -261,26 +292,28 @@ public class SLAMModule implements PerceptionModule
    }
 
    protected void publishResults()
-   {     
+   {
       String stringToReport = "";
       reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
       stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
       NormalOcTree octreeMap = slam.getOctree();
+      if (!enableNormalEstimation.get()) // update the normals here, becuase they weren't updated previously
+         octreeMap.updateNormals();
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
-      
+
+      LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
       }
-
       SLAMFrame latestFrame = slam.getLatestFrame();
-      Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
+      Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();
       Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
-      Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
+      Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePoints();
       if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
          return;
       StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
@@ -291,6 +324,8 @@ public class SLAMModule implements PerceptionModule
       latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
       reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
       reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
+      history.addLatestFrameHistory(latestFrame);
+      history.addDriftCorrectionHistory(slam.getDriftCorrectionResult());
    }
 
    private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
@@ -336,8 +371,7 @@ public class SLAMModule implements PerceptionModule
 
    private void updateSLAMParameters()
    {
-      RandomICPSLAMParameters parameters = slamParameters.get();
-      slam.updateParameters(parameters);
+      slam.updateParameters(slamParameters.get());
    }
 
    public void clearSLAM()
@@ -345,6 +379,7 @@ public class SLAMModule implements PerceptionModule
       newPointCloud.set(null);
       pointCloudQueue.clear();
       slam.clear();
+      history.clearHistory();
    }
 
    public void loadConfiguration(FilePropertyHelper filePropertyHelper)
@@ -357,7 +392,7 @@ public class SLAMModule implements PerceptionModule
          enableNormalEstimation.set(enableNormalEstimationFile);
       String slamParametersFile = filePropertyHelper.loadProperty(SLAMModuleAPI.SLAMParameters.getName());
       if (slamParametersFile != null)
-         slamParameters.set(RandomICPSLAMParameters.parse(slamParametersFile));
+         slamParameters.set(SurfaceElementICPSLAMParameters.parse(slamParametersFile));
       String normalEstimationParametersFile = filePropertyHelper.loadProperty(SLAMModuleAPI.NormalEstimationParameters.getName());
       if (normalEstimationParametersFile != null)
          normalEstimationParameters.set(NormalEstimationParameters.parse(normalEstimationParametersFile));
@@ -375,6 +410,7 @@ public class SLAMModule implements PerceptionModule
    private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
+      LogTools.trace("Received point cloud. numberOfPoints: {} timestamp: {}", message.getNumberOfPoints(), message.getTimestamp());
       newPointCloud.set(message);
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
