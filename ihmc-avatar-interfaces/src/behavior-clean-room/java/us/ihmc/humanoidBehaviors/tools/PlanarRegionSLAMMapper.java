@@ -34,6 +34,11 @@ public class PlanarRegionSLAMMapper
       return slamMap;
    }
 
+   public void clear()
+   {
+      slamMap = new PlanarRegionsList();
+   }
+
    public PlanarRegionsList getSlamMap()
    {
       return slamMap;
