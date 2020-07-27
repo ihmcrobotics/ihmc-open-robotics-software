@@ -1,11 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.google.common.util.concurrent.AtomicDouble;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -25,7 +20,16 @@ import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SLAMBasics implements SLAMInterface
 {
@@ -53,10 +57,11 @@ public class SLAMBasics implements SLAMInterface
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
       scan.getPointCloud().setTimestamp(frame.getTimeStamp());
 
-      octree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
+      Set<NormalOcTreeNode> updatedLeaves = new HashSet<>();
+      octree.insertScan(scan, insertMiss, updatedLeaves, null); // inserting the miss here is pretty dang expensive.
       octree.enableParallelComputationForNormals(true);
 
-      Arrays.stream(pointCloud).forEach(octreeHull::addVertex);
+      updatedLeaves.forEach(node -> octreeHull.addVertex(node.getHitLocationX(), node.getHitLocationY()));
       octreeHull.update();
    }
 
