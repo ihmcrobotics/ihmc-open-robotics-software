@@ -54,7 +54,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private static final String reportPlanarRegionsStateTimeReport = "Reporting Planar Regions state took: ";
 
    private final TimeReporter timeReporter = new TimeReporter();
-   Stopwatch stopwatch = new Stopwatch();
 
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
 
@@ -70,7 +69,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final AtomicReference<Boolean> clearOcTree;
-   private final AtomicReference<Pair<NormalOcTree, Long>> ocTree = new AtomicReference<>(null);
+   private final AtomicReference<NormalOcTree> ocTree = new AtomicReference<>(null);
    private final AtomicReference<NormalOcTree> currentOcTree = new AtomicReference<>(null);
    private final AtomicReference<Pose3DReadOnly> sensorPose = new AtomicReference<>(null);
 
@@ -234,14 +233,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    @Override
    public void reportOcTree(NormalOcTree ocTree, Pose3DReadOnly sensorPose)
    {
-      long latestTimestamp = -2L;
-      for (NormalOcTreeNode node : ocTree)
-      {
-         if (node.getLastHitTimestamp() > latestTimestamp)
-            latestTimestamp = node.getLastHitTimestamp();
-      }
-
-      this.ocTree.set(Pair.of(ocTree, latestTimestamp));
+      this.ocTree.set(ocTree);
       this.sensorPose.set(sensorPose);
 
       if (!runAsynchronously)
@@ -299,7 +291,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       try
       {
-         Pair<NormalOcTree, Long> ocTreeTimestamp = ocTree.getAndSet(null);
+         NormalOcTree ocTreeTimestamp = ocTree.getAndSet(null);
          Pose3DReadOnly latestSensorPose = this.sensorPose.get();
          if (ocTreeTimestamp != null)
          {
@@ -318,12 +310,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                NormalOcTree mainOcTree;
                if (currentOcTree.get() == null)
                {
-                  mainOcTree = new NormalOcTree(ocTreeTimestamp.getLeft());
+                  mainOcTree = new NormalOcTree(ocTreeTimestamp);
                }
                else
                {
                   mainOcTree = currentOcTree.get();
-                  NormalOcTreeSetter.updateOcTree(mainOcTree, ocTreeTimestamp.getLeft());
+                  NormalOcTreeSetter.updateOcTree(mainOcTree, ocTreeTimestamp);
                }
 
                Pose3D sensorPose = new Pose3D(latestSensorPose);
