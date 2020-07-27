@@ -42,7 +42,6 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
 
    private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
-   private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
 
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
    {
@@ -62,8 +61,8 @@ public class AtlasLookAndStepBehaviorDemo
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      ThreadTools.startAsDaemon(this::reaModule, "REAModule");
-      ThreadTools.startAsDaemon(simulation, "Simulation");
+      ThreadTools.startAsDaemon(this::perceptionStack, "PerceptionStack");
+      ThreadTools.startAsDaemon(USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation, "Simulation");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
@@ -80,7 +79,7 @@ public class AtlasLookAndStepBehaviorDemo
       }
    }
 
-   private void reaModule()
+   private void perceptionStack()
    {
       LogTools.info("Creating simulated multisense stereo regions module");
       Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "look_and_step_perception");
