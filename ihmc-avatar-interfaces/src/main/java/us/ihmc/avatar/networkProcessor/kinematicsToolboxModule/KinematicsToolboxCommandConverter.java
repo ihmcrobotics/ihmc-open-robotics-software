@@ -1,13 +1,20 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -16,17 +23,18 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
  * {@link KinematicsToolboxRigidBodyMessage} into a {@link KinematicsToolboxRigidBodyCommand}.
  * 
  * @author Sylvain Bertrand
- *
  */
 public class KinematicsToolboxCommandConverter implements CommandConversionInterface
 {
    private final RigidBodyHashCodeResolver rigidBodyHashCodeResolver;
+   private final JointHashCodeResolver jointHashCodeResolver;
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
    public KinematicsToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
    {
       rigidBodyHashCodeResolver = new RigidBodyHashCodeResolver(fullRobotModel);
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
+      jointHashCodeResolver = new JointHashCodeResolver(fullRobotModel);
    }
 
    public KinematicsToolboxCommandConverter(RigidBodyBasics rootBody)
@@ -35,6 +43,8 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
       rigidBodyHashCodeResolver.putAllMultiBodySystemRigidBodies(rootBody);
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
       referenceFrameHashCodeResolver.putAllMultiBodySystemReferenceFrames(rootBody);
+      jointHashCodeResolver = new JointHashCodeResolver();
+      jointHashCodeResolver.putAllMultiBodySystemJoints(rootBody);
    }
 
    /**
@@ -43,7 +53,15 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
    {
-      return message instanceof KinematicsToolboxRigidBodyMessage;
+      if (message instanceof KinematicsToolboxRigidBodyMessage)
+         return true;
+      if (message instanceof KinematicsToolboxOneDoFJointMessage)
+         return true;
+      if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
+         return true;
+      if (message instanceof KinematicsToolboxInputCollectionMessage)
+         return true;
+      return false;
    }
 
    /**
@@ -52,8 +70,29 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
    {
-      KinematicsToolboxRigidBodyMessage rigiBodyMessage = (KinematicsToolboxRigidBodyMessage) message;
-      KinematicsToolboxRigidBodyCommand rigiBodyCommand = (KinematicsToolboxRigidBodyCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyHashCodeResolver, referenceFrameHashCodeResolver);
+      if (message instanceof KinematicsToolboxRigidBodyMessage)
+      {
+         KinematicsToolboxRigidBodyMessage rigidBodyMessage = (KinematicsToolboxRigidBodyMessage) message;
+         KinematicsToolboxRigidBodyCommand rigidBodyCommand = (KinematicsToolboxRigidBodyCommand) command;
+         rigidBodyCommand.set(rigidBodyMessage, rigidBodyHashCodeResolver, referenceFrameHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxOneDoFJointMessage)
+      {
+         KinematicsToolboxOneDoFJointMessage jointMessage = (KinematicsToolboxOneDoFJointMessage) message;
+         KinematicsToolboxOneDoFJointCommand jointCommand = (KinematicsToolboxOneDoFJointCommand) command;
+         jointCommand.set(jointMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
+      {
+         KinematicsToolboxPrivilegedConfigurationMessage privConfMessage = (KinematicsToolboxPrivilegedConfigurationMessage) message;
+         KinematicsToolboxPrivilegedConfigurationCommand privConfCommand = (KinematicsToolboxPrivilegedConfigurationCommand) command;
+         privConfCommand.set(privConfMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxInputCollectionMessage)
+      {
+         KinematicsToolboxInputCollectionMessage privConfMessage = (KinematicsToolboxInputCollectionMessage) message;
+         KinematicsToolboxInputCollectionCommand privConfCommand = (KinematicsToolboxInputCollectionCommand) command;
+         privConfCommand.set(privConfMessage, rigidBodyHashCodeResolver, referenceFrameHashCodeResolver, jointHashCodeResolver);
+      }
    }
 }

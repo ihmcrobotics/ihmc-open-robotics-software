@@ -5,7 +5,12 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -13,7 +18,6 @@ import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -25,10 +29,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
@@ -48,6 +60,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -108,7 +121,6 @@ public class KinematicsToolboxController extends ToolboxController
     * joints that are not handled by this solver.
     */
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
    private final Collection<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
@@ -324,8 +336,6 @@ public class KinematicsToolboxController extends ToolboxController
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
-
-      Arrays.stream(oneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       controllerCore = createControllerCore(controllableRigidBodies);
@@ -743,24 +753,6 @@ public class KinematicsToolboxController extends ToolboxController
       {
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
 
-         /*
-          * If there is a new privileged configuration, the desired robot state is updated alongside with the
-          * privileged configuration and the initial center of mass position and foot poses.
-          */
-         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointHashCodeMap);
-         if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
-            robotConfigurationReinitialized();
-         if (command.hasPrivilegedJointAngles())
-            snapPrivilegedConfigurationToCurrent();
-         if (command.getPrivilegedWeight() < 0.0)
-            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-         else
-            privilegedWeight.set(command.getPrivilegedWeight());
-         if (command.getPrivilegedGain() < 0.0)
-            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-         else
-            privilegedConfigurationGain.set(command.getPrivilegedGain());
-
          if (command.getJointVelocityWeight() <= 0.0)
             activeOptimizationSettings.setJointVelocityWeight(optimizationSettings.getJointVelocityWeight());
          else
@@ -778,6 +770,33 @@ public class KinematicsToolboxController extends ToolboxController
             activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.DISABLED);
          if (command.getEnableJointVelocityLimits())
             activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.ENABLED);
+         if (command.getDisableInputPersistence())
+            setPreserveUserCommandHistory(false);
+         else if (command.getEnableInputPersistence())
+            setPreserveUserCommandHistory(true);
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxPrivilegedConfigurationCommand.class))
+      {
+         KinematicsToolboxPrivilegedConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxPrivilegedConfigurationCommand.class);
+
+         /*
+          * If there is a new privileged configuration, the desired robot state is updated alongside with the
+          * privileged configuration and the initial center of mass position and foot poses.
+          */
+         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint);
+         if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
+            robotConfigurationReinitialized();
+         if (command.hasPrivilegedJointAngles())
+            snapPrivilegedConfigurationToCurrent();
+         if (command.getPrivilegedWeight() < 0.0)
+            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+         else
+            privilegedWeight.set(command.getPrivilegedWeight());
+         if (command.getPrivilegedGain() < 0.0)
+            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         else
+            privilegedConfigurationGain.set(command.getPrivilegedGain());
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
@@ -821,8 +840,7 @@ public class KinematicsToolboxController extends ToolboxController
          for (int i = 0; i < commands.size(); i++)
          {
             KinematicsToolboxOneDoFJointCommand command = commands.get(i);
-            int jointHashCode = command.getJointHashCode();
-            OneDoFJointBasics joint = jointHashCodeMap.get(jointHashCode);
+            OneDoFJointBasics joint = command.getJoint();
             OneDoFJointFeedbackControlCommand jointCommand = null;
 
             for (int bufferIndex = 0; bufferIndex < userJointFeedbackControlCommands.size(); bufferIndex++)
@@ -838,7 +856,7 @@ public class KinematicsToolboxController extends ToolboxController
             if (jointCommand == null)
                jointCommand = userJointFeedbackControlCommands.add();
 
-            KinematicsToolboxHelper.consumeJointCommand(command, joint, jointGains, jointCommand);
+            KinematicsToolboxHelper.consumeJointCommand(command, jointGains, jointCommand);
          }
       }
 
