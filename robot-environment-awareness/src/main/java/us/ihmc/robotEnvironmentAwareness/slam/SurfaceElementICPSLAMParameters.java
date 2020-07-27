@@ -33,6 +33,8 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_ROTATION_PERTURBATION = 0.00001;
    private static final boolean DEFAULT_INCLUDE_PITCH_AND_ROLL = true;
 
+   private static final int DEFAULT_MAXIMUM_QUEUE_SIZE = Integer.MAX_VALUE;
+
    private double surfaceElementResolution;
    private double windowMargin;
    private int minimumNumberOfHit;
@@ -56,6 +58,8 @@ public class SurfaceElementICPSLAMParameters
    private double translationPerturbation;
    private double rotationPerturbation;
    private boolean includePitchAndRoll;
+
+   private int maximumQueueSize;
 
    public SurfaceElementICPSLAMParameters()
    {
@@ -92,6 +96,8 @@ public class SurfaceElementICPSLAMParameters
       translationPerturbation = other.translationPerturbation;
       rotationPerturbation = other.rotationPerturbation;
       includePitchAndRoll = other.includePitchAndRoll;
+
+      maximumQueueSize = other.maximumQueueSize;
    }
 
    public void setDefaultParameters()
@@ -119,6 +125,8 @@ public class SurfaceElementICPSLAMParameters
       translationPerturbation = DEFAULT_TRANSLATION_PERTURBATION;
       rotationPerturbation = DEFAULT_ROTATION_PERTURBATION;
       includePitchAndRoll = DEFAULT_INCLUDE_PITCH_AND_ROLL;
+
+      maximumQueueSize = DEFAULT_MAXIMUM_QUEUE_SIZE;
    }
 
    public double getSurfaceElementResolution()
@@ -206,6 +214,11 @@ public class SurfaceElementICPSLAMParameters
       return includePitchAndRoll;
    }
 
+   public int getMaximumQueueSize()
+   {
+      return maximumQueueSize;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -291,18 +304,23 @@ public class SurfaceElementICPSLAMParameters
       this.includePitchAndRoll = includePitchAndRoll;
    }
 
+   public void setMaximumQueueSize(int maximumQueueSize)
+   {
+      this.maximumQueueSize = maximumQueueSize;
+   }
+
    @Override
    public String toString()
    {
       return "surfaceElementResolution: " + getSurfaceElementResolution() + ", windowMargin: " + getWindowMargin() + ", minimumNumberOfHit: "
              + getMinimumNumberOfHit() + ", boundRatio: " + getBoundRatio() + ", minimumCorrespondingDistance: " + getMinimumCorrespondingDistance()
-             + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold()
-             + ", qualityConvergenceThreshold: " + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: "
-             + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
-             + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
-             + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame()
-            + ", insertMissInOcTree: " + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll()
-            + ", translationPerturbation: " + getTranslationPerturbation() + ", rotationPerturbation: " + getRotationPerturbation();
+             + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold() + ", qualityConvergenceThreshold: "
+             + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: " + getTranslationalEffortConvergenceThreshold()
+             + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold() + ", enableInitialQualityFilter: "
+             + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold() + ", maxOptimizationIterations: "
+             + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame() + ", insertMissInOcTree: "
+             + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll() + ", translationPerturbation: " + getTranslationPerturbation()
+             + ", rotationPerturbation: " + getRotationPerturbation() + ", maximumQueueSize: " + getMaximumQueueSize();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -328,6 +346,7 @@ public class SurfaceElementICPSLAMParameters
       parameters.setIncludePitchAndRoll(ScannerTools.readNextBoolean(scanner, parameters.getIncludePitchAndRoll()));
       parameters.setTranslationPerturbation(ScannerTools.readNextDouble(scanner, parameters.getTranslationPerturbation()));
       parameters.setRotationPerturbation(ScannerTools.readNextDouble(scanner, parameters.getRotationPerturbation()));
+      parameters.setMaximumQueueSize(ScannerTools.readNextInt(scanner, parameters.getMaximumQueueSize()));
       scanner.close();
       return parameters;
    }
