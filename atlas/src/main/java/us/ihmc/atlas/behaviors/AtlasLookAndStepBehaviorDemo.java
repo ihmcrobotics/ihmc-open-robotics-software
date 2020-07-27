@@ -101,7 +101,7 @@ public class AtlasLookAndStepBehaviorDemo
 
       // might be a weird delay with threads at 0.5 hz depending on each other
       double period = 1.0;
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, period, multisense).start();
+      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, period, multisense).start(); // TODO: Disable while not in use?
 
       if (RUN_REALSENSE_SLAM)
       {
@@ -122,7 +122,7 @@ public class AtlasLookAndStepBehaviorDemo
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
       AtlasBehaviorSimulation.create(createRobotModel(),
                                      createCommonAvatarEnvironment(),
-                                     communicationMode.getPubSubImplementation(),
+                                     communicationMode.getPubSubImplementation(), // TODO: Set X, Y, and Yaw!
                                      recordFrequencySpeedup,
                                      dataBufferSize).simulate();
    }
