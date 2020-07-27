@@ -135,8 +135,6 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
-      DMatrixRMaj newInput = new DMatrixRMaj(inputDimension, 1);
-
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
       if (!currentOutputSpace.computeCorrespondence())
       {
@@ -167,24 +165,18 @@ public class LevenbergMarquardtParameterOptimizer
       }
 
       // compute direction.
-      jacobianTranspose.set(jacobian);
-      CommonOps_DDRM.transpose(jacobianTranspose);
-
-      CommonOps_DDRM.mult(jacobianTranspose, jacobian, squaredJacobian);
+      CommonOps_DDRM.multInner(jacobian, squaredJacobian);
       if (useDamping)
       {
-         CommonOps_DDRM.add(squaredJacobian, dampingMatrix, squaredJacobian);
+         CommonOps_DDRM.addEquals(squaredJacobian, dampingMatrix);
       }
       CommonOps_DDRM.invert(squaredJacobian);
 
-      CommonOps_DDRM.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
+      CommonOps_DDRM.multTransB(squaredJacobian, jacobian, invMultJacobianTranspose);
       CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutputSpace.getOutput(), optimizeDirection);
 
       // update currentInput.
-      CommonOps_DDRM.subtract(currentInput, optimizeDirection, newInput);
-
-      // compute new quality.
-      currentInput.set(newInput);
+      CommonOps_DDRM.subtract(currentInput, optimizeDirection, currentInput);
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       if (DEBUG)
