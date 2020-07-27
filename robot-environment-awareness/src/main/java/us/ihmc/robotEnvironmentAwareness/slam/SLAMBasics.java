@@ -33,7 +33,7 @@ public class SLAMBasics implements SLAMInterface
       octree = new NormalOcTree(octreeResolution);
    }
 
-   protected void insertNewPointCloud(SLAMFrame frame)
+   protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
    {
       Point3DReadOnly[] pointCloud = frame.getPointCloud();
       RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
@@ -41,7 +41,7 @@ public class SLAMBasics implements SLAMInterface
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
       scan.getPointCloud().setTimestamp(frame.getTimeStamp());
 
-      octree.insertScan(scan, true); // inserting the miss here is pretty dang expensive.
+      octree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
       octree.enableParallelComputationForNormals(true);
    }
 
@@ -51,17 +51,17 @@ public class SLAMBasics implements SLAMInterface
    }
 
    @Override
-   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
       SLAMFrame frame = new SLAMFrame(pointCloudMessage);
       setLatestFrame(frame);
-      insertNewPointCloud(frame);
+      insertNewPointCloud(frame, insertMiss);
 
       driftCorrectionResult.setDefault();
    }
 
    @Override
-   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
       SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
 
@@ -78,7 +78,7 @@ public class SLAMBasics implements SLAMInterface
       {
          frame.updateOptimizedCorrection(driftCorrectionTransformer);
          setLatestFrame(frame);
-         insertNewPointCloud(frame);
+         insertNewPointCloud(frame, insertMiss);
          return true;
       }
    }
