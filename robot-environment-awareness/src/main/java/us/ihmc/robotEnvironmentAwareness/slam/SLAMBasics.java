@@ -38,15 +38,10 @@ public class SLAMBasics implements SLAMInterface
       Point3DReadOnly[] pointCloud = frame.getPointCloud();
       RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
 
-      ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = frame.getPointCloud().length;
-
-      scanCollection.setSubSampleSize(numberOfPoints);
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
       scan.getPointCloud().setTimestamp(frame.getTimeStamp());
-      scanCollection.addScan(scan);
 
-      octree.insertScanCollection(scanCollection, true);
+      octree.insertScan(scan, true); // inserting the miss here is pretty dang expensive.
       octree.enableParallelComputationForNormals(true);
    }
 
