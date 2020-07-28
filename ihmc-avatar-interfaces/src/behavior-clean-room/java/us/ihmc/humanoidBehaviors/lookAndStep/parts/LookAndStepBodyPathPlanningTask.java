@@ -40,9 +40,8 @@ public class LookAndStepBodyPathPlanningTask
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
    protected Supplier<Boolean> robotConnectedSupplier;
 
+   protected LookAndStepReview<List<? extends Pose3DReadOnly>> review;
    protected Consumer<ArrayList<Pose3D>> autonomousOutput;
-   protected Consumer<List<? extends Pose3DReadOnly>> initiateReviewOutput;
-   protected Supplier<Boolean> isBeingReviewed;
 
    protected final Timer planningFailedTimer = new Timer();
 
@@ -88,13 +87,11 @@ public class LookAndStepBodyPathPlanningTask
          goalInput.addCallback(data -> executor.execute(this::evaluateAndRun));
       }
 
-      public void laterSetup(Supplier<Boolean> isBeingReviewed,
-                             Consumer<ArrayList<Pose3D>> autonomousOutput,
-                             Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
+      public void laterSetup(LookAndStepReview<List<? extends Pose3DReadOnly>> review,
+                             Consumer<ArrayList<Pose3D>> autonomousOutput)
       {
-         this.isBeingReviewed = isBeingReviewed;
+         this.review = review;
          this.autonomousOutput = autonomousOutput;
-         this.initiateReviewOutput = reviewInitiation;
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING));
@@ -105,7 +102,7 @@ public class LookAndStepBodyPathPlanningTask
                                  () -> !regionsOK());
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
-         suppressor.addCondition("Is being reviewed", isBeingReviewed::get);
+         suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
@@ -196,7 +193,7 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (operatorReviewEnabled.get())
          {
-            initiateReviewOutput.accept(bodyPathPlanForReview);
+            review.review(bodyPathPlanForReview);
          }
          else
          {
