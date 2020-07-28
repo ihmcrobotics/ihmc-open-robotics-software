@@ -29,7 +29,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
@@ -59,6 +58,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -236,10 +236,10 @@ public class KinematicsToolboxController extends ToolboxController
    private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
    protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
 
-   private boolean isUserControllingCenterOfMass = false;
-   private final CenterOfMassFeedbackControlCommand userCoMFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
-   private final RecyclingArrayList<SpatialFeedbackControlCommand> userRigidBodyFeedbackControlCommands = new RecyclingArrayList<>(SpatialFeedbackControlCommand.class);
-   private final RecyclingArrayList<OneDoFJointFeedbackControlCommand> userJointFeedbackControlCommands = new RecyclingArrayList<>(OneDoFJointFeedbackControlCommand::new);
+   /** Command buffer used to keep track of the current commands submitted by the user. */
+   private final FeedbackControlCommandBuffer userFBCommands = new FeedbackControlCommandBuffer();
+   /** Command buffer used to keep track of the commands previously submitted by the user. */
+   private final FeedbackControlCommandBuffer previousUserFBCommands = new FeedbackControlCommandBuffer();
 
    /**
     * This is mostly for visualization to be able to keep track of the number of commands that the user
@@ -608,7 +608,8 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected boolean initializeInternal()
    {
-      clearUserCommands();
+      userFBCommands.clear();
+      previousUserFBCommands.clear();
 
       RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
       boolean hasRobotConfigurationData = robotConfigurationData != null;
@@ -643,13 +644,6 @@ public class KinematicsToolboxController extends ToolboxController
       return hasRobotConfigurationData;
    }
 
-   public void clearUserCommands()
-   {
-      isUserControllingCenterOfMass = false;
-      userRigidBodyFeedbackControlCommands.clear();
-      userJointFeedbackControlCommands.clear();
-   }
-
    /**
     * This is the control loop called periodically only when the user requested a solution for a
     * desired set of inputs.
@@ -665,15 +659,9 @@ public class KinematicsToolboxController extends ToolboxController
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
 
-      // Clear the map to forget the user commands previously submitted.
-      if (!preserveUserCommandHistory.getValue())
-         clearUserCommands();
-
       FeedbackControlCommandBuffer feedbackControlCommandBuffer = controllerCoreCommand.getFeedbackControlCommandList();
       InverseKinematicsCommandBuffer inverseKinematicsCommandBuffer = controllerCoreCommand.getInverseKinematicsCommandList();
       consumeUserCommands(feedbackControlCommandBuffer);
-      numberOfActiveCommands.set(userRigidBodyFeedbackControlCommands.size() + userJointFeedbackControlCommands.size()
-            + (isUserControllingCenterOfMass ? 1 : 0));
       getAdditionalFeedbackControlCommands(feedbackControlCommandBuffer);
 
       inverseKinematicsCommandBuffer.addInverseKinematicsOptimizationSettingsCommand().set(activeOptimizationSettings);
@@ -749,6 +737,9 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private void consumeUserCommands(FeedbackControlCommandBuffer commandBufferToPack)
    {
+      previousUserFBCommands.set(userFBCommands);
+      userFBCommands.clear();
+
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
       {
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
@@ -799,84 +790,182 @@ public class KinematicsToolboxController extends ToolboxController
             privilegedConfigurationGain.set(command.getPrivilegedGain());
       }
 
+      // Keeping track of whether we received at least 1 command, if not we re-submit the previous commands regardless of preserveUserCommandHistory.
+      boolean noCommandReceived = true;
+
+      /***************************************
+       * Individual center of mass commands
+       ***************************************/
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
+         noCommandReceived = false;
+
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userCoMFeedbackControlCommand);
-         isUserControllingCenterOfMass = true;
+         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
+
+         if (preserveUserCommandHistory.getValue())
+         {
+            // We override previous commands if any.
+            while (!previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty())
+            {
+               previousUserFBCommands.removeCommand(previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().get(0));
+            }
+         }
       }
 
+      /***************************************
+       * Individual rigid-body commands
+       ***************************************/
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxRigidBodyCommand.class))
       {
          List<KinematicsToolboxRigidBodyCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxRigidBodyCommand.class);
 
          for (int i = 0; i < commands.size(); i++)
          {
-            RigidBodyBasics endEffector = commands.get(i).getEndEffector();
-            SpatialFeedbackControlCommand rigidBodyCommand = null;
+            noCommandReceived = false;
+            KinematicsToolboxRigidBodyCommand command = commands.get(i);
+            RigidBodyBasics endEffector = command.getEndEffector();
+            SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
+            KinematicsToolboxHelper.consumeRigidBodyCommand(command, rootBody, spatialGains, rigidBodyCommand);
+            rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
 
-            for (int bufferIndex = 0; bufferIndex < userRigidBodyFeedbackControlCommands.size(); bufferIndex++)
+            if (preserveUserCommandHistory.getValue())
             {
-               SpatialFeedbackControlCommand candidate = userRigidBodyFeedbackControlCommands.get(bufferIndex);
-               if (candidate.getEndEffector() == endEffector)
+               // We override previous commands if any.
+               for (int j = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().size() - 1; j >= 0; j--)
                {
-                  rigidBodyCommand = candidate;
-                  break;
+                  SpatialFeedbackControlCommand previousCommand = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().get(j);
+                  if (previousCommand.getEndEffector() == endEffector)
+                     previousUserFBCommands.removeCommand(previousCommand);
                }
             }
-
-            if (rigidBodyCommand == null)
-               rigidBodyCommand = userRigidBodyFeedbackControlCommands.add();
-
-            KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, spatialGains, rigidBodyCommand);
-            rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
          }
       }
 
+      /***************************************
+       * Individual 1 DoF joint commands
+       ***************************************/
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxOneDoFJointCommand.class))
       {
          List<KinematicsToolboxOneDoFJointCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxOneDoFJointCommand.class);
 
          for (int i = 0; i < commands.size(); i++)
          {
+            noCommandReceived = false;
             KinematicsToolboxOneDoFJointCommand command = commands.get(i);
             OneDoFJointBasics joint = command.getJoint();
-            OneDoFJointFeedbackControlCommand jointCommand = null;
+            OneDoFJointFeedbackControlCommand jointCommand = userFBCommands.addOneDoFJointFeedbackControlCommand();
+            KinematicsToolboxHelper.consumeJointCommand(command, jointGains, jointCommand);
 
-            for (int bufferIndex = 0; bufferIndex < userJointFeedbackControlCommands.size(); bufferIndex++)
+            if (preserveUserCommandHistory.getValue())
             {
-               OneDoFJointFeedbackControlCommand candidate = userJointFeedbackControlCommands.get(bufferIndex);
-               if (candidate.getJoint() == joint)
+               // We override previous commands if any.
+               for (int j = 0; j < previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().size(); j++)
                {
-                  jointCommand = candidate;
-                  break;
+                  OneDoFJointFeedbackControlCommand previousCommand = previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().get(j);
+                  if (previousCommand.getJoint() == joint)
+                     previousUserFBCommands.removeCommand(previousCommand);
                }
             }
-
-            if (jointCommand == null)
-               jointCommand = userJointFeedbackControlCommands.add();
-
-            KinematicsToolboxHelper.consumeJointCommand(command, jointGains, jointCommand);
          }
       }
 
-      // TODO fix the doc
-      /*
-       * By using the map, we ensure that there is only one command per end-effector (including the center
-       * of mass). The map is also useful for remembering commands received during the previous control
-       * ticks of the same run.
-       */
-      if (isUserControllingCenterOfMass)
-         commandBufferToPack.addCenterOfMassFeedbackControlCommand().set(userCoMFeedbackControlCommand);
-
-      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      /***************************************
+       * Command collection
+       ***************************************/
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInputCollectionCommand.class))
       {
-         commandBufferToPack.addSpatialFeedbackControlCommand().set(userRigidBodyFeedbackControlCommands.get(i));
+         List<KinematicsToolboxInputCollectionCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxInputCollectionCommand.class);
+
+         for (int i = 0; i < commands.size(); i++)
+         {
+            KinematicsToolboxInputCollectionCommand command = commands.get(i);
+
+            // CoM inputs
+            RecyclingArrayList<KinematicsToolboxCenterOfMassCommand> centerOfMassInputs = command.getCenterOfMassInputs();
+            for (int j = 0; j < centerOfMassInputs.size(); j++)
+            {
+               noCommandReceived = false;
+               KinematicsToolboxCenterOfMassCommand input = centerOfMassInputs.get(j);
+               KinematicsToolboxHelper.consumeCenterOfMassCommand(input,
+                                                                  spatialGains.getPositionGains(),
+                                                                  userFBCommands.addCenterOfMassFeedbackControlCommand());
+
+               if (preserveUserCommandHistory.getValue())
+               {
+                  // We override previous commands if any.
+                  while (!previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty())
+                  {
+                     previousUserFBCommands.removeCommand(previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().get(0));
+                  }
+               }
+            }
+
+            // Rigid-body inputs
+            RecyclingArrayList<KinematicsToolboxRigidBodyCommand> rigidBodyInputs = command.getRigidBodyInputs();
+            for (int j = 0; j < rigidBodyInputs.size(); j++)
+            {
+               noCommandReceived = false;
+               KinematicsToolboxRigidBodyCommand input = rigidBodyInputs.get(j);
+               RigidBodyBasics endEffector = input.getEndEffector();
+               SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
+               KinematicsToolboxHelper.consumeRigidBodyCommand(input, rootBody, spatialGains, rigidBodyCommand);
+               rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
+
+               if (preserveUserCommandHistory.getValue())
+               {
+                  // We override previous commands if any.
+                  for (int k = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().size() - 1; k >= 0; k--)
+                  {
+                     SpatialFeedbackControlCommand previousCommand = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().get(k);
+                     if (previousCommand.getEndEffector() == endEffector)
+                        previousUserFBCommands.removeCommand(previousCommand);
+                  }
+               }
+            }
+
+            // 1-DoF joint inputs
+            RecyclingArrayList<KinematicsToolboxOneDoFJointCommand> jointInputs = command.getJointInputs();
+            for (int j = 0; j < jointInputs.size(); j++)
+            {
+               noCommandReceived = false;
+               KinematicsToolboxOneDoFJointCommand input = jointInputs.get(j);
+               OneDoFJointBasics joint = input.getJoint();
+               OneDoFJointFeedbackControlCommand jointCommand = userFBCommands.addOneDoFJointFeedbackControlCommand();
+               KinematicsToolboxHelper.consumeJointCommand(input, jointGains, jointCommand);
+
+               if (preserveUserCommandHistory.getValue())
+               {
+                  // We override previous commands if any.
+                  for (int k = 0; k < previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().size(); k++)
+                  {
+                     OneDoFJointFeedbackControlCommand previousCommand = previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().get(k);
+                     if (previousCommand.getJoint() == joint)
+                        previousUserFBCommands.removeCommand(previousCommand);
+                  }
+               }
+            }
+         }
       }
 
-      for (int i = 0; i < userJointFeedbackControlCommands.size(); i++)
+      if (noCommandReceived)
       {
-         commandBufferToPack.addOneDoFJointFeedbackControlCommand().set(userJointFeedbackControlCommands.get(i));
+         commandBufferToPack.addCommandList(previousUserFBCommands);
+         numberOfActiveCommands.set(previousUserFBCommands.getNumberOfCommands());
+         userFBCommands.set(previousUserFBCommands);
+         previousUserFBCommands.clear();
+      }
+      else
+      {
+         if (preserveUserCommandHistory.getValue())
+         { // We move the remaining previous commands to the current set of user commands.
+            userFBCommands.addCommandList(previousUserFBCommands);
+         }
+         previousUserFBCommands.clear();
+         // Add to the commandBufferToPack so it gets submitted to the controller core.
+         commandBufferToPack.addCommandList(userFBCommands);
+         // Stats accessible from remote visualizer.
+         numberOfActiveCommands.set(userFBCommands.getNumberOfCommands());
       }
    }
 
@@ -1054,27 +1143,50 @@ public class KinematicsToolboxController extends ToolboxController
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
    {
-      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      RecyclingArrayList<SpatialFeedbackControlCommand> currentFBCommands = userFBCommands.getSpatialFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < currentFBCommands.size(); i++)
       {
-         if (userRigidBodyFeedbackControlCommands.get(i).getEndEffector() == rigidBody)
+         if (currentFBCommands.get(i).getEndEffector() == rigidBody)
             return true;
       }
+
+      RecyclingArrayList<SpatialFeedbackControlCommand> previousFBCommands = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < previousFBCommands.size(); i++)
+      {
+         if (previousFBCommands.get(i).getEndEffector() == rigidBody)
+            return true;
+      }
+
       return false;
    }
 
    public boolean isUserControllingJoint(OneDoFJointBasics joint)
    {
-      for (int i = 0; i < userJointFeedbackControlCommands.size(); i++)
+      RecyclingArrayList<OneDoFJointFeedbackControlCommand> currentFBCommands = userFBCommands.getOneDoFJointFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < currentFBCommands.size(); i++)
       {
-         if (userJointFeedbackControlCommands.get(i).getJoint() == joint)
+         if (currentFBCommands.get(i).getJoint() == joint)
             return true;
       }
+
+      RecyclingArrayList<OneDoFJointFeedbackControlCommand> previousFBCommands = previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < previousFBCommands.size(); i++)
+      {
+         if (previousFBCommands.get(i).getJoint() == joint)
+            return true;
+      }
+
       return false;
    }
 
    public boolean isUserControllingCenterOfMass()
    {
-      return isUserControllingCenterOfMass;
+      return !userFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty()
+            || !previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty();
    }
 
    public YoPIDSE3Gains getDefaultSpatialGains()
