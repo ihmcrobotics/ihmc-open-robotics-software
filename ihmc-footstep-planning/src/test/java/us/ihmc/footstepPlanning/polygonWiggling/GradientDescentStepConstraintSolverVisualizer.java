@@ -84,7 +84,7 @@ public class GradientDescentStepConstraintSolverVisualizer
       RigidBodyTransform legCollisionShapeToSoleTransform = new RigidBodyTransform();
       parameters.set(log.getFootstepParametersPacket());
 
-      int maxIndex = footstepPlan.size(); // 2; //
+      int maxIndex = footstepPlan.size();
       for (int i = 1; i < maxIndex; i++)
       {
          FootstepNode footstepNode = footstepPlan.get(i);
@@ -122,7 +122,7 @@ public class GradientDescentStepConstraintSolverVisualizer
          transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
          transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
          transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
-         gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
+         gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, legCollisionShapeToSoleTransform);
 
          gradientDescentStepConstraintSolver.wigglePolygon(gradientDescentStepConstraintInput);
       }
