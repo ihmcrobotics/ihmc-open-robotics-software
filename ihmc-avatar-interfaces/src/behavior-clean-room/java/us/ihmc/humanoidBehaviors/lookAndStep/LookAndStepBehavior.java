@@ -189,7 +189,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       helper.setCommunicationCallbacksEnabled(enabled);
 
-      robotInterface.pitchHeadWithRespectToChest(0.38);
+      robotInterface.pitchHeadWithRespectToChest(0.8);
       //      Commanding neck trajectory: slider: 43.58974358974359 angle: 0.3824055641025641
    }
 }
