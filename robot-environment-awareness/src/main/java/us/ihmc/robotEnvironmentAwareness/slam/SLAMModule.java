@@ -224,6 +224,12 @@ public class SLAMModule implements PerceptionModule
          scheduledQueue = null;
       }
 
+      if (scheduledMain != null)
+      {
+         scheduledMain.cancel(true);
+         scheduledMain = null;
+      }
+
       if (manageRosNode)
          ros2Node.destroy();
 
