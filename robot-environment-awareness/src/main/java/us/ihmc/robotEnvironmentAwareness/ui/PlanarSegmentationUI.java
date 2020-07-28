@@ -32,6 +32,8 @@ public class PlanarSegmentationUI implements PerceptionUI
    @FXML
    private RegionSegmentationAnchorPaneController regionSegmentationAnchorPaneController;
    @FXML
+   private BoundingBoxAnchorPaneController boundingBoxAnchorPaneController;
+   @FXML
    private CustomRegionMergeAnchorPaneController customRegionMergeAnchorPaneController;
    @FXML
    private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
@@ -128,7 +130,9 @@ public class PlanarSegmentationUI implements PerceptionUI
       ocTreeEssentialsAnchorPaneController.attachREAMessager(uiMessager);
       ocTreeEssentialsAnchorPaneController.bindControls();
 
-      // FIXME the ocTree essentials controller
+      boundingBoxAnchorPaneController.setConfigurationFile(configurationFile);
+      boundingBoxAnchorPaneController.attachREAMessager(uiMessager);
+      boundingBoxAnchorPaneController.bindControls();
 
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationEnableTopic(SegmentationModuleAPI.PlanarRegionsSegmentationEnable);
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationClearTopic(SegmentationModuleAPI.PlanarRegionsSegmentationClear);

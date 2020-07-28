@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -306,9 +307,10 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
       LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
+      Pose3D pose = new Pose3D(slam.getLatestFrame().getSensorPose());
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
-         ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
+         ocTreeConsumer.reportOcTree(octreeMap, pose);
       }
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();
