@@ -57,7 +57,7 @@ public class SurfaceElementICPTest
       double windowMargin = 0.05;
       int minimumNumberOfHits = 10;
       boolean updateNormal = false;
-      frame2.registerSurfaceElements(slam.getOctreeHull(), windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
+      frame2.registerSurfaceElements(map, windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
 
       if (VISUALIZE)
       {
@@ -91,7 +91,7 @@ public class SurfaceElementICPTest
       double windowMargin = 0.05;
       int minimumNumberOfHits = 1;
       boolean updateNormal = false;
-      frame2.registerSurfaceElements(slam.getOctreeHull(), windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
+      frame2.registerSurfaceElements(map, windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
 
       int numberOfBigPointsToVisualize = 20;
       TDoubleArrayList bigSurfelDistances = new TDoubleArrayList(numberOfBigPointsToVisualize);
@@ -164,7 +164,7 @@ public class SurfaceElementICPTest
       double windowMargin = 0.04;
       int minimumNumberOfHits = 3;
       boolean updateNormal = false;
-      frame2.registerSurfaceElements(slam.getOctreeHull(), windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
+      frame2.registerSurfaceElements(map, windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
 
       if (VISUALIZE)
       {

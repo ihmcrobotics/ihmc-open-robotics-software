@@ -121,11 +121,16 @@ public class SLAMFrame
    private final List<Plane3DReadOnly> surfaceElementsToSensor = new ArrayList<>();
    private NormalOcTree frameMap;
 
-   public void registerSurfaceElements(ConvexPolygon2DReadOnly mapHullInWorld, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
+   public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
    {
       surfaceElements.clear();
       surfaceElementsToSensor.clear();
       frameMap = new NormalOcTree(surfaceElementResolution);
+
+      ConvexPolygon2D mapHullInWorld = new ConvexPolygon2D();
+      for (NormalOcTreeNode node : OcTreeIteratorFactory.createLeafBoundingBoxIteratable(map.getRoot(), map.getBoundingBox()))
+         mapHullInWorld.addVertex(node.getHitLocationX(), node.getHitLocationY());
+      mapHullInWorld.update();
 
       frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin), false);
       frameMap.enableParallelComputationForNormals(true);
