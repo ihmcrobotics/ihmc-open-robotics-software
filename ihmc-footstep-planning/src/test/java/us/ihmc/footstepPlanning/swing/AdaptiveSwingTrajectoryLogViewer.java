@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
+import java.io.File;
+
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -17,14 +19,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-import java.io.File;
-
 public class AdaptiveSwingTrajectoryLogViewer
 {
    public AdaptiveSwingTrajectoryLogViewer()
    {
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      if (!logLoader.load(new File("/home/smccrory/Documents/stairsTests/PlannerLog")))
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load(new File("/home/smccrory/Documents/stairsTests/PlannerLog"));
+      
+      if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
       {
          return;
       }
