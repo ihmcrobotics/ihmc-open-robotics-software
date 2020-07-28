@@ -23,6 +23,7 @@ import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -34,6 +35,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -43,7 +45,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private final AtomicReference<VideoPacket> videoPacket = new AtomicReference<VideoPacket>();
 
    //debugging only
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
    private JFrame frame;
    private ImageIcon image;
    //*************
@@ -68,7 +70,10 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private final FramePose3D cameraPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final FramePose3D reportedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
 
-   public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
+   private final Stopwatch stopwatch = new Stopwatch();
+
+   public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel,
+                                            StatusMessageOutputManager statusOutputManager,
                                             YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -98,6 +103,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
    @Override
    public boolean initialize()
    {
+      LogTools.info("Initializing");
       return true;
    }
 
@@ -113,7 +119,10 @@ public class FiducialDetectorToolboxController extends ToolboxController
       VideoPacket latest = videoPacket.getAndSet(null);
       if (latest != null)
       {
+         LogTools.info("Detecting fiducial in latest frame");
+         stopwatch.start();
          detectFromVideoPacket(latest);
+         LogTools.info("Took {} s", stopwatch.totalElapsed());
       }
    }
 
