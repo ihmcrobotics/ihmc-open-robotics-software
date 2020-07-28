@@ -365,9 +365,6 @@ public class SLAMModule implements PerceptionModule
       frameState.setUncorrectedPointCloudInWorld(originalPointCloud);
       frameState.setCorrectedPointCloudInWorld(correctedPointCloud);
       frameState.setCorrespondingPointsInWorld(sourcePointsToWorld);
-//      StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
-//                                                                                                         sourcePointsToWorld,
-//                                                                                                         correctedPointCloud);
       RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
       frameState.getSensorPosition().set(sensorPose.getTranslation());
       frameState.getSensorOrientation().set(sensorPose.getRotation());
@@ -377,31 +374,6 @@ public class SLAMModule implements PerceptionModule
       history.addDriftCorrectionHistory(slam.getDriftCorrectionResult());
    }
 
-   private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
-                                                                                        Point3DReadOnly[] sourcePointsToWorld,
-                                                                                        Point3DReadOnly[] correctedPointCloud)
-   {
-      int numberOfPointsToPack = originalPointCloud.length + sourcePointsToWorld.length + correctedPointCloud.length;
-
-      Point3D[] pointCloudBuffer = new Point3D[numberOfPointsToPack];
-      int[] colorBuffer = new int[numberOfPointsToPack];
-      for (int i = 0; i < originalPointCloud.length; i++)
-      {
-         pointCloudBuffer[i] = new Point3D(originalPointCloud[i]);
-         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_ORIGINAL_POINT_CLOUD_COLOR);
-      }
-      for (int i = originalPointCloud.length; i < originalPointCloud.length + sourcePointsToWorld.length; i++)
-      {
-         pointCloudBuffer[i] = new Point3D(sourcePointsToWorld[i - originalPointCloud.length]);
-         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(SOURCE_POINT_CLOUD_COLOR);
-      }
-      for (int i = originalPointCloud.length + sourcePointsToWorld.length; i < numberOfPointsToPack; i++)
-      {
-         pointCloudBuffer[i] = new Point3D(correctedPointCloud[i - originalPointCloud.length - sourcePointsToWorld.length]);
-         colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
-      }
-      return PointCloudCompression.compressPointCloud(19870612L, pointCloudBuffer, colorBuffer, numberOfPointsToPack, 0.001, null);
-   }
 
    public void updateMain()
    {
