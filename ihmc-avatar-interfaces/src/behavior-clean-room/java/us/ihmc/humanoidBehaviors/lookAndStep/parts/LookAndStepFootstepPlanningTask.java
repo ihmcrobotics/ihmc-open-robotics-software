@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepFootstepPlanningPart
+public class LookAndStepFootstepPlanningTask
 {
    protected StatusLogger statusLogger;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
@@ -58,7 +58,7 @@ public class LookAndStepFootstepPlanningPart
    protected Supplier<Boolean> robotConnectedSupplier;
    protected AtomicReference<RobotSide> lastStanceSideReference;
 
-   public static class TaskSetup extends LookAndStepFootstepPlanningPart
+   public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
       private final SingleThreadSizeOneQueueExecutor executor;
       private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
@@ -69,20 +69,20 @@ public class LookAndStepFootstepPlanningPart
       private Timer planarRegionsExpirationTimer = new Timer();
       private Timer planningFailedTimer = new Timer();
 
-      public TaskSetup(StatusLogger statusLogger,
-                       LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                       FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                       Supplier<Boolean> abortGoalWalkingSupplier,
-                       UIPublisher uiPublisher,
-                       Runnable onReachedGoal,
-                       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
-                       FootstepPlanningModule footstepPlanningModule,
-                       AtomicReference<RobotSide> lastStanceSideReference,
-                       Supplier<Boolean> operatorReviewEnabledSupplier,
-                       RemoteSyncedRobotModel syncedRobot,
-                       BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                       Supplier<Boolean> robotConnectedSupplier,
-                       WalkingFootstepTracker walkingFootstepTracker)
+      public LookAndStepFootstepPlanning(StatusLogger statusLogger,
+                                         LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                                         FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                         Supplier<Boolean> abortGoalWalkingSupplier,
+                                         UIPublisher uiPublisher,
+                                         Runnable onReachedGoal,
+                                         SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
+                                         FootstepPlanningModule footstepPlanningModule,
+                                         AtomicReference<RobotSide> lastStanceSideReference,
+                                         Supplier<Boolean> operatorReviewEnabledSupplier,
+                                         RemoteSyncedRobotModel syncedRobot,
+                                         BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                                         Supplier<Boolean> robotConnectedSupplier,
+                                         WalkingFootstepTracker walkingFootstepTracker)
       {
          this.statusLogger = statusLogger;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
