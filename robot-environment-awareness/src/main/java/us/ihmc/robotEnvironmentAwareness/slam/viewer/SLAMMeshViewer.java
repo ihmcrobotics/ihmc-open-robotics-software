@@ -21,8 +21,10 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.BoundingBoxMeshView;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OccupancyMapMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
@@ -46,6 +48,7 @@ public class SLAMMeshViewer
    private final PlanarRegionsMeshBuilder importedPlanarRegionsMeshBuilder;
    private final OccupancyMapMeshBuilder occupancyMapViewer;
    private final StereoVisionPointCloudViewer latestBufferViewer;
+   private final BoundingBoxMeshView boundingBoxMeshView;
 
    private final List<AtomicReference<Boolean>> enableTopicList = new ArrayList<>();
    private final Map<AtomicReference<Boolean>, Node> enableTopicToNode = new HashMap<>();
@@ -74,9 +77,14 @@ public class SLAMMeshViewer
                                                             SLAMModuleAPI.SLAMVizClear,
                                                             REAModuleAPI.UIStereoVisionSize); // FIXME this is obviously the wrong topic
 
+      boundingBoxMeshView = new BoundingBoxMeshView(uiMessager, SLAMModuleAPI.UIOcTreeBoundingBoxShow, SLAMModuleAPI.RequestBoundingBox,
+                                                    SLAMModuleAPI.OcTreeBoundingBoxState);
+
       occupancyMapViewer.getRoot().setMouseTransparent(true);
       latestBufferViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(planarRegionMeshView, importedPlanarRegionMeshView, occupancyMapViewer.getRoot(), latestBufferViewer.getRoot());
+      boundingBoxMeshView.setMouseTransparent(true);
+      root.getChildren().addAll(planarRegionMeshView, importedPlanarRegionMeshView, occupancyMapViewer.getRoot(), latestBufferViewer.getRoot(),
+                                boundingBoxMeshView);
 
       addViewer(uiMessager, planarRegionMeshView, SLAMModuleAPI.ShowPlanarRegionsMap);
       addViewer(uiMessager, importedPlanarRegionMeshView, SLAMModuleAPI.ShowImportedPlanarRegions);
@@ -157,6 +165,7 @@ public class SLAMMeshViewer
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(occupancyMapViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(boundingBoxMeshView, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }
 
    public void sleep()
