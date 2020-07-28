@@ -15,10 +15,6 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
 
    private final DoubleField minimumCorrespondingDistance = new DoubleField(SurfaceElementICPSLAMParameters::getMinimumCorrespondingDistance,
                                                                             SurfaceElementICPSLAMParameters::setMinimumCorrespondingDistance);
-   private final DoubleField maximumCorrespondingDistance = new DoubleField(SurfaceElementICPSLAMParameters::getMaximumCorrespondingDistance,
-                                                                            SurfaceElementICPSLAMParameters::setMaximumCorrespondingDistance);
-   private final IntegerField constantCorrespondingDistanceIteration = new IntegerField(SurfaceElementICPSLAMParameters::getConstantCorrespondingDistanceIteration,
-                                                                                        SurfaceElementICPSLAMParameters::setConstantCorrespondingDistanceIteration);
 
    private final IntegerField steadyStateDetectorIterationThreshold = new IntegerField(SurfaceElementICPSLAMParameters::getSteadyStateDetectorIterationThreshold,
                                                                                        SurfaceElementICPSLAMParameters::setSteadyStateDetectorIterationThreshold);
@@ -77,16 +73,6 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalMinimumCorrespondingDistance(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, minimumCorrespondingDistance);
-   }
-
-   public void bindBidirectionalMaximumCorrespondingDistance(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, maximumCorrespondingDistance);
-   }
-
-   public void bindBidirectionalConstantCorrespondingDistanceIteration(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, constantCorrespondingDistanceIteration);
    }
 
    public void bindBidirectionalSteadyStateDetectorIterationThreshold(Property<? extends Number> property)

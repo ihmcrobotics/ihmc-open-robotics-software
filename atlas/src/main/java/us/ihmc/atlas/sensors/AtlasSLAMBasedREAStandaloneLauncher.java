@@ -28,7 +28,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
-   private static boolean launchSegmentation = false;
+   private static boolean launchSegmentation = true;
 
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
    private final boolean spawnUIs;
