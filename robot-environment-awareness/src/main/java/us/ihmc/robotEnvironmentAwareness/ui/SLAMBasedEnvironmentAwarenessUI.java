@@ -22,10 +22,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.SurfaceElementICPPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,6 +46,8 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
    private SurfaceElementICPPaneController surfaceElementICPPaneController;
    @FXML
    private SLAMDataManagerAnchorPaneController slamDataManagerAnchorPaneController;
+   @FXML
+   private BoundingBoxAnchorPaneController boundingBoxAnchorPaneController;
    @FXML
    private NormalEstimationAnchorPaneController normalEstimationAnchorPaneController;
 
@@ -167,6 +166,14 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 
       surfaceElementICPPaneController.attachREAMessager(uiMessager);
       surfaceElementICPPaneController.bindControls();
+
+      boundingBoxAnchorPaneController.setBoundingBoxEnableTopic(SLAMModuleAPI.OcTreeBoundingBoxEnable);
+      boundingBoxAnchorPaneController.setBoundingBoxShowTopic(SLAMModuleAPI.UIOcTreeBoundingBoxShow);
+      boundingBoxAnchorPaneController.setSaveParameterConfigurationTopic(SLAMModuleAPI.SaveConfiguration);
+      boundingBoxAnchorPaneController.setBoundingBoxParametersTopic(SLAMModuleAPI.OcTreeBoundingBoxParameters);
+      boundingBoxAnchorPaneController.setConfigurationFile(configurationFile);
+      boundingBoxAnchorPaneController.attachREAMessager(uiMessager);
+      boundingBoxAnchorPaneController.bindControls();;
 
       normalEstimationAnchorPaneController.setNormalEstimationEnableTopic(SLAMModuleAPI.NormalEstimationEnable);
       normalEstimationAnchorPaneController.setNormalEstimationClearTopic(SLAMModuleAPI.NormalEstimationClear);
