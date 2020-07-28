@@ -221,7 +221,7 @@ public class LevenbergMarquardtParameterOptimizer
       return computationTime;
    }
 
-   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction()
+   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction(boolean includePitchAndRoll)
    {
       return new Function<DMatrixRMaj, RigidBodyTransform>()
       {
@@ -230,7 +230,10 @@ public class LevenbergMarquardtParameterOptimizer
          {
             RigidBodyTransform transform = new RigidBodyTransform();
 
-            transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            if (includePitchAndRoll)
+               transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            else
+               transform.setRotationYawAndZeroTranslation(input.get(3));
             transform.getTranslation().set(input.get(0), input.get(1), input.get(2));
             return transform;
          }
