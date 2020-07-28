@@ -53,7 +53,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
-   private final AtomicLong lastTimestamp = new AtomicLong();
+   private final AtomicLong lastTimestampProcessed = new AtomicLong(-1);
    protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
@@ -302,7 +302,7 @@ public class SLAMModule implements PerceptionModule
       updateSLAMParameters();
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
-      lastTimestamp.set(pointCloudToCompute.getTimestamp());
+      lastTimestampProcessed.set(pointCloudToCompute.getTimestamp());
 
       boolean success;
       if (slam.isEmpty())
@@ -342,15 +342,28 @@ public class SLAMModule implements PerceptionModule
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
    {
+      if (lastTimestampProcessed.get() > -1 &&
+          Conversions.nanosecondsToSeconds(pointCloud.getTimestamp() - lastTimestampProcessed.get()) > slamParameters.get().getLongestTimeToLag())
+      {
+         compressQueueToSize(1);
+         pointCloudQueue.add(pointCloud);
+      }
+
       if (pointCloudQueue.size() < slamParameters.get().getMaximumQueueSize())
       {
          pointCloudQueue.add(pointCloud);
          return;
       }
 
-      long timestamp = lastTimestamp.get();
+      compressQueueToSize(slamParameters.get().getMaximumQueueSize());
+      pointCloudQueue.add(pointCloud);
+   }
+
+   private void compressQueueToSize(int desiredSize)
+   {
+      long timestamp = lastTimestampProcessed.get();
       int index = 0;
-      while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() > slamParameters.get().getMaximumQueueSize() - 1)
+      while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() > desiredSize - 1)
       {
          StereoVisionPointCloudMessage pointCloudMessage = pointCloudQueue.get(index);
          StereoVisionPointCloudMessage nextPointCloudMessage = pointCloudQueue.get(index + 1);
@@ -364,7 +377,6 @@ public class SLAMModule implements PerceptionModule
             index++;
          }
       }
-      pointCloudQueue.add(pointCloud);
    }
 
    protected void dequeue()
