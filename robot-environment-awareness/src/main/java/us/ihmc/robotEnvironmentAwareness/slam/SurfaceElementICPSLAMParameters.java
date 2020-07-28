@@ -30,7 +30,10 @@ public class SurfaceElementICPSLAMParameters
    private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = true;
 
    private static final boolean DEFAULT_INSERT_MISS_IN_OCTREE = true;
-   private static final boolean DEFAULT_INCLUDE_PITCH_AND_ROLL = false;
+
+   private static final double DEFAULT_TRANSLATION_PERTURBATION = 0.002;
+   private static final double DEFAULT_ROTATION_PERTURBATION = 0.00001;
+   private static final boolean DEFAULT_INCLUDE_PITCH_AND_ROLL = true;
 
    private double surfaceElementResolution;
    private double windowMargin;
@@ -53,6 +56,9 @@ public class SurfaceElementICPSLAMParameters
    private boolean computeSurfaceNormalsInFrame;
 
    private boolean insertMissInOcTree;
+
+   private double translationPerturbation;
+   private double rotationPerturbation;
    private boolean includePitchAndRoll;
 
    public SurfaceElementICPSLAMParameters()
@@ -88,6 +94,9 @@ public class SurfaceElementICPSLAMParameters
       computeSurfaceNormalsInFrame = other.computeSurfaceNormalsInFrame;
 
       insertMissInOcTree = other.insertMissInOcTree;
+
+      translationPerturbation = other.translationPerturbation;
+      rotationPerturbation = other.rotationPerturbation;
       includePitchAndRoll = other.includePitchAndRoll;
    }
 
@@ -114,6 +123,9 @@ public class SurfaceElementICPSLAMParameters
       computeSurfaceNormalsInFrame = DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME;
 
       insertMissInOcTree = DEFAULT_INSERT_MISS_IN_OCTREE;
+
+      translationPerturbation = DEFAULT_TRANSLATION_PERTURBATION;
+      rotationPerturbation = DEFAULT_ROTATION_PERTURBATION;
       includePitchAndRoll = DEFAULT_INCLUDE_PITCH_AND_ROLL;
    }
 
@@ -195,6 +207,16 @@ public class SurfaceElementICPSLAMParameters
    public boolean getInsertMissInOcTree()
    {
       return insertMissInOcTree;
+   }
+
+   public double getTranslationPerturbation()
+   {
+      return translationPerturbation;
+   }
+
+   public double getRotationPerturbation()
+   {
+      return rotationPerturbation;
    }
 
    public boolean getIncludePitchAndRoll()
@@ -282,6 +304,16 @@ public class SurfaceElementICPSLAMParameters
       this.insertMissInOcTree = insertMissInOcTree;
    }
 
+   public void setTranslationPerturbation(double translationPerturbation)
+   {
+      this.translationPerturbation = translationPerturbation;
+   }
+
+   public void setRotationPerturbation(double rotationPerturbation)
+   {
+      this.rotationPerturbation = rotationPerturbation;
+   }
+
    public void setIncludePitchAndRoll(boolean includePitchAndRoll)
    {
       this.includePitchAndRoll = includePitchAndRoll;
@@ -298,7 +330,8 @@ public class SurfaceElementICPSLAMParameters
              + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
              + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
              + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame()
-            + ", insertMissInOcTree: " + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll();
+            + ", insertMissInOcTree: " + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll()
+            + ", translationPerturbation: " + getTranslationPerturbation() + ", rotationPerturbation: " + getRotationPerturbation();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -324,6 +357,8 @@ public class SurfaceElementICPSLAMParameters
       parameters.setComputeSurfaceNormalsInFrame(ScannerTools.readNextBoolean(scanner, parameters.getComputeSurfaceNormalsInFrame()));
       parameters.setInsertMissInOcTree(ScannerTools.readNextBoolean(scanner, parameters.getInsertMissInOcTree()));
       parameters.setIncludePitchAndRoll(ScannerTools.readNextBoolean(scanner, parameters.getIncludePitchAndRoll()));
+      parameters.setTranslationPerturbation(ScannerTools.readNextDouble(scanner, parameters.getTranslationPerturbation()));
+      parameters.setRotationPerturbation(ScannerTools.readNextDouble(scanner, parameters.getRotationPerturbation()));
       scanner.close();
       return parameters;
    }
