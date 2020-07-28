@@ -50,10 +50,10 @@ public class LookAndStepBodyPathPlanningTask
    {
       private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
       private final WalkingFootstepTracker walkingFootstepTracker;
-
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private final TypedInput<Pose3D> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
+      private BehaviorTaskSuppressor suppressor;
 
       public LookAndStepBodyPathPlanning(StatusLogger statusLogger,
                                          UIPublisher uiPublisher,
@@ -95,6 +95,21 @@ public class LookAndStepBodyPathPlanningTask
          this.isBeingReviewed = isBeingReviewed;
          this.autonomousOutput = autonomousOutput;
          this.initiateReviewOutput = reviewInitiation;
+
+         suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
+         suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING));
+         suppressor.addCondition("No goal specified", () -> !hasGoal(), () -> uiPublisher.publishToUI(MapRegionsForUI, mapRegions));
+         suppressor.addCondition(() -> "Body path planning suppressed: Regions not OK: " + mapRegions
+                                       + ", timePassed: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset()
+                                       + ", isEmpty: " + (mapRegions == null ? null : mapRegions.isEmpty()),
+                                 () -> !regionsOK());
+         // TODO: This could be "run recently" instead of failed recently
+         suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
+         suppressor.addCondition("Is being reviewed", () -> isBeingReviewed.get());
+         suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
+         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
+                                       + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
+                                 () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
       }
 
       public void acceptMapRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -119,7 +134,7 @@ public class LookAndStepBodyPathPlanningTask
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
 
-         if (evaluateEntry())
+         if (suppressor.evaulateShouldAccept())
          {
             performTask();
          }
@@ -134,66 +149,12 @@ public class LookAndStepBodyPathPlanningTask
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
 
-   protected boolean evaluateEntry()
-   {
-      boolean proceed = true;
-
-      //      if (!needNewPlan.get().get())
-      //      {
-      //         LogTools.warn("Body path planning supressed: New plan not needed");
-      //         proceed = false;
-      //      }
-      if (!behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
-      {
-         statusLogger.debug("Body path planning suppressed: Not in body path planning state");
-         proceed = false;
-      }
-      else if (!hasGoal())
-      {
-         statusLogger.debug("Body path planning suppressed: No goal specified");
-         uiPublisher.publishToUI(MapRegionsForUI, mapRegions);
-         proceed = false;
-      }
-      else if (!regionsOK())
-      {
-         statusLogger.debug("Body path planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
-                            mapRegions,
-                            mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
-                            mapRegions == null ? null : mapRegions.isEmpty());
-         proceed = false;
-      }
-      else if (planningFailureTimerSnapshot.isRunning()) // TODO: This could be "run recently" instead of failed recently
-      {
-         statusLogger.debug("Body path planning suppressed: Failed recently");
-         proceed = false;
-      }
-      else if (isBeingReviewed.get())
-      {
-         statusLogger.debug("Body path planning suppressed: Is being reviewed");
-         proceed = false;
-      }
-      else if (!robotConnectedSupplier.get())
-      {
-         statusLogger.debug("Body path planning suppressed: Robot disconnected");
-         proceed = false;
-      }
-      else if (numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps())
-      {
-         statusLogger.debug("Body path planning suppressed: numberOfIncompleteFootsteps {} > {}",
-                            numberOfIncompleteFootsteps,
-                            lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
-         proceed = false;
-      }
-
-      return proceed;
-   }
-
-   private boolean hasGoal()
+   protected boolean hasGoal()
    {
       return goal != null && !goal.containsNaN();
    }
 
-   private boolean regionsOK()
+   protected boolean regionsOK()
    {
       return mapRegions != null && !mapRegions.isEmpty() && mapRegionsReceptionTimerSnapshot.isRunning();
    }

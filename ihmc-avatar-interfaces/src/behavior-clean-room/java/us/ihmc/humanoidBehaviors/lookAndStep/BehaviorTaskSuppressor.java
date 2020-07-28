@@ -5,6 +5,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 /**
  * Conditions are evaluated in the order they are added and in the event that a condition
@@ -27,7 +28,7 @@ public class BehaviorTaskSuppressor
 
    private static class ConditionHolder
    {
-      String onSuppressMessage;
+      Supplier<String> onSuppressMessageSupplier;
       BooleanSupplier evaluateShouldSuppress;
       Runnable onSuppressAction;
    }
@@ -51,8 +52,18 @@ public class BehaviorTaskSuppressor
 
    public void addCondition(String onSuppressMessage, BooleanSupplier evaluateShouldSuppress, Runnable onSuppressAction)
    {
+      addCondition(() -> onSuppressMessage, evaluateShouldSuppress, onSuppressAction);
+   }
+
+   public void addCondition(Supplier<String> onSuppressMessageSupplier, BooleanSupplier evaluateShouldSuppress)
+   {
+      addCondition(onSuppressMessageSupplier, evaluateShouldSuppress, NOOP);
+   }
+
+   public void addCondition(Supplier<String> onSuppressMessageSupplier, BooleanSupplier evaluateShouldSuppress, Runnable onSuppressAction)
+   {
       ConditionHolder conditionHolder = new ConditionHolder();
-      conditionHolder.onSuppressMessage = onSuppressMessage;
+      conditionHolder.onSuppressMessageSupplier = onSuppressMessageSupplier;
       conditionHolder.evaluateShouldSuppress = evaluateShouldSuppress;
       conditionHolder.onSuppressAction = onSuppressAction;
 
@@ -83,7 +94,7 @@ public class BehaviorTaskSuppressor
          String message = taskTitle;
          if (currentSuppressionCause != null)
          {
-            message += " suppressed. Cause: " +  currentSuppressionCause.onSuppressMessage;
+            message += " suppressed. Cause: " +  currentSuppressionCause.onSuppressMessageSupplier.get();
          }
          else
          {
