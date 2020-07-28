@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -9,10 +10,7 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMessage;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.*;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
@@ -32,8 +30,9 @@ public class SegmentationModuleAPI
    public static final Topic<Boolean> OcTreeEnable = topic("OcTreeEnable");
    public static final Topic<Boolean> OcTreeClear = topic("OcTreeClear");
    public static final Topic<NormalOcTreeMessage> OcTreeState = topic("OcTreeState");
-   public static final Topic<Tuple3DReadOnly> SensorPosition = topic("SensorPosition");
+   public static final Topic<Pose3DReadOnly> SensorPose = topic("SensorPose");
    public static final Topic<PlanarRegionSegmentationMessage[]> PlanarRegionsSegmentationState = topic("PlanarRegionsSegmentationState");
+
 
    public static final Topic<SurfaceNormalFilterParameters> SurfaceNormalFilterParameters = topic("SurfaceNormalFilterParameters");
 
@@ -54,6 +53,11 @@ public class SegmentationModuleAPI
    public static final Topic<PolygonizerParameters> PlanarRegionsPolygonizerParameters = topic("PlanarRegionsPolygonizerParameters");
    public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = topic("PlanarRegionsIntersectionParameters");
 
+   public static final Topic<Boolean> OcTreeBoundingBoxEnable = topic("OcTreeBoundingBoxEnable");
+   public static final Topic<Boolean> RequestBoundingBox = topic("RequestBoundingBox");
+   public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = topic("OcTreeBoundingBoxParameters");
+   public static final Topic<BoxMessage> OcTreeBoundingBoxState = topic("OcTreeBoundingBoxState");
+
    public static final Topic<PlanarRegionsListMessage> PlanarRegionsState = topic("PlanarRegionsState");
 
    public static final Topic<Boolean> RequestEntireModuleState = topic("RequestEntireModuleState");
@@ -68,6 +72,8 @@ public class SegmentationModuleAPI
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = topic("UIPlanarRegionDataExporterDirectory");
 
    public static final Topic<String> UISegmentationDuration = topic("UISegmentationDuration");
+
+   public static final Topic<Boolean> UIOcTreeBoundingBoxShow = topic("UIOcTreeBoundingBoxShow");
 
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
 
