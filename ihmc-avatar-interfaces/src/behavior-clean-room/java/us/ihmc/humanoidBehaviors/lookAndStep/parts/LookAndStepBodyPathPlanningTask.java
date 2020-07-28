@@ -1,17 +1,20 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.humanoidBehaviors.lookAndStep.BehaviorStateReference;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
+import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -21,72 +24,117 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRegionsForUI;
 
-class LookAndStepBodyPathTask
+public class LookAndStepBodyPathPlanningTask
 {
-   protected final StatusLogger statusLogger;
-   protected final UIPublisher uiPublisher;
-   protected final VisibilityGraphsParametersReadOnly visibilityGraphParameters;
-   protected final LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
-   protected final Supplier<Boolean> operatorReviewEnabled;
-   protected final BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
-   protected final Supplier<Boolean> robotConnectedSupplier;
+   protected StatusLogger statusLogger;
+   protected UIPublisher uiPublisher;
+   protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
+   protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
+   protected Supplier<Boolean> operatorReviewEnabled;
+   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
+   protected Supplier<Boolean> robotConnectedSupplier;
 
    protected Consumer<ArrayList<Pose3D>> autonomousOutput;
    protected Consumer<List<? extends Pose3DReadOnly>> initiateReviewOutput;
    protected Supplier<Boolean> isBeingReviewed;
 
-   protected Runnable resetPlanningFailedTimer;
+   protected final Timer planningFailedTimer = new Timer();
 
-   private PlanarRegionsList mapRegions;
-   private Pose3D goal;
-   private RemoteSyncedRobotModel syncedRobot;
-   private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
-   private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
-   private LookAndStepBehavior.State behaviorState;
-   private int numberOfIncompleteFootsteps;
-
-   LookAndStepBodyPathTask(StatusLogger statusLogger,
-                           UIPublisher uiPublisher,
-                           VisibilityGraphsParametersReadOnly visibilityGraphParameters,
-                           LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                           Supplier<Boolean> operatorReviewEnabled,
-                           BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                           Supplier<Boolean> robotConnectedSupplier)
+   public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
-      this.statusLogger = statusLogger;
-      this.uiPublisher = uiPublisher;
-      this.visibilityGraphParameters = visibilityGraphParameters;
-      this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
-      this.operatorReviewEnabled = operatorReviewEnabled;
-      this.behaviorStateReference = behaviorStateReference;
-      this.robotConnectedSupplier = robotConnectedSupplier;
+      private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
+      private final WalkingFootstepTracker walkingFootstepTracker;
+
+      private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
+      private final TypedInput<Pose3D> goalInput = new TypedInput<>();
+      private final Timer mapRegionsExpirationTimer = new Timer();
+
+      public LookAndStepBodyPathPlanning(StatusLogger statusLogger,
+                                         UIPublisher uiPublisher,
+                                         VisibilityGraphsParametersReadOnly visibilityGraphParameters,
+                                         LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                                         Supplier<Boolean> operatorReviewEnabled,
+                                         RemoteSyncedRobotModel syncedRobot,
+                                         BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                                         Supplier<Boolean> robotConnectedSupplier,
+                                         WalkingFootstepTracker walkingFootstepTracker)
+      {
+
+         this.statusLogger = statusLogger;
+         this.uiPublisher = uiPublisher;
+         this.visibilityGraphParameters = visibilityGraphParameters;
+         this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
+         this.operatorReviewEnabled = operatorReviewEnabled;
+         this.behaviorStateReference = behaviorStateReference;
+         this.robotConnectedSupplier = robotConnectedSupplier;
+
+         this.robotStateSupplier = () ->
+         {
+            syncedRobot.update();
+            return syncedRobot;
+         };
+         this.walkingFootstepTracker = walkingFootstepTracker;
+
+         // don't run two body path plans at the same time
+         SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+
+         mapRegionsInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+         goalInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+      }
+
+      public void laterSetup(Supplier<Boolean> isBeingReviewed,
+                             Consumer<ArrayList<Pose3D>> autonomousOutput,
+                             Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
+      {
+         this.isBeingReviewed = isBeingReviewed;
+         this.autonomousOutput = autonomousOutput;
+         this.initiateReviewOutput = reviewInitiation;
+      }
+
+      public void acceptMapRegions(PlanarRegionsListMessage planarRegionsListMessage)
+      {
+         mapRegionsInput.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         mapRegionsExpirationTimer.reset();
+      }
+
+      public void acceptGoal(Pose3D goal)
+      {
+         goalInput.set(goal);
+         LogTools.info("Body path goal received: {}", goal);
+      }
+
+      private void evaluateAndRun()
+      {
+         mapRegions = mapRegionsInput.get();
+         goal = goalInput.get();
+         syncedRobot = robotStateSupplier.get();
+         mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
+         planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
+         behaviorState = behaviorStateReference.get();
+         numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
+
+         if (evaluateEntry())
+         {
+            performTask();
+         }
+      }
    }
 
-   protected void update(PlanarRegionsList mapRegions,
-                         Pose3D goal,
-                         RemoteSyncedRobotModel humanoidRobotState,
-                         TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot,
-                         TimerSnapshotWithExpiration planningFailureTimerSnapshot,
-                         LookAndStepBehavior.State behaviorState,
-                         int numberOfIncompleteFootsteps)
-   {
-      this.mapRegions = mapRegions;
-      this.goal = goal;
-      this.syncedRobot = humanoidRobotState;
-      this.mapRegionsReceptionTimerSnapshot = mapRegionsReceptionTimerSnapshot;
-      this.planningFailureTimerSnapshot = planningFailureTimerSnapshot;
-      this.behaviorState = behaviorState;
-      this.numberOfIncompleteFootsteps = numberOfIncompleteFootsteps;
-   }
+   protected PlanarRegionsList mapRegions;
+   protected Pose3D goal;
+   protected RemoteSyncedRobotModel syncedRobot;
+   protected TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
+   protected LookAndStepBehavior.State behaviorState;
+   protected int numberOfIncompleteFootsteps;
 
-   private boolean evaluateEntry()
+   protected boolean evaluateEntry()
    {
       boolean proceed = true;
 
@@ -150,21 +198,7 @@ class LookAndStepBodyPathTask
       return mapRegions != null && !mapRegions.isEmpty() && mapRegionsReceptionTimerSnapshot.isRunning();
    }
 
-   // TODO: Extract as interface?
-   public void run()
-   {
-      Objects.requireNonNull(resetPlanningFailedTimer);
-      Objects.requireNonNull(isBeingReviewed);
-      Objects.requireNonNull(autonomousOutput);
-      Objects.requireNonNull(initiateReviewOutput);
-
-      if (evaluateEntry())
-      {
-         performTask();
-      }
-   }
-
-   private void performTask()
+   protected void performTask()
    {
       statusLogger.info("Body path planning...");
       // TODO: Add robot standing still for 20s for real robot?
@@ -172,7 +206,7 @@ class LookAndStepBodyPathTask
 
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      YoVariableRegistry parentRegistry = new YoVariableRegistry(LookAndStepBodyPathModule.class.getSimpleName());
+      YoVariableRegistry parentRegistry = new YoVariableRegistry(getClass().getSimpleName());
       VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
 
       bodyPathPlanner.setGoal(goal);
@@ -211,27 +245,7 @@ class LookAndStepBodyPathTask
       }
       else
       {
-         resetPlanningFailedTimer.run();
+         planningFailedTimer.reset();
       }
-   }
-
-   protected void setResetPlanningFailedTimer(Runnable resetPlanningFailedTimer)
-   {
-      this.resetPlanningFailedTimer = resetPlanningFailedTimer;
-   }
-
-   public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewed)
-   {
-      this.isBeingReviewed = isBeingReviewed;
-   }
-
-   public void setAutonomousOutput(Consumer<ArrayList<Pose3D>> autonomousOutput)
-   {
-      this.autonomousOutput = autonomousOutput;
-   }
-
-   public void setReviewInitiator(Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
-   {
-      this.initiateReviewOutput = reviewInitiation;
    }
 }

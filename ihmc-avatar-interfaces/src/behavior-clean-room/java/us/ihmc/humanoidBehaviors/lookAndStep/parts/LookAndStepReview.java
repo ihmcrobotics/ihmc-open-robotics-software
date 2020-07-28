@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 
 import java.util.function.Consumer;
 
-public class LookAndStepReviewPart<T>
+public class LookAndStepReview<T>
 {
    private volatile boolean beingReviewed = false;
 
@@ -16,7 +16,7 @@ public class LookAndStepReviewPart<T>
    private final TypedNotification<Boolean> approvalNotification;
    private final Consumer<T> callback;
 
-   public LookAndStepReviewPart(StatusLogger statusLogger, String description, TypedNotification<Boolean> approvalNotification, Consumer<T> callback)
+   public LookAndStepReview(StatusLogger statusLogger, String description, TypedNotification<Boolean> approvalNotification, Consumer<T> callback)
    {
       this.statusLogger = statusLogger;
       this.description = description;
