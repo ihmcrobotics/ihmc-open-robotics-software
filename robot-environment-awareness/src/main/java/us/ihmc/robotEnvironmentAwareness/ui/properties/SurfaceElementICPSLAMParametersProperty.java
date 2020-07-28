@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
 import javafx.beans.property.Property;
+import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAMParameters;
 
 public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<SurfaceElementICPSLAMParameters>
@@ -40,6 +41,13 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
                                                                               SurfaceElementICPSLAMParameters::setComputeSurfaceNormalsInFrame);
    private final BooleanField insertMissInOcTree = new BooleanField(SurfaceElementICPSLAMParameters::getInsertMissInOcTree,
                                                                     SurfaceElementICPSLAMParameters::setInsertMissInOcTree);
+
+   private final BooleanField includePitchAndRoll = new BooleanField(SurfaceElementICPSLAMParameters::getIncludePitchAndRoll,
+                                                                     SurfaceElementICPSLAMParameters::setIncludePitchAndRoll);
+   private final DoubleField translationPerturbation = new DoubleField(SurfaceElementICPSLAMParameters::getTranslationPerturbation,
+                                                                       SurfaceElementICPSLAMParameters::setTranslationPerturbation);
+   private final DoubleField rotationPerturbation = new DoubleField(SurfaceElementICPSLAMParameters::getRotationPerturbation,
+                                                                    SurfaceElementICPSLAMParameters::setRotationPerturbation);
 
    public SurfaceElementICPSLAMParametersProperty(Object bean, String name)
    {
@@ -124,6 +132,21 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalInsertMissInOcTree(Property<Boolean> property)
    {
       bindFieldBidirectionalToBooleanProperty(property, insertMissInOcTree);
+   }
+
+   public void bindBidirectionalIncludePitchAndRoll(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, includePitchAndRoll);
+   }
+
+   public void bindBidirectionalTranslationPerturbation(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, translationPerturbation);
+   }
+
+   public void bindBidirectionalRotationPerturbation(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, rotationPerturbation);
    }
 
    @Override
