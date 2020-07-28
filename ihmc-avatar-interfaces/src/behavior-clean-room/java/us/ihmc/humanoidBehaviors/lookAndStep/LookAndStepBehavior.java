@@ -164,13 +164,11 @@ public class LookAndStepBehavior implements BehaviorInterface
             }
       );
       bodyPathPlanning.laterSetup(
-            bodyPathReview::isBeingReviewed,
-            footstepPlanning::acceptBodyPathPlan,
-            bodyPathReview::review
+            bodyPathReview,
+            footstepPlanning::acceptBodyPathPlan
       );
       footstepPlanning.laterSetup(
-            footstepPlanReview::isBeingReviewed,
-            footstepPlanReview::review,
+            footstepPlanReview,
             robotMotion::acceptFootstepPlan
       );
 

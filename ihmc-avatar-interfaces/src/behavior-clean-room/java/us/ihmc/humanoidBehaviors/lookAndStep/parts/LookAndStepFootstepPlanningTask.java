@@ -44,14 +44,13 @@ public class LookAndStepFootstepPlanningTask
    protected StatusLogger statusLogger;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   protected Supplier<Boolean> isBeingReviewedSupplier;
    protected Supplier<Boolean> abortGoalWalkingSupplier;
    protected UIPublisher uiPublisher;
    protected Runnable onReachedGoal;
    protected SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses;
    protected FootstepPlanningModule footstepPlanningModule;
    protected Supplier<Boolean> operatorReviewEnabledSupplier;
-   protected Consumer<FootstepPlan> reviewPlanOutput;
+   protected LookAndStepReview<FootstepPlan> review;
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Runnable planningFailedNotifier;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
@@ -112,12 +111,10 @@ public class LookAndStepFootstepPlanningTask
          this.planningFailedNotifier = planningFailedTimer::reset;
       }
 
-      public void laterSetup(Supplier<Boolean> isBeingReviewedSupplier,
-                             Consumer<FootstepPlan> reviewPlanOutput,
+      public void laterSetup(LookAndStepReview<FootstepPlan> review,
                              Consumer<FootstepPlan> autonomousOutput)
       {
-         this.isBeingReviewedSupplier = isBeingReviewedSupplier;
-         this.reviewPlanOutput = reviewPlanOutput;
+         this.review = review;
          this.autonomousOutput = autonomousOutput;
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
@@ -128,7 +125,7 @@ public class LookAndStepFootstepPlanningTask
                                  () -> !regionsOK());
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition(() -> "Body path size: " + (bodyPathPlan == null ? null : bodyPathPlan.size()), () -> !bodyPathPlanOK());
-         suppressor.addCondition("Plan being reviewed", isBeingReviewedSupplier::get);
+         suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
@@ -312,7 +309,7 @@ public class LookAndStepFootstepPlanningTask
 
       if (operatorReviewEnabledSupplier.get())
       {
-         reviewPlanOutput.accept(footstepPlannerOutput.getFootstepPlan());
+         review.review(footstepPlannerOutput.getFootstepPlan());
       }
       else
       {
