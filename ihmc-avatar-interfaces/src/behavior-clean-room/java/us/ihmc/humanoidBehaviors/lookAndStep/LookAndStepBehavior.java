@@ -98,8 +98,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       WalkingFootstepTracker walkingFootstepTracker = new WalkingFootstepTracker(helper.getManagedROS2Node(), helper.getRobotModel().getSimpleRobotName());
 
       // TODO: Want to be able to wire up behavior here and see all present modules
-
       // TODO: Add more meaning to the construction by establishing data patterns
+      // TODO: Use named interfaces or pass in actual objects instead of being so careful, misordered args are worse
 
       // could add meaning by local variables before passing
       bodyPathPlanning = new LookAndStepBodyPathPlanning(
@@ -143,32 +143,36 @@ public class LookAndStepBehavior implements BehaviorInterface
             behaviorStateReference,
             this::robotConnected
       );
-
       LookAndStepReview<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReview<>(
             statusLogger,
             "body path",
             approvalNotification,
             bodyPathPlan ->
             {
-               updateState(State.FOOTSTEP_PLANNING);
+               behaviorStateReference.set(State.FOOTSTEP_PLANNING);
                footstepPlanning.acceptBodyPathPlan(bodyPathPlan);
-            });
-      LookAndStepReview<FootstepPlan> footstepPlanReview = new LookAndStepReview<>(statusLogger,
-                                                                                   "footstep plan",
-                                                                                   approvalNotification,
-                                                                                           footstepPlan ->
-      {
-         updateState(LookAndStepBehavior.State.SWINGING);
-         robotMotion.acceptFootstepPlan(footstepPlan);
-      });
-
-      bodyPathPlanning.laterSetup(bodyPathReview::isBeingReviewed,
-                                  bodyPathReview::review,
-                                  footstepPlanning::acceptBodyPathPlan);
-
-      footstepPlanning.laterSetup(footstepPlanReview::isBeingReviewed,
-                                  footstepPlanReview::review,
-                                  robotMotion::acceptFootstepPlan);
+            }
+      );
+      LookAndStepReview<FootstepPlan> footstepPlanReview = new LookAndStepReview<>(
+            statusLogger,
+            "footstep plan",
+            approvalNotification,
+            footstepPlan ->
+            {
+               behaviorStateReference.set(LookAndStepBehavior.State.SWINGING);
+               robotMotion.acceptFootstepPlan(footstepPlan);
+            }
+      );
+      bodyPathPlanning.laterSetup(
+            bodyPathReview::isBeingReviewed,
+            footstepPlanning::acceptBodyPathPlan,
+            bodyPathReview::review
+      );
+      footstepPlanning.laterSetup(
+            footstepPlanReview::isBeingReviewed,
+            footstepPlanReview::review,
+            robotMotion::acceptFootstepPlan
+      );
 
       // TODO: Put these in better spots
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
@@ -181,13 +185,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       TimerSnapshotWithExpiration timerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                             .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
       return timerSnaphot.hasBeenSet() && !timerSnaphot.isExpired();
-   }
-
-   private void updateState(State state)
-   {
-      behaviorStateReference.set(state);
-      statusLogger.info("Entering state: {}", state.name());
-      helper.publishToUI(CurrentState, state.name());
    }
 
    @Override

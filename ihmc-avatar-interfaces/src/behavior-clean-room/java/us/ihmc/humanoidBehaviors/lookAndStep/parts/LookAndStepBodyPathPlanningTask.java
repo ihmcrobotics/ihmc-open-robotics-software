@@ -105,7 +105,7 @@ public class LookAndStepBodyPathPlanningTask
                                  () -> !regionsOK());
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
-         suppressor.addCondition("Is being reviewed", () -> isBeingReviewed.get());
+         suppressor.addCondition("Is being reviewed", isBeingReviewed::get);
          suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
