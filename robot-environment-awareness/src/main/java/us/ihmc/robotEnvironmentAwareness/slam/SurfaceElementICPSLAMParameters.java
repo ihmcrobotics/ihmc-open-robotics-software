@@ -15,8 +15,6 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_BOUND_RATIO = 1.1;
 
    private static final double DEFAULT_MINIMUM_CORRESPONDING_DISTANCE = 0.06;
-   private static final double DEFAULT_MAXIMUM_CORRESPONDING_DISTANCE = 0.1;
-   private static final int DEFAULT_CONSTANT_CORRESPONDING_DISTANCE_ITERATION = 3;
 
    private static final int DEFAULT_STEADY_STATE_DETECTOR_ITERATION_THRESHOLD = 3;
    private static final double DEFAULT_QUALITY_CONVERGENCE_THRESHOLD = 0.001;
@@ -41,8 +39,6 @@ public class SurfaceElementICPSLAMParameters
    private double boundRatio;
 
    private double minimumCorrespondingDistance;
-   private double maximumCorrespondingDistance;
-   private int constantCorrespondingDistanceIteration;
 
    private int steadyStateDetectorIterationThreshold;
    private double qualityConvergenceThreshold;
@@ -79,8 +75,6 @@ public class SurfaceElementICPSLAMParameters
       boundRatio = other.boundRatio;
 
       minimumCorrespondingDistance = other.minimumCorrespondingDistance;
-      maximumCorrespondingDistance = other.maximumCorrespondingDistance;
-      constantCorrespondingDistanceIteration = other.constantCorrespondingDistanceIteration;
 
       steadyStateDetectorIterationThreshold = other.steadyStateDetectorIterationThreshold;
       qualityConvergenceThreshold = other.qualityConvergenceThreshold;
@@ -108,8 +102,6 @@ public class SurfaceElementICPSLAMParameters
       boundRatio = DEFAULT_BOUND_RATIO;
 
       minimumCorrespondingDistance = DEFAULT_MINIMUM_CORRESPONDING_DISTANCE;
-      maximumCorrespondingDistance = DEFAULT_MAXIMUM_CORRESPONDING_DISTANCE;
-      constantCorrespondingDistanceIteration = DEFAULT_CONSTANT_CORRESPONDING_DISTANCE_ITERATION;
 
       steadyStateDetectorIterationThreshold = DEFAULT_STEADY_STATE_DETECTOR_ITERATION_THRESHOLD;
       qualityConvergenceThreshold = DEFAULT_QUALITY_CONVERGENCE_THRESHOLD;
@@ -152,16 +144,6 @@ public class SurfaceElementICPSLAMParameters
    public double getMinimumCorrespondingDistance()
    {
       return minimumCorrespondingDistance;
-   }
-
-   public double getMaximumCorrespondingDistance()
-   {
-      return maximumCorrespondingDistance;
-   }
-
-   public int getConstantCorrespondingDistanceIteration()
-   {
-      return constantCorrespondingDistanceIteration;
    }
 
    public int getSteadyStateDetectorIterationThreshold()
@@ -249,16 +231,6 @@ public class SurfaceElementICPSLAMParameters
       this.minimumCorrespondingDistance = minimumCorrespondingDistance;
    }
 
-   public void setMaximumCorrespondingDistance(double maximumCorrespondingDistance)
-   {
-      this.maximumCorrespondingDistance = maximumCorrespondingDistance;
-   }
-
-   public void setConstantCorrespondingDistanceIteration(int constantCorrespondingDistanceIteration)
-   {
-      this.constantCorrespondingDistanceIteration = constantCorrespondingDistanceIteration;
-   }
-
    public void setSteadyStateDetectorIterationThreshold(int steadyStateDetectorIterationThreshold)
    {
       this.steadyStateDetectorIterationThreshold = steadyStateDetectorIterationThreshold;
@@ -324,8 +296,7 @@ public class SurfaceElementICPSLAMParameters
    {
       return "surfaceElementResolution: " + getSurfaceElementResolution() + ", windowMargin: " + getWindowMargin() + ", minimumNumberOfHit: "
              + getMinimumNumberOfHit() + ", boundRatio: " + getBoundRatio() + ", minimumCorrespondingDistance: " + getMinimumCorrespondingDistance()
-             + ", maximumCorrespondingDistance: " + getMaximumCorrespondingDistance() + ", constantCorrespondingDistanceIteration: "
-             + getConstantCorrespondingDistanceIteration() + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold()
+             + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold()
              + ", qualityConvergenceThreshold: " + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: "
              + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
              + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
@@ -345,8 +316,6 @@ public class SurfaceElementICPSLAMParameters
       parameters.setMinimumNumberOfHit(ScannerTools.readNextInt(scanner, parameters.getMinimumNumberOfHit()));
       parameters.setBoundRatio(ScannerTools.readNextDouble(scanner, parameters.getBoundRatio()));
       parameters.setMinimumCorrespondingDistance(ScannerTools.readNextDouble(scanner, parameters.getMinimumCorrespondingDistance()));
-      parameters.setMaximumCorrespondingDistance(ScannerTools.readNextDouble(scanner, parameters.getMaximumCorrespondingDistance()));
-      parameters.setConstantCorrespondingDistanceIteration(ScannerTools.readNextInt(scanner, parameters.getConstantCorrespondingDistanceIteration()));
       parameters.setSteadyStateDetectorIterationThreshold(ScannerTools.readNextInt(scanner, parameters.getSteadyStateDetectorIterationThreshold()));
       parameters.setQualityConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getQualityConvergenceThreshold()));
       parameters.setTranslationalEffortConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getTranslationalEffortConvergenceThreshold()));
