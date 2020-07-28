@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
-import java.io.File;
-
+import javafx.scene.paint.Color;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -13,18 +12,21 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
+import java.util.Random;
+
 public class AdaptiveSwingTrajectoryLogViewer
 {
    public AdaptiveSwingTrajectoryLogViewer()
    {
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load(new File("/home/smccrory/Documents/stairsTests/PlannerLog"));
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
       
       if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
       {
@@ -43,10 +45,14 @@ public class AdaptiveSwingTrajectoryLogViewer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
+
       Graphics3DObject regionsGraphic = new Graphics3DObject();
+      IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;
+      Random random = new Random(0xC0FEFE);
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
-         Graphics3DObjectTools.addPlanarRegion(regionsGraphic, planarRegionsList.getPlanarRegion(i), 0.01, YoAppearance.DarkGray());
+         Color color = colorMapper.apply(random.nextInt(200));
+         Graphics3DObjectTools.addPlanarRegion(regionsGraphic, planarRegionsList.getPlanarRegion(i), 0.01, YoAppearance.RGBColor(color.getRed(), color.getGreen(), color.getBlue()));
       }
       scs.addStaticLinkGraphics(regionsGraphic);
 
