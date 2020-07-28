@@ -758,7 +758,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getShinLength());
 
 
-      cdr.write_type_6(data.getShinPitch());
+      cdr.write_type_6(data.getShinXOffset());
 
 
       cdr.write_type_6(data.getShinHeightOffet());
@@ -975,7 +975,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinLength(cdr.read_type_6());
       	
 
-      data.setShinPitch(cdr.read_type_6());
+      data.setShinXOffset(cdr.read_type_6());
       	
 
       data.setShinHeightOffet(cdr.read_type_6());
@@ -1127,7 +1127,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("shin_length", data.getShinLength());
 
-      ser.write_type_6("shin_pitch", data.getShinPitch());
+      ser.write_type_6("shin_x_offset", data.getShinXOffset());
 
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
 
@@ -1274,7 +1274,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setShinLength(ser.read_type_6("shin_length"));
 
-      data.setShinPitch(ser.read_type_6("shin_pitch"));
+      data.setShinXOffset(ser.read_type_6("shin_x_offset"));
 
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
 

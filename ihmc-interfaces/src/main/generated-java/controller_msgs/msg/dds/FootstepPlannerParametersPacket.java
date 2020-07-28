@@ -546,9 +546,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double shin_length_ = -11.1;
 
    /**
-            * Pitch of the shin collidable cylinder
+            * X (forward) offset of the shin collidable cylinder
             */
-   public double shin_pitch_ = -11.1;
+   public double shin_x_offset_ = -11.1;
 
    /**
             * Height offset of shin collidable cylinder
@@ -854,7 +854,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       shin_length_ = other.shin_length_;
 
 
-      shin_pitch_ = other.shin_pitch_;
+      shin_x_offset_ = other.shin_x_offset_;
 
 
       shin_height_offet_ = other.shin_height_offet_;
@@ -2277,18 +2277,18 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-            * Pitch of the shin collidable cylinder
+            * X (forward) offset of the shin collidable cylinder
             */
-   public void setShinPitch(double shin_pitch)
+   public void setShinXOffset(double shin_x_offset)
    {
-      shin_pitch_ = shin_pitch;
+      shin_x_offset_ = shin_x_offset;
    }
    /**
-            * Pitch of the shin collidable cylinder
+            * X (forward) offset of the shin collidable cylinder
             */
-   public double getShinPitch()
+   public double getShinXOffset()
    {
-      return shin_pitch_;
+      return shin_x_offset_;
    }
 
 
@@ -2565,7 +2565,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_length_, other.shin_length_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_pitch_, other.shin_pitch_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_x_offset_, other.shin_x_offset_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
@@ -2791,7 +2791,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.shin_length_ != otherMyClass.shin_length_) return false;
 
 
-      if(this.shin_pitch_ != otherMyClass.shin_pitch_) return false;
+      if(this.shin_x_offset_ != otherMyClass.shin_x_offset_) return false;
 
 
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
@@ -3014,8 +3014,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("shin_length=");
       builder.append(this.shin_length_);      builder.append(", ");
 
-      builder.append("shin_pitch=");
-      builder.append(this.shin_pitch_);      builder.append(", ");
+      builder.append("shin_x_offset=");
+      builder.append(this.shin_x_offset_);      builder.append(", ");
 
       builder.append("shin_height_offet=");
       builder.append(this.shin_height_offet_);      builder.append(", ");

@@ -399,8 +399,8 @@ float64 shin_radius -11.1
 # Length of the shin collidable cylinder
 float64 shin_length -11.1
 
-# Pitch of the shin collidable cylinder
-float64 shin_pitch -11.1
+# X (forward) offset of the shin collidable cylinder
+float64 shin_x_offset -11.1
 
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1

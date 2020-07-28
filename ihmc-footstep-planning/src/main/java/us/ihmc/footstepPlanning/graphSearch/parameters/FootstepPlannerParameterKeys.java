@@ -63,7 +63,7 @@ public class FootstepPlannerParameterKeys
    public static final BooleanStoredPropertyKey enableShinCollisionCheck                     = keys.addBooleanKey("Enable shin collision check", false);
    public static final DoubleStoredPropertyKey  shinRadius                                   = keys.addDoubleKey("Shin radius", 0.12);
    public static final DoubleStoredPropertyKey  shinLength                                   = keys.addDoubleKey("Shin length", 0.45);
-   public static final DoubleStoredPropertyKey  shinPitch                                    = keys.addDoubleKey("Shin pitch", 0.0);
+   public static final DoubleStoredPropertyKey  shinXOffset                                  = keys.addDoubleKey("Shin X offset", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
    public static final DoubleStoredPropertyKey  distanceEpsilonToBridgeRegions               = keys.addDoubleKey("Distance epsilon to bridge regions", 0.0);
    public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);

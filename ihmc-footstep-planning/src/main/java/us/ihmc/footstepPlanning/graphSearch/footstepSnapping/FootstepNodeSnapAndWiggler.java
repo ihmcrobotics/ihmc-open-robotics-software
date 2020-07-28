@@ -204,8 +204,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 
             legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
             transformGenerator.identity();
-            transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
-            transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
+            transformGenerator.translate(parameters.getShinXOffset(), 0.0, parameters.getShinHeightOffset());
             transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
             transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
             gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, legCollisionShapeToSoleTransform);
