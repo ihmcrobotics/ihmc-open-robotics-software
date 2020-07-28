@@ -85,14 +85,15 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       int problemSize = surfaceElementICPSLAMParameters.getIncludePitchAndRoll() ? 6 : 4;
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, problemSize, numberOfSurfel);
       DMatrixRMaj perturbationVector = new DMatrixRMaj(problemSize, 1);
-      perturbationVector.set(0, octree.getResolution() * 0.002);
-      perturbationVector.set(1, octree.getResolution() * 0.002);
-      perturbationVector.set(2, octree.getResolution() * 0.002);
-      perturbationVector.set(3, 0.00001);
+      double translationPerturbation = octree.getResolution() * surfaceElementICPSLAMParameters.getTranslationPerturbation();
+      perturbationVector.set(0, translationPerturbation);
+      perturbationVector.set(1, translationPerturbation);
+      perturbationVector.set(2, translationPerturbation);
+      perturbationVector.set(3, surfaceElementICPSLAMParameters.getRotationPerturbation());
       if (surfaceElementICPSLAMParameters.getIncludePitchAndRoll())
       {
-         perturbationVector.set(4, 0.00001);
-         perturbationVector.set(5, 0.00001);
+         perturbationVector.set(4, surfaceElementICPSLAMParameters.getRotationPerturbation());
+         perturbationVector.set(5, surfaceElementICPSLAMParameters.getRotationPerturbation());
       }
       optimizer.setPerturbationVector(perturbationVector);
       boolean initialCondition = optimizer.initialize();
