@@ -25,8 +25,11 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
@@ -56,6 +59,10 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
+
+   private final AtomicReference<Boolean> isOcTreeBoundingBoxRequested;
+   private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
+   private final AtomicReference<Boolean> useBoundingBox;
    
    protected final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
@@ -126,6 +133,17 @@ public class SLAMModule implements PerceptionModule
       normalEstimationParametersLocal.setNumberOfIterations(10);
       normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
+      isOcTreeBoundingBoxRequested = reaMessager.createInput(SLAMModuleAPI.RequestBoundingBox, false);
+
+      useBoundingBox = reaMessager.createInput(SLAMModuleAPI.OcTreeBoundingBoxEnable, true);
+      atomicBoundingBoxParameters = reaMessager.createInput(SLAMModuleAPI.OcTreeBoundingBoxParameters,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-0.5f,
+                                                                                                                           -1.0f,
+                                                                                                                           -1.5f,
+                                                                                                                           2.0f,
+                                                                                                                           1.0f,
+                                                                                                                           0.5f));
+
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
       if (configurationFile != null)
@@ -139,6 +157,26 @@ public class SLAMModule implements PerceptionModule
       reaMessager.registerTopicListener(SLAMModuleAPI.UISLAMDataExportRequest, content -> exportSLAMHistory());
 
       sendCurrentState();
+   }
+
+   private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
+   {
+      String slamParametersFile = filePropertyHelper.loadProperty(SLAMModuleAPI.SLAMParameters.getName());
+      if (slamParametersFile != null)
+         slamParameters.set(SurfaceElementICPSLAMParameters.parse(slamParametersFile));
+      Boolean useBoundingBoxFile = filePropertyHelper.loadBooleanProperty(SLAMModuleAPI.OcTreeBoundingBoxEnable.getName());
+      if (useBoundingBoxFile != null)
+         useBoundingBox.set(useBoundingBoxFile);
+      String boundingBoxParametersFile = filePropertyHelper.loadProperty(SLAMModuleAPI.OcTreeBoundingBoxParameters.getName());
+      if (boundingBoxParametersFile != null)
+         atomicBoundingBoxParameters.set(BoundingBoxMessageConverter.parse(boundingBoxParametersFile));
+   }
+
+   private void saveConfigurationFIle(FilePropertyHelper filePropertyHelper)
+   {
+      filePropertyHelper.saveProperty(SLAMModuleAPI.SLAMParameters.getName(), slamParameters.get().toString());
+      filePropertyHelper.saveProperty(SLAMModuleAPI.OcTreeBoundingBoxEnable.getName(), useBoundingBox.get());
+      filePropertyHelper.saveProperty(SLAMModuleAPI.OcTreeBoundingBoxParameters.getName(), atomicBoundingBoxParameters.get().toString());
    }
 
    private void exportSLAMHistory()
@@ -224,6 +262,9 @@ public class SLAMModule implements PerceptionModule
 
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationEnable, enableNormalEstimation.get());
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParameters.get());
+
+      reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxEnable, useBoundingBox.get());
+      reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxParameters, atomicBoundingBoxParameters.get());
    }
 
    public void updateSLAM()
@@ -233,6 +274,10 @@ public class SLAMModule implements PerceptionModule
       {
          publishResults();
       }
+
+      if (isOcTreeBoundingBoxRequested.getAndSet(false))
+         reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxState,
+                                   BoundingBoxMessageConverter.convertToMessage(slam.getOctree().getBoundingBox()));
    }
 
    private boolean updateSLAMInternal()
@@ -245,6 +290,7 @@ public class SLAMModule implements PerceptionModule
 
       updateSLAMParameters();
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
+      slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
 
       boolean success;
       if (slam.isEmpty())
