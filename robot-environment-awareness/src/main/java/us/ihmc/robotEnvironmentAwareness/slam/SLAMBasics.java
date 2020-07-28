@@ -36,7 +36,6 @@ public class SLAMBasics implements SLAMInterface
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
    protected Point3DBasics[] sourcePoints;
    protected final NormalOcTree octree;
-   private final ConvexPolygon2D octreeHull;
    private final AtomicInteger mapSize = new AtomicInteger();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
@@ -46,7 +45,6 @@ public class SLAMBasics implements SLAMInterface
    public SLAMBasics(double octreeResolution)
    {
       octree = new NormalOcTree(octreeResolution);
-      octreeHull = new ConvexPolygon2D();
    }
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
@@ -60,9 +58,6 @@ public class SLAMBasics implements SLAMInterface
       Set<NormalOcTreeNode> updatedLeaves = new HashSet<>();
       octree.insertScan(scan, insertMiss, updatedLeaves, null); // inserting the miss here is pretty dang expensive.
       octree.enableParallelComputationForNormals(true);
-
-      updatedLeaves.forEach(node -> octreeHull.addVertex(node.getHitLocationX(), node.getHitLocationY()));
-      octreeHull.update();
    }
 
    public void updateSurfaceNormals()
@@ -108,7 +103,6 @@ public class SLAMBasics implements SLAMInterface
    {
       latestSlamFrame.set(null);
       mapSize.set(0);
-      octreeHull.clearAndUpdate();
       octree.clear();
    }
 
@@ -181,11 +175,6 @@ public class SLAMBasics implements SLAMInterface
    public NormalOcTree getOctree()
    {
       return octree;
-   }
-
-   public ConvexPolygon2DReadOnly getOctreeHull()
-   {
-      return octreeHull;
    }
 
    public void clearNormals()
