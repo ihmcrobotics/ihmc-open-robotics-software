@@ -9,6 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * this class is to iterate minimizing input parameters for the given output calculator matrix. in
@@ -46,7 +47,6 @@ public class LevenbergMarquardtParameterOptimizer
    private final DMatrixRMaj perturbedOutput;
    private final DMatrixRMaj jacobian;
 
-   private final DMatrixRMaj jacobianTranspose;
    private final DMatrixRMaj squaredJacobian;
    private final DMatrixRMaj dampingMatrix;
    private final DMatrixRMaj invMultJacobianTranspose;
@@ -88,7 +88,6 @@ public class LevenbergMarquardtParameterOptimizer
       perturbedOutput = new DMatrixRMaj(outputDimension, 1);
       jacobian = new DMatrixRMaj(outputDimension, inputParameterDimension);
 
-      jacobianTranspose = new DMatrixRMaj(outputDimension, inputParameterDimension);
       squaredJacobian = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       dampingMatrix = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       invMultJacobianTranspose = new DMatrixRMaj(inputParameterDimension, outputDimension);
@@ -112,16 +111,7 @@ public class LevenbergMarquardtParameterOptimizer
    {
       iteration = 0;
       optimized = false;
-      for (int i = 0; i < inputDimension; i++)
-      {
-         for (int j = 0; j < inputDimension; j++)
-         {
-            if (i == j)
-            {
-               dampingMatrix.set(i, j, DEFAULT_DAMPING_COEFFICIENT);
-            }
-         }
-      }
+      MatrixTools.setDiagonal(dampingMatrix, DEFAULT_DAMPING_COEFFICIENT);
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
       boolean result = currentOutputSpace.computeCorrespondence();
