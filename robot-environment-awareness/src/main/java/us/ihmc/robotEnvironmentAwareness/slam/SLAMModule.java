@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -51,7 +52,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
-   private final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
+   protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
@@ -252,7 +253,7 @@ public class SLAMModule implements PerceptionModule
                        pointCloudQueue.size(),
                        pointCloudToCompute.getNumberOfPoints(),
                        pointCloudToCompute.getTimestamp());
-         slam.addKeyFrame(pointCloudToCompute);
+         slam.addKeyFrame(pointCloudToCompute, slamParameters.get().getInsertMissInOcTree());
          success = true;
       }
       else
@@ -278,7 +279,7 @@ public class SLAMModule implements PerceptionModule
 
    protected boolean addFrame(StereoVisionPointCloudMessage pointCloudToCompute)
    {
-      return slam.addFrame(pointCloudToCompute);
+      return slam.addFrame(pointCloudToCompute, slamParameters.get().getInsertMissInOcTree());
    }
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
@@ -306,9 +307,10 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
       LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
+      Pose3D pose = new Pose3D(slam.getLatestFrame().getSensorPose());
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
-         ocTreeConsumer.reportOcTree(octreeMap, slam.getLatestFrame().getSensorPose().getTranslation());
+         ocTreeConsumer.reportOcTree(octreeMap, pose);
       }
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();

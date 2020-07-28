@@ -41,6 +41,7 @@ public class SegmentationMeshViewer
    private final OcTreeMeshBuilder ocTreeViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
    private final PlanarRegionsIntersectionsMeshBuilder intersectionsMeshBuilder;
+   private final BoundingBoxMeshView boundingBoxMeshView;
 
    public SegmentationMeshViewer(REAUIMessager uiMessager)
    {
@@ -67,8 +68,12 @@ public class SegmentationMeshViewer
                                                                            SegmentationModuleAPI.RequestPlanarRegionsIntersections,
                                                                            SegmentationModuleAPI.PlanarRegionsIntersectionState);
 
+      boundingBoxMeshView = new BoundingBoxMeshView(uiMessager, SegmentationModuleAPI.UIOcTreeBoundingBoxShow, SegmentationModuleAPI.RequestBoundingBox,
+                                                    SegmentationModuleAPI.OcTreeBoundingBoxState);
+
       ocTreeViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(ocTreeViewer.getRoot(), planarRegionMeshView, intersectionsMeshView);
+      boundingBoxMeshView.setMouseTransparent(true);
+      root.getChildren().addAll(ocTreeViewer.getRoot(), planarRegionMeshView, intersectionsMeshView, boundingBoxMeshView);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -101,6 +106,7 @@ public class SegmentationMeshViewer
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(intersectionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(boundingBoxMeshView, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }
 
    public void sleep()

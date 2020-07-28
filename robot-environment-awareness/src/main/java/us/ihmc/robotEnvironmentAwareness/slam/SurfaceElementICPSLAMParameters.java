@@ -27,7 +27,9 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_INITIAL_QUALITY_THRESHOLD = 0.1;
 
    private static final int DEFAULT_MAX_OPTIMIZATION_ITERATIONS = 40;
-   private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = false;
+   private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = true;
+
+   private static final boolean DEFAULT_INSERT_MISS_IN_OCTREE = true;
 
    private double surfaceElementResolution;
    private double windowMargin;
@@ -48,6 +50,8 @@ public class SurfaceElementICPSLAMParameters
 
    private int maxOptimizationIterations;
    private boolean computeSurfaceNormalsInFrame;
+
+   private boolean insertMissInOcTree;
 
    public SurfaceElementICPSLAMParameters()
    {
@@ -80,6 +84,8 @@ public class SurfaceElementICPSLAMParameters
 
       maxOptimizationIterations = other.maxOptimizationIterations;
       computeSurfaceNormalsInFrame = other.computeSurfaceNormalsInFrame;
+
+      insertMissInOcTree = other.insertMissInOcTree;
    }
 
    public void setDefaultParameters()
@@ -103,6 +109,8 @@ public class SurfaceElementICPSLAMParameters
 
       maxOptimizationIterations = DEFAULT_MAX_OPTIMIZATION_ITERATIONS;
       computeSurfaceNormalsInFrame = DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME;
+
+      insertMissInOcTree = DEFAULT_INSERT_MISS_IN_OCTREE;
    }
 
    public double getSurfaceElementResolution()
@@ -180,6 +188,11 @@ public class SurfaceElementICPSLAMParameters
       return computeSurfaceNormalsInFrame;
    }
 
+   public boolean getInsertMissInOcTree()
+   {
+      return insertMissInOcTree;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -255,6 +268,11 @@ public class SurfaceElementICPSLAMParameters
       this.computeSurfaceNormalsInFrame = computeSurfaceNormalsInFrame;
    }
 
+   public void setInsertMissInOcTree(boolean insertMissInOcTree)
+   {
+      this.insertMissInOcTree = insertMissInOcTree;
+   }
+
    @Override
    public String toString()
    {
@@ -265,7 +283,8 @@ public class SurfaceElementICPSLAMParameters
              + ", qualityConvergenceThreshold: " + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: "
              + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
              + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
-             + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame();
+             + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame()
+            + ", insertMissInOcTree: " + getInsertMissInOcTree();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -289,6 +308,7 @@ public class SurfaceElementICPSLAMParameters
       parameters.setInitialQualityThreshold(ScannerTools.readNextDouble(scanner, parameters.getInitialQualityThreshold()));
       parameters.setMaxOptimizationIterations(ScannerTools.readNextInt(scanner, parameters.getMaxOptimizationIterations()));
       parameters.setComputeSurfaceNormalsInFrame(ScannerTools.readNextBoolean(scanner, parameters.getComputeSurfaceNormalsInFrame()));
+      parameters.setInsertMissInOcTree(ScannerTools.readNextBoolean(scanner, parameters.getInsertMissInOcTree()));
       scanner.close();
       return parameters;
    }

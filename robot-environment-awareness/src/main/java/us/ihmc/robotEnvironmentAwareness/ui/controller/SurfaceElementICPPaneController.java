@@ -45,6 +45,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private Spinner<Integer> maxOptimizationIterations;
    @FXML
    private ToggleButton computeSurfaceNormalsInFrame;
+   @FXML
+   private ToggleButton insertMissInOcTree;
    
    private final SurfaceElementICPSLAMParametersProperty surfaceElementICPSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "surfaceElementICPSLAMParametersProperty");
    
@@ -84,6 +86,7 @@ public class SurfaceElementICPPaneController extends REABasicUIController
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalInsertMissInOcTree(insertMissInOcTree.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, surfaceElementICPSLAMParametersProperty);
    }
 
