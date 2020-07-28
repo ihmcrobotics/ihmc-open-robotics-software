@@ -68,6 +68,7 @@ public class LookAndStepFootstepPlanningTask
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
       private Timer planarRegionsExpirationTimer = new Timer();
       private Timer planningFailedTimer = new Timer();
+      private BehaviorTaskSuppressor suppressor;
 
       public LookAndStepFootstepPlanning(StatusLogger statusLogger,
                                          LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
@@ -118,6 +119,20 @@ public class LookAndStepFootstepPlanningTask
          this.isBeingReviewedSupplier = isBeingReviewedSupplier;
          this.reviewPlanOutput = reviewPlanOutput;
          this.autonomousOutput = autonomousOutput;
+
+         suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
+         suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
+         suppressor.addCondition(() -> "Regions not OK: " + planarRegions
+                                       + ", timePassed: " + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset()
+                                       + ", isEmpty: " + (planarRegions == null ? null : planarRegions.isEmpty()),
+                                 () -> !regionsOK());
+         suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
+         suppressor.addCondition(() -> "Body path size: " + (bodyPathPlan == null ? null : bodyPathPlan.size()), () -> !bodyPathPlanOK());
+         suppressor.addCondition("Plan being reviewed", isBeingReviewedSupplier::get);
+         suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
+         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
+                                       + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
+                                 () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
       }
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -147,7 +162,7 @@ public class LookAndStepFootstepPlanningTask
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
 
-         if (evaluateEntry())
+         if (suppressor.evaulateShouldAccept())
          {
             performTask();
          }
@@ -164,63 +179,12 @@ public class LookAndStepFootstepPlanningTask
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
 
-   protected boolean evaluateEntry()
-   {
-      boolean proceed = true;
-
-      if (!behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
-      {
-         statusLogger.debug("Footstep planning supressed: Not in footstep planning state");
-         statusLogger.debug("Footstep planning evauation failed: Not in footstep planning state");
-         proceed = false;
-      }
-      else if (!regionsOK())
-      {
-         statusLogger.debug("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
-                            planarRegions,
-                            planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
-                            planarRegions == null ? null : planarRegions.isEmpty());
-
-         proceed = false;
-      }
-      else if (planningFailureTimerSnapshot.isRunning())
-      {
-         statusLogger.debug("Footstep planning suppressed: Planning failed recently");
-         proceed = false;
-      }
-      else if (!bodyPathPlanOK())
-      {
-         statusLogger.debug("Footstep planning suppressed: Body path size: {}", bodyPathPlan == null ? null : bodyPathPlan.size());
-         proceed = false;
-      }
-      else if (isBeingReviewedSupplier.get())
-      {
-         statusLogger.debug("Footstep planning suppressed: Plan being reviewed");
-         proceed = false;
-      }
-      else if (!robotConnectedSupplier.get())
-      {
-         statusLogger.debug("Footstep planning suppressed: Robot disconnected");
-         proceed = false;
-      }
-      else if (numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps())
-      {
-         statusLogger.debug("Footstep planning suppressed: numberOfIncompleteFootsteps {} > {}",
-                            numberOfIncompleteFootsteps,
-                            lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
-
-         proceed = false;
-      }
-
-      return proceed;
-   }
-
-   private boolean regionsOK()
+   protected boolean regionsOK()
    {
       return planarRegions != null && !planarRegions.isEmpty() && planarRegionReceptionTimerSnapshot.isRunning();
    }
 
-   private boolean bodyPathPlanOK()
+   protected boolean bodyPathPlanOK()
    {
       return bodyPathPlan != null && !bodyPathPlan.isEmpty(); // are these null checks necessary?
    }
