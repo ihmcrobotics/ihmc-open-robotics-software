@@ -5,6 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,6 +13,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
@@ -19,6 +22,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -58,12 +62,14 @@ public class GradientDescentStepConstraintSolver
    private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[500];
    private final YoFrameLineSegment2D[] yoRotationVectors = new YoFrameLineSegment2D[5];
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
+   private final YoGraphicCoordinateSystem soleFrameGraphic;
 
    public GradientDescentStepConstraintSolver()
    {
       this.tickAndUpdatable = null;
       this.legCollisionConstraintCalculator = new LegCollisionConstraintCalculator();
       this.yoGraphicPlanarRegionsList = null;
+      this.soleFrameGraphic = null;
    }
 
    public GradientDescentStepConstraintSolver(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
@@ -95,6 +101,9 @@ public class GradientDescentStepConstraintSolver
 
       this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("planarRegions", 150, 100, registry);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), yoGraphicPlanarRegionsList);
+
+      this.soleFrameGraphic = new YoGraphicCoordinateSystem("soleFrame", "", registry, false, 0.3);
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), soleFrameGraphic);
    }
 
    public RigidBodyTransform wigglePolygon(GradientDescentStepConstraintInput input)
@@ -126,7 +135,7 @@ public class GradientDescentStepConstraintSolver
 
       if (tickAndUpdatable != null)
       {
-         initializeConstraintGraphics(polygonToWiggle, input.getPolygonToWiggleInto(), input.getPlanarRegionsList());
+         initializeConstraintGraphics(polygonToWiggle, input);
          tickAndUpdatable.tickAndUpdate();
       }
 
@@ -240,11 +249,20 @@ public class GradientDescentStepConstraintSolver
       transform.appendTranslation(-polygonToWiggle.getCentroid().getX(), -polygonToWiggle.getCentroid().getY(), 0.0);
    }
 
-   private void initializeConstraintGraphics(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto, PlanarRegionsList planarRegionsList)
+   private void initializeConstraintGraphics(ConvexPolygon2DReadOnly polygonToWiggle, GradientDescentStepConstraintInput input)
    {
       if (tickAndUpdatable == null)
       {
          return;
+      }
+
+      Vertex2DSupplier concavePolygonToWiggleInto = input.getPolygonToWiggleInto();
+      RigidBodyTransform footstepInRegionFrame = input.getFootstepInRegionFrame();
+
+      // reset
+      for (int i = 0; i < constraintPolygon.length; i++)
+      {
+         constraintPolygon[i].setToNaN();
       }
 
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
@@ -263,16 +281,10 @@ public class GradientDescentStepConstraintSolver
          constraintPolygon[i].getSecondEndpoint().set(concavePolygonToWiggleInto.getVertex((i + 1) % concavePolygonToWiggleInto.getNumberOfVertices()));
       }
 
-      if (planarRegionsList != null)
-      {
-         yoGraphicPlanarRegionsList.clear();
-         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-         for (int i = 0; i < 100; i++)
-         {
-            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-            tickAndUpdatable.tickAndUpdate();
-         }
-      }
+      RigidBodyTransform soleFrame = new RigidBodyTransform(footstepInRegionFrame);
+      soleFrame.preMultiply(input.getLocalToWorld());
+      soleFrameGraphic.setPosition(soleFrame.getTranslation());
+      soleFrameGraphic.setOrientation(new Quaternion(soleFrame.getRotation()));
    }
 
    private void updateGraphics(ConvexPolygon2DReadOnly polygonToWiggle)
