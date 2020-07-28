@@ -102,6 +102,21 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
       return true;
    }
 
+   public RecyclingArrayList<KinematicsToolboxCenterOfMassCommand> getCenterOfMassInputs()
+   {
+      return centerOfMassInputs;
+   }
+
+   public RecyclingArrayList<KinematicsToolboxRigidBodyCommand> getRigidBodyInputs()
+   {
+      return rigidBodyInputs;
+   }
+
+   public RecyclingArrayList<KinematicsToolboxOneDoFJointCommand> getJointInputs()
+   {
+      return jointInputs;
+   }
+
    @Override
    public Class<KinematicsToolboxInputCollectionMessage> getMessageClass()
    {
