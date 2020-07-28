@@ -7,14 +7,21 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxWithCenterAndYaw;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMBasics implements SLAMInterface
@@ -113,6 +120,38 @@ public class SLAMBasics implements SLAMInterface
    {
       latestSlamFrame.set(frameToSet);
       mapSize.incrementAndGet();
+   }
+
+   public void handleBoundingBox(Pose3DReadOnly sensorPose, BoundingBoxParametersMessage boundingBoxParameters, boolean useBoundingBox)
+   {
+      handleBoundingBox(sensorPose.getPosition(), sensorPose.getOrientation(), boundingBoxParameters, useBoundingBox);
+   }
+
+   public void handleBoundingBox(Tuple3DReadOnly sensorPosition,
+                                 Orientation3DReadOnly sensorOrientation,
+                                 BoundingBoxParametersMessage boundingBoxParameters,
+                                 boolean useBoundingBox)
+   {
+      if (!useBoundingBox)
+      {
+         octree.disableBoundingBox();
+         return;
+      }
+
+      OcTreeBoundingBoxWithCenterAndYaw boundingBox = new OcTreeBoundingBoxWithCenterAndYaw();
+
+      Point3D min = boundingBoxParameters.getMin();
+      Point3D max = boundingBoxParameters.getMax();
+      boundingBox.setLocalMinMaxCoordinates(min, max);
+
+      if (sensorPosition != null && sensorOrientation != null)
+      {
+         boundingBox.setOffset(sensorPosition);
+         boundingBox.setYawFromQuaternion(new Quaternion(sensorOrientation));
+      }
+
+      boundingBox.update(octree.getResolution(), octree.getTreeDepth());
+      octree.setBoundingBox(boundingBox);
    }
 
    public SLAMFrame getLatestFrame()
