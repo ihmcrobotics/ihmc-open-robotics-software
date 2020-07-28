@@ -162,6 +162,8 @@ public class LevenbergMarquardtParameterOptimizer
                jacobian.set(j, i, 0.0);
             }
          }
+
+         perturbedInput.add(i, 0, -perturbationVector.get(i));
       }
 
       // compute direction.
