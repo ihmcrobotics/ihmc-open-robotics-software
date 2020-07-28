@@ -458,9 +458,9 @@ float64 shin_radius
 # Field default value -11.1
 float64 shin_length
 
-# Pitch of the shin collidable cylinder
+# X (forward) offset of the shin collidable cylinder
 # Field default value -11.1
-float64 shin_pitch
+float64 shin_x_offset
 
 # Height offset of shin collidable cylinder
 # Field default value -11.1

@@ -339,9 +339,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinLength, shinLength);
    }
 
-   default void setShinPitch(double shinPitch)
+   default void setShinXOffset(double shinXOffset)
    {
-      set(FootstepPlannerParameterKeys.shinPitch, shinPitch);
+      set(FootstepPlannerParameterKeys.shinXOffset, shinXOffset);
    }
 
    default void setShinHeightOffset(double shinHeightOffet)
@@ -487,8 +487,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinRadius(parametersPacket.getShinRadius());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
-      if (parametersPacket.getShinPitch() != noValue)
-         setShinPitch(parametersPacket.getShinPitch());
+      if (parametersPacket.getShinXOffset() != noValue)
+         setShinXOffset(parametersPacket.getShinXOffset());
       if (parametersPacket.getDistanceEpsilonToBridgeRegions() != noValue)
          setDistanceEpsilonToBridgeRegions(parametersPacket.getDistanceEpsilonToBridgeRegions());
       setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());

@@ -543,10 +543,10 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double shin_length;
         /**
-         * Pitch of the shin collidable cylinder
+         * X (forward) offset of the shin collidable cylinder
          */
         @defaultValue(value=-11.1)
-        double shin_pitch;
+        double shin_x_offset;
         /**
          * Height offset of shin collidable cylinder
          */

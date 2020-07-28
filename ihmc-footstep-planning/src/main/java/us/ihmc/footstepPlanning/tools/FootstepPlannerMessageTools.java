@@ -100,7 +100,7 @@ public class FootstepPlannerMessageTools
       packet.setEnableShinCollisionCheck(parameters.getEnableShinCollisionCheck());
       packet.setShinRadius(parameters.getShinRadius());
       packet.setShinLength(parameters.getShinLength());
-      packet.setShinPitch(parameters.getShinPitch());
+      packet.setShinXOffset(parameters.getShinXOffset());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
       packet.setDistanceEpsilonToBridgeRegions(parameters.getDistanceEpsilonToBridgeRegions());
 

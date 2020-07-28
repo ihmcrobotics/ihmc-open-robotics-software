@@ -236,9 +236,9 @@ public class FootstepPlannerParametersTest
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
 
-      double shinPitch = RandomNumbers.nextDouble(random, Math.PI);
-      parameters.setShinPitch(shinPitch);
-      assertEquals(shinPitch, parameters.getShinPitch());
+      double shinPitch = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinXOffset(shinPitch);
+      assertEquals(shinPitch, parameters.getShinXOffset());
 
       double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDistanceEpsilonToBridgeRegions(distanceEpsilonToBridgeRegions);

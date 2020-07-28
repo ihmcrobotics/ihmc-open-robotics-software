@@ -825,11 +825,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Pitch of the shin collidable cylinder
+    * X offset of the shin collidable cylinder in sole frame
     */
-   default double getShinPitch()
+   default double getShinXOffset()
    {
-      return get(shinPitch);
+      return get(shinXOffset);
    }
 
    /**
