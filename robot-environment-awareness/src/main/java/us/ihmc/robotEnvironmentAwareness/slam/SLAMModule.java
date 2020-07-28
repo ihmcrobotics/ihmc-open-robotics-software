@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -349,11 +350,11 @@ public class SLAMModule implements PerceptionModule
 
       long timestamp = lastTimestamp.get();
       int index = 0;
-      while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() < slamParameters.get().getMaximumQueueSize())
+      while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() > slamParameters.get().getMaximumQueueSize() - 1)
       {
          StereoVisionPointCloudMessage pointCloudMessage = pointCloudQueue.get(index);
          StereoVisionPointCloudMessage nextPointCloudMessage = pointCloudQueue.get(index + 1);
-         if (nextPointCloudMessage.getTimestamp() - timestamp < slamParameters.get().getMaximumTimeBetweenFrames())
+         if (Conversions.nanosecondsToSeconds(nextPointCloudMessage.getTimestamp() - timestamp) < slamParameters.get().getMaximumTimeBetweenFrames())
          {
             pointCloudQueue.remove(index);
          }
