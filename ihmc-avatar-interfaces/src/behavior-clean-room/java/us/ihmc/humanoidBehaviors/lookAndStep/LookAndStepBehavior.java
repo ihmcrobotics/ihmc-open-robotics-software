@@ -12,6 +12,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.*;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
+import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepRobotMotionTask.LookAndStepRobotMotion;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -37,7 +38,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private final LookAndStepBodyPathPlanning bodyPathPlanning;
    private final LookAndStepFootstepPlanning footstepPlanning;
-   private final LookAndStepRobotMotionModule robotMotionModule;
+   private final LookAndStepRobotMotion robotMotion;
    private final BehaviorStateReference<State> behaviorStateReference;
    private final StatusLogger statusLogger;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
@@ -131,23 +132,34 @@ public class LookAndStepBehavior implements BehaviorInterface
             this::robotConnected,
             walkingFootstepTracker
       );
-      robotMotionModule = new LookAndStepRobotMotionModule(statusLogger);
+      robotMotion = new LookAndStepRobotMotion(
+            statusLogger,
+            robotInterface.newSyncedRobot(),
+            lookAndStepParameters,
+            lastSteppedSolePoses,
+            helper::publishToUI,
+            robotInterface::requestWalk,
+            footstepPlanning::runOrQueue,
+            behaviorStateReference,
+            this::robotConnected
+      );
 
-      LookAndStepReview<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReview<>(statusLogger,
-                                                                                                 "body path",
-                                                                                                 approvalNotification,
-                                                                                                         bodyPathPlan ->
-      {
-         updateState(State.FOOTSTEP_PLANNING);
-         footstepPlanning.acceptBodyPathPlan(bodyPathPlan);
-      });
+      LookAndStepReview<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReview<>(
+            statusLogger,
+            "body path",
+            approvalNotification,
+            bodyPathPlan ->
+            {
+               updateState(State.FOOTSTEP_PLANNING);
+               footstepPlanning.acceptBodyPathPlan(bodyPathPlan);
+            });
       LookAndStepReview<FootstepPlan> footstepPlanReview = new LookAndStepReview<>(statusLogger,
                                                                                    "footstep plan",
                                                                                    approvalNotification,
                                                                                            footstepPlan ->
       {
          updateState(LookAndStepBehavior.State.SWINGING);
-         robotMotionModule.acceptFootstepPlan(footstepPlan);
+         robotMotion.acceptFootstepPlan(footstepPlan);
       });
 
       bodyPathPlanning.laterSetup(bodyPathReview::isBeingReviewed,
@@ -156,16 +168,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       footstepPlanning.laterSetup(footstepPlanReview::isBeingReviewed,
                                   footstepPlanReview::review,
-                                  robotMotionModule::acceptFootstepPlan);
-
-      robotMotionModule.setSyncedRobotSupplier(robotInterface.newSyncedRobot());
-      robotMotionModule.setRobotConnectedSupplier(this::robotConnected);
-      robotMotionModule.setLastSteppedSolePoses(lastSteppedSolePoses);
-      robotMotionModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
-      robotMotionModule.setReplanFootstepsOutput(footstepPlanning::runOrQueue);
-      robotMotionModule.setRobotWalkRequester(robotInterface::requestWalk);
-      robotMotionModule.setUiPublisher(helper::publishToUI);
-      robotMotionModule.setBehaviorStateReference(behaviorStateReference);
+                                  robotMotion::acceptFootstepPlan);
 
       // TODO: Put these in better spots
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
