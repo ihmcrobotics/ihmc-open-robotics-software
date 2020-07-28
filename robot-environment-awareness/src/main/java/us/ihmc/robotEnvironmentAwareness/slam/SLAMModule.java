@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -51,6 +52,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
+   private final AtomicLong lastTimestamp = new AtomicLong();
    protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
@@ -299,6 +301,7 @@ public class SLAMModule implements PerceptionModule
       updateSLAMParameters();
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
+      lastTimestamp.set(pointCloudToCompute.getTimestamp());
 
       boolean success;
       if (slam.isEmpty())
@@ -338,9 +341,29 @@ public class SLAMModule implements PerceptionModule
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
    {
+      if (pointCloudQueue.size() < slamParameters.get().getMaximumQueueSize())
+      {
+         pointCloudQueue.add(pointCloud);
+         return;
+      }
+
+      long timestamp = lastTimestamp.get();
+      int index = 0;
+      while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() < slamParameters.get().getMaximumQueueSize())
+      {
+         StereoVisionPointCloudMessage pointCloudMessage = pointCloudQueue.get(index);
+         StereoVisionPointCloudMessage nextPointCloudMessage = pointCloudQueue.get(index + 1);
+         if (nextPointCloudMessage.getTimestamp() - timestamp < slamParameters.get().getMaximumTimeBetweenFrames())
+         {
+            pointCloudQueue.remove(index);
+         }
+         else
+         {
+            timestamp = pointCloudMessage.getTimestamp();
+            index++;
+         }
+      }
       pointCloudQueue.add(pointCloud);
-      while (pointCloudQueue.size() > slamParameters.get().getMaximumQueueSize())
-         pointCloudQueue.removeFirst();
    }
 
    protected void dequeue()
