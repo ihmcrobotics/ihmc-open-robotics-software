@@ -47,7 +47,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
-   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 

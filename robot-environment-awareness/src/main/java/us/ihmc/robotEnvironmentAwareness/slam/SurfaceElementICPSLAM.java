@@ -19,9 +19,7 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
    public static final boolean DEBUG = false;
-   private final Function<DMatrixRMaj, RigidBodyTransform> transformConverter = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
-
-   private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<SurfaceElementICPSLAMParameters>(new SurfaceElementICPSLAMParameters());
+   private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<>(new SurfaceElementICPSLAMParameters());
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
@@ -37,6 +35,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       SurfaceElementICPSLAMParameters surfaceElementICPSLAMParameters = parameters.get();
+      Function<DMatrixRMaj, RigidBodyTransform> transformConverter = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(surfaceElementICPSLAMParameters.getIncludePitchAndRoll());
 
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
@@ -83,14 +82,18 @@ public class SurfaceElementICPSLAM extends SLAMBasics
                                                                                     octree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
          }
       };
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, 6, numberOfSurfel);
-      DMatrixRMaj perturbationVector = new DMatrixRMaj(6, 1);
+      int problemSize = surfaceElementICPSLAMParameters.getIncludePitchAndRoll() ? 6 : 4;
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, problemSize, numberOfSurfel);
+      DMatrixRMaj perturbationVector = new DMatrixRMaj(problemSize, 1);
       perturbationVector.set(0, octree.getResolution() * 0.002);
       perturbationVector.set(1, octree.getResolution() * 0.002);
       perturbationVector.set(2, octree.getResolution() * 0.002);
       perturbationVector.set(3, 0.00001);
-      perturbationVector.set(4, 0.00001);
-      perturbationVector.set(5, 0.00001);
+      if (surfaceElementICPSLAMParameters.getIncludePitchAndRoll())
+      {
+         perturbationVector.set(4, 0.00001);
+         perturbationVector.set(5, 0.00001);
+      }
       optimizer.setPerturbationVector(perturbationVector);
       boolean initialCondition = optimizer.initialize();
       if (DEBUG)

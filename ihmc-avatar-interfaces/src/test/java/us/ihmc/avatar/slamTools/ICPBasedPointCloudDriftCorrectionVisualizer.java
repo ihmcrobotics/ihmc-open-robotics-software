@@ -53,7 +53,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
    private static final boolean VISUALIZE_OCTREE = false;
 
-   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 

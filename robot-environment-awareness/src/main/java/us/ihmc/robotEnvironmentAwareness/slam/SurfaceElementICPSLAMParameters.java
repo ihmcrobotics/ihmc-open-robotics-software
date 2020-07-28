@@ -30,6 +30,7 @@ public class SurfaceElementICPSLAMParameters
    private static final boolean DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME = true;
 
    private static final boolean DEFAULT_INSERT_MISS_IN_OCTREE = true;
+   private static final boolean DEFAULT_INCLUDE_PITCH_AND_ROLL = false;
 
    private double surfaceElementResolution;
    private double windowMargin;
@@ -52,6 +53,7 @@ public class SurfaceElementICPSLAMParameters
    private boolean computeSurfaceNormalsInFrame;
 
    private boolean insertMissInOcTree;
+   private boolean includePitchAndRoll;
 
    public SurfaceElementICPSLAMParameters()
    {
@@ -86,6 +88,7 @@ public class SurfaceElementICPSLAMParameters
       computeSurfaceNormalsInFrame = other.computeSurfaceNormalsInFrame;
 
       insertMissInOcTree = other.insertMissInOcTree;
+      includePitchAndRoll = other.includePitchAndRoll;
    }
 
    public void setDefaultParameters()
@@ -111,6 +114,7 @@ public class SurfaceElementICPSLAMParameters
       computeSurfaceNormalsInFrame = DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME;
 
       insertMissInOcTree = DEFAULT_INSERT_MISS_IN_OCTREE;
+      includePitchAndRoll = DEFAULT_INCLUDE_PITCH_AND_ROLL;
    }
 
    public double getSurfaceElementResolution()
@@ -193,6 +197,11 @@ public class SurfaceElementICPSLAMParameters
       return insertMissInOcTree;
    }
 
+   public boolean getIncludePitchAndRoll()
+   {
+      return includePitchAndRoll;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -273,6 +282,11 @@ public class SurfaceElementICPSLAMParameters
       this.insertMissInOcTree = insertMissInOcTree;
    }
 
+   public void setIncludePitchAndRoll(boolean includePitchAndRoll)
+   {
+      this.includePitchAndRoll = includePitchAndRoll;
+   }
+
    @Override
    public String toString()
    {
@@ -284,7 +298,7 @@ public class SurfaceElementICPSLAMParameters
              + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
              + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
              + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame()
-            + ", insertMissInOcTree: " + getInsertMissInOcTree();
+            + ", insertMissInOcTree: " + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -309,6 +323,7 @@ public class SurfaceElementICPSLAMParameters
       parameters.setMaxOptimizationIterations(ScannerTools.readNextInt(scanner, parameters.getMaxOptimizationIterations()));
       parameters.setComputeSurfaceNormalsInFrame(ScannerTools.readNextBoolean(scanner, parameters.getComputeSurfaceNormalsInFrame()));
       parameters.setInsertMissInOcTree(ScannerTools.readNextBoolean(scanner, parameters.getInsertMissInOcTree()));
+      parameters.setIncludePitchAndRoll(ScannerTools.readNextBoolean(scanner, parameters.getIncludePitchAndRoll()));
       scanner.close();
       return parameters;
    }
