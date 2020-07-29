@@ -98,4 +98,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(LookAndStepBehaviorParameters.acceptableIncompleteFootsteps);
    }
+
+   default double getMinimumSwingFootClearanceOverride()
+   {
+      return get(LookAndStepBehaviorParameters.minimumSwingFootClearanceOverride);
+   }
 }
