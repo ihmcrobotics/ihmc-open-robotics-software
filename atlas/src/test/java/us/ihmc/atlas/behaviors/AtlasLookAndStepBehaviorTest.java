@@ -51,6 +51,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AtlasLookAndStepBehaviorTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
+   static
+   {
+      System.setProperty("show.scs.gui", Boolean.toString(VISUALIZE));
+   }
 
    Supplier<PlanarRegionsList> environment = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
 
@@ -88,7 +92,7 @@ public class AtlasLookAndStepBehaviorTest
       RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
       PausablePeriodicThread monitorThread = new PausablePeriodicThread(
             "RobotStatusThread",
-            0.5,
+            2.0,
             () -> monitorThread(currentState, syncedRobot, atTheTop, reachedOtherSide));
       monitorThread.start();
 
