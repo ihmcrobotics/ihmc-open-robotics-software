@@ -205,40 +205,45 @@ public class LookAndStepFootstepPlanningTask
       pelvisPose.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose3D goalPoseBetweenFeet = new FramePose3D();
-      goalPoseBetweenFeet.setIncludingFrame(pelvisPose);
-      goalPoseBetweenFeet.setZ(midFeetZ);
+      FramePose3D subGoalPoseBetweenFeet = new FramePose3D();
+      subGoalPoseBetweenFeet.setIncludingFrame(pelvisPose);
+      subGoalPoseBetweenFeet.setZ(midFeetZ);
 
       // find closest point along body path plan
       Point3D closestPointAlongPath = new Point3D();
-      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, goalPoseBetweenFeet.getPosition(), closestPointAlongPath);
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, subGoalPoseBetweenFeet.getPosition(), closestPointAlongPath);
 
       uiPublisher.publishToUI(ClosestPointForUI, new Pose3D(closestPointAlongPath, new Quaternion()));
 
       // move point along body path plan by plan horizon
-      Point3D goalPoint = new Point3D();
+      Point3D subGoalPoint = new Point3D();
       int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
                                                                            closestPointAlongPath,
-                                                                           goalPoint,
+                                                                           subGoalPoint,
                                                                            closestSegmentIndex,
                                                                            lookAndStepBehaviorParameters.getPlanHorizon());
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
-      boolean reachedGoal = closestPointAlongPath.distanceXY(goalPoint) < lookAndStepBehaviorParameters.getGoalSatisfactionRadius();
-      reachedGoal &= Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw()))
-                     < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
-      if (reachedGoal | abortGoalWalkingSupplier.get())
+      double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
+      boolean reachedGoalZone = distanceToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionRadius();
+      double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw()));
+      reachedGoalZone &= yawToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
+      if (reachedGoalZone | abortGoalWalkingSupplier.get())
       {
-         if (reachedGoal) statusLogger.warn("Footstep planning: Robot reached goal. Not planning");
-         if (abortGoalWalkingSupplier.get()) statusLogger.warn("Footstep planning: Goal was cancelled. Not planning");
+         if (reachedGoalZone) statusLogger.warn("Robot reached goal. Not planning.");
+         if (abortGoalWalkingSupplier.get()) statusLogger.warn("Goal was cancelled. Not planning.");
          behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          onReachedGoal.run();
          return;
       }
+      else
+      {
+         statusLogger.warn("Remaining travel distance: {} yaw: {}", distanceToExactGoal, yawToExactGoal);
+      }
 
-      statusLogger.info("Found next sub goal: {}", goalPoint);
-      goalPoseBetweenFeet.getPosition().set(goalPoint);
-      goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
+      statusLogger.info("Found next sub goal: {}", subGoalPoint);
+      subGoalPoseBetweenFeet.getPosition().set(subGoalPoint);
+      subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // update last stepped poses to plan from; initialize to current poses
       SideDependentList<FramePose3DReadOnly> startFootPoses = new SideDependentList<>();
@@ -266,8 +271,8 @@ public class LookAndStepFootstepPlanningTask
       }
       else // if first step, step with furthest foot from the goal
       {
-         if (startFootPoses.get(RobotSide.LEFT) .getPosition().distance(goalPoseBetweenFeet.getPosition())
-             <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPoseBetweenFeet.getPosition()))
+         if (startFootPoses.get(RobotSide.LEFT) .getPosition().distance(subGoalPoseBetweenFeet.getPosition())
+             <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
          {
             stanceSide = RobotSide.LEFT;
          }
@@ -279,13 +284,13 @@ public class LookAndStepFootstepPlanningTask
 
       lastStanceSideReference.set(stanceSide);
 
-      uiPublisher.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
+      uiPublisher.publishToUI(SubGoalForUI, new Pose3D(subGoalPoseBetweenFeet));
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
-      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPoseBetweenFeet);
+      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.getFootstepPlannerTimeout());
       footstepPlannerRequest.setPerformPositionBasedSplitFractionCalculation(true);
