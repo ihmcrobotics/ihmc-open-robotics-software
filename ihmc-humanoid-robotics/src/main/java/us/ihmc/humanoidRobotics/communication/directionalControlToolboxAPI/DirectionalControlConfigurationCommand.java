@@ -7,30 +7,40 @@ import us.ihmc.log.LogTools;
 public class DirectionalControlConfigurationCommand
 		implements Command<DirectionalControlConfigurationCommand, DirectionalControlConfigurationMessage> {
 	private long sequenceId;
-	private DirectionalControlConfigurationMessage message;
+	private boolean enableWalking;
+	private String profileName;
 
+	/**
+	 * This is essentially an assignment operator. When a command is copied from the internal buffer
+	 * for use by a toolbox controller, this function is called. It should copy in every
+	 * member of the class.
+	 */
 	@Override
 	public void set(DirectionalControlConfigurationCommand other) {
 		clear();
 
 		sequenceId = other.sequenceId;
+		enableWalking = other.enableWalking;
+		profileName = other.profileName;
 	}
 
 	@Override
 	public void clear() {
-		sequenceId = 0;
+		sequenceId    = 0;
+		enableWalking = false;
+		profileName   = "";
 	}
 
 	@Override
 	public void setFromMessage(DirectionalControlConfigurationMessage message) {
-		LogTools.info("setFromMessage has: " + message.toString());
 		set(message);
 	}
 
 	public void set(DirectionalControlConfigurationMessage message) {
 		clear();
 		sequenceId = message.getSequenceId();
-		this.message = message;
+        enableWalking = message.getEnableWalking();
+        profileName = message.getProfileNameAsString();
 	}
 
 	@Override
@@ -48,7 +58,19 @@ public class DirectionalControlConfigurationCommand
 		return sequenceId;
 	}
 
-	public DirectionalControlConfigurationMessage getMessage() {
-		return message;
+	public boolean getEnableWalking() {
+		return enableWalking;
+	}
+	
+	public String getProfileName() {
+		return profileName;
+	}
+	
+	public String toString() {
+		return this.getClass().getSimpleName() + ": "
+				                         + "{ sequenceId = " + String.valueOf(getSequenceId())
+		                                 + ", enableWalking = " + String.valueOf(getEnableWalking())
+		                                 + ", profileName = '" + String.valueOf(getProfileName())
+		                                 + "' }";
 	}
 }

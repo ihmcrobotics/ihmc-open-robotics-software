@@ -48,7 +48,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public abstract class ToolboxModule implements CloseableAndDisposable
 {
-   protected static final boolean DEBUG = true;
+   protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -113,7 +113,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
-      timeWithoutInputsBeforeGoingToSleep.set(100);
+      timeWithoutInputsBeforeGoingToSleep.set(0.5);
       commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
          private final Set<Class<? extends Command<?, ?>>> silentCommands = silentCommands();
