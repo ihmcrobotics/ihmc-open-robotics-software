@@ -46,6 +46,8 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetect
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
+import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -101,8 +103,8 @@ public class DirectionalControlController extends ToolboxController {
 	private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
-	private final AtomicReference<DirectionalControlInputMessage> controlInputMessage = new AtomicReference<>(null);
-	private final AtomicReference<DirectionalControlConfigurationMessage> controlConfigurationMessage = new AtomicReference<>(null);
+	private final AtomicReference<DirectionalControlInputCommand> controlInputCommand = new AtomicReference<>(null);
+	private final AtomicReference<DirectionalControlConfigurationCommand> controlConfigurationCommand = new AtomicReference<>(null);
 	
 	private JoystickStepParameters joystickParameters;
 	private UserProfileManager<JoystickStepParameters> userProfileManager;
@@ -179,13 +181,13 @@ public class DirectionalControlController extends ToolboxController {
 		// Incoming directional input messages
 		ROS2Tools.createCallbackSubscription(ros2Node, 
 				                             DirectionalControlInputMessage.class, controllerSubGenerator,
-				                             s -> controlInputMessage.set(s.takeNextData()));
+				                             s -> updateInputs(s.takeNextData()));
 		
 		// Incoming directional configuration messages
 		ROS2Tools.createCallbackSubscription(ros2Node, 
 				                             DirectionalControlConfigurationMessage.class, 
 				                             controllerSubGenerator,
-				                             s -> controlConfigurationMessage.set(s.takeNextData()));
+				                             s -> updateConfiguration(s.takeNextData()));
 		
 
 		// REA planes
@@ -217,18 +219,34 @@ public class DirectionalControlController extends ToolboxController {
 				collisionXYProximityCheck);
 
 		// TODO: need to figure out how to set this up w.r.t the toolbox.
-		//setupTasks();
+//		setupTasks();
 
 	}
 
-	public void updateConfiguration(DirectionalControlConfigurationMessage msg) {
-		controlConfigurationMessage.set(msg);
-		LogTools.info("Config is now " + controlConfigurationMessage.toString());
+	/* There need to be two sets of update functions, one for messages and one for commands.
+	 * When using this class as part of a toolbox, commands will be used. 
+	 * When using it as a standalone class, messages will be used.
+	 */
+	public void updateConfiguration(DirectionalControlConfigurationCommand command) {
+		controlConfigurationCommand.set(command);
+		LogTools.info("Config is now " + controlConfigurationCommand.toString());
+	}
+	
+	public void updateConfiguration(DirectionalControlConfigurationMessage message) {
+		DirectionalControlConfigurationCommand command = new DirectionalControlConfigurationCommand();
+		command.setFromMessage(message);
+		updateConfiguration(command);
 	}
 
-	public void updateInputs(DirectionalControlInputMessage msg) {
-		controlInputMessage.set(msg);
-		LogTools.info("Input is now " + controlInputMessage.toString());
+	public void updateInputs(DirectionalControlInputCommand command) {
+		controlInputCommand.set(command);
+		LogTools.info("Input is now " + controlInputCommand.toString());
+	}
+	
+	public void updateInputs(DirectionalControlInputMessage message) {
+		DirectionalControlInputCommand command = new DirectionalControlInputCommand();
+		command.setFromMessage(message);
+		updateInputs(command);
 	}
 
 	private void setupTasks() {
@@ -268,7 +286,7 @@ public class DirectionalControlController extends ToolboxController {
 		});
 
 		// Send current footsteps at a fixed rate, once enabled by startWalking()
-		scheduler.scheduleAtFixedRate(this::publishFootsteps, 0, SEND_FOOTSTEP_RATE_MS, TimeUnit.MILLISECONDS);
+//		scheduler.scheduleAtFixedRate(this::publishFootsteps, 0, SEND_FOOTSTEP_RATE_MS, TimeUnit.MILLISECONDS);
 	}
 	
 	private SideDependentList<ConvexPolygon2D> getFootPolygons(
@@ -448,19 +466,19 @@ public class DirectionalControlController extends ToolboxController {
 	
 	protected void updateDirectionalInputs() {
 		// Handle directional inputs
-		DirectionalControlInputMessage inputMessage = controlInputMessage.getAndSet(null);
+		DirectionalControlInputCommand inputMessage = controlInputCommand.getAndSet(null);
 		if (inputMessage != null) {
-			updateForwardVelocity(inputMessage.forward_);
-			updateLateralVelocity(-inputMessage.right_);
-			updateTurningVelocity(-inputMessage.clockwise_);
+			updateForwardVelocity(inputMessage.getForward());
+			updateLateralVelocity(-inputMessage.getRight());
+			updateTurningVelocity(-inputMessage.getClockwise());
 		}		
 	}
 	
 	protected void updateStateInputs() {
 		// Handle configuration inputs
-		DirectionalControlConfigurationMessage controlMessage = controlConfigurationMessage.getAndSet(null);
+		DirectionalControlConfigurationCommand controlMessage = controlConfigurationCommand.getAndSet(null);
 		if (controlMessage != null) {
-			String profile = controlMessage.getProfileNameAsString();
+			String profile = controlMessage.getProfileName();
 			if (profile.length() > 0) {
 				try {
 					joystickParameters = userProfileManager.loadProfile(profile);
@@ -470,9 +488,9 @@ public class DirectionalControlController extends ToolboxController {
 					System.out.printf("Unable to load profile %s: %s\n", profile, e);
 				}
 			}
-			if (isWalking.get() && !controlMessage.enable_walking_) {
+			if (isWalking.get() && !controlMessage.getEnableWalking()) {
 				stopWalking(true);
-			} else if (!isWalking.get() && controlMessage.enable_walking_) {
+			} else if (!isWalking.get() && controlMessage.getEnableWalking()) {
 				startWalking(true);
 			}
 		}		
@@ -504,7 +522,6 @@ public class DirectionalControlController extends ToolboxController {
 	public void updateInternal() throws Exception {
 		
 		try {
-			LogTools.info("update internal");
 			DirectionalControlController.this.handleJoystickMessages();
 			PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
 			if (latestMessage != null) {
@@ -520,6 +537,7 @@ public class DirectionalControlController extends ToolboxController {
 			continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(),
 					stepParameters.getTransferDuration());
 			continuousStepGenerator.update(Double.NaN);
+			publishFootsteps();
 
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -541,6 +559,9 @@ public class DirectionalControlController extends ToolboxController {
 	 * @param newState the new state this toolbox is about to enter.
 	 */
 	public void notifyToolboxStateChange(ToolboxState newState) {
+		if (newState == ToolboxState.SLEEP) {
+			stopWalking(true);
+		}
 		LogTools.info("Directional controller state is now " + newState.toString());
 	}
 

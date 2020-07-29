@@ -39,15 +39,15 @@ public class DirectionalControlModule extends ToolboxModule {
 				DirectionalControlConfigurationCommand configCommand = commandInputManager
 						.pollNewestCommand(DirectionalControlConfigurationCommand.class);
 				if (configCommand != null) {
-					LogTools.info("Got new config command");
-					steppingController.updateConfiguration(configCommand.getMessage());
+					LogTools.info("Got new config command: " + configCommand.toString());
+					steppingController.updateConfiguration(configCommand);
 				}
 
 				DirectionalControlInputCommand inputCommand = commandInputManager
 						.pollNewestCommand(DirectionalControlInputCommand.class);
 				if (inputCommand != null) {
 					LogTools.info("Got new input command");
-					steppingController.updateInputs(inputCommand.getMessage());
+					steppingController.updateInputs(inputCommand);
 				}
 			}
 
