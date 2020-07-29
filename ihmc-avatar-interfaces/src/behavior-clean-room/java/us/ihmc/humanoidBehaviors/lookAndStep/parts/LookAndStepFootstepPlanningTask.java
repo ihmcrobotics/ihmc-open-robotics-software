@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
@@ -291,7 +292,9 @@ public class LookAndStepFootstepPlanningTask
 
       statusLogger.info("Footstep planner started...");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
-      statusLogger.info("Footstep planner completed with {} steps", footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+      statusLogger.info("Footstep planner completed with {}, {} step(s)",
+                        footstepPlannerOutput.getFootstepPlanningResult(),
+                        footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
 
       // print log duration?
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
@@ -313,7 +316,7 @@ public class LookAndStepFootstepPlanningTask
       }
       else
       {
-         behaviorStateReference.set(LookAndStepBehavior.State.SWINGING);
+         behaviorStateReference.set(LookAndStepBehavior.State.ROBOT_MOTION);
          autonomousOutput.accept(footstepPlannerOutput.getFootstepPlan());
       }
    }

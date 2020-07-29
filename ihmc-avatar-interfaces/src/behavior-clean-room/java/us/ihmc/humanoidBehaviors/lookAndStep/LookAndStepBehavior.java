@@ -51,7 +51,7 @@ public class LookAndStepBehavior implements BehaviorInterface
     */
    public enum State
    {
-      BODY_PATH_PLANNING, FOOTSTEP_PLANNING, SWINGING
+      BODY_PATH_PLANNING, FOOTSTEP_PLANNING, ROBOT_MOTION
    }
 
    /**
@@ -159,7 +159,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             approvalNotification,
             footstepPlan ->
             {
-               behaviorStateReference.set(LookAndStepBehavior.State.SWINGING);
+               behaviorStateReference.set(LookAndStepBehavior.State.ROBOT_MOTION);
                robotMotion.acceptFootstepPlan(footstepPlan);
             }
       );
@@ -191,6 +191,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.info("Look and step behavior selected = {}", enabled);
 
       helper.setCommunicationCallbacksEnabled(enabled);
+
+      behaviorStateReference.broadcast();
 
       robotInterface.pitchHeadWithRespectToChest(0.38);
       //      Commanding neck trajectory: slider: 43.58974358974359 angle: 0.3824055641025641

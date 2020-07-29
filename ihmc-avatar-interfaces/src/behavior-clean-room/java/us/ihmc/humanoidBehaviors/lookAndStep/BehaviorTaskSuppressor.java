@@ -18,7 +18,7 @@ public class BehaviorTaskSuppressor
    private static final Runnable NOOP = () -> {};
 
    private ConditionHolder currentSuppressionCause;
-   private ConditionHolder lastSuppressionCause;
+   private ConditionHolder lastSuppressionCause = new ConditionHolder(); // so first evaluation is always changed
    private long unchangedEvalutionCount = 0;
 
    private final ArrayList<ConditionHolder> conditions = new ArrayList<>();
