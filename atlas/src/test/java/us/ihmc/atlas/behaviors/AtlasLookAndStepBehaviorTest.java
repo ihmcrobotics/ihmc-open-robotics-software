@@ -1,15 +1,18 @@
 package us.ihmc.atlas.behaviors;
 
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.junit.jupiter.api.Test;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,12 +29,12 @@ import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
-import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -82,9 +85,19 @@ public class AtlasLookAndStepBehaviorTest
 
       finishedDynamicsSimulationSetup.blockingPoll();
 
+      Notification reachedGoalOrFallen = new Notification();
+
+      new IHMCROS2Callback<>(ros2Node,
+                             ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+                             message ->
+                             {
+                                LogTools.error("Controller failure detected! Fall direction: {}", message.getFallingDirection());
+                                reachedGoalOrFallen.set();
+                             });
+
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
-      TypedNotification<Empty> reachedGoal = new ROS2Input<>(ros2Node, Empty.class, LookAndStepBehaviorAPI.REACHED_GOAL).getMessageNotification();
+      new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message -> reachedGoalOrFallen.set());
       goalInputPublisher.publish(new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0));
 
       Notification atTheTop = new Notification();
@@ -101,11 +114,11 @@ public class AtlasLookAndStepBehaviorTest
          new LookAndStepRemoteVisualizer(createRobotModel(), ros2Node, behaviorMessager);
       }
 
-      reachedGoal.blockingPoll();
+      reachedGoalOrFallen.blockingPoll();
       assertTrue(atTheTop.poll(), "Not at the top");
       LogTools.info("REACHED THE TOP");
       goalInputPublisher.publish(new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-      reachedGoal.blockingPoll();
+      reachedGoalOrFallen.blockingPoll();
       assertTrue(reachedOtherSide.poll(), "Not reached the other side");
       LogTools.info("REACHED OTHER SIDE");
    }
