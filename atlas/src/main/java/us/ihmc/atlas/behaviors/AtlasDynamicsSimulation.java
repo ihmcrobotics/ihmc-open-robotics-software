@@ -24,26 +24,30 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
-public class AtlasBehaviorSimulation
+public class AtlasDynamicsSimulation
 {
-   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel,
-                                                               CommonAvatarEnvironmentInterface environment,
-                                                               int recordTicksPerControllerTick,
-                                                               int dataBufferSize)
+   private final RealtimeRos2Node realtimeRos2Node;
+   private final SimulationConstructionSet simulationConstructionSet;
+   private final AvatarSimulation avatarSimulation;
+
+   public static AtlasDynamicsSimulation createForManualTest(DRCRobotModel robotModel,
+                                                             CommonAvatarEnvironmentInterface environment,
+                                                             int recordTicksPerControllerTick,
+                                                             int dataBufferSize)
    {
       return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize);
    }
 
-   public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   public static AtlasDynamicsSimulation createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
       return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1, 1024);
    }
 
-   public static SimulationConstructionSet create(DRCRobotModel robotModel,
-                                                  CommonAvatarEnvironmentInterface environment,
-                                                  PubSubImplementation pubSubImplementation,
-                                                  int recordTicksPerControllerTick,
-                                                  int dataBufferSize)
+   public static AtlasDynamicsSimulation create(DRCRobotModel robotModel,
+                                                CommonAvatarEnvironmentInterface environment,
+                                                PubSubImplementation pubSubImplementation,
+                                                int recordTicksPerControllerTick,
+                                                int dataBufferSize)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -110,17 +114,49 @@ public class AtlasBehaviorSimulation
       scs.setupGraph("root.atlas.t");
       scs.setupGraph("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
 
-      return scs;
+      return new AtlasDynamicsSimulation(realtimeRos2Node, avatarSimulation);
+   }
+
+   private AtlasDynamicsSimulation(RealtimeRos2Node realtimeRos2Node, AvatarSimulation avatarSimulation)
+   {
+      this.realtimeRos2Node = realtimeRos2Node;
+      this.avatarSimulation = avatarSimulation;
+      this.simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
+   }
+
+   public void destroy()
+   {
+      avatarSimulation.destroy();
+      realtimeRos2Node.destroy();
+   }
+
+   public RealtimeRos2Node getRealtimeRos2Node()
+   {
+      return realtimeRos2Node;
+   }
+
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+      return simulationConstructionSet;
+   }
+
+   public AvatarSimulation getAvatarSimulation()
+   {
+      return avatarSimulation;
+   }
+
+   public void simulate()
+   {
+      simulationConstructionSet.simulate();
    }
 
    public static void main(String[] args)
    {
       int recordTicksPerControllerTick = 1;
       int dataBufferSize = 1024;
-      SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
-                                                          new FlatGroundEnvironment(),
-                                                          recordTicksPerControllerTick,
-                                                          dataBufferSize);
-      scs.simulate();
+      createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
+                          new FlatGroundEnvironment(),
+                          recordTicksPerControllerTick,
+                          dataBufferSize).simulate();
    }
 }
