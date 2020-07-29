@@ -1,19 +1,27 @@
 package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
@@ -21,11 +29,8 @@ import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
-import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -42,12 +47,16 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class AtlasLookAndStepBehaviorTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
@@ -56,33 +65,91 @@ public class AtlasLookAndStepBehaviorTest
       System.setProperty("create.scs.gui", Boolean.toString(VISUALIZE));
    }
 
-   Supplier<PlanarRegionsList> environment = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
+   private BehaviorModule behaviorModule;
+   private Ros2Node ros2Node;
+   private Messager behaviorMessager;
+   private PausablePeriodicThread monitorThread;
+   private LookAndStepRemoteVisualizer lookAndStepVisualizer;
+   private HumanoidKinematicsSimulation kinematicsSimulation;
+   private AtlasDynamicsSimulation dynamicsSimulation;
+   private AtlasPerceptionSimulation perceptionStack;
+
+   private static class TestWaypoint
+   {
+      String name;
+      Pose3D goalPose;
+      Function<Pose3DReadOnly, Boolean> reachedCondition;
+      Notification reachedNotification = new Notification();
+   }
+
+   @Test
+   public void testLookAndStepOverFlatGround()
+   {
+      List<TestWaypoint> waypoints = new ArrayList<>();
+      waypoints.add(new TestWaypoint());
+      waypoints.get(0).name = "HALFWAY";
+      waypoints.get(0).goalPose = new Pose3D(1.5, 0.0, 0.0, 0.0, 0.0, 0.0);
+      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 1.0;
+      waypoints.add(new TestWaypoint());
+      waypoints.get(1).name = "ALL THE WAY";
+      waypoints.get(1).goalPose = new Pose3D(3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.5;
+
+      assertTimeoutPreemptively(Duration.ofMinutes(3), () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround, false, waypoints));
+   }
 
    @Test
    public void testLookAndStepOverStairs()
    {
-      assertTimeoutPreemptively(Duration.ofMinutes(5), this::runTheTest);
+      List<TestWaypoint> waypoints = new ArrayList<>();
+      waypoints.add(new TestWaypoint());
+      waypoints.get(0).name = "THE TOP";
+      waypoints.get(0).goalPose = new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0);
+      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.5 && pelvisPose.getPosition().getZ() > 1.3;
+      waypoints.add(new TestWaypoint());
+      waypoints.get(1).name = "OTHER SIDE";
+      waypoints.get(1).goalPose = new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 5.5;
+
+      assertTimeoutPreemptively(Duration.ofMinutes(5),
+                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop, true, waypoints));
    }
 
-   private void runTheTest()
+   private void runTheTest(Supplier<PlanarRegionsList> environment, boolean useDynamicsSimulation, List<TestWaypoint> waypoints)
    {
-      ThreadTools.startAsDaemon(this::reaModule, "REAModule");
-//      ThreadTools.startAsDaemon(this::kinematicSimulation, "KinematicsSimulation");
-      Notification finishedDynamicsSimulationSetup = new Notification();
-      ThreadTools.startAsDaemon(() -> dynamicsSimulation(finishedDynamicsSimulationSetup), "DynamicsSimulation");
+      ThreadTools.startAsDaemon(() -> reaModule(environment), "REAModule");
+      Notification finishedSimulationSetup = new Notification();
+      if (useDynamicsSimulation)
+      {
+         ThreadTools.startAsDaemon(() -> dynamicsSimulation(environment, finishedSimulationSetup), "DynamicsSimulation");
+      }
+      else
+      {
+         ThreadTools.startAsDaemon(() -> kinematicSimulation(finishedSimulationSetup), "KinematicsSimulation");
+      }
+
+      ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, "Helper");
+
 
       AtlasRobotModel robotModelForBehavior = createRobotModel();
       robotModelForBehavior.getSwingPlannerParameters().setMinimumSwingFootClearance(0.0);
-      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), robotModelForBehavior);
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, "Helper");
+      behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), robotModelForBehavior);
+      behaviorMessager = behaviorModule.getMessager();
+
+      if (VISUALIZE)
+      {
+         lookAndStepVisualizer = new LookAndStepRemoteVisualizer(createRobotModel(), ros2Node, behaviorMessager);
+      }
+
+      finishedSimulationSetup.blockingPoll();
+
+      ThreadTools.sleepSeconds(3.0);
+
       AtlasRobotModel robotModel = createRobotModel();
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, robotModel);
-      Messager behaviorMessager = behaviorModule.getMessager();
 
       AtomicReference<String> currentState = behaviorMessager.createInput(LookAndStepBehaviorAPI.CurrentState);
       behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
-
-      finishedDynamicsSimulationSetup.blockingPoll();
 
       Notification reachedGoalOrFallen = new Notification();
 
@@ -101,72 +168,66 @@ public class AtlasLookAndStepBehaviorTest
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
       new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message -> reachedGoalOrFallen.set());
-      goalInputPublisher.publish(new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0));
 
-      Notification atTheTop = new Notification();
-      Notification reachedOtherSide = new Notification();
       RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
-      PausablePeriodicThread monitorThread = new PausablePeriodicThread(
+      monitorThread = new PausablePeriodicThread(
             "RobotStatusThread",
             0.5,
-            () -> monitorThread(currentState, syncedRobot, atTheTop, reachedOtherSide));
+            () -> monitorThread(currentState, syncedRobot, waypoints));
       monitorThread.start();
 
-      if (VISUALIZE)
+      for (TestWaypoint waypoint : waypoints)
       {
-         new LookAndStepRemoteVisualizer(createRobotModel(), ros2Node, behaviorMessager);
+         goalInputPublisher.publish(waypoint.goalPose);
+         reachedGoalOrFallen.blockingPoll();
+         assertTrue(waypoint.reachedNotification.poll(), "NOT " + waypoint.name);
+         LogTools.info("REACHED " + waypoint.name);
       }
+   }
 
-      reachedGoalOrFallen.blockingPoll();
-      assertTrue(atTheTop.poll(), "Not at the top");
-      LogTools.info("REACHED THE TOP");
-      goalInputPublisher.publish(new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-      reachedGoalOrFallen.blockingPoll();
-      assertTrue(reachedOtherSide.poll(), "Not reached the other side");
-      LogTools.info("REACHED OTHER SIDE");
+   private void process()
+   {
+
    }
 
    private void monitorThread(AtomicReference<String> currentState,
                               RemoteSyncedRobotModel syncedRobot,
-                              Notification atTheTop,
-                              Notification reachedOtherSide)
+                              List<TestWaypoint> waypoints)
    {
       syncedRobot.update();
       FramePose3DReadOnly pelvisPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame);
       LogTools.info("{} pose: {}", currentState.get(), pelvisPose);
 
-      if (pelvisPose.getPosition().getX() > 2.5 && pelvisPose.getPosition().getZ() > 1.3)
+      for (TestWaypoint waypoint : waypoints)
       {
-         atTheTop.set();
-      }
-      if (pelvisPose.getPosition().getX() > 5.5)
-      {
-         reachedOtherSide.set();
+         if (waypoint.reachedCondition.apply(pelvisPose))
+         {
+            waypoint.reachedNotification.set();
+         }
       }
    }
 
-   private void reaModule()
+   private void reaModule(Supplier<PlanarRegionsList> environment)
    {
-      LogTools.info("Creating simulated realsense stereo regions module");
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
-      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
-      VisiblePlanarRegionService visiblePlanarRegionService = new VisiblePlanarRegionService(ros2Node, realsense);
-      visiblePlanarRegionService.start();
-
-      new PlanarRegionsMappingModule(INTRAPROCESS); // Start the SLAM mapper which look and step uses
+      perceptionStack = new AtlasPerceptionSimulation(CommunicationMode.INTRAPROCESS, environment.get(), false, createRobotModel());
    }
 
-   private void dynamicsSimulation(Notification finishedSettingUp)
+   private void dynamicsSimulation(Supplier<PlanarRegionsList> environment, Notification finishedSettingUp)
    {
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int scsDataBufferSize = 10;
-      AtlasBehaviorSimulation.create(createRobotModel(), createCommonAvatarEnvironment(), INTRAPROCESS, recordFrequencySpeedup, scsDataBufferSize).simulate();
+      dynamicsSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
+                                                          createCommonAvatarEnvironment(environment),
+                                                          INTRAPROCESS,
+                                                          recordFrequencySpeedup,
+                                                          scsDataBufferSize);
+      dynamicsSimulation.simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();
    }
 
-   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
+   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment(Supplier<PlanarRegionsList> environment)
    {
       String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
@@ -177,7 +238,7 @@ public class AtlasLookAndStepBehaviorTest
                                                      false);
    }
 
-   private void kinematicSimulation()
+   private void kinematicSimulation(Notification finishedSimulationSetup)
    {
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
@@ -189,12 +250,35 @@ public class AtlasLookAndStepBehaviorTest
          kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos"));
       }
       kinematicsSimulationParameters.setCreateYoVariableServer(false);
-      AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
+      kinematicsSimulation = AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
+      finishedSimulationSetup.set();
    }
 
    private AtlasRobotModel createRobotModel()
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
+   }
+
+   @AfterEach
+   public void afterEach()
+   {
+      perceptionStack.destroy();
+      behaviorModule.destroy();
+      ros2Node.destroy();
+      ExceptionTools.handle(() -> behaviorMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      monitorThread.stop();
+      if (VISUALIZE)
+         lookAndStepVisualizer.close();
+      if (kinematicsSimulation != null)
+      {
+         kinematicsSimulation.destroy();
+         kinematicsSimulation = null;
+      }
+      if (dynamicsSimulation != null)
+      {
+         dynamicsSimulation.destroy();
+         dynamicsSimulation = null;
+      }
    }
 }
