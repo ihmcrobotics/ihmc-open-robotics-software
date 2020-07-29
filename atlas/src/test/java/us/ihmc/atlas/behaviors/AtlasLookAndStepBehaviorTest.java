@@ -2,7 +2,6 @@ package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.junit.jupiter.api.Test;
-import std_msgs.msg.dds.Empty;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -11,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -35,8 +33,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
@@ -57,7 +53,7 @@ public class AtlasLookAndStepBehaviorTest
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
    static
    {
-      System.setProperty("show.scs.gui", Boolean.toString(VISUALIZE));
+      System.setProperty("create.scs.gui", Boolean.toString(VISUALIZE));
    }
 
    Supplier<PlanarRegionsList> environment = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
