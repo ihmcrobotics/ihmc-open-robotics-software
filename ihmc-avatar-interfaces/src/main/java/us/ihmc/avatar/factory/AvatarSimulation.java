@@ -55,7 +55,7 @@ public class AvatarSimulation
       dispose();
       if (yoVariableServer != null)
          yoVariableServer.close();
-      simulationConstructionSet.stopSimulationThread();
+      ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
       simulationConstructionSet.closeAndDispose();
    }
 

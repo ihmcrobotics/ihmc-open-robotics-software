@@ -1,8 +1,9 @@
 package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import javafx.application.Platform;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -37,13 +38,10 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -57,6 +55,7 @@ import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Execution(ExecutionMode.SAME_THREAD)
+@TestMethodOrder(OrderAnnotation.class)
 public class AtlasLookAndStepBehaviorTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
@@ -83,33 +82,35 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    @Test
+   @Order(1)
    public void testLookAndStepOverFlatGround()
    {
       List<TestWaypoint> waypoints = new ArrayList<>();
       waypoints.add(new TestWaypoint());
       waypoints.get(0).name = "HALFWAY";
       waypoints.get(0).goalPose = new Pose3D(1.5, 0.0, 0.0, 0.0, 0.0, 0.0);
-      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 1.0;
+      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 0.8;
       waypoints.add(new TestWaypoint());
       waypoints.get(1).name = "ALL THE WAY";
       waypoints.get(1).goalPose = new Pose3D(3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.5;
+      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.2;
 
       assertTimeoutPreemptively(Duration.ofMinutes(3), () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround, false, waypoints));
    }
 
    @Test
+   @Order(2)
    public void testLookAndStepOverStairs()
    {
       List<TestWaypoint> waypoints = new ArrayList<>();
       waypoints.add(new TestWaypoint());
       waypoints.get(0).name = "THE TOP";
       waypoints.get(0).goalPose = new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0);
-      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.5 && pelvisPose.getPosition().getZ() > 1.3;
+      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.2 && pelvisPose.getPosition().getZ() > 1.3;
       waypoints.add(new TestWaypoint());
       waypoints.get(1).name = "OTHER SIDE";
       waypoints.get(1).goalPose = new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 5.5;
+      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 5.2;
 
       assertTimeoutPreemptively(Duration.ofMinutes(5),
                                 () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop, true, waypoints));
@@ -256,8 +257,7 @@ public class AtlasLookAndStepBehaviorTest
 
    private AtlasRobotModel createRobotModel()
    {
-      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
    }
 
    @AfterEach
@@ -269,7 +269,7 @@ public class AtlasLookAndStepBehaviorTest
       ExceptionTools.handle(() -> behaviorMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
       monitorThread.stop();
       if (VISUALIZE)
-         lookAndStepVisualizer.close();
+         Platform.runLater(() -> lookAndStepVisualizer.close());
       if (kinematicsSimulation != null)
       {
          kinematicsSimulation.destroy();
