@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -45,6 +46,7 @@ public class LookAndStepFootstepPlanningTask
    protected StatusLogger statusLogger;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   protected SwingPlannerParametersReadOnly swingPlannerParameters;
    protected Supplier<Boolean> abortGoalWalkingSupplier;
    protected UIPublisher uiPublisher;
    protected Runnable onReachedGoal;
@@ -73,6 +75,7 @@ public class LookAndStepFootstepPlanningTask
       public LookAndStepFootstepPlanning(StatusLogger statusLogger,
                                          LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                                          FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                         SwingPlannerParametersReadOnly swingPlannerParameters,
                                          Supplier<Boolean> abortGoalWalkingSupplier,
                                          UIPublisher uiPublisher,
                                          Runnable onReachedGoal,
@@ -88,6 +91,7 @@ public class LookAndStepFootstepPlanningTask
          this.statusLogger = statusLogger;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
          this.footstepPlannerParameters = footstepPlannerParameters;
+         this.swingPlannerParameters = swingPlannerParameters;
          this.abortGoalWalkingSupplier = abortGoalWalkingSupplier;
          this.uiPublisher = uiPublisher;
          this.onReachedGoal = onReachedGoal;
@@ -288,6 +292,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.POSITION);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
 
       statusLogger.info("Footstep planner started...");

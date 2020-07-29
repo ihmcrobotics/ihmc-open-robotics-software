@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.*;
@@ -42,6 +43,8 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final BehaviorStateReference<State> behaviorStateReference;
    private final StatusLogger statusLogger;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
    private final RemoteSyncedRobotModel syncedRobot;
 
    /**
@@ -75,15 +78,22 @@ public class LookAndStepBehavior implements BehaviorInterface
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
       lookAndStepParameters = new LookAndStepBehaviorParameters();
-      helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
+      footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
+      swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters();
 
-      // TODO: hook up override parameters
-      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
-      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.getIdealFootstepLengthOverride());
-      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.getWiggleInsideDeltaOverride());
-      footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
-      footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
-      helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
+      updateOverrideParameters();
+
+      helper.createUICallback(LookAndStepParameters, parameters ->
+      {
+         statusLogger.info("Accepting new look and step parameters");
+         lookAndStepParameters.setAllFromStrings(parameters);
+         updateOverrideParameters();
+      });
+      helper.createUICallback(FootstepPlannerParameters, parameters ->
+      {
+         statusLogger.info("Accepting new footstep planner parameters");
+         footstepPlannerParameters.setAllFromStrings(parameters);
+      }); // TODO: This overrides overrides?
 
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
@@ -115,8 +125,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       );
       footstepPlanning = new LookAndStepFootstepPlanning(
             statusLogger,
-            lookAndStepParameters,
-            footstepPlannerParameters,
+            lookAndStepParameters, footstepPlannerParameters, swingPlannerParameters,
             resetInput::poll,
             helper::publishToUI,
             () -> {
@@ -176,6 +185,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
       helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
+   }
+
+   private void updateOverrideParameters()
+   {
+      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.getIdealFootstepLengthOverride());
+      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.getWiggleInsideDeltaOverride());
+      footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
+      footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
+      swingPlannerParameters.setMinimumSwingFootClearance(lookAndStepParameters.getMinimumSwingFootClearanceOverride());
    }
 
    private boolean robotConnected()

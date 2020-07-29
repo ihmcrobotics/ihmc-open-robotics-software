@@ -22,6 +22,7 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -74,7 +75,9 @@ public class AtlasLookAndStepBehaviorTest
       Notification finishedDynamicsSimulationSetup = new Notification();
       ThreadTools.startAsDaemon(() -> dynamicsSimulation(finishedDynamicsSimulationSetup), "DynamicsSimulation");
 
-      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), createRobotModel());
+      AtlasRobotModel robotModelForBehavior = createRobotModel();
+      robotModelForBehavior.getSwingPlannerParameters().setMinimumSwingFootClearance(0.0);
+      BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), robotModelForBehavior);
       Ros2Node ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, "Helper");
       AtlasRobotModel robotModel = createRobotModel();
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, robotModel);
@@ -95,6 +98,10 @@ public class AtlasLookAndStepBehaviorTest
                                 reachedGoalOrFallen.set();
                              });
 
+      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.minimumSwingFootClearanceOverride, 0.0);
+      behaviorMessager.submitMessage(LookAndStepBehaviorAPI.LookAndStepParameters, lookAndStepBehaviorParameters.getAllAsStrings());
+
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
       new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message -> reachedGoalOrFallen.set());
@@ -105,7 +112,7 @@ public class AtlasLookAndStepBehaviorTest
       RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
       PausablePeriodicThread monitorThread = new PausablePeriodicThread(
             "RobotStatusThread",
-            2.0,
+            0.5,
             () -> monitorThread(currentState, syncedRobot, atTheTop, reachedOtherSide));
       monitorThread.start();
 
