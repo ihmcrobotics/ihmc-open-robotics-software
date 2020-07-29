@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -30,8 +31,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -119,11 +122,16 @@ public class DirectionalControlController extends ToolboxController {
 		robotUpdater.updateConfiguration(message);
 	}
 
-	public DirectionalControlController(FullHumanoidRobotModel robotModel,
-			                            DRCRobotModel robot,
-			                            StatusMessageOutputManager statusOutputManager,
-			                            YoVariableRegistry registry)
-	{
+	public DirectionalControlController(FullHumanoidRobotModel robotModel, DRCRobotModel robot,
+			StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry) {
+		this(robotModel, robot, statusOutputManager, registry,
+				ControllerAPIDefinition.getSubscriberTopicNameGenerator(robot.getSimpleRobotName()),
+				ControllerAPIDefinition.getPublisherTopicNameGenerator(robot.getSimpleRobotName()));
+	}
+
+	public DirectionalControlController(FullHumanoidRobotModel robotModel, DRCRobotModel robot,
+			StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
+			MessageTopicNameGenerator subNameGenerator, MessageTopicNameGenerator pubNameGenerator) {
 		super(statusOutputManager, registry);
 
 		this.walkingControllerParameters = robot.getWalkingControllerParameters();
@@ -194,9 +202,9 @@ public class DirectionalControlController extends ToolboxController {
 		pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
 		footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
 
-
 		// TODO: Collision box parameters taken from StepGeneratorJavaFXController.java
-		// These are specific to the robot. To some degree, they should be derived from some combination of:
+		// These are specific to the robot. To some degree, they should be derived from
+		// some combination of:
 		// - walking parameters
 		// - physical properties
 		// - step planning values
@@ -205,11 +213,22 @@ public class DirectionalControlController extends ToolboxController {
 		double collisionBoxHeight = 1.0;
 		double collisionXYProximityCheck = 0.01;
 		collisionDetector = new BoundingBoxCollisionDetector();
-		collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
-		
-		// TODO: need to figure out how to set this up w.r.t the toolbox.
-		setupTasks();
+		collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight,
+				collisionXYProximityCheck);
 
+		// TODO: need to figure out how to set this up w.r.t the toolbox.
+		//setupTasks();
+
+	}
+
+	public void updateConfiguration(DirectionalControlConfigurationMessage msg) {
+		controlConfigurationMessage.set(msg);
+		LogTools.info("Config is now " + controlConfigurationMessage.toString());
+	}
+
+	public void updateInputs(DirectionalControlInputMessage msg) {
+		controlInputMessage.set(msg);
+		LogTools.info("Input is now " + controlInputMessage.toString());
 	}
 
 	private void setupTasks() {
@@ -477,14 +496,15 @@ public class DirectionalControlController extends ToolboxController {
 
 	@Override
 	public boolean initialize() {
-		// TODO Auto-generated method stub
-		return false;
+		// Should return true when the controller is initialized
+		return true;
 	}
 
 	@Override
 	public void updateInternal() throws Exception {
 		
 		try {
+			LogTools.info("update internal");
 			DirectionalControlController.this.handleJoystickMessages();
 			PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
 			if (latestMessage != null) {
@@ -511,6 +531,17 @@ public class DirectionalControlController extends ToolboxController {
 	public boolean isDone() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	/**
+	 * Implement this method to receive notifications when the state of this toolbox
+	 * is changing.
+	 * 
+	 * @param newState the new state this toolbox is about to enter.
+	 */
+	public void notifyToolboxStateChange(ToolboxState newState) {
+		LogTools.info("Directional controller state is now " + newState.toString());
 	}
 
 }

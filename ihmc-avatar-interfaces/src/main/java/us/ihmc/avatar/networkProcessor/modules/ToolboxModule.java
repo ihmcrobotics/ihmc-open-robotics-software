@@ -113,7 +113,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
-      timeWithoutInputsBeforeGoingToSleep.set(0.5);
+      timeWithoutInputsBeforeGoingToSleep.set(100);
       commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
          private final Set<Class<? extends Command<?, ?>>> silentCommands = silentCommands();
