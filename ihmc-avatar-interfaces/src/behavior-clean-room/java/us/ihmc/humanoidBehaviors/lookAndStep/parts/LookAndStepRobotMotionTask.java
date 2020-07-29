@@ -46,6 +46,7 @@ public class LookAndStepRobotMotionTask
    public static class LookAndStepRobotMotion extends LookAndStepRobotMotionTask
    {
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
+      private final BehaviorTaskSuppressor suppressor;
 
       public LookAndStepRobotMotion(StatusLogger statusLogger,
                                     RemoteSyncedRobotModel syncedRobot,
@@ -69,6 +70,18 @@ public class LookAndStepRobotMotionTask
 
          SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
          footstepPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+
+         suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
+         suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.ROBOT_MOTION));
+         suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
+                                       + ". Planning again...",
+                                 () -> !isFootstepPlanOK(),
+                                 () ->
+                                 {
+                                    behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                                    replanFootstepsOutput.run();
+                                 });
+         suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
       }
 
       public void acceptFootstepPlan(FootstepPlan footstepPlan)
@@ -83,7 +96,7 @@ public class LookAndStepRobotMotionTask
          footstepPlan = footstepPlanInput.get();
          syncedRobot.update();
 
-         if (evaluateEntry())
+         if (suppressor.evaulateShouldAccept())
          {
             performTask();
          }
@@ -96,33 +109,7 @@ public class LookAndStepRobotMotionTask
       this.syncedRobot = syncedRobot;
    }
 
-   protected boolean evaluateEntry()
-   {
-      boolean proceed = true;
-
-      if (!behaviorStateReference.get().equals(LookAndStepBehavior.State.SWINGING))
-      {
-         statusLogger.debug("Footstep planning supressed: Not in footstep planning state");
-         proceed = false;
-      }
-      else if (!isFootstepPlanOK())
-      {
-         statusLogger.debug("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
-                            footstepPlan == null ? null : footstepPlan.getNumberOfSteps());
-         behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-         replanFootstepsOutput.run();
-         proceed = false;
-      }
-      else if (!robotConnectedSupplier.get())
-      {
-         statusLogger.debug("Footstep planning supressed: Robot disconnected");
-         proceed = false;
-      }
-
-      return proceed;
-   }
-
-   private boolean isFootstepPlanOK()
+   protected boolean isFootstepPlanOK()
    {
       return footstepPlan != null && footstepPlan.getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
    }
@@ -141,7 +128,7 @@ public class LookAndStepRobotMotionTask
       startFootPosesForUI.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(lastSteppedSolePoses.get(RobotSide.RIGHT)), "Right Start"));
       uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI); // TODO: Should specify topic here?
 
-      statusLogger.info("Requesting walk");
+      statusLogger.warn("Requesting walk");
       double swingTime = lookAndStepBehaviorParameters.getSwingTime();
       double transferTime = lookAndStepBehaviorParameters.getTransferTime();
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
@@ -176,8 +163,8 @@ public class LookAndStepRobotMotionTask
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
    {
-      statusLogger.info("Waiting for robot walking...");
+      statusLogger.debug("Waiting for robot walking...");
       walkingStatusNotification.blockingPoll();
-      statusLogger.info("Robot walk complete.");
+      statusLogger.debug("Robot walk complete.");
    }
 }

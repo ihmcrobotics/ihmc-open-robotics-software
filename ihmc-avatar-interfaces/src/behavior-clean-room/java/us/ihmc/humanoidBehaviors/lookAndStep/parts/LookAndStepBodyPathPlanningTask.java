@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -44,6 +46,7 @@ public class LookAndStepBodyPathPlanningTask
    protected Consumer<ArrayList<Pose3D>> autonomousOutput;
 
    protected final Timer planningFailedTimer = new Timer();
+   protected final Stopwatch planningStopwatch = new Stopwatch();
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
@@ -177,8 +180,9 @@ public class LookAndStepBodyPathPlanningTask
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      bodyPathPlanner.planWaypoints(); // takes about 0.1s
-      statusLogger.info("Body path plan completed with {} waypoint(s)", bodyPathPlanner.getWaypoints().size());
+      planningStopwatch.start();
+      BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();// takes about 0.1s
+      statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result, bodyPathPlanner.getWaypoints().size());
       //      bodyPathPlan = bodyPathPlanner.getWaypoints();
       if (bodyPathPlanner.getWaypoints() != null)
       {
