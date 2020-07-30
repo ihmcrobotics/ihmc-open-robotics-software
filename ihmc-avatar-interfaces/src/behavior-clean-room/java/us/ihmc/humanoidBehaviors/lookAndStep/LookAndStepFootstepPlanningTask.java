@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep.parts;
+package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -20,7 +20,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
