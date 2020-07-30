@@ -29,8 +29,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRegionsForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -50,24 +49,25 @@ public class LookAndStepBodyPathPlanningTask
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
-      private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
-      private final WalkingFootstepTracker walkingFootstepTracker;
-      private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private final TypedInput<Pose3D> goalInput = new TypedInput<>();
-      private final Timer mapRegionsExpirationTimer = new Timer();
+      private Supplier<RemoteSyncedRobotModel> robotStateSupplier;
+      private WalkingFootstepTracker walkingFootstepTracker;
+      private TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
+      private TypedInput<Pose3D> goalInput = new TypedInput<>();
+      private Timer mapRegionsExpirationTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
-      public LookAndStepBodyPathPlanning(StatusLogger statusLogger,
-                                         UIPublisher uiPublisher,
-                                         VisibilityGraphsParametersReadOnly visibilityGraphParameters,
-                                         LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                                         Supplier<Boolean> operatorReviewEnabled,
-                                         RemoteSyncedRobotModel syncedRobot,
-                                         BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                                         Supplier<Boolean> robotConnectedSupplier,
-                                         WalkingFootstepTracker walkingFootstepTracker)
+      public void initialize(StatusLogger statusLogger,
+                             UIPublisher uiPublisher,
+                             VisibilityGraphsParametersReadOnly visibilityGraphParameters,
+                             LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                             Supplier<Boolean> operatorReviewEnabled,
+                             RemoteSyncedRobotModel syncedRobot,
+                             BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                             Supplier<Boolean> robotConnectedSupplier,
+                             WalkingFootstepTracker walkingFootstepTracker,
+                             LookAndStepReview<List<? extends Pose3DReadOnly>> review,
+                             Consumer<ArrayList<Pose3D>> autonomousOutput)
       {
-
          this.statusLogger = statusLogger;
          this.uiPublisher = uiPublisher;
          this.visibilityGraphParameters = visibilityGraphParameters;
@@ -75,6 +75,8 @@ public class LookAndStepBodyPathPlanningTask
          this.operatorReviewEnabled = operatorReviewEnabled;
          this.behaviorStateReference = behaviorStateReference;
          this.robotConnectedSupplier = robotConnectedSupplier;
+         this.review = review;
+         this.autonomousOutput = autonomousOutput;
 
          this.robotStateSupplier = () ->
          {
@@ -88,17 +90,10 @@ public class LookAndStepBodyPathPlanningTask
 
          mapRegionsInput.addCallback(data -> executor.execute(this::evaluateAndRun));
          goalInput.addCallback(data -> executor.execute(this::evaluateAndRun));
-      }
-
-      public void laterSetup(LookAndStepReview<List<? extends Pose3DReadOnly>> review,
-                             Consumer<ArrayList<Pose3D>> autonomousOutput)
-      {
-         this.review = review;
-         this.autonomousOutput = autonomousOutput;
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING));
-         suppressor.addCondition("No goal specified", () -> !hasGoal(), () -> uiPublisher.publishToUI(MapRegionsForUI, mapRegions));
+         suppressor.addCondition("No goal specified", () -> !hasGoal(), () -> uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions));
          suppressor.addCondition(() -> "Body path planning suppressed: Regions not OK: " + mapRegions
                                        + ", timePassed: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset()
                                        + ", isEmpty: " + (mapRegions == null ? null : mapRegions.isEmpty()),
@@ -163,7 +158,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       statusLogger.info("Body path planning...");
       // TODO: Add robot standing still for 20s for real robot?
-      uiPublisher.publishToUI(MapRegionsForUI, mapRegions);
+      uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions);
 
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);

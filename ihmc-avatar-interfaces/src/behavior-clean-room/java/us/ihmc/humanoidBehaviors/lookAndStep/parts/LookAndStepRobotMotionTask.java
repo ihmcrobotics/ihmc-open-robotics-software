@@ -46,9 +46,9 @@ public class LookAndStepRobotMotionTask
    public static class LookAndStepRobotMotion extends LookAndStepRobotMotionTask
    {
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
-      private final BehaviorTaskSuppressor suppressor;
+      private BehaviorTaskSuppressor suppressor;
 
-      public LookAndStepRobotMotion(StatusLogger statusLogger,
+      public void initialize(StatusLogger statusLogger,
                                     RemoteSyncedRobotModel syncedRobot,
                                     LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                                     SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,

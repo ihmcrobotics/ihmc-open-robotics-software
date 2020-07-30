@@ -37,9 +37,11 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final BehaviorHelper helper;
    private final RemoteHumanoidRobotInterface robotInterface;
 
-   private final LookAndStepBodyPathPlanning bodyPathPlanning;
-   private final LookAndStepFootstepPlanning footstepPlanning;
-   private final LookAndStepRobotMotion robotMotion;
+   private final LookAndStepBodyPathPlanning bodyPathPlanning = new LookAndStepBodyPathPlanning();
+   private final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
+   private final LookAndStepRobotMotion robotMotion = new LookAndStepRobotMotion();
+   private final LookAndStepReview<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReview<>();
+   private final LookAndStepReview<FootstepPlan> footstepPlanReview = new LookAndStepReview<>();
    private final BehaviorStateReference<State> behaviorStateReference;
    private final StatusLogger statusLogger;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
@@ -105,14 +107,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
 
       // TODO: Footstep log
-      WalkingFootstepTracker walkingFootstepTracker = new WalkingFootstepTracker(helper.getManagedROS2Node(), helper.getRobotModel().getSimpleRobotName());
+      WalkingFootstepTracker walkingFootstepTracker = new WalkingFootstepTracker(helper.getManagedROS2Node(),
+                                                                                 helper.getRobotModel().getSimpleRobotName());
 
       // TODO: Want to be able to wire up behavior here and see all present modules
       // TODO: Add more meaning to the construction by establishing data patterns
-      // TODO: Use named interfaces or pass in actual objects instead of being so careful, misordered args are worse
+      // TODO: Use named interfaces or pass in actual objects to prevent misordered arguments
 
       // could add meaning by local variables before passing
-      bodyPathPlanning = new LookAndStepBodyPathPlanning(
+      bodyPathPlanning.initialize(
             statusLogger,
             helper::publishToUI,
             visibilityGraphParameters,
@@ -121,9 +124,23 @@ public class LookAndStepBehavior implements BehaviorInterface
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
             this::robotConnected,
-            walkingFootstepTracker
+            walkingFootstepTracker,
+            bodyPathReview,
+            footstepPlanning::acceptBodyPathPlan
       );
-      footstepPlanning = new LookAndStepFootstepPlanning(
+      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
+      helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
+      bodyPathReview.initialize(
+            statusLogger,
+            "body path",
+            approvalNotification,
+            bodyPathPlan ->
+            {
+               behaviorStateReference.set(State.FOOTSTEP_PLANNING);
+               footstepPlanning.acceptBodyPathPlan(bodyPathPlan);
+            }
+      );
+      footstepPlanning.initialize(
             statusLogger,
             lookAndStepParameters, footstepPlannerParameters, swingPlannerParameters,
             resetInput::poll,
@@ -139,9 +156,22 @@ public class LookAndStepBehavior implements BehaviorInterface
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
             this::robotConnected,
-            walkingFootstepTracker
+            walkingFootstepTracker,
+            footstepPlanReview,
+            robotMotion::acceptFootstepPlan
       );
-      robotMotion = new LookAndStepRobotMotion(
+      helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
+      footstepPlanReview.initialize(
+            statusLogger,
+            "footstep plan",
+            approvalNotification,
+            footstepPlan ->
+            {
+               behaviorStateReference.set(LookAndStepBehavior.State.ROBOT_MOTION);
+               robotMotion.acceptFootstepPlan(footstepPlan);
+            }
+      );
+      robotMotion.initialize(
             statusLogger,
             robotInterface.newSyncedRobot(),
             lookAndStepParameters,
@@ -152,39 +182,6 @@ public class LookAndStepBehavior implements BehaviorInterface
             behaviorStateReference,
             this::robotConnected
       );
-      LookAndStepReview<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReview<>(
-            statusLogger,
-            "body path",
-            approvalNotification,
-            bodyPathPlan ->
-            {
-               behaviorStateReference.set(State.FOOTSTEP_PLANNING);
-               footstepPlanning.acceptBodyPathPlan(bodyPathPlan);
-            }
-      );
-      LookAndStepReview<FootstepPlan> footstepPlanReview = new LookAndStepReview<>(
-            statusLogger,
-            "footstep plan",
-            approvalNotification,
-            footstepPlan ->
-            {
-               behaviorStateReference.set(LookAndStepBehavior.State.ROBOT_MOTION);
-               robotMotion.acceptFootstepPlan(footstepPlan);
-            }
-      );
-      bodyPathPlanning.laterSetup(
-            bodyPathReview,
-            footstepPlanning::acceptBodyPathPlan
-      );
-      footstepPlanning.laterSetup(
-            footstepPlanReview,
-            robotMotion::acceptFootstepPlan
-      );
-
-      // TODO: Put these in better spots
-      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
-      helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
-      helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
    }
 
    private void updateOverrideParameters()
