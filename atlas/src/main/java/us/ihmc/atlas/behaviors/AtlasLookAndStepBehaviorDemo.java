@@ -34,6 +34,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
    private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam"));
+   private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
 
    private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
    private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
@@ -59,8 +60,9 @@ public class AtlasLookAndStepBehaviorDemo
       ThreadTools.startAsDaemon(() -> new AtlasPerceptionSimulation(communicationMode,
                                                                     environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                     RUN_REALSENSE_SLAM,
+                                                                    SHOW_REALSENSE_SLAM_UIS,
                                                                     createRobotModel()),
-                                "REAModule");
+                                "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
