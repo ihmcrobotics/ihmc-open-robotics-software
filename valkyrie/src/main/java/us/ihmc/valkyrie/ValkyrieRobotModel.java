@@ -11,9 +11,7 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
-import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
-import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -78,7 +76,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
-   private RobotROSClockCalculatorFromPPSOffset rosClockCalculator;
+   private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
 
    private ValkyrieSensorSuiteManager sensorSuiteManager = null;
@@ -394,8 +392,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotROSClockCalculator getROSClockCalculator()
    {
       if (rosClockCalculator == null)
-    	 rosClockCalculator = new RobotROSClockCalculatorFromPPSOffset(new SimulationRosClockPPSTimestampOffsetProvider());    	  
-         //rosClockCalculator = new WallTimeBasedROSClockCalculator();
+         rosClockCalculator = new WallTimeBasedROSClockCalculator();
       return rosClockCalculator;
    }
 
