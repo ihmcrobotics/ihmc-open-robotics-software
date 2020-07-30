@@ -117,7 +117,6 @@ public class AtlasLookAndStepBehaviorTest
                                 () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop, true, false, waypoints));
    }
 
-   @Disabled
    @Test
    @Order(3)
    public void testLookAndStepOverStairStepsWRealsenseSLAM()
