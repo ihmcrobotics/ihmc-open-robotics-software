@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
@@ -38,17 +39,15 @@ public class LookAndStepBodyPathPlanningTask
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected Supplier<Boolean> operatorReviewEnabled;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
-   protected Supplier<Boolean> robotConnectedSupplier;
 
-   protected LookAndStepReview<List<? extends Pose3DReadOnly>> review;
-   protected Consumer<ArrayList<Pose3D>> autonomousOutput;
+   protected final LookAndStepReview<List<? extends Pose3DReadOnly>> review = new LookAndStepReview<>();
+   protected Consumer<List<? extends Pose3DReadOnly>> autonomousOutput;
 
    protected final Timer planningFailedTimer = new Timer();
    protected final Stopwatch planningStopwatch = new Stopwatch();
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
-      private Supplier<RemoteSyncedRobotModel> robotStateSupplier;
       private WalkingFootstepTracker walkingFootstepTracker;
       private TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private TypedInput<Pose3D> goalInput = new TypedInput<>();
@@ -62,26 +61,30 @@ public class LookAndStepBodyPathPlanningTask
                              Supplier<Boolean> operatorReviewEnabled,
                              RemoteSyncedRobotModel syncedRobot,
                              BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                             Supplier<Boolean> robotConnectedSupplier,
                              WalkingFootstepTracker walkingFootstepTracker,
-                             LookAndStepReview<List<? extends Pose3DReadOnly>> review,
-                             Consumer<ArrayList<Pose3D>> autonomousOutput)
+                             Consumer<List<? extends Pose3DReadOnly>> autonomousOutput,
+                             TypedNotification<Boolean> approvalNotification)
       {
          this.statusLogger = statusLogger;
          this.uiPublisher = uiPublisher;
          this.visibilityGraphParameters = visibilityGraphParameters;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
          this.operatorReviewEnabled = operatorReviewEnabled;
+         this.syncedRobot = syncedRobot;
          this.behaviorStateReference = behaviorStateReference;
-         this.robotConnectedSupplier = robotConnectedSupplier;
-         this.review = review;
          this.autonomousOutput = autonomousOutput;
 
-         this.robotStateSupplier = () ->
-         {
-            syncedRobot.update();
-            return syncedRobot;
-         };
+         review.initialize(
+               statusLogger,
+               "body path",
+               approvalNotification,
+               bodyPathPlan ->
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                  autonomousOutput.accept(bodyPathPlan);
+               }
+         );
+
          this.walkingFootstepTracker = walkingFootstepTracker;
 
          // don't run two body path plans at the same time
@@ -100,7 +103,7 @@ public class LookAndStepBodyPathPlanningTask
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
-         suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
+         suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
                                  () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
@@ -122,7 +125,9 @@ public class LookAndStepBodyPathPlanningTask
       {
          mapRegions = mapRegionsInput.get();
          goal = goalInput.get();
-         syncedRobot = robotStateSupplier.get();
+         syncedRobot.update();
+         robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
+                                                     .withExpiration(lookAndStepBehaviorParameters.getRobotConfigurationDataExpiration());
          mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
@@ -138,6 +143,7 @@ public class LookAndStepBodyPathPlanningTask
    protected PlanarRegionsList mapRegions;
    protected Pose3D goal;
    protected RemoteSyncedRobotModel syncedRobot;
+   protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected LookAndStepBehavior.State behaviorState;
