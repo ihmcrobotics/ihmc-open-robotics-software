@@ -393,14 +393,14 @@ bool enable_expansion_mask true
 # Enable concave hull wiggler must be true in order for the shin collision checker to run.
 bool enable_shin_collision_check
 
-# Radius of the shin collidable cylinder
-float64 shin_radius -11.1
+# How far the shin collision cylinder extends from the toe
+float64 shin_toe_clearance -11.1
+
+# How far the shin collision cylinder extends from the heel
+float64 shin_heel_clearance -11.1
 
 # Length of the shin collidable cylinder
 float64 shin_length -11.1
-
-# Pitch of the shin collidable cylinder
-float64 shin_pitch -11.1
 
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1

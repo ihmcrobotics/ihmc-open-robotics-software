@@ -329,6 +329,9 @@ public class FootstepPlannerLogger
       {
          writeFootPolygon(numTabs, "croppedFoothold:", croppedFoothold);
       }
+
+      int regionIndex = snapData.getRegionIndex();
+      writeLine(numTabs, "regionIndex:" + regionIndex);
    }
 
    private void writeTransform(int numTabs, String name, QuaternionReadOnly orientation, Tuple3DReadOnly translation) throws IOException

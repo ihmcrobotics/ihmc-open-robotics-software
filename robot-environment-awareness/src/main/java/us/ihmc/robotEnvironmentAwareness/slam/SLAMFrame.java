@@ -5,7 +5,9 @@ import java.util.List;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -125,13 +127,12 @@ public class SLAMFrame
       surfaceElementsToSensor.clear();
       frameMap = new NormalOcTree(surfaceElementResolution);
 
-      ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = getUncorrectedPointCloudInWorld().length;
+      ConvexPolygon2D mapHullInWorld = new ConvexPolygon2D();
+      for (NormalOcTreeNode node : OcTreeIteratorFactory.createLeafBoundingBoxIteratable(map.getRoot(), map.getBoundingBox()))
+         mapHullInWorld.addVertex(node.getHitLocationX(), node.getHitLocationY());
+      mapHullInWorld.update();
 
-      scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getOriginalPointCloudToSensorPose(), getUncorrectedSensorPoseInWorld(), map, windowMargin));
-
-      frameMap.insertScanCollection(scanCollection, false);
+      frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin), false);
       frameMap.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();

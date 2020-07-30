@@ -533,20 +533,20 @@ module controller_msgs
          */
         boolean enable_shin_collision_check;
         /**
-         * Radius of the shin collidable cylinder
+         * How far the shin collision cylinder extends from the toe
          */
         @defaultValue(value=-11.1)
-        double shin_radius;
+        double shin_toe_clearance;
+        /**
+         * How far the shin collision cylinder extends from the heel
+         */
+        @defaultValue(value=-11.1)
+        double shin_heel_clearance;
         /**
          * Length of the shin collidable cylinder
          */
         @defaultValue(value=-11.1)
         double shin_length;
-        /**
-         * Pitch of the shin collidable cylinder
-         */
-        @defaultValue(value=-11.1)
-        double shin_pitch;
         /**
          * Height offset of shin collidable cylinder
          */

@@ -202,13 +202,18 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
             tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
             gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
 
-            legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
+            ConvexPolygon2D footPolygon = footPolygonsInSoleFrame.get(footstepNode.getRobotSide());
+            double forwardPoint = footPolygon.getMaxX() + parameters.getShinToeClearance();
+            double backwardPoint = footPolygon.getMinX() - parameters.getShinHeelClearance();
+            double shinRadius = 0.5 * (forwardPoint - backwardPoint);
+            double shinXOffset = 0.5 * (forwardPoint + backwardPoint);
+
+            legCollisionShape.setSize(parameters.getShinLength(), shinRadius);
             transformGenerator.identity();
-            transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
-            transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
+            transformGenerator.translate(shinXOffset, 0.0, parameters.getShinHeightOffset());
             transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
             transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
-            gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
+            gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, legCollisionShapeToSoleTransform);
 
             gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
          }

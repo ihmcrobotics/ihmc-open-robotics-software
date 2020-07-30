@@ -170,6 +170,7 @@ public class FootstepPlannerLogLoader
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+            iterationData.getStanceNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
             log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
@@ -183,6 +184,7 @@ public class FootstepPlannerLogLoader
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+               edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
 
                double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
                edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
