@@ -57,6 +57,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       //walk to general door location... point offseet from door approach location
       //search for door precise location
       WALKING_TO_PUSH_DOOR, //if failed jump to clear state
+      PUSH_DOOR_POWER_STANCE, //if failed jump to clear state
+
       WALKING_TO_PULL_DOOR,
       SEARCHING_FOR_DOOR_FINAL, //search for door handle
       OPEN_PUSH_DOOR, // in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
@@ -332,6 +334,56 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
+      
+      BehaviorAction powerStance = new BehaviorAction(atlasPrimitiveActions.footstepListBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            if (DEBUG)
+            {
+               doorOpenDetectorBehaviorService.run(false);
+               publishTextToSpeech("walk through door action");
+            }
+                  
+                  
+            PoseReferenceFrame doorPose = new PoseReferenceFrame("DoorReferenceFrame", ReferenceFrame.getWorldFrame());
+
+            Pose3D unrotatedDoor = new Pose3D(searchForDoorBehavior.getLocation());
+
+            double offsetLeftRight = 0;
+            double footSpread = 0;
+            FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
+                                                                                                 atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
+
+               offsetLeftRight = .381;
+               footSpread = -.05;
+               unrotatedDoor.appendYawRotation(Math.toRadians(180));
+               unrotatedDoor.appendTranslation(-0.9144, 0, 0);
+
+               doorPose.setPoseAndUpdate(unrotatedDoor);
+
+               RobotSide startStep = RobotSide.LEFT;
+
+            
+
+               FootstepDataMessage fs1 = createRelativeFootStep(doorPose,
+                                                                startStep.getOppositeSide(),
+                                                                new Point3D(-0.124 + offsetLeftRight, pushDoorOffsetPoint2.getX()+0.635, -0),
+                                                                new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+
+               message.getFootstepDataList().add().set(fs1);
+
+               message.setTrustHeightOfFootsteps(true);
+
+                  
+                  
+            atlasPrimitiveActions.footstepListBehavior.set(message);
+         }
+      };
+      
+      
       BehaviorAction walkThroughDoor = new BehaviorAction(atlasPrimitiveActions.footstepListBehavior)
       {
          @Override

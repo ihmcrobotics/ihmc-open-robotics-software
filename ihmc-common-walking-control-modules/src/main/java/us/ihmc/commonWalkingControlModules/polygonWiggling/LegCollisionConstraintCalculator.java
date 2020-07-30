@@ -25,6 +25,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class LegCollisionConstraintCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final static double defaultLegRadiusGraphic = 0.21; // YoGraphicCylinder doesn't support changing radius on the fly...
 
    private Cylinder3D legCollisionShape = null;
    private final RigidBodyTransform legShapeTransformToSoleFrame = new RigidBodyTransform();
@@ -58,7 +59,7 @@ public class LegCollisionConstraintCalculator
       AppearanceDefinition appearance = YoAppearance.LightGoldenRodYellow();
       appearance.setTransparency(0.85);
 
-      legCollisionShapeGraphic = new YoGraphicCylinder("legCollisionGraphic", legShapeBase, legShapeDirection, appearance, 0.05);
+      legCollisionShapeGraphic = new YoGraphicCylinder("legCollisionGraphic", legShapeBase, legShapeDirection, appearance, defaultLegRadiusGraphic);
       legIntersectionPositionGraphic = new YoGraphicPosition("intersectionPositionGraphic", legIntersectionPosition, 0.01, YoAppearance.Orange());
       regionIntersectionPositionGraphic = new YoGraphicPosition("regionIntersectionPositionGraphic", regionIntersectionPosition, 0.01, YoAppearance.Black());
       gradientDirectionGraphic = new YoGraphicVector("intersectionDirectionGraphic", legIntersectionPosition, gradientDirection, 1.0, YoAppearance.Orange(), true, 0.01);

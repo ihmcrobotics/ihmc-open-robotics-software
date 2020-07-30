@@ -92,27 +92,6 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       return current_alignment - initial_alignment;
    }
 
@@ -147,34 +126,6 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -261,34 +212,13 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       cdr.write_type_6(data.getMinimumHeightAboveFloorForCollision());
 
 
-      cdr.write_type_6(data.getMinimumSwingHeight());
-
-
-      cdr.write_type_6(data.getMaximumSwingHeight());
-
-
-      cdr.write_type_6(data.getMaximumStepHeightForMinimumSwingHeight());
-
-
-      cdr.write_type_6(data.getMinimumStepHeightForMaximumSwingHeight());
+      cdr.write_type_6(data.getSwingHeightIfCollisionDetected());
 
 
       cdr.write_type_6(data.getMinimumSwingTime());
 
 
       cdr.write_type_6(data.getMaximumSwingTime());
-
-
-      cdr.write_type_6(data.getMaximumStepTranslationForMinimumSwingTime());
-
-
-      cdr.write_type_6(data.getMinimumStepTranslationForMaximumSwingTime());
-
-
-      cdr.write_type_6(data.getMaximumStepHeightForMinimumSwingTime());
-
-
-      cdr.write_type_6(data.getMinimumStepHeightForMaximumSwingTime());
 
 
       cdr.write_type_6(data.getFootStubClearance());
@@ -337,34 +267,13 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       data.setMinimumHeightAboveFloorForCollision(cdr.read_type_6());
       	
 
-      data.setMinimumSwingHeight(cdr.read_type_6());
-      	
-
-      data.setMaximumSwingHeight(cdr.read_type_6());
-      	
-
-      data.setMaximumStepHeightForMinimumSwingHeight(cdr.read_type_6());
-      	
-
-      data.setMinimumStepHeightForMaximumSwingHeight(cdr.read_type_6());
+      data.setSwingHeightIfCollisionDetected(cdr.read_type_6());
       	
 
       data.setMinimumSwingTime(cdr.read_type_6());
       	
 
       data.setMaximumSwingTime(cdr.read_type_6());
-      	
-
-      data.setMaximumStepTranslationForMinimumSwingTime(cdr.read_type_6());
-      	
-
-      data.setMinimumStepTranslationForMaximumSwingTime(cdr.read_type_6());
-      	
-
-      data.setMaximumStepHeightForMinimumSwingTime(cdr.read_type_6());
-      	
-
-      data.setMinimumStepHeightForMaximumSwingTime(cdr.read_type_6());
       	
 
       data.setFootStubClearance(cdr.read_type_6());
@@ -404,25 +313,11 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
       ser.write_type_6("minimum_height_above_floor_for_collision", data.getMinimumHeightAboveFloorForCollision());
 
-      ser.write_type_6("minimum_swing_height", data.getMinimumSwingHeight());
-
-      ser.write_type_6("maximum_swing_height", data.getMaximumSwingHeight());
-
-      ser.write_type_6("maximum_step_height_for_minimum_swing_height", data.getMaximumStepHeightForMinimumSwingHeight());
-
-      ser.write_type_6("minimum_step_height_for_maximum_swing_height", data.getMinimumStepHeightForMaximumSwingHeight());
+      ser.write_type_6("swing_height_if_collision_detected", data.getSwingHeightIfCollisionDetected());
 
       ser.write_type_6("minimum_swing_time", data.getMinimumSwingTime());
 
       ser.write_type_6("maximum_swing_time", data.getMaximumSwingTime());
-
-      ser.write_type_6("maximum_step_translation_for_minimum_swing_time", data.getMaximumStepTranslationForMinimumSwingTime());
-
-      ser.write_type_6("minimum_step_translation_for_maximum_swing_time", data.getMinimumStepTranslationForMaximumSwingTime());
-
-      ser.write_type_6("maximum_step_height_for_minimum_swing_time", data.getMaximumStepHeightForMinimumSwingTime());
-
-      ser.write_type_6("minimum_step_height_for_maximum_swing_time", data.getMinimumStepHeightForMaximumSwingTime());
 
       ser.write_type_6("foot_stub_clearance", data.getFootStubClearance());
 
@@ -457,25 +352,11 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
       data.setMinimumHeightAboveFloorForCollision(ser.read_type_6("minimum_height_above_floor_for_collision"));
 
-      data.setMinimumSwingHeight(ser.read_type_6("minimum_swing_height"));
-
-      data.setMaximumSwingHeight(ser.read_type_6("maximum_swing_height"));
-
-      data.setMaximumStepHeightForMinimumSwingHeight(ser.read_type_6("maximum_step_height_for_minimum_swing_height"));
-
-      data.setMinimumStepHeightForMaximumSwingHeight(ser.read_type_6("minimum_step_height_for_maximum_swing_height"));
+      data.setSwingHeightIfCollisionDetected(ser.read_type_6("swing_height_if_collision_detected"));
 
       data.setMinimumSwingTime(ser.read_type_6("minimum_swing_time"));
 
       data.setMaximumSwingTime(ser.read_type_6("maximum_swing_time"));
-
-      data.setMaximumStepTranslationForMinimumSwingTime(ser.read_type_6("maximum_step_translation_for_minimum_swing_time"));
-
-      data.setMinimumStepTranslationForMaximumSwingTime(ser.read_type_6("minimum_step_translation_for_maximum_swing_time"));
-
-      data.setMaximumStepHeightForMinimumSwingTime(ser.read_type_6("maximum_step_height_for_minimum_swing_time"));
-
-      data.setMinimumStepHeightForMaximumSwingTime(ser.read_type_6("minimum_step_height_for_maximum_swing_time"));
 
       data.setFootStubClearance(ser.read_type_6("foot_stub_clearance"));
 
