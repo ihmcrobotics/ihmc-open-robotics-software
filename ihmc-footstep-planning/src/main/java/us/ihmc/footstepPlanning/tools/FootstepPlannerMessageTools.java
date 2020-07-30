@@ -98,9 +98,9 @@ public class FootstepPlannerMessageTools
       packet.setMaximumBranchFactor(parameters.getMaximumBranchFactor());
       packet.setEnableExpansionMask(parameters.getEnabledExpansionMask());
       packet.setEnableShinCollisionCheck(parameters.getEnableShinCollisionCheck());
-      packet.setShinRadius(parameters.getShinRadius());
+      packet.setShinToeClearance(parameters.getShinToeClearance());
+      packet.setShinHeelClearance(parameters.getShinHeelClearance());
       packet.setShinLength(parameters.getShinLength());
-      packet.setShinPitch(parameters.getShinPitch());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
       packet.setDistanceEpsilonToBridgeRegions(parameters.getDistanceEpsilonToBridgeRegions());
 

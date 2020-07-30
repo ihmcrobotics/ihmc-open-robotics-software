@@ -10,39 +10,16 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
-    * Specifies the minimum swing height in the swing waypoint proportion calculator
+    * Collision boxes are checked for the start and end of swing at the toe and heel, respectively.
+    * If a collision is detected at either, this swing height is used.
     */
-   default double getMinimumSwingHeight()
+   default double getSwingHeightIfCollisionDetected()
    {
-      return get(SwingPlannerParameterKeys.minimumSwingHeight);
+      return get(SwingPlannerParameterKeys.swingHeightIfCollisionDetected);
    }
 
    /**
-    * Specifies the maximum swing height in the swing waypoint proportion calculator
-    */
-   default double getMaximumSwingHeight()
-   {
-      return get(SwingPlannerParameterKeys.maximumSwingHeight);
-   }
-
-   /**
-    * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the minimum swing height for that interpolation
-    */
-   default double getMaximumStepHeightForMinimumSwingHeight()
-   {
-      return get(SwingPlannerParameterKeys.maximumStepHeightForMinimumSwingHeight);
-   }
-
-   /**
-    * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the maximum swing height for that interpolation
-    */
-   default double getMinimumStepHeightForMaximumSwingHeight()
-   {
-      return get(SwingPlannerParameterKeys.minimumStepHeightForMaximumSwingHeight);
-   }
-
-   /**
-    * Specifies the maximum swing time in the swing waypoint proportion calculator
+    * Specifies the minimum swing time in the swing waypoint proportion calculator.
     */
    default double getMinimumSwingTime()
    {
@@ -55,38 +32,6 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
    default double getMaximumSwingTime()
    {
       return get(SwingPlannerParameterKeys.maximumSwingTime);
-   }
-
-   /**
-    * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step translation for that interpolation
-    */
-   default double getMaximumStepTranslationForMinimumSwingTime()
-   {
-      return get(SwingPlannerParameterKeys.maximumStepTranslationForMinimumSwingTime);
-   }
-
-   /**
-    * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the minimum step translation for that interpolation
-    */
-   default double getMinimumStepTranslationForMaximumSwingTime()
-   {
-      return get(SwingPlannerParameterKeys.minimumStepTranslationForMaximumSwingTime);
-   }
-
-   /**
-    * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-    */
-   default double getMaximumStepHeightForMinimumSwingTime()
-   {
-      return get(SwingPlannerParameterKeys.maximumStepHeightForMinimumSwingTime);
-   }
-
-   /**
-    * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-    */
-   default double getMinimumStepHeightForMaximumSwingTime()
-   {
-      return get(SwingPlannerParameterKeys.minimumStepHeightForMaximumSwingTime);
    }
 
    /**
@@ -191,18 +136,12 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();
 
-      packet.setMinimumSwingHeight(getMinimumSwingHeight());
-      packet.setMaximumSwingHeight(getMaximumSwingHeight());
-      packet.setMaximumStepHeightForMinimumSwingHeight(getMaximumStepHeightForMinimumSwingHeight());
-      packet.setMinimumStepHeightForMaximumSwingHeight(getMinimumStepHeightForMaximumSwingHeight());
+      packet.setSwingHeightIfCollisionDetected(getSwingHeightIfCollisionDetected());
       packet.setMinimumSwingTime(getMinimumSwingTime());
       packet.setMaximumSwingTime(getMaximumSwingTime());
-      packet.setMaximumStepTranslationForMinimumSwingTime(getMaximumStepTranslationForMinimumSwingTime());
-      packet.setMinimumStepTranslationForMaximumSwingTime(getMinimumStepTranslationForMaximumSwingTime());
-      packet.setMaximumStepHeightForMinimumSwingTime(getMaximumStepHeightForMinimumSwingTime());
-      packet.setMinimumStepHeightForMaximumSwingTime(getMinimumStepHeightForMaximumSwingTime());
       packet.setFootStubClearance(getFootStubClearance());
       packet.setWaypointProportionShiftForStubAvoidance(getWaypointProportionShiftForStubAvoidance());
+
       packet.setDoInitialFastApproximation(getDoInitialFastApproximation());
       packet.setFastApproximationLessClearance(getFastApproximationLessClearance());
       packet.setMinimumSwingFootClearance(getMinimumSwingFootClearance());
