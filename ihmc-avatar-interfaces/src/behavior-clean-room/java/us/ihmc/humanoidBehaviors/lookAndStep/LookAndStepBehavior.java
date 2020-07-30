@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.Loo
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStepStepping;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -39,7 +38,6 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepBehaviorParameters lookAndStepParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
-   private final RemoteSyncedRobotModel syncedRobot;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -48,7 +46,7 @@ public class LookAndStepBehavior implements BehaviorInterface
     */
    public enum State
    {
-      LOOKING, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING
+      BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING;
    }
 
    /**
@@ -64,7 +62,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       this.helper = helper;
 
       robotInterface = helper.getOrCreateRobotInterface();
-      syncedRobot = robotInterface.newSyncedRobot();
       statusLogger = helper.getOrCreateStatusLogger();
 
       VisibilityGraphsParametersBasics visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
@@ -110,6 +107,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathPlanning.initialize(
             statusLogger,
             helper::publishToUI,
+            robotInterface::pitchHeadWithRespectToChest,
             visibilityGraphParameters,
             lookAndStepParameters,
             operatorReviewEnabledInput::get,
