@@ -10,10 +10,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.*;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
-import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepRobotMotionTask.LookAndStepRobotMotion;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepRobotMotionTask.LookAndStepRobotMotion;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -56,7 +55,7 @@ public class LookAndStepBehavior implements BehaviorInterface
     */
    public enum State
    {
-      BODY_PATH_PLANNING, FOOTSTEP_PLANNING, ROBOT_MOTION
+      PERCEPTION, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, ROBOT_MOTION
    }
 
    /**
