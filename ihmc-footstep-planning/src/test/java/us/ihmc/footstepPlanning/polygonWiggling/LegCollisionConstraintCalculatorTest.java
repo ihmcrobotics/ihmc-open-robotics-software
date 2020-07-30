@@ -88,6 +88,7 @@ public class LegCollisionConstraintCalculatorTest
       if (visualize)
       {
          scs.tickAndUpdate();
+         scs.cropBuffer();
          ThreadTools.sleepForever();
       }
    }
