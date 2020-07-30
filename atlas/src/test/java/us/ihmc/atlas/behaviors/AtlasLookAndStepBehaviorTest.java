@@ -54,6 +54,7 @@ import java.util.function.Supplier;
 import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO: Add reviewing
 @Execution(ExecutionMode.SAME_THREAD)
 @TestMethodOrder(OrderAnnotation.class)
 public class AtlasLookAndStepBehaviorTest
@@ -95,12 +96,12 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(1).goalPose = new Pose3D(3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.2;
 
-      assertTimeoutPreemptively(Duration.ofMinutes(3), () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround, false, waypoints));
+      assertTimeoutPreemptively(Duration.ofMinutes(3), () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround, false, false, waypoints));
    }
 
    @Test
    @Order(2)
-   public void testLookAndStepOverStairs()
+   public void testLookAndStepOverRoughTerrain()
    {
       List<TestWaypoint> waypoints = new ArrayList<>();
       waypoints.add(new TestWaypoint());
@@ -113,12 +114,31 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 5.2;
 
       assertTimeoutPreemptively(Duration.ofMinutes(5),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop, true, waypoints));
+                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop, true, false, waypoints));
    }
 
-   private void runTheTest(Supplier<PlanarRegionsList> environment, boolean useDynamicsSimulation, List<TestWaypoint> waypoints)
+   @Disabled
+   @Test
+   @Order(3)
+   public void testLookAndStepOverStairStepsWRealsenseSLAM()
    {
-      ThreadTools.startAsDaemon(() -> reaModule(environment), "REAModule");
+      List<TestWaypoint> waypoints = new ArrayList<>();
+      waypoints.add(new TestWaypoint());
+      waypoints.get(0).name = "THE TOP";
+      waypoints.get(0).goalPose = new Pose3D(3.0, 0.0, BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 0.0, 0.0);
+      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.2 && pelvisPose.getPosition().getZ() > 1.3;
+      waypoints.add(new TestWaypoint());
+      waypoints.get(1).name = "OTHER SIDE";
+      waypoints.get(1).goalPose = new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 5.2;
+
+      assertTimeoutPreemptively(Duration.ofMinutes(5),
+                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStairsWithFlatTop, false, true, waypoints));
+   }
+
+   private void runTheTest(Supplier<PlanarRegionsList> environment, boolean useDynamicsSimulation, boolean runRealsenseSLAM, List<TestWaypoint> waypoints)
+   {
+      ThreadTools.startAsDaemon(() -> perceptionStack(environment, runRealsenseSLAM), "PerceptionStack");
       Notification finishedSimulationSetup = new Notification();
       if (useDynamicsSimulation)
       {
@@ -208,9 +228,9 @@ public class AtlasLookAndStepBehaviorTest
       }
    }
 
-   private void reaModule(Supplier<PlanarRegionsList> environment)
+   private void perceptionStack(Supplier<PlanarRegionsList> environment, boolean runRealsenseSLAM)
    {
-      perceptionStack = new AtlasPerceptionSimulation(CommunicationMode.INTRAPROCESS, environment.get(), false, createRobotModel());
+      perceptionStack = new AtlasPerceptionSimulation(CommunicationMode.INTRAPROCESS, environment.get(), runRealsenseSLAM, VISUALIZE, createRobotModel());
    }
 
    private void dynamicsSimulation(Supplier<PlanarRegionsList> environment, Notification finishedSettingUp)
