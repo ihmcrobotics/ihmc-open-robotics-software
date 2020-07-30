@@ -32,7 +32,7 @@ public class DirectionalControlModule extends ToolboxModule {
 	 * The generic default update period for toolboxes is 1ms, which is much faster than is needed for
 	 * this toolbox, so we'll bump it up to something more reasonable.
 	 */
-	private final static int UPDATE_PERIOD_IN_MS = 100;
+	private final static int UPDATE_PERIOD_IN_MS = 1000;
 
 	public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer) {
 		super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(),
