@@ -2,29 +2,24 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.TimerSnapshotWithExpiration;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepRobotMotionTask.LookAndStepRobotMotion;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStepStepping;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -34,15 +29,13 @@ public class LookAndStepBehavior implements BehaviorInterface
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
    private final BehaviorHelper helper;
+   private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
 
    private final LookAndStepBodyPathPlanning bodyPathPlanning = new LookAndStepBodyPathPlanning();
    private final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
-   private final LookAndStepRobotMotion robotMotion = new LookAndStepRobotMotion();
-   private final LookAndStepReview<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReview<>();
-   private final LookAndStepReview<FootstepPlan> footstepPlanReview = new LookAndStepReview<>();
+   private final LookAndStepStepping stepping = new LookAndStepStepping();
    private final BehaviorStateReference<State> behaviorStateReference;
-   private final StatusLogger statusLogger;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
@@ -55,7 +48,7 @@ public class LookAndStepBehavior implements BehaviorInterface
     */
    public enum State
    {
-      PERCEPTION, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, ROBOT_MOTION
+      LOOKING, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING
    }
 
    /**
@@ -105,9 +98,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       Notification resetInput = helper.createROS2Notification(RESET);
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
 
-      // TODO: Footstep log
       WalkingFootstepTracker walkingFootstepTracker = new WalkingFootstepTracker(helper.getManagedROS2Node(),
                                                                                  helper.getRobotModel().getSimpleRobotName());
+      // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
 
       // TODO: Want to be able to wire up behavior here and see all present modules
       // TODO: Add more meaning to the construction by establishing data patterns
@@ -122,26 +115,17 @@ public class LookAndStepBehavior implements BehaviorInterface
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
-            this::robotConnected,
             walkingFootstepTracker,
-            bodyPathReview,
-            footstepPlanning::acceptBodyPathPlan
+            footstepPlanning::acceptBodyPathPlan,
+            approvalNotification
       );
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
       helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
-      bodyPathReview.initialize(
-            statusLogger,
-            "body path",
-            approvalNotification,
-            bodyPathPlan ->
-            {
-               behaviorStateReference.set(State.FOOTSTEP_PLANNING);
-               footstepPlanning.acceptBodyPathPlan(bodyPathPlan);
-            }
-      );
       footstepPlanning.initialize(
             statusLogger,
-            lookAndStepParameters, footstepPlannerParameters, swingPlannerParameters,
+            lookAndStepParameters,
+            footstepPlannerParameters,
+            swingPlannerParameters,
             resetInput::poll,
             helper::publishToUI,
             () -> {
@@ -154,23 +138,12 @@ public class LookAndStepBehavior implements BehaviorInterface
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
-            this::robotConnected,
             walkingFootstepTracker,
-            footstepPlanReview,
-            robotMotion::acceptFootstepPlan
+            stepping::acceptFootstepPlan,
+            approvalNotification
       );
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
-      footstepPlanReview.initialize(
-            statusLogger,
-            "footstep plan",
-            approvalNotification,
-            footstepPlan ->
-            {
-               behaviorStateReference.set(LookAndStepBehavior.State.ROBOT_MOTION);
-               robotMotion.acceptFootstepPlan(footstepPlan);
-            }
-      );
-      robotMotion.initialize(
+      stepping.initialize(
             statusLogger,
             robotInterface.newSyncedRobot(),
             lookAndStepParameters,
@@ -178,8 +151,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             helper::publishToUI,
             robotInterface::requestWalk,
             footstepPlanning::runOrQueue,
-            behaviorStateReference,
-            this::robotConnected
+            behaviorStateReference
       );
    }
 
@@ -192,19 +164,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       swingPlannerParameters.setMinimumSwingFootClearance(lookAndStepParameters.getMinimumSwingFootClearanceOverride());
    }
 
-   private boolean robotConnected()
-   {
-      TimerSnapshotWithExpiration timerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
-                                                            .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
-      return timerSnaphot.hasBeenSet() && !timerSnaphot.isExpired();
-   }
-
    @Override
    public void setEnabled(boolean enabled)
    {
-      LogTools.info("Look and step behavior selected = {}", enabled);
-
       helper.setCommunicationCallbacksEnabled(enabled);
+
+      statusLogger.info("Look and step behavior selected = {}", enabled);
 
       behaviorStateReference.broadcast();
 

@@ -5,13 +5,13 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.Start
 
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -26,7 +26,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class LookAndStepRobotMotionTask
+public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
 
@@ -35,27 +35,26 @@ public class LookAndStepRobotMotionTask
    protected UIPublisher uiPublisher;
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable replanFootstepsOutput;
-   protected Supplier<Boolean> robotConnectedSupplier;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
 
    protected FootstepPlan footstepPlan;
    protected RemoteSyncedRobotModel syncedRobot;
+   protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
 
-   public static class LookAndStepRobotMotion extends LookAndStepRobotMotionTask
+   public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
 
       public void initialize(StatusLogger statusLogger,
-                                    RemoteSyncedRobotModel syncedRobot,
-                                    LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                                    SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
-                                    UIPublisher uiPublisher,
-                                    RobotWalkRequester robotWalkRequester,
-                                    Runnable replanFootstepsOutput,
-                                    BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                                    Supplier<Boolean> robotConnectedSupplier)
+                             RemoteSyncedRobotModel syncedRobot,
+                             LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                             SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
+                             UIPublisher uiPublisher,
+                             RobotWalkRequester robotWalkRequester,
+                             Runnable replanFootstepsOutput,
+                             BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
       {
          this.statusLogger = statusLogger;
          this.syncedRobot = syncedRobot;
@@ -65,52 +64,40 @@ public class LookAndStepRobotMotionTask
          this.robotWalkRequester = robotWalkRequester;
          this.replanFootstepsOutput = replanFootstepsOutput;
          this.behaviorStateReference = behaviorStateReference;
-         this.robotConnectedSupplier = robotConnectedSupplier;
 
          SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
          footstepPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
-         suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.ROBOT_MOTION));
+         suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
          suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
                                        + ". Planning again...",
-                                 () -> !isFootstepPlanOK(),
+                                 () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0),
                                  () ->
                                  {
                                     behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
                                     replanFootstepsOutput.run();
                                  });
-         suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
+         suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
       }
 
       public void acceptFootstepPlan(FootstepPlan footstepPlan)
       {
-         // with the gets, maybe we don't need to have validate methods
-
-         footstepPlanInput.set(footstepPlan); // TODO: There could be data threading error here, might need to queue this data for use in the thread
+         footstepPlanInput.set(footstepPlan);
       }
 
       private void evaluateAndRun()
       {
          footstepPlan = footstepPlanInput.get();
          syncedRobot.update();
+         robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
+                                                     .withExpiration(lookAndStepBehaviorParameters.getRobotConfigurationDataExpiration());
 
          if (suppressor.evaulateShouldAccept())
          {
             performTask();
          }
       }
-   }
-
-   protected void update(FootstepPlan footstepPlan, RemoteSyncedRobotModel syncedRobot)
-   {
-      this.footstepPlan = footstepPlan;
-      this.syncedRobot = syncedRobot;
-   }
-
-   protected boolean isFootstepPlanOK()
-   {
-      return footstepPlan != null && footstepPlan.getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
    }
 
    protected void performTask()
