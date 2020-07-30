@@ -13,7 +13,6 @@ import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -65,75 +64,121 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Controller for walking the robot using virtual joystick messages over a
- * topic.
+ * Controller for walking the robot using directional control messages. This controller provides 
  * 
- * @author Mark Paterson (heavily based on existing hardware joystick walking
- *         code)
+ * DirectionalControlController is mainly intended to be used in conjunction with the DirectionalControlToolbox. It 
+ * receives two primary types of messages:
+ * - DirectionalControlConfigurationCommand messages to enable/disable walking, and otherwise configure the controller
+ * - DirectionalControlInputCommand messages to specify directional velocities. Velocities are represented in the
+ * message as a set of three parameters (forward, right, clockwise), each with values in the range [-1.0, 1.0]. The
+ * 
+ * If using in conjunction with the toolbox, the messaging would be as follows:
+ * - Send a wake-up message to the DirectionalControlToolbox to enable it
+ * - Within the toolbox timeout (currently 0.5 seconds), start streaming DirectionalControlInputCommand messages
+ * - Use DirectionalControlConfigurationCommand to enable/disable walking or load a different walking profile.
+ * - Send a sleep message to the DirectionalControlToolbox to disable it
+ * 
+ * If using in a standalone capacity (see the toolboxBypass parameter in the constructor), the controller is always
+ * ready to receive messages, and directional inputs are persistent, so only changes need to be sent (however,
+ * streaming still works fine).
+ * 
+ * Bear in mind that this class controls step generation. The long pole in terms of walking is often
+ * physically taking the step. It does not make sense to stream directional inputs at 100Hz if steps take
+ * 1 second to complete; this drives fruitless re-computation. At the other extreme, the toolbox will
+ * timeout if it does not receive a command within the timeout interval, so a rate of at least 3Hz is needed.
+ * 
+ * In addition to generating footstep, the controller performs several types of footstep validation and adjustment:
+ * - validation that the step is not too high/low to achieve
+ * - validation that the step will not result in a collision
+ * - snapping to a planar region (this requires REA)
+ * 
+ * @author Mark Paterson (heavily based on existing hardware joystick walking code by Sylvain Bertand)
  *
  */
 @SuppressWarnings("restriction")
 public class DirectionalControlController extends ToolboxController {
 
-	private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
-	private final DoubleProperty turningVelocityProperty = new SimpleDoubleProperty(this, "turningVelocityProperty",
-			0.0);
-	private final DoubleProperty forwardVelocityProperty = new SimpleDoubleProperty(this, "forwardVelocityProperty",
-			0.0);
-	private final DoubleProperty lateralVelocityProperty = new SimpleDoubleProperty(this, "lateralVelocityProperty",
-			0.0);
+	/* Class constants */
+	private final int MAIN_TASK_RATE_MS = 1000; // How often to check tasks for exceptions (milliseconds)
+	
+	/* 
+	 * Desired rate of travel, if walking is enabled. These properties correspond to how the footstep generator sees the world.
+	 * The incoming directional messages have directions: forward, right and clockwise. These are mapped to the 
+	 * footstep directions in updateDirectionalInputs  
+	 */
+	private final DoubleProperty turningVelocityProperty = new SimpleDoubleProperty(this, "turningVelocityProperty", 0.0);
+	private final DoubleProperty forwardVelocityProperty = new SimpleDoubleProperty(this, "forwardVelocityProperty", 0.0);
+	private final DoubleProperty lateralVelocityProperty = new SimpleDoubleProperty(this, "lateralVelocityProperty", 0.0);
 
+	// Storage space for messages
 	private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessage = new AtomicReference<>(null);
 	private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
-	private AtomicReference<JoystickStepParameters> stepParametersReference;
-	private final AtomicBoolean isWalking = new AtomicBoolean(false);
 	private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
+	private final AtomicReference<DirectionalControlInputCommand> controlInputCommand = new AtomicReference<>(null);
+	private final AtomicReference<DirectionalControlConfigurationCommand> controlConfigurationCommand = new AtomicReference<>(null);
 
-	private final DoubleProvider stepTime;
-	private final BoundingBoxCollisionDetector collisionDetector;
+	// Whether walking is enabled in the controller
+	private final AtomicBoolean isWalking = new AtomicBoolean(false);
+
+    // Support for "profiles" that determine how aggressive or conservative the steps will be	
+	private JoystickStepParameters controlParameters;
+	private UserProfileManager<JoystickStepParameters> userProfileManager;
+	private AtomicReference<JoystickStepParameters> stepParametersReference;	
+	
+	// Robot properties 
 	private final WalkingControllerParameters walkingControllerParameters;
 	private final String robotName;
 	private final SteppingParameters steppingParameters;
-	private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
-	private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+	private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
+	
+	private final DoubleProvider stepTime;
+	private final BoundingBoxCollisionDetector collisionDetector;
+	
+	// Keep the robotModel up-to-date with configuration changes
+	private final RobotModelUpdater robotUpdater; 
+	
+	// Publishers 
+	private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher; // publish  the footsteps from the step generator
+	private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher; // pause walking immediately
 
+	// Footstep generation, validation and processing
+	private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
 	private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
 	private final SnapAndWiggleSingleStepParameters snapAndWiggleParameters = new SnapAndWiggleSingleStepParameters();	
-	private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 	private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
-
-	private final AtomicReference<DirectionalControlInputCommand> controlInputCommand = new AtomicReference<>(null);
-	private final AtomicReference<DirectionalControlConfigurationCommand> controlConfigurationCommand = new AtomicReference<>(null);
-	
-	private JoystickStepParameters joystickParameters;
-	private UserProfileManager<JoystickStepParameters> userProfileManager;
-	private final RobotModelUpdater robotUpdater; // Keeps the robotModel up-to-date with configuration changes
-	private final int SEND_FOOTSTEP_RATE_MS = 1000; // How often to send footstep (milliseconds)
-	private final int MAIN_TASK_RATE_MS = 1000; // How often to check tasks for exceptions (milliseconds)
-
 	private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 	private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 	private final PlanarRegion tempRegion = new PlanarRegion();
-
-	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS,
-			"ihmc_valkyrie_vr_joystick_control");
 	
-	public void updateRobotConfigurationData(RobotConfigurationData message)
+	// Scheduler for sub-tasks
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+
+	// Comm to other nodes
+	private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_directional_control");
+
+	public DirectionalControlController(FullHumanoidRobotModel robotModel, 
+			                            DRCRobotModel robot,
+			                            StatusMessageOutputManager statusOutputManager, 
+			                            YoVariableRegistry registry) 
 	{
-		robotUpdater.updateConfiguration(message);
+		this(robotModel, robot, statusOutputManager, registry, false);
 	}
 
-	public DirectionalControlController(FullHumanoidRobotModel robotModel, DRCRobotModel robot,
-			StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry) {
-		this(robotModel, robot, statusOutputManager, registry,
-				ControllerAPIDefinition.getSubscriberTopicNameGenerator(robot.getSimpleRobotName()),
-				ControllerAPIDefinition.getPublisherTopicNameGenerator(robot.getSimpleRobotName()));
-	}
-
-	public DirectionalControlController(FullHumanoidRobotModel robotModel, DRCRobotModel robot,
-			StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
-			MessageTopicNameGenerator subNameGenerator, MessageTopicNameGenerator pubNameGenerator) {
+	/**
+	 * Main constructor.
+	 * @param robotModel -- model of the robot joints
+	 * @param robot -- behavioral model of the robot with parameters for walking, stepping and more
+	 * @param statusOutputManager -- manages toolbox output status messages. Currently this controller does not have any.
+	 * @param registry -- YoVariable registry for logging variables
+	 * @param toolboxBypass -- Debug option to bypass toolbox control and communicate with the controller directly.
+	 *                         Note that in this case, the topic names will be under /ihmc/valkyrie/humanoid_control/.
+	 */
+	public DirectionalControlController(FullHumanoidRobotModel robotModel, 
+			                            DRCRobotModel robot,
+			                            StatusMessageOutputManager statusOutputManager, 
+			                            YoVariableRegistry registry,
+			                            boolean toolboxBypass) 
+	{
 		super(statusOutputManager, registry);
 
 		this.walkingControllerParameters = robot.getWalkingControllerParameters();
@@ -144,14 +189,14 @@ public class DirectionalControlController extends ToolboxController {
 		steppingParameters = walkingControllerParameters.getSteppingParameters();
 		stepTime = () -> getSwingDuration() + getTransferDuration();
 
-		joystickParameters = new JoystickStepParameters(walkingControllerParameters);
+		controlParameters = new JoystickStepParameters(walkingControllerParameters);
 
 		userProfileManager = new UserProfileManager<JoystickStepParameters>(null, 
-				                                                            joystickParameters,
+				                                                            controlParameters,
 				                                                            JoystickStepParameters::parseFromPropertyMap, 
 				                                                            JoystickStepParameters::exportToPropertyMap);
-		joystickParameters = userProfileManager.loadProfile("default");
-		stepParametersReference = new AtomicReference<JoystickStepParameters>(joystickParameters);
+		controlParameters = userProfileManager.loadProfile("default");
+		stepParametersReference = new AtomicReference<JoystickStepParameters>(controlParameters);
 
 		
 		snapAndWiggleParameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
@@ -178,28 +223,22 @@ public class DirectionalControlController extends ToolboxController {
 				                             FootstepStatusMessage.class, controllerPubGenerator,
 				                             s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
 
-		// Incoming directional input messages
-		ROS2Tools.createCallbackSubscription(ros2Node, 
-				                             DirectionalControlInputMessage.class, controllerSubGenerator,
-				                             s -> updateInputs(s.takeNextData()));
-		
-		// Incoming directional configuration messages
-		ROS2Tools.createCallbackSubscription(ros2Node, 
-				                             DirectionalControlConfigurationMessage.class, 
-				                             controllerSubGenerator,
-				                             s -> updateConfiguration(s.takeNextData()));
-		
-
 		// REA planes
 		ROS2Tools.createCallbackSubscription(ros2Node, 
 				                             PlanarRegionsListMessage.class,
 				                             REACommunicationProperties.publisherTopicNameGenerator,
 				                             s -> planarRegionsListMessage.set(s.takeNextData()));
 
-		// Ensure we stop walking if a controller failure occurs
+		// Inform if a controller failure occurs so we can ensure we stop walking 
 		ROS2Tools.createCallbackSubscription(ros2Node, 
 				                             WalkingControllerFailureStatusMessage.class,
-				                             controllerPubGenerator, s -> stopWalking(true));
+				                             controllerPubGenerator, s -> stopWalking());
+		
+		// Robot configuration data updates (e.g. joint information)
+		ROS2Tools.createCallbackSubscription(ros2Node, 
+				                             RobotConfigurationData.class, 
+				                             controllerPubGenerator,
+				                             s -> updateRobotConfigurationData(s.takeNextData()));
 
 		pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
 		footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
@@ -218,10 +257,33 @@ public class DirectionalControlController extends ToolboxController {
 		collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight,
 				collisionXYProximityCheck);
 
-		// TODO: need to figure out how to set this up w.r.t the toolbox.
-//		setupTasks();
+		// Option to bypass toolbox control and accept messages directly sent to the controller
+		if (toolboxBypass) {
+			// Incoming directional input messages
+			ROS2Tools.createCallbackSubscription(ros2Node, 
+					                             DirectionalControlInputMessage.class, controllerSubGenerator,
+					                             s -> updateInputs(s.takeNextData()));
+			
+			// Incoming directional configuration messages
+			ROS2Tools.createCallbackSubscription(ros2Node, 
+					                             DirectionalControlConfigurationMessage.class, 
+					                             controllerSubGenerator,
+					                             s -> updateConfiguration(s.takeNextData()));
+			
+
+			setupTasks();			
+		}
 
 	}
+	
+	/**
+	 * Handler for robot configuration data updates
+	 * @param message
+	 */
+	public void updateRobotConfigurationData(RobotConfigurationData message)
+	{
+		robotUpdater.updateConfiguration(message);
+	}	
 
 	/* There need to be two sets of update functions, one for messages and one for commands.
 	 * When using this class as part of a toolbox, commands will be used. 
@@ -249,6 +311,9 @@ public class DirectionalControlController extends ToolboxController {
 		updateInputs(command);
 	}
 
+	/**
+	 * Helper function to set up direct subscription when not going through the toolbox.
+	 */
 	private void setupTasks() {
 		/*
 		 * Main update task. Duties include: - handling incoming joystick control
@@ -284,11 +349,13 @@ public class DirectionalControlController extends ToolboxController {
 				}
 			}
 		});
-
-		// Send current footsteps at a fixed rate, once enabled by startWalking()
-//		scheduler.scheduleAtFixedRate(this::publishFootsteps, 0, SEND_FOOTSTEP_RATE_MS, TimeUnit.MILLISECONDS);
 	}
-	
+
+	/**
+	 * Create polygons for the right and left feet. The polygons here are rectangles of the same size.. 
+	 * @param walkingControllerParameters
+	 * @return
+	 */
 	private SideDependentList<ConvexPolygon2D> getFootPolygons(
 			WalkingControllerParameters walkingControllerParameters) {
 		SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
@@ -377,28 +444,38 @@ public class DirectionalControlController extends ToolboxController {
 		turningVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
 	}
 
-	public void startWalking(boolean confirm) {
-		if (confirm) {
-			isWalking.set(true);
-			continuousStepGenerator.startWalking();
-		}
+	/**
+	 * Configure robot to start walking
+	 */
+	public void startWalking() {
+		isWalking.set(true);
+		continuousStepGenerator.startWalking();
 	}
 
-	public void stopWalking(boolean confirm) {
-		if (confirm) {
-			isWalking.set(false);
-			footstepsToSendReference.set(null);
-			continuousStepGenerator.stopWalking();
-			sendPauseMessage();
-		}
+	/**
+	 * Configure robot to stop walking
+	 */
+	public void stopWalking() {
+		isWalking.set(false);
+		footstepsToSendReference.set(null);
+		continuousStepGenerator.stopWalking();
+		sendPauseMessage();
 	}
 
+	/**
+	 * Send a pause walking message to the walking controller
+	 */
 	private void sendPauseMessage() {
 		PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
 		pauseWalkingMessage.setPause(true);
 		pauseWalkingPublisher.publish(pauseWalkingMessage);
 	}
 
+	/**
+	 * Take the footsteps generated by the continuous step generator and adjust according to 
+	 * our walking parameters.
+	 * @param footstepDataListMessage
+	 */
 	private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage) {
 		for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++) {
 			FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
@@ -408,7 +485,7 @@ public class DirectionalControlController extends ToolboxController {
 	}
 
 	/**
-	 * Publish the footsteps, if walking is active.
+	 * Publish the footsteps to the walking controller, if walking is active.
 	 */
 	private void publishFootsteps() {
 		FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
@@ -419,13 +496,26 @@ public class DirectionalControlController extends ToolboxController {
 			sendPauseMessage();
 	}
 
-	// Is this step too far down?
+	/**
+	 * Determine whether this step is stepping up or down too far to be safe
+	 * @param touchdownPose -- expected pose of the foot when it touches down
+	 * @param stancePose -- pose of the current planted foot
+	 * @param swingSide -- which foot will be taking the step
+	 * @return -- True if the the step is safe; false otherwise
+	 */
 	private boolean isSafeStepHeight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose,
 			RobotSide swingSide) {
 		double heightChange = touchdownPose.getZ() - stancePose.getZ();
 		return heightChange < steppingParameters.getMaxStepUp() && heightChange > -steppingParameters.getMaxStepDown();
 	}
 
+	/**
+	 * Determine whether the footstep places the robot too close to an obstacle
+	 * @param touchdownPose -- expected pose of the foot when it touches down
+	 * @param stancePose -- pose of the current planted foot
+	 * @param swingSide -- which foot will be taking the step
+	 * @return -- True if the step is safe; false otherwise
+	 */
 	private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose,
 			RobotSide swingSide) {
 		if (planarRegionsList.get() == null)
@@ -448,6 +538,13 @@ public class DirectionalControlController extends ToolboxController {
 		return !collisionDetector.checkForCollision().isCollisionDetected();
 	}
 
+	/**
+	 * Determine whether the step can be snapped to a planar region
+	 * @param touchdownPose -- expected pose of the foot when it touches down
+	 * @param stancePose -- pose of the current planted foot
+	 * @param swingSide -- which foot will be taking the step
+	 * @return -- True if the step can be snapped; false otherwise
+	 */
 	private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose,
 			RobotSide swingSide) {
 		if (planarRegionsList.get() == null)
@@ -464,6 +561,10 @@ public class DirectionalControlController extends ToolboxController {
 				tempRegion) != null;
 	}
 	
+	/**
+	 * Handle incoming changes to direction inputs. Note that the input message values need to be mapped to
+	 * how the footstep generator sees the world.
+	 */
 	protected void updateDirectionalInputs() {
 		// Handle directional inputs
 		DirectionalControlInputCommand inputMessage = controlInputCommand.getAndSet(null);
@@ -474,6 +575,9 @@ public class DirectionalControlController extends ToolboxController {
 		}		
 	}
 	
+	/**
+	 * Handle incoming changes to controller state
+	 */
 	protected void updateStateInputs() {
 		// Handle configuration inputs
 		DirectionalControlConfigurationCommand controlMessage = controlConfigurationCommand.getAndSet(null);
@@ -481,22 +585,22 @@ public class DirectionalControlController extends ToolboxController {
 			String profile = controlMessage.getProfileName();
 			if (profile.length() > 0) {
 				try {
-					joystickParameters = userProfileManager.loadProfile(profile);
-					stepParametersReference = new AtomicReference<JoystickStepParameters>(joystickParameters);
+					controlParameters = userProfileManager.loadProfile(profile);
+					stepParametersReference = new AtomicReference<JoystickStepParameters>(controlParameters);
 					LogTools.info("Switched profile to " + profile);
 				} catch (RuntimeException e) {
 					System.out.printf("Unable to load profile %s: %s\n", profile, e);
 				}
 			}
 			if (isWalking.get() && !controlMessage.getEnableWalking()) {
-				stopWalking(true);
+				stopWalking();
 			} else if (!isWalking.get() && controlMessage.getEnableWalking()) {
-				startWalking(true);
+				startWalking();
 			}
 		}		
 	}
 
-	protected void handleJoystickMessages() {
+	protected void handleIncomingMessages() {
 		updateDirectionalInputs();
 		updateStateInputs();
 	}
@@ -514,15 +618,24 @@ public class DirectionalControlController extends ToolboxController {
 
 	@Override
 	public boolean initialize() {
-		// Should return true when the controller is initialized
+		// Should return true when the controller is initialized.
+		// This controller is born ready.
 		return true;
 	}
 
+	/**
+	 * Main loop update function called from the toolbox or from a scheduled task if bypassing the toolbox.
+	 * This function handles:
+	 * - changing walking parameters based on input messages
+	 * - updating our planar regions list
+	 * - updating step generator control parameters and getting a new footstep plan
+	 * - publishing the new footstep plan
+	 */
 	@Override
 	public void updateInternal() throws Exception {
 		
 		try {
-			DirectionalControlController.this.handleJoystickMessages();
+			DirectionalControlController.this.handleIncomingMessages();
 			PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
 			if (latestMessage != null) {
 				PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestMessage);
@@ -534,8 +647,7 @@ public class DirectionalControlController extends ToolboxController {
 			}
 
 			JoystickStepParameters stepParameters = stepParametersReference.get();
-			continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(),
-					stepParameters.getTransferDuration());
+			continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(), stepParameters.getTransferDuration());
 			continuousStepGenerator.update(Double.NaN);
 			publishFootsteps();
 
@@ -545,22 +657,27 @@ public class DirectionalControlController extends ToolboxController {
 		}
 	}
 
+	/**
+	 * This function allows the controller to indicate that it has no active task to work on, and the toolbox may sleep.
+	 * This capability is not used here. Instead, we rely on the natural message flow.   
+	 */
 	@Override
 	public boolean isDone() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
+
 	/**
-	 * Implement this method to receive notifications when the state of this toolbox
-	 * is changing.
+	 * Receive notifications when the state of this toolbox is changing.
+	 * We use this to determine that the toolbox has decided to sleep. In this case, we stop walking
+	 * immediately rather than allowing the current plan to complete.
 	 * 
 	 * @param newState the new state this toolbox is about to enter.
 	 */
+	@Override
 	public void notifyToolboxStateChange(ToolboxState newState) {
 		if (newState == ToolboxState.SLEEP) {
-			stopWalking(true);
+			stopWalking();
 		}
 		LogTools.info("Directional controller state is now " + newState.toString());
 	}

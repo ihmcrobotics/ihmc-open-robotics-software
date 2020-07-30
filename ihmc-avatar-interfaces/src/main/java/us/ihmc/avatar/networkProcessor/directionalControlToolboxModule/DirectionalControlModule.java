@@ -23,30 +23,44 @@ import us.ihmc.ros2.RealtimeRos2Node;
 public class DirectionalControlModule extends ToolboxModule {
 
 	private final DirectionalControlController steppingController;
-	private final static int update_period_in_ms = 1000;
+	
+	/* Determines how often the controller's update function will be called. Note that incoming messages will be 
+	 * received and processed immediately when they arrive (this is the purpose of the InputListener defined 
+	 * in the constructor). However, this level of processing is limited to simple updates. The heavier work of 
+	 * reacting to the input happens in the controller's updateInternal() function. Unlike the InputListener, the 
+	 * call to upateInternal is performed on a separate thread, and so will not block other processing.
+	 * The generic default update period for toolboxes is 1ms, which is much faster than is needed for
+	 * this toolbox, so we'll bump it up to something more reasonable.
+	 */
+	private final static int UPDATE_PERIOD_IN_MS = 100;
 
 	public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer) {
 		super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(),
-				startYoVariableServer, update_period_in_ms);
+				startYoVariableServer, UPDATE_PERIOD_IN_MS);
 
-		steppingController = new DirectionalControlController(fullRobotModel, robotModel, statusOutputManager, registry,
-				getSubscriberTopicNameGenerator(), getPublisherTopicNameGenerator());
+		steppingController = new DirectionalControlController(fullRobotModel, robotModel, statusOutputManager, registry);
 
+		/*
+		 * Register a listener to process incoming commands to the toolbox. This listener is tailored
+		 * to the command we want to process in this module (so not, for example, for generic toolbox messages).
+		 * 
+		 * Actions taken by the handler should be as short as possible, since the handler blocks processing
+		 * of incoming commands by the CommandInputManager.
+		 */
 		commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener() {
 
 			@Override
 			public void hasReceivedInput(Class<? extends Command<?, ?>> commandClass) {
+				
 				DirectionalControlConfigurationCommand configCommand = commandInputManager
 						.pollNewestCommand(DirectionalControlConfigurationCommand.class);
 				if (configCommand != null) {
-					LogTools.info("Got new config command: " + configCommand.toString());
 					steppingController.updateConfiguration(configCommand);
 				}
 
 				DirectionalControlInputCommand inputCommand = commandInputManager
 						.pollNewestCommand(DirectionalControlInputCommand.class);
 				if (inputCommand != null) {
-					LogTools.info("Got new input command");
 					steppingController.updateInputs(inputCommand);
 				}
 			}
@@ -57,16 +71,13 @@ public class DirectionalControlModule extends ToolboxModule {
 		startYoVariableServer();
 	}
 
+	/**
+	 * Register extra pubs/subs that are needed by the controller but are not controller messages.
+	 * For DirectionalControl, we do not use this because of the desire to keep the controller
+	 * usable in a standalone mode.
+	 */
 	@Override
 	public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node) {
-		MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition
-				.getPublisherTopicNameGenerator(robotName);
-
-		ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-				s -> {
-					if (steppingController != null)
-						steppingController.updateRobotConfigurationData(s.takeNextData());
-				});
 	}
 
 	@Override
@@ -79,6 +90,12 @@ public class DirectionalControlModule extends ToolboxModule {
 		return supportedCommands();
 	}
 
+	/**
+	 * Here we declare the toolbox-specific commands. Note that these are commands, not messages.
+	 * The CommandInputManager receives messages on the toolbox topics, and converts them to commands
+	 * for processing. 
+	 * @return
+	 */
 	public static List<Class<? extends Command<?, ?>>> supportedCommands() {
 		List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
 		commands.add(DirectionalControlConfigurationCommand.class);
@@ -91,6 +108,10 @@ public class DirectionalControlModule extends ToolboxModule {
 		return supportedStatus();
 	}
 
+	/**
+	 * Here we declare the toolbox-specific status messages.
+	 * @return
+	 */
 	public static List<Class<? extends Settable<?>>> supportedStatus() {
 		List<Class<? extends Settable<?>>> status = new ArrayList<>();
 		return status;
@@ -108,13 +129,13 @@ public class DirectionalControlModule extends ToolboxModule {
 
 	@Override
 	public void sleep() {
-		LogTools.info("Directional toolbox told to sleep");
+		LogTools.info("Directional control toolbox told to sleep");
 		super.sleep();
 	}
 
 	@Override
 	public void wakeUp() {
-		LogTools.info("Directional toolbox told to wake up");
+		LogTools.info("Directional control toolbox told to wake up");
 		super.wakeUp();
 	}
 
