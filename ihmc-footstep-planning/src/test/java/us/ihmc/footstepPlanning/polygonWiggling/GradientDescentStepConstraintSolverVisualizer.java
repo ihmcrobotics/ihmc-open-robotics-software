@@ -116,9 +116,14 @@ public class GradientDescentStepConstraintSolverVisualizer
          tempTransform.preMultiply(planarRegion.getTransformToLocal());
          gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
 
-         legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
+         double forwardPoint = footPolygon.getMaxX() + parameters.getShinToeClearance();
+         double backwardPoint = footPolygon.getMinX() - parameters.getShinHeelClearance();
+         double shinRadius = 0.5 * (forwardPoint - backwardPoint);
+         double shinXOffset = 0.5 * (forwardPoint + backwardPoint);
+
+         legCollisionShape.setSize(parameters.getShinLength(), shinRadius);
          transformGenerator.identity();
-         transformGenerator.translate(parameters.getShinXOffset(), 0.0, parameters.getShinHeightOffset());
+         transformGenerator.translate(shinXOffset, 0.0, parameters.getShinHeightOffset());
          transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
          transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
          gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, legCollisionShapeToSoleTransform);
