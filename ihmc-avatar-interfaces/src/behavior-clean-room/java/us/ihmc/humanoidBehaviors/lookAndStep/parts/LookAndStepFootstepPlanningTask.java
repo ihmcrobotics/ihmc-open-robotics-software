@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
@@ -62,31 +61,33 @@ public class LookAndStepFootstepPlanningTask
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
-      private final SingleThreadSizeOneQueueExecutor executor;
-      private final Supplier<RemoteSyncedRobotModel> robotStateSupplier;
-      private final WalkingFootstepTracker walkingFootstepTracker;
+      private SingleThreadSizeOneQueueExecutor executor;
+      private Supplier<RemoteSyncedRobotModel> robotStateSupplier;
+      private WalkingFootstepTracker walkingFootstepTracker;
 
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
-      private Timer planarRegionsExpirationTimer = new Timer();
-      private Timer planningFailedTimer = new Timer();
+      private final Timer planarRegionsExpirationTimer = new Timer();
+      private final Timer planningFailedTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
-      public LookAndStepFootstepPlanning(StatusLogger statusLogger,
-                                         LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                                         FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                         SwingPlannerParametersReadOnly swingPlannerParameters,
-                                         Supplier<Boolean> abortGoalWalkingSupplier,
-                                         UIPublisher uiPublisher,
-                                         Runnable onReachedGoal,
-                                         SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
-                                         FootstepPlanningModule footstepPlanningModule,
-                                         AtomicReference<RobotSide> lastStanceSideReference,
-                                         Supplier<Boolean> operatorReviewEnabledSupplier,
-                                         RemoteSyncedRobotModel syncedRobot,
-                                         BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                                         Supplier<Boolean> robotConnectedSupplier,
-                                         WalkingFootstepTracker walkingFootstepTracker)
+      public void initialize(StatusLogger statusLogger,
+                             LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                             FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                             SwingPlannerParametersReadOnly swingPlannerParameters,
+                             Supplier<Boolean> abortGoalWalkingSupplier,
+                             UIPublisher uiPublisher,
+                             Runnable onReachedGoal,
+                             SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
+                             FootstepPlanningModule footstepPlanningModule,
+                             AtomicReference<RobotSide> lastStanceSideReference,
+                             Supplier<Boolean> operatorReviewEnabledSupplier,
+                             RemoteSyncedRobotModel syncedRobot,
+                             BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                             Supplier<Boolean> robotConnectedSupplier,
+                             WalkingFootstepTracker walkingFootstepTracker,
+                             LookAndStepReview<FootstepPlan> review,
+                             Consumer<FootstepPlan> autonomousOutput)
       {
          this.statusLogger = statusLogger;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
@@ -99,28 +100,24 @@ public class LookAndStepFootstepPlanningTask
          this.footstepPlanningModule = footstepPlanningModule;
          this.lastStanceSideReference = lastStanceSideReference;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
-         this.robotStateSupplier = () ->
+         this.behaviorStateReference = behaviorStateReference;
+         this.robotConnectedSupplier = robotConnectedSupplier;
+         this.walkingFootstepTracker = walkingFootstepTracker;
+         this.review = review;
+         this.autonomousOutput = autonomousOutput;
+
+         robotStateSupplier = () ->
          {
             syncedRobot.update();
             return syncedRobot;
          };
-         this.behaviorStateReference = behaviorStateReference;
-         this.robotConnectedSupplier = robotConnectedSupplier;
-         this.walkingFootstepTracker = walkingFootstepTracker;
+         planningFailedNotifier = planningFailedTimer::reset;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
          planarRegionsInput.addCallback(data -> runOrQueue());
          bodyPathPlanInput.addCallback(data -> runOrQueue());
 
-         this.planningFailedNotifier = planningFailedTimer::reset;
-      }
-
-      public void laterSetup(LookAndStepReview<FootstepPlan> review,
-                             Consumer<FootstepPlan> autonomousOutput)
-      {
-         this.review = review;
-         this.autonomousOutput = autonomousOutput;
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
@@ -194,7 +191,7 @@ public class LookAndStepFootstepPlanningTask
    protected void performTask()
    {
       statusLogger.info("Finding next sub goal for footstep planning...");
-      uiPublisher.publishToUI(MapRegionsForUI, planarRegions);
+      uiPublisher.publishToUI(FootstepPlanningRegionsForUI, planarRegions);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
       initialPoseBetweenFeet.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());

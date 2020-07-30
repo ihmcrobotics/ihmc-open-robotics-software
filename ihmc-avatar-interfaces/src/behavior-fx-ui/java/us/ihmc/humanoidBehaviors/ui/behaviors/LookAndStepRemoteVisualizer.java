@@ -27,7 +27,8 @@ public class LookAndStepRemoteVisualizer
    private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
-   private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
+   private LivePlanarRegionsGraphic bodyPathRegionsGraphic;
+   private LivePlanarRegionsGraphic footstepPlanningRegionsGraphic;
    private PoseGraphic goalGraphic;
 
    private Stage primaryStage;
@@ -52,9 +53,13 @@ public class LookAndStepRemoteVisualizer
          footstepPlanGraphic = new FootstepPlanWithTextGraphic(robotModel);
          behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
-         livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-         behaviorMessager.registerTopicListener(MapRegionsForUI, planarRegions -> {
-            livePlanarRegionsGraphic.acceptPlanarRegions(planarRegions);
+         bodyPathRegionsGraphic = new LivePlanarRegionsGraphic(false);
+         behaviorMessager.registerTopicListener(BodyPathRegionsForUI, planarRegions -> {
+            bodyPathRegionsGraphic.acceptPlanarRegions(planarRegions);
+         });
+         footstepPlanningRegionsGraphic = new LivePlanarRegionsGraphic(false);
+         behaviorMessager.registerTopicListener(FootstepPlanningRegionsForUI, planarRegions -> {
+            footstepPlanningRegionsGraphic.acceptPlanarRegions(planarRegions);
          });
 
          goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
@@ -80,7 +85,8 @@ public class LookAndStepRemoteVisualizer
          view3dFactory.addNodeToView(closestPointAlongPathGraphic);
          view3dFactory.addNodeToView(subGoalGraphic);
          view3dFactory.addNodeToView(goalGraphic);
-         view3dFactory.addNodeToView(livePlanarRegionsGraphic);
+         view3dFactory.addNodeToView(bodyPathRegionsGraphic);
+         view3dFactory.addNodeToView(footstepPlanningRegionsGraphic);
          view3dFactory.addNodeToView(startAndGoalFootPoses);
 
          primaryStage = new Stage();

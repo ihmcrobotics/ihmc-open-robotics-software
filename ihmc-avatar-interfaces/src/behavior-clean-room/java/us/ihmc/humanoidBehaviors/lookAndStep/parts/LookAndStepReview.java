@@ -11,12 +11,12 @@ public class LookAndStepReview<T>
 {
    private volatile boolean beingReviewed = false;
 
-   private final StatusLogger statusLogger;
-   private final String description;
-   private final TypedNotification<Boolean> approvalNotification;
-   private final Consumer<T> callback;
+   private StatusLogger statusLogger;
+   private String description;
+   private TypedNotification<Boolean> approvalNotification;
+   private Consumer<T> callback;
 
-   public LookAndStepReview(StatusLogger statusLogger, String description, TypedNotification<Boolean> approvalNotification, Consumer<T> callback)
+   public void initialize(StatusLogger statusLogger, String description, TypedNotification<Boolean> approvalNotification, Consumer<T> callback)
    {
       this.statusLogger = statusLogger;
       this.description = description;
