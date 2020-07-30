@@ -32,6 +32,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    private final boolean spawnUIs;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
+   private Ros2Node ros2Node;
    private Messager slamMessager;
    private Messager segmentationMessager;
    private SLAMBasedEnvironmentAwarenessUI ui;
@@ -63,7 +64,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
       slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
@@ -88,8 +89,8 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
       if (spawnUIs)
       {
-         primaryStage.setOnCloseRequest(event -> ExceptionTools.handle(this::stop, DefaultExceptionHandler.PRINT_STACKTRACE));
-         secondStage.setOnCloseRequest(event -> ExceptionTools.handle(this::stop, DefaultExceptionHandler.PRINT_STACKTRACE));
+         primaryStage.setOnCloseRequest(event -> stop());
+         secondStage.setOnCloseRequest(event -> stop());
 
          ui.show();
          planarSegmentationUI.show();
@@ -99,18 +100,18 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       segmentationModule.start();
    }
 
-   public void stop() throws Exception
+   public void stop()
    {
-      ui.stop();
+      if (spawnUIs) ui.stop();
       module.stop();
 
-      planarSegmentationUI.stop();
+      if (spawnUIs) planarSegmentationUI.stop();
       segmentationModule.stop();
 
-      slamMessager.closeMessager();
-      segmentationMessager.closeMessager();
+      ExceptionTools.handle(() -> slamMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
 
-      Platform.exit();
+      ros2Node.destroy();
    }
 
    public static void main(String[] args)

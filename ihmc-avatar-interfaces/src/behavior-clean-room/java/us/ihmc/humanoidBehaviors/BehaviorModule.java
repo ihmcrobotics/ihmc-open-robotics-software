@@ -26,10 +26,10 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
-
    private final MessagerAPI messagerAPI;
    private final Messager messager;
    private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
+   private final Ros2Node ros2Node;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -72,7 +72,7 @@ public class BehaviorModule
 
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
@@ -98,6 +98,17 @@ public class BehaviorModule
    public Messager getMessager()
    {
       return messager;
+   }
+
+   public void destroy()
+   {
+      for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
+      {
+         behavior.getRight().setEnabled(false);
+      }
+
+      ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      ros2Node.destroy();
    }
 
    // API created here from build
