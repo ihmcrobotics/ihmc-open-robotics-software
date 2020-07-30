@@ -21,6 +21,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.State.*;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBodyPathPlanningTask
@@ -52,10 +54,19 @@ public class LookAndStepBodyPathPlanningTask
       private TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private TypedInput<Pose3D> goalInput = new TypedInput<>();
       private Timer mapRegionsExpirationTimer = new Timer();
+      private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
       private BehaviorTaskSuppressor suppressor;
+      private double neckPitch;
+      private Timer neckTrajectoryTimer = new Timer();
+      private TimerSnapshotWithExpiration neckTrajectoryTimerSnapshot;
+      private TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
+      private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
+      private LookAndStepBehavior.State behaviorState;
+      private int numberOfIncompleteFootsteps;
 
       public void initialize(StatusLogger statusLogger,
                              UIPublisher uiPublisher,
+                             Consumer<Double> commandPitchHeadWithRespectToChest,
                              VisibilityGraphsParametersReadOnly visibilityGraphParameters,
                              LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                              Supplier<Boolean> operatorReviewEnabled,
@@ -94,12 +105,26 @@ public class LookAndStepBodyPathPlanningTask
          goalInput.addCallback(data -> executor.execute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
-         suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING));
-         suppressor.addCondition("No goal specified", () -> !hasGoal(), () -> uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions));
+         suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
+         suppressor.addCondition("No goal specified",
+                                 () -> !(goal != null && !goal.containsNaN()),
+                                 () -> uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions));
          suppressor.addCondition(() -> "Body path planning suppressed: Regions not OK: " + mapRegions
                                        + ", timePassed: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset()
                                        + ", isEmpty: " + (mapRegions == null ? null : mapRegions.isEmpty()),
-                                 () -> !regionsOK());
+                                 () -> !(mapRegions != null && !mapRegions.isEmpty() && mapRegionsReceptionTimerSnapshot.isRunning()));
+         suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
+                                 () -> neckTrajectoryTimerSnapshot != null && neckTrajectoryTimerSnapshot.isRunning());
+         suppressor.addCondition(() -> "Neck at wrong angle: " + neckPitch
+                                       + " != " + lookAndStepBehaviorParameters.getNeckPitchForBodyPath()
+                                       + " +/- " + lookAndStepBehaviorParameters.getNeckPitchTolerance(),
+                                 () -> Math.abs(neckPitch - lookAndStepBehaviorParameters.getNeckPitchForBodyPath())
+                                       > lookAndStepBehaviorParameters.getNeckPitchTolerance(),
+                                 () ->
+                                 {
+                                    commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
+                                    neckTrajectoryTimer.reset();
+                                 });
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
@@ -132,6 +157,9 @@ public class LookAndStepBodyPathPlanningTask
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
+         neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
+
+         neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
          if (suppressor.evaulateShouldAccept())
          {
@@ -143,21 +171,6 @@ public class LookAndStepBodyPathPlanningTask
    protected PlanarRegionsList mapRegions;
    protected Pose3D goal;
    protected RemoteSyncedRobotModel syncedRobot;
-   protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
-   protected TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
-   protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
-   protected LookAndStepBehavior.State behaviorState;
-   protected int numberOfIncompleteFootsteps;
-
-   protected boolean hasGoal()
-   {
-      return goal != null && !goal.containsNaN();
-   }
-
-   protected boolean regionsOK()
-   {
-      return mapRegions != null && !mapRegions.isEmpty() && mapRegionsReceptionTimerSnapshot.isRunning();
-   }
 
    protected void performTask()
    {
