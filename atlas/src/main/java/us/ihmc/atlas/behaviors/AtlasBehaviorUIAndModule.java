@@ -8,7 +8,6 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 
 public class AtlasBehaviorUIAndModule
 {
@@ -28,6 +27,6 @@ public class AtlasBehaviorUIAndModule
 
    public static void main(String[] args)
    {
-      new AtlasBehaviorUIAndModule(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION));
+      new AtlasBehaviorUIAndModule(BehaviorUIRegistry.DEFAULT_BEHAVIORS);
    }
 }

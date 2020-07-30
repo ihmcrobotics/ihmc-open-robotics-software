@@ -18,11 +18,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.humanoidBehaviors.lookAndStep.BehaviorStateReference;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
-import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
+import us.ihmc.humanoidBehaviors.lookAndStep.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
@@ -31,25 +27,80 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
+public class LookAndStepRobotMotionTask
 {
-   protected final StatusLogger statusLogger;
+   protected StatusLogger statusLogger;
 
-   private final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
-   private final Field<SideDependentList<FramePose3DReadOnly>> lastSteppedSolePoses = required();
-   private final Field<UIPublisher> uiPublisher = required();
-   private final Field<RobotWalkRequester> robotWalkRequester = required();
-   private final Field<Runnable> replanFootstepsOutput = required();
-   private final Field<Supplier<Boolean>> robotConnectedSupplier = required();
-   protected final Field<BehaviorStateReference<LookAndStepBehavior.State>> behaviorStateReference = required();
+   protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
+   protected SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses;
+   protected UIPublisher uiPublisher;
+   protected RobotWalkRequester robotWalkRequester;
+   protected Runnable replanFootstepsOutput;
+   protected Supplier<Boolean> robotConnectedSupplier;
+   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
 
-   private FootstepPlan footstepPlan;
-   private RemoteSyncedRobotModel syncedRobot;
-   private long previousStepMessageId = 0L;
+   protected FootstepPlan footstepPlan;
+   protected RemoteSyncedRobotModel syncedRobot;
+   protected long previousStepMessageId = 0L;
 
-   LookAndStepRobotMotionTask(StatusLogger statusLogger)
+   public static class LookAndStepRobotMotion extends LookAndStepRobotMotionTask
    {
-      this.statusLogger = statusLogger;
+      private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
+      private final BehaviorTaskSuppressor suppressor;
+
+      public LookAndStepRobotMotion(StatusLogger statusLogger,
+                                    RemoteSyncedRobotModel syncedRobot,
+                                    LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                                    SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses,
+                                    UIPublisher uiPublisher,
+                                    RobotWalkRequester robotWalkRequester,
+                                    Runnable replanFootstepsOutput,
+                                    BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                                    Supplier<Boolean> robotConnectedSupplier)
+      {
+         this.statusLogger = statusLogger;
+         this.syncedRobot = syncedRobot;
+         this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
+         this.lastSteppedSolePoses = lastSteppedSolePoses;
+         this.uiPublisher = uiPublisher;
+         this.robotWalkRequester = robotWalkRequester;
+         this.replanFootstepsOutput = replanFootstepsOutput;
+         this.behaviorStateReference = behaviorStateReference;
+         this.robotConnectedSupplier = robotConnectedSupplier;
+
+         SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+         footstepPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+
+         suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
+         suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.ROBOT_MOTION));
+         suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
+                                       + ". Planning again...",
+                                 () -> !isFootstepPlanOK(),
+                                 () ->
+                                 {
+                                    behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                                    replanFootstepsOutput.run();
+                                 });
+         suppressor.addCondition("Robot disconnected", () -> !robotConnectedSupplier.get());
+      }
+
+      public void acceptFootstepPlan(FootstepPlan footstepPlan)
+      {
+         // with the gets, maybe we don't need to have validate methods
+
+         footstepPlanInput.set(footstepPlan); // TODO: There could be data threading error here, might need to queue this data for use in the thread
+      }
+
+      private void evaluateAndRun()
+      {
+         footstepPlan = footstepPlanInput.get();
+         syncedRobot.update();
+
+         if (suppressor.evaulateShouldAccept())
+         {
+            performTask();
+         }
+      }
    }
 
    protected void update(FootstepPlan footstepPlan, RemoteSyncedRobotModel syncedRobot)
@@ -58,54 +109,28 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       this.syncedRobot = syncedRobot;
    }
 
-   private boolean evaluateEntry()
-   {
-      boolean proceed = true;
-
-      if (!behaviorStateReference.get().get().equals(LookAndStepBehavior.State.SWINGING))
-      {
-         statusLogger.debug("Footstep planning supressed: Not in footstep planning state");
-         proceed = false;
-      }
-      else if (!isFootstepPlanOK())
-      {
-         statusLogger.debug("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
-                       footstepPlan == null ? null : footstepPlan.getNumberOfSteps());
-         behaviorStateReference.get().set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-         replanFootstepsOutput.get().run();
-         proceed = false;
-      }
-      else if (!robotConnectedSupplier.get().get())
-      {
-         statusLogger.debug("Footstep planning supressed: Robot disconnected");
-         proceed = false;
-      }
-
-      return proceed;
-   }
-
-   private boolean isFootstepPlanOK()
+   protected boolean isFootstepPlanOK()
    {
       return footstepPlan != null && footstepPlan.getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
    }
 
-   private void performTask()
+   protected void performTask()
    {
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
       if (footstepPlan.getNumberOfSteps() > 0)
       {
          PlannedFootstep footstepToTake = footstepPlan.getFootstep(0);
          shortenedFootstepPlan.addFootstep(footstepToTake);
-         lastSteppedSolePoses.get().put(footstepToTake.getRobotSide(), new FramePose3D(footstepToTake.getFootstepPose()));
+         lastSteppedSolePoses.put(footstepToTake.getRobotSide(), new FramePose3D(footstepToTake.getFootstepPose()));
       }
       ArrayList<FootstepForUI> startFootPosesForUI = new ArrayList<>();
-      startFootPosesForUI.add(new FootstepForUI(RobotSide.LEFT, new Pose3D(lastSteppedSolePoses.get().get(RobotSide.LEFT)), "Left Start"));
-      startFootPosesForUI.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(lastSteppedSolePoses.get().get(RobotSide.RIGHT)), "Right Start"));
-      uiPublisher.get().publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI); // TODO: Should specify topic here?
+      startFootPosesForUI.add(new FootstepForUI(RobotSide.LEFT, new Pose3D(lastSteppedSolePoses.get(RobotSide.LEFT)), "Left Start"));
+      startFootPosesForUI.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(lastSteppedSolePoses.get(RobotSide.RIGHT)), "Right Start"));
+      uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI); // TODO: Should specify topic here?
 
-      statusLogger.info("Requesting walk");
-      double swingTime = lookAndStepBehaviorParameters.get().getSwingTime();
-      double transferTime = lookAndStepBehaviorParameters.get().getTransferTime();
+      statusLogger.warn("Requesting walk");
+      double swingTime = lookAndStepBehaviorParameters.getSwingTime();
+      double transferTime = lookAndStepBehaviorParameters.getTransferTime();
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
                                                                                                                     swingTime,
                                                                                                                     transferTime);
@@ -115,10 +140,9 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
       footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
       previousStepMessageId = messageId;
-      TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.get().requestWalk(footstepDataListMessage);
+      TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.requestWalk(footstepDataListMessage);
 
-      uiPublisher.get()
-                 .publishToUI(FootstepPlanForUI,
+      uiPublisher.publishToUI(FootstepPlanForUI,
                               FootstepForUI.reduceFootstepPlanForUIMessager(FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage),
                                                                             "Stepping"));
 
@@ -128,66 +152,19 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
    private void sleepForPartOfSwingThread(double swingTime)
    {
-      double percentSwingToWait = lookAndStepBehaviorParameters.get().get(LookAndStepBehaviorParameters.percentSwingToWait);
+      double percentSwingToWait = lookAndStepBehaviorParameters.get(LookAndStepBehaviorParameters.percentSwingToWait);
       double waitTime = swingTime * percentSwingToWait;
       statusLogger.info("Waiting {} s for {} % of swing...", waitTime, percentSwingToWait);
       ThreadTools.sleepSeconds(waitTime);
       statusLogger.info("{} % of swing complete!", percentSwingToWait);
-      behaviorStateReference.get().set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-      replanFootstepsOutput.get().run();
+      behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+      replanFootstepsOutput.run();
    }
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
    {
-      statusLogger.info("Waiting for robot walking...");
+      statusLogger.debug("Waiting for robot walking...");
       walkingStatusNotification.blockingPoll();
-      statusLogger.info("Robot walk complete.");
-   }
-
-   public void run()
-   {
-      validateAll();
-
-      if (evaluateEntry())
-      {
-         performTask();
-      }
-
-      invalidateChanging();
-   }
-
-   public void setLookAndStepBehaviorParameters(LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters)
-   {
-      this.lookAndStepBehaviorParameters.set(lookAndStepBehaviorParameters);
-   }
-
-   public void setLastSteppedSolePoses(SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses)
-   {
-      this.lastSteppedSolePoses.set(lastSteppedSolePoses);
-   }
-
-   public void setUiPublisher(UIPublisher uiPublisher)
-   {
-      this.uiPublisher.set(uiPublisher);
-   }
-
-   public void setRobotWalkRequester(RobotWalkRequester robotWalkRequester)
-   {
-      this.robotWalkRequester.set(robotWalkRequester);
-   }
-
-   public void setReplanFootstepsOutput(Runnable replanFootstepsOutput)
-   {
-      this.replanFootstepsOutput.set(replanFootstepsOutput);
-   }
-
-   public void setBehaviorStateReference(BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
-   {
-      this.behaviorStateReference.set(behaviorStateReference);
-   }
-
-   public void setRobotConnectedSupplier(Supplier<Boolean> robotConnectedSupplier)
-   {
-      this.robotConnectedSupplier.set(robotConnectedSupplier);
+      statusLogger.debug("Robot walk complete.");
    }
 }

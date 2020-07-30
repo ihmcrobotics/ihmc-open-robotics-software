@@ -30,6 +30,8 @@ public class LookAndStepRemoteVisualizer
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
    private PoseGraphic goalGraphic;
 
+   private Stage primaryStage;
+
    public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, Ros2Node ros2Node, Messager behaviorMessager)
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
@@ -81,12 +83,17 @@ public class LookAndStepRemoteVisualizer
          view3dFactory.addNodeToView(livePlanarRegionsGraphic);
          view3dFactory.addNodeToView(startAndGoalFootPoses);
 
-         Stage primaryStage = new Stage();
+         primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
          primaryStage.setScene(view3dFactory.getScene());
 
          primaryStage.show();
       });
+   }
+
+   public void close()
+   {
+      primaryStage.close();
    }
 }
