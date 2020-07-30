@@ -166,12 +166,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    public void setEnabled(boolean enabled)
    {
       helper.setCommunicationCallbacksEnabled(enabled);
-
       statusLogger.info("Look and step behavior selected = {}", enabled);
-
       behaviorStateReference.broadcast();
-
-      robotInterface.pitchHeadWithRespectToChest(0.38);
-      //      Commanding neck trajectory: slider: 43.58974358974359 angle: 0.3824055641025641
    }
 }
