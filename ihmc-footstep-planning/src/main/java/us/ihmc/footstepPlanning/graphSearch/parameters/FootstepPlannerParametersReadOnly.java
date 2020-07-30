@@ -809,11 +809,19 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Radius of the shin collidable cylinder
+    * How far the shin collision cylinder extends from the toe
     */
-   default double getShinRadius()
+   default double getShinToeClearance()
    {
-      return get(shinRadius);
+      return get(shinToeClearance);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the heel
+    */
+   default double getShinHeelClearance()
+   {
+      return get(shinHeelClearance);
    }
 
    /**
@@ -822,14 +830,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getShinLength()
    {
       return get(shinLength);
-   }
-
-   /**
-    * Pitch of the shin collidable cylinder
-    */
-   default double getShinPitch()
-   {
-      return get(shinPitch);
    }
 
    /**

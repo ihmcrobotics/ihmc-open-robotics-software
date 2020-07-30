@@ -31,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class AdaptiveSwingTrajectoryCalculator
 {
-   private static final double boxHeight = 0.15;
+   private static final double boxHeight = 0.25;
    private static final double boxGroundClearance = 0.04;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

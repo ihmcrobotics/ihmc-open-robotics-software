@@ -224,9 +224,13 @@ public class FootstepPlannerParametersTest
       parameters.setEnableShinCollisionCheck(enableShinCollision);
       assertEquals(enableShinCollision, parameters.getEnableShinCollisionCheck());
 
-      double shinRadius = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setShinRadius(shinRadius);
-      assertEquals(shinRadius, parameters.getShinRadius());
+      double shinToeClearance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinToeClearance(shinToeClearance);
+      assertEquals(shinToeClearance, parameters.getShinToeClearance());
+
+      double shinHeelClearance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinHeelClearance(shinHeelClearance);
+      assertEquals(shinHeelClearance, parameters.getShinHeelClearance());
 
       double shinLength = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinLength(shinLength);
@@ -235,10 +239,6 @@ public class FootstepPlannerParametersTest
       double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
-
-      double shinPitch = RandomNumbers.nextDouble(random, Math.PI);
-      parameters.setShinPitch(shinPitch);
-      assertEquals(shinPitch, parameters.getShinPitch());
 
       double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDistanceEpsilonToBridgeRegions(distanceEpsilonToBridgeRegions);

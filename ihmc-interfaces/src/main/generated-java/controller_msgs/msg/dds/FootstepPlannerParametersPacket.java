@@ -536,19 +536,19 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean enable_shin_collision_check_;
 
    /**
-            * Radius of the shin collidable cylinder
+            * How far the shin collision cylinder extends from the toe
             */
-   public double shin_radius_ = -11.1;
+   public double shin_toe_clearance_ = -11.1;
+
+   /**
+            * How far the shin collision cylinder extends from the heel
+            */
+   public double shin_heel_clearance_ = -11.1;
 
    /**
             * Length of the shin collidable cylinder
             */
    public double shin_length_ = -11.1;
-
-   /**
-            * Pitch of the shin collidable cylinder
-            */
-   public double shin_pitch_ = -11.1;
 
    /**
             * Height offset of shin collidable cylinder
@@ -848,13 +848,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       enable_shin_collision_check_ = other.enable_shin_collision_check_;
 
 
-      shin_radius_ = other.shin_radius_;
+      shin_toe_clearance_ = other.shin_toe_clearance_;
+
+
+      shin_heel_clearance_ = other.shin_heel_clearance_;
 
 
       shin_length_ = other.shin_length_;
-
-
-      shin_pitch_ = other.shin_pitch_;
 
 
       shin_height_offet_ = other.shin_height_offet_;
@@ -2245,18 +2245,34 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-            * Radius of the shin collidable cylinder
+            * How far the shin collision cylinder extends from the toe
             */
-   public void setShinRadius(double shin_radius)
+   public void setShinToeClearance(double shin_toe_clearance)
    {
-      shin_radius_ = shin_radius;
+      shin_toe_clearance_ = shin_toe_clearance;
    }
    /**
-            * Radius of the shin collidable cylinder
+            * How far the shin collision cylinder extends from the toe
             */
-   public double getShinRadius()
+   public double getShinToeClearance()
    {
-      return shin_radius_;
+      return shin_toe_clearance_;
+   }
+
+
+   /**
+            * How far the shin collision cylinder extends from the heel
+            */
+   public void setShinHeelClearance(double shin_heel_clearance)
+   {
+      shin_heel_clearance_ = shin_heel_clearance;
+   }
+   /**
+            * How far the shin collision cylinder extends from the heel
+            */
+   public double getShinHeelClearance()
+   {
+      return shin_heel_clearance_;
    }
 
 
@@ -2273,22 +2289,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getShinLength()
    {
       return shin_length_;
-   }
-
-
-   /**
-            * Pitch of the shin collidable cylinder
-            */
-   public void setShinPitch(double shin_pitch)
-   {
-      shin_pitch_ = shin_pitch;
-   }
-   /**
-            * Pitch of the shin collidable cylinder
-            */
-   public double getShinPitch()
-   {
-      return shin_pitch_;
    }
 
 
@@ -2559,13 +2559,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_shin_collision_check_, other.enable_shin_collision_check_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_radius_, other.shin_radius_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_toe_clearance_, other.shin_toe_clearance_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_heel_clearance_, other.shin_heel_clearance_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_length_, other.shin_length_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_pitch_, other.shin_pitch_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
@@ -2785,13 +2785,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.enable_shin_collision_check_ != otherMyClass.enable_shin_collision_check_) return false;
 
 
-      if(this.shin_radius_ != otherMyClass.shin_radius_) return false;
+      if(this.shin_toe_clearance_ != otherMyClass.shin_toe_clearance_) return false;
+
+
+      if(this.shin_heel_clearance_ != otherMyClass.shin_heel_clearance_) return false;
 
 
       if(this.shin_length_ != otherMyClass.shin_length_) return false;
-
-
-      if(this.shin_pitch_ != otherMyClass.shin_pitch_) return false;
 
 
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
@@ -3008,14 +3008,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("enable_shin_collision_check=");
       builder.append(this.enable_shin_collision_check_);      builder.append(", ");
 
-      builder.append("shin_radius=");
-      builder.append(this.shin_radius_);      builder.append(", ");
+      builder.append("shin_toe_clearance=");
+      builder.append(this.shin_toe_clearance_);      builder.append(", ");
+
+      builder.append("shin_heel_clearance=");
+      builder.append(this.shin_heel_clearance_);      builder.append(", ");
 
       builder.append("shin_length=");
       builder.append(this.shin_length_);      builder.append(", ");
-
-      builder.append("shin_pitch=");
-      builder.append(this.shin_pitch_);      builder.append(", ");
 
       builder.append("shin_height_offet=");
       builder.append(this.shin_height_offet_);      builder.append(", ");
