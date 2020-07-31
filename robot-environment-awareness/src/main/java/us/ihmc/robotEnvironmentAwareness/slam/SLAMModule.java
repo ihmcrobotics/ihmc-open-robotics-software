@@ -272,7 +272,7 @@ public class SLAMModule implements PerceptionModule
 
       if (isOcTreeBoundingBoxRequested.getAndSet(false))
          reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxState,
-                                   BoundingBoxMessageConverter.convertToMessage(slam.getOctree().getBoundingBox()));
+                                   BoundingBoxMessageConverter.convertToMessage(slam.getMapOcTree().getBoundingBox()));
    }
 
    private boolean updateSLAMInternal()
@@ -340,10 +340,10 @@ public class SLAMModule implements PerceptionModule
       stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
-      NormalOcTree octreeMap = slam.getOctree();
+      NormalOcTree octreeMap = slam.getMapOcTree();
       SLAMFrame latestFrame = slam.getLatestFrame();
 
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getOctree()));
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getMapOcTree()));
 
       LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
       Pose3D pose = new Pose3D(slam.getLatestFrame().getCorrectedLocalPoseInWorld());

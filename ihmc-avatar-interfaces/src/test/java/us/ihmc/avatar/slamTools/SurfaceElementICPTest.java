@@ -49,7 +49,7 @@ public class SurfaceElementICPTest
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
       slam.addKeyFrame(messages.get(0), true);
 
-      NormalOcTree map = slam.getOctree();
+      NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
@@ -83,7 +83,7 @@ public class SurfaceElementICPTest
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
       slam.addKeyFrame(messages.get(0), true);
 
-      NormalOcTree map = slam.getOctree();
+      NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
@@ -156,7 +156,7 @@ public class SurfaceElementICPTest
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
       slam.addKeyFrame(messages.get(0), true);
 
-      NormalOcTree map = slam.getOctree();
+      NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));

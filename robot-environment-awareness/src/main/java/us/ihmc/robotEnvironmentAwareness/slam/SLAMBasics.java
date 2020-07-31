@@ -16,19 +16,16 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
-import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SLAMBasics implements SLAMInterface
 {
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
-   protected Point3DBasics[] sourcePoints;
-   protected final NormalOcTree octree;
+   protected Point3DBasics[] correctedCorrespondingPointLocation;
+   protected final NormalOcTree mapOcTree;
    private final AtomicInteger mapSize = new AtomicInteger();
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
@@ -37,7 +34,7 @@ public class SLAMBasics implements SLAMInterface
 
    public SLAMBasics(double octreeResolution)
    {
-      octree = new NormalOcTree(octreeResolution);
+      mapOcTree = new NormalOcTree(octreeResolution);
    }
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
@@ -48,14 +45,13 @@ public class SLAMBasics implements SLAMInterface
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
       scan.getPointCloud().setTimestamp(frame.getTimeStamp());
 
-      Set<NormalOcTreeNode> updatedLeaves = new HashSet<>();
-      octree.insertScan(scan, insertMiss, updatedLeaves, null); // inserting the miss here is pretty dang expensive.
-      octree.enableParallelComputationForNormals(true);
+      mapOcTree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
+      mapOcTree.enableParallelComputationForNormals(true);
    }
 
    public void updateSurfaceNormals()
    {
-      octree.updateNormals();
+      mapOcTree.updateNormals();
    }
 
    @Override
@@ -96,12 +92,12 @@ public class SLAMBasics implements SLAMInterface
    {
       latestSlamFrame.set(null);
       mapSize.set(0);
-      octree.clear();
+      mapOcTree.clear();
    }
 
    public Point3DReadOnly[] getSourcePoints()
    {
-      return sourcePoints;
+      return correctedCorrespondingPointLocation;
    }
 
    public boolean isEmpty()
@@ -135,7 +131,7 @@ public class SLAMBasics implements SLAMInterface
    {
       if (!useBoundingBox)
       {
-         octree.disableBoundingBox();
+         mapOcTree.disableBoundingBox();
          return;
       }
 
@@ -151,8 +147,8 @@ public class SLAMBasics implements SLAMInterface
          boundingBox.setYawFromQuaternion(new Quaternion(sensorOrientation));
       }
 
-      boundingBox.update(octree.getResolution(), octree.getTreeDepth());
-      octree.setBoundingBox(boundingBox);
+      boundingBox.update(mapOcTree.getResolution(), mapOcTree.getTreeDepth());
+      mapOcTree.setBoundingBox(boundingBox);
    }
 
    public SLAMFrame getLatestFrame()
@@ -162,22 +158,22 @@ public class SLAMBasics implements SLAMInterface
 
    public double getOctreeResolution()
    {
-      return octree.getResolution();
+      return mapOcTree.getResolution();
    }
 
-   public NormalOcTree getOctree()
+   public NormalOcTree getMapOcTree()
    {
-      return octree;
+      return mapOcTree;
    }
 
    public void clearNormals()
    {
-      octree.clearNormals();
+      mapOcTree.clearNormals();
    }
 
    public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
    {
-      octree.setNormalEstimationParameters(normalEstimationParameters);
+      mapOcTree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
    public double getComputationTimeForLatestFrame()
