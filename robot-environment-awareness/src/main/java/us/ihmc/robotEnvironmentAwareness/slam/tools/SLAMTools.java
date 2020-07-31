@@ -27,7 +27,6 @@ import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.jOctoMap.tools.OcTreeNearestNeighborTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -319,9 +318,9 @@ public class SLAMTools
    public static Point3D[] createSourcePointsToSensorPose(SLAMFrame frame, NormalOcTree mapOctree, int desiredNumberOfSourcePoints, double minimumOverlapRatio,
                                                           double windowMargin)
    {
-      ConvexPolygon2D windowForMap = computeMapConvexHullInSensorFrame(mapOctree, frame.getInitialSensorPoseToWorld());
+      ConvexPolygon2D windowForMap = computeMapConvexHullInSensorFrame(mapOctree, frame.getUncorrectedSensorPoseInWorld());
 
-      Point3DReadOnly[] newPointCloudToSensorPose = frame.getOriginalPointCloudToSensorPose();
+      Point3DReadOnly[] newPointCloudToSensorPose = frame.getPointCloudInSensorFrame();
       boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
       int numberOfPointsInWindow = 0;
       for (int i = 0; i < newPointCloudToSensorPose.length; i++)

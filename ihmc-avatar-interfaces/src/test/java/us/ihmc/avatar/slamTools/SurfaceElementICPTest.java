@@ -176,7 +176,7 @@ public class SurfaceElementICPTest
          originalViewer.start("originalViewer");
       }
 
-      int numberOfSurfel = frame2.getSurfaceElementsToSensor().size();
+      int numberOfSurfel = frame2.getSurfaceElementsInSensorFrame().size();
       LogTools.info("numberOfSurfel " + numberOfSurfel);
       Function<DMatrixRMaj, RigidBodyTransform> inputFunction = new Function<DMatrixRMaj, RigidBodyTransform>()
       {
@@ -203,7 +203,7 @@ public class SurfaceElementICPTest
             for (int i = 0; i < numberOfSurfel; i++)
             {
                correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame2.getSurfaceElementsToSensor().get(i));
+               correctedSurfel[i].set(frame2.getSurfaceElementsInSensorFrame().get(i));
 
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());

@@ -137,17 +137,17 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap,
-                                                                       frameForSourcePoints.getOriginalPointCloudToSensorPose(),
-                                                                       frameForSourcePoints.getInitialSensorPoseToWorld());
+                                                                       frameForSourcePoints.getPointCloudInSensorFrame(),
+                                                                       frameForSourcePoints.getUncorrectedSensorPoseInWorld());
 
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frameForSourcePoints.getInitialSensorPoseToWorld());
+      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frameForSourcePoints.getUncorrectedSensorPoseInWorld());
       correctedSensorPoseToWorld.multiply(icpTransformer);
 
-      Point3D[] correctedData = new Point3D[frameForSourcePoints.getOriginalPointCloudToSensorPose().length];
+      Point3D[] correctedData = new Point3D[frameForSourcePoints.getPointCloudInSensorFrame().length];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
+         correctedData[i] = new Point3D(frameForSourcePoints.getPointCloudInSensorFrame()[i]);
          icpTransformer.transform(correctedData[i]);
       }
 
@@ -165,11 +165,11 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
          // get parameter.
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
-         correctedSensorPoseToWorld.set(frameForSourcePoints.getInitialSensorPoseToWorld());
+         correctedSensorPoseToWorld.set(frameForSourcePoints.getUncorrectedSensorPoseInWorld());
          correctedSensorPoseToWorld.multiply(icpTransformer);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
+            correctedData[i].set(frameForSourcePoints.getPointCloudInSensorFrame()[i]);
             icpTransformer.transform(correctedData[i]);
          }
 
@@ -267,7 +267,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getSensorPose());
 
       Point3DReadOnly[] newPointCloud = frame2.getPointCloud();
-      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getOriginalPointCloudToSensorPose();
+      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getPointCloudInSensorFrame();
       boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
       int numberOfPointsInWindow = 0;
       for (int i = 0; i < newPointCloudToSensorPose.length; i++)

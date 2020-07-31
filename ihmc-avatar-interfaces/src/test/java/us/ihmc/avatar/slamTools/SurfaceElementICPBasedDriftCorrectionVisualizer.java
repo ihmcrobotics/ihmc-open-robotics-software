@@ -134,13 +134,13 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap, frame2);
 
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getInitialSensorPoseToWorld());
+      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getUncorrectedSensorPoseInWorld());
       correctedSensorPoseToWorld.multiply(icpTransformer);
 
-      Point3D[] correctedData = new Point3D[frame2.getOriginalPointCloudToSensorPose().length];
+      Point3D[] correctedData = new Point3D[frame2.getPointCloudInSensorFrame().length];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frame2.getOriginalPointCloudToSensorPose()[i]);
+         correctedData[i] = new Point3D(frame2.getPointCloudInSensorFrame()[i]);
          icpTransformer.transform(correctedData[i]);
       }
 
@@ -159,11 +159,11 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          // get parameter.
          DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
          icpTransformer.set(inputFunction.apply(optimalParameter));
-         correctedSensorPoseToWorld.set(frame2.getInitialSensorPoseToWorld());
+         correctedSensorPoseToWorld.set(frame2.getUncorrectedSensorPoseInWorld());
          correctedSensorPoseToWorld.multiply(icpTransformer);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frame2.getOriginalPointCloudToSensorPose()[i]);
+            correctedData[i].set(frame2.getPointCloudInSensorFrame()[i]);
             icpTransformer.transform(correctedData[i]);
          }
 
@@ -251,7 +251,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, SLAMFrame frame)
    {
-      int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      int numberOfSurfel = frame.getSurfaceElementsInSensorFrame().size();
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
@@ -265,7 +265,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
             for (int i = 0; i < numberOfSurfel; i++)
             {
                correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame.getSurfaceElementsToSensor().get(i));
+               correctedSurfel[i].set(frame.getSurfaceElementsInSensorFrame().get(i));
 
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
