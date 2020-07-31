@@ -137,18 +137,18 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap,
-                                                                       frameForSourcePoints.getPointCloudInSensorFrame(),
-                                                                       frameForSourcePoints.getUncorrectedSensorPoseInWorld());
+                                                                       frameForSourcePoints.getPointCloudInLocalFrame(),
+                                                                       frameForSourcePoints.getUncorrectedLocalPoseInWorld());
 
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frameForSourcePoints.getUncorrectedSensorPoseInWorld());
-      correctedSensorPoseToWorld.multiply(icpTransformer);
+      RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform();
+      RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
+      correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frameForSourcePoints.getPointCloudInSensorFrame().length];
+      Point3D[] correctedData = new Point3D[frameForSourcePoints.getPointCloudInLocalFrame().length];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frameForSourcePoints.getPointCloudInSensorFrame()[i]);
-         icpTransformer.transform(correctedData[i]);
+         correctedData[i] = new Point3D(frameForSourcePoints.getPointCloudInLocalFrame()[i]);
+         driftCorrectionTransform.transform(correctedData[i]);
       }
 
       frame1GraphicsManager.updateGraphics();
@@ -164,17 +164,17 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          optimizer.iterate();
 
          // get parameter.
-         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
-         correctedSensorPoseToWorld.set(frameForSourcePoints.getUncorrectedSensorPoseInWorld());
-         correctedSensorPoseToWorld.multiply(icpTransformer);
+         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCorrectionTransform);
+         correctedLocalPoseInWorld.set(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
+         correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frameForSourcePoints.getPointCloudInSensorFrame()[i]);
-            icpTransformer.transform(correctedData[i]);
+            correctedData[i].set(frameForSourcePoints.getPointCloudInLocalFrame()[i]);
+            driftCorrectionTransform.transform(correctedData[i]);
          }
 
-         frame2.updateOptimizedCorrection(icpTransformer);
-         frameForSourcePoints.updateOptimizedCorrection(icpTransformer);
+         frame2.updateOptimizedCorrection(driftCorrectionTransform);
+         frameForSourcePoints.updateOptimizedCorrection(driftCorrectionTransform);
 
          // update viz.
          frame1GraphicsManager.updateGraphics();
@@ -197,8 +197,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       new ICPBasedPointCloudDriftCorrectionVisualizer();
    }
 
-   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, Point3DReadOnly[] sourcePointsToSensorPose,
-                                                                RigidBodyTransformReadOnly sensorPoseToWorld)
+   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, Point3DReadOnly[] sourcePointsInLocalFrame,
+                                                                RigidBodyTransformReadOnly uncorrectedLocalPoseInWorld)
    {
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
@@ -206,14 +206,14 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(sensorPoseToWorld);
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseToWorld = new RigidBodyTransform(uncorrectedLocalPoseInWorld);
+            correctedLocalPoseToWorld.multiply(driftCorrectionTransform);
 
-            Point3D[] correctedData = new Point3D[sourcePointsToSensorPose.length];
-            for (int i = 0; i < sourcePointsToSensorPose.length; i++)
+            Point3D[] correctedData = new Point3D[sourcePointsInLocalFrame.length];
+            for (int i = 0; i < sourcePointsInLocalFrame.length; i++)
             {
-               correctedData[i] = new Point3D(sourcePointsToSensorPose[i]);
-               correctedSensorPoseToWorld.transform(correctedData[i]);
+               correctedData[i] = new Point3D(sourcePointsInLocalFrame[i]);
+               correctedLocalPoseToWorld.transform(correctedData[i]);
             }
 
             DMatrixRMaj errorSpace = new DMatrixRMaj(correctedData.length, 1);
@@ -234,7 +234,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction,
                                                                                                 outputCalculator,
                                                                                                 6,
-                                                                                                sourcePointsToSensorPose.length);
+                                                                                                sourcePointsInLocalFrame.length);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0001);
       purterbationVector.set(1, 0.0001);
@@ -260,14 +260,14 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
       // octree.
       Point3D dummySensorLocation = new Point3D();
-      octreeMap = SLAMTools.computeOctreeData(frame1.getPointCloud(), dummySensorLocation, OCTREE_RESOLUTION);
+      octreeMap = SLAMTools.computeOctreeData(frame1.getCorrectedPointCloudInWorld(), dummySensorLocation, OCTREE_RESOLUTION);
 
       // define source points.
       double windowMargin = 0.05;
-      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getSensorPose());
+      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getCorrectedLocalPoseInWorld());
 
-      Point3DReadOnly[] newPointCloud = frame2.getPointCloud();
-      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getPointCloudInSensorFrame();
+      Point3DReadOnly[] newPointCloud = frame2.getCorrectedPointCloudInWorld();
+      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getPointCloudInLocalFrame();
       boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
       int numberOfPointsInWindow = 0;
       for (int i = 0; i < newPointCloudToSensorPose.length; i++)
@@ -301,8 +301,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
                                                                                                            pointsInPreviousWindow.length,
                                                                                                            0.005,
                                                                                                            null);
-      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getSensorPose().getTranslation());
-      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getSensorPose().getRotation());
+      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getCorrectedLocalPoseInWorld().getTranslation());
+      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getCorrectedLocalPoseInWorld().getRotation());
       frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints);
    }
 }
