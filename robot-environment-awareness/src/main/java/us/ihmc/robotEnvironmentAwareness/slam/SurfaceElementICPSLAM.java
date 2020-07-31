@@ -24,7 +24,12 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
-      super(octreeResolution);
+      this(octreeResolution, new RigidBodyTransform());
+   }
+
+   public SurfaceElementICPSLAM(double octreeResolution, RigidBodyTransformReadOnly transformFromSensorToLocalFrame)
+   {
+      super(octreeResolution, transformFromSensorToLocalFrame);
    }
 
    public void updateParameters(SurfaceElementICPSLAMParameters parameters)
@@ -132,16 +137,16 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double quality = 0.0;
       double translationalEffort = 0.0;
       RotationMatrix rotationalEffort = new RotationMatrix();
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
+      RigidBodyTransform driftCompensationTransform = new RigidBodyTransform();
       int iterations = -1;
       for (int i = 0; i < surfaceElementICPSLAMParameters.getMaxOptimizationIterations(); i++)
       {
          optimizer.iterate();
-         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
+         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
          quality = initialQuality;
-         translationalEffort = icpTransformer.getTranslation().lengthSquared();
-         rotationalEffort.set(icpTransformer.getRotation());
+         translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
+         rotationalEffort.set(driftCompensationTransform.getRotation());
 
          if (qualitySteady.isSteady(quality) && translationalSteady.isSteady(translationalEffort) && rotationalSteady.isSteady(rotationalEffort))
          {
@@ -164,11 +169,11 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       if (DEBUG)
          LogTools.info("final quality " + optimizer.getQuality());
       // get parameter.
-      optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
+      optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
       driftCorrectionResult.setFinalDistance(optimizer.getQuality());
       driftCorrectionResult.setNumberOfSurfels(numberOfSurfel);
-      driftCorrectionResult.setDriftCorrectionTransformer(icpTransformer);
+      driftCorrectionResult.setDriftCorrectionTransformer(driftCompensationTransform);
       driftCorrectionResult.setIcpIterations(iterations);
       if (iterations < 0)
       {
@@ -179,7 +184,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          driftCorrectionResult.setSuccess(true);
       }
 
-      return icpTransformer;
+      return driftCompensationTransform;
    }
 
    private class SteadyDetector

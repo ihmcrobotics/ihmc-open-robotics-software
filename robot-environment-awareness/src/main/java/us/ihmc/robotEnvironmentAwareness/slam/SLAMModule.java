@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
@@ -59,7 +60,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
    private final AtomicReference<Boolean> useBoundingBox;
    
-   protected final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   protected final SurfaceElementICPSLAM slam;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
@@ -83,24 +84,36 @@ public class SLAMModule implements PerceptionModule
 
    public SLAMModule(Ros2Node ros2Node, Messager messager)
    {
-      this(ros2Node, messager, null);
+      this(ros2Node, messager, new RigidBodyTransform());
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromSensorToLocalFrame)
+   {
+      this(ros2Node, messager, transformFromSensorToLocalFrame, null);
    }
 
    public SLAMModule(Messager messager, File configurationFile)
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, true);
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
    }
 
    public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile)
    {
-      this(ros2Node, messager, configurationFile, false);
+      this(ros2Node, messager, configurationFile, new RigidBodyTransform(), false);
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, boolean manageRosNode)
+   public SLAMModule(Ros2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromSensorToLocalFrame, File configurationFile)
+   {
+      this(ros2Node, messager, configurationFile, transformFromSensorToLocalFrame, false);
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, RigidBodyTransformReadOnly transformFromSensorToLocalFrame, boolean manageRosNode)
    {
       this.ros2Node = ros2Node;
       this.reaMessager = messager;
       this.manageRosNode = manageRosNode;
+
+      slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION, transformFromSensorToLocalFrame);
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node,

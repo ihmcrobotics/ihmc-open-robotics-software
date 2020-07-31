@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -31,9 +32,16 @@ public class SLAMBasics implements SLAMInterface
    private final AtomicDouble latestComputationTime = new AtomicDouble();
 
    protected final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
+   private final RigidBodyTransformReadOnly transformFromSensorToLocalFrame;
 
    public SLAMBasics(double octreeResolution)
    {
+      this(octreeResolution, new RigidBodyTransform());
+   }
+
+   public SLAMBasics(double octreeResolution, RigidBodyTransformReadOnly transformFromSensorToLocalFrame)
+   {
+      this.transformFromSensorToLocalFrame = transformFromSensorToLocalFrame;
       mapOcTree = new NormalOcTree(octreeResolution);
    }
 
@@ -57,7 +65,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(transformFromSensorToLocalFrame, pointCloudMessage);
       setLatestFrame(frame);
       insertNewPointCloud(frame, insertMiss);
 
@@ -67,7 +75,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromSensorToLocalFrame, pointCloudMessage);
 
       long startTime = System.nanoTime();
       RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);

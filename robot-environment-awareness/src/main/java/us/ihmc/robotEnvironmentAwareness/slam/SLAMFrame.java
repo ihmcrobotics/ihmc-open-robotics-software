@@ -51,17 +51,21 @@ public class SLAMFrame
    private final List<Plane3DReadOnly> surfaceElementsInLocalFrame = new ArrayList<>();
    private NormalOcTree frameMap;
 
-
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {
       this(null, new RigidBodyTransform(), message);
+   }
+
+   public SLAMFrame(RigidBodyTransformReadOnly sensorToLocalTransform, StereoVisionPointCloudMessage message)
+   {
+      this(null, sensorToLocalTransform, message);
    }
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
       this(frame, new RigidBodyTransform(), message);
    }
-   
+
    public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly sensorToLocalTransform, StereoVisionPointCloudMessage message)
    {
       timestamp = message.getTimestamp();
