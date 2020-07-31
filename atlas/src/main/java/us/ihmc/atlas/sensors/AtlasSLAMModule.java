@@ -27,6 +27,25 @@ public class AtlasSLAMModule extends SLAMModule
    private static final double PELVIS_VELOCITY_STATIONARY_THRESHOLD = 0.001;
    private static final double TOLERANCE_PELVIS_VELOCITY = 0.01;
 
+   private static final double depthOffsetX = -0.058611;
+   private static final double depthOffsetZ = -0.01;
+   private static final double depthPitchingAngle = -Math.toRadians(70.0);
+   private static final double depthThickness = -0.0245;
+   private static final double pelvisToMountOrigin = -0.19;
+
+   public static final RigidBodyTransform transformToLocalFrame = new RigidBodyTransform();
+   static
+   {
+      transformToLocalFrame.appendTranslation(depthThickness, 0.0, 0.0);
+      transformToLocalFrame.appendPitchRotation(depthPitchingAngle);
+      transformToLocalFrame.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
+      transformToLocalFrame.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
+
+      // Real robot Realsense D435 sensor has an additional frame change to convert to camera frame
+      // which is Z forward instead of X forward. We omit that here because the SimulatedDepthCamera
+      // algorithm operates if X forward frame (same as robot)
+   }
+
    private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
    private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
 
