@@ -47,8 +47,15 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       this.spawnUIs = spawnUIs;
       this.pubSubImplementation = pubSubImplementation;
 
-
-      Platform.runLater(() -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE));
+      Runnable setup = () -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE);
+      if (spawnUIs)
+      {
+         Platform.runLater(setup);
+      }
+      else
+      {
+         setup.run();
+      }
    }
 
    public void setup() throws Exception

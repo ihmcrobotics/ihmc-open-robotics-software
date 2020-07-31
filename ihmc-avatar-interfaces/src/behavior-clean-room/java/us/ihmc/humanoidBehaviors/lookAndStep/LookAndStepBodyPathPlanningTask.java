@@ -106,15 +106,8 @@ public class LookAndStepBodyPathPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
-         suppressor.addCondition("No goal specified",
-                                 () -> !(goal != null && !goal.containsNaN()),
-                                 () -> uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions));
-         suppressor.addCondition(() -> "Body path planning suppressed: Regions not OK: " + mapRegions
-                                       + ", timePassed: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset()
-                                       + ", isEmpty: " + (mapRegions == null ? null : mapRegions.isEmpty()),
-                                 () -> !(mapRegions != null && !mapRegions.isEmpty() && mapRegionsReceptionTimerSnapshot.isRunning()));
          suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
-                                 () -> neckTrajectoryTimerSnapshot != null && neckTrajectoryTimerSnapshot.isRunning());
+                                 () -> neckTrajectoryTimerSnapshot.isRunning());
          suppressor.addCondition(() -> "Neck at wrong angle: " + neckPitch
                                        + " != " + lookAndStepBehaviorParameters.getNeckPitchForBodyPath()
                                        + " +/- " + lookAndStepBehaviorParameters.getNeckPitchTolerance(),
@@ -125,10 +118,19 @@ public class LookAndStepBodyPathPlanningTask
                                     commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
                                     neckTrajectoryTimer.reset();
                                  });
+         suppressor.addCondition("No goal specified",
+                                 () -> !(goal != null && !goal.containsNaN()),
+                                 () -> uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions));
+         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
+                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
+                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
+         suppressor.addCondition(() -> "No regions. "
+                                       + (mapRegions == null ? null : (" isEmpty: " + mapRegions.isEmpty())),
+                                 () -> !(mapRegions != null && !mapRegions.isEmpty()));
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
-         suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
+         suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
                                  () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());

@@ -122,15 +122,17 @@ public class LookAndStepFootstepPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
-         suppressor.addCondition(() -> "Regions not OK: " + planarRegions
-                                       + ", timePassed: " + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset()
-                                       + ", isEmpty: " + (planarRegions == null ? null : planarRegions.isEmpty()),
-                                 () -> !(planarRegions != null && !planarRegions.isEmpty() && planarRegionReceptionTimerSnapshot.isRunning()));
+         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + planarRegionReceptionTimerSnapshot.hasBeenSet()
+                                       + " timeSinceLastUpdate: " + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
+                                 () -> planarRegionReceptionTimerSnapshot.isExpired());
+         suppressor.addCondition(() -> "No regions. "
+                                       + (planarRegions == null ? null : (" isEmpty: " + planarRegions.isEmpty())),
+                                 () -> !(planarRegions != null && !planarRegions.isEmpty()));
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition(() -> "Body path size: " + (bodyPathPlan == null ? null : bodyPathPlan.size()),
                                  () -> !(bodyPathPlan != null && !bodyPathPlan.isEmpty()));
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
-         suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
+         suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
                                  () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
