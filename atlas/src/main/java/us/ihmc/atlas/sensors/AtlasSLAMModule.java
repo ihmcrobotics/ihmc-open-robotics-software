@@ -27,25 +27,6 @@ public class AtlasSLAMModule extends SLAMModule
    private static final double PELVIS_VELOCITY_STATIONARY_THRESHOLD = 0.001;
    private static final double TOLERANCE_PELVIS_VELOCITY = 0.01;
 
-   private static final double depthOffsetX = 0.058611;
-   private static final double depthOffsetZ = 0.01;
-   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
-   private static final double depthThickness = 0.0245;
-
-   private static final double pelvisToMountOrigin = 0.19;
-
-   private static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
-   static
-   {
-      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
-      transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
-      transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
-
-      transformPelvisToDepthCamera.appendYawRotation(-Math.PI / 2);
-      transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
-   }
-
    private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
    private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
 
