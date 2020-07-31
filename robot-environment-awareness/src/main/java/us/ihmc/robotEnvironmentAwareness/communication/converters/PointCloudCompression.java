@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
 import us.ihmc.jOctoMap.tools.OcTreeKeyConversionTools;
@@ -43,7 +44,7 @@ public class PointCloudCompression
     * <li>Use {@link LZ4CompressionImplementation} as a final lossless compression pass.
     * </ul>
     */
-   public static StereoVisionPointCloudMessage compressPointCloud(long timestamp, Point3D[] pointCloud, int[] colors, int numberOfPoints, double minimumResolution,
+   public static StereoVisionPointCloudMessage compressPointCloud(long timestamp, Point3DReadOnly[] pointCloud, int[] colors, int numberOfPoints, double minimumResolution,
                                                                   ScanPointFilter filter)
    {
       BoundingBox3D boundingBox = new BoundingBox3D();
@@ -53,12 +54,12 @@ public class PointCloudCompression
       if (filter != null)
       {
          int filteredIndex = 0;
-         Point3D[] filteredPointCloud = new Point3D[numberOfPoints];
+         Point3DReadOnly[] filteredPointCloud = new Point3D[numberOfPoints];
          int[] filteredColors = new int[numberOfPoints];
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            Point3D scanPoint = pointCloud[i];
+            Point3DReadOnly scanPoint = pointCloud[i];
             int color = colors[i];
 
             if (filter.test(i, scanPoint))
@@ -76,7 +77,7 @@ public class PointCloudCompression
       }
       else
       {
-         for (Point3D scanPoint : pointCloud)
+         for (Point3DReadOnly scanPoint : pointCloud)
          {
             boundingBox.updateToIncludePoint(scanPoint);
          }
@@ -102,7 +103,7 @@ public class PointCloudCompression
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D scanPoint = pointCloud[i];
+         Point3DReadOnly scanPoint = pointCloud[i];
          int color = colors[i];
 
          double x = scanPoint.getX() - centerX;
