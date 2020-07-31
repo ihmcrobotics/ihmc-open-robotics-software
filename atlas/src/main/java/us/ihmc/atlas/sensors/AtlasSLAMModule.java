@@ -27,23 +27,23 @@ public class AtlasSLAMModule extends SLAMModule
    private static final double PELVIS_VELOCITY_STATIONARY_THRESHOLD = 0.001;
    private static final double TOLERANCE_PELVIS_VELOCITY = 0.01;
 
-   private static final double depthOffsetX = -0.058611;
-   private static final double depthOffsetZ = -0.01;
-   private static final double depthPitchingAngle = -Math.toRadians(70.0);
-   private static final double depthThickness = -0.0245;
-   private static final double pelvisToMountOrigin = -0.19;
+   private static final double depthOffsetX = 0.058611;
+   private static final double depthOffsetZ = 0.01;
+   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
+   private static final double depthThickness = 0.0245;
 
-   public static final RigidBodyTransform transformToLocalFrame = new RigidBodyTransform();
+   private static final double pelvisToMountOrigin = 0.19;
+
+   private static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
    static
    {
-      transformToLocalFrame.appendTranslation(depthThickness, 0.0, 0.0);
-      transformToLocalFrame.appendPitchRotation(depthPitchingAngle);
-      transformToLocalFrame.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformToLocalFrame.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
+      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
+      transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
+      transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
+      transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
 
-      // Real robot Realsense D435 sensor has an additional frame change to convert to camera frame
-      // which is Z forward instead of X forward. We omit that here because the SimulatedDepthCamera
-      // algorithm operates if X forward frame (same as robot)
+      transformPelvisToDepthCamera.appendYawRotation(-Math.PI / 2);
+      transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
    private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
@@ -62,7 +62,7 @@ public class AtlasSLAMModule extends SLAMModule
 
    public AtlasSLAMModule(Ros2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel)
    {
-      super(ros2Node, messager);
+      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
@@ -180,7 +180,7 @@ public class AtlasSLAMModule extends SLAMModule
          }
          posePacket.setConfidenceFactor(0.5);
          RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
-         estimatedPelvisPose.preMultiply(latestFrame.getCorrectedLocalPoseInWorld());
+         estimatedPelvisPose.preMultiply(latestFrame.getCorrectedSensorPoseInWorld());
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
 

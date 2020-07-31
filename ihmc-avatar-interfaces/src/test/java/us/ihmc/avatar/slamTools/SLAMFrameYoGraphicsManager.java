@@ -116,7 +116,7 @@ public class SLAMFrameYoGraphicsManager
 
    public void updateGraphics()
    {
-      yoFrameSensorPose.set(slamFrame.getCorrectedLocalPoseInWorld());
+      yoFrameSensorPose.set(slamFrame.getCorrectedSensorPoseInWorld());
       Point3DReadOnly[] pointCloud = slamFrame.getCorrectedPointCloudInWorld();
       for (int i = 0; i < sizeOfPointCloud; i++)
       {

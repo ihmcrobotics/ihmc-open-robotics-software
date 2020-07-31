@@ -272,8 +272,8 @@ public class SurfaceElementICPTest
          SLAMViewer slamViewer = new SLAMViewer();
          slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
          slamViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.GREEN);
-         slamViewer.addSensorPose(frame2.getCorrectedLocalPoseInWorld(), Color.GREEN);
-         slamViewer.addSensorPose(frame2.getUncorrectedLocalPoseInWorld(), Color.BLUE);
+         slamViewer.addSensorPose(frame2.getCorrectedSensorPoseInWorld(), Color.GREEN);
+         slamViewer.addSensorPose(frame2.getUncorrectedSensorPoseInWorld(), Color.BLUE);
          slamViewer.start("testDriftCorrection");
 
          assertTrue(0.005 > qualityArray[qualityArray.length - 1], "GOOD!");
