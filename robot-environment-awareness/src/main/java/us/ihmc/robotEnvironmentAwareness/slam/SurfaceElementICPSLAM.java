@@ -7,6 +7,7 @@ import java.util.function.UnaryOperator;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -40,10 +41,10 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
-      frame.registerSurfaceElements(getOctree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
+      frame.registerSurfaceElements(getMapOcTree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
 
       int numberOfSurfel = frame.getNumberOfSurfaceElements();
-      sourcePoints = new Point3D[numberOfSurfel];
+      correctedCorrespondingPointLocation = new Point3D[numberOfSurfel];
       if (DEBUG)
          LogTools.info("numberOfSurfel " + numberOfSurfel);
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
@@ -55,37 +56,35 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
             correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            Plane3D[] correctedSurfelInWorld = new Plane3D[numberOfSurfel];
+            DMatrixRMaj errorSpace = new DMatrixRMaj(numberOfSurfel, 1);
+
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               correctedSurfelInWorld[i] = new Plane3D();
-               correctedSurfelInWorld[i].set(frame.getSurfaceElementsInLocalFrame().get(i));
+               Plane3D correctedSurfelInWorld = new Plane3D();
+               correctedSurfelInWorld.set(frame.getSurfaceElementsInLocalFrame().get(i));
 
-               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getPoint());
-               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getNormal());
-               sourcePoints[i] = new Point3D(correctedLocalPoseInWorld.getTranslation());
-            }
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getNormal());
+               correctedCorrespondingPointLocation[i] = new Point3D(correctedLocalPoseInWorld.getTranslation());
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfelInWorld.length, 1);
-            for (int i = 0; i < correctedSurfelInWorld.length; i++)
-            {
-               double distance = computeClosestDistance(correctedSurfelInWorld[i]);
+               double distance = computeClosestDistance(correctedSurfelInWorld);
                errorSpace.set(i, distance);
             }
+
             return errorSpace;
          }
 
-         private double computeClosestDistance(Plane3D surfel)
+         private double computeClosestDistance(Plane3DReadOnly surfel)
          {
-            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree,
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(mapOcTree,
                                                                                     surfel.getPoint(),
-                                                                                    octree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
+                                                                                    mapOcTree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
          }
       };
       int problemSize = surfaceElementICPSLAMParameters.getIncludePitchAndRoll() ? 6 : 4;
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, problemSize, numberOfSurfel);
       DMatrixRMaj perturbationVector = new DMatrixRMaj(problemSize, 1);
-      double translationPerturbation = octree.getResolution() * surfaceElementICPSLAMParameters.getTranslationPerturbation();
+      double translationPerturbation = mapOcTree.getResolution() * surfaceElementICPSLAMParameters.getTranslationPerturbation();
       perturbationVector.set(0, translationPerturbation);
       perturbationVector.set(1, translationPerturbation);
       perturbationVector.set(2, translationPerturbation);
