@@ -10,6 +10,7 @@ import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrameState;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -89,7 +90,7 @@ public class SLAMModuleAPI
    public static final Topic<NormalEstimationParameters> NormalEstimationParameters = Root.child(Normal).topic(Parameters);
 
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = Root.child(UI).child(DepthCloud).topic(Data);
-   public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
+   public static final Topic<SLAMFrameState> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
    public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = Root.child(UI).child(OcTree).topic(Data);
    public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);
    public static final Topic<StampedPosePacket> CustomizedFrameState = Root.child(UI).child(Custom).topic(Data);
@@ -100,6 +101,8 @@ public class SLAMModuleAPI
    public static final Topic<Boolean> RequestBoundingBox = topic("RequestBoundingBox");
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = topic("OcTreeBoundingBoxParameters");
    public static final Topic<BoxMessage> OcTreeBoundingBoxState = topic("OcTreeBoundingBoxState");
+   
+   public static final Topic<StereoVisionPointCloudMessage> UIStereoSLAMPointCloud = topic("UIUncorrectedPointCloud");
 
    public static final Topic<Boolean> UIRawDataExportRequest = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Request);
    public static final Topic<Boolean> UISLAMDataExportRequest = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Request);
