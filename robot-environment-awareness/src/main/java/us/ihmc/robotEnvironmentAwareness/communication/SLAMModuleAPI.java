@@ -102,9 +102,7 @@ public class SLAMModuleAPI
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = topic("OcTreeBoundingBoxParameters");
    public static final Topic<BoxMessage> OcTreeBoundingBoxState = topic("OcTreeBoundingBoxState");
    
-   public static final Topic<StereoVisionPointCloudMessage> UICorrectedPointCloud = topic("UICorrectedPointCloud");
-   public static final Topic<StereoVisionPointCloudMessage> UIUncorrectedPointCloud = topic("UIUncorrectedPointCloud");
-   public static final Topic<StereoVisionPointCloudMessage> UICorrespondingPointsInWorld = topic("UICorrespondingPointsInWorld");
+   public static final Topic<StereoVisionPointCloudMessage> UIStereoSLAMPointCloud = topic("UIUncorrectedPointCloud");
 
    public static final Topic<Boolean> UIRawDataExportRequest = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Request);
    public static final Topic<Boolean> UISLAMDataExportRequest = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Request);
