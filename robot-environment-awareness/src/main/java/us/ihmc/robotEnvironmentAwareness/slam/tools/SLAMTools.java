@@ -49,7 +49,7 @@ public class SLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Scan toScan(Point3DReadOnly[] points, RigidBodyTransformReadOnly sensorPose, ConvexPolygon2DReadOnly mapHull, double windowMargin)
+   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition, ConvexPolygon2DReadOnly mapHull, double windowMargin)
    {
       PointCloud pointCloud = new PointCloud();
 
@@ -66,7 +66,7 @@ public class SLAMTools
             pointCloud.add(x, y, z);
          }
       }
-      return new Scan(new Point3D(sensorPose.getTranslation()), pointCloud);
+      return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
    public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
@@ -96,18 +96,6 @@ public class SLAMTools
       return convertedPoint;
    }
 
-   public static Point3D[] createConvertedPointsToWorld(RigidBodyTransformReadOnly otherSensorPose, Point3DReadOnly[] pointCloudToSensorPose)
-   {
-      Point3D[] pointCloudToWorld = new Point3D[pointCloudToSensorPose.length];
-      for (int i = 0; i < pointCloudToWorld.length; i++)
-      {
-         pointCloudToWorld[i] = new Point3D(pointCloudToSensorPose[i]);
-         otherSensorPose.transform(pointCloudToWorld[i]);
-      }
-
-      return pointCloudToWorld;
-   }
-
    public static NormalOcTree computeOctreeData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
    {
       ScanCollection scanCollection = new ScanCollection();
@@ -128,84 +116,6 @@ public class SLAMTools
 
       octree.updateNormals();
       return octree;
-   }
-
-   public static NormalOcTree computeOctreeData(List<Point3DReadOnly[]> pointCloudMap, List<RigidBodyTransformReadOnly> sensorPoses, double octreeResolution)
-   {
-      ScanCollection scanCollection = new ScanCollection();
-      for (int i = 0; i < pointCloudMap.size(); i++)
-      {
-         int numberOfPoints = pointCloudMap.get(i).length;
-
-         scanCollection.setSubSampleSize(numberOfPoints);
-         scanCollection.addScan(toScan(pointCloudMap.get(i), sensorPoses.get(i).getTranslation()));
-      }
-
-      NormalOcTree octree = new NormalOcTree(octreeResolution);
-
-      octree.insertScanCollection(scanCollection, false);
-
-      octree.enableParallelComputationForNormals(true);
-
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
-      octree.setNormalEstimationParameters(normalEstimationParameters);
-
-      octree.updateNormals();
-      return octree;
-   }
-
-   public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(List<Point3DReadOnly[]> pointCloudMap,
-                                                                                  List<RigidBodyTransformReadOnly> sensorPoses, double octreeResolution,
-                                                                                  PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
-   {
-      // TODO: FB-348: Surface normal filter in NormalOctree.
-      NormalOcTree referenceOctree = computeOctreeData(pointCloudMap, sensorPoses, octreeResolution);
-
-      PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(false);
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-      segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
-
-      segmentationCalculator.compute(referenceOctree.getRoot());
-
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-
-      return rawData;
-   }
-
-   public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition,
-                                                                                  double octreeResolution,
-                                                                                  PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
-   {
-      return computePlanarRegionRawData(pointCloud, sensorPosition, octreeResolution, planarRegionSegmentationParameters, true);
-   }
-
-   public static List<PlanarRegionSegmentationRawData> computePlanarRegionRawData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition,
-                                                                                  double octreeResolution,
-                                                                                  PlanarRegionSegmentationParameters planarRegionSegmentationParameters,
-                                                                                  boolean useSurfaceNormalFilter)
-   {
-      NormalOcTree referenceOctree = computeOctreeData(pointCloud, sensorPosition, octreeResolution);
-
-      PlanarRegionSegmentationCalculator segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(useSurfaceNormalFilter);
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-      segmentationCalculator.setSensorPosition(sensorPosition);
-
-      segmentationCalculator.compute(referenceOctree.getRoot());
-
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-
-      return rawData;
    }
 
    public static double computeDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
@@ -289,111 +199,6 @@ public class SLAMTools
          vertex.add(hitLocation);
       }
       Vertex3DSupplier supplier = Vertex3DSupplier.asVertex3DSupplier(vertex);
-      ConvexPolygon2D windowForMap = new ConvexPolygon2D(supplier);
-
-      return windowForMap;
-   }
-
-   /**
-    * Collects the points in the {@code frame} that overlap with the {@code mapOctree} from the sensor
-    * perspective.
-    * <p>
-    * The points from the new frame that overlap with the map are called <i>source points</i>.
-    * </p>
-    * 
-    * @param frame                       single frame previously measured.
-    * @param mapOctree                   the octree used to record frames over-time and serving as a
-    *                                    map.
-    * @param desiredNumberOfSourcePoints the number of source points required. If the actual number of
-    *                                    source points found is less than
-    *                                    {@code desiredNumberOfSourcePoints}, then this method returns
-    *                                    {@code null}.
-    * @param minimumOverlapRatio         minimum ratio of the actual number of source points over the
-    *                                    frame size. If the actual ratio is under, then this method
-    *                                    returns {@code null}.
-    * @param windowMargin                tolerance used to shrink the map when testing if a point is
-    *                                    overlapping.
-    * @return the source points or {@code null} if {@code frame} should be thrown away.
-    */
-   public static Point3D[] createSourcePointsToSensorPose(SLAMFrame frame, NormalOcTree mapOctree, int desiredNumberOfSourcePoints, double minimumOverlapRatio,
-                                                          double windowMargin)
-   {
-      ConvexPolygon2D windowForMap = computeMapConvexHullInSensorFrame(mapOctree, frame.getUncorrectedSensorPoseInWorld());
-
-      Point3DReadOnly[] newPointCloudToSensorPose = frame.getPointCloudInSensorFrame();
-      boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
-      int numberOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
-      {
-         Point3DReadOnly point = newPointCloudToSensorPose[i];
-         isInPreviousView[i] = false;
-         if (windowForMap.isPointInside(point.getX(), point.getY(), -windowMargin))
-         {
-            isInPreviousView[i] = true;
-            numberOfPointsInWindow++;
-         }
-      }
-
-      Point3D[] pointsInPreviousWindow = new Point3D[numberOfPointsInWindow];
-      int indexOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
-      {
-         if (isInPreviousView[i])
-         {
-            pointsInPreviousWindow[indexOfPointsInWindow] = new Point3D(newPointCloudToSensorPose[i]);
-            indexOfPointsInWindow++;
-         }
-      }
-
-      double overlappedRatio = (double) numberOfPointsInWindow / newPointCloudToSensorPose.length;
-      if (overlappedRatio < minimumOverlapRatio)
-      {
-         return null;
-      }
-      if (numberOfPointsInWindow < desiredNumberOfSourcePoints)
-      {
-         return null;
-      }
-
-      TIntArrayList indexOfSourcePoints = new TIntArrayList();
-      int indexOfSourcePoint = 0;
-      Point3D[] sourcePoints = new Point3D[desiredNumberOfSourcePoints];
-      Random randomSelector = new Random(0612L);
-
-      while (indexOfSourcePoints.size() != desiredNumberOfSourcePoints)
-      {
-         int selectedIndex = randomSelector.nextInt(pointsInPreviousWindow.length);
-         if (!indexOfSourcePoints.contains(selectedIndex))
-         {
-            Point3D selectedPoint = pointsInPreviousWindow[selectedIndex];
-            sourcePoints[indexOfSourcePoint] = selectedPoint;
-            indexOfSourcePoint++;
-            indexOfSourcePoints.add(selectedIndex);
-         }
-      }
-
-      return sourcePoints;
-   }
-
-   public static int countNumberOfInliers(NormalOcTree octree, RigidBodyTransformReadOnly sensorPoseToWorld, Point3DReadOnly[] sourcePointsToSensor)
-   {
-      int numberOfInliers = 0;
-      Point3D newSourcePointToWorld = new Point3D();
-      for (Point3DReadOnly sourcePoint : sourcePointsToSensor)
-      {
-         newSourcePointToWorld.set(sourcePoint);
-         sensorPoseToWorld.transform(newSourcePointToWorld);
-
-         double distance = SLAMTools.computeDistancePointToNormalOctree(octree, newSourcePointToWorld);
-
-         if (distance >= 0)
-         {
-            if (distance < octree.getResolution())
-            {
-               numberOfInliers++;
-            }
-         }
-      }
-      return numberOfInliers;
+      return new ConvexPolygon2D(supplier);
    }
 }
