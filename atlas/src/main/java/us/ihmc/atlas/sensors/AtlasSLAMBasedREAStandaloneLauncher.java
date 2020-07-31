@@ -50,6 +50,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       Runnable setup = () -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE);
       if (spawnUIs)
       {
+         JavaFXApplicationCreator.createAJavaFXApplication();
          Platform.runLater(setup);
       }
       else
@@ -63,7 +64,6 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       Stage primaryStage = null;
       if (spawnUIs)
       {
-         JavaFXApplicationCreator.createAJavaFXApplication();
          primaryStage = new Stage();
       }
 
