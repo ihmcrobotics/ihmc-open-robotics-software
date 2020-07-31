@@ -138,6 +138,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
       {
          if (frame == null)
          {
+            System.out.println("FiducialDetectorToolBoxController: Debug True starting jframe");
             frame = new JFrame();
 
             frame.getContentPane().setLayout(new FlowLayout());
@@ -165,7 +166,8 @@ public class FiducialDetectorToolboxController extends ToolboxController
       if (DEBUG)
       {
          image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
-         frame.setVisible(true);
+         frame.pack();
+         frame.repaint();
       }
 
       detector.detect(grayImage);
