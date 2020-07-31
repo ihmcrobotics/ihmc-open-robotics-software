@@ -188,7 +188,7 @@ public class LookAndStepFootstepPlanningTask
    protected void performTask()
    {
       statusLogger.info("Finding next sub goal for footstep planning...");
-      uiPublisher.publishToUI(FootstepPlanningRegionsForUI, planarRegions);
+      uiPublisher.publishToUI(BodyPathRegionsForUI, planarRegions);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
       initialPoseBetweenFeet.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
