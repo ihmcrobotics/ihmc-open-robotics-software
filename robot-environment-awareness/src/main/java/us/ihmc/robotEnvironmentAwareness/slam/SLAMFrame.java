@@ -7,7 +7,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -18,7 +17,6 @@ import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
@@ -33,11 +31,6 @@ public class SLAMFrame
    private final RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld;
 
    /**
-    * parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
-    */
-   private final RigidBodyTransformReadOnly sensorPoseInWorld;
-
-   /**
     * SLAM result.
     */
    private final RigidBodyTransform driftCompensationTransform = new RigidBodyTransform();
@@ -45,13 +38,18 @@ public class SLAMFrame
    /**
     * this.sensorPoseToWorld * this.slamTransformer.
     */
-   private final RigidBodyTransform optimizedSensorPoseInWorld = new RigidBodyTransform();
+   private final RigidBodyTransform correctedSensorPoseInWorld = new RigidBodyTransform();
 
    private final Point3DReadOnly[] uncorrectedPointCloudInWorld; // For comparison after mapping.
    private final Point3DReadOnly[] pointCloudInSensorFrame;
    private final Point3D[] correctedPointCloudInWorld;
 
    private double confidenceFactor = 1.0;
+
+   private final List<Plane3D> surfaceElements = new ArrayList<>();
+   private final List<Plane3DReadOnly> surfaceElementsInSensorFrame = new ArrayList<>();
+   private NormalOcTree frameMap;
+
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {
@@ -65,8 +63,7 @@ public class SLAMFrame
 
       uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
 
-      sensorPoseInWorld = new RigidBodyTransform(uncorrectedSensorPoseInWorld);
-      optimizedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
+      correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudInSensorFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedSensorPoseInWorld, uncorrectedPointCloudInWorld);
@@ -85,33 +82,26 @@ public class SLAMFrame
 
    private void updateOptimizedPointCloudAndSensorPose()
    {
-      optimizedSensorPoseInWorld.set(sensorPoseInWorld);
-      optimizedSensorPoseInWorld.getRotation().normalize();
-      optimizedSensorPoseInWorld.multiply(driftCompensationTransform);
+      correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
+      correctedSensorPoseInWorld.getRotation().normalize();
+      correctedSensorPoseInWorld.multiply(driftCompensationTransform);
 
       for (int i = 0; i < correctedPointCloudInWorld.length; i++)
-      {
-         correctedPointCloudInWorld[i].set(pointCloudInSensorFrame[i]);
-         optimizedSensorPoseInWorld.transform(correctedPointCloudInWorld[i]);
-      }
+         correctedSensorPoseInWorld.transform(pointCloudInSensorFrame[i], correctedPointCloudInWorld[i]);
 
       for (int i = 0; i < surfaceElements.size(); i++)
       {
          Plane3D surfel = surfaceElements.get(i);
-         surfel.set(surfaceElementsToSensor.get(i));
+         surfel.set(surfaceElementsInSensorFrame.get(i));
          getSensorPose().transform(surfel.getPoint());
          getSensorPose().transform(surfel.getNormal());
       }
    }
 
-   private final List<Plane3D> surfaceElements = new ArrayList<>();
-   private final List<Plane3DReadOnly> surfaceElementsToSensor = new ArrayList<>();
-   private NormalOcTree frameMap;
-
    public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
    {
       surfaceElements.clear();
-      surfaceElementsToSensor.clear();
+      surfaceElementsInSensorFrame.clear();
       frameMap = new NormalOcTree(surfaceElementResolution);
 
       ConvexPolygon2D mapHullInWorld = new ConvexPolygon2D();
@@ -140,7 +130,7 @@ public class SLAMFrame
                node.getHitLocation(surfaceElement.getPoint());
 
                surfaceElements.add(surfaceElement);
-               surfaceElementsToSensor.add(SLAMTools.createConvertedSurfaceElementToSensorPose(getUncorrectedSensorPoseInWorld(), surfaceElement));
+               surfaceElementsInSensorFrame.add(SLAMTools.createConvertedSurfaceElementToSensorPose(getUncorrectedSensorPoseInWorld(), surfaceElement));
             }
          }
       }
@@ -156,9 +146,9 @@ public class SLAMFrame
       return surfaceElements;
    }
 
-   public List<Plane3DReadOnly> getSurfaceElementsToSensor()
+   public List<Plane3DReadOnly> getSurfaceElementsInSensorFrame()
    {
-      return surfaceElementsToSensor;
+      return surfaceElementsInSensorFrame;
    }
 
    public void setConfidenceFactor(double value)
@@ -171,7 +161,7 @@ public class SLAMFrame
       return uncorrectedPointCloudInWorld;
    }
 
-   public Point3DReadOnly[] getOriginalPointCloudToSensorPose()
+   public Point3DReadOnly[] getPointCloudInSensorFrame()
    {
       return pointCloudInSensorFrame;
    }
@@ -181,11 +171,6 @@ public class SLAMFrame
       return uncorrectedSensorPoseInWorld;
    }
 
-   public RigidBodyTransformReadOnly getInitialSensorPoseToWorld()
-   {
-      return sensorPoseInWorld;
-   }
-
    public Point3DReadOnly[] getPointCloud()
    {
       return correctedPointCloudInWorld;
@@ -193,7 +178,7 @@ public class SLAMFrame
 
    public RigidBodyTransformReadOnly getSensorPose()
    {
-      return optimizedSensorPoseInWorld;
+      return correctedSensorPoseInWorld;
    }
 
    public boolean isFirstFrame()

@@ -42,7 +42,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
       frame.registerSurfaceElements(getOctree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
 
-      int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      int numberOfSurfel = frame.getSurfaceElementsInSensorFrame().size();
       sourcePoints = new Point3D[numberOfSurfel];
       if (DEBUG)
          LogTools.info("numberOfSurfel " + numberOfSurfel);
@@ -59,7 +59,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             for (int i = 0; i < numberOfSurfel; i++)
             {
                correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame.getSurfaceElementsToSensor().get(i));
+               correctedSurfel[i].set(frame.getSurfaceElementsInSensorFrame().get(i));
 
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
