@@ -133,22 +133,22 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap, frame2);
 
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getUncorrectedSensorPoseInWorld());
-      correctedSensorPoseToWorld.multiply(icpTransformer);
+      RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform();
+      RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame2.getUncorrectedLocalPoseInWorld());
+      correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frame2.getPointCloudInSensorFrame().length];
+      Point3D[] correctedData = new Point3D[frame2.getPointCloudInLocalFrame().length];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frame2.getPointCloudInSensorFrame()[i]);
-         icpTransformer.transform(correctedData[i]);
+         correctedData[i] = new Point3D(frame2.getPointCloudInLocalFrame()[i]);
+         driftCorrectionTransform.transform(correctedData[i]);
       }
 
       frame1GraphicsManager.updateGraphics();
       frame2GraphicsManager.updateGraphics();
       scs.tickAndUpdate();
 
-      RigidBodyTransform previousIcpTransformer = new RigidBodyTransform(icpTransformer);
+      RigidBodyTransform previousDriftCorrectionTransform = new RigidBodyTransform(driftCorrectionTransform);
       for (double t = 1.0; t <= trajectoryTime + dt; t += dt)
       {
          robot.getYoTime().set(t);
@@ -158,23 +158,23 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          // get parameter.
          DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
-         icpTransformer.set(inputFunction.apply(optimalParameter));
-         correctedSensorPoseToWorld.set(frame2.getUncorrectedSensorPoseInWorld());
-         correctedSensorPoseToWorld.multiply(icpTransformer);
+         driftCorrectionTransform.set(inputFunction.apply(optimalParameter));
+         correctedLocalPoseInWorld.set(frame2.getUncorrectedLocalPoseInWorld());
+         correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frame2.getPointCloudInSensorFrame()[i]);
-            icpTransformer.transform(correctedData[i]);
+            correctedData[i].set(frame2.getPointCloudInLocalFrame()[i]);
+            driftCorrectionTransform.transform(correctedData[i]);
          }
 
-         frame2.updateOptimizedCorrection(icpTransformer);
+         frame2.updateOptimizedCorrection(driftCorrectionTransform);
          double quality = optimizer.getQuality();
          double pureQuality = optimizer.getPureQuality();
-         double translationalEffort = icpTransformer.getTranslation().lengthSquared();
-         double rotationalEffort = icpTransformer.getRotation().distance(new RotationMatrix());
+         double translationalEffort = driftCorrectionTransform.getTranslation().lengthSquared();
+         double rotationalEffort = driftCorrectionTransform.getRotation().distance(new RotationMatrix());
          //double translationalEffortDiff = new Point3D(previousIcpTransformer.getTranslation()).distance(new Point3D(icpTransformer.getTranslation()));
          double translationalEffortDiff = Math.abs(translationalEffort - optimizerTranslationalEffort.getDoubleValue());
-         double rotationalEffortDiff = new Quaternion(previousIcpTransformer.getRotation()).distance(new Quaternion(icpTransformer.getRotation()));
+         double rotationalEffortDiff = new Quaternion(previousDriftCorrectionTransform.getRotation()).distance(new Quaternion(driftCorrectionTransform.getRotation()));
 
          // update viz.
          frame1GraphicsManager.updateGraphics();
@@ -219,7 +219,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizerRotationalEffort.set(rotationalEffort);
          numberOfCorrespondingPoints.set(optimizer.getNumberOfCorrespondingPoints());
 
-         previousIcpTransformer.set(icpTransformer);
+         previousDriftCorrectionTransform.set(driftCorrectionTransform);
          if (isSteady)
          {
             steadyIterations++;
@@ -251,30 +251,30 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, SLAMFrame frame)
    {
-      int numberOfSurfel = frame.getSurfaceElementsInSensorFrame().size();
+      int numberOfSurfel = frame.getNumberOfSurfaceElements();
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getUncorrectedSensorPoseInWorld());
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
+            correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
+            Plane3D[] correctedSurfelInWorld = new Plane3D[numberOfSurfel];
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame.getSurfaceElementsInSensorFrame().get(i));
+               correctedSurfelInWorld[i] = new Plane3D();
+               correctedSurfelInWorld[i].set(frame.getSurfaceElementsInLocalFrame().get(i));
 
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getNormal());
             }
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
-            for (int i = 0; i < correctedSurfel.length; i++)
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfelInWorld.length, 1);
+            for (int i = 0; i < correctedSurfelInWorld.length; i++)
             {
-               double distance = computeClosestDistance(correctedSurfel[i]);
+               double distance = computeClosestDistance(correctedSurfelInWorld[i]);
                errorSpace.set(i, distance);
             }
             return errorSpace;

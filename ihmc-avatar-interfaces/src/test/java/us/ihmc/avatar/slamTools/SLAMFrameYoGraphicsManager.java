@@ -53,10 +53,10 @@ public class SLAMFrameYoGraphicsManager
       yoGraphicSensorPose = new YoGraphicCoordinateSystem(prefix + "_SensorPoseViz", yoFrameSensorPose, 0.1, appearance);
       yoGraphicListRegistry.add(yoGraphicSensorPose);
 
-      if (size < 0 || slamFrame.getPointCloud().length < size)
+      if (size < 0 || slamFrame.getCorrectedPointCloudInWorld().length < size)
       {
-         sizeOfPointCloud = slamFrame.getPointCloud().length;
-         for (int i = 0; i < slamFrame.getPointCloud().length; i++)
+         sizeOfPointCloud = slamFrame.getCorrectedPointCloudInWorld().length;
+         for (int i = 0; i < slamFrame.getCorrectedPointCloudInWorld().length; i++)
          {
             indicesArray.add(i);
          }
@@ -67,7 +67,7 @@ public class SLAMFrameYoGraphicsManager
          sizeOfPointCloud = size;
          while (indicesArray.size() != sizeOfPointCloud)
          {
-            int selectedIndex = selector.nextInt(slamFrame.getPointCloud().length);
+            int selectedIndex = selector.nextInt(slamFrame.getCorrectedPointCloudInWorld().length);
             if (!indicesArray.contains(selectedIndex))
             {
                indicesArray.add(selectedIndex);
@@ -116,8 +116,8 @@ public class SLAMFrameYoGraphicsManager
 
    public void updateGraphics()
    {
-      yoFrameSensorPose.set(slamFrame.getSensorPose());
-      Point3DReadOnly[] pointCloud = slamFrame.getPointCloud();
+      yoFrameSensorPose.set(slamFrame.getCorrectedLocalPoseInWorld());
+      Point3DReadOnly[] pointCloud = slamFrame.getCorrectedPointCloudInWorld();
       for (int i = 0; i < sizeOfPointCloud; i++)
       {
          yoFramePointCloud[i].set(pointCloud[indicesArray.get(i)]);

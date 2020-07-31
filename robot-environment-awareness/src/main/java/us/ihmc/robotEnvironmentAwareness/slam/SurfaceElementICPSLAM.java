@@ -42,7 +42,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
       frame.registerSurfaceElements(getOctree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
 
-      int numberOfSurfel = frame.getSurfaceElementsInSensorFrame().size();
+      int numberOfSurfel = frame.getNumberOfSurfaceElements();
       sourcePoints = new Point3D[numberOfSurfel];
       if (DEBUG)
          LogTools.info("numberOfSurfel " + numberOfSurfel);
@@ -52,24 +52,24 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getUncorrectedSensorPoseInWorld());
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
+            correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
+            Plane3D[] correctedSurfelInWorld = new Plane3D[numberOfSurfel];
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame.getSurfaceElementsInSensorFrame().get(i));
+               correctedSurfelInWorld[i] = new Plane3D();
+               correctedSurfelInWorld[i].set(frame.getSurfaceElementsInLocalFrame().get(i));
 
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
-               sourcePoints[i] = new Point3D(correctedSensorPoseToWorld.getTranslation());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getNormal());
+               sourcePoints[i] = new Point3D(correctedLocalPoseInWorld.getTranslation());
             }
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
-            for (int i = 0; i < correctedSurfel.length; i++)
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfelInWorld.length, 1);
+            for (int i = 0; i < correctedSurfelInWorld.length; i++)
             {
-               double distance = computeClosestDistance(correctedSurfel[i]);
+               double distance = computeClosestDistance(correctedSurfelInWorld[i]);
                errorSpace.set(i, distance);
             }
             return errorSpace;

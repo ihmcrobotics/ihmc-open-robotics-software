@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -26,9 +27,9 @@ public class SLAMFrame
    private final SLAMFrame previousFrame;
 
    /**
-    * original sensor pose from message.
+    * original pose from message.
     */
-   private final RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld;
+   private final RigidBodyTransformBasics uncorrectedLocalPoseInWorld;
 
    /**
     * SLAM result.
@@ -38,38 +39,45 @@ public class SLAMFrame
    /**
     * this.sensorPoseToWorld * this.slamTransformer.
     */
-   private final RigidBodyTransform correctedSensorPoseInWorld = new RigidBodyTransform();
+   private final RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform();
 
    private final Point3DReadOnly[] uncorrectedPointCloudInWorld; // For comparison after mapping.
-   private final Point3DReadOnly[] pointCloudInSensorFrame;
+   private final Point3DReadOnly[] pointCloudInLocalFrame;
    private final Point3D[] correctedPointCloudInWorld;
 
    private double confidenceFactor = 1.0;
 
    private final List<Plane3D> surfaceElements = new ArrayList<>();
-   private final List<Plane3DReadOnly> surfaceElementsInSensorFrame = new ArrayList<>();
+   private final List<Plane3DReadOnly> surfaceElementsInLocalFrame = new ArrayList<>();
    private NormalOcTree frameMap;
 
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {
-      this(null, message);
+      this(null, new RigidBodyTransform(), message);
    }
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
+      this(frame, new RigidBodyTransform(), message);
+   }
+   
+   public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly sensorToLocalTransform, StereoVisionPointCloudMessage message)
+   {
       timestamp = message.getTimestamp();
       previousFrame = frame;
 
-      uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
+      RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
+      uncorrectedLocalPoseInWorld = new RigidBodyTransform();
+      sensorToLocalTransform.transform(uncorrectedSensorPoseInWorld, uncorrectedLocalPoseInWorld);
 
-      correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
+      correctedLocalPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
-      pointCloudInSensorFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedSensorPoseInWorld, uncorrectedPointCloudInWorld);
-      correctedPointCloudInWorld = new Point3D[pointCloudInSensorFrame.length];
+      pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld);
+      correctedPointCloudInWorld = new Point3D[pointCloudInLocalFrame.length];
       for (int i = 0; i < correctedPointCloudInWorld.length; i++)
-         correctedPointCloudInWorld[i] = new Point3D(pointCloudInSensorFrame[i]);
+         correctedPointCloudInWorld[i] = new Point3D(pointCloudInLocalFrame[i]);
 
       updateOptimizedPointCloudAndSensorPose();
    }
@@ -82,26 +90,26 @@ public class SLAMFrame
 
    private void updateOptimizedPointCloudAndSensorPose()
    {
-      correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
-      correctedSensorPoseInWorld.getRotation().normalize();
-      correctedSensorPoseInWorld.multiply(driftCompensationTransform);
+      correctedLocalPoseInWorld.set(uncorrectedLocalPoseInWorld);
+      correctedLocalPoseInWorld.getRotation().normalize();
+      correctedLocalPoseInWorld.multiply(driftCompensationTransform);
 
       for (int i = 0; i < correctedPointCloudInWorld.length; i++)
-         correctedSensorPoseInWorld.transform(pointCloudInSensorFrame[i], correctedPointCloudInWorld[i]);
+         correctedLocalPoseInWorld.transform(pointCloudInLocalFrame[i], correctedPointCloudInWorld[i]);
 
       for (int i = 0; i < surfaceElements.size(); i++)
       {
          Plane3D surfel = surfaceElements.get(i);
-         surfel.set(surfaceElementsInSensorFrame.get(i));
-         getSensorPose().transform(surfel.getPoint());
-         getSensorPose().transform(surfel.getNormal());
+         surfel.set(surfaceElementsInLocalFrame.get(i));
+         getCorrectedLocalPoseInWorld().transform(surfel.getPoint());
+         getCorrectedLocalPoseInWorld().transform(surfel.getNormal());
       }
    }
 
    public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
    {
       surfaceElements.clear();
-      surfaceElementsInSensorFrame.clear();
+      surfaceElementsInLocalFrame.clear();
       frameMap = new NormalOcTree(surfaceElementResolution);
 
       ConvexPolygon2D mapHullInWorld = new ConvexPolygon2D();
@@ -109,7 +117,7 @@ public class SLAMFrame
          mapHullInWorld.addVertex(node.getHitLocationX(), node.getHitLocationY());
       mapHullInWorld.update();
 
-      frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedSensorPoseInWorld(), mapHullInWorld, windowMargin), false);
+      frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedLocalPoseInWorld().getTranslation(), mapHullInWorld, windowMargin), false);
       frameMap.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
@@ -130,7 +138,7 @@ public class SLAMFrame
                node.getHitLocation(surfaceElement.getPoint());
 
                surfaceElements.add(surfaceElement);
-               surfaceElementsInSensorFrame.add(SLAMTools.createConvertedSurfaceElementToSensorPose(getUncorrectedSensorPoseInWorld(), surfaceElement));
+               surfaceElementsInLocalFrame.add(SLAMTools.createConvertedSurfaceElementToSensorPose(getUncorrectedLocalPoseInWorld(), surfaceElement));
             }
          }
       }
@@ -141,14 +149,19 @@ public class SLAMFrame
       return frameMap;
    }
 
+   public int getNumberOfSurfaceElements()
+   {
+      return surfaceElements.size();
+   }
+
    public List<Plane3D> getSurfaceElements()
    {
       return surfaceElements;
    }
 
-   public List<Plane3DReadOnly> getSurfaceElementsInSensorFrame()
+   public List<Plane3DReadOnly> getSurfaceElementsInLocalFrame()
    {
-      return surfaceElementsInSensorFrame;
+      return surfaceElementsInLocalFrame;
    }
 
    public void setConfidenceFactor(double value)
@@ -161,24 +174,24 @@ public class SLAMFrame
       return uncorrectedPointCloudInWorld;
    }
 
-   public Point3DReadOnly[] getPointCloudInSensorFrame()
+   public Point3DReadOnly[] getPointCloudInLocalFrame()
    {
-      return pointCloudInSensorFrame;
+      return pointCloudInLocalFrame;
    }
 
-   public RigidBodyTransformReadOnly getUncorrectedSensorPoseInWorld()
+   public RigidBodyTransformReadOnly getUncorrectedLocalPoseInWorld()
    {
-      return uncorrectedSensorPoseInWorld;
+      return uncorrectedLocalPoseInWorld;
    }
 
-   public Point3DReadOnly[] getPointCloud()
+   public Point3DReadOnly[] getCorrectedPointCloudInWorld()
    {
       return correctedPointCloudInWorld;
    }
 
-   public RigidBodyTransformReadOnly getSensorPose()
+   public RigidBodyTransformReadOnly getCorrectedLocalPoseInWorld()
    {
-      return correctedSensorPoseInWorld;
+      return correctedLocalPoseInWorld;
    }
 
    public boolean isFirstFrame()

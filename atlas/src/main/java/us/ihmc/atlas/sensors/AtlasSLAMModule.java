@@ -161,7 +161,7 @@ public class AtlasSLAMModule extends SLAMModule
          }
          posePacket.setConfidenceFactor(0.5);
          RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
-         estimatedPelvisPose.preMultiply(latestFrame.getSensorPose());
+         estimatedPelvisPose.preMultiply(latestFrame.getCorrectedLocalPoseInWorld());
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
 
