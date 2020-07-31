@@ -51,7 +51,6 @@ public class AtlasSLAMModule extends SLAMModule
 
    private final AtomicBoolean robotStatus = new AtomicBoolean(false);
    private final AtomicBoolean velocityStatus = new AtomicBoolean(true);
-   private final AtomicBoolean biasEnable = new AtomicBoolean(false);
 
    /**
     * to update corrected sensor frame for robot state estimation.
@@ -101,7 +100,6 @@ public class AtlasSLAMModule extends SLAMModule
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
       reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
-      reaMessager.registerTopicListener(SLAMModuleAPI.BiasEnable, biasEnable::set);
    }
 
    @Override
@@ -113,8 +111,6 @@ public class AtlasSLAMModule extends SLAMModule
          reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
       if (velocityStatus != null)
          reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, velocityStatus.get());
-      if (biasEnable != null)
-         reaMessager.submitMessage(SLAMModuleAPI.BiasEnable, biasEnable.get());
    }
 
    @Override
