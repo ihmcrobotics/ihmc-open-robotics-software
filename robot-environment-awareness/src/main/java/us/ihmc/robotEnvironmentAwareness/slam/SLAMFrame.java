@@ -55,21 +55,7 @@ public class SLAMFrame
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {
-      timestamp = message.getTimestamp();
-      previousFrame = null;
-
-      uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
-
-      sensorPoseInWorld = new RigidBodyTransform(uncorrectedSensorPoseInWorld);
-      optimizedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
-
-      uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
-      pointCloudInSensorFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedSensorPoseInWorld, uncorrectedPointCloudInWorld);
-      correctedPointCloudInWorld = new Point3D[pointCloudInSensorFrame.length];
-      for (int i = 0; i < correctedPointCloudInWorld.length; i++)
-         correctedPointCloudInWorld[i] = new Point3D(pointCloudInSensorFrame[i]);
-
-      updateOptimizedPointCloudAndSensorPose();
+      this(null, message);
    }
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
@@ -80,6 +66,7 @@ public class SLAMFrame
       uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
 
       sensorPoseInWorld = new RigidBodyTransform(uncorrectedSensorPoseInWorld);
+      optimizedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudInSensorFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedSensorPoseInWorld, uncorrectedPointCloudInWorld);
