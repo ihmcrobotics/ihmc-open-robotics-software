@@ -27,9 +27,9 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       this(octreeResolution, new RigidBodyTransform());
    }
 
-   public SurfaceElementICPSLAM(double octreeResolution, RigidBodyTransformReadOnly transformFromSensorToLocalFrame)
+   public SurfaceElementICPSLAM(double octreeResolution, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
    {
-      super(octreeResolution, transformFromSensorToLocalFrame);
+      super(octreeResolution, transformFromLocalFrameToSensor);
    }
 
    public void updateParameters(SurfaceElementICPSLAMParameters parameters)

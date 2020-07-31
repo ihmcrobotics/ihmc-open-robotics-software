@@ -30,6 +30,7 @@ public class SLAMFrame
     * original pose from message.
     */
    private final RigidBodyTransformBasics uncorrectedLocalPoseInWorld;
+   private final RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld;
 
    /**
     * SLAM result.
@@ -40,6 +41,7 @@ public class SLAMFrame
     * this.sensorPoseToWorld * this.slamTransformer.
     */
    private final RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform();
+   private final RigidBodyTransform correctedSensorPoseInWorld = new RigidBodyTransform();
 
    private final Point3DReadOnly[] uncorrectedPointCloudInWorld; // For comparison after mapping.
    private final Point3DReadOnly[] pointCloudInLocalFrame;
@@ -56,9 +58,9 @@ public class SLAMFrame
       this(null, new RigidBodyTransform(), message);
    }
 
-   public SLAMFrame(RigidBodyTransformReadOnly sensorToLocalTransform, StereoVisionPointCloudMessage message)
+   public SLAMFrame(RigidBodyTransformReadOnly localToSensorTransform, StereoVisionPointCloudMessage message)
    {
-      this(null, sensorToLocalTransform, message);
+      this(null, localToSensorTransform, message);
    }
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
@@ -66,16 +68,18 @@ public class SLAMFrame
       this(frame, new RigidBodyTransform(), message);
    }
 
-   public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly sensorToLocalTransform, StereoVisionPointCloudMessage message)
+   public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly localToSensorTransorm, StereoVisionPointCloudMessage message)
    {
       timestamp = message.getTimestamp();
       previousFrame = frame;
 
-      RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
+      uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
       uncorrectedLocalPoseInWorld = new RigidBodyTransform();
-      sensorToLocalTransform.transform(uncorrectedSensorPoseInWorld, uncorrectedLocalPoseInWorld);
+      uncorrectedLocalPoseInWorld.set(uncorrectedSensorPoseInWorld);
+      uncorrectedLocalPoseInWorld.multiplyInvertOther(localToSensorTransorm);
 
-      correctedLocalPoseInWorld.set(uncorrectedSensorPoseInWorld);
+      correctedLocalPoseInWorld.set(uncorrectedLocalPoseInWorld);
+      correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld);
@@ -97,6 +101,10 @@ public class SLAMFrame
       correctedLocalPoseInWorld.set(uncorrectedLocalPoseInWorld);
       correctedLocalPoseInWorld.getRotation().normalize();
       correctedLocalPoseInWorld.multiply(driftCompensationTransform);
+
+      correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
+      correctedSensorPoseInWorld.getRotation().normalize();
+      correctedSensorPoseInWorld.multiply(driftCompensationTransform);
 
       for (int i = 0; i < correctedPointCloudInWorld.length; i++)
          correctedLocalPoseInWorld.transform(pointCloudInLocalFrame[i], correctedPointCloudInWorld[i]);
@@ -188,6 +196,11 @@ public class SLAMFrame
       return uncorrectedLocalPoseInWorld;
    }
 
+   public RigidBodyTransformReadOnly getUncorrectedSensorPoseInWorld()
+   {
+      return uncorrectedSensorPoseInWorld;
+   }
+
    public Point3DReadOnly[] getCorrectedPointCloudInWorld()
    {
       return correctedPointCloudInWorld;
@@ -196,6 +209,11 @@ public class SLAMFrame
    public RigidBodyTransformReadOnly getCorrectedLocalPoseInWorld()
    {
       return correctedLocalPoseInWorld;
+   }
+
+   public RigidBodyTransformReadOnly getCorrectedSensorPoseInWorld()
+   {
+      return correctedSensorPoseInWorld;
    }
 
    public boolean isFirstFrame()

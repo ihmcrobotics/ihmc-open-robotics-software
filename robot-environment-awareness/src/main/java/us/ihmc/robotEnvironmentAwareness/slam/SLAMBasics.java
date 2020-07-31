@@ -32,23 +32,23 @@ public class SLAMBasics implements SLAMInterface
    private final AtomicDouble latestComputationTime = new AtomicDouble();
 
    protected final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
-   private final RigidBodyTransformReadOnly transformFromSensorToLocalFrame;
+   private final RigidBodyTransformReadOnly transformFromLocalToSensor;
 
    public SLAMBasics(double octreeResolution)
    {
       this(octreeResolution, new RigidBodyTransform());
    }
 
-   public SLAMBasics(double octreeResolution, RigidBodyTransformReadOnly transformFromSensorToLocalFrame)
+   public SLAMBasics(double octreeResolution, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
    {
-      this.transformFromSensorToLocalFrame = transformFromSensorToLocalFrame;
+      this.transformFromLocalToSensor = transformFromLocalFrameToSensor;
       mapOcTree = new NormalOcTree(octreeResolution);
    }
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
    {
       Point3DReadOnly[] pointCloud = frame.getCorrectedPointCloudInWorld();
-      RigidBodyTransformReadOnly sensorPose = frame.getCorrectedLocalPoseInWorld();
+      RigidBodyTransformReadOnly sensorPose = frame.getCorrectedSensorPoseInWorld();
 
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
       scan.getPointCloud().setTimestamp(frame.getTimeStamp());
@@ -65,7 +65,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(transformFromSensorToLocalFrame, pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage);
       setLatestFrame(frame);
       insertNewPointCloud(frame, insertMiss);
 
@@ -75,7 +75,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromSensorToLocalFrame, pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage);
 
       long startTime = System.nanoTime();
       RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);

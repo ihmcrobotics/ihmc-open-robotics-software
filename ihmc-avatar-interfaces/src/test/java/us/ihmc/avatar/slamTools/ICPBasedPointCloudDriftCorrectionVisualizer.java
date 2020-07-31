@@ -301,8 +301,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
                                                                                                            pointsInPreviousWindow.length,
                                                                                                            0.005,
                                                                                                            null);
-      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getCorrectedLocalPoseInWorld().getTranslation());
-      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getCorrectedLocalPoseInWorld().getRotation());
+      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getCorrectedSensorPoseInWorld().getTranslation());
+      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getCorrectedSensorPoseInWorld().getRotation());
       frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints);
    }
 }
