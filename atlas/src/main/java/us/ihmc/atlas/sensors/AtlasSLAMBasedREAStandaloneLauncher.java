@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
@@ -46,14 +47,18 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       this.spawnUIs = spawnUIs;
       this.pubSubImplementation = pubSubImplementation;
 
-      JavaFXApplicationCreator.createAJavaFXApplication();
 
       Platform.runLater(() -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE));
    }
 
    public void setup() throws Exception
    {
-      Stage primaryStage = new Stage();
+      Stage primaryStage = null;
+      if (spawnUIs)
+      {
+         JavaFXApplicationCreator.createAJavaFXApplication();
+         primaryStage = new Stage();
+      }
 
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
@@ -66,10 +71,10 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
-      slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
+      slamMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
 
-      segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
+      segmentationMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
       segmentationMessager.startMessager();
 
       if (spawnUIs)
