@@ -137,11 +137,11 @@ public class SLAMModule implements PerceptionModule
 
       useBoundingBox = reaMessager.createInput(SLAMModuleAPI.OcTreeBoundingBoxEnable, true);
       atomicBoundingBoxParameters = reaMessager.createInput(SLAMModuleAPI.OcTreeBoundingBoxParameters,
-                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-0.5f,
-                                                                                                                           -1.0f,
+                                                            BoundingBoxMessageConverter.createBoundingBoxParametersMessage(-1.0f,
+                                                                                                                           -1.5f,
                                                                                                                            -1.5f,
                                                                                                                            2.0f,
-                                                                                                                           1.0f,
+                                                                                                                           1.5f,
                                                                                                                            0.5f));
 
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
