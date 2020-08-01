@@ -146,6 +146,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          optimizer.iterate();
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
+         // FIXME this value for quality is never getting updated. Is that correct?
          quality = initialQuality;
          translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
          rotationalEffort.set(driftCompensationTransform.getRotation());
