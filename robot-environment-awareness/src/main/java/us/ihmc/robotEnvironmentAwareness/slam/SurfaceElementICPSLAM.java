@@ -12,6 +12,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
@@ -65,12 +66,10 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               Plane3D correctedSurfelInWorld = new Plane3D();
-               correctedSurfelInWorld.set(frame.getSurfaceElementsInLocalFrame().get(i));
+               Point3D correctedSurfelInWorld = new Point3D(frame.getSurfaceElementsInLocalFrame().get(i).getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld);
 
-               correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getPoint());
-               correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getNormal());
-               correctedCorrespondingPointLocation[i] = new Point3D(correctedLocalPoseInWorld.getTranslation());
+               correctedCorrespondingPointLocation[i] = correctedSurfelInWorld;
 
                double distance = computeClosestDistance(correctedSurfelInWorld);
                errorSpace.set(i, distance);
@@ -79,10 +78,10 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             return errorSpace;
          }
 
-         private double computeClosestDistance(Plane3DReadOnly surfel)
+         private double computeClosestDistance(Point3DReadOnly surfelLocation)
          {
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(mapOcTree,
-                                                                                    surfel.getPoint(),
+                                                                                    surfelLocation,
                                                                                     mapOcTree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
          }
       };
