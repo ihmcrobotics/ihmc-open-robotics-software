@@ -56,6 +56,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicLong lastTimestampProcessed = new AtomicLong(-1);
    protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
+   private final AtomicReference<NormalEstimationParameters> frameNormalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
    private final AtomicReference<Boolean> clearNormals;
 
@@ -144,6 +145,12 @@ public class SLAMModule implements PerceptionModule
       normalEstimationParametersLocal.setNumberOfIterations(10);
       normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
+      NormalEstimationParameters frameNormalEstimationParametersLocal = new NormalEstimationParameters();
+      frameNormalEstimationParametersLocal.setNumberOfIterations(10);
+      frameNormalEstimationParametersLocal.enableLeastSquaresEstimation(false);
+      frameNormalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParametersLocal);
+
+
       isOcTreeBoundingBoxRequested = reaMessager.createInput(SLAMModuleAPI.RequestBoundingBox, false);
 
       useBoundingBox = reaMessager.createInput(SLAMModuleAPI.OcTreeBoundingBoxEnable, true);
@@ -156,6 +163,7 @@ public class SLAMModule implements PerceptionModule
                                                                                                                            0.5f));
 
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
+      reaMessager.submitMessage(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParametersLocal);
 
       if (configurationFile != null)
       {
@@ -325,6 +333,7 @@ public class SLAMModule implements PerceptionModule
       }
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
          slam.clearNormals();
       if (enableNormalEstimation.get())
