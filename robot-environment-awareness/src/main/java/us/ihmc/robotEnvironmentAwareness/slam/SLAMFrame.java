@@ -81,27 +81,38 @@ public class SLAMFrame
     * Surface elements expressed in the local frame. They are absolute, and unaffected by drift correction, as they are local values.
     */
    private final List<Plane3DReadOnly> surfaceElementsInLocalFrame = new ArrayList<>();
+   private final NormalEstimationParameters normalEstimationParameters;
+
    private NormalOcTree frameMap;
 
-   public SLAMFrame(StereoVisionPointCloudMessage message)
+   public SLAMFrame(StereoVisionPointCloudMessage message, NormalEstimationParameters normalEstimationParameters)
    {
-      this(null, new RigidBodyTransform(), message);
+      this(null, new RigidBodyTransform(), message, normalEstimationParameters);
    }
 
-   public SLAMFrame(RigidBodyTransformReadOnly localToSensorTransform, StereoVisionPointCloudMessage message)
+   public SLAMFrame(RigidBodyTransformReadOnly localToSensorTransform,
+                    StereoVisionPointCloudMessage message,
+                    NormalEstimationParameters normalEstimationParameters)
    {
-      this(null, localToSensorTransform, message);
+      this(null, localToSensorTransform, message, normalEstimationParameters);
    }
 
-   public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
+   public SLAMFrame(SLAMFrame frame,
+                    StereoVisionPointCloudMessage message,
+                    NormalEstimationParameters normalEstimationParameters)
    {
-      this(frame, new RigidBodyTransform(), message);
+      this(frame, new RigidBodyTransform(), message, normalEstimationParameters);
    }
 
-   public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly localToSensorTransform, StereoVisionPointCloudMessage message)
+   public SLAMFrame(SLAMFrame frame,
+                    RigidBodyTransformReadOnly localToSensorTransform,
+                    StereoVisionPointCloudMessage message,
+                    NormalEstimationParameters normalEstimationParameters)
    {
       timestamp = message.getTimestamp();
       previousFrame = frame;
+
+      this.normalEstimationParameters = normalEstimationParameters;
 
       uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
       uncorrectedLocalPoseInWorld = new RigidBodyTransform();
@@ -162,8 +173,6 @@ public class SLAMFrame
       frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedLocalPoseInWorld().getTranslation(), mapHullInWorld, windowMargin), false);
       frameMap.enableParallelComputationForNormals(true);
 
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(10);
       frameMap.setNormalEstimationParameters(normalEstimationParameters);
       if (updateNormal)
          frameMap.updateNormals();
