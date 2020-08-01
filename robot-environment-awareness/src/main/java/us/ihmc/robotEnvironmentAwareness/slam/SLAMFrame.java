@@ -27,29 +27,59 @@ public class SLAMFrame
    private final SLAMFrame previousFrame;
 
    /**
-    * original pose from message.
+    * original sensor pose expressed in the world frame from the message.
+    */
+   private final RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld;
+   /**
+    * original pose to optimize about expressed in the world frame. This is pose is calculated from the {@link #correctedSensorPoseInWorld} by transforming it
+    * using the transform provided on construction.
     */
    private final RigidBodyTransformBasics uncorrectedLocalPoseInWorld;
-   private final RigidBodyTransformReadOnly uncorrectedSensorPoseInWorld;
 
    /**
-    * SLAM result.
+    * The result of the SLAM algorithm. This is the transform that maps the {@link #uncorrectedLocalPoseInWorld} to the {@link #correctedLocalPoseInWorld},
+    * which should account for any state estimation drift an error.
     */
    private final RigidBodyTransform driftCompensationTransform = new RigidBodyTransform();
 
    /**
-    * this.sensorPoseToWorld * this.slamTransformer.
+    * The sensor pose expressed in world frame from {@link #uncorrectedSensorPoseInWorld} after correcting the data for any drift to make it match the map. This
+    * is found by {@link #uncorrectedSensorPoseInWorld} * {@link #driftCompensationTransform}.
+    */
+   private final RigidBodyTransform correctedSensorPoseInWorld = new RigidBodyTransform();
+   /**
+    * The local frame pose expressed in world frame from {@link #uncorrectedLocalPoseInWorld} after correcting the data for any drift to make it match the map.
+    * This is found by {@link #uncorrectedLocalPoseInWorld} * {@link #driftCompensationTransform}. This transform is ultimately the goal of the optimization.
     */
    private final RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform();
-   private final RigidBodyTransform correctedSensorPoseInWorld = new RigidBodyTransform();
 
+   /**
+    * This is the raw point cloud expressed in world frame received on construction. These points are likely to have drifted.
+    */
    private final Point3DReadOnly[] uncorrectedPointCloudInWorld; // For comparison after mapping.
+   /**
+    * Point cloud expressed in local frame. These points are absolute, and unaffected by the drift compensation transform. The goal of the algorithm is to
+    * modify the {@link #correctedLocalPoseInWorld} such that, when {@link #pointCloudInLocalFrame} is transformed to world, they best match up with the world
+    * map.
+    */
    private final Point3DReadOnly[] pointCloudInLocalFrame;
+   /**
+    * Corrected point cloud expressed in the world frame. These are found by by applying {@link #driftCompensationTransform}, and the algorithm is said to have
+    * converged when these correspond to the global map properly.
+    */
    private final Point3D[] correctedPointCloudInWorld;
 
    private double confidenceFactor = 1.0;
 
+   /**
+    * Surface elements expressed in the world frame, which are the leaves of the {@link #frameMap} OcTree that correspond to points in the global map (they are
+    * the features being used for SLAM). They are updated with {@link #driftCompensationTransform} each time
+    * {@link SLAMFrame#updateOptimizedPointCloudAndSensorPose()} is called.
+    */
    private final List<Plane3D> surfaceElements = new ArrayList<>();
+   /**
+    * Surface elements expressed in the local frame. They are absolute, and unaffected by drift correction, as they are local values.
+    */
    private final List<Plane3DReadOnly> surfaceElementsInLocalFrame = new ArrayList<>();
    private NormalOcTree frameMap;
 
@@ -68,7 +98,7 @@ public class SLAMFrame
       this(frame, new RigidBodyTransform(), message);
    }
 
-   public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly localToSensorTransorm, StereoVisionPointCloudMessage message)
+   public SLAMFrame(SLAMFrame frame, RigidBodyTransformReadOnly localToSensorTransform, StereoVisionPointCloudMessage message)
    {
       timestamp = message.getTimestamp();
       previousFrame = frame;
@@ -76,7 +106,7 @@ public class SLAMFrame
       uncorrectedSensorPoseInWorld = MessageTools.unpackSensorPose(message);
       uncorrectedLocalPoseInWorld = new RigidBodyTransform();
       uncorrectedLocalPoseInWorld.set(uncorrectedSensorPoseInWorld);
-      uncorrectedLocalPoseInWorld.multiplyInvertOther(localToSensorTransorm);
+      uncorrectedLocalPoseInWorld.multiplyInvertOther(localToSensorTransform);
 
       correctedLocalPoseInWorld.set(uncorrectedLocalPoseInWorld);
       correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);

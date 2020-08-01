@@ -125,6 +125,9 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
+      // TODO because of the way the operations are ordered, on the first iteration, the current output space is already valid, as it was called in the
+      // TODO initialize function. This is a relatively expensive operation, so figuring out how to reorder things would reduce the number of "update output
+      // TODO space" calls by 1, which would be helpful.
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
       if (!currentOutputSpace.computeCorrespondence())
       {

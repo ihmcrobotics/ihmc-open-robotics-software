@@ -59,6 +59,7 @@ public class SLAMBasics implements SLAMInterface
 
    public void updateSurfaceNormals()
    {
+      // TODO update the node normals only within the bounding box.
       mapOcTree.updateNormals();
    }
 
