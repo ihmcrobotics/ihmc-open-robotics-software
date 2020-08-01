@@ -126,7 +126,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double translationalSteadyThreshold = surfaceElementICPSLAMParameters.getTranslationalEffortConvergenceThreshold();
       double rotationalSteadyThreshold = surfaceElementICPSLAMParameters.getRotationalEffortConvergenceThreshold();
 
-      SteadyDetector qualitySteady = new SteadyDetector(0.0, qualitySteadyThreshold);
+      SteadyDetector qualitySteady = new SteadyDetector(initialQuality, qualitySteadyThreshold);
       SteadyDetector translationalSteady = new SteadyDetector(0.0, translationalSteadyThreshold);
       RotationalEffortSteadyDetector rotationalSteady = new RotationalEffortSteadyDetector(rotationalSteadyThreshold);
 
@@ -143,8 +143,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          optimizer.iterate();
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
-         // FIXME this value for quality is never getting updated. Is that correct?
-         quality = initialQuality;
+         quality = optimizer.getQuality();
          translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
          rotationalEffort.set(driftCompensationTransform.getRotation());
 
