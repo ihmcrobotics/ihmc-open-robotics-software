@@ -57,7 +57,6 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-            // FIXME this is information already contained in the frame.
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
             RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
             correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
@@ -69,7 +68,6 @@ public class SurfaceElementICPSLAM extends SLAMBasics
                Plane3D correctedSurfelInWorld = new Plane3D();
                correctedSurfelInWorld.set(frame.getSurfaceElementsInLocalFrame().get(i));
 
-               // FIXME is this not the same value as frame.getSurfaceElements().get(i)? I think it is, which would remove this calculation.
                correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getPoint());
                correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getNormal());
                correctedCorrespondingPointLocation[i] = new Point3D(correctedLocalPoseInWorld.getTranslation());
