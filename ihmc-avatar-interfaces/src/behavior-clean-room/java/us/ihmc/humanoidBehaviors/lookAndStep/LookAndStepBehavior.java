@@ -13,7 +13,8 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStep
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.humanoidBehaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
@@ -95,8 +96,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       Notification resetInput = helper.createROS2Notification(RESET);
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
 
-      WalkingFootstepTracker walkingFootstepTracker = new WalkingFootstepTracker(helper.getManagedROS2Node(),
-                                                                                 helper.getRobotModel().getSimpleRobotName());
+      ControllerStatusTracker controllerStatusTracker = new ControllerStatusTracker(statusLogger,
+                                                                                   helper.getManagedROS2Node(),
+                                                                                   helper.getRobotModel().getSimpleRobotName());
       // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
 
       // TODO: Want to be able to wire up behavior here and see all present modules
@@ -113,7 +115,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
-            walkingFootstepTracker,
+            controllerStatusTracker,
             footstepPlanning::acceptBodyPathPlan,
             approvalNotification
       );
@@ -136,7 +138,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
-            walkingFootstepTracker,
+            controllerStatusTracker,
             stepping::acceptFootstepPlan,
             approvalNotification
       );
@@ -149,6 +151,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             helper::publishToUI,
             robotInterface::requestWalk,
             footstepPlanning::runOrQueue,
+            controllerStatusTracker,
             behaviorStateReference
       );
    }

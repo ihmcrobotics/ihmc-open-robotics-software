@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
-import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
@@ -50,7 +50,7 @@ public class LookAndStepBodyPathPlanningTask
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
-      private WalkingFootstepTracker walkingFootstepTracker;
+      private ControllerStatusTracker controllerStatusTracker;
       private TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private TypedInput<Pose3D> goalInput = new TypedInput<>();
       private Timer mapRegionsExpirationTimer = new Timer();
@@ -72,7 +72,7 @@ public class LookAndStepBodyPathPlanningTask
                              Supplier<Boolean> operatorReviewEnabled,
                              RemoteSyncedRobotModel syncedRobot,
                              BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                             WalkingFootstepTracker walkingFootstepTracker,
+                             ControllerStatusTracker controllerStatusTracker,
                              Consumer<List<? extends Pose3DReadOnly>> autonomousOutput,
                              TypedNotification<Boolean> approvalNotification)
       {
@@ -96,7 +96,7 @@ public class LookAndStepBodyPathPlanningTask
                }
          );
 
-         this.walkingFootstepTracker = walkingFootstepTracker;
+         this.controllerStatusTracker = controllerStatusTracker;
 
          // don't run two body path plans at the same time
          SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
@@ -131,6 +131,7 @@ public class LookAndStepBodyPathPlanningTask
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
+         suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
                                  () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
@@ -158,7 +159,7 @@ public class LookAndStepBodyPathPlanningTask
          mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
-         numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
+         numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
 
          neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
