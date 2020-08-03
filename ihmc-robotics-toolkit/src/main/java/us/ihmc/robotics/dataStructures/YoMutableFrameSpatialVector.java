@@ -27,7 +27,7 @@ public class YoMutableFrameSpatialVector implements SpatialVectorBasics, YoMutab
    public YoMutableFrameSpatialVector(YoMutableFrameVector3D angularPart, YoMutableFrameVector3D linearPart)
    {
       this.frameId = angularPart.getYoFrameIndex();
-      this.frameIndexMap = linearPart.getFrameIndexMap();
+      this.frameIndexMap = angularPart.getFrameIndexMap();
       this.angularPart = angularPart;
       this.linearPart = linearPart;
       checkFrameConsistency();
