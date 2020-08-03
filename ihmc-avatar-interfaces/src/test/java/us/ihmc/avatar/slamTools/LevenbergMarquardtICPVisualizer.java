@@ -57,7 +57,7 @@ public class LevenbergMarquardtICPVisualizer
    private final List<YoDouble[]> yoModelPointsHolder;
    private final List<YoDouble[]> yoDataPointsHolder;
 
-   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
 
    public LevenbergMarquardtICPVisualizer()
    {

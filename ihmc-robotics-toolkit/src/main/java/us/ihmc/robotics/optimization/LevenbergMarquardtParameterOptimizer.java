@@ -9,6 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * this class is to iterate minimizing input parameters for the given output calculator matrix. in
@@ -46,7 +47,6 @@ public class LevenbergMarquardtParameterOptimizer
    private final DMatrixRMaj perturbedOutput;
    private final DMatrixRMaj jacobian;
 
-   private final DMatrixRMaj jacobianTranspose;
    private final DMatrixRMaj squaredJacobian;
    private final DMatrixRMaj dampingMatrix;
    private final DMatrixRMaj invMultJacobianTranspose;
@@ -88,7 +88,6 @@ public class LevenbergMarquardtParameterOptimizer
       perturbedOutput = new DMatrixRMaj(outputDimension, 1);
       jacobian = new DMatrixRMaj(outputDimension, inputParameterDimension);
 
-      jacobianTranspose = new DMatrixRMaj(outputDimension, inputParameterDimension);
       squaredJacobian = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       dampingMatrix = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       invMultJacobianTranspose = new DMatrixRMaj(inputParameterDimension, outputDimension);
@@ -112,16 +111,7 @@ public class LevenbergMarquardtParameterOptimizer
    {
       iteration = 0;
       optimized = false;
-      for (int i = 0; i < inputDimension; i++)
-      {
-         for (int j = 0; j < inputDimension; j++)
-         {
-            if (i == j)
-            {
-               dampingMatrix.set(i, j, DEFAULT_DAMPING_COEFFICIENT);
-            }
-         }
-      }
+      MatrixTools.setDiagonal(dampingMatrix, DEFAULT_DAMPING_COEFFICIENT);
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
       boolean result = currentOutputSpace.computeCorrespondence();
@@ -135,6 +125,9 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
+      // TODO because of the way the operations are ordered, on the first iteration, the current output space is already valid, as it was called in the
+      // TODO initialize function. This is a relatively expensive operation, so figuring out how to reorder things would reduce the number of "update output
+      // TODO space" calls by 1, which would be helpful.
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
       if (!currentOutputSpace.computeCorrespondence())
       {
@@ -231,7 +224,7 @@ public class LevenbergMarquardtParameterOptimizer
       return computationTime;
    }
 
-   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction()
+   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction(boolean includePitchAndRoll)
    {
       return new Function<DMatrixRMaj, RigidBodyTransform>()
       {
@@ -240,7 +233,10 @@ public class LevenbergMarquardtParameterOptimizer
          {
             RigidBodyTransform transform = new RigidBodyTransform();
 
-            transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            if (includePitchAndRoll)
+               transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            else
+               transform.setRotationYawAndZeroTranslation(input.get(3));
             transform.getTranslation().set(input.get(0), input.get(1), input.get(2));
             return transform;
          }

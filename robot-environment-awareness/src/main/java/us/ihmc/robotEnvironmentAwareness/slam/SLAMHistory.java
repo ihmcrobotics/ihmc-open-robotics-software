@@ -39,24 +39,24 @@ public class SLAMHistory
     * parameters
     */
    private final TLongArrayList timeStamps = new TLongArrayList();
-   private final List<RigidBodyTransformReadOnly> originalSensorFrames = new ArrayList<>();
-   private final List<RigidBodyTransformReadOnly> sensorFrames = new ArrayList<>();
+   private final List<RigidBodyTransformReadOnly> uncorrectedLocalFrames = new ArrayList<>();
+   private final List<RigidBodyTransformReadOnly> correctedLocalFrames = new ArrayList<>();
 
    private final List<DriftCorrectionResult> driftCorrectionResults = new ArrayList<DriftCorrectionResult>();
 
    public void clearHistory()
    {
       timeStamps.clear();
-      originalSensorFrames.clear();
-      sensorFrames.clear();
+      uncorrectedLocalFrames.clear();
+      correctedLocalFrames.clear();
       driftCorrectionResults.clear();
    }
 
    public void addLatestFrameHistory(SLAMFrame latestFrame)
    {
       timeStamps.add(latestFrame.getTimeStamp());
-      originalSensorFrames.add(latestFrame.getUncorrectedSensorPoseInWorld());
-      sensorFrames.add(latestFrame.getSensorPose());
+      uncorrectedLocalFrames.add(latestFrame.getUncorrectedLocalPoseInWorld());
+      correctedLocalFrames.add(latestFrame.getCorrectedLocalPoseInWorld());
    }
 
    public void addDriftCorrectionHistory(DriftCorrectionResult latestResult)

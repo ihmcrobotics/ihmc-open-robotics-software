@@ -15,8 +15,8 @@ import javafx.scene.paint.Color;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
@@ -25,18 +25,14 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
 import us.ihmc.ros2.Ros2Node;
 
@@ -64,7 +60,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
    private final AtomicReference<Boolean> useBoundingBox;
    
-   protected final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   protected final SurfaceElementICPSLAM slam;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
@@ -88,24 +84,36 @@ public class SLAMModule implements PerceptionModule
 
    public SLAMModule(Ros2Node ros2Node, Messager messager)
    {
-      this(ros2Node, messager, null);
+      this(ros2Node, messager, new RigidBodyTransform());
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
+   {
+      this(ros2Node, messager, transformFromLocalFrameToSensor, null);
    }
 
    public SLAMModule(Messager messager, File configurationFile)
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, true);
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
    }
 
    public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile)
    {
-      this(ros2Node, messager, configurationFile, false);
+      this(ros2Node, messager, configurationFile, new RigidBodyTransform(), false);
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, boolean manageRosNode)
+   public SLAMModule(Ros2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromLocalFrameToSensor, File configurationFile)
+   {
+      this(ros2Node, messager, configurationFile, transformFromLocalFrameToSensor, false);
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, RigidBodyTransformReadOnly transformFromLocalFrameToSensor, boolean manageRosNode)
    {
       this.ros2Node = ros2Node;
       this.reaMessager = messager;
       this.manageRosNode = manageRosNode;
+
+      slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION, transformFromLocalFrameToSensor);
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node,
@@ -277,7 +285,7 @@ public class SLAMModule implements PerceptionModule
 
       if (isOcTreeBoundingBoxRequested.getAndSet(false))
          reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxState,
-                                   BoundingBoxMessageConverter.convertToMessage(slam.getOctree().getBoundingBox()));
+                                   BoundingBoxMessageConverter.convertToMessage(slam.getMapOcTree().getBoundingBox()));
    }
 
    private boolean updateSLAMInternal()
@@ -345,19 +353,19 @@ public class SLAMModule implements PerceptionModule
       stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
       reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
-      NormalOcTree octreeMap = slam.getOctree();
+      NormalOcTree octreeMap = slam.getMapOcTree();
       SLAMFrame latestFrame = slam.getLatestFrame();
 
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getOctree()));
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getMapOcTree()));
 
       LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
-      Pose3D pose = new Pose3D(slam.getLatestFrame().getSensorPose());
+      Pose3D pose = new Pose3D(slam.getLatestFrame().getCorrectedSensorPoseInWorld());
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, pose);
       }
       Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();
-      Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
+      Point3DReadOnly[] correctedPointCloud = latestFrame.getCorrectedPointCloudInWorld();
       Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePoints();
       if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
          return;
@@ -365,7 +373,7 @@ public class SLAMModule implements PerceptionModule
       frameState.setUncorrectedPointCloudInWorld(originalPointCloud);
       frameState.setCorrectedPointCloudInWorld(correctedPointCloud);
       frameState.setCorrespondingPointsInWorld(sourcePointsToWorld);
-      RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
+      RigidBodyTransformReadOnly sensorPose = latestFrame.getCorrectedSensorPoseInWorld();
       frameState.getSensorPosition().set(sensorPose.getTranslation());
       frameState.getSensorOrientation().set(sensorPose.getRotation());
       reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, frameState);

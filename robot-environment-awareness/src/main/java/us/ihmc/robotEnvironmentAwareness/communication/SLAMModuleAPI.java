@@ -58,7 +58,6 @@ public class SLAMModuleAPI
    public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
 
    public static final Topic<Boolean> SLAMEnable = Root.child(Module).topic(Enable);
-   public static final Topic<Boolean> BiasEnable = Root.child(Module).child(SensorFrame).topic(Enable);
    public static final Topic<Boolean> SLAMClear = Root.child(Module).topic(Clear);
 
    public static final Topic<Boolean> ShowPlanarRegionsMap = Root.child(UI).child(PlanarRegions).topic(Show);

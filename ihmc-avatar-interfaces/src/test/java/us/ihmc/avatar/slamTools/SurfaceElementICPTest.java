@@ -49,7 +49,7 @@ public class SurfaceElementICPTest
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
       slam.addKeyFrame(messages.get(0), true);
 
-      NormalOcTree map = slam.getOctree();
+      NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
@@ -83,7 +83,7 @@ public class SurfaceElementICPTest
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
       slam.addKeyFrame(messages.get(0), true);
 
-      NormalOcTree map = slam.getOctree();
+      NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
@@ -156,7 +156,7 @@ public class SurfaceElementICPTest
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
       slam.addKeyFrame(messages.get(0), true);
 
-      NormalOcTree map = slam.getOctree();
+      NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
@@ -171,12 +171,12 @@ public class SurfaceElementICPTest
          SLAMViewer originalViewer = new SLAMViewer();
          originalViewer.addOctree(map, Color.CORAL, octreeResolution, true);
 
-         originalViewer.addPointCloud(frame2.getPointCloud(), Color.CYAN);
+         originalViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.CYAN);
          originalViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
          originalViewer.start("originalViewer");
       }
 
-      int numberOfSurfel = frame2.getSurfaceElementsToSensor().size();
+      int numberOfSurfel = frame2.getNumberOfSurfaceElements();
       LogTools.info("numberOfSurfel " + numberOfSurfel);
       Function<DMatrixRMaj, RigidBodyTransform> inputFunction = new Function<DMatrixRMaj, RigidBodyTransform>()
       {
@@ -196,17 +196,17 @@ public class SurfaceElementICPTest
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getUncorrectedSensorPoseInWorld());
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame2.getUncorrectedLocalPoseInWorld());
+            correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
             Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
             for (int i = 0; i < numberOfSurfel; i++)
             {
                correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame2.getSurfaceElementsToSensor().get(i));
+               correctedSurfel[i].set(frame2.getSurfaceElementsInLocalFrame().get(i));
 
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
+               correctedLocalPoseInWorld.transform(correctedSurfel[i].getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfel[i].getNormal());
             }
 
             DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
@@ -250,11 +250,11 @@ public class SurfaceElementICPTest
       System.out.println("icpTransformer");
       System.out.println(icpTransformer);
 
-      Point3DReadOnly[] pointCloud = frame2.getPointCloud();
-      RigidBodyTransformReadOnly sensorPose = frame2.getSensorPose();
+      Point3DReadOnly[] pointCloud = frame2.getCorrectedPointCloudInWorld();
+      RigidBodyTransformReadOnly sensorPose = frame2.getCorrectedLocalPoseInWorld();
 
       ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = frame2.getPointCloud().length;
+      int numberOfPoints = frame2.getCorrectedPointCloudInWorld().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
@@ -271,8 +271,8 @@ public class SurfaceElementICPTest
       {
          SLAMViewer slamViewer = new SLAMViewer();
          slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-         slamViewer.addPointCloud(frame2.getPointCloud(), Color.GREEN);
-         slamViewer.addSensorPose(frame2.getSensorPose(), Color.GREEN);
+         slamViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.GREEN);
+         slamViewer.addSensorPose(frame2.getCorrectedSensorPoseInWorld(), Color.GREEN);
          slamViewer.addSensorPose(frame2.getUncorrectedSensorPoseInWorld(), Color.BLUE);
          slamViewer.start("testDriftCorrection");
 

@@ -1,11 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -213,7 +208,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          public void onEntry()
          {
             publishTextToSpeech("Searching For The Door");
-            lookDown();
+            //lookDown();
             super.onEntry();
          }
 

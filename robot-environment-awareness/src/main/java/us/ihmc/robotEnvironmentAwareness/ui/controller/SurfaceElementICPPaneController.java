@@ -47,6 +47,13 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private ToggleButton computeSurfaceNormalsInFrame;
    @FXML
    private ToggleButton insertMissInOcTree;
+
+   @FXML
+   private ToggleButton includePitchAndRoll;
+   @FXML
+   private Spinner<Double> translationPerturbation;
+   @FXML
+   private Spinner<Double> rotationPerturbation;
    
    private final SurfaceElementICPSLAMParametersProperty surfaceElementICPSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "surfaceElementICPSLAMParametersProperty");
    
@@ -65,6 +72,9 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       initialQualityThreshold.setValueFactory(createDoubleValueFactory(0.05, 0.3, 0.1, 0.05));
 
       maxOptimizationIterations.setValueFactory(createIntegerValueFactory(1, 100, 40, 1));
+
+      translationPerturbation.setValueFactory(createDoubleValueFactory(0.0001, 0.01, 0.002, 0.0005));
+      rotationPerturbation.setValueFactory(createDoubleValueFactory(0.00001, 0.0001, 0.00001, 0.00001));
    }
    
    @Override
@@ -87,6 +97,11 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInsertMissInOcTree(insertMissInOcTree.selectedProperty());
+
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalIncludePitchAndRoll(includePitchAndRoll.selectedProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalTranslationPerturbation(translationPerturbation.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalRotationPerturbation(rotationPerturbation.getValueFactory().valueProperty());
+      
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, surfaceElementICPSLAMParametersProperty);
    }
 
