@@ -26,6 +26,16 @@ public class Timer
       return isExpired(getElapsedTime(), expirationTime);
    }
 
+   public boolean isRunning(double expirationTime)
+   {
+      return isRunning(getElapsedTime(), expirationTime);
+   }
+
+   static boolean isRunning(double timePassedSinceReset, double expirationTime)
+   {
+      return hasBeenSet(timePassedSinceReset) && !isExpired(timePassedSinceReset, expirationTime);
+   }
+
    static boolean hasBeenSet(double timePassedSinceReset)
    {
       return !Double.isNaN(timePassedSinceReset);
