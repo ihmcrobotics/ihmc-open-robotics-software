@@ -40,9 +40,9 @@ public class PushRecoveryTrajectoryGeneratorTest
 
    private void testSimpleTrajectory(int numDesiredSplines)
    {
-      YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoRegistry(""));
+      YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoRegistry("Dummy"));
       stepTimeProvider.set(0.8);
-      YoVariableDoubleProvider timeRemainingProvider = new YoVariableDoubleProvider("", new YoRegistry(""));
+      YoVariableDoubleProvider timeRemainingProvider = new YoVariableDoubleProvider("", new YoRegistry("Dummy"));
       PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame, new double[] {-0.1, 2.3, 0.0}));
       VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0.2, 0.0, -0.05}));
 
@@ -52,7 +52,7 @@ public class PushRecoveryTrajectoryGeneratorTest
       waypoints.add(firstIntermediatePosition);
       waypoints.add(secondIntermediatePosition);
 
-      YoFramePoint3D finalPosition = new YoFramePoint3D("", worldFrame, new YoRegistry(""));
+      YoFramePoint3D finalPosition = new YoFramePoint3D("", worldFrame, new YoRegistry("Dummy"));
       finalPosition.set(new FramePoint3D(worldFrame, new double[] {0.2, 2.35, 0.03}));
       YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
       VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0, 0, -0.02}));
@@ -61,7 +61,7 @@ public class PushRecoveryTrajectoryGeneratorTest
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 
       TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, initialPositionProvider,
-            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoRegistry(""), null, 0.0,
+            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoRegistry("Dummy"), null, 0.0,
             false);
 
       List<Point3D> points = new ArrayList<Point3D>();
@@ -109,7 +109,7 @@ public class PushRecoveryTrajectoryGeneratorTest
       VectorProvider intermediateVelocityProvider = new ConstantVectorProvider(intermediateVelocity);
 
       PositionTrajectoryGenerator pushRecoveryTrajectoryGenerator = new PushRecoveryTrajectoryGenerator("", worldFrame, stepTimeProvider, timeRemainingProvider,
-            intermediatePositionProvider, intermediateVelocityProvider, finalPositionProvider, new YoRegistry(""), null, trajectory);
+            intermediatePositionProvider, intermediateVelocityProvider, finalPositionProvider, new YoRegistry("Dummy"), null, trajectory);
 
       double tIntoStep = 0.4;
       timeRemainingProvider.set(stepTimeProvider.getValue() - tIntoStep);

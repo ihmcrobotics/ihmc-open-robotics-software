@@ -24,7 +24,7 @@ public class ConstantVelocityTrajectoryGeneratorTest
       DoubleProvider velocity = new ConstantDoubleProvider(1.0);
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(5.0);
       
-      ConstantVelocityTrajectoryGenerator simpleLinearTrajectory = new ConstantVelocityTrajectoryGenerator("", initialPosition, velocity, trajectoryTimeProvider, new YoRegistry(""));
+      ConstantVelocityTrajectoryGenerator simpleLinearTrajectory = new ConstantVelocityTrajectoryGenerator("", initialPosition, velocity, trajectoryTimeProvider, new YoRegistry("Dummy"));
       simpleLinearTrajectory.initialize();
       
       simpleLinearTrajectory.compute(2.5);
@@ -46,7 +46,7 @@ public class ConstantVelocityTrajectoryGeneratorTest
          DoubleProvider velocity = new ConstantDoubleProvider(2 * random.nextDouble() - 1);
          DoubleProvider trajectoryTime = new ConstantDoubleProvider(random.nextDouble() + minimumTrajectoryTime);
          
-         constantVelocityTrajectoryGenerator = new ConstantVelocityTrajectoryGenerator("", initialPosition, velocity, trajectoryTime, new YoRegistry(""));
+         constantVelocityTrajectoryGenerator = new ConstantVelocityTrajectoryGenerator("", initialPosition, velocity, trajectoryTime, new YoRegistry("Dummy"));
          constantVelocityTrajectoryGenerator.initialize();
          
          double randomTimeDuringTrajectory = trajectoryTime.getValue() * random.nextDouble();

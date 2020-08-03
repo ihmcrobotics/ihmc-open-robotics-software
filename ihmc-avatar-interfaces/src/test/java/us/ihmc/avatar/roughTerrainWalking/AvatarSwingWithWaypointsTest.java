@@ -150,7 +150,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          waypointPositions.add(waypoint.getPosition());
       }
 
-      PositionOptimizedTrajectoryGenerator generator = new PositionOptimizedTrajectoryGenerator("", new YoRegistry(""), null, 100, waypoints);
+      PositionOptimizedTrajectoryGenerator generator = new PositionOptimizedTrajectoryGenerator("", new YoRegistry("Dummy"), null, 100, waypoints);
       generator.setEndpointConditions(initialPose.getPosition(), new FrameVector3D(), footstepPose.getPosition(), new FrameVector3D());
       generator.setWaypoints(waypointPositions);
       generator.initialize();

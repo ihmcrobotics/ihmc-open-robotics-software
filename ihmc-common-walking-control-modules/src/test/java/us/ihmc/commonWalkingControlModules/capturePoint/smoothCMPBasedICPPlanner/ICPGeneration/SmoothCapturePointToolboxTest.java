@@ -29,7 +29,7 @@ public class SmoothCapturePointToolboxTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private Random random = new Random(5165415);
    
-   YoRegistry registry = new YoRegistry("");
+   YoRegistry registry = new YoRegistry("Dummy");
    String namePrefix = "SmoothCapturePointToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();

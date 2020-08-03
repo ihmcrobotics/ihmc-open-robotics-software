@@ -24,7 +24,7 @@ public class TrajectoryPointOptimizerTest
    {
       Assertions.assertThrows(RuntimeException.class, () -> {
       int dimensions = 3;
-      YoRegistry registry = new YoRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, registry);
 
       TDoubleArrayList rightSize = new TDoubleArrayList(dimensions);
@@ -70,7 +70,7 @@ public class TrajectoryPointOptimizerTest
    public void testYoVariables()
    {
       int dimensions = 3;
-      YoRegistry registry = new YoRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       new TrajectoryPointOptimizer(dimensions, registry);
 
       YoDouble timeGain = (YoDouble) registry.findVariable("TimeGain");

@@ -48,7 +48,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
                                                                                                              9.81,
-                                                                                                             new YoRegistry(""),
+                                                                                                             new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 
@@ -118,7 +118,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
                                                                                                              9.81,
-                                                                                                             new YoRegistry(""),
+                                                                                                             new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 

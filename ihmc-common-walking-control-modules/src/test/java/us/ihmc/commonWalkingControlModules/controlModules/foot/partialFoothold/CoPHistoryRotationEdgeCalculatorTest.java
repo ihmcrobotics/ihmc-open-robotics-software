@@ -48,7 +48,7 @@ public class CoPHistoryRotationEdgeCalculatorTest extends RotationEdgeCalculator
    public void testCoPHistory()
    {
       double dt = 0.001;
-      YoRegistry registry = new YoRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       double stableAngleThreshold = 3.0;
       double stablePositionThreshold = 0.5;
       int stableWindowSize = 5;
