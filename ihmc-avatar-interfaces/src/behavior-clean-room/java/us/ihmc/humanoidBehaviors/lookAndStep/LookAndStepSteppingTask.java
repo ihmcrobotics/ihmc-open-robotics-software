@@ -23,6 +23,7 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -46,6 +47,7 @@ public class LookAndStepSteppingTask
    {
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
+      private ControllerStatusTracker controllerStatusTracker;
 
       public void initialize(StatusLogger statusLogger,
                              RemoteSyncedRobotModel syncedRobot,
@@ -54,8 +56,10 @@ public class LookAndStepSteppingTask
                              UIPublisher uiPublisher,
                              RobotWalkRequester robotWalkRequester,
                              Runnable replanFootstepsOutput,
+                             ControllerStatusTracker controllerStatusTracker,
                              BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference)
       {
+         this.controllerStatusTracker = controllerStatusTracker;
          this.statusLogger = statusLogger;
          this.syncedRobot = syncedRobot;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
@@ -79,6 +83,7 @@ public class LookAndStepSteppingTask
                                     replanFootstepsOutput.run();
                                  });
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
+         suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
       }
 
       public void acceptFootstepPlan(FootstepPlan footstepPlan)

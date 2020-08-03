@@ -25,7 +25,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
-import us.ihmc.humanoidBehaviors.tools.walking.WalkingFootstepTracker;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -61,7 +61,7 @@ public class LookAndStepFootstepPlanningTask
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
       private SingleThreadSizeOneQueueExecutor executor;
-      private WalkingFootstepTracker walkingFootstepTracker;
+      private ControllerStatusTracker controllerStatusTracker;
 
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -82,7 +82,7 @@ public class LookAndStepFootstepPlanningTask
                              Supplier<Boolean> operatorReviewEnabledSupplier,
                              RemoteSyncedRobotModel syncedRobot,
                              BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
-                             WalkingFootstepTracker walkingFootstepTracker,
+                             ControllerStatusTracker controllerStatusTracker,
                              Consumer<FootstepPlan> autonomousOutput,
                              TypedNotification<Boolean> approvalNotification)
       {
@@ -98,7 +98,7 @@ public class LookAndStepFootstepPlanningTask
          this.lastStanceSideReference = lastStanceSideReference;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
          this.behaviorStateReference = behaviorStateReference;
-         this.walkingFootstepTracker = walkingFootstepTracker;
+         this.controllerStatusTracker = controllerStatusTracker;
          this.autonomousOutput = autonomousOutput;
          this.syncedRobot = syncedRobot;
 
@@ -133,6 +133,7 @@ public class LookAndStepFootstepPlanningTask
                                  () -> !(bodyPathPlan != null && !bodyPathPlan.isEmpty()));
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
+         suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
                                  () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
@@ -165,7 +166,7 @@ public class LookAndStepFootstepPlanningTask
                                                      .withExpiration(lookAndStepBehaviorParameters.getRobotConfigurationDataExpiration());
          lastStanceSide = lastStanceSideReference.get();
          behaviorState = behaviorStateReference.get();
-         numberOfIncompleteFootsteps = walkingFootstepTracker.getNumberOfIncompleteFootsteps();
+         numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
 
          if (suppressor.evaulateShouldAccept())
          {
@@ -288,7 +289,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.getFootstepPlannerTimeout());
       footstepPlannerRequest.setPerformPositionBasedSplitFractionCalculation(true);
-      footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.POSITION);
+      footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.PROPORTION);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
