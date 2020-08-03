@@ -88,12 +88,12 @@ public class PositionOptimizedTrajectoryGenerator
 
    public PositionOptimizedTrajectoryGenerator()
    {
-      this("", new YoRegistry(""));
+      this("", null);
    }
 
    public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints)
    {
-      this("", new YoRegistry(""), null, maxIterations, maxWaypoints);
+      this("", null, null, maxIterations, maxWaypoints);
    }
 
    public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
@@ -162,7 +162,8 @@ public class PositionOptimizedTrajectoryGenerator
          extendBySegment(registry);
 
       reset();
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
 
       if (graphicsListRegistry != null)
       {

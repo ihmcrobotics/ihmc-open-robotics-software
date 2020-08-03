@@ -29,7 +29,7 @@ public class CapturePointTrajectoryToolsTest
 {
    int nTests = 20;
    Random random = new Random();
-   YoRegistry registry = new YoRegistry("");
+   YoRegistry registry = new YoRegistry("Dummy");
 
    private static final double EPSILON = 10e-6;
 
