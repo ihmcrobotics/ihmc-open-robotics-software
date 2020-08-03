@@ -29,6 +29,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
+   private static boolean launchSegmentation = true;
+
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
    private final boolean spawnUIs;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
@@ -81,8 +83,11 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       slamMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
 
-      segmentationMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
-      segmentationMessager.startMessager();
+      if (launchSegmentation)
+      {
+         segmentationMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
+         segmentationMessager.startMessager();
+      }
 
       if (spawnUIs)
       {
@@ -91,25 +96,31 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager);
 
       Stage secondStage = null;
-      if (spawnUIs)
+      if (launchSegmentation)
       {
-         secondStage = new Stage();
-         planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
+         if (spawnUIs)
+         {
+            secondStage = new Stage();
+            planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
+         }
+         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
+         module.attachOcTreeConsumer(segmentationModule);
       }
-      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
-      module.attachOcTreeConsumer(segmentationModule);
 
       if (spawnUIs)
       {
          primaryStage.setOnCloseRequest(event -> stop());
-         secondStage.setOnCloseRequest(event -> stop());
+         if (secondStage != null)
+            secondStage.setOnCloseRequest(event -> stop());
 
          ui.show();
-         planarSegmentationUI.show();
+         if (planarSegmentationUI != null)
+            planarSegmentationUI.show();
       }
 
       module.start();
-      segmentationModule.start();
+      if (segmentationModule != null)
+         segmentationModule.start();
    }
 
    public void stop()
@@ -117,11 +128,15 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       if (spawnUIs) ui.stop();
       module.stop();
 
-      if (spawnUIs) planarSegmentationUI.stop();
-      segmentationModule.stop();
-
       ExceptionTools.handle(() -> slamMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
-      ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+
+      if (launchSegmentation)
+      {
+         if (spawnUIs)
+            planarSegmentationUI.stop();
+         segmentationModule.stop();
+         ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
 
       ros2Node.destroy();
    }
