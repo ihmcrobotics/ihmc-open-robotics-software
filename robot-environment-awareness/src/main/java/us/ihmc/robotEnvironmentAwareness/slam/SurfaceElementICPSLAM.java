@@ -7,6 +7,7 @@ import java.util.function.UnaryOperator;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -19,13 +20,16 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
    public static final boolean DEBUG = false;
-   private final Function<DMatrixRMaj, RigidBodyTransform> transformConverter = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
-
-   private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<SurfaceElementICPSLAMParameters>(new SurfaceElementICPSLAMParameters());
+   private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<>(new SurfaceElementICPSLAMParameters());
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
-      super(octreeResolution);
+      this(octreeResolution, new RigidBodyTransform());
+   }
+
+   public SurfaceElementICPSLAM(double octreeResolution, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
+   {
+      super(octreeResolution, transformFromLocalFrameToSensor);
    }
 
    public void updateParameters(SurfaceElementICPSLAMParameters parameters)
@@ -37,14 +41,15 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       SurfaceElementICPSLAMParameters surfaceElementICPSLAMParameters = parameters.get();
+      Function<DMatrixRMaj, RigidBodyTransform> transformConverter = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(surfaceElementICPSLAMParameters.getIncludePitchAndRoll());
 
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
-      frame.registerSurfaceElements(getOctree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
+      frame.registerSurfaceElements(getMapOcTree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
 
-      int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
-      sourcePoints = new Point3D[numberOfSurfel];
+      int numberOfSurfel = frame.getNumberOfSurfaceElements();
+      correctedCorrespondingPointLocation = new Point3D[numberOfSurfel];
       if (DEBUG)
          LogTools.info("numberOfSurfel " + numberOfSurfel);
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
@@ -53,44 +58,47 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getUncorrectedSensorPoseInWorld());
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
+            correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
+            DMatrixRMaj errorSpace = new DMatrixRMaj(numberOfSurfel, 1);
+
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame.getSurfaceElementsToSensor().get(i));
+               Plane3D correctedSurfelInWorld = new Plane3D();
+               correctedSurfelInWorld.set(frame.getSurfaceElementsInLocalFrame().get(i));
 
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
-               sourcePoints[i] = new Point3D(correctedSensorPoseToWorld.getTranslation());
-            }
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld.getNormal());
+               correctedCorrespondingPointLocation[i] = new Point3D(correctedLocalPoseInWorld.getTranslation());
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
-            for (int i = 0; i < correctedSurfel.length; i++)
-            {
-               double distance = computeClosestDistance(correctedSurfel[i]);
+               double distance = computeClosestDistance(correctedSurfelInWorld);
                errorSpace.set(i, distance);
             }
+
             return errorSpace;
          }
 
-         private double computeClosestDistance(Plane3D surfel)
+         private double computeClosestDistance(Plane3DReadOnly surfel)
          {
-            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree,
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(mapOcTree,
                                                                                     surfel.getPoint(),
-                                                                                    octree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
+                                                                                    mapOcTree.getResolution() * surfaceElementICPSLAMParameters.getBoundRatio());
          }
       };
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, 6, numberOfSurfel);
-      DMatrixRMaj perturbationVector = new DMatrixRMaj(6, 1);
-      perturbationVector.set(0, octree.getResolution() * 0.002);
-      perturbationVector.set(1, octree.getResolution() * 0.002);
-      perturbationVector.set(2, octree.getResolution() * 0.002);
-      perturbationVector.set(3, 0.00001);
-      perturbationVector.set(4, 0.00001);
-      perturbationVector.set(5, 0.00001);
+      int problemSize = surfaceElementICPSLAMParameters.getIncludePitchAndRoll() ? 6 : 4;
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, problemSize, numberOfSurfel);
+      DMatrixRMaj perturbationVector = new DMatrixRMaj(problemSize, 1);
+      double translationPerturbation = mapOcTree.getResolution() * surfaceElementICPSLAMParameters.getTranslationPerturbation();
+      perturbationVector.set(0, translationPerturbation);
+      perturbationVector.set(1, translationPerturbation);
+      perturbationVector.set(2, translationPerturbation);
+      perturbationVector.set(3, surfaceElementICPSLAMParameters.getRotationPerturbation());
+      if (surfaceElementICPSLAMParameters.getIncludePitchAndRoll())
+      {
+         perturbationVector.set(4, surfaceElementICPSLAMParameters.getRotationPerturbation());
+         perturbationVector.set(5, surfaceElementICPSLAMParameters.getRotationPerturbation());
+      }
       optimizer.setPerturbationVector(perturbationVector);
       boolean initialCondition = optimizer.initialize();
       if (DEBUG)
@@ -129,16 +137,17 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double quality = 0.0;
       double translationalEffort = 0.0;
       RotationMatrix rotationalEffort = new RotationMatrix();
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
+      RigidBodyTransform driftCompensationTransform = new RigidBodyTransform();
       int iterations = -1;
       for (int i = 0; i < surfaceElementICPSLAMParameters.getMaxOptimizationIterations(); i++)
       {
          optimizer.iterate();
-         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
+         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
+         // FIXME this value for quality is never getting updated. Is that correct?
          quality = initialQuality;
-         translationalEffort = icpTransformer.getTranslation().lengthSquared();
-         rotationalEffort.set(icpTransformer.getRotation());
+         translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
+         rotationalEffort.set(driftCompensationTransform.getRotation());
 
          if (qualitySteady.isSteady(quality) && translationalSteady.isSteady(translationalEffort) && rotationalSteady.isSteady(rotationalEffort))
          {
@@ -161,11 +170,11 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       if (DEBUG)
          LogTools.info("final quality " + optimizer.getQuality());
       // get parameter.
-      optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
+      optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
       driftCorrectionResult.setFinalDistance(optimizer.getQuality());
       driftCorrectionResult.setNumberOfSurfels(numberOfSurfel);
-      driftCorrectionResult.setDriftCorrectionTransformer(icpTransformer);
+      driftCorrectionResult.setDriftCorrectionTransformer(driftCompensationTransform);
       driftCorrectionResult.setIcpIterations(iterations);
       if (iterations < 0)
       {
@@ -176,7 +185,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          driftCorrectionResult.setSuccess(true);
       }
 
-      return icpTransformer;
+      return driftCompensationTransform;
    }
 
    private class SteadyDetector
