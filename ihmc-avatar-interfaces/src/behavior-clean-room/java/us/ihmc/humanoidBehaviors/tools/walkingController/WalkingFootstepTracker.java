@@ -1,12 +1,17 @@
 package us.ihmc.humanoidBehaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 /**
@@ -20,16 +25,14 @@ public class WalkingFootstepTracker
    private int stepsCommanded = 0;
    private int stepsCompleted = 0;
 
+   private SideDependentList<FootstepDataMessage> lastCommandedFootsteps = new SideDependentList<>();
+
    public WalkingFootstepTracker(Ros2NodeInterface ros2Node, String robotName)
    {
-      new ROS2Callback<>(ros2Node,
-                         FootstepDataListMessage.class,
-                         ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName),
-                         this::interceptFootstepDataListMessage);
-      new ROS2Callback<>(ros2Node,
-                         FootstepStatusMessage.class,
-                         ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotName),
-                         this::acceptFootstepStatusMessage);
+      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
+      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
+
+      // TODO: Observe when footsteps are cancelled / walking aborted?
    }
 
    private void acceptFootstepStatusMessage(FootstepStatusMessage footstepStatusMessage)
@@ -54,6 +57,7 @@ public class WalkingFootstepTracker
    private void interceptFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
    {
       ExecutionMode executionMode = ExecutionMode.fromByte(footstepDataListMessage.getQueueingProperties().getExecutionMode());
+      int size = footstepDataListMessage.getFootstepDataList().size();
 
       synchronized (this)
       {
@@ -62,10 +66,28 @@ public class WalkingFootstepTracker
             stepsCommanded = 0;
             stepsCompleted = 0;
          }
+
+         stepsCommanded += size;
       }
 
-      stepsCommanded += footstepDataListMessage.getFootstepDataList().size();
+      if (size > 0)
+      {
+         FootstepDataMessage lastFootstep = footstepDataListMessage.getFootstepDataList().get(size - 1);
+         lastCommandedFootsteps.set(RobotSide.fromByte(lastFootstep.getRobotSide()), lastFootstep);
+      }
+      if (size > 1)
+      {
+         FootstepDataMessage secondToLastFootstep = footstepDataListMessage.getFootstepDataList().get(size - 2);
+         lastCommandedFootsteps.set(RobotSide.fromByte(secondToLastFootstep.getRobotSide()), secondToLastFootstep);
+      }
+
       LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+   }
+
+   public ImmutablePair<FootstepDataMessage, FootstepDataMessage> getLastCommandedFootsteps()
+   {
+
+      return ImmutablePair.of(lastCommandedFootsteps.get(RobotSide.LEFT), lastCommandedFootsteps.get(RobotSide.RIGHT));
    }
 
    public int getNumberOfIncompleteFootsteps()
