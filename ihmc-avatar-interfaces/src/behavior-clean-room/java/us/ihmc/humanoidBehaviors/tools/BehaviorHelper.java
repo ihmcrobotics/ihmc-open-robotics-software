@@ -16,6 +16,7 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInte
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
+import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
@@ -132,6 +133,11 @@ public class BehaviorHelper
       return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
    }
 
+   public ROS2TypelessInput createROS2TypelessInput(ROS2Topic<Empty> topic)
+   {
+      return new ROS2TypelessInput(managedROS2Node, topic);
+   }
+
    public Notification createROS2Notification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
@@ -183,6 +189,11 @@ public class BehaviorHelper
    public <T> void publishToUI(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
+   }
+
+   public void publishToUI(Topic<Object> topic)
+   {
+      managedMessager.submitMessage(topic, new Object());
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
