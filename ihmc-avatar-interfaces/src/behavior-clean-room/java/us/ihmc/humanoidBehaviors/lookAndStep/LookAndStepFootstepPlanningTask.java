@@ -152,7 +152,7 @@ public class LookAndStepFootstepPlanningTask
 
       public synchronized void runOrQueue()
       {
-         executor.execute(this::evaluateAndRun);
+         executor.queueExecution(this::evaluateAndRun);
       }
 
       private void evaluateAndRun()
