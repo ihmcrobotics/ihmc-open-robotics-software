@@ -55,6 +55,7 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> BodyPathRegionsForUI = topic("BodyPathRegionsForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> FootstepPlanningRegionsForUI = topic("FootstepPlanningRegionsForUI");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
+   public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
