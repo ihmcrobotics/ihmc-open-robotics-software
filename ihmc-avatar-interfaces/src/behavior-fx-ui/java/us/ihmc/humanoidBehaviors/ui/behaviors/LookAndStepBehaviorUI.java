@@ -180,6 +180,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          placeGoalButton.setDisable(false);
       });
 
+      behaviorMessager.registerTopicListener(ResetForUI, message -> clearGraphics());
+
       // TODO Add joystick support
    }
 
@@ -188,10 +190,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    {
       if (!enabled)
       {
-         bodyPathRegionsGraphic.clear();
-         footstepPlanningRegionsGraphic.clear();
-         startAndGoalFootPoses.clear();
-         footstepPlanGraphic.clear();
+         clearGraphics();
          Platform.runLater(() -> getChildren().remove(closestPointAlongPathGraphic));
          Platform.runLater(() -> getChildren().remove(subGoalGraphic));
          Platform.runLater(() -> getChildren().remove(goalGraphic));
@@ -212,6 +211,14 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().add(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
       }
+   }
+
+   private void clearGraphics()
+   {
+      bodyPathRegionsGraphic.clear();
+      footstepPlanningRegionsGraphic.clear();
+      startAndGoalFootPoses.clear();
+      footstepPlanGraphic.clear();
    }
 
    private void publishLookAndStepParameters()
