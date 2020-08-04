@@ -23,7 +23,7 @@ public class SingleThreadSizeOneQueueExecutor
       executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, sizeOneQueue, ThreadTools.createNamedThreadFactory(prefix));
    }
 
-   public void execute(Runnable runnable)
+   public void queueExecution(Runnable runnable)
    {
       try
       {

@@ -70,7 +70,7 @@ public class LookAndStepSteppingTask
          this.behaviorStateReference = behaviorStateReference;
 
          SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
-         footstepPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+         footstepPlanInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
          suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
