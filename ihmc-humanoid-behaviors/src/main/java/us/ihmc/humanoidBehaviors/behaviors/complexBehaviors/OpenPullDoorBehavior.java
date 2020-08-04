@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior.BasicStates;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.OpenPullDoorBehavior.OpenDoorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -33,6 +34,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
    enum OpenDoorState
    {
       START,
+      LOWER_HEIGHT,
       MOVE_LEFT_HAND_TO_INITIAL_LOCATION,
       MOVE_RIGHT_HAND_TO_INITIAL_LOCATION,
       TURN_ON_OPEN_DOOR_DETECTOR,
@@ -140,6 +142,17 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
       };
       
+      
+      BehaviorAction lowerHeightTask = new BehaviorAction(atlasPrimitiveActions.pelvisHeightTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75);
+            atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
+            publishTextToSpeech("Decrease heigth");
+         }
+      };
       
      
 
@@ -449,7 +462,8 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          }
       };
 
-      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
+      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.LOWER_HEIGHT);
+      factory.addStateAndDoneTransition(OpenDoorState.LOWER_HEIGHT, lowerHeightTask, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION,moveLeftHandToDoor,OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR);
       factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.OPEN_RIGHT_HAND);

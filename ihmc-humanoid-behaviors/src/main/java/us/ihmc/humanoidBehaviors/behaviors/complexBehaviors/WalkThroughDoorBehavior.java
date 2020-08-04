@@ -71,8 +71,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
    private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.5f, -0.6f, 0f);
 
-   private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(1.0f, 0.9f, 0f);
-   private Vector3D32 pullDoorOffsetPoint2 = new Vector3D32(0.95f, 0.8f, 0f);
+   private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(1.15f, 0.9f, 0f);
+   private Vector3D32 pullDoorOffsetPoint2 = new Vector3D32(1.1f, 0.8f, 0f);
 
    //define some of the sub-behaviors that will be used that are specific to this behavior
    private final SearchForDoorBehavior searchForDoorBehavior;
