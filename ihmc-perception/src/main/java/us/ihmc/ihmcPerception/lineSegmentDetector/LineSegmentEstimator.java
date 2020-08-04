@@ -11,16 +11,14 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,62 +30,85 @@ import static java.lang.StrictMath.pow;
 
 public class LineSegmentEstimator {
 
+
+    private boolean prevImgFilled = false;
+    private boolean currentVideoPacketFilled = false;
+    private VideoPacket currentVideoPacket;
+    private Mat curImg;
+    private Mat prevImg;
+    private Mat curLines;
+    private Mat prevLines;
+    private ArrayList<LineMatch> correspLines;
+
     private Ros2Node ros2Node;
-    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
     private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
+    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-    public void handleVideo(VideoPacket message) {
-
-        BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().toArray());
-        Mat mat = new Mat();
-        byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
-        mat.put(0, 0, data);
-
-        System.out.println("Message Received" + message.getVideoSource() + "\t" + mat.height() + "\t" + mat.width());
-    }
-
-    public void registerVideoCallback(Ros2Node ros2Node) {
-
-        new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::handleVideo);
-    }
-
-    public void mainUpdate() {
-        int i = 0;
-    }
 
     public LineSegmentEstimator() {
-//        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+        System.out.println(System.getProperty("java.library.path"));
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
+
         this.ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
         this.registerVideoCallback(ros2Node);
         executorService.scheduleAtFixedRate(this::mainUpdate, 0, 32, TimeUnit.MILLISECONDS);
-
     }
 
-    public static void main(String[] args) {
-        new LineSegmentEstimator();
+    public void videoPacketCallback(VideoPacket message) {
+        currentVideoPacketFilled = true;
+        currentVideoPacket = message;
+    }
+
+    public void registerVideoCallback(Ros2Node ros2Node) {
+        new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::videoPacketCallback);
+    }
+
+    public void mainUpdate() {
+
+        if (currentVideoPacketFilled) {
+
+
+            BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(this.currentVideoPacket.getData().toArray());
+            Mat mat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), CvType.CV_8UC3);
+            byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
+            mat.put(0, 0, data);
+
+            this.curImg = mat;
+
+            // HighGui.imshow("LineDetector", mat);
+            // HighGui.waitKey(1);
+
+            // System.out.println("Message Received" + message.getVideoSource() + "\t" + mat.height() + "\t" + mat.width());
+
+            if (!(this.prevImgFilled)) {
+                prevImgFilled = true;
+                this.prevImg = this.curImg;
+                this.prevLines = getFLDLinesFromImage(this.prevImg);
+            } else {
+                System.out.println("Processing " + prevImgFilled);
+                this.processImages();
+
+                this.prevImgFilled = true;
+                this.prevImg = this.curImg;
+                this.prevLines = this.curLines;
+            }
+        }
+
+
     }
 
     public void processImages() {
-        // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
-
-        Mat curImg, prevImg, curLines, prevLines, dispImage;
-        curImg = new Mat();
-        curLines = new Mat();
-        dispImage = new Mat();
-
-        prevImg = curImg;
-        prevLines = getFLDLinesFromImage(prevImg);
 
         float startTime = System.nanoTime();
-        curLines = getFLDLinesFromImage(curImg);
 
-        ArrayList<LineMatch> correspLines = matchFLDLines(prevLines, curLines);
+        Mat dispImage = new Mat();
+        this.curLines = getFLDLinesFromImage(this.curImg);
+        this.correspLines = matchFLDLines(this.prevLines, this.curLines);
 
         for (int i = 0; i < curLines.rows(); i++) {
             double[] val = curLines.get(i, 0);
-            Imgproc.line(curImg, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 255, 255), 2);
+            Imgproc.line(this.curImg, new Point(val[0], val[1]), new Point(val[2], val[3]), new Scalar(0, 255, 255), 2);
         }
 
         List<Mat> src = Arrays.asList(prevImg, curImg);
@@ -106,14 +127,10 @@ public class LineSegmentEstimator {
         Imgproc.resize(dispImage, dispImage, new Size(2400, 900));
         HighGui.namedWindow("LineEstimator", HighGui.WINDOW_AUTOSIZE);
         HighGui.imshow("LineEstimator", dispImage);
-        int code = HighGui.waitKey(1000);
-        prevImg = curImg;
-        prevLines = curLines;
-
-        System.exit(0);
+        int code = HighGui.waitKey(32);
     }
 
-    static ArrayList<LineMatch> matchFLDLines(Mat prevFLDLines, Mat FLDlines) {
+    private static ArrayList<LineMatch> matchFLDLines(Mat prevFLDLines, Mat FLDlines) {
         ArrayList<LineMatch> corresp = new ArrayList<>();
         double angleCost, midPointCost, lengthCost = 0;
         double angleThreshold = 50, midPointThreshold = 100, lengthThreshold = 1200;
@@ -137,7 +154,7 @@ public class LineSegmentEstimator {
         return corresp;
     }
 
-    static double calcAngleCost(double[] l1, double[] l2) {
+    private static double calcAngleCost(double[] l1, double[] l2) {
         Vector2D a = new Vector2D(l1[0], l1[1]);
         Vector2D b = new Vector2D(l1[2], l1[3]);
         Vector2D c = new Vector2D(l2[0], l2[1]);
@@ -151,7 +168,7 @@ public class LineSegmentEstimator {
         return pow(acos(l1_hat.dot(l2_hat)) * 360 / EuclidCoreTools.TwoPI, 2);
     }
 
-    static double calcMidPointCost(double[] l1, double[] l2) {
+    private static double calcMidPointCost(double[] l1, double[] l2) {
         Vector2D a = new Vector2D(l1[0], l1[1]);
         Vector2D b = new Vector2D(l1[2], l1[3]);
         Vector2D c = new Vector2D(l2[0], l2[1]);
@@ -167,7 +184,7 @@ public class LineSegmentEstimator {
         return pow(p.length(), 2);
     }
 
-    static double calcLengthCost(double[] l1, double[] l2) {
+    private static double calcLengthCost(double[] l1, double[] l2) {
         Vector2D a = new Vector2D(l1[0], l1[1]);
         Vector2D b = new Vector2D(l1[2], l1[3]);
         Vector2D c = new Vector2D(l2[0], l2[1]);
@@ -179,7 +196,7 @@ public class LineSegmentEstimator {
         return pow(ab.length() - cd.length(), 2);
     }
 
-    public static Mat getFLDLinesFromImage(Mat image) {
+    private static Mat getFLDLinesFromImage(Mat image) {
         Mat lines = new Mat();
         Mat gray = new Mat();
         Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
@@ -196,7 +213,7 @@ public class LineSegmentEstimator {
         return getHoughLinesFromEdges(edges);
     }
 
-    public static Mat preProcessImage(Mat frame) {
+    private static Mat preProcessImage(Mat frame) {
         Mat gray = new Mat();
 //        Imgproc.pyrDown(frame,frame);
         Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
@@ -205,7 +222,7 @@ public class LineSegmentEstimator {
         return gray;
     }
 
-    public static Mat getCannyEdges(Mat gray) {
+    private static Mat getCannyEdges(Mat gray) {
         Mat edges = new Mat();
         Imgproc.Canny(gray, edges, 60, 60 * 3, 3, true);
         Mat cannyColor = new Mat();
@@ -213,7 +230,7 @@ public class LineSegmentEstimator {
         return edges;
     }
 
-    public static Mat getHoughLinesFromEdges(Mat edges) {
+    private static Mat getHoughLinesFromEdges(Mat edges) {
         Mat lines = new Mat();
         Imgproc.HoughLinesP(edges, lines, 1, Math.PI / 180, 70, 30, 10);
         return lines;
@@ -222,4 +239,10 @@ public class LineSegmentEstimator {
     private static Mat getImage(String path) {
         return Imgcodecs.imread(path);
     }
+
+
+    public static void main(String[] args) {
+        new LineSegmentEstimator();
+    }
+
 }
