@@ -69,15 +69,11 @@ public class WalkingFootstepTracker
          stepsCommanded += size;
       }
 
-      if (size > 0)
+      // handles same foot steps twice in a row
+      for (int i = 0; i < size; i++)
       {
-         FootstepDataMessage lastFootstep = footstepDataListMessage.getFootstepDataList().get(size - 1);
-         lastCommandedFootsteps.set(RobotSide.fromByte(lastFootstep.getRobotSide()), lastFootstep);
-      }
-      if (size > 1)
-      {
-         FootstepDataMessage secondToLastFootstep = footstepDataListMessage.getFootstepDataList().get(size - 2);
-         lastCommandedFootsteps.set(RobotSide.fromByte(secondToLastFootstep.getRobotSide()), secondToLastFootstep);
+         FootstepDataMessage footstep = footstepDataListMessage.getFootstepDataList().get(i);
+         lastCommandedFootsteps.set(RobotSide.fromByte(footstep.getRobotSide()), footstep);
       }
 
       LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
@@ -85,7 +81,6 @@ public class WalkingFootstepTracker
 
    public ImmutablePair<FootstepDataMessage, FootstepDataMessage> getLastCommandedFootsteps()
    {
-
       return ImmutablePair.of(lastCommandedFootsteps.get(RobotSide.LEFT), lastCommandedFootsteps.get(RobotSide.RIGHT));
    }
 
