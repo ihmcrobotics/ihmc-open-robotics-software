@@ -2,8 +2,10 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -159,7 +161,12 @@ public class SLAMFrame
       }
    }
 
-   public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
+   public void registerSurfaceElements(NormalOcTree map,
+                                       double windowMargin,
+                                       double surfaceElementResolution,
+                                       int minimumNumberOfHits,
+                                       boolean updateNormal,
+                                       int maxNumberOfSurfaceElements)
    {
       surfaceElements.clear();
       surfaceElementsInLocalFrame.clear();
@@ -193,6 +200,19 @@ public class SLAMFrame
             }
          }
       }
+
+      randomlySampleSurfaceElements(surfaceElements, maxNumberOfSurfaceElements);
+
+      surfaceElements.forEach(surfaceElement -> surfaceElementsInLocalFrame.add(SLAMTools.createConvertedSurfaceElementToSensorPose(
+            getUncorrectedLocalPoseInWorld(),
+            surfaceElement)));
+   }
+
+   private static void randomlySampleSurfaceElements(List<Plane3D> surfaceElementsToSample, int maxNumberOfSurfaceElements)
+   {
+      Random random = new Random();
+      while (surfaceElementsToSample.size() > maxNumberOfSurfaceElements)
+         surfaceElementsToSample.remove(RandomNumbers.nextInt(random, 0, surfaceElementsToSample.size() - 1));
    }
 
    public NormalOcTree getFrameMap()

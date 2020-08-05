@@ -319,7 +319,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
-      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
+      int maxNumberOfSurfels = Integer.MAX_VALUE;
+      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true, maxNumberOfSurfels);
       numberOfSourcePoints.set(frame2.getSurfaceElements().size());
    }
 }
