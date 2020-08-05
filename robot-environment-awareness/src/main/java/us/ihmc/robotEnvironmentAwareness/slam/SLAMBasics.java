@@ -34,6 +34,8 @@ public class SLAMBasics implements SLAMInterface
    protected final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
    private final RigidBodyTransformReadOnly transformFromLocalToSensor;
 
+   private final NormalEstimationParameters frameNormalEstimationParameters = new NormalEstimationParameters();
+
    public SLAMBasics(double octreeResolution)
    {
       this(octreeResolution, new RigidBodyTransform());
@@ -43,6 +45,8 @@ public class SLAMBasics implements SLAMInterface
    {
       this.transformFromLocalToSensor = transformFromLocalFrameToSensor;
       mapOcTree = new NormalOcTree(octreeResolution);
+
+      frameNormalEstimationParameters.setNumberOfIterations(10);
    }
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
@@ -66,7 +70,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters);
       setLatestFrame(frame);
       insertNewPointCloud(frame, insertMiss);
 
@@ -76,7 +80,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters);
 
       long startTime = System.nanoTime();
       RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);
@@ -183,6 +187,11 @@ public class SLAMBasics implements SLAMInterface
    public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
    {
       mapOcTree.setNormalEstimationParameters(normalEstimationParameters);
+   }
+
+   public void setFrameNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      this.frameNormalEstimationParameters.set(normalEstimationParameters);
    }
 
    public double getComputationTimeForLatestFrame()

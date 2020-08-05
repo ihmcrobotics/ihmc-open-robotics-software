@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
@@ -310,8 +311,11 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       octreeMap = slam.getMapOcTree();
       octreeMap.updateNormals();
 
-      frame1 = new SLAMFrame(messages.get(0));
-      frame2 = new SLAMFrame(frame1, messages.get(1));
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+
+      frame1 = new SLAMFrame(messages.get(0), normalEstimationParameters);
+      frame2 = new SLAMFrame(frame1, messages.get(1), normalEstimationParameters);
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
