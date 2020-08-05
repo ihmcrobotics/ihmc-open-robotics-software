@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -111,7 +112,13 @@ public class BehaviorHelper
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      new IHMCROS2Callback<>(managedROS2Node, topic.getType(), topic, callback);
+      new IHMCROS2Callback<>(managedROS2Node, topic, callback);
+   }
+
+   // TODO: Move to remote robot interface?
+   public <T> void createROS2ControllerCallback(Class<T> messageClass, Consumer<T> callback)
+   {
+      new IHMCROS2Callback<>(managedROS2Node, ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
    public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)

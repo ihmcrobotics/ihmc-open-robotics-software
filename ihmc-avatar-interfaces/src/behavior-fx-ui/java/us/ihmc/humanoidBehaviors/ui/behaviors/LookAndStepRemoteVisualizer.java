@@ -54,7 +54,7 @@ public class LookAndStepRemoteVisualizer
          behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
          bodyPathRegionsGraphic = new LivePlanarRegionsGraphic(false);
-         behaviorMessager.registerTopicListener(BodyPathRegionsForUI, planarRegions -> {
+         behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
             bodyPathRegionsGraphic.acceptPlanarRegions(planarRegions);
          });
          footstepPlanningRegionsGraphic = new LivePlanarRegionsGraphic(false);

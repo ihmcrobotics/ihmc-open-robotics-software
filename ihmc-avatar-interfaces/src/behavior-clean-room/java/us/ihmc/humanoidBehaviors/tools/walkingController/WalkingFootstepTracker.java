@@ -93,4 +93,14 @@ public class WalkingFootstepTracker
       }
       return numberOfIncompleteFootsteps;
    }
+
+   public void reset()
+   {
+      synchronized (this)
+      {
+         stepsCommanded = 0;
+         stepsCompleted = 0;
+      }
+      lastCommandedFootsteps.clear();
+   }
 }
