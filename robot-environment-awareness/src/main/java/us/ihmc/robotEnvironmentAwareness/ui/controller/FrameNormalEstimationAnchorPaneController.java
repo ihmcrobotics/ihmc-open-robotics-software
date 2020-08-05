@@ -18,6 +18,8 @@ public class FrameNormalEstimationAnchorPaneController extends REABasicUIControl
 
    @FXML
    private ToggleButton weightNumberOfHits;
+   @FXML
+   private ToggleButton enableLeastSquares;
 
    @FXML
    private Slider searchRadiusSlider;
@@ -64,6 +66,7 @@ public class FrameNormalEstimationAnchorPaneController extends REABasicUIControl
       normalEstimationParametersProperty.bindBidirectionalMaxAverageDeviationRatio(maxAverageDeviationRatioSlider.valueProperty());
       normalEstimationParametersProperty.bindBidirectionalNumberOfIterations(numberOfIterationsSlider.valueProperty());
       normalEstimationParametersProperty.bindBidrectionalWeightByNumberOfHits(weightNumberOfHits.selectedProperty());
+      normalEstimationParametersProperty.bindBidirectionalEnableLeastSquaresEstimation(enableLeastSquares.selectedProperty());
 
       uiMessager.bindBidirectionalGlobal(normalEstimationParametersTopic, normalEstimationParametersProperty);
    }
