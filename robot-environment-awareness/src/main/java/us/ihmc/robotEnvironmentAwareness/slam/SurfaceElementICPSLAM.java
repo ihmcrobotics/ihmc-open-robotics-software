@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.geometry.Plane3D;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
@@ -57,10 +59,24 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       int numberOfSurfel = frame.getNumberOfSurfaceElements();
       correctedCorrespondingPointLocation = new Point3D[numberOfSurfel];
+
       if (DEBUG)
          LogTools.info("numberOfSurfel " + numberOfSurfel);
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
+         private TIntArrayList indicesToCompute;
+
+         public void setIndicesToCompute(TIntArrayList indicesToCompute)
+         {
+            this.indicesToCompute = indicesToCompute;
+         }
+
+         public void resetIndicesToCompute()
+         {
+            this.indicesToCompute = null;
+         }
+
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
@@ -68,12 +84,16 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
             correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(numberOfSurfel, 1);
+            int size = indicesToCompute != null ? indicesToCompute.size() : numberOfSurfel;
+            correctedCorrespondingPointLocation = new Point3D[size];
+            DMatrixRMaj errorSpace = new DMatrixRMaj(size, 1);
 
-            for (int i = 0; i < numberOfSurfel; i++)
+            for (int i = 0; i < size; i++)
             {
+               int index = indicesToCompute != null ? indicesToCompute.get(i) : i;
+
                Point3D correctedSurfelInWorld = new Point3D();
-               correctedLocalPoseInWorld.transform(frame.getSurfaceElementsInLocalFrame().get(i).getPoint(), correctedSurfelInWorld);
+               correctedLocalPoseInWorld.transform(frame.getSurfaceElementsInLocalFrame().get(index).getPoint(), correctedSurfelInWorld);
 
                correctedCorrespondingPointLocation[i] = correctedSurfelInWorld;
 
