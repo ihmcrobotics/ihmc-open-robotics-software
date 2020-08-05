@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
@@ -8,12 +9,15 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.ximgproc.FastLineDetector;
 import org.opencv.ximgproc.Ximgproc;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
+import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.Ros2Node;
 
@@ -33,7 +37,11 @@ public class LineSegmentEstimator {
 
     private boolean prevImgFilled = false;
     private boolean currentVideoPacketFilled = false;
+    private boolean currentPlanarRegionsListMessageFilled = false;
+
     private VideoPacket currentVideoPacket;
+    private PlanarRegionsListMessage currentPlanarRegionsListMessage;
+
     private Mat curImg;
     private Mat prevImg;
     private Mat curLines;
@@ -41,6 +49,7 @@ public class LineSegmentEstimator {
     private ArrayList<LineMatch> correspLines;
 
     private Ros2Node ros2Node;
+    private JavaFXPlanarRegionsViewer planarRegionsViewer = new JavaFXPlanarRegionsViewer();
     private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
     private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
@@ -50,8 +59,11 @@ public class LineSegmentEstimator {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
 
+        this.planarRegionsViewer.start();
+
+
         this.ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
-        this.registerVideoCallback(ros2Node);
+        this.registerCallbacks(ros2Node);
         executorService.scheduleAtFixedRate(this::mainUpdate, 0, 32, TimeUnit.MILLISECONDS);
     }
 
@@ -60,7 +72,14 @@ public class LineSegmentEstimator {
         currentVideoPacket = message;
     }
 
-    public void registerVideoCallback(Ros2Node ros2Node) {
+    public void planarRegionsListCallback(PlanarRegionsListMessage message) {
+        System.out.println("Planar Regions Message:" + message.toString());
+        currentPlanarRegionsListMessageFilled = true;
+        currentPlanarRegionsListMessage = message;
+    }
+
+    public void registerCallbacks(Ros2Node ros2Node) {
+        new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::planarRegionsListCallback);
         new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::videoPacketCallback);
     }
 
@@ -76,11 +95,6 @@ public class LineSegmentEstimator {
 
             this.curImg = mat;
 
-            // HighGui.imshow("LineDetector", mat);
-            // HighGui.waitKey(1);
-
-            // System.out.println("Message Received" + message.getVideoSource() + "\t" + mat.height() + "\t" + mat.width());
-
             if (!(this.prevImgFilled)) {
                 prevImgFilled = true;
                 this.prevImg = this.curImg;
@@ -93,8 +107,17 @@ public class LineSegmentEstimator {
                 this.prevImg = this.curImg;
                 this.prevLines = this.curLines;
             }
+            currentVideoPacketFilled = false;
         }
 
+        if(currentPlanarRegionsListMessageFilled){
+
+            PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(currentPlanarRegionsListMessage);
+            this.planarRegionsViewer.submitPlanarRegions(currentPlanarRegionsListMessage);
+
+            currentPlanarRegionsListMessageFilled = false;
+
+        }
 
     }
 
