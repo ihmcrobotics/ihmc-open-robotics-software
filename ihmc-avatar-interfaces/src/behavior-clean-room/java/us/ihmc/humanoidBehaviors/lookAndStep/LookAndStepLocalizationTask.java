@@ -4,13 +4,17 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,14 +35,17 @@ public class LookAndStepLocalizationTask
       private SingleThreadSizeOneQueueExecutor executor;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
       private final Input swingSleepCompleteInput = new Input();
+      private SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
 
       public void initialize(StatusLogger statusLogger,
                              UIPublisher uiPublisher,
                              LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                              RemoteSyncedRobotModel syncedRobot,
                              Runnable reachedGoalOutput,
+                             SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps,
                              Consumer<LookAndStepLocalizationResult> footstepPlanningOutput)
       {
+         this.lastCommandedFootsteps = lastCommandedFootsteps;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
          this.reachedGoalOutput = reachedGoalOutput;
          this.footstepPlanningOutput = footstepPlanningOutput;
@@ -67,11 +74,29 @@ public class LookAndStepLocalizationTask
          bodyPathPlan = bodyPathPlanInput.getLatest();
          syncedRobot.update();
 
+         // if lastCommandedFootsteps are null we are going to assume the robot is standing still TODO: Check this later
+         stanceForChecking = new SideDependentList<>();
+         for (RobotSide side : RobotSide.values)
+         {
+            FramePose3D solePose = new FramePose3D();
+            if (lastCommandedFootsteps.get(side) == null)
+            {
+               solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+            }
+            else
+            {
+               lastCommandedFootsteps.get(side).getFootstepPose(solePose);
+            }
+            solePose.changeFrame(ReferenceFrame.getWorldFrame());
+            stanceForChecking.set(side, solePose);
+         }
+
          run();
       }
    }
 
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
+   protected SideDependentList<FramePose3DReadOnly> stanceForChecking;
 
    protected void run()
    {
@@ -113,8 +138,8 @@ public class LookAndStepLocalizationTask
          LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
                                                                                   closestSegmentIndex,
                                                                                   subGoalPoseBetweenFeet,
-                                                                                  reachedGoalZone,
-                                                                                  bodyPathPlan);
+                                                                                  bodyPathPlan,
+                                                                                  stanceForChecking);
          footstepPlanningOutput.accept(result);
       }
    }

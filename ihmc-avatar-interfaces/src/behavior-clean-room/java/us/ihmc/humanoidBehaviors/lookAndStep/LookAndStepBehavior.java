@@ -1,20 +1,22 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
-import us.ihmc.commons.thread.Notification;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepLocalization;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStepStepping;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.humanoidBehaviors.tools.walkingController.WalkingFootstepTracker;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
@@ -33,6 +35,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final RemoteHumanoidRobotInterface robotInterface;
 
    private final LookAndStepBodyPathPlanning bodyPathPlanning = new LookAndStepBodyPathPlanning();
+   private final LookAndStepLocalization localization = new LookAndStepLocalization();
    private final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
    private final LookAndStepStepping stepping = new LookAndStepStepping();
    private final BehaviorStateReference<State> behaviorStateReference;
@@ -92,13 +95,25 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
-      SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
-      Notification resetInput = helper.createROS2Notification(RESET);
+      SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps = new SideDependentList<>();
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
-
+      ROS2TypelessInput resetInput = helper.createROS2TypelessInput(RESET);
       ControllerStatusTracker controllerStatusTracker = new ControllerStatusTracker(statusLogger,
                                                                                    helper.getManagedROS2Node(),
                                                                                    helper.getRobotModel().getSimpleRobotName());
+
+      resetInput.addCallback(() ->
+                             {
+                                bodyPathPlanning.acceptGoal(null);
+                                stepping.reset();
+                                behaviorStateReference.set(State.BODY_PATH_PLANNING);
+                                lastStanceSide.set(null);
+                                helper.publishToUI(ResetForUI);
+                                statusLogger.warn("Behavior reset.");
+                                lastCommandedFootsteps.clear();
+                                controllerStatusTracker.getFootstepTracker().reset();
+                             });
+
       // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
 
       // TODO: Want to be able to wire up behavior here and see all present modules
@@ -116,23 +131,31 @@ public class LookAndStepBehavior implements BehaviorInterface
             robotInterface.newSyncedRobot(),
             behaviorStateReference,
             controllerStatusTracker,
-            footstepPlanning::acceptBodyPathPlan,
+            localization::acceptBodyPathPlan,
             approvalNotification
       );
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
       helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
+      localization.initialize(
+            statusLogger,
+            helper::publishToUI,
+            lookAndStepParameters,
+            robotInterface.newSyncedRobot(),
+            () -> { // TODO: Review order of calls here
+               bodyPathPlanning.acceptGoal(null);
+               helper.publishROS2(REACHED_GOAL);
+               behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+            },
+            lastCommandedFootsteps,
+            footstepPlanning::acceptLocalizationResult
+      );
       footstepPlanning.initialize(
             statusLogger,
             lookAndStepParameters,
             footstepPlannerParameters,
             swingPlannerParameters,
-            resetInput::poll,
             helper::publishToUI,
-            () -> {
-               bodyPathPlanning.acceptGoal(null);
-               helper.publishROS2(REACHED_GOAL);
-            },
-            lastSteppedSolePoses,
+            lastCommandedFootsteps,
             helper.getOrCreateFootstepPlanner(),
             lastStanceSide,
             operatorReviewEnabledInput::get,
@@ -143,16 +166,27 @@ public class LookAndStepBehavior implements BehaviorInterface
             approvalNotification
       );
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
+      helper.createROS2ControllerCallback(FootstepStatusMessage.class, status ->
+      {
+         if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+         {
+            footstepPlanning.acceptFootstepCompleted();
+         }
+      });
       stepping.initialize(
             statusLogger,
             robotInterface.newSyncedRobot(),
             lookAndStepParameters,
-            lastSteppedSolePoses,
             helper::publishToUI,
             robotInterface::requestWalk,
-            footstepPlanning::runOrQueue,
+            () ->
+            {
+               behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+               localization.acceptSwingSleepComplete();
+            },
             controllerStatusTracker,
-            behaviorStateReference
+            behaviorStateReference,
+            lastCommandedFootsteps
       );
    }
 

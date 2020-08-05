@@ -2,7 +2,9 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 
@@ -11,20 +13,20 @@ public class LookAndStepLocalizationResult
    private final Point3D closestPointAlongPath;
    private final int closestSegmentIndex;
    private final FramePose3D subGoalPoseBetweenFeet;
-   private final boolean reachedGoalZone;
    private final List<? extends Pose3DReadOnly> bodyPathPlan;
+   private final SideDependentList<FramePose3DReadOnly> stanceForPlanning;
 
    public LookAndStepLocalizationResult(Point3D closestPointAlongPath,
                                         int closestSegmentIndex,
                                         FramePose3D subGoalPoseBetweenFeet,
-                                        boolean reachedGoalZone,
-                                        List<? extends Pose3DReadOnly> bodyPathPlan)
+                                        List<? extends Pose3DReadOnly> bodyPathPlan,
+                                        SideDependentList<FramePose3DReadOnly> stanceForPlanning)
    {
       this.closestPointAlongPath = closestPointAlongPath;
       this.closestSegmentIndex = closestSegmentIndex;
       this.subGoalPoseBetweenFeet = subGoalPoseBetweenFeet;
-      this.reachedGoalZone = reachedGoalZone;
       this.bodyPathPlan = bodyPathPlan;
+      this.stanceForPlanning = stanceForPlanning;
    }
 
    public Point3D getClosestPointAlongPath()
@@ -42,13 +44,13 @@ public class LookAndStepLocalizationResult
       return subGoalPoseBetweenFeet;
    }
 
-   public boolean isReachedGoalZone()
-   {
-      return reachedGoalZone;
-   }
-
    public List<? extends Pose3DReadOnly> getBodyPathPlan()
    {
       return bodyPathPlan;
+   }
+
+   public SideDependentList<FramePose3DReadOnly> getStanceForPlanning()
+   {
+      return stanceForPlanning;
    }
 }

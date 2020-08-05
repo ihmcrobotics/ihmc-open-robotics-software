@@ -120,7 +120,7 @@ public class LookAndStepBodyPathPlanningTask
                                  });
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
-                                 () -> uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions));
+                                 () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
          suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
                                        + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
                                  () -> mapRegionsReceptionTimerSnapshot.isExpired());
@@ -132,9 +132,7 @@ public class LookAndStepBodyPathPlanningTask
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
-         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
-                                       + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
-                                 () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
+         suppressor.addCondition("Robot still walking", controllerStatusTracker::isWalking);
       }
 
       public void acceptMapRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -151,8 +149,8 @@ public class LookAndStepBodyPathPlanningTask
 
       private void evaluateAndRun()
       {
-         mapRegions = mapRegionsInput.get();
-         goal = goalInput.get();
+         mapRegions = mapRegionsInput.getLatest();
+         goal = goalInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepBehaviorParameters.getRobotConfigurationDataExpiration());
@@ -179,7 +177,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       statusLogger.info("Body path planning...");
       // TODO: Add robot standing still for 20s for real robot?
-      uiPublisher.publishToUI(BodyPathRegionsForUI, mapRegions);
+      uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
 
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
