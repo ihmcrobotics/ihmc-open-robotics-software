@@ -126,7 +126,6 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
-
       if (currentOutputSpace.getNumberOfCorrespondingPoints() < 1)
          return -1;
 
@@ -144,13 +143,12 @@ public class LevenbergMarquardtParameterOptimizer
          perturbedInput.add(i, 0, perturbationVector.get(i));
 
          DMatrixRMaj perturbedOutput = outputCalculator.apply(perturbedInput);
-         if (perturbedOutput.getNumRows() != numberOfCorrespondences)
-            throw new IllegalArgumentException("Got a size problem.");
+         DMatrixRMaj currentOutput = currentOutputSpace.getCorrespondingOutput();
 
          for (int j = 0; j < numberOfCorrespondences; j++)
          {
-               double partialValue = (perturbedOutput.get(j) - currentOutputSpace.getCorrespondingOutput().get(j)) / perturbationVector.get(i);
-               jacobian.set(j, i, partialValue);
+            double partialValue = (perturbedOutput.get(j) - currentOutput.get(j)) / perturbationVector.get(i);
+            jacobian.set(j, i, partialValue);
          }
 
          perturbedInput.add(i, 0, -perturbationVector.get(i));
