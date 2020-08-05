@@ -48,9 +48,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoDouble hipWidth = new YoDouble("hipWidth", registry);
    private final YoDouble extraToeOffHeight = new YoDouble("extraToeOffHeight", registry);
 
-   private final YoDouble nominalDoubleSupportPercentageIn = new YoDouble("nominalDoubleSupportPercentageIn", registry);
+   private final YoDouble nominalDoubleSupportExchange = new YoDouble("nominalDoubleSupportExchange", registry);
+   private final YoDouble doubleSupportExchange = new YoDouble("doubleSupportExchange", registry);
    private final YoDouble doubleSupportPercentageIn = new YoDouble("doubleSupportPercentageIn", registry);
-   private final YoDouble doubleSupportPercentageInOffset = new YoDouble("doubleSupportPercentageInOffset", registry);
+   private final YoDouble doubleSupportPercentageOut = new YoDouble("doubleSupportPercentageOut", registry);
+   private final YoDouble doubleSupportExchangeOffset = new YoDouble("doubleSupportExchangeOffset", registry);
    private final YoDouble percentageThroughSegment = new YoDouble("percentageThroughSegment", registry);
    private final YoDouble splineQuery = new YoDouble("splineQuery", registry);
 
@@ -128,7 +130,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       this.yoTime = yoTime;
 
       heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
-      doubleSupportPercentageInOffset.set(defaultPercentageInOffset);
+      doubleSupportExchangeOffset.set(defaultPercentageInOffset);
 
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
@@ -141,7 +143,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       setSupportLeg(RobotSide.LEFT);
 
-      this.nominalDoubleSupportPercentageIn.set(doubleSupportPercentageIn);
+      this.nominalDoubleSupportExchange.set(doubleSupportPercentageIn);
 
       parentRegistry.addChild(registry);
 
@@ -262,18 +264,21 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          tempFramePoint.changeFrame(frameOfSupportLeg);
          tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
 
-         double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
+         double percentExchange = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
 
-         percentIn = MathTools.clamp(percentIn - doubleSupportPercentageInOffset.getDoubleValue(),
-                                     nominalDoubleSupportPercentageIn.getDoubleValue(),
-                                     1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
-         doubleSupportPercentageIn.set(percentIn);
+         percentExchange = MathTools.clamp(percentExchange,
+                                     nominalDoubleSupportExchange.getDoubleValue(),
+                                     1.0 - nominalDoubleSupportExchange.getDoubleValue());
+         doubleSupportExchange.set(percentExchange);
       }
       else
       {
          desiredCoMPositionAtEnd.setToNaN();
-         doubleSupportPercentageIn.set(nominalDoubleSupportPercentageIn.getDoubleValue());
+         doubleSupportExchange.set(nominalDoubleSupportExchange.getDoubleValue());
       }
+
+      doubleSupportPercentageIn.set(doubleSupportExchange.getDoubleValue() - doubleSupportExchangeOffset.getDoubleValue());
+      doubleSupportPercentageOut.set(doubleSupportExchange.getDoubleValue() + doubleSupportExchangeOffset.getDoubleValue());
 
       heightWaypoints.clear();
 
