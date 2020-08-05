@@ -7,6 +7,7 @@ import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -22,10 +23,9 @@ public class ControllerStatusTracker
 
    private final WalkingFootstepTracker footstepTracker;
    private volatile HighLevelControllerName currentState;
-   private volatile CapturabilityBasedStatus latestCapturabilityBasedStatus;
-   private volatile long numberCapturabilityBasedStatusReceived;
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
+   private volatile boolean isWalking = false;
 
    public ControllerStatusTracker(StatusLogger statusLogger, Ros2NodeInterface ros2Node, String robotName)
    {
@@ -65,28 +65,35 @@ public class ControllerStatusTracker
                              message ->
                              {
                                 capturabilityBasedStatusTimer.reset();
-//                                ++numberCapturabilityBasedStatusReceived;
-//                                latestCapturabilityBasedStatus = message;
                              });
-//      new IHMCROS2Callback<>(ros2Node,
-//                             ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotName),
-//                             message ->
-//                             {
-//                                statusLogger.error("Controller crashed! {}", () -> message.toString());
-//                             });
+      new IHMCROS2Callback<>(ros2Node,
+                             ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotName),
+                             message ->
+                             {
+                                WalkingStatus walkingStatus = WalkingStatus.fromByte(message.getWalkingStatus());
+                                if (walkingStatus == WalkingStatus.STARTED  || walkingStatus == WalkingStatus.RESUMED)
+                                {
+                                    isWalking = true;
+                                }
+                                else if (walkingStatus == WalkingStatus.ABORT_REQUESTED)
+                                {
 
-//      new PausablePeriodicThread("CapturabilityBSReporter", 1.0, () ->
-//      {
-//                                statusLogger.info("Capturability: # {}: {}",
-//                                                   numberCapturabilityBasedStatusReceived,
-//                                                   latestCapturabilityBasedStatus.toString());
-//      }).start();
+                                }
+                                else
+                                {
+                                    isWalking = false;
+                                }
+                             });
+   }
+
+   public boolean isWalking()
+   {
+      return isWalking;
    }
 
    public boolean isInWalkingState()
    {
       return capturabilityBasedStatusTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
-//      return currentState == HighLevelControllerName.WALKING;
    }
 
    public WalkingFootstepTracker getFootstepTracker()
