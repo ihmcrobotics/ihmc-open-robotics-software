@@ -246,6 +246,7 @@ public class LevenbergMarquardtParameterOptimizer
    private class OutputSpace
    {
       private final DMatrixRMaj output;
+      private DMatrixRMaj correspondingOutput;
       private final boolean[] correspondence;
       private int numberOfCorrespondingPoints;
       private double correspondingQuality;
@@ -283,6 +284,18 @@ public class LevenbergMarquardtParameterOptimizer
                correspondence[i] = false;
             }
          }
+
+         correspondingOutput = new DMatrixRMaj(numberOfCorrespondingPoints, 1);
+         int index = 0;
+         for (int i = 0; i < output.getNumRows(); i++)
+         {
+            if (correspondence[i])
+            {
+               correspondingOutput.set(index, 0, output.get(i));
+               index++;
+            }
+         }
+
          if (numberOfCorrespondingPoints == 0)
          {
             return false;
@@ -312,6 +325,11 @@ public class LevenbergMarquardtParameterOptimizer
       DMatrixRMaj getOutput()
       {
          return output;
+      }
+
+      DMatrixRMaj getCorrespondingOutput()
+      {
+         return correspondingOutput;
       }
 
       boolean isCorresponding(int index)
