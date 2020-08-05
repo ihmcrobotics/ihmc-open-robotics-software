@@ -116,7 +116,7 @@ public class LevenbergMarquardtParameterOptimizer
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
       boolean result = currentOutputSpace.computeCorrespondence();
-//      currentOutputSpace.computeQuality();
+      currentOutputSpace.computeQuality();
       
       return result;
    }
@@ -126,17 +126,10 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
-      // TODO because of the way the operations are ordered, on the first iteration, the current output space is already valid, as it was called in the
-      // TODO initialize function. This is a relatively expensive operation, so figuring out how to reorder things would reduce the number of "update output
-      // TODO space" calls by 1, which would be helpful.
-      outputCalculator.resetIndicesToCompute();
-      currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
-      if (!currentOutputSpace.computeCorrespondence())
-      {
+      if (currentOutputSpace.getNumberOfCorrespondingPoints() < 1)
          return -1;
-      }
-      currentOutputSpace.computeQuality();
+
       outputCalculator.setIndicesToCompute(currentOutputSpace.correspondingIndices);
 
       int numberOfCorrespondences = currentOutputSpace.getNumberOfCorrespondingPoints();
@@ -175,13 +168,18 @@ public class LevenbergMarquardtParameterOptimizer
       CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutputSpace.getCorrespondingOutput(), optimizeDirection);
 
       // update currentInput.
-      CommonOps_DDRM.subtract(currentInput, optimizeDirection, currentInput);
+      CommonOps_DDRM.subtractEquals(currentInput, optimizeDirection);
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       if (DEBUG)
       {
          System.out.println("elapsed iteration time is " + iterateTime);
       }
+
+      outputCalculator.resetIndicesToCompute();
+      currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
+      currentOutputSpace.computeCorrespondence();
+      currentOutputSpace.computeQuality();
 
       return currentOutputSpace.getCorrespondingQuality();
    }
