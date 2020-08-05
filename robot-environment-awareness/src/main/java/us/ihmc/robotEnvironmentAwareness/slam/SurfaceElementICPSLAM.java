@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -80,8 +81,8 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-            RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
-            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
+            RigidBodyTransformReadOnly driftCorrectionTransform = transformConverter.apply(inputParameter);
+            RigidBodyTransformBasics correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
             correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
             int size = indicesToCompute != null ? indicesToCompute.size() : numberOfSurfel;
