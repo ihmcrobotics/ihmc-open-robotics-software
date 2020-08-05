@@ -283,7 +283,7 @@ public class SLAMModule implements PerceptionModule
       slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
          slam.clearNormals();
-      if (enableNormalEstimation.get())
+      if (enableNormalEstimation.get() && useBoundingBox.get())
          slam.updateSurfaceNormals();
    }
 
@@ -332,6 +332,11 @@ public class SLAMModule implements PerceptionModule
          success = addFrame(pointCloudToCompute);
          LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
+
+      slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
+      if (enableNormalEstimation.get())
+         slam.updateSurfaceNormalsInBoundingBox();
          
       dequeue();
 
