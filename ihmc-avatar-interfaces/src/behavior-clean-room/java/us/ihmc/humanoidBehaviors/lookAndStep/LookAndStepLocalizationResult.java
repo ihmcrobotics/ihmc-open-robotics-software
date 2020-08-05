@@ -8,11 +8,11 @@ import java.util.List;
 
 public class LookAndStepLocalizationResult
 {
-   public final Point3D closestPointAlongPath;
-   public final int closestSegmentIndex;
-   public final FramePose3D subGoalPoseBetweenFeet;
-   public final boolean reachedGoalZone;
-   public final List<? extends Pose3DReadOnly> bodyPathPlan;
+   private final Point3D closestPointAlongPath;
+   private final int closestSegmentIndex;
+   private final FramePose3D subGoalPoseBetweenFeet;
+   private final boolean reachedGoalZone;
+   private final List<? extends Pose3DReadOnly> bodyPathPlan;
 
    public LookAndStepLocalizationResult(Point3D closestPointAlongPath,
                                         int closestSegmentIndex,
