@@ -39,6 +39,7 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_LONGEST_TIME_TO_LAG = Double.POSITIVE_INFINITY;
 
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_SURFACE_ELEMENTS = Integer.MAX_VALUE;
+   private static final int DEFAULT_MAXIMUM_NUMBER_OF_CORRESPONDENCES = Integer.MAX_VALUE;
 
    private double surfaceElementResolution;
    private double windowMargin;
@@ -70,6 +71,7 @@ public class SurfaceElementICPSLAMParameters
    private double longestTimeToLag;
 
    private int maxNumberOfSurfaceElements;
+   private int maxNumberOfCorrespondences;
 
    public SurfaceElementICPSLAMParameters()
    {
@@ -113,6 +115,7 @@ public class SurfaceElementICPSLAMParameters
       longestTimeToLag = other.longestTimeToLag;
 
       maxNumberOfSurfaceElements = other.maxNumberOfSurfaceElements;
+      maxNumberOfCorrespondences = other.maxNumberOfCorrespondences;
    }
 
    public void setDefaultParameters()
@@ -147,6 +150,7 @@ public class SurfaceElementICPSLAMParameters
       longestTimeToLag = DEFAULT_LONGEST_TIME_TO_LAG;
 
       maxNumberOfSurfaceElements = DEFAULT_MAXIMUM_NUMBER_OF_SURFACE_ELEMENTS;
+      maxNumberOfCorrespondences = DEFAULT_MAXIMUM_NUMBER_OF_CORRESPONDENCES;
    }
 
    public double getSurfaceElementResolution()
@@ -259,6 +263,11 @@ public class SurfaceElementICPSLAMParameters
       return maxNumberOfSurfaceElements;
    }
 
+   public int getMaxNumberOfCorrespondences()
+   {
+      return maxNumberOfCorrespondences;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -369,6 +378,11 @@ public class SurfaceElementICPSLAMParameters
       this.computeFramesInParalel = computeFramesInParallel;
    }
 
+   public void setMaxNumberOfCorrespondences(int maxNumberOfCorrespondences)
+   {
+      this.maxNumberOfCorrespondences = maxNumberOfCorrespondences;
+   }
+
    @Override
    public String toString()
    {
@@ -381,8 +395,9 @@ public class SurfaceElementICPSLAMParameters
              + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame() + ", insertMissInOcTree: "
              + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll() + ", translationPerturbation: " + getTranslationPerturbation()
              + ", rotationPerturbation: " + getRotationPerturbation() + ", maximumQueueSize: " + getMaximumQueueSize() + ", maximumTimeBetweenFrames: "
-             + getMaximumTimeBetweenFrames() + ", longestTimeToLag: " + getLongestTimeToLag() + ", maximumNumberOfSurfaceElements: " + getMaxNumberOfSurfaceElements()
-            + ", computeFramesInParallel: " + getComputeFramesInParallel();
+             + getMaximumTimeBetweenFrames() + ", longestTimeToLag: " + getLongestTimeToLag() + ", maximumNumberOfSurfaceElements: "
+             + getMaxNumberOfSurfaceElements() + ", maxNumberOfCorrespondences: " + getMaxNumberOfCorrespondences()
+             + ", computeFramesInParallel: " + getComputeFramesInParallel();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -412,6 +427,7 @@ public class SurfaceElementICPSLAMParameters
       parameters.setMaximumTimeBetweenFrames(ScannerTools.readNextDouble(scanner, parameters.getMaximumTimeBetweenFrames()));
       parameters.setLongestTimeToLag(ScannerTools.readNextDouble(scanner, parameters.getLongestTimeToLag()));
       parameters.setMaxNumberOfSurfaceElements(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfSurfaceElements()));
+      parameters.setMaxNumberOfCorrespondences(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfCorrespondences()));
       parameters.setComputeFramesInParallel(ScannerTools.readNextBoolean(scanner, parameters.getComputeFramesInParallel()));
       scanner.close();
       return parameters;

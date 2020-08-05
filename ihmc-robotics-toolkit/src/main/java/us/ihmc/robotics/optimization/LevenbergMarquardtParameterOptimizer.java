@@ -1,5 +1,7 @@
 package us.ihmc.robotics.optimization;
 
+import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -10,6 +12,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -63,6 +67,8 @@ public class LevenbergMarquardtParameterOptimizer
    private static final double DEFAULT_DAMPING_COEFFICIENT = 0.001;
    private boolean useDamping = true;
 
+   private int maximumNumberOfCorrespondences = Integer.MAX_VALUE;
+
    private double computationTime;
    private int iteration;
    private boolean optimized;
@@ -104,6 +110,11 @@ public class LevenbergMarquardtParameterOptimizer
    public void setCorrespondenceThreshold(double correspondenceThreshold)
    {
       this.correspondenceThreshold = correspondenceThreshold;
+   }
+
+   public void setMaximumNumberOfCorrespondences(int maximumNumberOfCorrespondences)
+   {
+      this.maximumNumberOfCorrespondences = maximumNumberOfCorrespondences;
    }
 
    public boolean initialize()
@@ -285,6 +296,8 @@ public class LevenbergMarquardtParameterOptimizer
             }
          }
 
+         randomlySampleCorrespondences(correspondingIndices, maximumNumberOfCorrespondences);
+
          correspondingOutput = new DMatrixRMaj(correspondingIndices.size(), 1);
          int index = 0;
          TIntIterator iterator = correspondingIndices.iterator();
@@ -293,6 +306,14 @@ public class LevenbergMarquardtParameterOptimizer
 
          return correspondingIndices.size() != 0;
       }
+
+      private void randomlySampleCorrespondences(TIntArrayList correpsondencesToSample, int maxNumberOfCorrespondences)
+      {
+         Random random = new Random();
+         while (correpsondencesToSample.size() > maxNumberOfCorrespondences)
+            correpsondencesToSample.remove(RandomNumbers.nextInt(random, 0, correpsondencesToSample.size() - 1));
+      }
+
 
       /**
        * there are two kinds of quality. one is distance between corresponding points

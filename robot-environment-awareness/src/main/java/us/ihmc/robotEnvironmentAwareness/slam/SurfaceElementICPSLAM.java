@@ -135,6 +135,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          //return null;
       }
       optimizer.setCorrespondenceThreshold(surfaceElementICPSLAMParameters.getMinimumCorrespondingDistance()); // Note : (x 1.5) of surfel resolution.
+      optimizer.setMaximumNumberOfCorrespondences(surfaceElementICPSLAMParameters.getMaxNumberOfCorrespondences()); // Note : (x 1.5) of surfel resolution.
       double initialQuality = optimizer.getQuality();
       driftCorrectionResult.setInitialDistance(initialQuality);
       if (DEBUG)
