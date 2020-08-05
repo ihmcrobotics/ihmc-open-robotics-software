@@ -31,6 +31,9 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    private final DoubleField initialQualityThreshold = new DoubleField(SurfaceElementICPSLAMParameters::getInitialQualityThreshold,
                                                                        SurfaceElementICPSLAMParameters::setInitialQualityThreshold);
 
+   private final IntegerField maxQueueSize = new IntegerField(SurfaceElementICPSLAMParameters::getMaximumQueueSize,
+                                                              SurfaceElementICPSLAMParameters::setMaximumQueueSize);
+
    private final IntegerField maxOptimizationIterations = new IntegerField(SurfaceElementICPSLAMParameters::getMaxOptimizationIterations,
                                                                            SurfaceElementICPSLAMParameters::setMaxOptimizationIterations);
    private final BooleanField computeSurfaceNormalsInFrame = new BooleanField(SurfaceElementICPSLAMParameters::getComputeSurfaceNormalsInFrame,
@@ -103,6 +106,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalInitialQualityThreshold(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, initialQualityThreshold);
+   }
+
+   public void bindBidirectionalMaxQueueSize(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxQueueSize);
    }
 
    public void bindBidirectionalMaxOptimizationIterations(Property<? extends Number> property)

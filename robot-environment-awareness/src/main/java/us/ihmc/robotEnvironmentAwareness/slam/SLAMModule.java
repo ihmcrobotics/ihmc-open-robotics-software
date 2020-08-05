@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -51,6 +53,7 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
+   private final AtomicLong lastTimestampProcessed = new AtomicLong(-1);
    protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<Boolean> enableNormalEstimation;
@@ -299,6 +302,7 @@ public class SLAMModule implements PerceptionModule
       updateSLAMParameters();
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
+      lastTimestampProcessed.set(pointCloudToCompute.getTimestamp());
 
       boolean success;
       if (slam.isEmpty())
@@ -338,7 +342,41 @@ public class SLAMModule implements PerceptionModule
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
    {
+      if (lastTimestampProcessed.get() > -1 &&
+          Conversions.nanosecondsToSeconds(pointCloud.getTimestamp() - lastTimestampProcessed.get()) > slamParameters.get().getLongestTimeToLag())
+      {
+         compressQueueToSize(1);
+         pointCloudQueue.add(pointCloud);
+      }
+
+      if (pointCloudQueue.size() < slamParameters.get().getMaximumQueueSize())
+      {
+         pointCloudQueue.add(pointCloud);
+         return;
+      }
+
+      compressQueueToSize(slamParameters.get().getMaximumQueueSize());
       pointCloudQueue.add(pointCloud);
+   }
+
+   private void compressQueueToSize(int desiredSize)
+   {
+      long timestamp = lastTimestampProcessed.get();
+      int index = 0;
+      while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() > desiredSize - 1)
+      {
+         StereoVisionPointCloudMessage pointCloudMessage = pointCloudQueue.get(index);
+         StereoVisionPointCloudMessage nextPointCloudMessage = pointCloudQueue.get(index + 1);
+         if (Conversions.nanosecondsToSeconds(nextPointCloudMessage.getTimestamp() - timestamp) < slamParameters.get().getMaximumTimeBetweenFrames())
+         {
+            pointCloudQueue.remove(index);
+         }
+         else
+         {
+            timestamp = pointCloudMessage.getTimestamp();
+            index++;
+         }
+      }
    }
 
    protected void dequeue()
