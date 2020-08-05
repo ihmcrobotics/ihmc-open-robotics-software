@@ -44,10 +44,6 @@ public class SLAMModule implements PerceptionModule
 
    private static final double DEFAULT_OCTREE_RESOLUTION = 0.02;
 
-   private static final Color LATEST_ORIGINAL_POINT_CLOUD_COLOR = Color.BEIGE;
-   private static final Color SOURCE_POINT_CLOUD_COLOR = Color.RED;
-   private static final Color LATEST_POINT_CLOUD_COLOR = Color.LIME;
-
    protected final AtomicReference<Boolean> enable;
 
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
@@ -147,7 +143,6 @@ public class SLAMModule implements PerceptionModule
 
       NormalEstimationParameters frameNormalEstimationParametersLocal = new NormalEstimationParameters();
       frameNormalEstimationParametersLocal.setNumberOfIterations(10);
-      frameNormalEstimationParametersLocal.enableLeastSquaresEstimation(false);
       frameNormalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParametersLocal);
 
 
@@ -281,6 +276,7 @@ public class SLAMModule implements PerceptionModule
 
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationEnable, enableNormalEstimation.get());
       reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParameters.get());
+      reaMessager.submitMessage(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParameters.get());
 
       reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxEnable, useBoundingBox.get());
       reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxParameters, atomicBoundingBoxParameters.get());
