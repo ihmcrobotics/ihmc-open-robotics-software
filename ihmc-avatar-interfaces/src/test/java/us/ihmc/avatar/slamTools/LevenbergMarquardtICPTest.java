@@ -13,6 +13,7 @@ import java.util.function.UnaryOperator;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Tag;
@@ -24,6 +25,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 
 /**
  * see {@link LevenbergMarquardtParameterOptimizer}.
@@ -284,7 +286,7 @@ public class LevenbergMarquardtICPTest
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
 
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
