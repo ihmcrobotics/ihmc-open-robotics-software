@@ -66,8 +66,8 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               Point3D correctedSurfelInWorld = new Point3D(frame.getSurfaceElementsInLocalFrame().get(i).getPoint());
-               correctedLocalPoseInWorld.transform(correctedSurfelInWorld);
+               Point3D correctedSurfelInWorld = new Point3D();
+               correctedLocalPoseInWorld.transform(frame.getSurfaceElementsInLocalFrame().get(i).getPoint(), correctedSurfelInWorld);
 
                correctedCorrespondingPointLocation[i] = correctedSurfelInWorld;
 
