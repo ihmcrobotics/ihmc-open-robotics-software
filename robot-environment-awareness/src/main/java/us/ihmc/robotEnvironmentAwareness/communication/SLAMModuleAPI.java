@@ -86,7 +86,8 @@ public class SLAMModuleAPI
 
    public static final Topic<Boolean> NormalEstimationClear = Root.child(Normal).topic(Clear);
    public static final Topic<Boolean> NormalEstimationEnable = Root.child(Normal).topic(Enable);
-   public static final Topic<NormalEstimationParameters> NormalEstimationParameters = Root.child(Normal).topic(Parameters);
+   public static final Topic<NormalEstimationParameters> NormalEstimationParameters = topic("NormalEstimationParameters");
+   public static final Topic<NormalEstimationParameters> FrameNormalEstimationParameters = topic("FrameNormalEstimationParameters");
 
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = Root.child(UI).child(DepthCloud).topic(Data);
    public static final Topic<SLAMFrameState> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
