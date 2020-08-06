@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -9,7 +10,6 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.tools.thread.PausablePeriodicThread;
 
 /**
  * A class to keep track of the controller by listening to its ROS 2 status API.
@@ -26,10 +26,13 @@ public class ControllerStatusTracker
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
    private volatile boolean isWalking = false;
+   private final Notification finishedWalkingNotification = new Notification();
 
    public ControllerStatusTracker(StatusLogger statusLogger, Ros2NodeInterface ros2Node, String robotName)
    {
       footstepTracker = new WalkingFootstepTracker(ros2Node, robotName);
+
+      finishedWalkingNotification.set();
 
       new IHMCROS2Callback<>(ros2Node,
                              ControllerAPIDefinition.getTopic(HighLevelStateChangeStatusMessage.class, robotName),
@@ -82,6 +85,7 @@ public class ControllerStatusTracker
                                 else
                                 {
                                     isWalking = false;
+                                    finishedWalkingNotification.set();
                                 }
                              });
    }
@@ -89,6 +93,11 @@ public class ControllerStatusTracker
    public boolean isWalking()
    {
       return isWalking;
+   }
+
+   public Notification getFinishedWalkingNotification()
+   {
+      return finishedWalkingNotification;
    }
 
    public boolean isInWalkingState()

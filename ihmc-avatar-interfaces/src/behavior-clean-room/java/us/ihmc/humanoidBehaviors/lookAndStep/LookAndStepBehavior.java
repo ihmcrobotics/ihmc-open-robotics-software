@@ -18,11 +18,13 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.humanoidBehaviors.tools.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -39,6 +41,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepLocalization localization = new LookAndStepLocalization();
    private final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
    private final LookAndStepStepping stepping = new LookAndStepStepping();
+   private final LookAndStepReset reset = new LookAndStepReset();
    private final BehaviorStateReference<State> behaviorStateReference;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -98,22 +101,39 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps = new SideDependentList<>();
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
+      AtomicBoolean isBeingReset = new AtomicBoolean();
       ROS2TypelessInput resetInput = helper.createROS2TypelessInput(RESET);
       ControllerStatusTracker controllerStatusTracker = new ControllerStatusTracker(statusLogger,
                                                                                    helper.getManagedROS2Node(),
                                                                                    helper.getRobotModel().getSimpleRobotName());
-
       resetInput.addCallback(() ->
                              {
-                                bodyPathPlanning.acceptGoal(null);
+                                isBeingReset.set(true);
+                                LogTools.info("Reset requested");
+
+                                bodyPathPlanning.reset();
+                                localization.reset();
+                                footstepPlanning.reset();
                                 stepping.reset();
-                                behaviorStateReference.set(State.BODY_PATH_PLANNING);
-                                lastStanceSide.set(null);
-                                helper.publishToUI(ResetForUI);
-                                statusLogger.info("Behavior reset.");
-                                lastCommandedFootsteps.clear();
-                                controllerStatusTracker.getFootstepTracker().reset();
+
+                                robotInterface.pauseWalking();
+
+                                reset.queueReset();
                              });
+      reset.initialize(statusLogger,
+                       controllerStatusTracker,
+                       lookAndStepParameters,
+                       () ->
+                       {
+                          bodyPathPlanning.acceptGoal(null);
+                          behaviorStateReference.set(State.BODY_PATH_PLANNING);
+                          lastStanceSide.set(null);
+                          helper.publishToUI(ResetForUI);
+                          lastCommandedFootsteps.clear();
+                          controllerStatusTracker.getFootstepTracker().reset();
+                          isBeingReset.set(false);
+                          statusLogger.info("Behavior has been reset");
+                       });
 
       // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
 
@@ -130,9 +150,16 @@ public class LookAndStepBehavior implements BehaviorInterface
             lookAndStepParameters,
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
-            behaviorStateReference,
+            behaviorStateReference::get,
             controllerStatusTracker,
-            localization::acceptBodyPathPlan,
+            bodyPathPlan ->
+            {
+               if (!isBeingReset.get())
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                  localization.acceptBodyPathPlan(bodyPathPlan);
+               }
+            },
             approvalNotification
       );
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
@@ -142,10 +169,13 @@ public class LookAndStepBehavior implements BehaviorInterface
             helper::publishToUI,
             lookAndStepParameters,
             robotInterface.newSyncedRobot(),
-            () -> { // TODO: Review order of calls here
-               bodyPathPlanning.acceptGoal(null);
-               helper.publishROS2(REACHED_GOAL);
-               behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+            () -> {
+               if ((!isBeingReset.get()))
+               {
+                  bodyPathPlanning.acceptGoal(null);
+                  helper.publishROS2(REACHED_GOAL);
+                  behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+               }
             },
             lastCommandedFootsteps,
             footstepPlanning::acceptLocalizationResult
@@ -157,14 +187,20 @@ public class LookAndStepBehavior implements BehaviorInterface
             footstepPlannerParameters,
             swingPlannerParameters,
             helper::publishToUI,
-            lastCommandedFootsteps,
             helper.getOrCreateFootstepPlanner(),
             lastStanceSide,
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
-            behaviorStateReference,
+            behaviorStateReference::get,
             controllerStatusTracker,
-            stepping::acceptFootstepPlan,
+            footstepPlan ->
+            {
+               if (!isBeingReset.get())
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.STEPPING);
+                  stepping.acceptFootstepPlan(footstepPlan);
+               }
+            },
             approvalNotification
       );
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
@@ -183,11 +219,14 @@ public class LookAndStepBehavior implements BehaviorInterface
             robotInterface::requestWalk,
             () ->
             {
-               behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-               localization.acceptSwingSleepComplete();
+               if (!isBeingReset.get())
+               {
+                  behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+                  localization.acceptSwingSleepComplete();
+               }
             },
             controllerStatusTracker,
-            behaviorStateReference,
+            behaviorStateReference::get,
             lastCommandedFootsteps
       );
    }

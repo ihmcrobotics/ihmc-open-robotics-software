@@ -1,5 +1,6 @@
 package us.ihmc.communication.util;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 
 public class Timer
@@ -14,6 +15,15 @@ public class Timer
    public double getElapsedTime()
    {
       return stopwatch.totalElapsed();
+   }
+
+   public void waitUntilExpiration(double expirationTime)
+   {
+      TimerSnapshotWithExpiration snapshot = createSnapshot(expirationTime);
+      if (snapshot.isRunning())
+      {
+         ThreadTools.sleepSeconds(expirationTime - snapshot.getTimePassedSinceReset());
+      }
    }
 
    public boolean hasBeenSet()
