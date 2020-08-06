@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.humanoidBehaviors.tools.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
@@ -40,10 +40,9 @@ public class LookAndStepBodyPathPlanningTask
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected Supplier<Boolean> operatorReviewEnabled;
-   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
 
    protected final LookAndStepReview<List<? extends Pose3DReadOnly>> review = new LookAndStepReview<>();
-   protected Consumer<List<? extends Pose3DReadOnly>> autonomousOutput;
+   protected Consumer<List<? extends Pose3DReadOnly>> output;
 
    protected final Timer planningFailedTimer = new Timer();
    protected final Stopwatch planningStopwatch = new Stopwatch();
@@ -56,6 +55,7 @@ public class LookAndStepBodyPathPlanningTask
       private TypedInput<Pose3D> goalInput = new TypedInput<>();
       private Timer mapRegionsExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
+      private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private BehaviorTaskSuppressor suppressor;
       private double neckPitch;
       private Timer neckTrajectoryTimer = new Timer();
@@ -72,9 +72,9 @@ public class LookAndStepBodyPathPlanningTask
                              LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                              Supplier<Boolean> operatorReviewEnabled,
                              RemoteSyncedRobotModel syncedRobot,
-                             BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                             Supplier<LookAndStepBehavior.State> behaviorStateReference,
                              ControllerStatusTracker controllerStatusTracker,
-                             Consumer<List<? extends Pose3DReadOnly>> autonomousOutput,
+                             Consumer<List<? extends Pose3DReadOnly>> output,
                              TypedNotification<Boolean> approvalNotification)
       {
          this.statusLogger = statusLogger;
@@ -84,19 +84,10 @@ public class LookAndStepBodyPathPlanningTask
          this.operatorReviewEnabled = operatorReviewEnabled;
          this.syncedRobot = syncedRobot;
          this.behaviorStateReference = behaviorStateReference;
-         this.autonomousOutput = autonomousOutput;
+         this.output = output;
          this.controllerStatusTracker = controllerStatusTracker;
 
-         review.initialize(
-               statusLogger,
-               "body path",
-               approvalNotification,
-               bodyPathPlan ->
-               {
-                  behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-                  autonomousOutput.accept(bodyPathPlan);
-               }
-         );
+         review.initialize(statusLogger, "body path", approvalNotification, output);
 
          // don't run two body path plans at the same time
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
@@ -145,6 +136,13 @@ public class LookAndStepBodyPathPlanningTask
       {
          goalInput.set(goal);
          LogTools.info("Body path goal received: {}", goal);
+      }
+
+      public void reset()
+      {
+         executor.interruptAndReset();
+         review.reset();
+         goalInput.set(null);
       }
 
       private void evaluateAndRun()
@@ -215,8 +213,7 @@ public class LookAndStepBodyPathPlanningTask
          }
          else
          {
-            behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-            autonomousOutput.accept(bodyPathPlanForReview);
+            output.accept(bodyPathPlanForReview);
          }
       }
       else

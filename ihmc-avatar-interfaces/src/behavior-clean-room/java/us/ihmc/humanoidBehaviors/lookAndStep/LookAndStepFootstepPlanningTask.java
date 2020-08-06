@@ -2,14 +2,13 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.humanoidBehaviors.tools.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -47,7 +46,6 @@ public class LookAndStepFootstepPlanningTask
    protected LookAndStepReview<FootstepPlan> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Runnable planningFailedNotifier;
-   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
    protected AtomicReference<RobotSide> lastStanceSideReference;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
@@ -55,6 +53,7 @@ public class LookAndStepFootstepPlanningTask
       // instance variables
       private SingleThreadSizeOneQueueExecutor executor;
       private ControllerStatusTracker controllerStatusTracker;
+      private Supplier<LookAndStepBehavior.State> behaviorStateReference;
 
       private final TypedInput<LookAndStepLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
@@ -68,12 +67,11 @@ public class LookAndStepFootstepPlanningTask
                              FootstepPlannerParametersReadOnly footstepPlannerParameters,
                              SwingPlannerParametersReadOnly swingPlannerParameters,
                              UIPublisher uiPublisher,
-                             SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps,
                              FootstepPlanningModule footstepPlanningModule,
                              AtomicReference<RobotSide> lastStanceSideReference,
                              Supplier<Boolean> operatorReviewEnabledSupplier,
                              RemoteSyncedRobotModel syncedRobot,
-                             BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                             Supplier<LookAndStepBehavior.State> behaviorStateReference,
                              ControllerStatusTracker controllerStatusTracker,
                              Consumer<FootstepPlan> autonomousOutput,
                              TypedNotification<Boolean> approvalNotification)
@@ -91,16 +89,7 @@ public class LookAndStepFootstepPlanningTask
          this.autonomousOutput = autonomousOutput;
          this.syncedRobot = syncedRobot;
 
-         review.initialize(
-               statusLogger,
-               "footstep plan",
-               approvalNotification,
-               footstepPlan ->
-               {
-                  behaviorStateReference.set(LookAndStepBehavior.State.STEPPING);
-                  autonomousOutput.accept(footstepPlan);
-               }
-         );
+         review.initialize(statusLogger, "footstep plan", approvalNotification, autonomousOutput);
 
          planningFailedNotifier = planningFailedTimer::reset;
 
@@ -141,6 +130,12 @@ public class LookAndStepFootstepPlanningTask
       public void acceptLocalizationResult(LookAndStepLocalizationResult localizationResult)
       {
          localizationResultInput.set(localizationResult);
+      }
+
+      public void reset()
+      {
+         executor.interruptAndReset();
+         review.reset();
       }
 
       private void evaluateAndRun()
@@ -269,7 +264,6 @@ public class LookAndStepFootstepPlanningTask
       }
       else
       {
-         behaviorStateReference.set(LookAndStepBehavior.State.STEPPING);
          autonomousOutput.accept(footstepPlannerOutput.getFootstepPlan());
       }
    }

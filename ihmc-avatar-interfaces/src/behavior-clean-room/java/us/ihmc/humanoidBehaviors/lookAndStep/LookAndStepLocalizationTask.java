@@ -77,6 +77,11 @@ public class LookAndStepLocalizationTask
          capturabilityBasedStatusInput.set(capturabilityBasedStatus);
       }
 
+      public void reset()
+      {
+         executor.interruptAndReset();
+      }
+
       private void snapshotAndRun()
       {
          bodyPathPlan = bodyPathPlanInput.getLatest();

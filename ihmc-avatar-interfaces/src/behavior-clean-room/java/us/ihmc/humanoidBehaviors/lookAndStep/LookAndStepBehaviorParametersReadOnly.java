@@ -113,4 +113,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(LookAndStepBehaviorParameters.neckPitchTolerance);
    }
+
+   default double getResetDuration()
+   {
+      return get(LookAndStepBehaviorParameters.resetDuration);
+   }
 }

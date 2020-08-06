@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -24,7 +25,6 @@ public class LookAndStepSteppingTask
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
-   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
 
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable replanFootstepsOutput;
@@ -37,6 +37,7 @@ public class LookAndStepSteppingTask
 
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
+      private SingleThreadSizeOneQueueExecutor executor;
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
       private ControllerStatusTracker controllerStatusTracker;
@@ -48,7 +49,7 @@ public class LookAndStepSteppingTask
                              RobotWalkRequester robotWalkRequester,
                              Runnable replanFootstepsOutput,
                              ControllerStatusTracker controllerStatusTracker,
-                             BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference,
+                             Supplier<LookAndStepBehavior.State> behaviorStateReference,
                              SideDependentList<PlannedFootstepReadOnly> lastCommandedFoosteps)
       {
          this.controllerStatusTracker = controllerStatusTracker;
@@ -59,9 +60,8 @@ public class LookAndStepSteppingTask
          this.uiPublisher = uiPublisher;
          this.robotWalkRequester = robotWalkRequester;
          this.replanFootstepsOutput = replanFootstepsOutput;
-         this.behaviorStateReference = behaviorStateReference;
 
-         SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
          footstepPlanInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
@@ -75,6 +75,7 @@ public class LookAndStepSteppingTask
 
       public void reset()
       {
+         executor.interruptAndReset();
          previousStepMessageId = 0L;
       }
 
