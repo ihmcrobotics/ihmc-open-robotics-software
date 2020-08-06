@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
@@ -109,7 +110,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                 behaviorStateReference.set(State.BODY_PATH_PLANNING);
                                 lastStanceSide.set(null);
                                 helper.publishToUI(ResetForUI);
-                                statusLogger.warn("Behavior reset.");
+                                statusLogger.info("Behavior reset.");
                                 lastCommandedFootsteps.clear();
                                 controllerStatusTracker.getFootstepTracker().reset();
                              });
@@ -149,6 +150,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             lastCommandedFootsteps,
             footstepPlanning::acceptLocalizationResult
       );
+      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, localization::acceptCapturabilityBasedStatus);
       footstepPlanning.initialize(
             statusLogger,
             lookAndStepParameters,

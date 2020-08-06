@@ -112,9 +112,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       visualizationPane.getChildren().addAll(scatterChart);
 
-      startAndGoalFootPoses = new FootstepPlanWithTextGraphic(robotModel);
+      startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
       behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
-      footstepPlanGraphic = new FootstepPlanWithTextGraphic(robotModel);
+      footstepPlanGraphic = new FootstepPlanWithTextGraphic();
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
       bodyPathRegionsGraphic = new LivePlanarRegionsGraphic(false);

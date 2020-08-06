@@ -68,12 +68,7 @@ public class LookAndStepSteppingTask
          suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
          suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
                                        + ". Planning again...",
-                                 () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0),
-                                 () ->
-                                 {
-                                    behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-                                    replanFootstepsOutput.run();
-                                 });
+                                 () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), replanFootstepsOutput::run);
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
       }

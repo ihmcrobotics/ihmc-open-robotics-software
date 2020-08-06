@@ -48,9 +48,9 @@ public class LookAndStepRemoteVisualizer
 
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
-         startAndGoalFootPoses = new FootstepPlanWithTextGraphic(robotModel);
+         startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
          behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
-         footstepPlanGraphic = new FootstepPlanWithTextGraphic(robotModel);
+         footstepPlanGraphic = new FootstepPlanWithTextGraphic();
          behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
          bodyPathRegionsGraphic = new LivePlanarRegionsGraphic(false);
