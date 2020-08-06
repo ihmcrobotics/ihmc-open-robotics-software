@@ -50,6 +50,7 @@ public class LookAndStepBodyPathPlanningTask
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
+      private SingleThreadSizeOneQueueExecutor executor;
       private ControllerStatusTracker controllerStatusTracker;
       private TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private TypedInput<Pose3D> goalInput = new TypedInput<>();
@@ -84,6 +85,7 @@ public class LookAndStepBodyPathPlanningTask
          this.syncedRobot = syncedRobot;
          this.behaviorStateReference = behaviorStateReference;
          this.autonomousOutput = autonomousOutput;
+         this.controllerStatusTracker = controllerStatusTracker;
 
          review.initialize(
                statusLogger,
@@ -96,10 +98,8 @@ public class LookAndStepBodyPathPlanningTask
                }
          );
 
-         this.controllerStatusTracker = controllerStatusTracker;
-
          // don't run two body path plans at the same time
-         SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
          mapRegionsInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
          goalInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
