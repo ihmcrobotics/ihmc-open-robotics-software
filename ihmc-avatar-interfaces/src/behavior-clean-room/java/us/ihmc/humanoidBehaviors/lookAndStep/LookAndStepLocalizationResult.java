@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
@@ -14,13 +14,13 @@ public class LookAndStepLocalizationResult
    private final int closestSegmentIndex;
    private final FramePose3D subGoalPoseBetweenFeet;
    private final List<? extends Pose3DReadOnly> bodyPathPlan;
-   private final SideDependentList<FramePose3DReadOnly> stanceForPlanning;
+   private final SideDependentList<MinimalFootstep> stanceForPlanning;
 
    public LookAndStepLocalizationResult(Point3D closestPointAlongPath,
                                         int closestSegmentIndex,
                                         FramePose3D subGoalPoseBetweenFeet,
                                         List<? extends Pose3DReadOnly> bodyPathPlan,
-                                        SideDependentList<FramePose3DReadOnly> stanceForPlanning)
+                                        SideDependentList<MinimalFootstep> stanceForPlanning)
    {
       this.closestPointAlongPath = closestPointAlongPath;
       this.closestSegmentIndex = closestSegmentIndex;
@@ -49,7 +49,7 @@ public class LookAndStepLocalizationResult
       return bodyPathPlan;
    }
 
-   public SideDependentList<FramePose3DReadOnly> getStanceForPlanning()
+   public SideDependentList<MinimalFootstep> getStanceForPlanning()
    {
       return stanceForPlanning;
    }

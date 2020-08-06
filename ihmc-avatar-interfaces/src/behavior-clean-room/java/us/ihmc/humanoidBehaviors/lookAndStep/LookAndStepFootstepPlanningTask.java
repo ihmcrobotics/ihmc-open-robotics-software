@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
@@ -181,7 +181,7 @@ public class LookAndStepFootstepPlanningTask
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
       FramePose3D subGoalPoseBetweenFeet = localizationResult.getSubGoalPoseBetweenFeet();
       List<? extends Pose3DReadOnly> bodyPathPlan = localizationResult.getBodyPathPlan();
-      SideDependentList<FramePose3DReadOnly> startFootPoses = localizationResult.getStanceForPlanning();
+      SideDependentList<MinimalFootstep> startFootPoses = localizationResult.getStanceForPlanning();
 
       // move point along body path plan by plan horizon
       Point3D subGoalPoint = new Point3D();
@@ -196,10 +196,13 @@ public class LookAndStepFootstepPlanningTask
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // update last stepped poses to plan from; initialize to current poses
-      ArrayList<FootstepForUI> startFootPosesForUI = new ArrayList<>();
+      ArrayList<MinimalFootstep> startFootPosesForUI = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
       {
-         startFootPosesForUI.add(new FootstepForUI(side, new Pose3D(startFootPoses.get(side)), side.getPascalCaseName() + " Start"));
+         startFootPosesForUI.add(new MinimalFootstep(side,
+                                                     new Pose3D(startFootPoses.get(side).getSolePoseInWorld()),
+                                                     startFootPoses.get(side).getFoothold(),
+                                                     side.getPascalCaseName() + " Start"));
       }
       uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI);
 
@@ -210,8 +213,8 @@ public class LookAndStepFootstepPlanningTask
       }
       else // if first step, step with furthest foot from the goal
       {
-         if (startFootPoses.get(RobotSide.LEFT) .getPosition().distance(subGoalPoseBetweenFeet.getPosition())
-             <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
+         if (startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition())
+             <= startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
          {
             stanceSide = RobotSide.LEFT;
          }
@@ -228,7 +231,8 @@ public class LookAndStepFootstepPlanningTask
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
-      footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
+      footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
+                                               startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.getFootstepPlannerTimeout());
@@ -256,7 +260,7 @@ public class LookAndStepFootstepPlanningTask
       }
       else
       {
-         uiPublisher.publishToUI(FootstepPlanForUI, FootstepForUI.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+         uiPublisher.publishToUI(FootstepPlanForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
       }
 
       if (operatorReviewEnabledSupplier.get())

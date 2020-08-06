@@ -1,14 +1,16 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
@@ -34,6 +36,7 @@ public class LookAndStepLocalizationTask
    {
       private SingleThreadSizeOneQueueExecutor executor;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
+      private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input swingSleepCompleteInput = new Input();
       private SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
 
@@ -69,9 +72,15 @@ public class LookAndStepLocalizationTask
          swingSleepCompleteInput.set();
       }
 
+      public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+      {
+         capturabilityBasedStatusInput.set(capturabilityBasedStatus);
+      }
+
       private void snapshotAndRun()
       {
          bodyPathPlan = bodyPathPlanInput.getLatest();
+         capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          syncedRobot.update();
 
          // if lastCommandedFootsteps are null we are going to assume the robot is standing still TODO: Check this later
@@ -82,13 +91,26 @@ public class LookAndStepLocalizationTask
             if (lastCommandedFootsteps.get(side) == null)
             {
                solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+               solePose.changeFrame(ReferenceFrame.getWorldFrame());
+               us.ihmc.idl.IDLSequence.Object<Point3D> rawPolygon = side == RobotSide.LEFT ?
+                     capturabilityBasedStatus.getLeftFootSupportPolygon2d() : capturabilityBasedStatus.getRightFootSupportPolygon2d();
+               ConvexPolygon2D foothold = new ConvexPolygon2D();
+               for (Point3D vertex : rawPolygon)
+               {
+                  foothold.addVertex(vertex);
+               }
+               stanceForChecking.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
             }
             else
             {
                lastCommandedFootsteps.get(side).getFootstepPose(solePose);
+               solePose.changeFrame(ReferenceFrame.getWorldFrame());
+               stanceForChecking.set(side,
+                                     new MinimalFootstep(side,
+                                                         solePose,
+                                                         lastCommandedFootsteps.get(side).getFoothold(),
+                                                         side.getPascalCaseName() + " Commanded Stance"));
             }
-            solePose.changeFrame(ReferenceFrame.getWorldFrame());
-            stanceForChecking.set(side, solePose);
          }
 
          run();
@@ -96,7 +118,8 @@ public class LookAndStepLocalizationTask
    }
 
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
-   protected SideDependentList<FramePose3DReadOnly> stanceForChecking;
+   protected SideDependentList<MinimalFootstep> stanceForChecking;
+   protected CapturabilityBasedStatus capturabilityBasedStatus;
 
    protected void run()
    {
@@ -134,7 +157,7 @@ public class LookAndStepLocalizationTask
       }
       else
       {
-         statusLogger.warn("Remaining travel distance: {} yaw: {}", distanceToExactGoal, yawToExactGoal);
+         statusLogger.info("Remaining travel distance: {} yaw: {}", distanceToExactGoal, yawToExactGoal);
          LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
                                                                                   closestSegmentIndex,
                                                                                   subGoalPoseBetweenFeet,
