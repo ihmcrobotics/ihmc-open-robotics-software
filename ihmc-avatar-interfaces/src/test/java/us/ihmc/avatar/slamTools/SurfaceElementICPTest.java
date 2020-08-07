@@ -52,7 +52,9 @@ public class SurfaceElementICPTest
       NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
-      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1), normalEstimationParameters);
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
       int minimumNumberOfHits = 10;
@@ -86,7 +88,9 @@ public class SurfaceElementICPTest
       NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
-      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1), normalEstimationParameters);
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
       int minimumNumberOfHits = 1;
@@ -159,7 +163,10 @@ public class SurfaceElementICPTest
       NormalOcTree map = slam.getMapOcTree();
       map.updateNormals();
 
-      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1));
+      NormalEstimationParameters frameNormalEstimationParameters = new NormalEstimationParameters();
+      frameNormalEstimationParameters.setNumberOfIterations(10);
+
+      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(1), frameNormalEstimationParameters);
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.04;
       int minimumNumberOfHits = 3;
