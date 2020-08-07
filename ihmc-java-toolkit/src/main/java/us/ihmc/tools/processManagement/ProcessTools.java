@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -35,5 +36,18 @@ public class ProcessTools
          
          return null;
       }
+   }
+
+   public static String[] getCurrentJVMProperties()
+   {
+      Properties properties = System.getProperties();
+      String[] propertyStrings = new String[properties.size()];
+      int i = 0;
+      for (String stringPropertyName : properties.stringPropertyNames())
+      {
+         propertyStrings[i] = "-D" + stringPropertyName + "=" + System.getProperty(stringPropertyName);
+         ++i;
+      }
+      return propertyStrings;
    }
 }
