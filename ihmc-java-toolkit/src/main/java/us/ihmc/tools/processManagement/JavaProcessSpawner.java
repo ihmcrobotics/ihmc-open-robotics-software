@@ -14,18 +14,15 @@ import org.apache.commons.lang3.ArrayUtils;
 public class JavaProcessSpawner extends ProcessSpawner
 {
    private final String jreHome = System.getProperty("java.home");
-   private final String currentClassPath;
-   private final String currentNativeLibraryPath;
-   private final String ldLibraryPath;
+   private final String currentClassPath = System.getProperty("java.class.path");
+   private final String currentNativeLibraryPath = System.getProperty("java.library.path");
+   private final String ldLibraryPath = System.getenv("LD_LIBRARY_PATH");
    private final boolean useEnvironmentForClasspath;
 
    public JavaProcessSpawner(boolean killChildProcessesOnShutdown, boolean useEnvironmentForClasspath)
    {
       super(killChildProcessesOnShutdown);
 
-      currentClassPath = System.getProperty("java.class.path");
-      currentNativeLibraryPath = System.getProperty("java.library.path");
-      ldLibraryPath = System.getenv("LD_LIBRARY_PATH");
       this.useEnvironmentForClasspath = useEnvironmentForClasspath;
    }
 
@@ -108,7 +105,7 @@ public class JavaProcessSpawner extends ProcessSpawner
 
       if(!useEnvironmentForClasspath)
       {
-         cp = ArrayUtils.addAll(cp, new String[]{"-cp", currentClassPath});
+         cp = ArrayUtils.addAll(cp, "-cp", currentClassPath);
       }
 
       spawnString = ArrayUtils.addAll(spawnString, cp);
