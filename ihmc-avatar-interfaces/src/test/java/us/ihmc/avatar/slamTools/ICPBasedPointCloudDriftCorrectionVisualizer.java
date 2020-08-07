@@ -24,6 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jOctoMap.iterators.OcTreeIterable;
 import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
@@ -255,8 +256,10 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       File pointCloudFile = new File(DATA_PATH);
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
-      frame1 = new SLAMFrame(messages.get(0));
-      frame2 = new SLAMFrame(frame1, messages.get(1));
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+      frame1 = new SLAMFrame(messages.get(0), normalEstimationParameters);
+      frame2 = new SLAMFrame(frame1, messages.get(1), normalEstimationParameters);
 
       // octree.
       Point3D dummySensorLocation = new Point3D();
@@ -303,6 +306,6 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
                                                                                                            null);
       dummyMessageForSourcePoints.getSensorPosition().set(frame2.getCorrectedSensorPoseInWorld().getTranslation());
       dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getCorrectedSensorPoseInWorld().getRotation());
-      frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints);
+      frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints, normalEstimationParameters);
    }
 }

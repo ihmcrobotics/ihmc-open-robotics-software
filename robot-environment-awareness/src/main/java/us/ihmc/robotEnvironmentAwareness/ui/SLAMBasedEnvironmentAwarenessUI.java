@@ -50,6 +50,8 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
    private BoundingBoxAnchorPaneController boundingBoxAnchorPaneController;
    @FXML
    private NormalEstimationAnchorPaneController normalEstimationAnchorPaneController;
+   @FXML
+   private FrameNormalEstimationAnchorPaneController frameNormalEstimationAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -182,6 +184,10 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       normalEstimationAnchorPaneController.setConfigurationFile(configurationFile);
       normalEstimationAnchorPaneController.attachREAMessager(uiMessager);
       normalEstimationAnchorPaneController.bindControls();
+
+      frameNormalEstimationAnchorPaneController.setConfigurationFile(configurationFile);
+      frameNormalEstimationAnchorPaneController.attachREAMessager(uiMessager);
+      frameNormalEstimationAnchorPaneController.bindControls();
    }
 
    @Override
