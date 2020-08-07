@@ -47,48 +47,6 @@ public abstract class ProcessSpawner
       Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "IHMC-ProcessSpawnerShutdown"));
    }
 
-   private void redirectProcessOutput(String commandString, Process p, boolean shouldGobbleOutput, boolean shouldGobbleError)
-   {
-      if (shouldGobbleOutput)
-      {
-         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, p.getInputStream(), System.out);
-         streamGobblers.add(processStreamGobbler);
-         processStreamGobbler.start();
-      }
-
-      if (shouldGobbleError)
-      {
-         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, p.getErrorStream(), System.err);
-         streamGobblers.add(processStreamGobbler);
-         processStreamGobbler.start();
-      }
-   }
-
-   private void asyncWaitForExit(final ImmutablePair<Process, String> pair)
-   {
-      ThreadTools.startAThread(() ->
-      {
-         try
-         {
-            Process process = pair.getLeft();
-            process.waitFor();
-            processes.remove(pair);
-
-            ExitListener exitListener = exitListeners.get(process);
-            if (exitListener != null)
-            {
-               int exitValue = process.exitValue();
-               exitListener.exited(exitValue);
-               exitListeners.remove(process);
-            }
-         }
-         catch (InterruptedException e)
-         {
-            e.printStackTrace();
-         }
-      }, "ProcessExitListener" + pair.getRight());
-   }
-
    protected Process spawn(String commandString, String[] spawnString, ProcessBuilder builder, File outputLog, File errorLog, ExitListener exitListener)
    {
       Process process = null;
@@ -125,6 +83,48 @@ public abstract class ProcessSpawner
          reportProcessSpawnException(errorLog, e);
          return null;
       }
+   }
+
+   private void redirectProcessOutput(String commandString, Process process, boolean shouldGobbleOutput, boolean shouldGobbleError)
+   {
+      if (shouldGobbleOutput)
+      {
+         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, process.getInputStream(), System.out);
+         streamGobblers.add(processStreamGobbler);
+         processStreamGobbler.start();
+      }
+
+      if (shouldGobbleError)
+      {
+         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, process.getErrorStream(), System.err);
+         streamGobblers.add(processStreamGobbler);
+         processStreamGobbler.start();
+      }
+   }
+
+   private void asyncWaitForExit(final ImmutablePair<Process, String> pair)
+   {
+      ThreadTools.startAThread(() ->
+      {
+         try
+         {
+            Process process = pair.getLeft();
+            process.waitFor();
+            processes.remove(pair);
+
+            ExitListener exitListener = exitListeners.get(process);
+            if (exitListener != null)
+            {
+               int exitValue = process.exitValue();
+               exitListener.exited(exitValue);
+               exitListeners.remove(process);
+            }
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+      }, "ProcessExitListener" + pair.getRight());
    }
 
    private void reportProcessSpawnException(File errorLog, IOException exception)
