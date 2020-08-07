@@ -1,6 +1,13 @@
 package us.ihmc.tools.processManagement;
 
-import static us.ihmc.robotics.Assert.*;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -11,17 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.robotics.Assert;
-import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.thread.ThreadTools;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProcessSpawnerTest
 {
@@ -34,7 +31,7 @@ public class ProcessSpawnerTest
       dis.readFully(binaryData, 0, dis.available());
       dis.close();
       String content = new String(binaryData).trim();
-      Assert.assertEquals(expectedContent, content);
+      assertEquals(expectedContent, content);
    }
 
    @Disabled
@@ -43,7 +40,7 @@ public class ProcessSpawnerTest
    {
       String randomString = Long.toString(System.nanoTime());
       String[] arguments = {randomString};
-      System.out.println(testFilePath);
+      LogTools.info(testFilePath);
       ForkedShellProcessSpawner sps = new ForkedShellProcessSpawner(true);
       sps.spawn("echo", arguments, testFilePath.toFile(), testFilePath.toFile(), null);
 
@@ -62,7 +59,7 @@ public class ProcessSpawnerTest
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         PrintTools.error("Not compatible with Windows");
+         LogTools.error("Not compatible with Windows");
          fail("Not compatible with Windows");
 
          return;
@@ -121,7 +118,7 @@ public class ProcessSpawnerTest
    {
       if (SystemUtils.IS_OS_WINDOWS)
       {
-         PrintTools.error("Not compatible with Windows");
+         LogTools.error("Not compatible with Windows");
 
          return;
       }
@@ -157,9 +154,9 @@ public class ProcessSpawnerTest
          ThreadTools.sleep(500);
       }
 
-      Assert.assertEquals(exitValues.size(), 2);
-      Assert.assertEquals(exitValues.get(0).intValue(), 0);
-      Assert.assertEquals(exitValues.get(1).intValue(), 0);
+      assertEquals(exitValues.size(), 2);
+      assertEquals(exitValues.get(0).intValue(), 0);
+      assertEquals(exitValues.get(1).intValue(), 0);
    }
 
    private static Path extractScriptFileToKnownDirectory()
