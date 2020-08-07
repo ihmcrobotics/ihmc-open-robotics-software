@@ -87,7 +87,7 @@ public class JavaProcessSpawner extends ProcessSpawner
 
       if (javaArgs != null)
       {
-         spawnString = (String[]) ArrayUtils.addAll(spawnString, javaArgs);
+         spawnString = ArrayUtils.addAll(spawnString, javaArgs);
       }
 
       String fqClassName = mainClass.getCanonicalName();
@@ -95,15 +95,15 @@ public class JavaProcessSpawner extends ProcessSpawner
 
       if(!useEnvironmentForClasspath)
       {
-         cp = (String[]) ArrayUtils.addAll(cp, new String[]{"-cp", currentClassPath});
+         cp = ArrayUtils.addAll(cp, new String[]{"-cp", currentClassPath});
       }
 
-      spawnString = (String[]) ArrayUtils.addAll(spawnString, cp);
-      spawnString = (String[]) ArrayUtils.addAll(spawnString, fqClassName);
+      spawnString = ArrayUtils.addAll(spawnString, cp);
+      spawnString = ArrayUtils.addAll(spawnString, fqClassName);
 
       if (programArgs != null)
       {
-         spawnString = (String[]) ArrayUtils.addAll(spawnString, programArgs);
+         spawnString = ArrayUtils.addAll(spawnString, programArgs);
       }
 
       return spawnString;
