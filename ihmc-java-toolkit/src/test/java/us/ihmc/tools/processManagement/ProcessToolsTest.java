@@ -5,6 +5,8 @@ import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class ProcessToolsTest
 {
 	@Test
@@ -16,5 +18,7 @@ public class ProcessToolsTest
       {
          LogTools.info(line);
       }
+
+      assertFalse(processLines.isEmpty());
    }
 }

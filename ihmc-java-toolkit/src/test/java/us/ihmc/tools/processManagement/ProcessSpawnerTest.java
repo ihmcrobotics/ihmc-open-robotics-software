@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -83,12 +84,12 @@ public class ProcessSpawnerTest
    @Test
    public void testJavaProcessSpawnerWithClasspathAsArgument() throws Exception
    {
-      String randomString = Long.toString(System.nanoTime());
-      String[] arguments = {randomString};
-      JavaProcessSpawner jps = new JavaProcessSpawner(true, false);
-      jps.spawn(getClass(), arguments);
+      String randomString = UUID.randomUUID().toString();
+      String[] arguments = { randomString } ;
+      JavaProcessSpawner spawner = new JavaProcessSpawner(true, false);
+      spawner.spawn(getClass(), arguments);
 
-      while (jps.hasRunningProcesses())
+      while (spawner.hasRunningProcesses())
       {
          ThreadTools.sleep(500);
       }
@@ -99,12 +100,12 @@ public class ProcessSpawnerTest
    @Test
    public void testJavaProcessSpawnerWithClasspathAsEnvironmentVariable() throws Exception
    {
-      String randomString = Long.toString(System.nanoTime());
-      String[] arguments = {randomString};
-      JavaProcessSpawner jps = new JavaProcessSpawner(true, true);
-      jps.spawn(getClass(), arguments);
+      String randomString = UUID.randomUUID().toString();
+      String[] arguments = { randomString };
+      JavaProcessSpawner spawner = new JavaProcessSpawner(true, true);
+      spawner.spawn(getClass(), arguments);
 
-      while (jps.hasRunningProcesses())
+      while (spawner.hasRunningProcesses())
       {
          ThreadTools.sleep(500);
       }

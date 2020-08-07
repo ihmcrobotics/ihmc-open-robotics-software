@@ -13,14 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 
 /**
  * @author Igor Kalkov <a href="mailto:ikalkov@ihmc.us">(ikalkov@ihmc.us)</a>
  */
 public abstract class ProcessSpawner
 {
-   private static final boolean DEBUG = false;
-
    private final boolean killChildProcessesOnShutdown;
    private final List<ProcessStreamGobbler> streamGobblers;
 
@@ -44,14 +44,7 @@ public abstract class ProcessSpawner
 
    private void setupShutdownHook()
    {
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            shutdown();
-         }
-      }, "IHMC-ProcessSpawnerShutdown"));
+      Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "IHMC-ProcessSpawnerShutdown"));
    }
 
    private void redirectProcessOutput(String commandString, Process p, boolean shouldGobbleOutput, boolean shouldGobbleError)
@@ -73,38 +66,27 @@ public abstract class ProcessSpawner
 
    private void asyncWaitForExit(final ImmutablePair<Process, String> pair)
    {
-      new Thread(new Runnable()
+      ThreadTools.startAThread(() ->
       {
-         @Override
-         public void run()
+         try
          {
-            try
-            {
-               Process process = pair.getLeft();
-               process.waitFor();
-               processes.remove(pair);
+            Process process = pair.getLeft();
+            process.waitFor();
+            processes.remove(pair);
 
-               ExitListener exitListener = exitListeners.get(process);
-               if (exitListener != null)
-               {
-                  int exitValue = process.exitValue();
-                  exitListener.exited(exitValue);
-                  exitListeners.remove(process);
-               }
-            }
-            catch (InterruptedException e)
+            ExitListener exitListener = exitListeners.get(process);
+            if (exitListener != null)
             {
-               e.printStackTrace();
+               int exitValue = process.exitValue();
+               exitListener.exited(exitValue);
+               exitListeners.remove(process);
             }
-
          }
-      }, "ProcessExitListener" + pair.getRight()).start();
-   }
-
-   private void printSpawnStringInfo(String[] spawnString)
-   {
-      System.out.print("[Process Spawner]: Forking process:" + System.getProperty("line.separator") + "\t");
-      System.out.print(Arrays.toString(spawnString));
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+      }, "ProcessExitListener" + pair.getRight());
    }
 
    protected Process spawn(String commandString, String[] spawnString, ProcessBuilder builder, File outputLog, File errorLog, ExitListener exitListener)
@@ -113,10 +95,7 @@ public abstract class ProcessSpawner
       boolean shouldGobbleOutput = true;
       boolean shouldGobbleError = true;
 
-      if (DEBUG)
-      {
-         printSpawnStringInfo(spawnString);
-      }
+      LogTools.trace("Forking process: {}{}", System.getProperty("line.separator"), Arrays.toString(spawnString));
 
       if (outputLog != null)
       {
