@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 /**
  * A lot of the magic in this class comes from inheriting the classpath of the current process before spawning
@@ -78,12 +79,12 @@ public class JavaProcessSpawner extends ProcessSpawner
       String[] spawnString = setupSpawnString(mainClass, javaArgs, programArgs);
       ProcessBuilder builder = new ProcessBuilder(spawnString);
 
-      if (isLinux() && (ldLibraryPath != null))
+      if (SystemUtils.IS_OS_UNIX && (ldLibraryPath != null))
       {
          builder.environment().put("LD_LIBRARY_PATH", ldLibraryPath);
       }
 
-      if(useEnvironmentForClasspath)
+      if (useEnvironmentForClasspath)
       {
          builder.environment().put("CLASSPATH", currentClassPath);
       }
@@ -101,9 +102,9 @@ public class JavaProcessSpawner extends ProcessSpawner
       }
 
       String fqClassName = mainClass.getCanonicalName();
-      String[] cp = new String[] { "-Djava.library.path=" + currentNativeLibraryPath};
+      String[] cp = new String[] {"-Djava.library.path=" + currentNativeLibraryPath};
 
-      if(!useEnvironmentForClasspath)
+      if (!useEnvironmentForClasspath)
       {
          cp = ArrayUtils.addAll(cp, "-cp", currentClassPath);
       }
@@ -117,13 +118,6 @@ public class JavaProcessSpawner extends ProcessSpawner
       }
 
       return spawnString;
-   }
-
-   private boolean isLinux()
-   {
-      String os = System.getProperty("os.name").toLowerCase();
-
-      return (os.contains("nix") || os.contains("nux") || os.contains("aix"));
    }
 
    public void prettyPrintClassPath()
@@ -144,7 +138,8 @@ public class JavaProcessSpawner extends ProcessSpawner
       }
    }
 
-   @Override public void kill(Process process)
+   @Override
+   public void kill(Process process)
    {
       process.destroy();
    }
