@@ -1,6 +1,7 @@
 package us.ihmc.tools.processManagement;
 
 import java.io.File;
+import java.io.PrintStream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -35,35 +36,47 @@ public class JavaProcessSpawner extends ProcessSpawner
 
    public Process spawn(Class<?> mainClass)
    {
-      return spawn(mainClass, null, null, null, null, null);
+      return spawn(mainClass, null, null, null, null, null, null, null);
    }
 
    public Process spawn(Class<?> mainClass, String[] progArgs)
    {
-      return spawn(mainClass, null, progArgs, null, null, null);
+      return spawn(mainClass, null, progArgs, null, null, null, null, null);
    }
 
    public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs)
    {
-      return spawn(mainClass, javaArgs, programArgs, null, null, null);
+      return spawn(mainClass, javaArgs, programArgs, null, null, null, null, null);
    }
 
    public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs, File outputLog, File errorLog)
    {
-      return spawn(mainClass, javaArgs, programArgs, outputLog, errorLog, null);
+      return spawn(mainClass, javaArgs, programArgs, outputLog, errorLog, null, null, null);
+   }
+
+   public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs, PrintStream outputStream, PrintStream errorStream)
+   {
+      return spawn(mainClass, javaArgs, programArgs, null, null, outputStream, errorStream, null);
    }
 
    public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs, ExitListener exitListener)
    {
-      return spawn(mainClass, javaArgs, programArgs, null, null, exitListener);
+      return spawn(mainClass, javaArgs, programArgs, null, null, null, null, exitListener);
    }
 
    public Process spawn(Class<?> mainClass, ExitListener exitListener)
    {
-      return spawn(mainClass, null, null, null, null, exitListener);
+      return spawn(mainClass, null, null, null, null, null, null, exitListener);
    }
 
-   public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs, File outputLog, File errorLog, ExitListener exitListener)
+   public Process spawn(Class<?> mainClass,
+                        String[] javaArgs,
+                        String[] programArgs,
+                        File outputFile,
+                        File errorFile,
+                        PrintStream outputStream,
+                        PrintStream errorStream,
+                        ExitListener exitListener)
    {
       String[] spawnString = setupSpawnString(mainClass, javaArgs, programArgs);
       ProcessBuilder builder = new ProcessBuilder(spawnString);
@@ -78,7 +91,7 @@ public class JavaProcessSpawner extends ProcessSpawner
          builder.environment().put("CLASSPATH", currentClassPath);
       }
 
-      return spawn(mainClass.getSimpleName(), spawnString, builder, outputLog, errorLog, exitListener);
+      return spawn(mainClass.getSimpleName(), spawnString, builder, outputFile, errorFile, outputStream, errorStream, exitListener);
    }
 
    private String[] setupSpawnString(Class<?> mainClass, String[] javaArgs, String[] programArgs)

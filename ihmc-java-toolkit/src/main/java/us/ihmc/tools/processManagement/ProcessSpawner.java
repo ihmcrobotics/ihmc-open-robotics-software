@@ -47,58 +47,79 @@ public abstract class ProcessSpawner
       Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "IHMC-ProcessSpawnerShutdown"));
    }
 
-   protected Process spawn(String commandString, String[] spawnString, ProcessBuilder builder, File outputLog, File errorLog, ExitListener exitListener)
+   protected Process spawn(String commandString,
+                           String[] spawnString,
+                           ProcessBuilder builder,
+                           File outputFile,
+                           File errorFile,
+                           ExitListener exitListener)
    {
-      Process process = null;
-      boolean shouldGobbleOutput = true;
-      boolean shouldGobbleError = true;
+      return spawn(commandString, spawnString, builder, outputFile, errorFile, null, null, exitListener);
+   }
 
-      LogTools.trace("Forking process: {}{}", System.getProperty("line.separator"), Arrays.toString(spawnString));
+   protected Process spawn(String commandString,
+                           String[] spawnString,
+                           ProcessBuilder builder,
+                           PrintStream outputStream,
+                           PrintStream errorStream,
+                           ExitListener exitListener)
+   {
+      return spawn(commandString, spawnString, builder, null, null, outputStream, errorStream, exitListener);
+   }
 
-      if (outputLog != null)
+   protected Process spawn(String commandString,
+                           String[] spawnString,
+                           ProcessBuilder builder,
+                           File outputFile,
+                           File errorFile,
+                           PrintStream outputStream,
+                           PrintStream errorStream,
+                           ExitListener exitListener)
+   {
+      if (outputFile != null)
       {
-         builder.redirectOutput(outputLog);
-         shouldGobbleOutput = false;
+         builder.redirectOutput(outputFile);
       }
 
-      if (errorLog != null)
+      if (errorFile != null)
       {
-         builder.redirectError(errorLog);
-         shouldGobbleError = false;
+         builder.redirectError(errorFile);
       }
 
       try
       {
-         process = builder.start();
+         LogTools.trace("Forking process: {}{}", System.getProperty("line.separator"), Arrays.toString(spawnString));
+         Process process = builder.start();
          ImmutablePair<Process, String> newPair = new ImmutablePair<>(process, commandString);
          processes.add(newPair);
 
          setProcessExitListener(process, exitListener);
-         redirectProcessOutput(commandString, process, shouldGobbleOutput, shouldGobbleError);
+
+         if (outputFile == null)
+         {
+            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString,
+                                                                                 process.getInputStream(),
+                                                                                 outputStream == null ? System.out : outputStream);
+            streamGobblers.add(processStreamGobbler);
+            processStreamGobbler.start();
+         }
+
+         if (errorFile == null)
+         {
+            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString,
+                                                                                 process.getErrorStream(),
+                                                                                 errorStream == null ? System.err : errorStream);
+            streamGobblers.add(processStreamGobbler);
+            processStreamGobbler.start();
+         }
+
          asyncWaitForExit(newPair);
          return process;
       }
       catch (IOException e)
       {
-         reportProcessSpawnException(errorLog, e);
+         reportProcessSpawnException(errorFile, errorStream, e);
          return null;
-      }
-   }
-
-   private void redirectProcessOutput(String commandString, Process process, boolean shouldGobbleOutput, boolean shouldGobbleError)
-   {
-      if (shouldGobbleOutput)
-      {
-         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, process.getInputStream(), System.out);
-         streamGobblers.add(processStreamGobbler);
-         processStreamGobbler.start();
-      }
-
-      if (shouldGobbleError)
-      {
-         ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString, process.getErrorStream(), System.err);
-         streamGobblers.add(processStreamGobbler);
-         processStreamGobbler.start();
       }
    }
 
@@ -127,24 +148,26 @@ public abstract class ProcessSpawner
       }, "ProcessExitListener" + pair.getRight());
    }
 
-   private void reportProcessSpawnException(File errorLog, IOException exception)
+   private void reportProcessSpawnException(File errorFile, PrintStream errorStream, IOException exception)
    {
-      if (errorLog == null)
+      if (errorStream != null)
       {
-         exception.printStackTrace();
-         return;
+         exception.printStackTrace(errorStream);
       }
 
-      try
+      if (errorFile != null)
       {
-         PrintStream ps = new PrintStream(errorLog);
-         exception.printStackTrace(ps);
-         ps.flush();
-         ps.close();
-      }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
+         try
+         {
+            PrintStream ps = new PrintStream(errorFile);
+            exception.printStackTrace(ps);
+            ps.flush();
+            ps.close();
+         }
+         catch (FileNotFoundException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 
