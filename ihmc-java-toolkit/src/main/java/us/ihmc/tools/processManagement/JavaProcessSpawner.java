@@ -3,7 +3,6 @@ package us.ihmc.tools.processManagement;
 import java.io.File;
 import java.io.PrintStream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 /**
@@ -14,7 +13,7 @@ import org.apache.commons.lang3.SystemUtils;
  */
 public class JavaProcessSpawner extends ProcessSpawner
 {
-   private final String jreHome = System.getProperty("java.home");
+   private final String javaHome = System.getProperty("java.home");
    private final String currentClassPath = System.getProperty("java.class.path");
    private final String currentNativeLibraryPath = System.getProperty("java.library.path");
    private final String ldLibraryPath = System.getenv("LD_LIBRARY_PATH");
@@ -76,7 +75,12 @@ public class JavaProcessSpawner extends ProcessSpawner
                         PrintStream errorStream,
                         ExitListener exitListener)
    {
-      String[] spawnString = setupSpawnString(mainClass, javaArgs, programArgs);
+      String[] spawnString = ProcessTools.constructJavaProcessCommand(javaHome,
+                                                                      currentNativeLibraryPath,
+                                                                      useEnvironmentForClasspath ? null : currentClassPath,
+                                                                      mainClass,
+                                                                      javaArgs,
+                                                                      programArgs);
       ProcessBuilder builder = new ProcessBuilder(spawnString);
 
       if (SystemUtils.IS_OS_UNIX && (ldLibraryPath != null))
@@ -92,49 +96,21 @@ public class JavaProcessSpawner extends ProcessSpawner
       return spawn(mainClass.getSimpleName(), spawnString, builder, outputFile, errorFile, outputStream, errorStream, exitListener);
    }
 
-   private String[] setupSpawnString(Class<?> mainClass, String[] javaArgs, String[] programArgs)
-   {
-      String[] spawnString = new String[] {jreHome + "/bin/java"};
-
-      if (javaArgs != null)
-      {
-         spawnString = ArrayUtils.addAll(spawnString, javaArgs);
-      }
-
-      String fqClassName = mainClass.getCanonicalName();
-      String[] cp = new String[] {"-Djava.library.path=" + currentNativeLibraryPath};
-
-      if (!useEnvironmentForClasspath)
-      {
-         cp = ArrayUtils.addAll(cp, "-cp", currentClassPath);
-      }
-
-      spawnString = ArrayUtils.addAll(spawnString, cp);
-      spawnString = ArrayUtils.addAll(spawnString, fqClassName);
-
-      if (programArgs != null)
-      {
-         spawnString = ArrayUtils.addAll(spawnString, programArgs);
-      }
-
-      return spawnString;
-   }
-
    public void prettyPrintClassPath()
    {
       String[] paths = currentClassPath.split(File.pathSeparator);
-      for (String s : paths)
+      for (String path : paths)
       {
-         System.out.println(s);
+         System.out.println(path);
       }
    }
 
    public void prettyPrintNativeLibraryPath()
    {
       String[] paths = currentNativeLibraryPath.split(File.pathSeparator);
-      for (String s : paths)
+      for (String path : paths)
       {
-         System.out.println(s);
+         System.out.println(path);
       }
    }
 
