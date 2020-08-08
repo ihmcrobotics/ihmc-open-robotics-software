@@ -2,6 +2,7 @@ package us.ihmc.tools.processManagement;
 
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
+import org.fusesource.jansi.AnsiPrintStream;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
@@ -26,34 +27,35 @@ import java.util.Calendar;
  * - logging to timestamped .ihmc/logs file
  * - starting multiple processes with runnables
  *
- * start method must be called after all processes are added via startProcess
+ * start method must be called after all processes are added via runOrRegister
  */
 public class JavaProcessManager
 {
-   public static final String FORKED_PROCESS_INDEX = "forked.process.index";
-
-   private final boolean isSpawnerProcess;
-   private int forkedProcessIndex;
+   private static final String FORKED_PROCESS_INDEX = "forked.process.index";
+   private static final String forkedProcessIndexProperty = System.getProperty(FORKED_PROCESS_INDEX);
+   private static final boolean isSpawnerProcess = forkedProcessIndexProperty == null;
+   private static final int forkedProcessIndex = isSpawnerProcess ? -1 : Integer.parseInt(forkedProcessIndexProperty);
 
    private final ArrayList<String> processNames = new ArrayList<>();
 
-   public JavaProcessManager()
+   public static void teeToLogFile(Class<?> mainClass)
    {
-      String forkedProcessIndexProperty = System.getProperty(FORKED_PROCESS_INDEX);
-      isSpawnerProcess = forkedProcessIndexProperty == null;
-
-      if (!isSpawnerProcess)
-      {
-         forkedProcessIndex = Integer.parseInt(forkedProcessIndexProperty);
-      }
+      JavaProcessManager manager = new JavaProcessManager();
+      manager.runOrRegister(mainClass);
+      manager.spawnProcesses(mainClass, null);
    }
 
-   public ArrayList<Process> start(Class<?> mainClass, String[] args)
+   public JavaProcessManager()
    {
-      ArrayList<Process> processList = new ArrayList<>();
 
+   }
+
+   public ArrayList<Process> spawnProcesses(Class<?> mainClass, String[] args)
+   {
       if (isSpawnerProcess) // fork processes
       {
+         ArrayList<Process> processList = new ArrayList<>();
+
          try
          {
             JavaProcessSpawner spawner = new JavaProcessSpawner(true);
@@ -69,6 +71,9 @@ public class JavaProcessManager
                                             "logs",
                                             timestampOfCreation + "_" + processNames.get(i) + "Log.txt");
                String[] jvmProperties = ArrayUtils.add(parentJVMProperties, "-D" + FORKED_PROCESS_INDEX + "=" + i);
+
+//               new AnsiPrintStream() // TODO: Filter out ANSI codes to file
+
                TeeOutputStream outputTee = new TeeOutputStream(System.out, Files.newOutputStream(logFilePath));
                TeeOutputStream errorTee = new TeeOutputStream(System.err, Files.newOutputStream(logFilePath));
                PrintStream outputStream = new PrintStream(outputTee);
@@ -85,17 +90,24 @@ public class JavaProcessManager
          {
             e.printStackTrace();
          }
+
+         return processList;
       }
 
-      return processList;
+      return null;
    }
 
-   public void startProcess(Class<?> mainClass)
+   public boolean isSpawnerProcess()
    {
-      startProcess(mainClass.getSimpleName(), () -> ExceptionTools.handle(mainClass::newInstance, DefaultExceptionHandler.PRINT_STACKTRACE));
+      return isSpawnerProcess;
    }
 
-   public void startProcess(String name, Runnable runnable)
+   public void runOrRegister(Class<?> mainClass)
+   {
+      runOrRegister(mainClass.getSimpleName(), () -> ExceptionTools.handle(mainClass::newInstance, DefaultExceptionHandler.PRINT_STACKTRACE));
+   }
+
+   public void runOrRegister(String name, Runnable runnable)
    {
       if (!isSpawnerProcess && forkedProcessIndex == processNames.size())
       {

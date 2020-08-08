@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -125,6 +126,6 @@ public class AtlasLookAndStepBehaviorDemo
 
    public static void main(String[] args)
    {
-      new AtlasLookAndStepBehaviorDemo();
+      JavaProcessManager.teeToLogFile(AtlasLookAndStepBehaviorDemo.class);
    }
 }
