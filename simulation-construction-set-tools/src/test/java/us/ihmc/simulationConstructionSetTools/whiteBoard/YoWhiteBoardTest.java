@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.tools.YoFactories;
 import us.ihmc.yoVariables.variable.*;
@@ -395,7 +395,7 @@ public class YoWhiteBoardTest
       for (YoVariable variable : variablesToCopy)
       {
          String name = variable.getName();
-         NameSpace nameSpace = variable.getNameSpace();
+         YoNamespace nameSpace = variable.getNameSpace();
 
          YoVariableType yoVariableType = variable.getType();
          YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, nameSpace);

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.tools.YoFactories;
 import us.ihmc.yoVariables.variable.*;
@@ -339,12 +339,12 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
 
       for (int i = 0; i < numberOfVariablesFromStream; i++)
       {
-         NameSpace fullName = new NameSpace(dataInputStream.readUTF());
+         YoNamespace fullName = new YoNamespace(dataInputStream.readUTF());
          int yoVariableTypeOrdinal = dataInputStream.readInt();
          YoVariableType yoVariableType = YoVariableType.values()[yoVariableTypeOrdinal];
 
          String variableName = fullName.getShortName();
-         NameSpace fullNameSpace = fullName.getParent();
+         YoNamespace fullNameSpace = fullName.getParent();
          YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
          
          YoVariable yoVariable = createNewYoVariable(variableName, yoVariableType, registry);
