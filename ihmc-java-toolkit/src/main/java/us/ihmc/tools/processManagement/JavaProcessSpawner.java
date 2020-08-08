@@ -51,6 +51,11 @@ public class JavaProcessSpawner extends ProcessSpawner
       return spawn(mainClass, javaArgs, programArgs, outputLog, errorLog, null, null, null);
    }
 
+   public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs, File outputLog, File errorLog, ExitListener exitListener)
+   {
+      return spawn(mainClass, javaArgs, programArgs, outputLog, errorLog, null, null, exitListener);
+   }
+
    public Process spawn(Class<?> mainClass, String[] javaArgs, String[] programArgs, PrintStream outputStream, PrintStream errorStream)
    {
       return spawn(mainClass, javaArgs, programArgs, null, null, outputStream, errorStream, null);
