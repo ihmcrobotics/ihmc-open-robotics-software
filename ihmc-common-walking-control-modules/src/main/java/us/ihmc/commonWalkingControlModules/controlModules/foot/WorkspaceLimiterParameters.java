@@ -46,7 +46,7 @@ public class WorkspaceLimiterParameters
 
       maxPercentOfLegLengthForSingularityAvoidanceInSupport.set(0.98);
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.set(0.97);
-      maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.set(0.92);
+      maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.set(0.95);
       minPercentOfLegLengthForSingularityAvoidanceInSwing.set(0.5);
 
       percentOfLegLengthMarginToEnableSingularityAvoidance.set(0.1);
