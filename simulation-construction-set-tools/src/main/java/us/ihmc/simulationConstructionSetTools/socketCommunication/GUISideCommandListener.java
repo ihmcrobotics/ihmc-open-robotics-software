@@ -11,7 +11,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
 import us.ihmc.yoVariables.buffer.YoBuffer;
-import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableList;
 import us.ihmc.yoVariables.tools.YoFactories;
@@ -85,7 +85,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       for (int i=0; i<registryNames.length; i++)
       {
          String registryName = registryNames[i];
-         NameSpace fullNameSpace = new NameSpace(registryName);
+         YoNamespace fullNameSpace = new YoNamespace(registryName);
          YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
 
          if (registry.getNumberOfVariables() != variableNames[i].length)
@@ -123,7 +123,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       for (int i = 0; i < nRegistries; i++)
       {
          String registryName = registryNames[i];
-         NameSpace fullNameSpace = new NameSpace(registryName);
+         YoNamespace fullNameSpace = new YoNamespace(registryName);
          YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
          registryIndexMap.put(registry, i);
          allRegistries.add(registry);
@@ -175,7 +175,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
 
    private void createAndAddVariableAndSetInitialValue(float initialValue, String fullVariableName)
    {
-      NameSpace fullName = new NameSpace(fullVariableName);
+      YoNamespace fullName = new YoNamespace(fullVariableName);
       YoRegistry registry = rootRegistry.findRegistry(fullName.getParent());
       YoDouble newVar = new YoDouble(fullName.getShortName(), "", registry);
 

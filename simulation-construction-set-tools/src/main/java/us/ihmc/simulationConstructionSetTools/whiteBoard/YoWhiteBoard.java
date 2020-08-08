@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -440,8 +440,8 @@ public abstract class YoWhiteBoard
 
    protected void verifyNamesAreConsistent(String fullNameSpaceOne, String fullNameSpaceTwo)
    {
-      final String variableNameOne = new NameSpace(fullNameSpaceOne).getShortName();
-      final String variableNameTwo = new NameSpace(fullNameSpaceTwo).getShortName();
+      final String variableNameOne = new YoNamespace(fullNameSpaceOne).getShortName();
+      final String variableNameTwo = new YoNamespace(fullNameSpaceTwo).getShortName();
       if (!variableNameOne.equals(variableNameTwo))
       {
          throw new RuntimeException("Variable names are not the same. variableNameOne = \'" + variableNameOne + "\', variableNameTwo = \'" + variableNameTwo
