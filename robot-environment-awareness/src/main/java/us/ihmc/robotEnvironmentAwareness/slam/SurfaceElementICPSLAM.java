@@ -47,7 +47,13 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
-      frame.registerSurfaceElements(getMapOcTree(), windowMargin, surfaceElementResolution, minimumNumberOfHits, surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame());
+      int maxNumberOfSurfels = Integer.MAX_VALUE;
+      frame.registerSurfaceElements(getMapOcTree(),
+                                    windowMargin,
+                                    surfaceElementResolution,
+                                    minimumNumberOfHits,
+                                    surfaceElementICPSLAMParameters.getComputeSurfaceNormalsInFrame(),
+                                    maxNumberOfSurfels);
 
       int numberOfSurfel = frame.getNumberOfSurfaceElements();
       correctedCorrespondingPointLocation = new Point3D[numberOfSurfel];
