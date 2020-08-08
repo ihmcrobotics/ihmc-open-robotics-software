@@ -395,10 +395,10 @@ public class YoWhiteBoardTest
       for (YoVariable variable : variablesToCopy)
       {
          String name = variable.getName();
-         YoNamespace nameSpace = variable.getNameSpace();
+         YoNamespace namespace = variable.getNamespace();
 
          YoVariableType yoVariableType = variable.getType();
-         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, nameSpace);
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, namespace);
 
          switch (yoVariableType)
          {

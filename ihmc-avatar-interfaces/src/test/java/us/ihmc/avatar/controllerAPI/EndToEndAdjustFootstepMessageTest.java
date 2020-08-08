@@ -184,22 +184,22 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       return ((YoEnum<RobotSide>)scs.findVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
-   private static YoFramePose3D findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose(String namespace, String namePrefix, SimulationConstructionSet scs)
    {
-      return findYoFramePose3D(nameSpace, namePrefix, "", scs);
+      return findYoFramePose3D(namespace, namePrefix, "", scs);
    }
 
-   private static YoFramePose3D findYoFramePose3D(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose3D(String namespace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
-      YoDouble x = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createXName(namePrefix, nameSuffix));
-      YoDouble y = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createYName(namePrefix, nameSuffix));
-      YoDouble z = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createZName(namePrefix, nameSuffix));
+      YoDouble x = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createXName(namePrefix, nameSuffix));
+      YoDouble y = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createYName(namePrefix, nameSuffix));
+      YoDouble z = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createZName(namePrefix, nameSuffix));
       YoFramePoint3D position = new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
 
-      YoDouble qx = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQxName(namePrefix, nameSuffix));
-      YoDouble qy = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQyName(namePrefix, nameSuffix));
-      YoDouble qz = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQzName(namePrefix, nameSuffix));
-      YoDouble qs = (YoDouble) scs.findVariable(nameSpace, YoGeometryNameTools.createQsName(namePrefix, nameSuffix));
+      YoDouble qx = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQxName(namePrefix, nameSuffix));
+      YoDouble qy = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQyName(namePrefix, nameSuffix));
+      YoDouble qz = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQzName(namePrefix, nameSuffix));
+      YoDouble qs = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQsName(namePrefix, nameSuffix));
       YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
       return new YoFramePose3D(position, orientation);
    }

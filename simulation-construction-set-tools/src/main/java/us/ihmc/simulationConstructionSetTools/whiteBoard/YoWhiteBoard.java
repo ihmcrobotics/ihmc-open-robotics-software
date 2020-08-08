@@ -438,20 +438,20 @@ public abstract class YoWhiteBoard
       variablesToReadHaveBeenSet.set(true);
    }
 
-   protected void verifyNamesAreConsistent(String fullNameSpaceOne, String fullNameSpaceTwo)
+   protected void verifyNamesAreConsistent(String fullNamespaceOne, String fullNamespaceTwo)
    {
-      final String variableNameOne = new YoNamespace(fullNameSpaceOne).getShortName();
-      final String variableNameTwo = new YoNamespace(fullNameSpaceTwo).getShortName();
+      final String variableNameOne = new YoNamespace(fullNamespaceOne).getShortName();
+      final String variableNameTwo = new YoNamespace(fullNamespaceTwo).getShortName();
       if (!variableNameOne.equals(variableNameTwo))
       {
          throw new RuntimeException("Variable names are not the same. variableNameOne = \'" + variableNameOne + "\', variableNameTwo = \'" + variableNameTwo
                                     + "\'");
       }
 
-//    if (!fullNameSpaceOne.endsWith(fullNameSpaceTwo))
+//    if (!fullNamespaceOne.endsWith(fullNamespaceTwo))
 //    {
-//       if (!fullNameSpaceTwo.endsWith(fullNameSpaceOne))
-//          throw new RuntimeException("Namespace endings not equal. fullNameSpaceOne = \'" + fullNameSpaceOne + "\', fullNameSpaceTwo = \'" + fullNameSpaceTwo + "\'");
+//       if (!fullNamespaceTwo.endsWith(fullNamespaceOne))
+//          throw new RuntimeException("Namespace endings not equal. fullNamespaceOne = \'" + fullNamespaceOne + "\', fullNamespaceTwo = \'" + fullNamespaceTwo + "\'");
 //    }
    }
 

@@ -849,25 +849,25 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       // check internal tracking is decent:
-      String nameSpaceRotation = FeedbackControllerToolbox.class.getSimpleName();
+      String namespaceRotation = FeedbackControllerToolbox.class.getSimpleName();
       String varnameRotation = handName + "ErrorRotationVector";
-      Vector3D rotationError = EndToEndTestTools.findVector3D(nameSpaceRotation, varnameRotation, scs);
+      Vector3D rotationError = EndToEndTestTools.findVector3D(namespaceRotation, varnameRotation, scs);
 
-      String nameSpacePosition = FeedbackControllerToolbox.class.getSimpleName();
+      String namespacePosition = FeedbackControllerToolbox.class.getSimpleName();
       String varnamePosition = handName + "ErrorPosition";
-      Vector3D positionError = EndToEndTestTools.findVector3D(nameSpacePosition, varnamePosition, scs);
+      Vector3D positionError = EndToEndTestTools.findVector3D(namespacePosition, varnamePosition, scs);
 
       assertTrue(rotationError.length() < Math.toRadians(15.0));
       assertTrue(positionError.length() < 0.05);
 
       // check internal desired matches last trajectory point:
-      String nameSpacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
+      String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
       String varnamePositionDesired = handName + Type.DESIRED.getName() + Space.POSITION.getName();
-      Vector3D desiredPosition = EndToEndTestTools.findVector3D(nameSpacePositionDesired, varnamePositionDesired, scs);
+      Vector3D desiredPosition = EndToEndTestTools.findVector3D(namespacePositionDesired, varnamePositionDesired, scs);
 
-      String nameSpaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
+      String namespaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
       String varnameOrientationDesired = handName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
-      Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
+      Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, scs);
 
       lastPoint.changeFrame(worldFrame);
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);

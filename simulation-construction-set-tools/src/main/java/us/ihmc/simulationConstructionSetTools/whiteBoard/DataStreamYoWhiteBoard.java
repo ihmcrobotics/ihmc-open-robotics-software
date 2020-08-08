@@ -344,8 +344,8 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
          YoVariableType yoVariableType = YoVariableType.values()[yoVariableTypeOrdinal];
 
          String variableName = fullName.getShortName();
-         YoNamespace fullNameSpace = fullName.getParent();
-         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
+         YoNamespace fullNamespace = fullName.getParent();
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNamespace);
          
          YoVariable yoVariable = createNewYoVariable(variableName, yoVariableType, registry);
          ret.add(yoVariable);

@@ -1615,9 +1615,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    public static Vector3D findControlErrorRotationVector(SimulationConstructionSet scs, RigidBodyBasics chest)
    {
       String chestPrefix = chest.getName();
-      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String varName = chestPrefix + "ErrorRotationVector";
-      return EndToEndTestTools.findVector3D(nameSpace, varName, scs);
+      return EndToEndTestTools.findVector3D(namespace, varName, scs);
    }
 
    public static SO3TrajectoryPoint findTrajectoryPoint(int trajectoryPointIndex, SimulationConstructionSet scs, RigidBodyBasics chestRigidBody)

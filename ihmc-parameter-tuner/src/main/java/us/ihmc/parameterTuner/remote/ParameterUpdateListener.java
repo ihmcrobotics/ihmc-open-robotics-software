@@ -306,7 +306,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 
    private static String getUniqueName(YoParameter yoParameter)
    {
-      return yoParameter.getNameSpace() + "." + yoParameter.getName();
+      return yoParameter.getNamespace() + "." + yoParameter.getName();
    }
 
    @Override

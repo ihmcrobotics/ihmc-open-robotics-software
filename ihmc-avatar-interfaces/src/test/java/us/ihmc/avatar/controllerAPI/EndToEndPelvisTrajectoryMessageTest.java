@@ -1453,10 +1453,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static int findControllerNumberOfCommandsInQueueForXY(SimulationConstructionSet scs)
    {
-      String nameSpace = PelvisICPBasedTranslationManager.class.getSimpleName();
+      String namespace = PelvisICPBasedTranslationManager.class.getSimpleName();
       String queuedCommandsVariableName = "PelvisXYTranslationNumberOfQueuedCommands";
 
-      int numberOfCommands = (int) ((YoLong) scs.findVariable(nameSpace, queuedCommandsVariableName)).getLongValue();
+      int numberOfCommands = (int) ((YoLong) scs.findVariable(namespace, queuedCommandsVariableName)).getLongValue();
       return numberOfCommands;
    }
 

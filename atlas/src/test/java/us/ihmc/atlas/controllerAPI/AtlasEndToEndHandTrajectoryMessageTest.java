@@ -186,9 +186,9 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String handName = fullRobotModel.getHand(robotSide).getName();
-      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String varname = handName + "ErrorRotationVector";
-      Vector3D rotationError = EndToEndTestTools.findVector3D(nameSpace, varname, scs);
+      Vector3D rotationError = EndToEndTestTools.findVector3D(namespace, varname, scs);
 
       /*
        * Checking the tracking error should be enough. As went the bug is present, the error magnitude
