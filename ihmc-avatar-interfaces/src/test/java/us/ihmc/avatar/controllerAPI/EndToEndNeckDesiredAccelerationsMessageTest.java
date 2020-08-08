@@ -114,12 +114,12 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
    public static double[] findControllerDesiredJointAccelerations(OneDoFJointBasics[] neckJoints, String bodyName, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[neckJoints.length];
-      String nameSpace = bodyName + "UserControlModule";
+      String namespace = bodyName + "UserControlModule";
 
       for (int i = 0; i < neckJoints.length; i++)
       {
          String variable = bodyName + "UserMode_" + neckJoints[i].getName() + "_qdd_d";
-         qdd_ds[i] = scs.findVariable(nameSpace, variable).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(namespace, variable).getValueAsDouble();
       }
       return qdd_ds;
    }

@@ -559,13 +559,13 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
 
       // check internal desired matches last trajectory point:
-      String nameSpacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
+      String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
       String varnamePositionDesired = footName + Type.DESIRED.getName() + Space.POSITION.getName();
-      Vector3D currentDesiredPosition = EndToEndTestTools.findVector3D(nameSpacePositionDesired, varnamePositionDesired, scs);
+      Vector3D currentDesiredPosition = EndToEndTestTools.findVector3D(namespacePositionDesired, varnamePositionDesired, scs);
 
-      String nameSpaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
+      String namespaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
       String varnameOrientationDesired = footName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
-      Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
+      Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, scs);
 
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);

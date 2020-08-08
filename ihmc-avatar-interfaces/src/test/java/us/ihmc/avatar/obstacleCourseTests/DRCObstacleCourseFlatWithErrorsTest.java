@@ -242,11 +242,11 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       SideDependentList<YoFramePoint3D> stateEstimatorFootPosition = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         String nameSpace = PelvisKinematicsBasedLinearStateCalculator.class.getSimpleName();
+         String namespace = PelvisKinematicsBasedLinearStateCalculator.class.getSimpleName();
          String namePrefix = fullRobotModel.getFoot(robotSide).getName() + "FootPositionInWorld";
-         YoDouble x = (YoDouble) simulationConstructionSet.findVariable(nameSpace, namePrefix + "X");
-         YoDouble y = (YoDouble) simulationConstructionSet.findVariable(nameSpace, namePrefix + "Y");
-         YoDouble z = (YoDouble) simulationConstructionSet.findVariable(nameSpace, namePrefix + "Z");
+         YoDouble x = (YoDouble) simulationConstructionSet.findVariable(namespace, namePrefix + "X");
+         YoDouble y = (YoDouble) simulationConstructionSet.findVariable(namespace, namePrefix + "Y");
+         YoDouble z = (YoDouble) simulationConstructionSet.findVariable(namespace, namePrefix + "Z");
          stateEstimatorFootPosition.put(robotSide, new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame()));
       }
 

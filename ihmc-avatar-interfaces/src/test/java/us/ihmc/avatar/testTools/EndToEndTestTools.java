@@ -432,135 +432,135 @@ public class EndToEndTestTools
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredPosition(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String nameSpace = jointName + OneDoFJointFeedbackController.shortName;
+      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "q_d_" + jointName;
-      return findYoDouble(nameSpace, variable, yoVariableHolder);
+      return findYoDouble(namespace, variable, yoVariableHolder);
    }
 
    public static YoDouble findOneDoFJointFeedbackControllerDesiredVelocity(String jointName, YoVariableHolder yoVariableHolder)
    {
-      String nameSpace = jointName + OneDoFJointFeedbackController.shortName;
+      String namespace = jointName + OneDoFJointFeedbackController.shortName;
       String variable = "qd_d_" + jointName;
-      return findYoDouble(nameSpace, variable, yoVariableHolder);
+      return findYoDouble(namespace, variable, yoVariableHolder);
    }
 
    /**
     * Finds the quaternion associated with the given namespace and name in scs.
     */
-   public static Quaternion findQuaternion(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Quaternion findQuaternion(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findQuaternion(nameSpace, varname, "", yoVariableHolder);
+      return findQuaternion(namespace, varname, "", yoVariableHolder);
    }
 
    /**
     * Finds the quaternion associated with the given namespace, prefix and suffix in scs.
     */
-   public static Quaternion findQuaternion(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static Quaternion findQuaternion(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      return new Quaternion(findYoFrameQuaternion(nameSpace, prefix, suffix, yoVariableHolder));
+      return new Quaternion(findYoFrameQuaternion(namespace, prefix, suffix, yoVariableHolder));
    }
 
-   public static YoFrameQuaternion findYoFrameQuaternion(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFrameQuaternion findYoFrameQuaternion(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameQuaternion(nameSpace, varname, "", yoVariableHolder);
+      return findYoFrameQuaternion(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFrameQuaternion findYoFrameQuaternion(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFrameQuaternion findYoFrameQuaternion(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble qx = findYoDouble(nameSpace, YoGeometryNameTools.createQxName(prefix, suffix), yoVariableHolder);
-      YoDouble qy = findYoDouble(nameSpace, YoGeometryNameTools.createQyName(prefix, suffix), yoVariableHolder);
-      YoDouble qz = findYoDouble(nameSpace, YoGeometryNameTools.createQzName(prefix, suffix), yoVariableHolder);
-      YoDouble qs = findYoDouble(nameSpace, YoGeometryNameTools.createQsName(prefix, suffix), yoVariableHolder);
+      YoDouble qx = findYoDouble(namespace, YoGeometryNameTools.createQxName(prefix, suffix), yoVariableHolder);
+      YoDouble qy = findYoDouble(namespace, YoGeometryNameTools.createQyName(prefix, suffix), yoVariableHolder);
+      YoDouble qz = findYoDouble(namespace, YoGeometryNameTools.createQzName(prefix, suffix), yoVariableHolder);
+      YoDouble qs = findYoDouble(namespace, YoGeometryNameTools.createQsName(prefix, suffix), yoVariableHolder);
       return new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
    }
 
-   public static Vector2D findVector2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Vector2D findVector2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findVector2D(nameSpace, varname, "", yoVariableHolder);
+      return findVector2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Vector2D findVector2D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Vector2D findVector2D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Vector2D(findYoFramePoint2D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Vector2D(findYoFramePoint2D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static Point2D findPoint2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Point2D findPoint2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findPoint2D(nameSpace, varname, "", yoVariableHolder);
+      return findPoint2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Point2D findPoint2D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Point2D findPoint2D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Point2D(findYoFramePoint2D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Point2D(findYoFramePoint2D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static Vector3D findVector3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Vector3D findVector3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findVector3D(nameSpace, varname, "", yoVariableHolder);
+      return findVector3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Vector3D findVector3D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Vector3D findVector3D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Vector3D(findYoFramePoint3D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Vector3D(findYoFramePoint3D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static Point3D findPoint3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static Point3D findPoint3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findPoint3D(nameSpace, varname, "", yoVariableHolder);
+      return findPoint3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static Point3D findPoint3D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   public static Point3D findPoint3D(String namespace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
-      return new Point3D(findYoFramePoint3D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+      return new Point3D(findYoFramePoint3D(namespace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
-   public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint2D findYoFramePoint2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFramePoint2D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFramePoint2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint2D findYoFramePoint2D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
       return new YoFramePoint2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
-   public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector2D findYoFrameVector2D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector2D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFrameVector2D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector2D findYoFrameVector2D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
       return new YoFrameVector2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
-   public static YoFramePoint3D findYoFramePoint3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint3D findYoFramePoint3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFramePoint3D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFramePoint3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFramePoint3D findYoFramePoint3D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFramePoint3D findYoFramePoint3D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
-      YoDouble z = findYoDouble(nameSpace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble z = findYoDouble(namespace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
       return new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
    }
 
-   public static YoFrameVector3D findYoFrameVector3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector3D findYoFrameVector3D(String namespace, String varname, YoVariableHolder yoVariableHolder)
    {
-      return findYoFrameVector3D(nameSpace, varname, "", yoVariableHolder);
+      return findYoFrameVector3D(namespace, varname, "", yoVariableHolder);
    }
 
-   public static YoFrameVector3D findYoFrameVector3D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   public static YoFrameVector3D findYoFrameVector3D(String namespace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble x = findYoDouble(nameSpace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
-      YoDouble y = findYoDouble(nameSpace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
-      YoDouble z = findYoDouble(nameSpace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
+      YoDouble x = findYoDouble(namespace, YoGeometryNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(namespace, YoGeometryNameTools.createYName(prefix, suffix), yoVariableHolder);
+      YoDouble z = findYoDouble(namespace, YoGeometryNameTools.createZName(prefix, suffix), yoVariableHolder);
       return new YoFrameVector3D(x, y, z, ReferenceFrame.getWorldFrame());
    }
 

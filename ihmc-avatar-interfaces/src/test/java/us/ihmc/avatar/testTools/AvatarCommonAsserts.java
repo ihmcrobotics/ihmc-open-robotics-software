@@ -214,44 +214,44 @@ public class AvatarCommonAsserts
       return new FrameVector3D(ReferenceFrame.getWorldFrame(), desiredAngularVelocity);
    }
 
-   private static Quaternion findQuat4d(String nameSpace, String varname, YoVariableHolder scs)
+   private static Quaternion findQuat4d(String namespace, String varname, YoVariableHolder scs)
    {
-      return findQuat4d(nameSpace, varname, "", scs);
+      return findQuat4d(namespace, varname, "", scs);
    }
 
-   private static Quaternion findQuat4d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
+   private static Quaternion findQuat4d(String namespace, String prefix, String suffix, YoVariableHolder scs)
    {
-      double x = scs.findVariable(nameSpace, YoGeometryNameTools.createQxName(prefix, suffix)).getValueAsDouble();
-      double y = scs.findVariable(nameSpace, YoGeometryNameTools.createQyName(prefix, suffix)).getValueAsDouble();
-      double z = scs.findVariable(nameSpace, YoGeometryNameTools.createQzName(prefix, suffix)).getValueAsDouble();
-      double s = scs.findVariable(nameSpace, YoGeometryNameTools.createQsName(prefix, suffix)).getValueAsDouble();
+      double x = scs.findVariable(namespace, YoGeometryNameTools.createQxName(prefix, suffix)).getValueAsDouble();
+      double y = scs.findVariable(namespace, YoGeometryNameTools.createQyName(prefix, suffix)).getValueAsDouble();
+      double z = scs.findVariable(namespace, YoGeometryNameTools.createQzName(prefix, suffix)).getValueAsDouble();
+      double s = scs.findVariable(namespace, YoGeometryNameTools.createQsName(prefix, suffix)).getValueAsDouble();
       return new Quaternion(x, y, z, s);
    }
 
-   private static Tuple3DBasics findTuple3d(String nameSpace, String varname, YoVariableHolder scs)
+   private static Tuple3DBasics findTuple3d(String namespace, String varname, YoVariableHolder scs)
    {
-      return findTuple3d(nameSpace, varname, "", scs);
+      return findTuple3d(namespace, varname, "", scs);
    }
 
-   private static Tuple3DBasics findTuple3d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
+   private static Tuple3DBasics findTuple3d(String namespace, String prefix, String suffix, YoVariableHolder scs)
    {
       Tuple3DBasics tuple3d = new Point3D();
-      tuple3d.setX(scs.findVariable(nameSpace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
-      tuple3d.setY(scs.findVariable(nameSpace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
-      tuple3d.setZ(scs.findVariable(nameSpace, YoGeometryNameTools.createZName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setX(scs.findVariable(namespace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setY(scs.findVariable(namespace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple3d.setZ(scs.findVariable(namespace, YoGeometryNameTools.createZName(prefix, suffix)).getValueAsDouble());
       return tuple3d;
    }
 
-   private static Tuple2DBasics findTuple2d(String nameSpace, String varname, YoVariableHolder scs)
+   private static Tuple2DBasics findTuple2d(String namespace, String varname, YoVariableHolder scs)
    {
-      return findTuple2d(nameSpace, varname, "", scs);
+      return findTuple2d(namespace, varname, "", scs);
    }
 
-   private static Tuple2DBasics findTuple2d(String nameSpace, String prefix, String suffix, YoVariableHolder scs)
+   private static Tuple2DBasics findTuple2d(String namespace, String prefix, String suffix, YoVariableHolder scs)
    {
       Tuple2DBasics tuple2d = new Point2D();
-      tuple2d.setX(scs.findVariable(nameSpace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
-      tuple2d.setY(scs.findVariable(nameSpace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setX(scs.findVariable(namespace, YoGeometryNameTools.createXName(prefix, suffix)).getValueAsDouble());
+      tuple2d.setY(scs.findVariable(namespace, YoGeometryNameTools.createYName(prefix, suffix)).getValueAsDouble());
       return tuple2d;
    }
 

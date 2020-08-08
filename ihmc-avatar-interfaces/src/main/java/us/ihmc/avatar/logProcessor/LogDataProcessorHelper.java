@@ -99,29 +99,29 @@ public class LogDataProcessorHelper
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String bodyName = contactableFeet.get(robotSide).getName();
          String copNamePrefix = bodyName + "StateEstimator";
-         String copNameSpace = copNamePrefix + WrenchBasedFootSwitch.class.getSimpleName();
+         String copNamespace = copNamePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          String copName = copNamePrefix + "ResolvedCoP";
-         YoDouble copx = (YoDouble) scs.findVariable(copNameSpace, copName + "X");
-         YoDouble copy = (YoDouble) scs.findVariable(copNameSpace, copName + "Y");
+         YoDouble copx = (YoDouble) scs.findVariable(copNamespace, copName + "X");
+         YoDouble copy = (YoDouble) scs.findVariable(copNamespace, copName + "Y");
          if (copx != null && copy != null)
          {
             YoFramePoint2D cop = new YoFramePoint2D(copx, copy, soleFrame);
             cops.put(robotSide, cop);
          }
 
-         String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
+         String desiredCoPNamespace = PlaneContactWrenchProcessor.class.getSimpleName();
          String desiredCoPName = side + "SoleCoP2d";
-         YoDouble desiredCoPx = (YoDouble) scs.findVariable(desiredCoPNameSpace, desiredCoPName + "X");
-         YoDouble desiredCoPy = (YoDouble) scs.findVariable(desiredCoPNameSpace, desiredCoPName + "Y");
+         YoDouble desiredCoPx = (YoDouble) scs.findVariable(desiredCoPNamespace, desiredCoPName + "X");
+         YoDouble desiredCoPy = (YoDouble) scs.findVariable(desiredCoPNamespace, desiredCoPName + "Y");
          YoFramePoint2D desiredCoP = new YoFramePoint2D(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPs.put(robotSide, desiredCoP);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String namePrefix = sidePrefix + "Foot";
-         String footStateNameSpace = sidePrefix + FootControlModule.class.getSimpleName();
+         String footStateNamespace = sidePrefix + FootControlModule.class.getSimpleName();
          String footStateName = namePrefix + "State";
          @SuppressWarnings("unchecked")
-         YoEnum<?> footState = (YoEnum<ConstraintType>) scs.findVariable(footStateNameSpace, footStateName);
+         YoEnum<?> footState = (YoEnum<ConstraintType>) scs.findVariable(footStateNamespace, footStateName);
          footStates.put(robotSide, footState);
       }
 
@@ -143,10 +143,10 @@ public class LogDataProcessorHelper
       for (final RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
-         String nameSpaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
-         final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.findVariable(nameSpaceEnding, namePrefix + "FilteredFootHitGround");
-         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(nameSpaceEnding, namePrefix +  "ForcePastThresh");
-         final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.findVariable(nameSpaceEnding, namePrefix + "FootLoadPercentage");
+         String namespaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
+         final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FilteredFootHitGround");
+         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix +  "ForcePastThresh");
+         final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
          {

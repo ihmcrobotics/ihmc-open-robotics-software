@@ -230,9 +230,9 @@ public class DRCSimulationTestHelper
       return scs.findVariable(name);
    }
 
-   public YoVariable getYoVariable(String nameSpace, String name)
+   public YoVariable getYoVariable(String namespace, String name)
    {
-      return scs.findVariable(nameSpace, name);
+      return scs.findVariable(namespace, name);
    }
 
    public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)

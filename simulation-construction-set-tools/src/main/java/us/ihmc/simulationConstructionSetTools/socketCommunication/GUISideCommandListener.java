@@ -85,8 +85,8 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       for (int i=0; i<registryNames.length; i++)
       {
          String registryName = registryNames[i];
-         YoNamespace fullNameSpace = new YoNamespace(registryName);
-         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
+         YoNamespace fullNamespace = new YoNamespace(registryName);
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNamespace);
 
          if (registry.getNumberOfVariables() != variableNames[i].length)
          {
@@ -123,11 +123,11 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       for (int i = 0; i < nRegistries; i++)
       {
          String registryName = registryNames[i];
-         YoNamespace fullNameSpace = new YoNamespace(registryName);
-         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNameSpace);
+         YoNamespace fullNamespace = new YoNamespace(registryName);
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNamespace);
          registryIndexMap.put(registry, i);
          allRegistries.add(registry);
-         //       System.out.println(i + " " + registry.getNameSpace().getName());
+         //       System.out.println(i + " " + registry.getNamespace().getName());
       }
 
       notifyCreatedNewRegistriesListeners();
@@ -346,7 +346,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       Integer ret = registryIndexMap.get(registry);
 
       if (ret == null)
-         throw new RuntimeException("YoRegistry not found: " + registry.getNameSpace());
+         throw new RuntimeException("YoRegistry not found: " + registry.getNamespace());
 
       return ret;
    }

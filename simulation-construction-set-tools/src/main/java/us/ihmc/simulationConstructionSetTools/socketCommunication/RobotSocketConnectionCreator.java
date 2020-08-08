@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import us.ihmc.simulationconstructionset.NewDataListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
+import us.ihmc.simulationconstructionset.gui.hierarchyTree.NamespaceHierarchyTree;
 
 import java.util.ArrayList;
 
@@ -45,9 +45,9 @@ public class RobotSocketConnectionCreator
 
       if (scs.getGUI() != null)
       {
-         NameSpaceHierarchyTree nameSpaceHierarchyTree = scs.getGUI().getCombinedVarPanel().getNameSpaceHierarchyTree();
-         nameSpaceHierarchyTree.addRegistrySettingsChangedListener(robotSocketConnection);
-         robotCommandListener.addCreatedNewRegistryListener(nameSpaceHierarchyTree);
+         NamespaceHierarchyTree namespaceHierarchyTree = scs.getGUI().getCombinedVarPanel().getNamespaceHierarchyTree();
+         namespaceHierarchyTree.addRegistrySettingsChangedListener(robotSocketConnection);
+         robotCommandListener.addCreatedNewRegistryListener(namespaceHierarchyTree);
       }
 
       SCSRobotGUICommunicatorComponents robotGUI = new SCSRobotGUICommunicatorComponents(robotSocketConnection);

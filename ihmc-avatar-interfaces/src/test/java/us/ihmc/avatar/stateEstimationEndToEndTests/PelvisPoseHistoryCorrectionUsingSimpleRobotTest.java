@@ -166,92 +166,92 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       {
          for (int j = 0; j < postFix.length; j++)
          {
-            System.out.println(vars[i] + postFix[j] + " = (YoDouble) registry.getVariable(nameSpace, \"" + vars[i] + postFix[j] + "\"); ");
+            System.out.println(vars[i] + postFix[j] + " = (YoDouble) registry.getVariable(namespace, \"" + vars[i] + postFix[j] + "\"); ");
          }
       }
    }
 
-   private void setupYoVariables(YoRegistry registry, String nameSpace)
+   private void setupYoVariables(YoRegistry registry, String namespace)
    {
-      interpolationTranslationAlphaFilter = (YoDouble) registry.findVariable(nameSpace, "PelvisTranslationErrorCorrectionAlphaFilter");
-      interpolationTranslationAlphaFilterAlphaValue = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationAlphaFilterAlphaValue");
-      interpolationTranslationAlphaFilterBreakFrequency = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationAlphaFilterBreakFrequency");
-      interpolationRotationAlphaFilter = (YoDouble) registry.findVariable(nameSpace, "PelvisRotationErrorCorrectionAlphaFilter");
-      interpolationRotationAlphaFilterAlphaValue = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationAlphaFilterAlphaValue");
-      interpolationRotationAlphaFilterBreakFrequency = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationAlphaFilterBreakFrequency");
-      confidenceFactor = (YoDouble) registry.findVariable(nameSpace, "PelvisErrorCorrectionConfidenceFactor");
-      seNonProcessedPelvisTimeStamp = (YoLong) registry.findVariable(nameSpace, "seNonProcessedPelvis_timestamp");
-      maxTranslationVelocityClip = (YoDouble) registry.findVariable(nameSpace, "maxTranslationVelocityClip");
-      maxRotationVelocityClip = (YoDouble) registry.findVariable(nameSpace, "maxRotationVelocityClip");
-      translationClippedAlphaValue = (YoDouble) registry.findVariable(nameSpace, "translationClippedAlphaValue");
-      rotationClippedAlphaValue = (YoDouble) registry.findVariable(nameSpace, "rotationClippedAlphaValue");
+      interpolationTranslationAlphaFilter = (YoDouble) registry.findVariable(namespace, "PelvisTranslationErrorCorrectionAlphaFilter");
+      interpolationTranslationAlphaFilterAlphaValue = (YoDouble) registry.findVariable(namespace, "interpolationTranslationAlphaFilterAlphaValue");
+      interpolationTranslationAlphaFilterBreakFrequency = (YoDouble) registry.findVariable(namespace, "interpolationTranslationAlphaFilterBreakFrequency");
+      interpolationRotationAlphaFilter = (YoDouble) registry.findVariable(namespace, "PelvisRotationErrorCorrectionAlphaFilter");
+      interpolationRotationAlphaFilterAlphaValue = (YoDouble) registry.findVariable(namespace, "interpolationRotationAlphaFilterAlphaValue");
+      interpolationRotationAlphaFilterBreakFrequency = (YoDouble) registry.findVariable(namespace, "interpolationRotationAlphaFilterBreakFrequency");
+      confidenceFactor = (YoDouble) registry.findVariable(namespace, "PelvisErrorCorrectionConfidenceFactor");
+      seNonProcessedPelvisTimeStamp = (YoLong) registry.findVariable(namespace, "seNonProcessedPelvis_timestamp");
+      maxTranslationVelocityClip = (YoDouble) registry.findVariable(namespace, "maxTranslationVelocityClip");
+      maxRotationVelocityClip = (YoDouble) registry.findVariable(namespace, "maxRotationVelocityClip");
+      translationClippedAlphaValue = (YoDouble) registry.findVariable(namespace, "translationClippedAlphaValue");
+      rotationClippedAlphaValue = (YoDouble) registry.findVariable(namespace, "rotationClippedAlphaValue");
 
-      nonCorrectedPelvis_x = (YoDouble) registry.findVariable(nameSpace, "nonCorrectedPelvis_x");
-      nonCorrectedPelvis_y = (YoDouble) registry.findVariable(nameSpace, "nonCorrectedPelvis_y");
-      nonCorrectedPelvis_z = (YoDouble) registry.findVariable(nameSpace, "nonCorrectedPelvis_z");
-      nonCorrectedPelvis_yaw = (YoDouble) registry.findVariable(nameSpace, "nonCorrectedPelvis_yaw");
-      nonCorrectedPelvis_pitch = (YoDouble) registry.findVariable(nameSpace, "nonCorrectedPelvis_pitch");
-      nonCorrectedPelvis_roll = (YoDouble) registry.findVariable(nameSpace, "nonCorrectedPelvis_roll");
-      correctedPelvis_x = (YoDouble) registry.findVariable(nameSpace, "correctedPelvis_x");
-      correctedPelvis_y = (YoDouble) registry.findVariable(nameSpace, "correctedPelvis_y");
-      correctedPelvis_z = (YoDouble) registry.findVariable(nameSpace, "correctedPelvis_z");
-      correctedPelvis_yaw = (YoDouble) registry.findVariable(nameSpace, "correctedPelvis_yaw");
-      correctedPelvis_pitch = (YoDouble) registry.findVariable(nameSpace, "correctedPelvis_pitch");
-      correctedPelvis_roll = (YoDouble) registry.findVariable(nameSpace, "correctedPelvis_roll");
-      seBackInTimeFrame_x = (YoDouble) registry.findVariable(nameSpace, "seBackInTimeFrame_x");
-      seBackInTimeFrame_y = (YoDouble) registry.findVariable(nameSpace, "seBackInTimeFrame_y");
-      seBackInTimeFrame_z = (YoDouble) registry.findVariable(nameSpace, "seBackInTimeFrame_z");
-      seBackInTimeFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "seBackInTimeFrame_yaw");
-      seBackInTimeFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "seBackInTimeFrame_pitch");
-      seBackInTimeFrame_roll = (YoDouble) registry.findVariable(nameSpace, "seBackInTimeFrame_roll");
-      localizationBackInTimeFrame_x = (YoDouble) registry.findVariable(nameSpace, "localizationBackInTimeFrame_x");
-      localizationBackInTimeFrame_y = (YoDouble) registry.findVariable(nameSpace, "localizationBackInTimeFrame_y");
-      localizationBackInTimeFrame_z = (YoDouble) registry.findVariable(nameSpace, "localizationBackInTimeFrame_z");
-      localizationBackInTimeFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "localizationBackInTimeFrame_yaw");
-      localizationBackInTimeFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "localizationBackInTimeFrame_pitch");
-      localizationBackInTimeFrame_roll = (YoDouble) registry.findVariable(nameSpace, "localizationBackInTimeFrame_roll");
+      nonCorrectedPelvis_x = (YoDouble) registry.findVariable(namespace, "nonCorrectedPelvis_x");
+      nonCorrectedPelvis_y = (YoDouble) registry.findVariable(namespace, "nonCorrectedPelvis_y");
+      nonCorrectedPelvis_z = (YoDouble) registry.findVariable(namespace, "nonCorrectedPelvis_z");
+      nonCorrectedPelvis_yaw = (YoDouble) registry.findVariable(namespace, "nonCorrectedPelvis_yaw");
+      nonCorrectedPelvis_pitch = (YoDouble) registry.findVariable(namespace, "nonCorrectedPelvis_pitch");
+      nonCorrectedPelvis_roll = (YoDouble) registry.findVariable(namespace, "nonCorrectedPelvis_roll");
+      correctedPelvis_x = (YoDouble) registry.findVariable(namespace, "correctedPelvis_x");
+      correctedPelvis_y = (YoDouble) registry.findVariable(namespace, "correctedPelvis_y");
+      correctedPelvis_z = (YoDouble) registry.findVariable(namespace, "correctedPelvis_z");
+      correctedPelvis_yaw = (YoDouble) registry.findVariable(namespace, "correctedPelvis_yaw");
+      correctedPelvis_pitch = (YoDouble) registry.findVariable(namespace, "correctedPelvis_pitch");
+      correctedPelvis_roll = (YoDouble) registry.findVariable(namespace, "correctedPelvis_roll");
+      seBackInTimeFrame_x = (YoDouble) registry.findVariable(namespace, "seBackInTimeFrame_x");
+      seBackInTimeFrame_y = (YoDouble) registry.findVariable(namespace, "seBackInTimeFrame_y");
+      seBackInTimeFrame_z = (YoDouble) registry.findVariable(namespace, "seBackInTimeFrame_z");
+      seBackInTimeFrame_yaw = (YoDouble) registry.findVariable(namespace, "seBackInTimeFrame_yaw");
+      seBackInTimeFrame_pitch = (YoDouble) registry.findVariable(namespace, "seBackInTimeFrame_pitch");
+      seBackInTimeFrame_roll = (YoDouble) registry.findVariable(namespace, "seBackInTimeFrame_roll");
+      localizationBackInTimeFrame_x = (YoDouble) registry.findVariable(namespace, "localizationBackInTimeFrame_x");
+      localizationBackInTimeFrame_y = (YoDouble) registry.findVariable(namespace, "localizationBackInTimeFrame_y");
+      localizationBackInTimeFrame_z = (YoDouble) registry.findVariable(namespace, "localizationBackInTimeFrame_z");
+      localizationBackInTimeFrame_yaw = (YoDouble) registry.findVariable(namespace, "localizationBackInTimeFrame_yaw");
+      localizationBackInTimeFrame_pitch = (YoDouble) registry.findVariable(namespace, "localizationBackInTimeFrame_pitch");
+      localizationBackInTimeFrame_roll = (YoDouble) registry.findVariable(namespace, "localizationBackInTimeFrame_roll");
       
-      totalTranslationErrorFrame_x = (YoDouble) registry.findVariable(nameSpace, "totalTranslationErrorFrame_x");
-      totalTranslationErrorFrame_y = (YoDouble) registry.findVariable(nameSpace, "totalTranslationErrorFrame_y");
-      totalTranslationErrorFrame_z = (YoDouble) registry.findVariable(nameSpace, "totalTranslationErrorFrame_z");
-      totalTranslationErrorFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "totalTranslationErrorFrame_yaw");
-      totalTranslationErrorFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "totalTranslationErrorFrame_pitch");
-      totalTranslationErrorFrame_roll = (YoDouble) registry.findVariable(nameSpace, "totalTranslationErrorFrame_roll");
+      totalTranslationErrorFrame_x = (YoDouble) registry.findVariable(namespace, "totalTranslationErrorFrame_x");
+      totalTranslationErrorFrame_y = (YoDouble) registry.findVariable(namespace, "totalTranslationErrorFrame_y");
+      totalTranslationErrorFrame_z = (YoDouble) registry.findVariable(namespace, "totalTranslationErrorFrame_z");
+      totalTranslationErrorFrame_yaw = (YoDouble) registry.findVariable(namespace, "totalTranslationErrorFrame_yaw");
+      totalTranslationErrorFrame_pitch = (YoDouble) registry.findVariable(namespace, "totalTranslationErrorFrame_pitch");
+      totalTranslationErrorFrame_roll = (YoDouble) registry.findVariable(namespace, "totalTranslationErrorFrame_roll");
       
-      totalRotationErrorFrame_x = (YoDouble) registry.findVariable(nameSpace, "totalRotationErrorFrame_x");
-      totalRotationErrorFrame_y = (YoDouble) registry.findVariable(nameSpace, "totalRotationErrorFrame_y");
-      totalRotationErrorFrame_z = (YoDouble) registry.findVariable(nameSpace, "totalRotationErrorFrame_z");
-      totalRotationErrorFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "totalRotationErrorFrame_yaw");
-      totalRotationErrorFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "totalRotationErrorFrame_pitch");
-      totalRotationErrorFrame_roll = (YoDouble) registry.findVariable(nameSpace, "totalRotationErrorFrame_roll");
+      totalRotationErrorFrame_x = (YoDouble) registry.findVariable(namespace, "totalRotationErrorFrame_x");
+      totalRotationErrorFrame_y = (YoDouble) registry.findVariable(namespace, "totalRotationErrorFrame_y");
+      totalRotationErrorFrame_z = (YoDouble) registry.findVariable(namespace, "totalRotationErrorFrame_z");
+      totalRotationErrorFrame_yaw = (YoDouble) registry.findVariable(namespace, "totalRotationErrorFrame_yaw");
+      totalRotationErrorFrame_pitch = (YoDouble) registry.findVariable(namespace, "totalRotationErrorFrame_pitch");
+      totalRotationErrorFrame_roll = (YoDouble) registry.findVariable(namespace, "totalRotationErrorFrame_roll");
       
-      interpolatedTranslationCorrectionFrame_x = (YoDouble) registry.findVariable(nameSpace, "interpolatedTranslationCorrectionFrame_x");
-      interpolatedTranslationCorrectionFrame_y = (YoDouble) registry.findVariable(nameSpace, "interpolatedTranslationCorrectionFrame_y");
-      interpolatedTranslationCorrectionFrame_z = (YoDouble) registry.findVariable(nameSpace, "interpolatedTranslationCorrectionFrame_z");
-      interpolatedTranslationCorrectionFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "interpolatedTranslationCorrectionFrame_yaw");
-      interpolatedTranslationCorrectionFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "interpolatedTranslationCorrectionFrame_pitch");
-      interpolatedTranslationCorrectionFrame_roll = (YoDouble) registry.findVariable(nameSpace, "interpolatedTranslationCorrectionFrame_roll");
+      interpolatedTranslationCorrectionFrame_x = (YoDouble) registry.findVariable(namespace, "interpolatedTranslationCorrectionFrame_x");
+      interpolatedTranslationCorrectionFrame_y = (YoDouble) registry.findVariable(namespace, "interpolatedTranslationCorrectionFrame_y");
+      interpolatedTranslationCorrectionFrame_z = (YoDouble) registry.findVariable(namespace, "interpolatedTranslationCorrectionFrame_z");
+      interpolatedTranslationCorrectionFrame_yaw = (YoDouble) registry.findVariable(namespace, "interpolatedTranslationCorrectionFrame_yaw");
+      interpolatedTranslationCorrectionFrame_pitch = (YoDouble) registry.findVariable(namespace, "interpolatedTranslationCorrectionFrame_pitch");
+      interpolatedTranslationCorrectionFrame_roll = (YoDouble) registry.findVariable(namespace, "interpolatedTranslationCorrectionFrame_roll");
       
-      interpolatedRotationCorrectionFrame_x = (YoDouble) registry.findVariable(nameSpace, "interpolatedRotationCorrectionFrame_x");
-      interpolatedRotationCorrectionFrame_y = (YoDouble) registry.findVariable(nameSpace, "interpolatedRotationCorrectionFrame_y");
-      interpolatedRotationCorrectionFrame_z = (YoDouble) registry.findVariable(nameSpace, "interpolatedRotationCorrectionFrame_z");
-      interpolatedRotationCorrectionFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "interpolatedRotationCorrectionFrame_yaw");
-      interpolatedRotationCorrectionFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "interpolatedRotationCorrectionFrame_pitch");
-      interpolatedRotationCorrectionFrame_roll = (YoDouble) registry.findVariable(nameSpace, "interpolatedRotationCorrectionFrame_roll");
+      interpolatedRotationCorrectionFrame_x = (YoDouble) registry.findVariable(namespace, "interpolatedRotationCorrectionFrame_x");
+      interpolatedRotationCorrectionFrame_y = (YoDouble) registry.findVariable(namespace, "interpolatedRotationCorrectionFrame_y");
+      interpolatedRotationCorrectionFrame_z = (YoDouble) registry.findVariable(namespace, "interpolatedRotationCorrectionFrame_z");
+      interpolatedRotationCorrectionFrame_yaw = (YoDouble) registry.findVariable(namespace, "interpolatedRotationCorrectionFrame_yaw");
+      interpolatedRotationCorrectionFrame_pitch = (YoDouble) registry.findVariable(namespace, "interpolatedRotationCorrectionFrame_pitch");
+      interpolatedRotationCorrectionFrame_roll = (YoDouble) registry.findVariable(namespace, "interpolatedRotationCorrectionFrame_roll");
       
-      interpolationTranslationStartFrame_x = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationStartFrame_x");
-      interpolationTranslationStartFrame_y = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationStartFrame_y");
-      interpolationTranslationStartFrame_z = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationStartFrame_z");
-      interpolationTranslationStartFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationStartFrame_yaw");
-      interpolationTranslationStartFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationStartFrame_pitch");
-      interpolationTranslationStartFrame_roll = (YoDouble) registry.findVariable(nameSpace, "interpolationTranslationStartFrame_roll");
+      interpolationTranslationStartFrame_x = (YoDouble) registry.findVariable(namespace, "interpolationTranslationStartFrame_x");
+      interpolationTranslationStartFrame_y = (YoDouble) registry.findVariable(namespace, "interpolationTranslationStartFrame_y");
+      interpolationTranslationStartFrame_z = (YoDouble) registry.findVariable(namespace, "interpolationTranslationStartFrame_z");
+      interpolationTranslationStartFrame_yaw = (YoDouble) registry.findVariable(namespace, "interpolationTranslationStartFrame_yaw");
+      interpolationTranslationStartFrame_pitch = (YoDouble) registry.findVariable(namespace, "interpolationTranslationStartFrame_pitch");
+      interpolationTranslationStartFrame_roll = (YoDouble) registry.findVariable(namespace, "interpolationTranslationStartFrame_roll");
       
-      interpolationRotationStartFrame_x = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationStartFrame_x");
-      interpolationRotationStartFrame_y = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationStartFrame_y");
-      interpolationRotationStartFrame_z = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationStartFrame_z");
-      interpolationRotationStartFrame_yaw = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationStartFrame_yaw");
-      interpolationRotationStartFrame_pitch = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationStartFrame_pitch");
-      interpolationRotationStartFrame_roll = (YoDouble) registry.findVariable(nameSpace, "interpolationRotationStartFrame_roll");
+      interpolationRotationStartFrame_x = (YoDouble) registry.findVariable(namespace, "interpolationRotationStartFrame_x");
+      interpolationRotationStartFrame_y = (YoDouble) registry.findVariable(namespace, "interpolationRotationStartFrame_y");
+      interpolationRotationStartFrame_z = (YoDouble) registry.findVariable(namespace, "interpolationRotationStartFrame_z");
+      interpolationRotationStartFrame_yaw = (YoDouble) registry.findVariable(namespace, "interpolationRotationStartFrame_yaw");
+      interpolationRotationStartFrame_pitch = (YoDouble) registry.findVariable(namespace, "interpolationRotationStartFrame_pitch");
+      interpolationRotationStartFrame_roll = (YoDouble) registry.findVariable(namespace, "interpolationRotationStartFrame_roll");
 
    }
 
