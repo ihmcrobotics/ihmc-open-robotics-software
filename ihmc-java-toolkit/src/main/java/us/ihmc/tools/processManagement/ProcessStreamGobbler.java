@@ -7,13 +7,14 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProcessStreamGobbler extends Thread
 {
    private final PrintStream outputStream;
    private final InputStream inputStream;
    private final String processName;
-   private final String processPrintingPrefix;
+   private final AtomicReference<String> processPrintingPrefix = new AtomicReference<>();
    private Timer currentTimer;
 
    private BufferedReader bufferedReader;
@@ -23,11 +24,16 @@ public class ProcessStreamGobbler extends Thread
 
    public ProcessStreamGobbler(final String processName, InputStream inputStream, PrintStream outputStream)
    {
+      this(processName, inputStream, outputStream, "[Process: " + processName + "] ");
+   }
+
+   public ProcessStreamGobbler(final String processName, InputStream inputStream, PrintStream outputStream, String processPrintingPrefix)
+   {
       super("ProcessStreamGobbler_" + processName);
       this.inputStream = inputStream;
       this.outputStream = outputStream;
       this.processName = processName;
-      this.processPrintingPrefix = "[Process: " + processName + "] ";
+      this.processPrintingPrefix.set(processPrintingPrefix);
 //      Runtime.getRuntime().addShutdownHook(new Thread(() -> { }, "IHMC-ProcessStreamGobblerShutdown"));
    }
 
@@ -103,7 +109,8 @@ public class ProcessStreamGobbler extends Thread
       line = bufferedReader.readLine();
       if (line != null && outputStream != null)
       {
-         outputStream.println(processPrintingPrefix + line);
+         String prefix = processPrintingPrefix.get();
+         outputStream.println(prefix == null ? line : prefix + line);
          outputStream.flush();
       }
    }

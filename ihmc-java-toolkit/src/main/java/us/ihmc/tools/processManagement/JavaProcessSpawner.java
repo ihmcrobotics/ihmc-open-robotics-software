@@ -75,6 +75,27 @@ public class JavaProcessSpawner extends ProcessSpawner
                         PrintStream errorStream,
                         ExitListener exitListener)
    {
+      return spawn(mainClass,
+                   javaArgs,
+                   programArgs,
+                   outputFile,
+                   errorFile,
+                   outputStream,
+                   errorStream,
+                   ProcessSpawner.defaultPrintingPrefix(mainClass.getSimpleName()),
+                   exitListener);
+   }
+
+   public Process spawn(Class<?> mainClass,
+                        String[] javaArgs,
+                        String[] programArgs,
+                        File outputFile,
+                        File errorFile,
+                        PrintStream outputStream,
+                        PrintStream errorStream,
+                        String processPrintingPrefix,
+                        ExitListener exitListener)
+   {
       String[] spawnString = ProcessTools.constructJavaProcessCommand(javaHome,
                                                                       currentNativeLibraryPath,
                                                                       useEnvironmentForClasspath ? null : currentClassPath,
@@ -93,7 +114,15 @@ public class JavaProcessSpawner extends ProcessSpawner
          builder.environment().put("CLASSPATH", currentClassPath);
       }
 
-      return spawn(mainClass.getSimpleName(), spawnString, builder, outputFile, errorFile, outputStream, errorStream, exitListener);
+      return spawn(mainClass.getSimpleName(),
+                   spawnString,
+                   builder,
+                   outputFile,
+                   errorFile,
+                   outputStream,
+                   errorStream,
+                   processPrintingPrefix,
+                   exitListener);
    }
 
    public void prettyPrintClassPath()
