@@ -54,7 +54,7 @@ public abstract class ProcessSpawner
                            File errorFile,
                            ExitListener exitListener)
    {
-      return spawn(commandString, spawnString, builder, outputFile, errorFile, null, null, exitListener);
+      return spawn(commandString, spawnString, builder, outputFile, errorFile, null, null, defaultPrintingPrefix(commandString), exitListener);
    }
 
    protected Process spawn(String commandString,
@@ -64,7 +64,7 @@ public abstract class ProcessSpawner
                            PrintStream errorStream,
                            ExitListener exitListener)
    {
-      return spawn(commandString, spawnString, builder, null, null, outputStream, errorStream, exitListener);
+      return spawn(commandString, spawnString, builder, null, null, outputStream, errorStream, defaultPrintingPrefix(commandString), exitListener);
    }
 
    protected Process spawn(String commandString,
@@ -74,6 +74,7 @@ public abstract class ProcessSpawner
                            File errorFile,
                            PrintStream outputStream,
                            PrintStream errorStream,
+                           String processPrintingPrefix,
                            ExitListener exitListener)
    {
       if (outputFile != null)
@@ -99,7 +100,8 @@ public abstract class ProcessSpawner
          {
             ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString,
                                                                                  process.getInputStream(),
-                                                                                 outputStream == null ? System.out : outputStream);
+                                                                                 outputStream == null ? System.out : outputStream,
+                                                                                 processPrintingPrefix);
             streamGobblers.add(processStreamGobbler);
             processStreamGobbler.start();
          }
@@ -108,7 +110,8 @@ public abstract class ProcessSpawner
          {
             ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString,
                                                                                  process.getErrorStream(),
-                                                                                 errorStream == null ? System.err : errorStream);
+                                                                                 errorStream == null ? System.err : errorStream,
+                                                                                 processPrintingPrefix);
             streamGobblers.add(processStreamGobbler);
             processStreamGobbler.start();
          }
@@ -169,6 +172,11 @@ public abstract class ProcessSpawner
             e.printStackTrace();
          }
       }
+   }
+
+   public static String defaultPrintingPrefix(String commandString)
+   {
+      return "[Process: " + commandString + "] ";
    }
 
    public void setProcessExitListener(Process process, ExitListener exitListener)
