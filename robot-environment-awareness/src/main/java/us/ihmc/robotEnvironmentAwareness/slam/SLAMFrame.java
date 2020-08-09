@@ -196,7 +196,6 @@ public class SLAMFrame
                node.getHitLocation(surfaceElement.getPoint());
 
                surfaceElements.add(surfaceElement);
-               surfaceElementsInLocalFrame.add(SLAMTools.createConvertedSurfaceElementToSensorPose(getUncorrectedLocalPoseInWorld(), surfaceElement));
             }
          }
       }
