@@ -5,9 +5,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,6 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -98,7 +98,16 @@ public class BehaviorUI
          SubScene subScene3D = view3DFactory.getSubScene();
          Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
 
-//         AnchorPane sideVisualizationArea = new AnchorPane();
+         JavaFXROS2VideoViewOverlay videoOverlay = new JavaFXROS2VideoViewOverlay(1024, 544, false, false);
+         AnchorPane anchoredVideo = new AnchorPane(videoOverlay.getNode());
+         anchoredVideo.setPrefHeight(200);
+         anchoredVideo.setPrefWidth(300);
+         AnchorPane.setTopAnchor(videoOverlay.getNode(), 10.0);
+         AnchorPane.setRightAnchor(videoOverlay.getNode(), 10.0);
+         StackPane videoStackPane = new StackPane(view3DSubSceneWrappedInsidePane, anchoredVideo);
+         videoOverlay.start(ros2Node);
+         videoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> videoOverlay.toggleMode());
+
          VBox sideVisualizationArea = new VBox();
 
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
@@ -126,11 +135,8 @@ public class BehaviorUI
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-//         sideVisualizationArea.setPrefWidth(200.0);
-//         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
-         mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
+         mainSplitPane.getItems().add(videoStackPane);
          mainSplitPane.getItems().add(consoleScrollPane);
-//         mainSplitPane.getItems().add(sideVisualizationArea);
          mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();
