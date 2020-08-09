@@ -18,13 +18,16 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.BoundingBoxMeshView;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OccupancyMapMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.SLAMFrameStateViewer;
 
 public class SLAMMeshViewer
 {
@@ -44,7 +47,8 @@ public class SLAMMeshViewer
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
    private final PlanarRegionsMeshBuilder importedPlanarRegionsMeshBuilder;
    private final OccupancyMapMeshBuilder occupancyMapViewer;
-   private final StereoVisionPointCloudViewer latestBufferViewer;
+   private final BoundingBoxMeshView boundingBoxMeshView;
+   private final SLAMFrameStateViewer latestFrameStateViewer;
 
    private final List<AtomicReference<Boolean>> enableTopicList = new ArrayList<>();
    private final Map<AtomicReference<Boolean>, Node> enableTopicToNode = new HashMap<>();
@@ -67,19 +71,24 @@ public class SLAMMeshViewer
 
       occupancyMapViewer = new OccupancyMapMeshBuilder(uiMessager);
 
-      latestBufferViewer = new StereoVisionPointCloudViewer(SLAMModuleAPI.IhmcSLAMFrameState,
-                                                            uiMessager,
-                                                            SLAMModuleAPI.ShowLatestFrame,
-                                                            SLAMModuleAPI.SLAMVizClear);
+      latestFrameStateViewer = new SLAMFrameStateViewer(uiMessager,
+                                                        SLAMModuleAPI.ShowLatestFrame,
+                                                        SLAMModuleAPI.SLAMVizClear,
+                                                        REAModuleAPI.UIStereoVisionSize); // FIXME this is obviously the wrong topic
+
+      boundingBoxMeshView = new BoundingBoxMeshView(uiMessager, SLAMModuleAPI.UIOcTreeBoundingBoxShow, SLAMModuleAPI.RequestBoundingBox,
+                                                    SLAMModuleAPI.OcTreeBoundingBoxState);
 
       occupancyMapViewer.getRoot().setMouseTransparent(true);
-      latestBufferViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(planarRegionMeshView, importedPlanarRegionMeshView, occupancyMapViewer.getRoot(), latestBufferViewer.getRoot());
+      boundingBoxMeshView.setMouseTransparent(true);
+      latestFrameStateViewer.getRoot().setMouseTransparent(true);
+      root.getChildren().addAll(planarRegionMeshView, importedPlanarRegionMeshView, occupancyMapViewer.getRoot(), latestFrameStateViewer.getRoot(),
+                                boundingBoxMeshView);
 
       addViewer(uiMessager, planarRegionMeshView, SLAMModuleAPI.ShowPlanarRegionsMap);
       addViewer(uiMessager, importedPlanarRegionMeshView, SLAMModuleAPI.ShowImportedPlanarRegions);
       addViewer(uiMessager, occupancyMapViewer.getRoot(), SLAMModuleAPI.ShowSLAMOctreeMap);
-      addViewer(uiMessager, latestBufferViewer.getRoot(), SLAMModuleAPI.ShowLatestFrame);
+      addViewer(uiMessager, latestFrameStateViewer.getRoot(), SLAMModuleAPI.ShowLatestFrame);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -87,7 +96,7 @@ public class SLAMMeshViewer
          public void handle(long now)
          {
             occupancyMapViewer.render();
-            latestBufferViewer.render();
+            latestFrameStateViewer.render();
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
                updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());
@@ -153,8 +162,9 @@ public class SLAMMeshViewer
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(importedPlanarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(occupancyMapViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestFrameStateViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(boundingBoxMeshView, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }
 
    public void sleep()

@@ -18,10 +18,19 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
    public static final double Z_STEP_UP_PER_ROW = 0.10;
    private static double cinderSquareSurfaceSize = 0.395;
    private static double cinderThickness = 0.145;
-   private static double topRegionHeight = 5 * Z_STEP_UP_PER_ROW - cinderThickness;
+   public static double topRegionHeight = 5 * Z_STEP_UP_PER_ROW - cinderThickness;
+   public static double topPlatformHeight = topRegionHeight + cinderThickness + 0.07;
    private static double superGridSize = cinderSquareSurfaceSize * 3;
    private static double groundSize = 20.0;
    private static int greenId = 6;
+
+   public static PlanarRegionsList flatGround()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setId(greenId);
+      generator.addRectangle(groundSize, groundSize);
+      return generator.getPlanarRegionsList();
+   }
 
    public static PlanarRegionsList createTraversalRegionsRegions()
    {

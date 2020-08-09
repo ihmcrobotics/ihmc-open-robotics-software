@@ -10,24 +10,9 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       setAll(swingPlannerParameters.getAll());
    }
 
-   default void setMinimumSwingHeight(double minimumSwingHeight)
+   default void setSwingHeightIfCollisionDetected(double swingHeightIfCollisionDetected)
    {
-      set(SwingPlannerParameterKeys.minimumSwingHeight, minimumSwingHeight);
-   }
-
-   default void setMaximumSwingHeight(double maximumSwingHeight)
-   {
-      set(SwingPlannerParameterKeys.maximumSwingHeight, maximumSwingHeight);
-   }
-
-   default void setMaximumStepHeightForMinimumSwingHeight(double maximumStepHeightForMinimumSwingHeight)
-   {
-      set(SwingPlannerParameterKeys.maximumStepHeightForMinimumSwingHeight, maximumStepHeightForMinimumSwingHeight);
-   }
-
-   default void setMinimumStepHeightForMaximumSwingHeight(double minimumStepHeightForMaximumSwingHeight)
-   {
-      set(SwingPlannerParameterKeys.minimumStepHeightForMaximumSwingHeight, minimumStepHeightForMaximumSwingHeight);
+      set(SwingPlannerParameterKeys.swingHeightIfCollisionDetected, swingHeightIfCollisionDetected);
    }
 
    default void setMinimumSwingTime(double minimumSwingTime)
@@ -38,26 +23,6 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
    default void setMaximumSwingTime(double maximumSwingTime)
    {
       set(SwingPlannerParameterKeys.maximumSwingTime, maximumSwingTime);
-   }
-
-   default void setMaximumStepTranslationForMinimumSwingTime(double maximumStepTranslationForMinimumSwingTime)
-   {
-      set(SwingPlannerParameterKeys.maximumStepTranslationForMinimumSwingTime, maximumStepTranslationForMinimumSwingTime);
-   }
-
-   default void setMinimumStepTranslationForMaximumSwingTime(double minimumStepTranslationForMaximumSwingTime)
-   {
-      set(SwingPlannerParameterKeys.minimumStepTranslationForMaximumSwingTime, minimumStepTranslationForMaximumSwingTime);
-   }
-
-   default void setMaximumStepHeightForMinimumSwingTime(double maximumStepHeightForMinimumSwingTime)
-   {
-      set(SwingPlannerParameterKeys.maximumStepHeightForMinimumSwingTime, maximumStepHeightForMinimumSwingTime);
-   }
-
-   default void setMinimumStepHeightForMaximumSwingTime(double minimumStepHeightForMaximumSwingTime)
-   {
-      set(SwingPlannerParameterKeys.minimumStepHeightForMaximumSwingTime, minimumStepHeightForMaximumSwingTime);
    }
 
    default void setFootStubClearance(double footStubClearance)
@@ -131,30 +96,17 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       setNumberOfChecksPerSwing((int) packet.getNumberOfChecksPerSwing());
       setMaximumNumberOfAdjustmentAttempts((int) packet.getMaximumNumberOfAdjustmentAttempts());
 
-      if (packet.getMinimumSwingHeight() != -1.0)
-         setMinimumSwingHeight(packet.getMinimumSwingHeight());
-      if (packet.getMaximumSwingHeight() != -1.0)
-         setMaximumSwingHeight(packet.getMaximumSwingHeight());
-      if (packet.getMaximumStepHeightForMinimumSwingHeight() != -1.0)
-         setMaximumStepHeightForMinimumSwingHeight(packet.getMaximumStepHeightForMinimumSwingHeight());
-      if (packet.getMinimumStepHeightForMaximumSwingHeight() != -1.0)
-         setMinimumStepHeightForMaximumSwingHeight(packet.getMinimumStepHeightForMaximumSwingHeight());
+      if (packet.getSwingHeightIfCollisionDetected() != -1.0)
+         setSwingHeightIfCollisionDetected(packet.getSwingHeightIfCollisionDetected());
       if (packet.getMinimumSwingTime() != -1.0)
          setMinimumSwingTime(packet.getMinimumSwingTime());
       if (packet.getMaximumSwingTime() != -1.0)
          setMaximumSwingTime(packet.getMaximumSwingTime());
-      if (packet.getMaximumStepTranslationForMinimumSwingTime() != -1.0)
-         setMaximumStepTranslationForMinimumSwingTime(packet.getMaximumStepTranslationForMinimumSwingTime());
-      if (packet.getMinimumStepTranslationForMaximumSwingTime() != -1.0)
-         setMinimumStepTranslationForMaximumSwingTime(packet.getMinimumStepTranslationForMaximumSwingTime());
-      if (packet.getMaximumStepHeightForMinimumSwingTime() != -1.0)
-         setMaximumStepHeightForMinimumSwingTime(packet.getMaximumStepHeightForMinimumSwingTime());
-      if (packet.getMinimumStepHeightForMaximumSwingTime() != -1.0)
-         setMinimumStepHeightForMaximumSwingTime(packet.getMinimumStepHeightForMaximumSwingTime());
       if (packet.getFootStubClearance() != -1.0)
          setFootStubClearance(packet.getFootStubClearance());
       if (packet.getWaypointProportionShiftForStubAvoidance() != -1.0)
          setWaypointProportionShiftForStubAvoidance(packet.getWaypointProportionShiftForStubAvoidance());
+
       if (packet.getMinimumSwingFootClearance() != -1.0)
          setMinimumSwingFootClearance(packet.getMinimumSwingFootClearance());
       if (packet.getFastApproximationLessClearance() != -1.0)

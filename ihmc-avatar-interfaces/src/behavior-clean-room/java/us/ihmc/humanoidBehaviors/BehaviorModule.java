@@ -1,10 +1,13 @@
 package us.ihmc.humanoidBehaviors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -23,49 +26,59 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
-   private enum CommunicationMode { INTERPROCESS, INTRAPROCESS }
-
    private final MessagerAPI messagerAPI;
    private final Messager messager;
    private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
+   private final Ros2Node ros2Node;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS);
    }
 
    public static BehaviorModule createIntraprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS);
    }
 
-   private BehaviorModule(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, CommunicationMode communicationMode)
+   public BehaviorModule(BehaviorRegistry behaviorRegistry, 
+                         DRCRobotModel robotModel, 
+                         CommunicationMode ros2CommunicationMode, 
+                         CommunicationMode messagerCommunicationMode)
    {
-      LogTools.info("Starting behavior module in {} mode", communicationMode.name());
+      LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
 
       messagerAPI = behaviorRegistry.getMessagerAPI();
 
       PubSubImplementation pubSubImplementation;
-      if (communicationMode == CommunicationMode.INTERPROCESS)
+      if (ros2CommunicationMode == CommunicationMode.INTERPROCESS)
       {
          pubSubImplementation = PubSubImplementation.FAST_RTPS;
+      }
+      else // intraprocess
+      {
+         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+      }
+      if (messagerCommunicationMode == CommunicationMode.INTERPROCESS)
+      {
          messager = KryoMessager.createServer(messagerAPI,
                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                               new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
       }
       else // intraprocess
       {
-         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
          messager = new SharedMemoryMessager(messagerAPI);
       }
 
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         constructedBehaviors.add(behaviorDefinition, behaviorDefinition.getBehaviorSupplier().build(new BehaviorHelper(robotModel, messager, ros2Node)));
+         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros2Node);
+         BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
+         constructedBehaviors.add(behaviorDefinition, constructedBehavior);
       }
 
       messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
@@ -79,12 +92,23 @@ public class BehaviorModule
 
    private void kryoStarter()
    {
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    public Messager getMessager()
    {
       return messager;
+   }
+
+   public void destroy()
+   {
+      for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
+      {
+         behavior.getRight().setEnabled(false);
+      }
+
+      ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      ros2Node.destroy();
    }
 
    // API created here from build
@@ -95,13 +119,14 @@ public class BehaviorModule
       private static final MessagerAPIFactory.CategoryTheme BehaviorModuleTheme = apiFactory.createCategoryTheme("BehaviorModule");
 
       public static final MessagerAPIFactory.Topic<String> BehaviorSelection = topic("BehaviorSelection");
+      public static final MessagerAPIFactory.Topic<MutablePair<Integer, String>> StatusLog = topic("StatusLog");
 
-      private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
+      private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
          return RootCategory.child(BehaviorModuleTheme).topic(apiFactory.createTypedTopicTheme(name));
       }
 
-      public static synchronized final MessagerAPI create(MessagerAPI... behaviorAPIs) // TODO check threading
+      public static synchronized MessagerAPI create(MessagerAPI... behaviorAPIs) // TODO check threading
       {
          apiFactory.includeMessagerAPIs(behaviorAPIs);
 

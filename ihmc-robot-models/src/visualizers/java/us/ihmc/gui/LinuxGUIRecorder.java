@@ -66,7 +66,7 @@ public class LinuxGUIRecorder
       String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
       SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
       PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
-         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(guiName + LOG_MP4_POSTFIX))
+         if (type == BasicPathVisitor.PathType.FILE && path.getFileName().toString().endsWith(guiName + LOG_MP4_POSTFIX))
             sortedSet.add(path);
          return FileVisitResult.CONTINUE;
       });

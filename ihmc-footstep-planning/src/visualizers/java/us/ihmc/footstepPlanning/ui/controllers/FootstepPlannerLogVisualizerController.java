@@ -184,14 +184,14 @@ public class FootstepPlannerLogVisualizerController
 
       loadingLog.set(true);
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, "Loading log...");
 
-      if(logLoader.load())
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
+      if(loadResult == FootstepPlannerLogLoader.LoadResult.LOADED)
       {
          footstepPlannerLog = logLoader.getLog();
          loadLog(footstepPlannerLog);
       }
-      else
+      else if (loadResult == FootstepPlannerLogLoader.LoadResult.ERROR)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, "Error loading log");
       }
@@ -510,15 +510,12 @@ public class FootstepPlannerLogVisualizerController
       private final FootstepNodeSnapData snapData;
       private final RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
       private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
-      private final RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
 
       public ParentStepProperty(FootstepPlannerIterationData iterationData)
       {
          this.stanceNode = iterationData.getStanceNode();
          this.snapData = iterationData.getStanceNodeSnapData();
-
-         snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
-         FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapAndWiggleTransform, snappedNodeTransform);
+         snappedNodeTransform.set(snapData.getSnappedNodeTransform(stanceNode));
 
          FootstepNode idealStep = iterationData.getIdealStep();
          FootstepNodeSnapData idealStepSnapData = snapper.snapFootstepNode(idealStep);
@@ -588,15 +585,17 @@ public class FootstepPlannerLogVisualizerController
 
          stepYaw = candidateNode.getRobotSide().negateIfLeftSide(AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw()));
          FootstepNodeSnapData snapData = edgeData.getCandidateNodeSnapData();
-         if (snapData.getWiggleTransformInWorld().containsNaN())
+
+         // TODO take yet another pass at this api, it doesn't read that clearly
+         if (snapData.getSnapTransform().containsNaN())
          {
-            snapAndWiggledNodeTransform.set(snappedNodeTransform);
+            snappedNodeTransform.setIdentity();
+            snapAndWiggledNodeTransform.setIdentity();
          }
          else
          {
-            RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
-            snapData.packSnapAndWiggleTransform(snapAndWiggleTransform);
-            FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapAndWiggleTransform, snapAndWiggledNodeTransform);
+            FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapData.getSnapTransform(), snappedNodeTransform);
+            snapAndWiggledNodeTransform.set(snapData.getSnappedNodeTransform(candidateNode));
          }
       }
 

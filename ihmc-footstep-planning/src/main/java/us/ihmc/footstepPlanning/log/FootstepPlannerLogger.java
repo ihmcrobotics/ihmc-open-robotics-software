@@ -103,8 +103,13 @@ public class FootstepPlannerLogger
 
    public static void deleteOldLogs(int numberOflogsToKeep)
    {
+      deleteOldLogs(numberOflogsToKeep, defaultLogsDirectory);
+   }
+
+   public static void deleteOldLogs(int numberOflogsToKeep, String directory)
+   {
       SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
-      PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
+      PathTools.walkFlat(Paths.get(directory), (path, type) -> {
          if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(FOOTSTEP_PLANNER_LOG_POSTFIX))
             sortedSet.add(path);
          return FileVisitResult.CONTINUE;
@@ -313,7 +318,7 @@ public class FootstepPlannerLogger
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       writeTransform(numTabs, "snapTransform: ", new Quaternion(snapTransform.getRotation()), snapTransform.getTranslation());
       RigidBodyTransform wiggleTransform = snapData.getWiggleTransformInWorld();
-      writeTransform(numTabs, "wiggleTransform: ", new Quaternion(wiggleTransform.getRotation()), snapTransform.getTranslation());
+      writeTransform(numTabs, "wiggleTransform: ", new Quaternion(wiggleTransform.getRotation()), wiggleTransform.getTranslation());
 
       ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
       if (croppedFoothold.isEmpty() || croppedFoothold.containsNaN())
@@ -324,6 +329,9 @@ public class FootstepPlannerLogger
       {
          writeFootPolygon(numTabs, "croppedFoothold:", croppedFoothold);
       }
+
+      int regionIndex = snapData.getRegionIndex();
+      writeLine(numTabs, "regionIndex:" + regionIndex);
    }
 
    private void writeTransform(int numTabs, String name, QuaternionReadOnly orientation, Tuple3DReadOnly translation) throws IOException

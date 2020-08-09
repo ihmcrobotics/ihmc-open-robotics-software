@@ -9,6 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * this class is to iterate minimizing input parameters for the given output calculator matrix. in
@@ -40,13 +41,12 @@ public class LevenbergMarquardtParameterOptimizer
    private final UnaryOperator<DMatrixRMaj> outputCalculator;
 
    private final DMatrixRMaj currentInput;
-   private final OuputSpace currentOutputSpace;
-   private final DMatrixRMaj purterbationVector;
+   private final OutputSpace currentOutputSpace;
+   private final DMatrixRMaj perturbationVector;
    private final DMatrixRMaj perturbedInput;
    private final DMatrixRMaj perturbedOutput;
    private final DMatrixRMaj jacobian;
 
-   private final DMatrixRMaj jacobianTranspose;
    private final DMatrixRMaj squaredJacobian;
    private final DMatrixRMaj dampingMatrix;
    private final DMatrixRMaj invMultJacobianTranspose;
@@ -79,16 +79,15 @@ public class LevenbergMarquardtParameterOptimizer
       this.outputCalculator = outputCalculator;
 
       currentInput = new DMatrixRMaj(inputParameterDimension, 1);
-      currentOutputSpace = new OuputSpace(outputDimension);
+      currentOutputSpace = new OutputSpace(outputDimension);
 
-      purterbationVector = new DMatrixRMaj(inputParameterDimension, 1);
+      perturbationVector = new DMatrixRMaj(inputParameterDimension, 1);
       for (int i = 0; i < inputParameterDimension; i++)
-         purterbationVector.set(i, DEFAULT_PERTURBATION);
+         perturbationVector.set(i, DEFAULT_PERTURBATION);
       perturbedInput = new DMatrixRMaj(inputParameterDimension, 1);
       perturbedOutput = new DMatrixRMaj(outputDimension, 1);
       jacobian = new DMatrixRMaj(outputDimension, inputParameterDimension);
 
-      jacobianTranspose = new DMatrixRMaj(outputDimension, inputParameterDimension);
       squaredJacobian = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       dampingMatrix = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
       invMultJacobianTranspose = new DMatrixRMaj(inputParameterDimension, outputDimension);
@@ -96,11 +95,11 @@ public class LevenbergMarquardtParameterOptimizer
       optimizeDirection = new DMatrixRMaj(inputParameterDimension, 1);
    }
 
-   public void setPerturbationVector(DMatrixRMaj purterbationVector)
+   public void setPerturbationVector(DMatrixRMaj perturbationVector)
    {
-      if (this.purterbationVector.getNumCols() != purterbationVector.getNumCols())
-         throw new MatrixDimensionException("dimension is wrong. " + this.purterbationVector.getNumCols() + " " + purterbationVector.getNumCols());
-      this.purterbationVector.set(purterbationVector);
+      if (this.perturbationVector.getNumCols() != perturbationVector.getNumCols())
+         throw new MatrixDimensionException("dimension is wrong. " + this.perturbationVector.getNumCols() + " " + perturbationVector.getNumCols());
+      this.perturbationVector.set(perturbationVector);
    }
 
    public void setCorrespondenceThreshold(double correspondenceThreshold)
@@ -112,19 +111,13 @@ public class LevenbergMarquardtParameterOptimizer
    {
       iteration = 0;
       optimized = false;
-      for (int i = 0; i < inputDimension; i++)
-      {
-         for (int j = 0; j < inputDimension; j++)
-         {
-            if (i == j)
-            {
-               dampingMatrix.set(i, j, DEFAULT_DAMPING_COEFFICIENT);
-            }
-         }
-      }
+      MatrixTools.setDiagonal(dampingMatrix, DEFAULT_DAMPING_COEFFICIENT);
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
-      return currentOutputSpace.computeCorrespondence();
+      boolean result = currentOutputSpace.computeCorrespondence();
+      currentOutputSpace.computeQuality();
+      
+      return result;
    }
 
    public double iterate()
@@ -132,8 +125,9 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
-      DMatrixRMaj newInput = new DMatrixRMaj(inputDimension, 1);
-
+      // TODO because of the way the operations are ordered, on the first iteration, the current output space is already valid, as it was called in the
+      // TODO initialize function. This is a relatively expensive operation, so figuring out how to reorder things would reduce the number of "update output
+      // TODO space" calls by 1, which would be helpful.
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
       if (!currentOutputSpace.computeCorrespondence())
       {
@@ -143,17 +137,17 @@ public class LevenbergMarquardtParameterOptimizer
 
       // start.      
       // compute jacobian.
+      perturbedInput.set(currentInput);
       for (int i = 0; i < inputDimension; i++)
       {
-         perturbedInput.set(currentInput);
-         perturbedInput.add(i, 0, purterbationVector.get(i));
+         perturbedInput.add(i, 0, perturbationVector.get(i));
 
          perturbedOutput.set(outputCalculator.apply(perturbedInput));
          for (int j = 0; j < outputDimension; j++)
          {
             if (currentOutputSpace.isCorresponding(j))
             {
-               double partialValue = (perturbedOutput.get(j) - currentOutputSpace.getOutput().get(j)) / purterbationVector.get(i);
+               double partialValue = (perturbedOutput.get(j) - currentOutputSpace.getOutput().get(j)) / perturbationVector.get(i);
                jacobian.set(j, i, partialValue);
             }
             else
@@ -161,27 +155,23 @@ public class LevenbergMarquardtParameterOptimizer
                jacobian.set(j, i, 0.0);
             }
          }
+
+         perturbedInput.add(i, 0, -perturbationVector.get(i));
       }
 
       // compute direction.
-      jacobianTranspose.set(jacobian);
-      CommonOps_DDRM.transpose(jacobianTranspose);
-
-      CommonOps_DDRM.mult(jacobianTranspose, jacobian, squaredJacobian);
+      CommonOps_DDRM.multInner(jacobian, squaredJacobian);
       if (useDamping)
       {
-         CommonOps_DDRM.add(squaredJacobian, dampingMatrix, squaredJacobian);
+         CommonOps_DDRM.addEquals(squaredJacobian, dampingMatrix);
       }
       CommonOps_DDRM.invert(squaredJacobian);
 
-      CommonOps_DDRM.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
+      CommonOps_DDRM.multTransB(squaredJacobian, jacobian, invMultJacobianTranspose);
       CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutputSpace.getOutput(), optimizeDirection);
 
       // update currentInput.
-      CommonOps_DDRM.subtract(currentInput, optimizeDirection, newInput);
-
-      // compute new quality.
-      currentInput.set(newInput);
+      CommonOps_DDRM.subtract(currentInput, optimizeDirection, currentInput);
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       if (DEBUG)
@@ -199,7 +189,7 @@ public class LevenbergMarquardtParameterOptimizer
       transformToPack.set(inputFunction.apply(input));
    }
 
-   public int getNumberOfCorespondingPoints()
+   public int getNumberOfCorrespondingPoints()
    {
       return currentOutputSpace.getNumberOfCorrespondingPoints();
    }
@@ -234,7 +224,7 @@ public class LevenbergMarquardtParameterOptimizer
       return computationTime;
    }
 
-   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction()
+   public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction(boolean includePitchAndRoll)
    {
       return new Function<DMatrixRMaj, RigidBodyTransform>()
       {
@@ -243,14 +233,17 @@ public class LevenbergMarquardtParameterOptimizer
          {
             RigidBodyTransform transform = new RigidBodyTransform();
 
-            transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            if (includePitchAndRoll)
+               transform.setRotationYawPitchRollAndZeroTranslation(input.get(5), input.get(4), input.get(3));
+            else
+               transform.setRotationYawAndZeroTranslation(input.get(3));
             transform.getTranslation().set(input.get(0), input.get(1), input.get(2));
             return transform;
          }
       };
    }
 
-   private class OuputSpace
+   private class OutputSpace
    {
       private final DMatrixRMaj output;
       private final boolean[] correspondence;
@@ -258,7 +251,7 @@ public class LevenbergMarquardtParameterOptimizer
       private double correspondingQuality;
       private double quality;
 
-      private OuputSpace(int dimension)
+      private OutputSpace(int dimension)
       {
          output = new DMatrixRMaj(dimension, 1);
          correspondence = new boolean[dimension];

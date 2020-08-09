@@ -13,12 +13,14 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Object holding all information planned for a given step by {@link FootstepPlanningModule}
  */
 public class PlannedFootstep implements PlannedFootstepReadOnly
 {
+   private final long sequenceId;
    private final RobotSide robotSide;
    private final FramePose3D footstepPose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
@@ -48,6 +50,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
    public PlannedFootstep(RobotSide robotSide, Pose3DReadOnly footstepPose, ConvexPolygon2D foothold)
    {
+      this.sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
       this.robotSide = robotSide;
 
       if (footstepPose != null)
@@ -62,6 +65,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
    public PlannedFootstep(PlannedFootstep other)
    {
+      this.sequenceId = other.sequenceId;
       this.robotSide = other.robotSide;
       this.footstepPose.set(other.footstepPose);
       this.foothold.set(other.foothold);
@@ -232,6 +236,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    public FootstepDataMessage getAsMessage()
    {
       FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
+      footstepDataMessage.setSequenceId(sequenceId);
       footstepDataMessage.setRobotSide(robotSide.toByte());
       footstepDataMessage.getLocation().set(footstepPose.getPosition());
       footstepDataMessage.getOrientation().set(footstepPose.getOrientation());

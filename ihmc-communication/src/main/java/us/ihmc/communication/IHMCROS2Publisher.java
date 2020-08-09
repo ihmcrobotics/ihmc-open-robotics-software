@@ -1,12 +1,15 @@
 package us.ihmc.communication;
 
+import geometry_msgs.msg.dds.PosePubSubType;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2PublisherBasics;
+import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
 public class IHMCROS2Publisher<T>
 {
@@ -15,6 +18,11 @@ public class IHMCROS2Publisher<T>
    private Ros2PublisherBasics<T> publisher;
 
    private int numberOfExceptions = 0;
+
+   private IHMCROS2Publisher()
+   {
+      // internal use only
+   }
 
    IHMCROS2Publisher(Ros2PublisherBasics<T> ros2Publisher)
    {
@@ -38,7 +46,16 @@ public class IHMCROS2Publisher<T>
                             DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
-   public void publish(T message)
+   public static IHMCROS2Publisher<Pose3D> newPose3DPublisher(Ros2NodeInterface ros2Node, ROS2Topic topicName)
+   {
+      PosePubSubType.setImplementation(new Pose3DPubSubTypeImpl());
+      IHMCROS2Publisher<Pose3D> ihmcROS2Publisher = new IHMCROS2Publisher<>();
+      ExceptionTools.handle(() -> ihmcROS2Publisher.publisher = ros2Node.createPublisher(new PosePubSubType(), topicName.getName()),
+                            DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      return ihmcROS2Publisher;
+   }
+
+   public synchronized void publish(T message)
    {
       try
       {

@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
@@ -47,7 +48,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
-   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 
@@ -133,22 +134,22 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap, frame2);
 
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getInitialSensorPoseToWorld());
-      correctedSensorPoseToWorld.multiply(icpTransformer);
+      RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform();
+      RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame2.getUncorrectedLocalPoseInWorld());
+      correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frame2.getOriginalPointCloudToSensorPose().length];
+      Point3D[] correctedData = new Point3D[frame2.getPointCloudInLocalFrame().length];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frame2.getOriginalPointCloudToSensorPose()[i]);
-         icpTransformer.transform(correctedData[i]);
+         correctedData[i] = new Point3D(frame2.getPointCloudInLocalFrame()[i]);
+         driftCorrectionTransform.transform(correctedData[i]);
       }
 
       frame1GraphicsManager.updateGraphics();
       frame2GraphicsManager.updateGraphics();
       scs.tickAndUpdate();
 
-      RigidBodyTransform previousIcpTransformer = new RigidBodyTransform(icpTransformer);
+      RigidBodyTransform previousDriftCorrectionTransform = new RigidBodyTransform(driftCorrectionTransform);
       for (double t = 1.0; t <= trajectoryTime + dt; t += dt)
       {
          robot.getYoTime().set(t);
@@ -158,23 +159,23 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          // get parameter.
          DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
-         icpTransformer.set(inputFunction.apply(optimalParameter));
-         correctedSensorPoseToWorld.set(frame2.getInitialSensorPoseToWorld());
-         correctedSensorPoseToWorld.multiply(icpTransformer);
+         driftCorrectionTransform.set(inputFunction.apply(optimalParameter));
+         correctedLocalPoseInWorld.set(frame2.getUncorrectedLocalPoseInWorld());
+         correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frame2.getOriginalPointCloudToSensorPose()[i]);
-            icpTransformer.transform(correctedData[i]);
+            correctedData[i].set(frame2.getPointCloudInLocalFrame()[i]);
+            driftCorrectionTransform.transform(correctedData[i]);
          }
 
-         frame2.updateOptimizedCorrection(icpTransformer);
+         frame2.updateOptimizedCorrection(driftCorrectionTransform);
          double quality = optimizer.getQuality();
          double pureQuality = optimizer.getPureQuality();
-         double translationalEffort = icpTransformer.getTranslation().lengthSquared();
-         double rotationalEffort = icpTransformer.getRotation().distance(new RotationMatrix());
+         double translationalEffort = driftCorrectionTransform.getTranslation().lengthSquared();
+         double rotationalEffort = driftCorrectionTransform.getRotation().distance(new RotationMatrix());
          //double translationalEffortDiff = new Point3D(previousIcpTransformer.getTranslation()).distance(new Point3D(icpTransformer.getTranslation()));
          double translationalEffortDiff = Math.abs(translationalEffort - optimizerTranslationalEffort.getDoubleValue());
-         double rotationalEffortDiff = new Quaternion(previousIcpTransformer.getRotation()).distance(new Quaternion(icpTransformer.getRotation()));
+         double rotationalEffortDiff = new Quaternion(previousDriftCorrectionTransform.getRotation()).distance(new Quaternion(driftCorrectionTransform.getRotation()));
 
          // update viz.
          frame1GraphicsManager.updateGraphics();
@@ -217,9 +218,9 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizerRotationalEffortDiff.set(rotationalEffortDiff);
          optimizerTranslationalEffort.set(translationalEffort);
          optimizerRotationalEffort.set(rotationalEffort);
-         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorespondingPoints());
+         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorrespondingPoints());
 
-         previousIcpTransformer.set(icpTransformer);
+         previousDriftCorrectionTransform.set(driftCorrectionTransform);
          if (isSteady)
          {
             steadyIterations++;
@@ -251,30 +252,30 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, SLAMFrame frame)
    {
-      int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      int numberOfSurfel = frame.getNumberOfSurfaceElements();
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
+            correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
+            Plane3D[] correctedSurfelInWorld = new Plane3D[numberOfSurfel];
             for (int i = 0; i < numberOfSurfel; i++)
             {
-               correctedSurfel[i] = new Plane3D();
-               correctedSurfel[i].set(frame.getSurfaceElementsToSensor().get(i));
+               correctedSurfelInWorld[i] = new Plane3D();
+               correctedSurfelInWorld[i].set(frame.getSurfaceElementsInLocalFrame().get(i));
 
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
-               correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getPoint());
+               correctedLocalPoseInWorld.transform(correctedSurfelInWorld[i].getNormal());
             }
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
-            for (int i = 0; i < correctedSurfel.length; i++)
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfelInWorld.length, 1);
+            for (int i = 0; i < correctedSurfelInWorld.length; i++)
             {
-               double distance = computeClosestDistance(correctedSurfel[i]);
+               double distance = computeClosestDistance(correctedSurfelInWorld[i]);
                errorSpace.set(i, distance);
             }
             return errorSpace;
@@ -306,16 +307,20 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       File pointCloudFile = new File(DATA_PATH);
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
-      slam.addKeyFrame(messages.get(0));
-      octreeMap = slam.getOctree();
+      slam.addKeyFrame(messages.get(0), true);
+      octreeMap = slam.getMapOcTree();
       octreeMap.updateNormals();
 
-      frame1 = new SLAMFrame(messages.get(0));
-      frame2 = new SLAMFrame(frame1, messages.get(1));
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+
+      frame1 = new SLAMFrame(messages.get(0), normalEstimationParameters);
+      frame2 = new SLAMFrame(frame1, messages.get(1), normalEstimationParameters);
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
-      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
+      int maxNumberOfSurfels = Integer.MAX_VALUE;
+      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true, maxNumberOfSurfels);
       numberOfSourcePoints.set(frame2.getSurfaceElements().size());
    }
 }

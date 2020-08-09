@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="187.0" prefWidth="861.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane minWidth="-Infinity" prefHeight="240.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <FlowPane prefWrapLength="1300.0">
          <children>
@@ -21,7 +21,7 @@
                         <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </Button>
-                  <Button fx:id="cancelGoalButton" mnemonicParsing="false" onAction="#cancelGoalButton" text="Abort Goal">
+                  <Button fx:id="reset" mnemonicParsing="false" onAction="#reset" text="Reset">
                      <VBox.margin>
                         <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
@@ -55,7 +55,7 @@
                   <Insets />
                </FlowPane.margin>
             </VBox>
-            <TableView fx:id="lookAndStepParameterTable" prefHeight="210.0" prefWidth="370.0">
+            <TableView fx:id="lookAndStepParameterTable" prefHeight="233.0" prefWidth="419.0">
                <FlowPane.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </FlowPane.margin>

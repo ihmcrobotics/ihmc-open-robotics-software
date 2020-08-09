@@ -56,7 +56,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -69,8 +69,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -78,20 +76,16 @@ public class HumanoidKinematicsSimulation
 {
    private static final double PLAYBACK_SPEED_MULTIPLIER = 10.0;
    private static final double DT = UnitConversions.hertzToSeconds(70);
-   private static final double UPDATE_RATE = DT / PLAYBACK_SPEED_MULTIPLIER;
+   private static final double UPDATE_PERIOD = DT / PLAYBACK_SPEED_MULTIPLIER;
    private static final double GRAVITY_Z = 9.81;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
-   private final ExceptionHandlingThreadScheduler scheduler
-           = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), ExceptionHandlingThreadScheduler.DEFAULT_HANDLER, 5);
-   private final ExceptionHandlingThreadScheduler yoVariableScheduler
-           = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), ExceptionHandlingThreadScheduler.DEFAULT_HANDLER, 5);
+   private final PausablePeriodicThread controlThread;
    private final Ros2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private double yoVariableServerTime = 0.0;
-   private ScheduledFuture<?> yoVariableServerScheduled;
    private final Stopwatch monotonicTimer = new Stopwatch();
    private final YoDouble yoTime;
 
@@ -212,9 +206,11 @@ public class HumanoidKinematicsSimulation
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      double groundHeight = 0.0;
-      double initialYaw = 0.0;
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(
+            kinematicsSimulationParameters.getInitialGroundHeight(),
+            kinematicsSimulationParameters.getInitialRobotYaw(),
+            kinematicsSimulationParameters.getInitialRobotX(),
+            kinematicsSimulationParameters.getInitialRobotY());
       KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(), robotInitialSetup.getInitialJointAngles(),
                                                        fullRobotModel.getRootJoint(),
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
@@ -328,7 +324,8 @@ public class HumanoidKinematicsSimulation
       initialize();
 
       monotonicTimer.start();
-      scheduler.schedule(this::controllerTick, Conversions.secondsToNanoseconds(UPDATE_RATE), TimeUnit.NANOSECONDS);
+      controlThread = new PausablePeriodicThread(getClass().getSimpleName(), UPDATE_PERIOD, 5, this::controllerTick);
+      controlThread.start();
    }
 
    public void initialize()
@@ -467,5 +464,13 @@ public class HumanoidKinematicsSimulation
    private void processWalkingStatus(WalkingStatusMessage status)
    {
       latestWalkingStatus.set(WalkingStatus.fromByte(status.getWalkingStatus()));
+   }
+
+   public void destroy()
+   {
+      controlThread.stop();
+      ros2Node.destroy();
+      if (yoVariableServer != null)
+         yoVariableServer.close();
    }
 }

@@ -178,7 +178,7 @@ public class ConvexStepConstraintOptimizer
             LogTools.info("Result: " + solution);
          }
       }
-      catch (Exception e)
+      catch (Throwable e)
       {
          e.printStackTrace();
          return null;

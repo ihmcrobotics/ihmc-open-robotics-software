@@ -7,10 +7,8 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -43,7 +41,12 @@ public class FootstepPlannerLogLoader
    private FootstepPlannerLog log = null;
    private final ObjectMapper objectMapper = new ObjectMapper();
 
-   public boolean load()
+   public enum LoadResult
+   {
+      LOADED, CANCELLED, ERROR
+   }
+
+   public LoadResult load()
    {
       JFileChooser fileChooser = new JFileChooser();
       File logDirectory = new File(FootstepPlannerLogger.getDefaultLogsDirectory());
@@ -51,8 +54,14 @@ public class FootstepPlannerLogLoader
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       int chooserState = fileChooser.showOpenDialog(null);
 
-      if (chooserState != JFileChooser.APPROVE_OPTION)
-         return false;
+      if (chooserState == JFileChooser.CANCEL_OPTION)
+      {
+         return LoadResult.CANCELLED;
+      }
+      else if (chooserState != JFileChooser.APPROVE_OPTION)
+      {
+         return LoadResult.ERROR;
+      }
 
       return load(fileChooser.getSelectedFile());
    }
@@ -61,12 +70,12 @@ public class FootstepPlannerLogLoader
     * Loads the given log file. If successful, retreive the log by calling {@link #getLog}
     * @return if the log loaded successfully
     */
-   public boolean load(File logDirectory)
+   public LoadResult load(File logDirectory)
    {
       if (!logDirectory.isDirectory())
       {
          LogTools.error("The given file isn't a directory. This method should receive a directory as input");
-         return false;
+         return LoadResult.ERROR;
       }
 
       try
@@ -161,6 +170,7 @@ public class FootstepPlannerLogLoader
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+            iterationData.getStanceNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
             log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
@@ -174,6 +184,7 @@ public class FootstepPlannerLogLoader
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+               edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
 
                double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
                edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
@@ -192,13 +203,13 @@ public class FootstepPlannerLogLoader
             }
          }
 
-         return true;
+         return LoadResult.LOADED;
       }
       catch (Exception e)
       {
          LogTools.error("Exception while loading log");
          e.printStackTrace();
-         return false;
+         return LoadResult.ERROR;
       }
    }
 
