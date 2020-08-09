@@ -112,7 +112,9 @@ public class DirectRobotUIController extends Group
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
+      supportRegionScale.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> sendSupportRegionParameters());
       enableSupportRegions.setSelected(true);
+      enableSupportRegions.selectedProperty().addListener(observable -> sendSupportRegionParameters());
 
       setupSlider(stanceHeightSlider, () -> LogTools.info("stanceHeightSlider: {}", stanceHeightSlider.getValue()));
       setupSlider(leanForwardSlider, () -> LogTools.info("leanForwardSlider: {}", leanForwardSlider.getValue()));
@@ -169,11 +171,12 @@ public class DirectRobotUIController extends Group
       robotLowLevelMessenger.setHydraulicPumpPSI(pumpPSI.getValue());
    }
 
-   @FXML public void sendSupportRegionParameters()
+   private void sendSupportRegionParameters()
    {
       BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
       supportPlanarRegionParametersMessage.setSupportRegionScaleFactor(supportRegionScale.getValue());
+      LogTools.info("Sending {}, {}", enableSupportRegions.isSelected(), supportRegionScale.getValue());
       supportRegionsParametersPublisher.publish(supportPlanarRegionParametersMessage);
    }
 
