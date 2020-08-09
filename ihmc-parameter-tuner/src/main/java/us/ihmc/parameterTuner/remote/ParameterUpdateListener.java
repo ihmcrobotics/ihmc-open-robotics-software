@@ -79,7 +79,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       this.yoVariableClientInterface = yoVariableClientInterface;
       yoRootRegistry = handshakeParser.getRootRegistry();
 
-      yoRootRegistry.subtreeParameters().stream().forEach(parameter -> {
+      yoRootRegistry.collectSubtreeParameters().stream().forEach(parameter -> {
          parameter.addListener(new YoParameterChangedListener()
          {
             @Override
@@ -161,7 +161,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
          }
       });
       yoRegistry.getChildren().stream().forEach(yoChild -> {
-         if (!yoChild.subtreeParameters().isEmpty())
+         if (!yoChild.collectSubtreeParameters().isEmpty())
          {
             GuiRegistry guiChild = new GuiRegistry(yoChild.getName(), guiRegistry);
             createGuiRegistryRecursive(guiChild, yoChild);

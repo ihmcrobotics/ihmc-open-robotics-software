@@ -103,7 +103,7 @@ public class LogVisualizer
    private void printOutYoVariableNames()
    {
       YoRegistry rootRegistry = scs.getRootRegistry();
-      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.subtreeVariables();
+      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.collectSubtreeVariables();
 
       for (YoVariable yoVariable : allVariablesIncludingDescendants)
       {

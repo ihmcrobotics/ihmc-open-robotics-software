@@ -513,7 +513,7 @@ public class ProcessedSensors
 
    public ProcessedSensors()
    {
-      List<YoVariable> variables = registry.subtreeVariables();
+      List<YoVariable> variables = registry.collectSubtreeVariables();
       allVariables = new YoDouble[variables.size()];
       variables.toArray(allVariables);
    }
