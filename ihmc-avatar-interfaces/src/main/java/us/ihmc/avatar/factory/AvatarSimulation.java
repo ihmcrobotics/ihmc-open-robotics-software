@@ -50,6 +50,15 @@ public class AvatarSimulation
       robotController = null;
    }
 
+   public void destroy()
+   {
+      dispose();
+      if (yoVariableServer != null)
+         yoVariableServer.close();
+      ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
+      simulationConstructionSet.closeAndDispose();
+   }
+
    public void resetRobot()
    {
       resetRobot(true);

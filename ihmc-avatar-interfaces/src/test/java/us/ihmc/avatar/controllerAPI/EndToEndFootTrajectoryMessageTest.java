@@ -865,7 +865,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       currentPose.changeFrame(worldFrame);
       EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
             + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
-            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))), controllerDesiredPose, currentPose, 5.0e-3);
+            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))), controllerDesiredPose, currentPose, 1.0e-2);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);

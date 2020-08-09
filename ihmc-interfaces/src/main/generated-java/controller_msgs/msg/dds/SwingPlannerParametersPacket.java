@@ -25,7 +25,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    /**
             * If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
             * along the swing foot trajectory and the planar regions in the environment.
-            * Field default value -1.0
             */
    public double minimum_swing_foot_clearance_ = -1.0;
 
@@ -33,69 +32,46 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
             * If using the swing over planar regions module, this sets up how much less clearance is required on the fast approximation, since it doesn't usually have
             * the same amount of curve to the trajectory.
             */
-   public double fast_approximation_less_clearance_;
+   public double fast_approximation_less_clearance_ = -1.0;
 
    /**
             * If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
-            * Field default value 100
             */
-   public long number_of_checks_per_swing_;
+   public long number_of_checks_per_swing_ = 100;
 
    /**
             * If using the swing over planar regions module, this is the maximum number of iterations for adjusting the swing foot waypoints to attempt avoiding
             * collisions with the environment.
-            * Field default value 50
             */
-   public long maximum_number_of_adjustment_attempts_;
+   public long maximum_number_of_adjustment_attempts_ = 50;
 
    /**
             * If using the swing over planar regions module, this is the maximum adjustment distance of the swing waypoints that will be allowed.
-            * Field default value -1.0
             */
-   public double maximum_waypoint_adjustment_distance_;
+   public double maximum_waypoint_adjustment_distance_ = -1.0;
 
    /**
             * If using the swing over planar regions module, this is the minimum distance that the swing waypoints will be adjusted by on each increment.
-            * Field default value -1.0
             */
-   public double minimum_adjustment_increment_distance_;
+   public double minimum_adjustment_increment_distance_ = -1.0;
 
    /**
             * If using the swing over planar regions module, this is the maximum distance that the swing waypoints will be adjusted by on each increment.
-            * Field default value -1.0
             */
-   public double maximum_adjustment_increment_distance_;
+   public double maximum_adjustment_increment_distance_ = -1.0;
 
    /**
             * If using the swing over planar regions module, this is the scale factor to be applied to the collision on each increment for adjustment.
-            * Field default value -1.0
             */
-   public double adjustment_increment_distance_gain_;
+   public double adjustment_increment_distance_gain_ = -1.0;
+
+   public double minimum_height_above_floor_for_collision_ = -1.0;
 
    /**
-            * Field default value -1.0
+            * Collision boxes are checked for the start and end of swing at the toe and heel, respectively.
+            * If a collision is detected at either, this swing height is used.
             */
-   public double minimum_height_above_floor_for_collision_;
-
-   /**
-            * Specifies the minimum swing height in the swing waypoint proportion calculator
-            */
-   public double minimum_swing_height_ = -1.0;
-
-   /**
-            * Specifies the maximum swing height in the swing waypoint proportion calculator
-            */
-   public double maximum_swing_height_ = -1.0;
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the minimum swing height for that interpolation
-            */
-   public double maximum_step_height_for_minimum_swing_height_ = -1.0;
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the maximum swing height for that interpolation
-            */
-   public double minimum_step_height_for_maximum_swing_height_ = -1.0;
+   public double swing_height_if_collision_detected_ = -1.0;
 
    /**
             * Specifies the maximum swing time in the swing waypoint proportion calculator
@@ -106,26 +82,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
             * Specifies the maximum swing time in the swing waypoint proportion calculator
             */
    public double maximum_swing_time_ = -1.0;
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step translation for that interpolation
-            */
-   public double maximum_step_translation_for_minimum_swing_time_ = -1.0;
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the minimum step translation for that interpolation
-            */
-   public double minimum_step_translation_for_maximum_swing_time_ = -1.0;
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-            */
-   public double maximum_step_height_for_minimum_swing_time_ = -1.0;
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-            */
-   public double minimum_step_height_for_maximum_swing_time_ = -1.0;
 
    /**
             * The waypoint proportion calculator shifts the specified proportions if a foot collision is detected. This specifies the clearance of that collision
@@ -144,13 +100,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
    public SwingPlannerParametersPacket()
    {
-
-
-
-
-
-
-
 
 
 
@@ -213,34 +162,13 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       minimum_height_above_floor_for_collision_ = other.minimum_height_above_floor_for_collision_;
 
 
-      minimum_swing_height_ = other.minimum_swing_height_;
-
-
-      maximum_swing_height_ = other.maximum_swing_height_;
-
-
-      maximum_step_height_for_minimum_swing_height_ = other.maximum_step_height_for_minimum_swing_height_;
-
-
-      minimum_step_height_for_maximum_swing_height_ = other.minimum_step_height_for_maximum_swing_height_;
+      swing_height_if_collision_detected_ = other.swing_height_if_collision_detected_;
 
 
       minimum_swing_time_ = other.minimum_swing_time_;
 
 
       maximum_swing_time_ = other.maximum_swing_time_;
-
-
-      maximum_step_translation_for_minimum_swing_time_ = other.maximum_step_translation_for_minimum_swing_time_;
-
-
-      minimum_step_translation_for_maximum_swing_time_ = other.minimum_step_translation_for_maximum_swing_time_;
-
-
-      maximum_step_height_for_minimum_swing_time_ = other.maximum_step_height_for_minimum_swing_time_;
-
-
-      minimum_step_height_for_maximum_swing_time_ = other.minimum_step_height_for_maximum_swing_time_;
 
 
       foot_stub_clearance_ = other.foot_stub_clearance_;
@@ -289,7 +217,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    /**
             * If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
             * along the swing foot trajectory and the planar regions in the environment.
-            * Field default value -1.0
             */
    public void setMinimumSwingFootClearance(double minimum_swing_foot_clearance)
    {
@@ -298,7 +225,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    /**
             * If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
             * along the swing foot trajectory and the planar regions in the environment.
-            * Field default value -1.0
             */
    public double getMinimumSwingFootClearance()
    {
@@ -326,7 +252,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
    /**
             * If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
-            * Field default value 100
             */
    public void setNumberOfChecksPerSwing(long number_of_checks_per_swing)
    {
@@ -334,7 +259,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
    /**
             * If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
-            * Field default value 100
             */
    public long getNumberOfChecksPerSwing()
    {
@@ -345,7 +269,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    /**
             * If using the swing over planar regions module, this is the maximum number of iterations for adjusting the swing foot waypoints to attempt avoiding
             * collisions with the environment.
-            * Field default value 50
             */
    public void setMaximumNumberOfAdjustmentAttempts(long maximum_number_of_adjustment_attempts)
    {
@@ -354,7 +277,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    /**
             * If using the swing over planar regions module, this is the maximum number of iterations for adjusting the swing foot waypoints to attempt avoiding
             * collisions with the environment.
-            * Field default value 50
             */
    public long getMaximumNumberOfAdjustmentAttempts()
    {
@@ -364,7 +286,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
    /**
             * If using the swing over planar regions module, this is the maximum adjustment distance of the swing waypoints that will be allowed.
-            * Field default value -1.0
             */
    public void setMaximumWaypointAdjustmentDistance(double maximum_waypoint_adjustment_distance)
    {
@@ -372,7 +293,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
    /**
             * If using the swing over planar regions module, this is the maximum adjustment distance of the swing waypoints that will be allowed.
-            * Field default value -1.0
             */
    public double getMaximumWaypointAdjustmentDistance()
    {
@@ -382,7 +302,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
    /**
             * If using the swing over planar regions module, this is the minimum distance that the swing waypoints will be adjusted by on each increment.
-            * Field default value -1.0
             */
    public void setMinimumAdjustmentIncrementDistance(double minimum_adjustment_increment_distance)
    {
@@ -390,7 +309,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
    /**
             * If using the swing over planar regions module, this is the minimum distance that the swing waypoints will be adjusted by on each increment.
-            * Field default value -1.0
             */
    public double getMinimumAdjustmentIncrementDistance()
    {
@@ -400,7 +318,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
    /**
             * If using the swing over planar regions module, this is the maximum distance that the swing waypoints will be adjusted by on each increment.
-            * Field default value -1.0
             */
    public void setMaximumAdjustmentIncrementDistance(double maximum_adjustment_increment_distance)
    {
@@ -408,7 +325,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
    /**
             * If using the swing over planar regions module, this is the maximum distance that the swing waypoints will be adjusted by on each increment.
-            * Field default value -1.0
             */
    public double getMaximumAdjustmentIncrementDistance()
    {
@@ -418,7 +334,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
    /**
             * If using the swing over planar regions module, this is the scale factor to be applied to the collision on each increment for adjustment.
-            * Field default value -1.0
             */
    public void setAdjustmentIncrementDistanceGain(double adjustment_increment_distance_gain)
    {
@@ -426,7 +341,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
    /**
             * If using the swing over planar regions module, this is the scale factor to be applied to the collision on each increment for adjustment.
-            * Field default value -1.0
             */
    public double getAdjustmentIncrementDistanceGain()
    {
@@ -434,16 +348,10 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
 
 
-   /**
-            * Field default value -1.0
-            */
    public void setMinimumHeightAboveFloorForCollision(double minimum_height_above_floor_for_collision)
    {
       minimum_height_above_floor_for_collision_ = minimum_height_above_floor_for_collision;
    }
-   /**
-            * Field default value -1.0
-            */
    public double getMinimumHeightAboveFloorForCollision()
    {
       return minimum_height_above_floor_for_collision_;
@@ -451,66 +359,20 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
 
    /**
-            * Specifies the minimum swing height in the swing waypoint proportion calculator
+            * Collision boxes are checked for the start and end of swing at the toe and heel, respectively.
+            * If a collision is detected at either, this swing height is used.
             */
-   public void setMinimumSwingHeight(double minimum_swing_height)
+   public void setSwingHeightIfCollisionDetected(double swing_height_if_collision_detected)
    {
-      minimum_swing_height_ = minimum_swing_height;
+      swing_height_if_collision_detected_ = swing_height_if_collision_detected;
    }
    /**
-            * Specifies the minimum swing height in the swing waypoint proportion calculator
+            * Collision boxes are checked for the start and end of swing at the toe and heel, respectively.
+            * If a collision is detected at either, this swing height is used.
             */
-   public double getMinimumSwingHeight()
+   public double getSwingHeightIfCollisionDetected()
    {
-      return minimum_swing_height_;
-   }
-
-
-   /**
-            * Specifies the maximum swing height in the swing waypoint proportion calculator
-            */
-   public void setMaximumSwingHeight(double maximum_swing_height)
-   {
-      maximum_swing_height_ = maximum_swing_height;
-   }
-   /**
-            * Specifies the maximum swing height in the swing waypoint proportion calculator
-            */
-   public double getMaximumSwingHeight()
-   {
-      return maximum_swing_height_;
-   }
-
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the minimum swing height for that interpolation
-            */
-   public void setMaximumStepHeightForMinimumSwingHeight(double maximum_step_height_for_minimum_swing_height)
-   {
-      maximum_step_height_for_minimum_swing_height_ = maximum_step_height_for_minimum_swing_height;
-   }
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the minimum swing height for that interpolation
-            */
-   public double getMaximumStepHeightForMinimumSwingHeight()
-   {
-      return maximum_step_height_for_minimum_swing_height_;
-   }
-
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the maximum swing height for that interpolation
-            */
-   public void setMinimumStepHeightForMaximumSwingHeight(double minimum_step_height_for_maximum_swing_height)
-   {
-      minimum_step_height_for_maximum_swing_height_ = minimum_step_height_for_maximum_swing_height;
-   }
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the maximum swing height for that interpolation
-            */
-   public double getMinimumStepHeightForMaximumSwingHeight()
-   {
-      return minimum_step_height_for_maximum_swing_height_;
+      return swing_height_if_collision_detected_;
    }
 
 
@@ -543,70 +405,6 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    public double getMaximumSwingTime()
    {
       return maximum_swing_time_;
-   }
-
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step translation for that interpolation
-            */
-   public void setMaximumStepTranslationForMinimumSwingTime(double maximum_step_translation_for_minimum_swing_time)
-   {
-      maximum_step_translation_for_minimum_swing_time_ = maximum_step_translation_for_minimum_swing_time;
-   }
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step translation for that interpolation
-            */
-   public double getMaximumStepTranslationForMinimumSwingTime()
-   {
-      return maximum_step_translation_for_minimum_swing_time_;
-   }
-
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the minimum step translation for that interpolation
-            */
-   public void setMinimumStepTranslationForMaximumSwingTime(double minimum_step_translation_for_maximum_swing_time)
-   {
-      minimum_step_translation_for_maximum_swing_time_ = minimum_step_translation_for_maximum_swing_time;
-   }
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the minimum step translation for that interpolation
-            */
-   public double getMinimumStepTranslationForMaximumSwingTime()
-   {
-      return minimum_step_translation_for_maximum_swing_time_;
-   }
-
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-            */
-   public void setMaximumStepHeightForMinimumSwingTime(double maximum_step_height_for_minimum_swing_time)
-   {
-      maximum_step_height_for_minimum_swing_time_ = maximum_step_height_for_minimum_swing_time;
-   }
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-            */
-   public double getMaximumStepHeightForMinimumSwingTime()
-   {
-      return maximum_step_height_for_minimum_swing_time_;
-   }
-
-
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-            */
-   public void setMinimumStepHeightForMaximumSwingTime(double minimum_step_height_for_maximum_swing_time)
-   {
-      minimum_step_height_for_maximum_swing_time_ = minimum_step_height_for_maximum_swing_time;
-   }
-   /**
-            * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-            */
-   public double getMinimumStepHeightForMaximumSwingTime()
-   {
-      return minimum_step_height_for_maximum_swing_time_;
    }
 
 
@@ -709,34 +507,13 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_height_above_floor_for_collision_, other.minimum_height_above_floor_for_collision_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_swing_height_, other.minimum_swing_height_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_swing_height_, other.maximum_swing_height_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_height_for_minimum_swing_height_, other.maximum_step_height_for_minimum_swing_height_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_height_for_maximum_swing_height_, other.minimum_step_height_for_maximum_swing_height_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_if_collision_detected_, other.swing_height_if_collision_detected_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_swing_time_, other.minimum_swing_time_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_swing_time_, other.maximum_swing_time_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_translation_for_minimum_swing_time_, other.maximum_step_translation_for_minimum_swing_time_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_translation_for_maximum_swing_time_, other.minimum_step_translation_for_maximum_swing_time_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_height_for_minimum_swing_time_, other.maximum_step_height_for_minimum_swing_time_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_height_for_maximum_swing_time_, other.minimum_step_height_for_maximum_swing_time_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_stub_clearance_, other.foot_stub_clearance_, epsilon)) return false;
@@ -794,34 +571,13 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       if(this.minimum_height_above_floor_for_collision_ != otherMyClass.minimum_height_above_floor_for_collision_) return false;
 
 
-      if(this.minimum_swing_height_ != otherMyClass.minimum_swing_height_) return false;
-
-
-      if(this.maximum_swing_height_ != otherMyClass.maximum_swing_height_) return false;
-
-
-      if(this.maximum_step_height_for_minimum_swing_height_ != otherMyClass.maximum_step_height_for_minimum_swing_height_) return false;
-
-
-      if(this.minimum_step_height_for_maximum_swing_height_ != otherMyClass.minimum_step_height_for_maximum_swing_height_) return false;
+      if(this.swing_height_if_collision_detected_ != otherMyClass.swing_height_if_collision_detected_) return false;
 
 
       if(this.minimum_swing_time_ != otherMyClass.minimum_swing_time_) return false;
 
 
       if(this.maximum_swing_time_ != otherMyClass.maximum_swing_time_) return false;
-
-
-      if(this.maximum_step_translation_for_minimum_swing_time_ != otherMyClass.maximum_step_translation_for_minimum_swing_time_) return false;
-
-
-      if(this.minimum_step_translation_for_maximum_swing_time_ != otherMyClass.minimum_step_translation_for_maximum_swing_time_) return false;
-
-
-      if(this.maximum_step_height_for_minimum_swing_time_ != otherMyClass.maximum_step_height_for_minimum_swing_time_) return false;
-
-
-      if(this.minimum_step_height_for_maximum_swing_time_ != otherMyClass.minimum_step_height_for_maximum_swing_time_) return false;
 
 
       if(this.foot_stub_clearance_ != otherMyClass.foot_stub_clearance_) return false;
@@ -876,35 +632,14 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       builder.append("minimum_height_above_floor_for_collision=");
       builder.append(this.minimum_height_above_floor_for_collision_);      builder.append(", ");
 
-      builder.append("minimum_swing_height=");
-      builder.append(this.minimum_swing_height_);      builder.append(", ");
-
-      builder.append("maximum_swing_height=");
-      builder.append(this.maximum_swing_height_);      builder.append(", ");
-
-      builder.append("maximum_step_height_for_minimum_swing_height=");
-      builder.append(this.maximum_step_height_for_minimum_swing_height_);      builder.append(", ");
-
-      builder.append("minimum_step_height_for_maximum_swing_height=");
-      builder.append(this.minimum_step_height_for_maximum_swing_height_);      builder.append(", ");
+      builder.append("swing_height_if_collision_detected=");
+      builder.append(this.swing_height_if_collision_detected_);      builder.append(", ");
 
       builder.append("minimum_swing_time=");
       builder.append(this.minimum_swing_time_);      builder.append(", ");
 
       builder.append("maximum_swing_time=");
       builder.append(this.maximum_swing_time_);      builder.append(", ");
-
-      builder.append("maximum_step_translation_for_minimum_swing_time=");
-      builder.append(this.maximum_step_translation_for_minimum_swing_time_);      builder.append(", ");
-
-      builder.append("minimum_step_translation_for_maximum_swing_time=");
-      builder.append(this.minimum_step_translation_for_maximum_swing_time_);      builder.append(", ");
-
-      builder.append("maximum_step_height_for_minimum_swing_time=");
-      builder.append(this.maximum_step_height_for_minimum_swing_time_);      builder.append(", ");
-
-      builder.append("minimum_step_height_for_maximum_swing_time=");
-      builder.append(this.minimum_step_height_for_maximum_swing_time_);      builder.append(", ");
 
       builder.append("foot_stub_clearance=");
       builder.append(this.foot_stub_clearance_);      builder.append(", ");

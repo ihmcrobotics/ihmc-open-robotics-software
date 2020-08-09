@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -42,8 +42,8 @@ public class CoMHeightTimeDerivativesSmootherTest
       YoRegistry registry = new YoRegistry("Test");
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
-      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData("out", registry);
-      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData("in", registry);
+      YoCoMHeightTimeDerivativesData comHeightDataOut = new YoCoMHeightTimeDerivativesData("out", registry);
+      YoCoMHeightTimeDerivativesData comHeightDataIn = new YoCoMHeightTimeDerivativesData("in", registry);
 
       double comHeight = 1.2;
       double comHeightVelocity = 0.0;
@@ -86,8 +86,8 @@ public class CoMHeightTimeDerivativesSmootherTest
 
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
-      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData("out", registry);
-      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData("in", registry);
+      YoCoMHeightTimeDerivativesData comHeightDataOut = new YoCoMHeightTimeDerivativesData("out", registry);
+      YoCoMHeightTimeDerivativesData comHeightDataIn = new YoCoMHeightTimeDerivativesData("in", registry);
 
       double comHeightIn = 1.0;
       double comHeightVelocityIn = 0.0;
@@ -184,8 +184,8 @@ public class CoMHeightTimeDerivativesSmootherTest
 
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
-      CoMHeightTimeDerivativesData comHeightDataOut = new CoMHeightTimeDerivativesData("out", registry);
-      CoMHeightTimeDerivativesData comHeightDataIn = new CoMHeightTimeDerivativesData("in", registry);
+      YoCoMHeightTimeDerivativesData comHeightDataOut = new YoCoMHeightTimeDerivativesData("out", registry);
+      YoCoMHeightTimeDerivativesData comHeightDataIn = new YoCoMHeightTimeDerivativesData("in", registry);
 
       double comHeightIn = 0.0; //amplitude.getDoubleValue(); //1.0;
       double comHeightVelocityIn = 2.0 * Math.PI * frequency.getDoubleValue() * amplitude.getDoubleValue();

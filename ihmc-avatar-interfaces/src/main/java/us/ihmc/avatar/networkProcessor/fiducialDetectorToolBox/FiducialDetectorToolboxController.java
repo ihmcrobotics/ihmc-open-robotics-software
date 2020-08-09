@@ -57,7 +57,6 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
    private FiducialDetector<GrayF32> detector;
 
-
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
    private String prefix = "fiducial";
@@ -67,14 +66,15 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
    private final FramePose3D cameraPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final FramePose3D reportedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private AtomicReference<Boolean> inProcessingThread = new AtomicReference<Boolean>();
 
    public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
                                             YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
-
-      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize),
-                                              ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
+      inProcessingThread.set(false);
+      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize), ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10),
+                                              GrayF32.class);
 
       cameraReferenceFrame = new ReferenceFrame(prefix + "CameraReferenceFrame", ReferenceFrame.getWorldFrame())
       {
@@ -92,7 +92,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
          {
             transformToParent.set(0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
          }
-      }; 
+      };
    }
 
    @Override
@@ -110,19 +110,31 @@ public class FiducialDetectorToolboxController extends ToolboxController
    @Override
    public void updateInternal()
    {
-      VideoPacket latest = videoPacket.getAndSet(null);
-      if (latest != null)
+      if (!inProcessingThread.get())
       {
-         detectFromVideoPacket(latest);
+         VideoPacket latest = videoPacket.getAndSet(null);
+         if (latest != null)
+         {
+
+            Thread packetPRocessor = new Thread(new Runnable()
+            {
+               @Override
+               public void run()
+               {
+                  inProcessingThread.set(true);
+                  detectFromVideoPacket(latest);
+                  inProcessingThread.set(false);
+               }
+            }, "FiducialDetectorToolboxController image processing");
+            packetPRocessor.start();
+         }
       }
    }
 
    private void detectFromVideoPacket(VideoPacket videoPacket)
    {
       BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
-      detect(bufferedImage,
-             videoPacket.getPosition(),
-             videoPacket.getOrientation(),
+      detect(bufferedImage, videoPacket.getPosition(), videoPacket.getOrientation(),
              HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
 
    }
@@ -138,6 +150,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
       {
          if (frame == null)
          {
+            System.out.println("FiducialDetectorToolBoxController: Debug True starting jframe");
             frame = new JFrame();
 
             frame.getContentPane().setLayout(new FlowLayout());
@@ -165,7 +178,8 @@ public class FiducialDetectorToolboxController extends ToolboxController
       if (DEBUG)
       {
          image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
-         frame.setVisible(true);
+         frame.pack();
+         frame.repaint();
       }
 
       detector.detect(grayImage);
@@ -177,13 +191,11 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
          fiducialRotationMatrix.set(fiducialToCamera.getR().data);
 
-   
          reportedFiducialPoseInWorldFrame.setReferenceFrame(detectorReferenceFrame);
          reportedFiducialPoseInWorldFrame.getOrientation().set(fiducialRotationMatrix);
          reportedFiducialPoseInWorldFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
          reportedFiducialPoseInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
-         
-         
+
          DetectedFiducialPacket packet = new DetectedFiducialPacket();
          packet.fiducial_id_ = detector.getId(i);
 

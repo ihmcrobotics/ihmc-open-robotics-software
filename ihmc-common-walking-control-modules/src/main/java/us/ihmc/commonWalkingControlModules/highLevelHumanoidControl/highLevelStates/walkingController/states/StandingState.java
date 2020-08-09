@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -89,6 +90,10 @@ public class StandingState extends WalkingState
       balanceManager.enablePelvisXYControl();
       balanceManager.setICPPlanTransferFromSide(null);
       balanceManager.initializeICPPlanForStanding();
+
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
+            .createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.RIGHT);
+      comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, 0.0);
 
       walkingMessageHandler.reportWalkingComplete();
 

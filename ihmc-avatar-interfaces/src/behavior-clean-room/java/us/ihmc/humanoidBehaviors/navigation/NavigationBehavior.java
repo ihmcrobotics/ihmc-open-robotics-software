@@ -26,8 +26,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.NonReactiveLoopSequenceNode;
 import us.ihmc.log.LogTools;
@@ -64,7 +64,8 @@ public class NavigationBehavior implements BehaviorInterface
 
    private final BehaviorHelper helper;
    private final ROS2Input<PlanarRegionsListMessage> mapRegionsInput;
-   private final RemoteHumanoidRobotInterface robot;
+   private final RemoteHumanoidRobotInterface robotInterface;
+   private final RemoteSyncedRobotModel syncedRobot;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
    private final VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
@@ -75,7 +76,6 @@ public class NavigationBehavior implements BehaviorInterface
    private final PausablePeriodicThread mainThread;
 
    private long latestMapSequenceId = 0;
-   private HumanoidRobotState latestHumanoidRobotState;
    private List<Point3DReadOnly> pathPoints = null;
    private List<? extends Pose3DReadOnly> path = null;
    private NavigableRegionsManager navigableRegionsManager;
@@ -89,7 +89,8 @@ public class NavigationBehavior implements BehaviorInterface
       // create map subscriber
       mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.withOutput());
 
-      robot = helper.getOrCreateRobotInterface();
+      robotInterface = helper.getOrCreateRobotInterface();
+      syncedRobot = robotInterface.newSyncedRobot();
 
       footPolygons = helper.createFootPolygons();
 
@@ -141,8 +142,8 @@ public class NavigationBehavior implements BehaviorInterface
    {
       LogTools.info("Planning with occlusions");
 
-      latestHumanoidRobotState = robot.pollHumanoidRobotState();
-      robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+      syncedRobot.update();
+      robotPose.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
       robotPose.changeFrame(ReferenceFrame.getWorldFrame());
       LogTools.info("Distance to goal: {}", robotPose.getPosition().distance(goal));
 
@@ -201,10 +202,10 @@ public class NavigationBehavior implements BehaviorInterface
       RobotSide initialStanceFootSide = null;
       FramePose3D initialStanceFootPose = null;
       FramePose3D leftSolePose = new FramePose3D();
-      leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
+      leftSolePose.setToZero(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
       leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
       FramePose3D rightSolePose = new FramePose3D();
-      rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
+      rightSolePose.setToZero(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.RIGHT));
       rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       if (leftSolePose.getPosition().distance(finalPose.getPosition()) <= rightSolePose.getPosition().distance(finalPose.getPosition()))
@@ -296,7 +297,7 @@ public class NavigationBehavior implements BehaviorInterface
       }
 
       LogTools.info("Requesting walk");
-      TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
+      TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotInterface.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
             shortenedFootstepPlan,
             1.0,
             0.5));
@@ -306,8 +307,8 @@ public class NavigationBehavior implements BehaviorInterface
       double timeout = 3.0;
       while (!walkingStatusNotification.poll() && stopwatch.lapElapsed() < timeout)
       {
-         latestHumanoidRobotState = robot.pollHumanoidRobotState();
-         robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+         syncedRobot.update();
+         robotPose.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
          robotPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          ThreadTools.sleep(100);

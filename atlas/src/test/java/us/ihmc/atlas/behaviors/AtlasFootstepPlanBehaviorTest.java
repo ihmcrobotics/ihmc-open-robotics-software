@@ -12,8 +12,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -78,7 +78,7 @@ public class AtlasFootstepPlanBehaviorTest
             .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
                                       ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
-      RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      RemoteSyncedRobotModel syncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
       AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
@@ -165,12 +165,13 @@ public class AtlasFootstepPlanBehaviorTest
             .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
                                       ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
-      RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      RemoteSyncedRobotModel syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
       AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
 
-      FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
+      syncedRobot.update();
+      FramePose3D midFeetZUpPose = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
       LogTools.debug("MidFeetZUp = {}", midFeetZUpPose);
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
@@ -196,7 +197,7 @@ public class AtlasFootstepPlanBehaviorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      SimulationConstructionSet scs = AtlasBehaviorSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment());
+      SimulationConstructionSet scs = AtlasDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
       variables = new AtlasBehaviorTestYoVariables(scs);
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

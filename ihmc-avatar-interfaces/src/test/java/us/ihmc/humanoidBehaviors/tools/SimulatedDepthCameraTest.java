@@ -110,9 +110,9 @@ public class SimulatedDepthCameraTest
       PlanarRegionsList trickCorridor = map;
       PoseReferenceFrame cameraFrame = new PoseReferenceFrame("camera", ReferenceFrame.getWorldFrame());
       cameraFrame.setPoseAndUpdate(pose3D);
-      SimulatedDepthCamera simulatedDepthCamera = new SimulatedDepthCamera(verticalFov, horizontalFov, cameraFrame);
+      SimulatedDepthCamera simulatedDepthCamera = new SimulatedDepthCamera(verticalFov, horizontalFov, Double.POSITIVE_INFINITY, cameraFrame);
       Stopwatch stopwatch = new Stopwatch().start();
-      PlanarRegionsList virtualCamera = simulatedDepthCamera.filterMapToVisible(trickCorridor);
+      PlanarRegionsList virtualCamera = simulatedDepthCamera.computeAndPolygonize(trickCorridor);
       LogTools.info("Time taken: {}", stopwatch.lapElapsed());
       if (mapWindowNumber > 0)
          createAndShowPlanarRegionWindow(trickCorridor, cameraFrame, mapWindowNumber - 1, verticalFov, horizontalFov);

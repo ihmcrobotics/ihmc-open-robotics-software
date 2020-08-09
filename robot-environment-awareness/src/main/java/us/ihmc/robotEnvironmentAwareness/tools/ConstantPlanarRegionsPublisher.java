@@ -1,8 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.tools;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -21,6 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
+
 public class ConstantPlanarRegionsPublisher
 {
    private final PlanarRegionsList planarRegionsList;
@@ -28,11 +27,12 @@ public class ConstantPlanarRegionsPublisher
    private final REAPlanarRegionPublicNetworkProvider publisher;
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
+   private final RegionFeaturesProvider featuresProvider = new ConstantPlanarRegionProvider();
 
    public ConstantPlanarRegionsPublisher(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      this.publisher = new REAPlanarRegionPublicNetworkProvider(null, new ConstantPlanarRegionProvider(), ros2Node, outputTopic, inputTopic);
+      this.publisher = new REAPlanarRegionPublicNetworkProvider(ros2Node, outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
    }
 
    public void start()
@@ -44,7 +44,7 @@ public class ConstantPlanarRegionsPublisher
    {
       if(scheduled == null)
       {
-         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(true), 0, periodMillis, TimeUnit.MILLISECONDS);
+         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(featuresProvider, true), 0, periodMillis, TimeUnit.MILLISECONDS);
       }
    }
 

@@ -45,11 +45,11 @@ import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
 {
+   private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
+
    @Test
    public void testSLAMWithThreeNiceWalls()
    {
-      boolean visualize = false;
-
       PlanarRegionsList map;
       PlanarRegionsList newData;
 
@@ -74,7 +74,7 @@ class PlanarRegionSLAMTest
       assertTrue(transformResult.epsilonEquals(new RigidBodyTransform(), 1e-7));
       assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(map);
          visualizePlanarRegions(mergedMap);
@@ -213,8 +213,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithTrickyCase()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -234,12 +232,12 @@ class PlanarRegionSLAMTest
 
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListB, parameters, listener);
 
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -251,8 +249,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithAddingTwoSquaresToMapSquare()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -283,7 +279,7 @@ class PlanarRegionSLAMTest
       parameters.setDampedLeastSquaresLambda(0.0);
       parameters.setMinimumRegionOverlapDistance(0.0999);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
 
@@ -293,7 +289,7 @@ class PlanarRegionSLAMTest
 
       assertTrue(boundingBox3d.epsilonEquals(new BoundingBox3D(-1.0, 0.0, 0.0, 2.0, 1.0, 0.0), 1e-7));
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(planarRegionsListA);
          visualizePlanarRegions(planarRegionsListBC);
@@ -310,7 +306,7 @@ class PlanarRegionSLAMTest
       mergedMap = slamResult.getMergedMap();
       assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -320,8 +316,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithThreeUnconnectedSquares()
    {
-      boolean visualize = false;
-
       Point2D pointA0 = new Point2D(0.0, 0.0);
       Point2D pointA1 = new Point2D(0.0, 1.0);
       Point2D pointA2 = new Point2D(1.0, 1.0);
@@ -352,7 +346,7 @@ class PlanarRegionSLAMTest
       parameters.setDampedLeastSquaresLambda(0.0);
       parameters.setMinimumRegionOverlapDistance(0.05);
 
-      ConcaveHullMergerListener listener = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener listener = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
 
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(planarRegionsListA, planarRegionsListBC, parameters, listener);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
@@ -362,7 +356,7 @@ class PlanarRegionSLAMTest
       mergedMap = slamResult.getMergedMap();
       assertEquals(3, mergedMap.getNumberOfPlanarRegions());
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -372,8 +366,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithAFloorAndAShallowRamp()
    {
-      boolean visualize = false;
-
       PlanarRegionsList map;
       PlanarRegionsList newData;
 
@@ -449,7 +441,7 @@ class PlanarRegionSLAMTest
 
       assertTrue(rampTransformRecovered.epsilonEquals(new RigidBodyTransform(), 1e-7));
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(map);
          visualizePlanarRegions(newData);
@@ -478,8 +470,6 @@ class PlanarRegionSLAMTest
    @Test
    public void testSLAMWithRandomPolygonsAndSmallExactTransforms()
    {
-      boolean visualize = false;
-
       PlanarRegionsList map = new PlanarRegionsList();
       PlanarRegionsList newData = new PlanarRegionsList();
 
@@ -549,7 +539,7 @@ class PlanarRegionSLAMTest
       parameters.setMaximumPointProjectionDistance(0.1);
       parameters.setDampedLeastSquaresLambda(0.1);
 
-      ConcaveHullMergerListener visualizer = (visualize ? new ConcaveHullGraphicalMergerListener() : null);
+      ConcaveHullMergerListener visualizer = (VISUALIZE ? new ConcaveHullGraphicalMergerListener() : null);
       PlanarRegionSLAMResult slamResult = PlanarRegionSLAM.slam(map, newData, parameters, visualizer);
       PlanarRegionsList mergedMap = slamResult.getMergedMap();
       RigidBodyTransform transformResult = slamResult.getTransformFromIncomingToMap();
@@ -560,7 +550,7 @@ class PlanarRegionSLAMTest
 
       assertPlanarRegionsListAreEquivalentThroughPointProjections(random, perfectCombinedMap, mergedMap);
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mergedMap);
          ThreadTools.sleepForever();
@@ -578,8 +568,6 @@ class PlanarRegionSLAMTest
     */
    public void testSLAMWithThreeNiceWallsFarFromTheOrigin()
    {
-      boolean visualize = false;
-
       // Parameters, with DampedLeastSquaresLambda = 0, everything should be fine without a better reference.
       PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
       parameters.setBoundingBoxHeight(0.1);
@@ -600,7 +588,7 @@ class PlanarRegionSLAMTest
       PlanarRegionsList mergedMapNearOrigin = slamResultNearOrigin.getMergedMap();
       RigidBodyTransform transformResultNearOrigin = slamResultNearOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Close to the origin transformResult = \n" + transformResultNearOrigin);
       }
@@ -639,7 +627,7 @@ class PlanarRegionSLAMTest
       expectedLocalTransform.preMultiply(largeTransformInverse);
       expectedLocalTransform.multiply(largeTransform);
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
       }
@@ -655,12 +643,12 @@ class PlanarRegionSLAMTest
       mergedMapNearOrigin = slamResultNearOrigin.getMergedMap();
       transformResultNearOrigin = slamResultNearOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Close to the origin transformResult = \n" + transformResultNearOrigin);
       }
 
-      if (visualize)
+      if (VISUALIZE)
       {
          visualizePlanarRegions(mapNearOrigin, mergedMapNearOrigin);
       }
@@ -674,7 +662,7 @@ class PlanarRegionSLAMTest
       mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
       transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
       }
@@ -692,7 +680,7 @@ class PlanarRegionSLAMTest
       mergedMapFarFromOrigin = slamResultFarFromOrigin.getMergedMap();
       transformResultFarFromOrigin = slamResultFarFromOrigin.getTransformFromIncomingToMap();
 
-      if (visualize)
+      if (VISUALIZE)
       {
          System.out.println("Far from the origin transformResult = \n" + transformResultFarFromOrigin);
          System.out.println("expectedTransform = \n" + expectedTransform);

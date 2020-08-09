@@ -81,7 +81,8 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    @FXML
    private void exportSLAMData()
    {
-      //TODO: implement
+      uiMessager.submitMessageToModule(SLAMModuleAPI.UISLAMDataExportDirectory, currentSLAMDataOutputFolderTextField.getText());
+      uiMessager.submitMessageToModule(SLAMModuleAPI.UISLAMDataExportRequest, true);
    }
 
    @FXML

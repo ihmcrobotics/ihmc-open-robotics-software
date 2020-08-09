@@ -80,7 +80,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
       nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.761 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08);
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 

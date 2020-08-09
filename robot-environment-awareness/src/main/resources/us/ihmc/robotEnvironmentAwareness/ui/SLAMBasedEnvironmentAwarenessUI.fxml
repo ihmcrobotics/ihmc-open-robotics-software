@@ -28,6 +28,33 @@
                      </AnchorPane>
                  </content>
              </Tab>
+             <Tab text="FrameNormalEstimation">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="frameNormalEstimationAnchorPane" source="FrameNormalEstimationAnchorPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
+             <Tab text="SLAM Parameters">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="surfaceElementICPPane" source="SurfaceElementICPPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
+             <Tab text="BoundingBox">
+                 <content>
+                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                         <children>
+                             <fx:include fx:id="boundingBoxAnchorPane" source="BoundingBoxAnchorPane.fxml" />
+                         </children>
+                     </AnchorPane>
+                 </content>
+             </Tab>
              <Tab text="DataManager">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

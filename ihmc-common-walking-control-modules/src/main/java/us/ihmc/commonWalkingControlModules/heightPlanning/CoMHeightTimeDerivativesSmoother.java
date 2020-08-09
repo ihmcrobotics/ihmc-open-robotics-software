@@ -127,7 +127,7 @@ public class CoMHeightTimeDerivativesSmoother
       }
    }
 
-   public void smooth(CoMHeightTimeDerivativesData heightZDataOutputToPack, CoMHeightTimeDerivativesData heightZDataInput)
+   public void smooth(YoCoMHeightTimeDerivativesData heightZDataOutputToPack, YoCoMHeightTimeDerivativesData heightZDataInput)
    {
       if (!hasBeenInitialized.getBooleanValue())
          initialize(heightZDataInput);
@@ -178,7 +178,7 @@ public class CoMHeightTimeDerivativesSmoother
       heightZDataOutputToPack.setComHeightJerk(smoothComHeightJerk.getDoubleValue());
    }
 
-   public void initialize(CoMHeightTimeDerivativesData comHeightDataIn)
+   public void initialize(YoCoMHeightTimeDerivativesData comHeightDataIn)
    {
       comHeightDataIn.getComHeight(centerOfMassHeightPoint);
 
