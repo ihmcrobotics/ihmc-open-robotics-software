@@ -85,7 +85,7 @@ public class ParameterLoaderHelper
 
       if (debugLoading)
       {
-         LogTools.info("When loading " + registry.getName() + " with " + registry.subtreeParameters().size() + " parameters:");
+         LogTools.info("When loading " + registry.getName() + " with " + registry.collectSubtreeParameters().size() + " parameters:");
          List<String> sortedUnmatchedParameters = new ArrayList<>(unmatchedParameters);
          List<String> sortedDefaultParameters = new ArrayList<>(defaultParameters);
          Collections.sort(sortedUnmatchedParameters);
@@ -98,7 +98,7 @@ public class ParameterLoaderHelper
       else if (printWarnings && !unmatchedParameters.isEmpty())
       {
          String message = "I think something is off in your parameter file.";
-         String additionalInfo = "Parameters in registry: " + registry.subtreeParameters().size() + "\n" + "Parameters using their default value: "
+         String additionalInfo = "Parameters in registry: " + registry.collectSubtreeParameters().size() + "\n" + "Parameters using their default value: "
                + defaultParameters.size() + "\n" + "Parameters in XML with no match: " + unmatchedParameters.size();
          Skully.say(message, additionalInfo);
       }

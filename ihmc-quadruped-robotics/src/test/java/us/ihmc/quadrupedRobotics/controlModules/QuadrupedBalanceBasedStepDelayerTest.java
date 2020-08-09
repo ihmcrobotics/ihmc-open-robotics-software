@@ -468,7 +468,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
 
    private YoParameter getParameter(String name)
    {
-      for (YoParameter parameter : registry.subtreeParameters())
+      for (YoParameter parameter : registry.collectSubtreeParameters())
       {
          if (parameter.getName().equals(name))
             return parameter;

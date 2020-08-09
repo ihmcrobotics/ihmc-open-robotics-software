@@ -55,7 +55,7 @@ public class AtlasObstacleCourseNoUI
       SimulationConstructionSet simulationConstructionSet = simulationStarter.getSimulationConstructionSet();
       YoRegistry rootRegistry = simulationConstructionSet.getRootRegistry();
 
-      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.subtreeVariables();
+      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.collectSubtreeVariables();
       System.out.println("Size = " + allVariablesIncludingDescendants.size());
       for (YoVariable yoVariable : allVariablesIncludingDescendants)
       {

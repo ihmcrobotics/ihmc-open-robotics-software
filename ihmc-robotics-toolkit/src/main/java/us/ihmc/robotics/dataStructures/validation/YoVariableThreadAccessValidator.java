@@ -124,7 +124,7 @@ public class YoVariableThreadAccessValidator
 
    public void start()
    {
-      List<YoVariable> variables = root.subtreeVariables();
+      List<YoVariable> variables = root.collectSubtreeVariables();
       
       Field validator = null;
       if(REGISTERED_ACCESS_VALIDATOR)

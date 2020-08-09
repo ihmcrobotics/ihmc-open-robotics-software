@@ -105,7 +105,7 @@ public class LogDataProcessorWrapper implements YoBufferProcessor, Script
    {
       logDataProcessorFunctions.add(logDataProcessorFunction);
       logDataProcessorRegistry.addChild(logDataProcessorFunction.getYoVariableRegistry());
-      varsToSave.addAll(logDataProcessorFunction.getYoVariableRegistry().subtreeVariables());
+      varsToSave.addAll(logDataProcessorFunction.getYoVariableRegistry().collectSubtreeVariables());
    }
 
    public void saveYoVariablesAsDoubles()

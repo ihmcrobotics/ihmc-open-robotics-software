@@ -256,7 +256,7 @@ public class ParameterProvider
 
    private static <T extends YoParameter> T findParameter(YoRegistry registry, String parameterName, Class<T> clazz)
    {
-      Optional<YoParameter> parameter = registry.subtreeParameters().stream().filter(p -> p.getName().equals(parameterName)).findFirst();
+      Optional<YoParameter> parameter = registry.collectSubtreeParameters().stream().filter(p -> p.getName().equals(parameterName)).findFirst();
 
       if (parameter.isPresent())
       {
