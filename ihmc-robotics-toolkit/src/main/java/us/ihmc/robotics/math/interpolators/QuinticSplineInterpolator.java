@@ -108,7 +108,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       splines = new QuinticSpline[numberOfSplines];
       for (int i = 0; i < numberOfSplines; i++)
       {
-         String eName = name + "[" + i + "]";
+         String eName = name + "-" + i;
          splines[i] = new QuinticSpline(eName, maximumNumberOfPoints, registry);
 
          position[i] = new YoDouble(eName + "_position", registry);
