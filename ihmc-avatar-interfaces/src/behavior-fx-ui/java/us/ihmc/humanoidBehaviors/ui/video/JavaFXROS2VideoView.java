@@ -14,7 +14,6 @@ import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.awt.image.BufferedImage;
