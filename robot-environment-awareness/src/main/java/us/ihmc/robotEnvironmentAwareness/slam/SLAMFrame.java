@@ -93,6 +93,9 @@ public class SLAMFrame
 
    private NormalOcTree frameMap;
 
+   private boolean isCorrectedPointCloudUpToDate = false;
+   private boolean areSurfaceElementsUpToDate = false;
+
    public SLAMFrame(StereoVisionPointCloudMessage message, NormalEstimationParameters normalEstimationParameters)
    {
       this(null, new RigidBodyTransform(), message, normalEstimationParameters);
@@ -133,12 +136,14 @@ public class SLAMFrame
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld, calculateInParallel);
 
-
       updateOptimizedPointCloudAndSensorPose();
    }
 
    public void updateOptimizedCorrection(RigidBodyTransformReadOnly driftCorrectionTransform)
    {
+      isCorrectedPointCloudUpToDate = false;
+      areSurfaceElementsUpToDate = false;
+
       driftCompensationTransform.set(driftCorrectionTransform);
       updateOptimizedPointCloudAndSensorPose();
    }
@@ -152,7 +157,10 @@ public class SLAMFrame
       correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
       correctedSensorPoseInWorld.getRotation().normalize();
       correctedSensorPoseInWorld.multiply(driftCompensationTransform);
+   }
 
+   private void updateCorrectedPointCloudInWorld()
+   {
       Stream<Point3DReadOnly> pointCloudStream = calculateInParallel ? pointCloudInLocalFrame.parallelStream() : pointCloudInLocalFrame.stream();
       correctedPointCloudInWorld = pointCloudStream.map(pointInLocal ->
                                                         {
@@ -160,7 +168,11 @@ public class SLAMFrame
                                                            correctedLocalPoseInWorld.transform(pointInLocal, pointInWorld);
                                                            return pointInWorld;
                                                         }).collect(Collectors.toList());
+      isCorrectedPointCloudUpToDate = true;
+   }
 
+   private void updateSurfaceElements()
+   {
       Stream<Plane3DReadOnly> surfaceElementInLocalStream = calculateInParallel ? surfaceElementsInLocalFrame.parallelStream() : surfaceElementsInLocalFrame.stream();
       surfaceElements = surfaceElementInLocalStream.map(surfaceElementInLocal ->
                                                         {
@@ -170,6 +182,7 @@ public class SLAMFrame
                                                            getCorrectedLocalPoseInWorld().transform(surfel.getNormal());
                                                            return surfel;
                                                         }).collect(Collectors.toList());
+      areSurfaceElementsUpToDate = true;
    }
 
    public void registerSurfaceElements(NormalOcTree map,
@@ -197,7 +210,7 @@ public class SLAMFrame
       if (updateNormal)
          frameMap.updateNormals();
 
-      OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(frameMap.getRoot());
+      OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createLeafIterable(frameMap.getRoot());
       Stream<NormalOcTreeNode> nodeStream = StreamSupport.stream(iterable.spliterator(), calculateInParallel);
       surfaceElements = nodeStream.filter(node -> isValidNode(node, minimumNumberOfHits, 0.00005, updateNormal)).map(node ->
                                                                                                                      {
@@ -220,7 +233,6 @@ public class SLAMFrame
       return node.getNumberOfHits() >= minimumNumberOfHits && (!updateNormal || node.getNormalAverageDeviation() < maximumAverageDeviation);
    }
 
-
    private static void randomlySampleSurfaceElements(List<Plane3D> surfaceElementsToSample, int maxNumberOfSurfaceElements)
    {
       Random random = new Random();
@@ -235,11 +247,14 @@ public class SLAMFrame
 
    public int getNumberOfSurfaceElements()
    {
-      return surfaceElements.size();
+      return surfaceElementsInLocalFrame.size();
    }
 
    public List<Plane3D> getSurfaceElements()
    {
+      if (!areSurfaceElementsUpToDate)
+         updateSurfaceElements();
+
       return surfaceElements;
    }
 
@@ -275,6 +290,9 @@ public class SLAMFrame
 
    public List<? extends Point3DReadOnly> getCorrectedPointCloudInWorld()
    {
+      if (!isCorrectedPointCloudUpToDate)
+         updateCorrectedPointCloudInWorld();
+
       return correctedPointCloudInWorld;
    }
 
