@@ -92,6 +92,8 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
       dcmCornerPoints.clear();
       vrpTrajectoryPool.clear();
       vrpTrajectories.clear();
+      vrpWaypointPools.clear();
+      vrpWaypoints.clear();
 
       FramePoint3DReadOnly finalCoP = contactSequence.get(contactSequence.size() - 1).getCopEndPosition();
       FramePoint3D finalDCM = dcmCornerPointPool.add();

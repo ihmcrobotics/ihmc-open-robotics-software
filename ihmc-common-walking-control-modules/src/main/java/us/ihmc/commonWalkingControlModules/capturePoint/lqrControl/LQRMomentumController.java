@@ -19,6 +19,7 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -46,7 +47,8 @@ public class LQRMomentumController
    private final YoFramePoint3D finalVRPPosition = new YoFramePoint3D("finalVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D referenceVRPPosition = new YoFramePoint3D("referenceVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D feedbackVRPPosition = new YoFramePoint3D("feedbackVRPPosition", ReferenceFrame.getWorldFrame(), registry);
-
+   private final YoDouble omega = new YoDouble("omega", registry);
+   
    static final double defaultVrpTrackingWeight = 1e2;
    static final double defaultMomentumRateWeight = 1e-4;
 
@@ -125,9 +127,20 @@ public class LQRMomentumController
 
    public LQRMomentumController(DoubleProvider omega, YoVariableRegistry parentRegistry)
    {
-      computeDynamicsMatrix(omega.getValue());
+      this(omega.getValue(), parentRegistry);
+   }
+   
+   public LQRMomentumController(double omega, YoVariableRegistry parentRegistry)
+   {
+      this.omega.set(omega);
+      computeDynamicsMatrix(this.omega.getDoubleValue());
+                            
+      this.omega.addVariableChangedListener(v -> {
+         computeDynamicsMatrix(this.omega.getDoubleValue());
+      });
 
       computeS1();
+      
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -147,7 +160,7 @@ public class LQRMomentumController
       shouldUpdateS1 = true;
    }
 
-   private void computeDynamicsMatrix(double omega)
+   public void computeDynamicsMatrix(double omega)
    {
       MatrixTools.setMatrixBlock(A, 0, 3, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(B, 3, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
@@ -448,5 +461,10 @@ public class LQRMomentumController
       for (int i = 0; i < segment; i++)
          timeOffset += relativeVRPTrajectories.get(i).getDuration();
       return time - timeOffset;
+   }
+   
+   public void setOmega(double omega)
+   {
+      this.omega.set(omega);
    }
 }
