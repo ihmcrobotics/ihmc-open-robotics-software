@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra.cdreSolvers;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
  * This solver computes the solution to the differential Riccati equation
@@ -51,7 +51,7 @@ import org.ejml.data.DenseMatrix64F;
  */
 public interface CDRESolver
 {
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S);
+   void setMatrices(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj E, DMatrixRMaj Q, DMatrixRMaj R, DMatrixRMaj S);
 
    /**
     * Setter of the solver. A and B should be compatible. B and R must be
@@ -63,11 +63,11 @@ public interface CDRESolver
     * @param Q state cost matrix
     * @param R control cost matrix
     */
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R);
+   void setMatrices(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj E, DMatrixRMaj Q, DMatrixRMaj R);
 
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F E, DenseMatrix64F M, DenseMatrix64F Q);
+   void setMatrices(DMatrixRMaj A, DMatrixRMaj E, DMatrixRMaj M, DMatrixRMaj Q);
 
-   void setFinalBoundaryCondition(double finalTime, DenseMatrix64F PFinal);
+   void setFinalBoundaryCondition(double finalTime, DMatrixRMaj PFinal);
 
    /**
     * Computes and returns the P matrix.
@@ -77,5 +77,5 @@ public interface CDRESolver
    /**
     * Returns the P matrix.
     */
-   DenseMatrix64F getP(double time);
+   DMatrixRMaj getP(double time);
 }

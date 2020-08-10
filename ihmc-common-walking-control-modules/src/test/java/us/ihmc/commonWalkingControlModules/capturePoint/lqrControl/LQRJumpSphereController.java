@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,7 +41,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
       lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), registry);
    }
 
-   private final DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
 
    @Override
    public void doControl()

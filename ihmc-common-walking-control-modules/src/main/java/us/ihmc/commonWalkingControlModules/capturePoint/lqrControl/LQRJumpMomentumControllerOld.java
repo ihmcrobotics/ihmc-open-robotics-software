@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.MathTools;
@@ -54,86 +54,86 @@ public class LQRJumpMomentumControllerOld
    private double vrpTrackingWeight = defaultVrpTrackingWeight;
    private double momentumRateWeight = defaultMomentumRateWeight;
 
-   final DenseMatrix64F Q = new DenseMatrix64F(3, 3);
-   final DenseMatrix64F R = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj Q = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj R = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F A = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F B = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F BTranspose = new DenseMatrix64F(3, 6);
-   final DenseMatrix64F C = new DenseMatrix64F(3, 6);
-   final DenseMatrix64F D = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj A = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj B = new DMatrixRMaj(6, 3);
+   private final DMatrixRMaj BTranspose = new DMatrixRMaj(3, 6);
+   final DMatrixRMaj C = new DMatrixRMaj(3, 6);
+   final DMatrixRMaj D = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F A2 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F A2Inverse = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F B2 = new DenseMatrix64F(6, 3);
+   final DMatrixRMaj A2 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj A2Inverse = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj B2 = new DMatrixRMaj(6, 3);
 
-   final DenseMatrix64F Ad1 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F Ad2 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F Ad1TransposeS1 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F Ad2TransposeS1 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F Bd1 = new DenseMatrix64F(6, 3);
-   final DenseMatrix64F Bd2 = new DenseMatrix64F(6, 3);
-   final DenseMatrix64F Bd1g = new DenseMatrix64F(6, 1);
-   final DenseMatrix64F Bd2g = new DenseMatrix64F(6, 1);
-   final DenseMatrix64F g = new DenseMatrix64F(3, 1);
+   final DMatrixRMaj Ad1 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj Ad2 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj Ad1TransposeS1 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj Ad2TransposeS1 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj Bd1 = new DMatrixRMaj(6, 3);
+   final DMatrixRMaj Bd2 = new DMatrixRMaj(6, 3);
+   final DMatrixRMaj Bd1g = new DMatrixRMaj(6, 1);
+   final DMatrixRMaj Bd2g = new DMatrixRMaj(6, 1);
+   final DMatrixRMaj g = new DMatrixRMaj(3, 1);
 
-   final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj Q1 = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F R1 = new DenseMatrix64F(3, 3);
-   final DenseMatrix64F R1Inverse = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj R1 = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj R1Inverse = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F N = new DenseMatrix64F(6, 3);
-   final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
+   final DMatrixRMaj N = new DMatrixRMaj(6, 3);
+   final DMatrixRMaj NTranspose = new DMatrixRMaj(3, 6);
 
-   final DenseMatrix64F NB = new DenseMatrix64F(3, 6);
+   final DMatrixRMaj NB = new DMatrixRMaj(3, 6);
 
-   final DenseMatrix64F P = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F S1 = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F s2 = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F S1Hat = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F S1HatInverse = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F s2Hat = new DenseMatrix64F(6, 1);
+   final DMatrixRMaj P = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj S1 = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj s2 = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj S1Hat = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj S1HatInverse = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj s2Hat = new DMatrixRMaj(6, 1);
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F K1 = new DenseMatrix64F(3, 6);
-   final DenseMatrix64F k2 = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F u = new DenseMatrix64F(3, 1);
+   final DMatrixRMaj K1 = new DMatrixRMaj(3, 6);
+   final DMatrixRMaj k2 = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj u = new DMatrixRMaj(3, 1);
 
-   final DenseMatrix64F QRiccati = new DenseMatrix64F(3, 3);
-   final DenseMatrix64F ARiccati = new DenseMatrix64F(6, 6);
+   final DMatrixRMaj QRiccati = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj ARiccati = new DMatrixRMaj(6, 6);
 
-   private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseDQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 6);
-   private final DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
+   private final DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj R1InverseDQ = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj R1InverseBTranspose = new DMatrixRMaj(3, 6);
+   private final DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
-   final DenseMatrix64F A2Exponential = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F timeScaledA2 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
-   final DenseMatrix64F summedGammas = new DenseMatrix64F(6, 1);
+   final DMatrixRMaj A2Exponential = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj timeScaledA2 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj summedBetas = new DMatrixRMaj(6, 1);
+   final DMatrixRMaj summedGammas = new DMatrixRMaj(6, 1);
 
-   private final DenseMatrix64F finalVRPState = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj finalVRPState = new DMatrixRMaj(6, 1);
 
-   private final DenseMatrix64F relativeState = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F relativeDesiredVRP = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj relativeState = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj relativeDesiredVRP = new DMatrixRMaj(3, 1);
 
-   private final DenseMatrix64F identity = CommonOps.identity(3);
+   private final DMatrixRMaj identity = CommonOps_DDRM.identity(3);
 
-   final RecyclingArrayList<DenseMatrix64F> alphas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
-   final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
-         () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
-   final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
-         () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
+   final RecyclingArrayList<DMatrixRMaj> alphas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
+   final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> betas = new RecyclingArrayList<>(
+         () -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
+   final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> gammas = new RecyclingArrayList<>(
+         () -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
 
-   final RecyclingArrayList<DenseMatrix64F> sigmas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 6));
-   final RecyclingArrayList<DenseMatrix64F> phis = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 6));
+   final RecyclingArrayList<DMatrixRMaj> sigmas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
+   final RecyclingArrayList<DMatrixRMaj> phis = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
 
    final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
    final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(3);
 
    private final MatrixExponentialCalculator a2ExponentialCalculator = new MatrixExponentialCalculator(6);
    private final CARESolver careSolver = new DefectCorrectionCARESolver(new SignFunctionCARESolver());
@@ -159,8 +159,8 @@ public class LQRJumpMomentumControllerOld
       MatrixTools.setMatrixBlock(Bd2, 3, 0, identity, 0, 0, 3, 3, 1.0);
 
       g.set(2, 0, -9.81);
-      CommonOps.mult(Bd1, g, Bd1g);
-      CommonOps.mult(Bd2, g, Bd2g);
+      CommonOps_DDRM.mult(Bd1, g, Bd1g);
+      CommonOps_DDRM.mult(Bd2, g, Bd2g);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -183,14 +183,14 @@ public class LQRJumpMomentumControllerOld
    private void computeDynamicsMatrix(double omega)
    {
       identity.reshape(3, 3);
-      CommonOps.setIdentity(identity);
+      CommonOps_DDRM.setIdentity(identity);
 
       MatrixTools.setMatrixBlock(A, 0, 3, identity, 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(B, 3, 0, identity, 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(C, 0, 0, identity, 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(D, 0, 0, identity, 0, 0, 3, 3, -1.0 / MathTools.square(omega));
 
-      CommonOps.transpose(B, BTranspose);
+      CommonOps_DDRM.transpose(B, BTranspose);
 
       shouldUpdateP = true;
    }
@@ -224,19 +224,19 @@ public class LQRJumpMomentumControllerOld
 
       NativeCommonOps.multQuad(C, Q, Q1);
       NativeCommonOps.multQuad(D, Q, R1);
-      CommonOps.addEquals(R1, R);
+      CommonOps_DDRM.addEquals(R1, R);
 
       NativeCommonOps.invert(R1, R1Inverse);
 
-      CommonOps.mult(D, Q, DQ);
+      CommonOps_DDRM.mult(D, Q, DQ);
 
-      CommonOps.mult(R1Inverse, DQ, R1InverseDQ);
-      CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
+      CommonOps_DDRM.mult(R1Inverse, DQ, R1InverseDQ);
+      CommonOps_DDRM.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
 
       tempMatrix.reshape(3, 3);
-      CommonOps.mult(Q, D, tempMatrix);
-      CommonOps.multTransA(C, tempMatrix, N);
-      CommonOps.transpose(N, NTranspose);
+      CommonOps_DDRM.mult(Q, D, tempMatrix);
+      CommonOps_DDRM.multTransA(C, tempMatrix, N);
+      CommonOps_DDRM.transpose(N, NTranspose);
 
       /*
         A' S1 + S1 A - Nb' R1inv Nb + Q1 = S1dot = 0
@@ -253,12 +253,12 @@ public class LQRJumpMomentumControllerOld
       QRiccati.set(Q1);
       tempMatrix.reshape(6, 6);
       NativeCommonOps.multQuad(NTranspose, R1Inverse, tempMatrix);
-      CommonOps.addEquals(QRiccati, -1.0, tempMatrix);
+      CommonOps_DDRM.addEquals(QRiccati, -1.0, tempMatrix);
 
       ARiccati.set(A);
       tempMatrix.reshape(3, 6);
-      CommonOps.mult(R1Inverse, NTranspose, tempMatrix);
-      CommonOps.multAdd(-1.0, B, tempMatrix, ARiccati);
+      CommonOps_DDRM.mult(R1Inverse, NTranspose, tempMatrix);
+      CommonOps_DDRM.multAdd(-1.0, B, tempMatrix, ARiccati);
 
       careSolver.setMatrices(ARiccati, B, null, QRiccati, R1);
       P.set(careSolver.computeP());
@@ -287,7 +287,7 @@ public class LQRJumpMomentumControllerOld
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
 
       sigmas.get(numberOfSegments).zero();
-      CommonOps.setIdentity(phis.get(numberOfSegments));
+      CommonOps_DDRM.setIdentity(phis.get(numberOfSegments));
 
       for (int j = numberOfSegments - 1; j >= 0; j--)
       {
@@ -299,14 +299,14 @@ public class LQRJumpMomentumControllerOld
          else
          {
             // sigma_j = phi_j+1 Ad,1
-            CommonOps.mult(-1.0, phis.get(j+1), Ad1, sigmas.get(j));
+            CommonOps_DDRM.mult(-1.0, phis.get(j+1), Ad1, sigmas.get(j));
 
             // phi_j = phi_j+1 (Ad,1 (t_j+1 + t_j) + Ad,2)
             double duration = relativeVRPTrajectories.get(j).getDuration();
             tempMatrix.set(Ad2);
-            CommonOps.addEquals(tempMatrix, duration, Ad1);
+            CommonOps_DDRM.addEquals(tempMatrix, duration, Ad1);
 
-            CommonOps.mult(phis.get(j+1), tempMatrix, phis.get(j));
+            CommonOps_DDRM.mult(phis.get(j+1), tempMatrix, phis.get(j));
          }
       }
    }
@@ -317,15 +317,15 @@ public class LQRJumpMomentumControllerOld
       double timeInState = computeTimeInSegment(time, segmentNumber);
 
       tempMatrix.set(phis.get(segmentNumber));
-      CommonOps.addEquals(tempMatrix, timeInState, sigmas.get(segmentNumber));
+      CommonOps_DDRM.addEquals(tempMatrix, timeInState, sigmas.get(segmentNumber));
       NativeCommonOps.multQuad(tempMatrix, P, S1);
 
       // Nb = N' + B' S1
-      CommonOps.transpose(N, NB);
-      CommonOps.multAddTransA(B, S1, NB);
+      CommonOps_DDRM.transpose(N, NB);
+      CommonOps_DDRM.multAddTransA(B, S1, NB);
 
       // K1 = -R1inv NB
-      CommonOps.mult(-1.0, R1Inverse, NB, K1);
+      CommonOps_DDRM.mult(-1.0, R1Inverse, NB, K1);
    }
 
    private void resetS2Parameters()
@@ -371,31 +371,31 @@ public class LQRJumpMomentumControllerOld
          if (contactStateProviders.get(j).getContactState().isLoadBearing())
          {
             // Nb = N' + B' S1
-            CommonOps.transpose(N, NB);
+            CommonOps_DDRM.transpose(N, NB);
             NativeCommonOps.multQuad(phis.get(j), P, S1Hat);
-            CommonOps.multAddTransA(B, S1Hat, NB);
+            CommonOps_DDRM.multAddTransA(B, S1Hat, NB);
 
             // A2 = Nb' R1inv B' - A'
             tempMatrix.reshape(3, 6);
             MatrixTools.scaleTranspose(-1.0, A, A2);
-            CommonOps.multTransB(R1Inverse, B, tempMatrix);
-            CommonOps.multAddTransA(NB, tempMatrix, A2);
+            CommonOps_DDRM.multTransB(R1Inverse, B, tempMatrix);
+            CommonOps_DDRM.multAddTransA(NB, tempMatrix, A2);
 
             // B2 = 2 (C' - Nb' R1inv D) Q
-            CommonOps.multTransA(-2.0, NB, R1InverseDQ, B2);
-            CommonOps.multAddTransA(2.0, C, Q, B2);
+            CommonOps_DDRM.multTransA(-2.0, NB, R1InverseDQ, B2);
+            CommonOps_DDRM.multAddTransA(2.0, C, Q, B2);
 
             NativeCommonOps.invert(A2, A2Inverse);
-            CommonOps.mult(-1.0, A2Inverse, B2, A2InverseB2);
+            CommonOps_DDRM.mult(-1.0, A2Inverse, B2, A2InverseB2);
 
             // solve for betas
             trajectorySegment.getCoefficients(k, coefficients);
-            DenseMatrix64F betaLocal = betas.get(j).get(k);
+            DMatrixRMaj betaLocal = betas.get(j).get(k);
 
             // betaJK = -A2inv B2 cJK
-            CommonOps.mult(A2InverseB2, coefficients, betaLocal);
+            CommonOps_DDRM.mult(A2InverseB2, coefficients, betaLocal);
 
-            DenseMatrix64F betaLocalPrevious = betaLocal;
+            DMatrixRMaj betaLocalPrevious = betaLocal;
 
             for (int i = k - 1; i >= 0; i--)
             {
@@ -403,8 +403,8 @@ public class LQRJumpMomentumControllerOld
                trajectorySegment.getCoefficients(i, coefficients);
 
                // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
-               CommonOps.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
-               CommonOps.multAdd(A2InverseB2, coefficients, betaLocal);
+               CommonOps_DDRM.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
+               CommonOps_DDRM.multAdd(A2InverseB2, coefficients, betaLocal);
 
                betaLocalPrevious = betaLocal;
             }
@@ -412,18 +412,18 @@ public class LQRJumpMomentumControllerOld
             double duration = relativeVRPTrajectories.get(j).getDuration();
             summedBetas.set(s2Hat);
             for (int i = 0; i <= k; i++)
-               CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
+               CommonOps_DDRM.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
 
-            CommonOps.scale(duration, A2, timeScaledA2);
+            CommonOps_DDRM.scale(duration, A2, timeScaledA2);
             a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
 
-            DenseMatrix64F alphaLocal = alphas.get(j);
+            DMatrixRMaj alphaLocal = alphas.get(j);
 
             solver.setA(A2Exponential);
             solver.invert(S1HatInverse);
             solver.solve(summedBetas, alphaLocal);
 
-            CommonOps.add(alphaLocal, betas.get(j).get(0), s2Hat);
+            CommonOps_DDRM.add(alphaLocal, betas.get(j).get(0), s2Hat);
          }
          else
          {
@@ -433,22 +433,22 @@ public class LQRJumpMomentumControllerOld
 
             NativeCommonOps.multQuad(phis.get(j+1), P, S1Hat);
 
-            CommonOps.multTransA(Ad1, S1Hat, Ad1TransposeS1);
-            CommonOps.multTransA(Ad2, S1Hat, Ad2TransposeS1);
+            CommonOps_DDRM.multTransA(Ad1, S1Hat, Ad1TransposeS1);
+            CommonOps_DDRM.multTransA(Ad2, S1Hat, Ad2TransposeS1);
 
             // gamma 0 = 2 Ad2Transpose S1 Bd2 g
-            CommonOps.mult(2, Ad2TransposeS1, Bd2g, gammas.get(j).get(0));
+            CommonOps_DDRM.mult(2, Ad2TransposeS1, Bd2g, gammas.get(j).get(0));
 
             // gamma 1 = 2 Ad1Transpose S1 Bd2 g + 2 Ad2Transpose S1 Bd1 g
-            CommonOps.mult(2, Ad1TransposeS1, Bd2g, gammas.get(j).get(1));
-            CommonOps.multAdd(2, Ad2TransposeS1, Bd1g, gammas.get(j).get(1));
+            CommonOps_DDRM.mult(2, Ad1TransposeS1, Bd2g, gammas.get(j).get(1));
+            CommonOps_DDRM.multAdd(2, Ad2TransposeS1, Bd1g, gammas.get(j).get(1));
 
             // gamma 3 = 2 Ad1Transpose S1 Bd1 g
-            CommonOps.mult(2, Ad1TransposeS1, Bd1g, gammas.get(j).get(2));
+            CommonOps_DDRM.mult(2, Ad1TransposeS1, Bd1g, gammas.get(j).get(2));
 
-            CommonOps.scale(duration, gammas.get(j).get(0), s2Hat);
-            CommonOps.addEquals(s2Hat, d2, gammas.get(j).get(1));
-            CommonOps.addEquals(s2Hat, d3, gammas.get(j).get(2));
+            CommonOps_DDRM.scale(duration, gammas.get(j).get(0), s2Hat);
+            CommonOps_DDRM.addEquals(s2Hat, d2, gammas.get(j).get(1));
+            CommonOps_DDRM.addEquals(s2Hat, d3, gammas.get(j).get(2));
          }
       }
    }
@@ -463,24 +463,24 @@ public class LQRJumpMomentumControllerOld
       referenceVRPPosition.add(finalVRPPosition);
 
       // s2 = exp(A2 (t - tJ) alphaJ + sum_i=0^k betaJI (t - tj)^i
-      CommonOps.scale(timeInSegment, A2, timeScaledA2);
+      CommonOps_DDRM.scale(timeInSegment, A2, timeScaledA2);
       a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
 
-      CommonOps.mult(A2Exponential, alphas.get(j), s2);
+      CommonOps_DDRM.mult(A2Exponential, alphas.get(j), s2);
       int k = relativeVRPTrajectories.get(j).getNumberOfCoefficients() - 1;
       for (int i = 0; i <= k; i++)
-         CommonOps.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
+         CommonOps_DDRM.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
 
       // defined this way, because the R1Inverse BT already has a -0.5 appended.
       tempMatrix.reshape(3, 1);
       relativeVRPTrajectories.get(j).getPosition().get(tempMatrix);
-      CommonOps.mult(R1InverseDQ, tempMatrix, k2);
-      CommonOps.multAdd(R1InverseBTranspose, s2, k2);
+      CommonOps_DDRM.mult(R1InverseDQ, tempMatrix, k2);
+      CommonOps_DDRM.multAdd(R1InverseBTranspose, s2, k2);
 
       yoK2.set(k2);
    }
 
-   public void computeControlInput(DenseMatrix64F currentState, double time)
+   public void computeControlInput(DMatrixRMaj currentState, double time)
    {
       if (shouldUpdateP)
          computeP();
@@ -499,29 +499,29 @@ public class LQRJumpMomentumControllerOld
       relativeCoMVelocity.set(3, relativeState);
 
       // u = K1 relativeX + k2
-      CommonOps.mult(K1, relativeState, u);
+      CommonOps_DDRM.mult(K1, relativeState, u);
       feedbackForce.set(u);
 
-      CommonOps.addEquals(u, k2);
+      CommonOps_DDRM.addEquals(u, k2);
 
-      CommonOps.mult(C, relativeState, relativeDesiredVRP);
-      CommonOps.multAdd(D, u, relativeDesiredVRP);
+      CommonOps_DDRM.mult(C, relativeState, relativeDesiredVRP);
+      CommonOps_DDRM.multAdd(D, u, relativeDesiredVRP);
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
    }
 
-   public DenseMatrix64F getU()
+   public DMatrixRMaj getU()
    {
       return u;
    }
 
-   public DenseMatrix64F getCostHessian()
+   public DMatrixRMaj getCostHessian()
    {
       return S1;
    }
 
-   public DenseMatrix64F getCostJacobian()
+   public DMatrixRMaj getCostJacobian()
    {
       return s2;
    }
