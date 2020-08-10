@@ -27,8 +27,7 @@ public class LookAndStepRemoteVisualizer
    private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
-   private LivePlanarRegionsGraphic bodyPathRegionsGraphic;
-   private LivePlanarRegionsGraphic footstepPlanningRegionsGraphic;
+   private LivePlanarRegionsGraphic planarRegionsGraphic;
    private PoseGraphic goalGraphic;
 
    private Stage primaryStage;
@@ -53,13 +52,9 @@ public class LookAndStepRemoteVisualizer
          footstepPlanGraphic = new FootstepPlanWithTextGraphic();
          behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
-         bodyPathRegionsGraphic = new LivePlanarRegionsGraphic(false);
+         planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
          behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
-            bodyPathRegionsGraphic.acceptPlanarRegions(planarRegions);
-         });
-         footstepPlanningRegionsGraphic = new LivePlanarRegionsGraphic(false);
-         behaviorMessager.registerTopicListener(FootstepPlanningRegionsForUI, planarRegions -> {
-            footstepPlanningRegionsGraphic.acceptPlanarRegions(planarRegions);
+            planarRegionsGraphic.acceptPlanarRegions(planarRegions);
          });
 
          goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
@@ -85,8 +80,7 @@ public class LookAndStepRemoteVisualizer
          view3dFactory.addNodeToView(closestPointAlongPathGraphic);
          view3dFactory.addNodeToView(subGoalGraphic);
          view3dFactory.addNodeToView(goalGraphic);
-         view3dFactory.addNodeToView(bodyPathRegionsGraphic);
-         view3dFactory.addNodeToView(footstepPlanningRegionsGraphic);
+         view3dFactory.addNodeToView(planarRegionsGraphic);
          view3dFactory.addNodeToView(startAndGoalFootPoses);
 
          primaryStage = new Stage();
