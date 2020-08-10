@@ -85,6 +85,9 @@ public class ROS2Tools
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
 
+   public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withType(VideoPacket.class);
+   public static final ROS2Topic<VideoPacket> D435_VIDEO = VIDEO.withSuffix(D435_NAME);
+
    public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
                                                                                             .withType(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = IHMC_ROOT.withType(StereoVisionPointCloudMessage.class);
