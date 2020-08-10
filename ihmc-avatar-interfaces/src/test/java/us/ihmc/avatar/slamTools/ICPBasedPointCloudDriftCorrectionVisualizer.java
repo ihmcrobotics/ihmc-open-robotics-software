@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -145,12 +146,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
       correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frameForSourcePoints.getPointCloudInLocalFrame().size()];
-      for (int i = 0; i < correctedData.length; i++)
-      {
-         correctedData[i] = new Point3D(frameForSourcePoints.getPointCloudInLocalFrame().get(i));
-         driftCorrectionTransform.transform(correctedData[i]);
-      }
+      List<Point3D> correctedData = frameForSourcePoints.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+      correctedData.forEach(driftCorrectionTransform::transform);
 
       frame1GraphicsManager.updateGraphics();
       frame2GraphicsManager.updateGraphics();
@@ -168,11 +165,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCorrectionTransform);
          correctedLocalPoseInWorld.set(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
          correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
-         for (int i = 0; i < correctedData.length; i++)
-         {
-            correctedData[i].set(frameForSourcePoints.getPointCloudInLocalFrame().get(i));
-            driftCorrectionTransform.transform(correctedData[i]);
-         }
+         correctedData = frameForSourcePoints.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+         correctedData.forEach(driftCorrectionTransform::transform);
 
          frame2.updateOptimizedCorrection(driftCorrectionTransform);
          frameForSourcePoints.updateOptimizedCorrection(driftCorrectionTransform);
@@ -210,17 +204,13 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
             RigidBodyTransform correctedLocalPoseToWorld = new RigidBodyTransform(uncorrectedLocalPoseInWorld);
             correctedLocalPoseToWorld.multiply(driftCorrectionTransform);
 
-            Point3D[] correctedData = new Point3D[sourcePointsInLocalFrame.size()];
-            for (int i = 0; i < sourcePointsInLocalFrame.size(); i++)
-            {
-               correctedData[i] = new Point3D(sourcePointsInLocalFrame.get(i));
-               correctedLocalPoseToWorld.transform(correctedData[i]);
-            }
+            List<Point3D> correctedData = sourcePointsInLocalFrame.stream().map(Point3D::new).collect(Collectors.toList());
+            correctedData.forEach(correctedLocalPoseToWorld::transform);
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedData.length, 1);
-            for (int i = 0; i < correctedData.length; i++)
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedData.size(), 1);
+            for (int i = 0; i < correctedData.size(); i++)
             {
-               double distance = computeClosestDistance(correctedData[i]);
+               double distance = computeClosestDistance(correctedData.get(i));
                errorSpace.set(i, distance);
             }
             return errorSpace;

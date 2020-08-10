@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -138,12 +139,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame2.getUncorrectedLocalPoseInWorld());
       correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frame2.getPointCloudInLocalFrame().size()];
-      for (int i = 0; i < correctedData.length; i++)
-      {
-         correctedData[i] = new Point3D(frame2.getPointCloudInLocalFrame().get(i));
-         driftCorrectionTransform.transform(correctedData[i]);
-      }
+      List<Point3D> correctedData = frame2.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+      correctedData.forEach(driftCorrectionTransform::transform);
 
       frame1GraphicsManager.updateGraphics();
       frame2GraphicsManager.updateGraphics();
@@ -162,11 +159,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          driftCorrectionTransform.set(inputFunction.apply(optimalParameter));
          correctedLocalPoseInWorld.set(frame2.getUncorrectedLocalPoseInWorld());
          correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
-         for (int i = 0; i < correctedData.length; i++)
-         {
-            correctedData[i].set(frame2.getPointCloudInLocalFrame().get(i));
-            driftCorrectionTransform.transform(correctedData[i]);
-         }
+         correctedData = frame2.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+         correctedData.forEach(driftCorrectionTransform::transform);
 
          frame2.updateOptimizedCorrection(driftCorrectionTransform);
          double quality = optimizer.getQuality();
