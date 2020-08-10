@@ -42,6 +42,7 @@ public class DirectRobotUIController extends Group
    @FXML private CheckBox showMapRegions;
    @FXML private CheckBox showSupportRegions;
    @FXML private CheckBox showMultisenseVideo;
+   @FXML private CheckBox showRealsenseVideo;
    @FXML private Slider stanceHeightSlider;
    @FXML private Slider leanForwardSlider;
    @FXML private Slider neckSlider;
@@ -56,7 +57,9 @@ public class DirectRobotUIController extends Group
    private LivePlanarRegionsGraphic mapRegionsGraphic;
    private LivePlanarRegionsGraphic supportRegionsGraphic;
    private JavaFXROS2VideoViewOverlay multisenseVideoOverlay;
-   private StackPane videoStackPane;
+   private StackPane multisenseVideoStackPane;
+   private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
+   private StackPane realsenseVideoStackPane;
 
    public void init(AnchorPane mainAnchorPane, SubScene subScene, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -118,12 +121,21 @@ public class DirectRobotUIController extends Group
       getChildren().add(supportRegionsGraphic);
 
       multisenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, 1024, 544, false, false));
-      videoStackPane = new StackPane(multisenseVideoOverlay.getNode());
-      videoStackPane.setVisible(false);
-      AnchorPane.setTopAnchor(videoStackPane, 10.0);
-      AnchorPane.setRightAnchor(videoStackPane, 10.0);
+      multisenseVideoStackPane = new StackPane(multisenseVideoOverlay.getNode());
+      multisenseVideoStackPane.setVisible(false);
+      AnchorPane.setTopAnchor(multisenseVideoStackPane, 10.0);
+      AnchorPane.setRightAnchor(multisenseVideoStackPane, 10.0);
       multisenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> multisenseVideoOverlay.toggleMode());
-      mainAnchorPane.getChildren().add(videoStackPane);
+      mainAnchorPane.getChildren().add(multisenseVideoStackPane);
+
+      LogTools.info("REALSENSE D435 VIDEO {}", ROS2Tools.D435_VIDEO.getName());
+      realsenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 1024, 544, false, false)); // TODO: res
+      realsenseVideoStackPane = new StackPane(realsenseVideoOverlay.getNode());
+      realsenseVideoStackPane.setVisible(false);
+      AnchorPane.setBottomAnchor(realsenseVideoStackPane, 10.0);
+      AnchorPane.setRightAnchor(realsenseVideoStackPane, 10.0);
+      realsenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> realsenseVideoOverlay.toggleMode());
+      mainAnchorPane.getChildren().add(realsenseVideoStackPane);
 
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
 
@@ -222,18 +234,27 @@ public class DirectRobotUIController extends Group
 
    @FXML public void showMultisenseVideo()
    {
-      videoStackPane.setVisible(showMultisenseVideo.isSelected());
-//         multisenseVideoOverlay.getNode().setVisible(showMultisenseVideo.isSelected());
+      multisenseVideoStackPane.setVisible(showMultisenseVideo.isSelected());
       if (showMultisenseVideo.isSelected())
       {
          multisenseVideoOverlay.start();
-//         multisenseVideoOverlay.getNode().setVisible(true);
       }
       else
       {
          multisenseVideoOverlay.stop();
-//         multisenseVideoOverlay.getNode().setVisible(false);
-//
+      }
+   }
+
+   @FXML public void showRealsenseVideo()
+   {
+      realsenseVideoStackPane.setVisible(showRealsenseVideo.isSelected());
+      if (showRealsenseVideo.isSelected())
+      {
+         realsenseVideoOverlay.start();
+      }
+      else
+      {
+         realsenseVideoOverlay.stop();
       }
    }
 
