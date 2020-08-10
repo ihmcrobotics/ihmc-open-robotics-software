@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -147,9 +148,7 @@ public class LevenbergMarquardtICPVisualizer
 
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octree, driftedCowPointCloud);
-      Point3D[] transformedData = new Point3D[driftedCowPointCloud.size()];
-      for (int i = 0; i < driftedCowPointCloud.size(); i++)
-         transformedData[i] = new Point3D();
+
       Point3D initialDataLocation = new Point3D(dataLocation);
       RotationMatrix initialDataOrientation = new RotationMatrix(dataOrientation);
       for (double t = 0.0; t <= trajectoryTime + dt; t += dt)
@@ -161,11 +160,12 @@ public class LevenbergMarquardtICPVisualizer
 
          // update viz.
          DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
-         for (int i = 0; i < driftedCowPointCloud.size(); i++)
-            transformedData[i].set(driftedCowPointCloud.get(i));
+
          RigidBodyTransform transform = new RigidBodyTransform();
          optimizer.convertInputToTransform(optimalParameter, transform);
-         transformPointCloud(transformedData, transform);
+         List<Point3D> transformedData = driftedCowPointCloud.stream().map(Point3D::new).collect(Collectors.toList());
+         transformedData.forEach(transform::transform);
+
          dataLocation.set(initialDataLocation);
          dataOrientation.set(initialDataOrientation);
          transform.transform(dataLocation);
@@ -178,9 +178,9 @@ public class LevenbergMarquardtICPVisualizer
 
          for (int i = 0; i < yoDataPointsHolder.size(); i++)
          {
-            yoDataPointsHolder.get(i)[0].set(transformedData[i].getX());
-            yoDataPointsHolder.get(i)[1].set(transformedData[i].getY());
-            yoDataPointsHolder.get(i)[2].set(transformedData[i].getZ());
+            yoDataPointsHolder.get(i)[0].set(transformedData.get(i).getX());
+            yoDataPointsHolder.get(i)[1].set(transformedData.get(i).getY());
+            yoDataPointsHolder.get(i)[2].set(transformedData.get(i).getZ());
          }
 
          scs.tickAndUpdate();
@@ -211,16 +211,14 @@ public class LevenbergMarquardtICPVisualizer
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-            Point3D[] transformedData = new Point3D[newPointCloud.size()];
-            for (int i = 0; i < newPointCloud.size(); i++)
-               transformedData[i] = new Point3D(newPointCloud.get(i));
             RigidBodyTransform transform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            transformPointCloud(transformedData, transform);
+            List<Point3D> transformedData = newPointCloud.stream().map(Point3D::new).collect(Collectors.toList());
+            transformedData.forEach(transform::transform);
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(transformedData.length, 1);
-            for (int i = 0; i < transformedData.length; i++)
+            DMatrixRMaj errorSpace = new DMatrixRMaj(transformedData.size(), 1);
+            for (int i = 0; i < transformedData.size(); i++)
             {
-               double distance = computeClosestDistance(transformedData[i]);
+               double distance = computeClosestDistance(transformedData.get(i));
                errorSpace.set(i, distance);
             }
             return errorSpace;
