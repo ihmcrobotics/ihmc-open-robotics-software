@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.video;
 
-import controller_msgs.msg.dds.VideoPacket;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -10,13 +9,10 @@ import javafx.scene.Node;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
-import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.ros2.Ros2Node;
 
 public class JavaFXROS2VideoViewOverlay
 {
-   private final JavaFXROS2VideoView videoView;
+   private final JavaFXVideoView videoView;
    private SizeMode currentMode = SizeMode.MIN;
 
    private final DoubleProperty animationDurationProperty = new SimpleDoubleProperty(this, "animationDuration", 0.15);
@@ -37,9 +33,10 @@ public class JavaFXROS2VideoViewOverlay
       }
    }
 
-   public JavaFXROS2VideoViewOverlay(int width, int height, boolean flipX, boolean flipY)
+   public JavaFXROS2VideoViewOverlay(JavaFXVideoView videoView)
    {
-      videoView = new JavaFXROS2VideoView(width, height, flipX, flipY);
+      this.videoView = videoView;
+
       videoView.setPreserveRatio(true);
       videoView.setFitWidth(currentMode.getWidth());
       videoView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);");
@@ -90,19 +87,19 @@ public class JavaFXROS2VideoViewOverlay
       timeline.play();
    }
 
-   public void start(Messager messager, Topic<VideoPacket> videoTopic)
+   public void start()
    {
-      videoView.start(messager, videoTopic);
-   }
-
-   public void start(Ros2Node ros2Node)
-   {
-      videoView.start(ros2Node);
+      videoView.start();
    }
 
    public void stop()
    {
       videoView.stop();
+   }
+
+   public void destroy()
+   {
+      videoView.destroy();
    }
 
    public Node getNode()

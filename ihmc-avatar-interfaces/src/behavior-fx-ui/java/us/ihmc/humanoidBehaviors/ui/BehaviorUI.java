@@ -91,6 +91,8 @@ public class BehaviorUI
             tabPane.getTabs().add(tab);
          }
 
+         AnchorPane mainAnchorPane = new AnchorPane();
+
          View3DFactory view3DFactory = View3DFactory.createSubscene();
          view3DFactory.addCameraController(0.05, 2000.0, true);
          view3DFactory.addWorldCoordinateSystem(0.3);
@@ -102,13 +104,7 @@ public class BehaviorUI
          AnchorPane.setBottomAnchor(view3DStackPane, 0.0);
          AnchorPane.setLeftAnchor(view3DStackPane, 0.0);
          AnchorPane.setRightAnchor(view3DStackPane, 0.0);
-
-         JavaFXROS2VideoViewOverlay videoOverlay = new JavaFXROS2VideoViewOverlay(1024, 544, false, false);
-         StackPane videoStackPane = new StackPane(videoOverlay.getNode());
-         AnchorPane.setTopAnchor(videoStackPane, 10.0);
-         AnchorPane.setRightAnchor(videoStackPane, 10.0);
-         videoOverlay.start(ros2Node);
-         videoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> videoOverlay.toggleMode());
+         mainAnchorPane.getChildren().add(view3DStackPane);
 
          VBox sideVisualizationArea = new VBox();
 
@@ -132,12 +128,11 @@ public class BehaviorUI
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUIController.init(subScene3D, ros2Node, robotModel);
+         directRobotUIController.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
          view3DFactory.addNodeToView(directRobotUIController);
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-         AnchorPane mainAnchorPane = new AnchorPane(view3DStackPane, videoStackPane);
          mainSplitPane.getItems().add(mainAnchorPane);
          mainSplitPane.getItems().add(consoleScrollPane);
          mainSplitPane.setDividerPositions(2.0 / 3.0);
