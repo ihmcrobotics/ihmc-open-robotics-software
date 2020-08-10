@@ -56,6 +56,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class HighLevelHumanoidControllerToolbox
 {
@@ -962,6 +963,11 @@ public class HighLevelHumanoidControllerToolbox
    public double getOmega0()
    {
       return omega0.getDoubleValue();
+   }
+   
+   public DoubleProvider getOmega0Provider()
+   {
+      return omega0;
    }
 
    public void getCoP(FramePoint3D copToPack)
