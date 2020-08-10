@@ -21,7 +21,7 @@ public class SingleThreadExecutor
 
    private void recreate()
    {
-      executor = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(prefix));
+      executor = ThreadTools.newSingleThreadExecutor(prefix);
    }
 
    public void queueExecution(Runnable runnable)
