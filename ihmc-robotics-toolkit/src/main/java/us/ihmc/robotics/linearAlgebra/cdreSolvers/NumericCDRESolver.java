@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearAlgebra.cdreSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.linearAlgebra.careSolvers.CARETools;
@@ -13,9 +13,9 @@ public class NumericCDRESolver extends AbstractCDRESolver
 
    private double finalTime;
 
-   private final DenseMatrix64F PFinal = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj PFinal = new DMatrixRMaj(0, 0);
 
-   private final RecyclingArrayList<DenseMatrix64F> PTrajectory = new RecyclingArrayList<>(() -> new DenseMatrix64F(0, 0));
+   private final RecyclingArrayList<DMatrixRMaj> PTrajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(0, 0));
 
    public NumericCDRESolver()
    {
@@ -27,7 +27,7 @@ public class NumericCDRESolver extends AbstractCDRESolver
       this.dt = dt;
    }
 
-   public void setFinalBoundaryCondition(double finalTime, DenseMatrix64F PFinal)
+   public void setFinalBoundaryCondition(double finalTime, DMatrixRMaj PFinal)
    {
       this.PFinal.set(PFinal);
       this.finalTime = finalTime;
@@ -35,14 +35,14 @@ public class NumericCDRESolver extends AbstractCDRESolver
       PTrajectory.clear();
    }
 
-   private final DenseMatrix64F PDot = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj PDot = new DMatrixRMaj(0, 0);
 
    // just does a really simple first order reverse time integration.
    public void computePFunction(double initialTime)
    {
       double time = finalTime;
 
-      DenseMatrix64F lastP = PTrajectory.add();
+      DMatrixRMaj lastP = PTrajectory.add();
       lastP.set(PFinal);
       time -= dt;
 
@@ -52,18 +52,18 @@ public class NumericCDRESolver extends AbstractCDRESolver
       {
          CARETools.computeRiccatiRate(lastP, A, Q, M, PDot);
 
-         DenseMatrix64F nextP = PTrajectory.add();
+         DMatrixRMaj nextP = PTrajectory.add();
          nextP.set(lastP);
-         CommonOps.addEquals(nextP, -dt, PDot);
+         CommonOps_DDRM.addEquals(nextP, -dt, PDot);
 
          lastP = nextP;
       }
    }
 
-   private final DenseMatrix64F PToReturn = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj PToReturn = new DMatrixRMaj(0, 0);
 
    @Override
-   public DenseMatrix64F getP(double time)
+   public DMatrixRMaj getP(double time)
    {
       int index = (int) (Math.floor(time / dt));
       index = MathTools.clamp(index, 0, PTrajectory.size() - 2);
@@ -72,8 +72,8 @@ public class NumericCDRESolver extends AbstractCDRESolver
       int reverseTimeTrajectoryIndex = PTrajectory.size() - 1 - index;
 
       PToReturn.set(PTrajectory.get(reverseTimeTrajectoryIndex));
-      CommonOps.scale(1.0 - interpolationFraction, PToReturn);
-      CommonOps.addEquals(PToReturn, interpolationFraction, PTrajectory.get(reverseTimeTrajectoryIndex - 1));
+      CommonOps_DDRM.scale(1.0 - interpolationFraction, PToReturn);
+      CommonOps_DDRM.addEquals(PToReturn, interpolationFraction, PTrajectory.get(reverseTimeTrajectoryIndex - 1));
 
       return PToReturn;
    }
