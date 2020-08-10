@@ -42,7 +42,7 @@ mainDependencies {
 }
 
 benchmarksDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 }
 
 testDependencies {

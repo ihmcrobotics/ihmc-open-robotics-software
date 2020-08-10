@@ -57,13 +57,13 @@ mainDependencies {
 }
 
 behaviorCleanRoomDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
    api("us.ihmc:ihmc-messager-kryo:0.1.5")
 }
 
 behaviorFxUiDependencies {
-   compile ihmc.sourceSetProject("main")
-   compile ihmc.sourceSetProject("behavior-clean-room")
+   api(ihmc.sourceSetProject("main"))
+   api(ihmc.sourceSetProject("behavior-clean-room"))
    api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
@@ -71,9 +71,9 @@ behaviorFxUiDependencies {
 }
 
 testDependencies {
-   compile ihmc.sourceSetProject("behavior-clean-room")
-   compile ihmc.sourceSetProject("behavior-fx-ui")
-   compile ihmc.sourceSetProject("visualizers")
+   api(ihmc.sourceSetProject("behavior-clean-room"))
+   api(ihmc.sourceSetProject("behavior-fx-ui"))
+   api(ihmc.sourceSetProject("visualizers"))
 
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-footstep-planning-test:source")
@@ -83,7 +83,7 @@ testDependencies {
 }
 
 visualizersDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:robot-environment-awareness-application:source")

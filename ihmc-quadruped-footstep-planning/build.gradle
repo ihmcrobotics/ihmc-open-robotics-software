@@ -20,12 +20,12 @@ mainDependencies {
 }
 
 testDependencies {
-    compile ihmc.sourceSetProject("visualizers")
+    api(ihmc.sourceSetProject("visualizers"))
     api("us.ihmc:ihmc-quadruped-planning-test:source")
 }
 
 visualizersDependencies {
-    compile ihmc.sourceSetProject("main")
+    api(ihmc.sourceSetProject("main"))
 
     api("us.ihmc:ihmc-robot-models-visualizers:source")
     api("us.ihmc:ihmc-path-planning-visualizers:source")

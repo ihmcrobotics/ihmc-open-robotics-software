@@ -29,7 +29,7 @@ mainDependencies {
 }
 
 testDependencies {
-   compile ihmc.sourceSetProject("visualizers")
+   api(ihmc.sourceSetProject("visualizers"))
 
    api("us.ihmc:ihmc-path-planning-data-sets:source")
    api("us.ihmc:simulation-construction-set-test:0.19.0")
@@ -39,7 +39,7 @@ testDependencies {
 }
 
 visualizersDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:robot-environment-awareness-application:source")
