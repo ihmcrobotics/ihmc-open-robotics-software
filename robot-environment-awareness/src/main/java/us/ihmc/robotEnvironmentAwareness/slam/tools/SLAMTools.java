@@ -35,17 +35,10 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 
 public class SLAMTools
 {
-   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition)
+   public static Scan toScan(List<? extends Point3DReadOnly> points, Tuple3DReadOnly sensorPosition)
    {
       PointCloud pointCloud = new PointCloud();
-
-      for (int i = 0; i < points.length; i++)
-      {
-         double x = points[i].getX();
-         double y = points[i].getY();
-         double z = points[i].getZ();
-         pointCloud.add(x, y, z);
-      }
+      points.forEach(pointCloud::add);
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
@@ -69,12 +62,12 @@ public class SLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
+   public static List<Point3DReadOnly> createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
    {
-      Point3D[] convertedPoints = new Point3D[pointCloud.length];
+      List<Point3DReadOnly> convertedPoints = new ArrayList<>();
       for (int i = 0; i < pointCloud.length; i++)
       {
-         convertedPoints[i] = createConvertedPointToSensorPose(sensorPose, pointCloud[i]);
+         convertedPoints.add(createConvertedPointToSensorPose(sensorPose, pointCloud[i]));
       }
 
       return convertedPoints;
@@ -96,10 +89,10 @@ public class SLAMTools
       return convertedPoint;
    }
 
-   public static NormalOcTree computeOctreeData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
+   public static NormalOcTree computeOctreeData(List<? extends Point3DReadOnly> pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
    {
       ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = pointCloud.length;
+      int numberOfPoints = pointCloud.size();
 
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(toScan(pointCloud, sensorPosition));

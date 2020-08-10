@@ -412,7 +412,7 @@ public class SLAMModule implements PerceptionModule
          ocTreeConsumer.reportOcTree(octreeMap, pose);
       }
       Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();
-      Point3DReadOnly[] correctedPointCloud = latestFrame.getCorrectedPointCloudInWorld();
+      List<? extends Point3DReadOnly> correctedPointCloud = latestFrame.getCorrectedPointCloudInWorld();
       Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePoints();
       if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
          return;

@@ -138,10 +138,10 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame2.getUncorrectedLocalPoseInWorld());
       correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frame2.getPointCloudInLocalFrame().length];
+      Point3D[] correctedData = new Point3D[frame2.getPointCloudInLocalFrame().size()];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frame2.getPointCloudInLocalFrame()[i]);
+         correctedData[i] = new Point3D(frame2.getPointCloudInLocalFrame().get(i));
          driftCorrectionTransform.transform(correctedData[i]);
       }
 
@@ -164,7 +164,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frame2.getPointCloudInLocalFrame()[i]);
+            correctedData[i].set(frame2.getPointCloudInLocalFrame().get(i));
             driftCorrectionTransform.transform(correctedData[i]);
          }
 

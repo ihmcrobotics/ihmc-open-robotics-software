@@ -145,10 +145,10 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
       correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frameForSourcePoints.getPointCloudInLocalFrame().length];
+      Point3D[] correctedData = new Point3D[frameForSourcePoints.getPointCloudInLocalFrame().size()];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frameForSourcePoints.getPointCloudInLocalFrame()[i]);
+         correctedData[i] = new Point3D(frameForSourcePoints.getPointCloudInLocalFrame().get(i));
          driftCorrectionTransform.transform(correctedData[i]);
       }
 
@@ -170,7 +170,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frameForSourcePoints.getPointCloudInLocalFrame()[i]);
+            correctedData[i].set(frameForSourcePoints.getPointCloudInLocalFrame().get(i));
             driftCorrectionTransform.transform(correctedData[i]);
          }
 
@@ -198,7 +198,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       new ICPBasedPointCloudDriftCorrectionVisualizer();
    }
 
-   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, Point3DReadOnly[] sourcePointsInLocalFrame,
+   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, List<Point3DReadOnly> sourcePointsInLocalFrame,
                                                                 RigidBodyTransformReadOnly uncorrectedLocalPoseInWorld)
    {
       UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
@@ -210,10 +210,10 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
             RigidBodyTransform correctedLocalPoseToWorld = new RigidBodyTransform(uncorrectedLocalPoseInWorld);
             correctedLocalPoseToWorld.multiply(driftCorrectionTransform);
 
-            Point3D[] correctedData = new Point3D[sourcePointsInLocalFrame.length];
-            for (int i = 0; i < sourcePointsInLocalFrame.length; i++)
+            Point3D[] correctedData = new Point3D[sourcePointsInLocalFrame.size()];
+            for (int i = 0; i < sourcePointsInLocalFrame.size(); i++)
             {
-               correctedData[i] = new Point3D(sourcePointsInLocalFrame[i]);
+               correctedData[i] = new Point3D(sourcePointsInLocalFrame.get(i));
                correctedLocalPoseToWorld.transform(correctedData[i]);
             }
 
@@ -235,7 +235,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction,
                                                                                                 outputCalculator,
                                                                                                 6,
-                                                                                                sourcePointsInLocalFrame.length);
+                                                                                                sourcePointsInLocalFrame.size());
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0001);
       purterbationVector.set(1, 0.0001);
@@ -269,13 +269,13 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       double windowMargin = 0.05;
       ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getCorrectedLocalPoseInWorld());
 
-      Point3DReadOnly[] newPointCloud = frame2.getCorrectedPointCloudInWorld();
-      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getPointCloudInLocalFrame();
-      boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
+      List<? extends Point3DReadOnly> newPointCloud = frame2.getCorrectedPointCloudInWorld();
+      List<Point3DReadOnly> newPointCloudToSensorPose = frame2.getPointCloudInLocalFrame();
+      boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.size()];
       int numberOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
+      for (int i = 0; i < newPointCloudToSensorPose.size(); i++)
       {
-         Point3DReadOnly point = newPointCloudToSensorPose[i];
+         Point3DReadOnly point = newPointCloudToSensorPose.get(i);
          isInPreviousView[i] = false;
          if (windowForMap.isPointInside(point.getX(), point.getY(), -windowMargin))
          {
@@ -288,11 +288,11 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       Point3D[] pointsInPreviousWindow = new Point3D[numberOfPointsInWindow];
       int[] colors = new int[numberOfPointsInWindow];
       int indexOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
+      for (int i = 0; i < newPointCloudToSensorPose.size(); i++)
       {
          if (isInPreviousView[i])
          {
-            pointsInPreviousWindow[indexOfPointsInWindow] = new Point3D(newPointCloud[i]);
+            pointsInPreviousWindow[indexOfPointsInWindow] = new Point3D(newPointCloud.get(i));
             indexOfPointsInWindow++;
          }
       }

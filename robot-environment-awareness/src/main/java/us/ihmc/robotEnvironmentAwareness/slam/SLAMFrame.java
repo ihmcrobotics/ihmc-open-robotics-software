@@ -14,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.iterators.OcTreeIterable;
 import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
@@ -64,12 +65,12 @@ public class SLAMFrame
     * modify the {@link #correctedLocalPoseInWorld} such that, when {@link #pointCloudInLocalFrame} is transformed to world, they best match up with the world
     * map.
     */
-   private final Point3DReadOnly[] pointCloudInLocalFrame;
+   private final List<Point3DReadOnly> pointCloudInLocalFrame;
    /**
     * Corrected point cloud expressed in the world frame. These are found by by applying {@link #driftCompensationTransform}, and the algorithm is said to have
     * converged when these correspond to the global map properly.
     */
-   private final Point3D[] correctedPointCloudInWorld;
+   private List<Point3DBasics> correctedPointCloudInWorld;
 
    private double confidenceFactor = 1.0;
 
@@ -126,9 +127,9 @@ public class SLAMFrame
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld);
-      correctedPointCloudInWorld = new Point3D[pointCloudInLocalFrame.length];
-      for (int i = 0; i < correctedPointCloudInWorld.length; i++)
-         correctedPointCloudInWorld[i] = new Point3D(pointCloudInLocalFrame[i]);
+      correctedPointCloudInWorld = new ArrayList<>();
+      for (int i = 0; i < pointCloudInLocalFrame.size(); i++)
+         correctedPointCloudInWorld.add(new Point3D(pointCloudInLocalFrame.get(i)));
 
       updateOptimizedPointCloudAndSensorPose();
    }
@@ -149,8 +150,8 @@ public class SLAMFrame
       correctedSensorPoseInWorld.getRotation().normalize();
       correctedSensorPoseInWorld.multiply(driftCompensationTransform);
 
-      for (int i = 0; i < correctedPointCloudInWorld.length; i++)
-         correctedLocalPoseInWorld.transform(pointCloudInLocalFrame[i], correctedPointCloudInWorld[i]);
+      for (int i = 0; i < correctedPointCloudInWorld.size(); i++)
+         correctedLocalPoseInWorld.transform(pointCloudInLocalFrame.get(i), correctedPointCloudInWorld.get(i));
 
       for (int i = 0; i < surfaceElements.size(); i++)
       {
@@ -244,7 +245,7 @@ public class SLAMFrame
       return uncorrectedPointCloudInWorld;
    }
 
-   public Point3DReadOnly[] getPointCloudInLocalFrame()
+   public List<Point3DReadOnly> getPointCloudInLocalFrame()
    {
       return pointCloudInLocalFrame;
    }
@@ -259,7 +260,7 @@ public class SLAMFrame
       return uncorrectedSensorPoseInWorld;
    }
 
-   public Point3DReadOnly[] getCorrectedPointCloudInWorld()
+   public List<? extends Point3DReadOnly> getCorrectedPointCloudInWorld()
    {
       return correctedPointCloudInWorld;
    }

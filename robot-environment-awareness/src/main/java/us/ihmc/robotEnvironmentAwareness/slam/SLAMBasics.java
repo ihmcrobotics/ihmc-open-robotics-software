@@ -21,8 +21,6 @@ import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,7 +54,7 @@ public class SLAMBasics implements SLAMInterface
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
    {
-      Point3DReadOnly[] pointCloud = frame.getCorrectedPointCloudInWorld();
+      List<? extends Point3DReadOnly> pointCloud = frame.getCorrectedPointCloudInWorld();
       RigidBodyTransformReadOnly sensorPose = frame.getCorrectedSensorPoseInWorld();
 
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
