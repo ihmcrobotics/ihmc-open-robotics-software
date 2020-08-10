@@ -53,8 +53,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private ROS2PublisherMap ros2Publisher;
    private FootstepPlanWithTextGraphic footstepPlanGraphic;
    private FootstepPlanWithTextGraphic startAndGoalFootPoses;
-   private LivePlanarRegionsGraphic bodyPathRegionsGraphic;
-   private LivePlanarRegionsGraphic footstepPlanningRegionsGraphic;
+   private LivePlanarRegionsGraphic planarRegionsRegionsGraphic;
    private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
@@ -117,13 +116,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlanGraphic = new FootstepPlanWithTextGraphic();
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
-      bodyPathRegionsGraphic = new LivePlanarRegionsGraphic(false);
+      planarRegionsRegionsGraphic = new LivePlanarRegionsGraphic(false);
       behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
-         bodyPathRegionsGraphic.acceptPlanarRegions(planarRegions);
-      });
-      footstepPlanningRegionsGraphic = new LivePlanarRegionsGraphic(false);
-      behaviorMessager.registerTopicListener(FootstepPlanningRegionsForUI, planarRegions -> {
-         footstepPlanningRegionsGraphic.acceptPlanarRegions(planarRegions);
+         planarRegionsRegionsGraphic.acceptPlanarRegions(planarRegions);
       });
 
       goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
@@ -195,8 +190,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().remove(subGoalGraphic));
          Platform.runLater(() -> getChildren().remove(goalGraphic));
          Platform.runLater(() -> getChildren().remove(bodyPathPlanGraphic));
-         Platform.runLater(() -> getChildren().remove(bodyPathRegionsGraphic));
-         Platform.runLater(() -> getChildren().remove(footstepPlanningRegionsGraphic));
+         Platform.runLater(() -> getChildren().remove(planarRegionsRegionsGraphic));
          Platform.runLater(() -> getChildren().remove(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().remove(footstepPlanGraphic));
       }
@@ -206,8 +200,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().add(subGoalGraphic));
          Platform.runLater(() -> getChildren().add(goalGraphic));
          Platform.runLater(() -> getChildren().add(bodyPathPlanGraphic));
-         Platform.runLater(() -> getChildren().add(bodyPathRegionsGraphic));
-         Platform.runLater(() -> getChildren().add(footstepPlanningRegionsGraphic));
+         Platform.runLater(() -> getChildren().add(planarRegionsRegionsGraphic));
          Platform.runLater(() -> getChildren().add(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
       }
@@ -215,8 +208,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private void clearGraphics()
    {
-      bodyPathRegionsGraphic.clear();
-      footstepPlanningRegionsGraphic.clear();
+      planarRegionsRegionsGraphic.clear();
       startAndGoalFootPoses.clear();
       footstepPlanGraphic.clear();
    }
