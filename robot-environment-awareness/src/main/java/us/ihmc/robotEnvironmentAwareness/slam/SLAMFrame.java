@@ -3,6 +3,9 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.RandomNumbers;
@@ -26,6 +29,8 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
 {
+   private static final boolean calculateInParallel = true;
+
    private final Long timestamp;
    private final SLAMFrame previousFrame;
 
@@ -79,11 +84,11 @@ public class SLAMFrame
     * the features being used for SLAM). They are updated with {@link #driftCompensationTransform} each time
     * {@link SLAMFrame#updateOptimizedPointCloudAndSensorPose()} is called.
     */
-   private final List<Plane3D> surfaceElements = new ArrayList<>();
+   private List<Plane3D> surfaceElements = new ArrayList<>();
    /**
     * Surface elements expressed in the local frame. They are absolute, and unaffected by drift correction, as they are local values.
     */
-   private final List<Plane3DReadOnly> surfaceElementsInLocalFrame = new ArrayList<>();
+   private List<Plane3DReadOnly> surfaceElementsInLocalFrame = new ArrayList<>();
    private final NormalEstimationParameters normalEstimationParameters;
 
    private NormalOcTree frameMap;
@@ -126,10 +131,8 @@ public class SLAMFrame
       correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
-      pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld);
-      correctedPointCloudInWorld = new ArrayList<>();
-      for (int i = 0; i < pointCloudInLocalFrame.size(); i++)
-         correctedPointCloudInWorld.add(new Point3D(pointCloudInLocalFrame.get(i)));
+      pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld, calculateInParallel);
+
 
       updateOptimizedPointCloudAndSensorPose();
    }
@@ -150,16 +153,23 @@ public class SLAMFrame
       correctedSensorPoseInWorld.getRotation().normalize();
       correctedSensorPoseInWorld.multiply(driftCompensationTransform);
 
-      for (int i = 0; i < correctedPointCloudInWorld.size(); i++)
-         correctedLocalPoseInWorld.transform(pointCloudInLocalFrame.get(i), correctedPointCloudInWorld.get(i));
+      Stream<Point3DReadOnly> pointCloudStream = calculateInParallel ? pointCloudInLocalFrame.parallelStream() : pointCloudInLocalFrame.stream();
+      correctedPointCloudInWorld = pointCloudStream.map(pointInLocal ->
+                                                        {
+                                                           Point3D pointInWorld = new Point3D();
+                                                           correctedLocalPoseInWorld.transform(pointInLocal, pointInWorld);
+                                                           return pointInWorld;
+                                                        }).collect(Collectors.toList());
 
-      for (int i = 0; i < surfaceElements.size(); i++)
-      {
-         Plane3D surfel = surfaceElements.get(i);
-         surfel.set(surfaceElementsInLocalFrame.get(i));
-         getCorrectedLocalPoseInWorld().transform(surfel.getPoint());
-         getCorrectedLocalPoseInWorld().transform(surfel.getNormal());
-      }
+      Stream<Plane3DReadOnly> surfaceElementInLocalStream = calculateInParallel ? surfaceElementsInLocalFrame.parallelStream() : surfaceElementsInLocalFrame.stream();
+      surfaceElements = surfaceElementInLocalStream.map(surfaceElementInLocal ->
+                                                        {
+                                                           Plane3D surfel = new Plane3D();
+                                                           surfel.set(surfaceElementInLocal);
+                                                           getCorrectedLocalPoseInWorld().transform(surfel.getPoint());
+                                                           getCorrectedLocalPoseInWorld().transform(surfel.getNormal());
+                                                           return surfel;
+                                                        }).collect(Collectors.toList());
    }
 
    public void registerSurfaceElements(NormalOcTree map,
@@ -169,8 +179,6 @@ public class SLAMFrame
                                        boolean updateNormal,
                                        int maxNumberOfSurfaceElements)
    {
-      surfaceElements.clear();
-      surfaceElementsInLocalFrame.clear();
       frameMap = new NormalOcTree(surfaceElementResolution);
 
       ConvexPolygon2D mapHullInWorld = new ConvexPolygon2D();
@@ -178,7 +186,11 @@ public class SLAMFrame
          mapHullInWorld.addVertex(node.getHitLocationX(), node.getHitLocationY());
       mapHullInWorld.update();
 
-      frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(), getUncorrectedLocalPoseInWorld().getTranslation(), mapHullInWorld, windowMargin), false);
+      frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(),
+                                           getUncorrectedLocalPoseInWorld().getTranslation(),
+                                           mapHullInWorld,
+                                           windowMargin,
+                                           calculateInParallel), false);
       frameMap.enableParallelComputationForNormals(true);
 
       frameMap.setNormalEstimationParameters(normalEstimationParameters);
@@ -186,27 +198,28 @@ public class SLAMFrame
          frameMap.updateNormals();
 
       OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(frameMap.getRoot());
-      for (NormalOcTreeNode node : iterable)
-      {
-         if (node.getNumberOfHits() >= minimumNumberOfHits)
-         {
-            if (!updateNormal || node.getNormalAverageDeviation() < 0.00005)
-            {
-               Plane3D surfaceElement = new Plane3D();
-               node.getNormal(surfaceElement.getNormal());
-               node.getHitLocation(surfaceElement.getPoint());
-
-               surfaceElements.add(surfaceElement);
-            }
-         }
-      }
+      Stream<NormalOcTreeNode> nodeStream = StreamSupport.stream(iterable.spliterator(), calculateInParallel);
+      surfaceElements = nodeStream.filter(node -> isValidNode(node, minimumNumberOfHits, 0.00005, updateNormal)).map(node ->
+                                                                                                                     {
+                                                                                                                        Plane3D surfaceElement = new Plane3D();
+                                                                                                                        node.getNormal(surfaceElement.getNormal());
+                                                                                                                        node.getHitLocation(surfaceElement.getPoint());
+                                                                                                                        return surfaceElement;
+                                                                                                                     }).collect(Collectors.toList());
 
       randomlySampleSurfaceElements(surfaceElements, maxNumberOfSurfaceElements);
 
-      surfaceElements.forEach(surfaceElement -> surfaceElementsInLocalFrame.add(SLAMTools.createConvertedSurfaceElementToSensorPose(
+      Stream<Plane3D> surfaceElementStream = calculateInParallel ? surfaceElements.parallelStream() : surfaceElements.stream();
+      surfaceElementsInLocalFrame = surfaceElementStream.map(surfaceElement -> SLAMTools.createConvertedSurfaceElementToSensorPose(
             getUncorrectedLocalPoseInWorld(),
-            surfaceElement)));
+            surfaceElement)).collect(Collectors.toList());
    }
+
+   private static boolean isValidNode(NormalOcTreeNode node, int minimumNumberOfHits, double maximumAverageDeviation, boolean updateNormal)
+   {
+      return node.getNumberOfHits() >= minimumNumberOfHits && (!updateNormal || node.getNormalAverageDeviation() < maximumAverageDeviation);
+   }
+
 
    private static void randomlySampleSurfaceElements(List<Plane3D> surfaceElementsToSample, int maxNumberOfSurfaceElements)
    {
