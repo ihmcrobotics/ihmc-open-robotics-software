@@ -33,6 +33,5 @@ mainDependencies {
 }
 
 testDependencies {
-
    api("us.ihmc:ihmc-communication-test:source")
 }
