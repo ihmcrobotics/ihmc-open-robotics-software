@@ -6,10 +6,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SLAMFrameState
 {
    private Point3DReadOnly[] uncorrectedPointCloudInWorld = new Point3DReadOnly[0];
-   private Point3DReadOnly[] correctedPointCloudInWorld = new Point3DReadOnly[0];
+   private List<? extends Point3DReadOnly> correctedPointCloudInWorld = new ArrayList<>();
    private Point3DReadOnly[] correspondingPointsInWorld = new Point3DReadOnly[0];
 
    private final Point3D sensorPosition = new Point3D();
@@ -34,7 +37,7 @@ public class SLAMFrameState
       this.uncorrectedPointCloudInWorld = uncorrectedPointCloudInWorld;
    }
 
-   public void setCorrectedPointCloudInWorld(Point3DReadOnly[] correctedPointCloudInWorld)
+   public void setCorrectedPointCloudInWorld(List<? extends Point3DReadOnly> correctedPointCloudInWorld)
    {
       this.correctedPointCloudInWorld = correctedPointCloudInWorld;
    }
@@ -49,7 +52,7 @@ public class SLAMFrameState
       return uncorrectedPointCloudInWorld;
    }
 
-   public Point3DReadOnly[] getCorrectedPointCloudInWorld()
+   public List<? extends Point3DReadOnly> getCorrectedPointCloudInWorld()
    {
       return correctedPointCloudInWorld;
    }
