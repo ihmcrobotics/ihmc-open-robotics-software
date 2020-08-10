@@ -75,7 +75,7 @@
                         <Font size="9.0" />
                      </font>
                   </CheckBox>
-                  <CheckBox mnemonicParsing="false" text="Realsense video" GridPane.columnIndex="2" GridPane.rowIndex="5">
+                  <CheckBox fx:id="showRealsenseVideo" mnemonicParsing="false" onAction="#showRealsenseVideo" text="Realsense video" GridPane.columnIndex="2" GridPane.rowIndex="5">
                      <font>
                         <Font size="9.0" />
                      </font>
