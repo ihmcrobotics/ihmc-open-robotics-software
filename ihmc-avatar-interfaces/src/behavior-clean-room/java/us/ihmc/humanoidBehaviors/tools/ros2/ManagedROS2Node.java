@@ -25,18 +25,18 @@ public class ManagedROS2Node implements ROS2NodeInterface
    }
 
    @Override
-   public <T> Ros2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName) throws IOException
+   public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName) throws IOException
    {
       return createManagedPublisher(ros2Node.createPublisher(topicDataType, topicName));
    }
 
    @Override
-   public <T> Ros2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName, Ros2QosProfile qosProfile) throws IOException
+   public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName, Ros2QosProfile qosProfile) throws IOException
    {
       return createManagedPublisher(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
    }
 
-   private <T> ManagedROS2Publisher<T> createManagedPublisher(Ros2PublisherBasics<T> publisher)
+   private <T> ManagedROS2Publisher<T> createManagedPublisher(ROS2PublisherBasics<T> publisher)
    {
       return new ManagedROS2Publisher<>(publisher, enabled::get);
    }
