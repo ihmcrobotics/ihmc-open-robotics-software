@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 /**
  * The purpose of this class is to check on the robot progress
@@ -20,7 +20,7 @@ public class WalkingFootstepTracker
    private int stepsCommanded = 0;
    private int stepsCompleted = 0;
 
-   public WalkingFootstepTracker(Ros2NodeInterface ros2Node, String robotName)
+   public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
       new ROS2Callback<>(ros2Node,
                          FootstepDataListMessage.class,
