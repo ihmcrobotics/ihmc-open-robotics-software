@@ -31,7 +31,7 @@ public class ManagedROS2Node implements ROS2NodeInterface
    }
 
    @Override
-   public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName, Ros2QosProfile qosProfile) throws IOException
+   public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName, ROS2QosProfile qosProfile) throws IOException
    {
       return createManagedPublisher(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
    }
@@ -52,7 +52,7 @@ public class ManagedROS2Node implements ROS2NodeInterface
    public <T> Ros2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
                                                      NewMessageListener<T> newMessageListener,
                                                      String topicName,
-                                                     Ros2QosProfile qosProfile) throws IOException
+                                                     ROS2QosProfile qosProfile) throws IOException
    {
       return ros2Node.createSubscription(topicDataType, createManagedListener(newMessageListener), topicName, qosProfile);
    }
@@ -62,7 +62,7 @@ public class ManagedROS2Node implements ROS2NodeInterface
                                                      NewMessageListener<T> newMessageListener,
                                                      SubscriptionMatchedListener<T> subscriptionMatchedListener,
                                                      String topicName,
-                                                     Ros2QosProfile qosProfile) throws IOException
+                                                     ROS2QosProfile qosProfile) throws IOException
    {
       ManagedROS2Listener<T> managedListener = new ManagedROS2Listener<T>(newMessageListener, subscriptionMatchedListener, enabled::get);
       return ros2Node.createSubscription(topicDataType, managedListener, managedListener, topicName, qosProfile);

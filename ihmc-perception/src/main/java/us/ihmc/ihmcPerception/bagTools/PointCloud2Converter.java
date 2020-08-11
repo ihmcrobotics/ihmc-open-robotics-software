@@ -9,7 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.Ros2QosProfile;
+import us.ihmc.ros2.ROS2QosProfile;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -57,7 +57,7 @@ public class PointCloud2Converter
          }
       };
 
-      Ros2QosProfile rosQoSProfile = Ros2QosProfile.DEFAULT();
+      ROS2QosProfile rosQoSProfile = ROS2QosProfile.DEFAULT();
       ros2Node.createSubscription(pointCloudDataType, pointCloudCallback, pointCloudTopicName, rosQoSProfile);
 
       ThreadFactory threadFactory = ThreadTools.createNamedThreadFactory(getClass().getSimpleName());
