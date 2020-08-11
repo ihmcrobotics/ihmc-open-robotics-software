@@ -13,8 +13,8 @@ import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 
 public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 {
@@ -25,12 +25,12 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private boolean acceptNewRegions = true;
    private volatile PlanarRegionsList latestPlanarRegionsList = new PlanarRegionsList(); // prevent NPEs
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
+   public LivePlanarRegionsGraphic(ROS2Node ros2Node, boolean initializeToFlatGround)
    {
       this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, initializeToFlatGround);
    }
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
+   public LivePlanarRegionsGraphic(ROS2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
 

@@ -48,7 +48,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -81,7 +81,7 @@ public class HumanoidKinematicsSimulation
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
    private final PausablePeriodicThread controlThread;
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

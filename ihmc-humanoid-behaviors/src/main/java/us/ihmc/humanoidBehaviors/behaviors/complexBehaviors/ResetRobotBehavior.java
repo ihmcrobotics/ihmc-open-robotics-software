@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ResetRobotBehavior extends AbstractBehavior
@@ -25,12 +25,12 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private final PipeLine<AbstractBehavior> pipeLine;
 
-   public ResetRobotBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public ResetRobotBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, true, true, true, true, ros2Node, yoTime);
    }
 
-   public ResetRobotBehavior(String robotName, boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, Ros2Node ros2Node, YoDouble yoTime)
+   public ResetRobotBehavior(String robotName, boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);

@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPointCloudPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class AtlasPerceptionSimulation
 {
@@ -25,7 +25,7 @@ public class AtlasPerceptionSimulation
    public AtlasPerceptionSimulation(CommunicationMode communicationMode, PlanarRegionsList map, boolean runRealsenseSLAM, DRCRobotModel robotModel)
    {
       this.runRealsenseSLAM = runRealsenseSLAM;
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "perception");
+      ROS2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "perception");
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(map, robotModel, ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(map, robotModel, ros2Node);
 

@@ -1,14 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
-import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.ui.LiveMapUI;
@@ -18,7 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
@@ -34,7 +30,7 @@ public class PerceptionSuite
    private final PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
    private final PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
 
-   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   protected final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final Messager messager;
 

@@ -19,7 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -33,7 +33,7 @@ public class AtlasKinematicSimWithCamera
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    private IHMCROS2Publisher<VideoPacket> scsCameraPublisher;
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    public AtlasKinematicSimWithCamera(CommonAvatarEnvironmentInterface environment)
    {

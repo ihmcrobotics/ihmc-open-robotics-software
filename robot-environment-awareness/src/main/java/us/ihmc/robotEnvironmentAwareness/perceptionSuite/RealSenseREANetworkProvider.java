@@ -15,7 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
@@ -24,7 +24,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
@@ -33,7 +33,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
       this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), stereoOutputTopic);
    }
 
-   public RealSenseREANetworkProvider(Ros2Node ros2Node, ROS2Topic stereoOutputTopic)
+   public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic stereoOutputTopic)
    {
       this.ros2Node = ros2Node;
 

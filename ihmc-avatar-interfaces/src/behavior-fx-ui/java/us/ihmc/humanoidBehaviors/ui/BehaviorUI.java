@@ -25,7 +25,7 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class BehaviorUI
    {
       this.behaviorMessager = behaviorMessager;
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
+      ROS2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
       {

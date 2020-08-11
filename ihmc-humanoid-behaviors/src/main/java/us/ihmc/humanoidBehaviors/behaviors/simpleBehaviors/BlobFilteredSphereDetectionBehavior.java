@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 {
@@ -32,7 +32,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
 
-   public BlobFilteredSphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
+   public BlobFilteredSphereDetectionBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames,
                                               FullHumanoidRobotModel fullRobotModel)
    {
       super(robotName, ros2Node, referenceFrames);

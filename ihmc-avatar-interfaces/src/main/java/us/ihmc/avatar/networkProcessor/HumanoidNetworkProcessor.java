@@ -34,7 +34,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -59,7 +59,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    private final DRCRobotModel robotModel;
    private final PubSubImplementation pubSubImplementation;
 
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
    private URI rosURI;
    private ObjectCommunicator simulatedSensorCommunicator;
 
@@ -150,7 +150,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
    }
 
-   public Ros2Node getOrCreateRos2Node()
+   public ROS2Node getOrCreateRos2Node()
    {
       if (ros2Node == null)
       {

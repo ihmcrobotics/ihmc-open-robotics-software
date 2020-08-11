@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
@@ -26,7 +26,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
 
    private final YoBoolean locationEnabled;
 
-   public FiducialDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FiducialDetectorBehaviorService(String robotName, String ThreadName, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ThreadName, ros2Node);
 

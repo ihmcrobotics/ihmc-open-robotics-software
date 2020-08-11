@@ -72,7 +72,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -112,7 +112,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected SimulationConstructionSet scs;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
    protected HumanoidFloatingRootJointRobot robot, ghost;
-   protected Ros2Node ros2Node;
+   protected ROS2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
    protected ROS2Topic controllerInputTopic;

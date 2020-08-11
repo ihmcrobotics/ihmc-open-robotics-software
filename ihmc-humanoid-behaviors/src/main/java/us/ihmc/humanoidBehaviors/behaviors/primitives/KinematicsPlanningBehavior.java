@@ -28,7 +28,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class KinematicsPlanningBehavior extends AbstractBehavior
 {
@@ -53,7 +53,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    private int planningResult = -1;
    private int numberOfValidKeyFrames = -1;
 
-   public KinematicsPlanningBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public KinematicsPlanningBehavior(String robotName, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                      FullHumanoidRobotModel fullRobotModel)
    {
       super(robotName, ros2Node);

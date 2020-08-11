@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,7 +50,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final ReferenceFrame midFootZUpFrame;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
-   public RepeatedlyWalkFootstepListBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public RepeatedlyWalkFootstepListBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       super(robotName, ros2Node);
 

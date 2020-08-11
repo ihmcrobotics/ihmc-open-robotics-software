@@ -27,7 +27,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotVisionSensorInformation;
@@ -42,7 +42,7 @@ public class RosModule implements CloseableAndDisposable
 
    private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final RosMainNode rosMainNode;
    private final RobotROSClockCalculator rosClockCalculator;

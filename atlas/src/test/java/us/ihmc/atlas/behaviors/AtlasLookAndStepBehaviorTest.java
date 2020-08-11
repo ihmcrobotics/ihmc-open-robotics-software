@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -65,7 +65,7 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    private BehaviorModule behaviorModule;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
    private Messager behaviorMessager;
    private PausablePeriodicThread monitorThread;
    private LookAndStepRemoteVisualizer lookAndStepVisualizer;

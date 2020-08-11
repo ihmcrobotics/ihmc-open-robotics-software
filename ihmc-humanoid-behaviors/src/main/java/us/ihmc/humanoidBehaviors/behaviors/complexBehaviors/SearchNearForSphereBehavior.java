@@ -12,14 +12,13 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SearchNearForSphereB
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNearState>
@@ -35,7 +34,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final ReferenceFrame chestCoMFrame;
 
    public SearchNearForSphereBehavior(String robotName, YoDouble yoTime,
-                                      HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node,
+                                      HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, ROS2Node ros2Node,
                                       AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "SearchForSpehereNear", SearchNearState.class, yoTime, ros2Node);

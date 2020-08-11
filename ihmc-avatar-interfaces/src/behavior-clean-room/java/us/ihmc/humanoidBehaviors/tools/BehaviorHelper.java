@@ -25,7 +25,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.commons.thread.TypedNotification;
@@ -80,7 +80,7 @@ public class BehaviorHelper
    private StatusLogger statusLogger;
 
 
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2Node ros2Node)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);

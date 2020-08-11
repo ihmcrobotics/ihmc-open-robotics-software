@@ -90,7 +90,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.taskExecutor.NullState;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -255,7 +255,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
+                             YoDouble yoTime, YoBoolean yoDoubleSupport, ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
                              YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);

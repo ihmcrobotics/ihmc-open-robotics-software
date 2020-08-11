@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -24,7 +24,7 @@ public class WalkToFiducialAndTurnBehavior extends StateMachineBehavior<WalkAndT
    private TurnInPlaceBehavior turnInPlaceBehavior;
    private boolean turnLeft = false;
 
-   public WalkToFiducialAndTurnBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+   public WalkToFiducialAndTurnBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
                                         HumanoidReferenceFrames referenceFrames, FootstepPlannerParametersBasics footstepPlannerParameters, GoalDetectorBehaviorService goalDetectorBehaviorService,
                                         FullHumanoidRobotModel fullRobotModel)
    {

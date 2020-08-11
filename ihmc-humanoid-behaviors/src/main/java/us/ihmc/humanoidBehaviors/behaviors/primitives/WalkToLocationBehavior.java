@@ -25,7 +25,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -73,7 +73,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
-   public WalkToLocationBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+   public WalkToLocationBehavior(String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
                                  HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
       super(robotName, ros2Node);

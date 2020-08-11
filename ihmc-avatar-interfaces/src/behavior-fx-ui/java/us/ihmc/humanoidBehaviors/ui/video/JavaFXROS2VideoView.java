@@ -14,7 +14,7 @@ import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +39,7 @@ public class JavaFXROS2VideoView extends ImageView
       writableImageBuffer = new ConcurrentRingBuffer<>(() -> new WritableImage(width, height), 4);
    }
 
-   public void start(Ros2Node ros2Node)
+   public void start(ROS2Node ros2Node)
    {
       if (running)
       {

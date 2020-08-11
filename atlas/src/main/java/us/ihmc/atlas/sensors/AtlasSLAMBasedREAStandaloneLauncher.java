@@ -23,7 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
@@ -34,7 +34,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    private final boolean spawnUIs;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
    private Messager slamMessager;
    private Messager segmentationMessager;
    private SLAMBasedEnvironmentAwarenessUI ui;
