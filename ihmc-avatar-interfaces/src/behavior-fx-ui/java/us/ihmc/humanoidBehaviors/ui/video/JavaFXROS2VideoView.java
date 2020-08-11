@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.video;
 
 import controller_msgs.msg.dds.VideoPacket;
-import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2NodeInterface;
 
@@ -9,7 +9,7 @@ public class JavaFXROS2VideoView extends JavaFXVideoView
 {
    private final Ros2NodeInterface ros2Node;
    private final ROS2Topic<VideoPacket> topic;
-   private ROS2Callback<VideoPacket> ros2Callback;
+   private IHMCROS2Callback<VideoPacket> ros2Callback;
 
    public JavaFXROS2VideoView(Ros2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic, int width, int height, boolean flipX, boolean flipY)
    {
@@ -22,7 +22,7 @@ public class JavaFXROS2VideoView extends JavaFXVideoView
    @Override
    public void start()
    {
-      ros2Callback = new ROS2Callback<>(ros2Node, topic, this::acceptVideo);
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, topic, this::acceptVideo);
       super.start();
    }
 
