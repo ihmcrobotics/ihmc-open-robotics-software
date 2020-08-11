@@ -9,7 +9,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -202,8 +202,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       lowlLevelController.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
    }
 
-   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
-      lowlLevelController.setupLowLevelControlCommunication(robotName, realtimeRos2Node);
+      lowlLevelController.setupLowLevelControlCommunication(robotName, realtimeROS2Node);
    }
 }

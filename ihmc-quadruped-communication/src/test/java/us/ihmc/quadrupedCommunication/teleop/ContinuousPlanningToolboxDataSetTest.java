@@ -82,7 +82,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -127,7 +127,7 @@ public class ContinuousPlanningToolboxDataSetTest
    private PawStepPlannerParametersBasics footstepPlannerParameters = null;
    private QuadrupedContinuousPlanningModule continuousPlanningModule = null;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
 
    private final AtomicReference<PawStepPlan> planReference = new AtomicReference<>(null);
    private final AtomicReference<List<Pose3D>> pathReference = new AtomicReference<>(null);

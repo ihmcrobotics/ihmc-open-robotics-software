@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
@@ -58,7 +58,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
    private final MirroredYoVariableRegistry registry;
 
-   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
+   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node,
                                           ROS2Topic outputTopic, ROS2Topic inputTopic)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
@@ -70,9 +70,9 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
       sendFingerJointGains.set(true);
 
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
                                                                                                                   outputTopic);
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
@@ -105,9 +105,9 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
          {
             HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
-            if (realtimeRos2Node != null)
+            if (realtimeROS2Node != null)
             {
-               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, inputTopic,
+               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
                                                              handDesiredConfigurationSubscriber);
             }
 

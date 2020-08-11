@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -67,14 +67,14 @@ public class TrackingCameraBridge
       stampedPosePacketPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.T265_POSE)::publish;
    }
 
-   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, RealtimeRos2Node realtimeRos2Node)
+   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, RealtimeROS2Node realtimeROS2Node)
    {
       this.fullRobotModel = fullRobotModel;
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      stampedPosePacketPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ROS2Tools.T265_POSE)::publish;
+      stampedPosePacketPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.T265_POSE)::publish;
    }
 
    public void start()

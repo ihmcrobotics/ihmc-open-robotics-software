@@ -49,7 +49,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -478,7 +478,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
-   public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
       ROS2Topic inputTopic = ROS2Tools.getQuadrupedControllerInputTopic(robotName);
       ROS2Topic outputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
@@ -486,7 +486,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                                 commandInputManager,
                                                                                                 outputTopic,
                                                                                                 statusMessageOutputManager,
-                                                                                                realtimeRos2Node);
+                                                                                                realtimeROS2Node);
       controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
    }

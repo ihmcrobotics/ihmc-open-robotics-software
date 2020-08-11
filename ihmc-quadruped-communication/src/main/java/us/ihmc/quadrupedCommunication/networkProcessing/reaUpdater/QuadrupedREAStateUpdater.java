@@ -14,11 +14,11 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class QuadrupedREAStateUpdater
 {
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));

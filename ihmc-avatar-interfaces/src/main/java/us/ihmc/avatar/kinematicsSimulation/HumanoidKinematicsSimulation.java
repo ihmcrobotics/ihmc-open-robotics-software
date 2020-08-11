@@ -47,7 +47,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -228,7 +228,7 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(kinematicsSimulationParameters.getPubSubImplementation(),
+      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(kinematicsSimulationParameters.getPubSubImplementation(),
                                                                            ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
@@ -236,7 +236,7 @@ public class HumanoidKinematicsSimulation
                                                                                                 walkingInputManager,
                                                                                                 outputTopic,
                                                                                                 walkingOutputManager,
-                                                                                                realtimeRos2Node);
+                                                                                                realtimeROS2Node);
       controllerNetworkSubscriber.addMessageFilter(message ->
       {
          if (message instanceof FootstepDataListMessage)
@@ -252,7 +252,7 @@ public class HumanoidKinematicsSimulation
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
-      realtimeRos2Node.spin();
+      realtimeROS2Node.spin();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT,
                                                                                        GRAVITY_Z,

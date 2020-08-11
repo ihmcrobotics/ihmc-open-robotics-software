@@ -15,12 +15,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
 {
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
