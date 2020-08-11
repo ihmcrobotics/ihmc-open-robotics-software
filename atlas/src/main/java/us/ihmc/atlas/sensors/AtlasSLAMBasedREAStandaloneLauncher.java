@@ -66,7 +66,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
 
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
       slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();

@@ -141,15 +141,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
       createToolboxController(ghostRobotModel);
       setupCollisions(ghostRobotModel.getHumanoidRobotKinematicsCollisionModel(), ghost);
 
-      ros2Node = drcSimulationTestHelper.getRos2Node();
+      ros2Node = drcSimulationTestHelper.getROS2Node();
 
       controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-      RealtimeROS2Node toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
-      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxRos2Node);
+      RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
       IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                          WholeBodyTrajectoryMessage.class,
                                                                                                          controllerInputTopic);
@@ -202,7 +202,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             ghost.setController(ghostController, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
       }
 
-      toolboxRos2Node.spin();
+      toolboxROS2Node.spin();
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       scs = drcSimulationTestHelper.getSimulationConstructionSet();
    }

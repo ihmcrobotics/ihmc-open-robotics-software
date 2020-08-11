@@ -217,7 +217,7 @@ public class ContinuousPlanningToolboxDataSetTest
       continuousPlanningModule.setRootRegistry(testRegistry, null);
       planningFailed = ((YoBoolean) testRegistry.getVariable("planningFailed"));
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PawStepPlanningToolboxOutputStatus.class,

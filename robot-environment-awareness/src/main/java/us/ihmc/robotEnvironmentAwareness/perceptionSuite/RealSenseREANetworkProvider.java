@@ -30,7 +30,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
 
    public RealSenseREANetworkProvider(ROS2Topic stereoOutputTopic)
    {
-      this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), stereoOutputTopic);
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), stereoOutputTopic);
    }
 
    public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic stereoOutputTopic)

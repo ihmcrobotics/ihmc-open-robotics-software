@@ -54,7 +54,7 @@ public class RemotePlannerMessageConverter
 
    public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
    }
 

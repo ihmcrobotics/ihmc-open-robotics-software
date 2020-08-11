@@ -21,8 +21,8 @@ public class LidarImageFusionProcessorLauncher extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.STEREO_REA_NODE_NAME);
-      //ROS2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_lidar_image_fusion_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.STEREO_REA_NODE_NAME);
+      //ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_lidar_image_fusion_ui");
 
       messager = new SharedMemoryJavaFXMessager(LidarImageFusionAPI.API);
       messager.startMessager();

@@ -39,7 +39,7 @@ public class PointCloud2Converter
 
    public PointCloud2Converter() throws IOException
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
       AtomicLong timestamp = new AtomicLong(-1);
       AtomicInteger counter = new AtomicInteger();

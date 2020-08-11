@@ -14,6 +14,6 @@ public abstract class HandControlThread implements Runnable
    public HandControlThread(RobotSide robotSide)
    {
       String nodeName = robotSide.getLowerCaseName() + "_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName());
-      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, nodeName);
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, nodeName);
    }
 }

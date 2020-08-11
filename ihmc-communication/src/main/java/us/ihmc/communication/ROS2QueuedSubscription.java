@@ -11,7 +11,7 @@ import us.ihmc.ros2.ROS2Subscription;
  * @deprecated Be careful using this class! TODO undeprecate and make thread safe, using ROS2Callback
  * @param <T>
  */
-public class Ros2QueuedSubscription<T> implements NewMessageListener<T>
+public class ROS2QueuedSubscription<T> implements NewMessageListener<T>
 {
    private final T data;
    private final ConcurrentRingBuffer<T> messageQueue;
@@ -19,7 +19,7 @@ public class Ros2QueuedSubscription<T> implements NewMessageListener<T>
    private final TopicDataType<T> topicDataTypeForPoll;
    private ROS2Subscription<T> rosSubscription;
 
-   public Ros2QueuedSubscription(TopicDataType<T> topicDataType, int queueDepth)
+   public ROS2QueuedSubscription(TopicDataType<T> topicDataType, int queueDepth)
    {
       this.data = topicDataType.createData();
       this.messageQueue = new ConcurrentRingBuffer<>(() -> topicDataType.createData(), queueDepth);
@@ -80,7 +80,7 @@ public class Ros2QueuedSubscription<T> implements NewMessageListener<T>
       }
    }
 
-   void setRos2Subscription(ROS2Subscription<T> rosSubscription)
+   void setROS2Subscription(ROS2Subscription<T> rosSubscription)
    {
       this.rosSubscription = rosSubscription;
    }

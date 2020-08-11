@@ -160,7 +160,7 @@ public class AtlasCorridorNavigationTest
          AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
       }).start();
 
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubMode, "test_node");
 
       if (VISUALIZE)
       {

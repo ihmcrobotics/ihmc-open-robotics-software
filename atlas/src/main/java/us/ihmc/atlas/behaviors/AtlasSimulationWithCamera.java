@@ -68,7 +68,7 @@ public class AtlasSimulationWithCamera
                                                             contactPointParameters.getAdditionalContactTransforms().get(i));
       }
 
-      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "humanoid_simulation_controller");
+      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "humanoid_simulation_controller");
 
       scsCameraPublisher = ROS2Tools.createPublisher(realtimeROS2Node, VideoPacket.class, "/ihmc/video");
 
@@ -98,7 +98,7 @@ public class AtlasSimulationWithCamera
       avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(0.0, 0.0));
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setRealtimeRos2Node(realtimeROS2Node);
+      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(false);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();

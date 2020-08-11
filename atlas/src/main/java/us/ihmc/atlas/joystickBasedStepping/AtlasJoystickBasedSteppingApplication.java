@@ -22,7 +22,7 @@ import us.ihmc.ros2.ROS2Node;
 public class AtlasJoystickBasedSteppingApplication extends Application
 {
    private JoystickBasedSteppingMainUI ui;
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_xbox_joystick_control");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_xbox_joystick_control");
    private IHMCROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorcommandPublisher;
 
    @Override

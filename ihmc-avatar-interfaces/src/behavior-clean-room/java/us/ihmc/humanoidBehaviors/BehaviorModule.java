@@ -72,7 +72,7 @@ public class BehaviorModule
 
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
 
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {

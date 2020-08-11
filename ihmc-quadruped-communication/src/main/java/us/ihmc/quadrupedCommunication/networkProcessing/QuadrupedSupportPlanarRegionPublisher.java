@@ -83,7 +83,7 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),

@@ -58,7 +58,7 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ROS2Node ros2Node = drcBehaviorTestHelper.getRos2Node();
+      ROS2Node ros2Node = drcBehaviorTestHelper.getROS2Node();
       CollaborativeBehavior collaborativeBehavior = new CollaborativeBehavior(robotModel.getSimpleRobotName(),
                                                                               ros2Node,
                                                                               referenceFrames,

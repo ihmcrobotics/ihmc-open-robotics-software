@@ -51,7 +51,7 @@ public class ValkyrieExternalForceEstimationSimulation
       simulationStarter.createSimulation(null, false, false);
 
       double controllerDT = robotModel.getControllerDT();
-      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_sim");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_sim");
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry scsRootRegistry = simulationStarter.getAvatarSimulation().getSimulationConstructionSet().getRootRegistry();

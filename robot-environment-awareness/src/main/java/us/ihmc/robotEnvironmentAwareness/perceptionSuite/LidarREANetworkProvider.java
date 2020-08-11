@@ -34,7 +34,7 @@ public class LidarREANetworkProvider implements REANetworkProvider
    public LidarREANetworkProvider(ROS2Topic outputTopic,
                                   ROS2Topic lidarOutputTopic)
    {
-      this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            outputTopic,
            lidarOutputTopic);
    }

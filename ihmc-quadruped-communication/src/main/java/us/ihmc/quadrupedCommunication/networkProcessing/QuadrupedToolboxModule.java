@@ -98,7 +98,7 @@ public abstract class QuadrupedToolboxModule
       this.startYoVariableServer = startYoVariableServer;
       this.dataServerSettings = dataServerSettings;
       this.fullRobotModel = fullRobotModelToLog;
-      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
       outputManager = new OutputManager(createMapOfSupportedOutputMessages());
       networkSubscriber = new NetworkSubscriber(getInputTopic(), inputManager, getOutputTopic(), outputManager,

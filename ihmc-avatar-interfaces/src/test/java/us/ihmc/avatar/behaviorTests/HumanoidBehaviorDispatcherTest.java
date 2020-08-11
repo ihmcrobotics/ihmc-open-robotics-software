@@ -136,7 +136,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       registry = new YoVariableRegistry(getClass().getSimpleName());
       this.yoTime = new YoDouble("yoTime", registry);
 
-      this.ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_humanoid_behavior_dispatcher_test");
+      this.ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_humanoid_behavior_dispatcher_test");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getSimpleRobotName());
@@ -159,7 +159,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                                                                                                         fullRobotModel, sensorInfo,
                                                                                                         robotDataReceiver.getForceSensorDataHolder(),
                                                                                                         IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT,
-                                                                                                        drcSimulationTestHelper.getRos2Node(), registry);
+                                                                                                        drcSimulationTestHelper.getROS2Node(), registry);
          behaviorDispatcher.addUpdatable(wristSensorUpdatable);
       }
 

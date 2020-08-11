@@ -48,7 +48,7 @@ public class LidarScanMessageImporter
 
       System.out.println("Loaded " + numberOfMessages + " messages");
 
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
       IHMCROS2Publisher<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
 
       for (int i = 0; i < PUBLISH_N_TIMES; i++)

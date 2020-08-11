@@ -120,7 +120,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
 
       FullHumanoidRobotModel fullRobotModel = robotModelFactory.createFullRobotModel();
 

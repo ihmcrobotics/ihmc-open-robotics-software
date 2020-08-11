@@ -44,7 +44,7 @@ class ROS2ToolsTest
 
    public void testROS2Communication()
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
       IHMCROS2Publisher<Int64> intPublisher = new IHMCROS2Publisher<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
 

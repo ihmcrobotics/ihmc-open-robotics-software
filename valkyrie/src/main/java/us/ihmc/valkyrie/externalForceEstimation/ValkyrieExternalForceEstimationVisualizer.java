@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
 {
-   private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
+   private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
    private final ROS2Topic inputTopic;
    private final ROS2Topic outputTopic;
    private final int endEffectorHashCode;

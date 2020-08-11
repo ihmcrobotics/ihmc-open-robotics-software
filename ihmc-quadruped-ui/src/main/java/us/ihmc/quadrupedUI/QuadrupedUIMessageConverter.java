@@ -510,7 +510,7 @@ public class QuadrupedUIMessageConverter
 
    public static QuadrupedUIMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_quadruped_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_quadruped_ui");
       return createConverter(ros2Node, messager, robotName);
    }
 

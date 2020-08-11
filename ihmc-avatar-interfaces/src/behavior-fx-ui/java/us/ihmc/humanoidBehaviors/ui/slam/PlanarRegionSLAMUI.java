@@ -23,7 +23,7 @@ public class PlanarRegionSLAMUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "behavior_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_ui");
 
       LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
       LabelGraphic.initializeYoVariables(parameterServer.getRegistry());

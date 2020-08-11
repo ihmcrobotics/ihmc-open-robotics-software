@@ -29,7 +29,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
 
    public ZeroPoseMockRobotConfigurationDataPublisherModule(final DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_zero_pose_mock_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_zero_pose_mock_node");
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 

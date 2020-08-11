@@ -103,7 +103,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    public void setup()
    {
-      localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      localNode = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else

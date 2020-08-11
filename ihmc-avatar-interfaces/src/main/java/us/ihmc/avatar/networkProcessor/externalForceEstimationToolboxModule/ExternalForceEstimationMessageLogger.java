@@ -61,7 +61,7 @@ public class ExternalForceEstimationMessageLogger
    public ExternalForceEstimationMessageLogger(String robotName)
    {
       this.robotName = robotName;
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);

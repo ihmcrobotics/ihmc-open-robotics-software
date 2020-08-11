@@ -81,7 +81,7 @@ public abstract class BehaviorService
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
-   protected ROS2Node getRos2Node()
+   protected ROS2Node getROS2Node()
    {
       return ros2Node;
    }

@@ -46,7 +46,7 @@ public class BuildingExplorationBehaviorCoordinator
 
    public BuildingExplorationBehaviorCoordinator(String robotName, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, getClass().getSimpleName());
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, getClass().getSimpleName());
       executorService = Executors.newSingleThreadScheduledExecutor();
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();

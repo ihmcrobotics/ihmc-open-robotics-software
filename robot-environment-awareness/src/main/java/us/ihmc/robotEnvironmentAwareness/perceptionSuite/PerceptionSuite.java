@@ -30,7 +30,7 @@ public class PerceptionSuite
    private final PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
    private final PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
 
-   protected final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   protected final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final Messager messager;
 

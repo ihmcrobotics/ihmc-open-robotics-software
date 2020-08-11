@@ -289,9 +289,9 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createRealtimeRos2Node()
+   private void createRealtimeROS2Node()
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation.get(), "ihmc_quadruped_simulation");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation.get(), "ihmc_quadruped_simulation");
    }
 
    public void createControllerManager()
@@ -476,7 +476,7 @@ public class QuadrupedSimulationFactory
       createFootSwitches();
       createStateEstimatorFootSwitches();
       createSensorReader();
-      createRealtimeRos2Node();
+      createRealtimeROS2Node();
       createControllerManager();
       createStateEstimator();
       createControllerNetworkSubscriber();

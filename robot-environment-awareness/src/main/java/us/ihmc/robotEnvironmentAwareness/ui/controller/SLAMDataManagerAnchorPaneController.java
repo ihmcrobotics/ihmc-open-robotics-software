@@ -155,7 +155,7 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
       uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsVizClear, true);
    }
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                              StereoVisionPointCloudMessage.class,
                                                                                                                              ROS2Tools.IHMC_ROOT);

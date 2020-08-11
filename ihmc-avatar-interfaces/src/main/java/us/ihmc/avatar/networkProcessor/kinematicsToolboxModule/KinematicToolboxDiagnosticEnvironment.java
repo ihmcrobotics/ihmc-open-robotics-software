@@ -29,7 +29,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 public class KinematicToolboxDiagnosticEnvironment
 {
    private final String threadName = "NonRealtimeScheduler";
-   private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_fake_controller");
+   private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_fake_controller");
 
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {

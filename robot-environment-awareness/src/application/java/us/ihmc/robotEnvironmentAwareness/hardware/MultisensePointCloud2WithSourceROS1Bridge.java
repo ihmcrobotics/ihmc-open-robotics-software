@@ -24,7 +24,7 @@ public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicS
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
    
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
 

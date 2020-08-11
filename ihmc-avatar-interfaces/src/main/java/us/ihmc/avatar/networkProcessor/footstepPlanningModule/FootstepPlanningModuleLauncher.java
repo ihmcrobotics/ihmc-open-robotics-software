@@ -69,7 +69,7 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "footstep_planner");
       return createModule(ros2Node, robotModel);
    }
 
