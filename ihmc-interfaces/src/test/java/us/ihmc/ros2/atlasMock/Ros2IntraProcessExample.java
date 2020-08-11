@@ -6,7 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.Ros2QosProfile;
+import us.ihmc.ros2.ROS2QosProfile;
 
 import java.io.IOException;
 
@@ -52,7 +52,7 @@ public class Ros2IntraProcessExample
          }
       }, (subscriber, info) -> {
          System.out.println("Subscription matched!: " + subscriber.getAttributes().getTopic().getTopicName() + " " + info.getStatus().name());
-      }, "/robot_configuration_data", Ros2QosProfile.DEFAULT());
+      }, "/robot_configuration_data", ROS2QosProfile.DEFAULT());
       Thread.currentThread().join();
    }
 

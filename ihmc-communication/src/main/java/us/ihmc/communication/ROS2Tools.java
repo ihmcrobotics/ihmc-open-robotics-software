@@ -277,7 +277,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, Ros2QosProfile.DEFAULT());
+         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, ROS2QosProfile.DEFAULT());
       }
       catch (IOException e)
       {
@@ -324,7 +324,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, Ros2QosProfile.DEFAULT());
+         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
       }
       catch (IOException e)
       {
@@ -362,7 +362,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10);
+         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10);
       }
       catch (IOException e)
       {
@@ -401,7 +401,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10));
+         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10));
       }
       catch (IOException e)
       {
@@ -435,7 +435,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT()));
+         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.DEFAULT()));
       }
       catch (IOException e)
       {
