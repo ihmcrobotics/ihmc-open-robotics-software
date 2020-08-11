@@ -8,14 +8,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.Ros2PublisherBasics;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
 public class IHMCROS2Publisher<T>
 {
    private static final int NUMBER_OF_EXCEPTIONS_TO_PRINT = 5;
 
-   private Ros2PublisherBasics<T> publisher;
+   private ROS2PublisherBasics<T> publisher;
 
    private int numberOfExceptions = 0;
 
@@ -24,7 +24,7 @@ public class IHMCROS2Publisher<T>
       // internal use only
    }
 
-   IHMCROS2Publisher(Ros2PublisherBasics<T> ros2Publisher)
+   IHMCROS2Publisher(ROS2PublisherBasics<T> ros2Publisher)
    {
       this.publisher = ros2Publisher;
    }
