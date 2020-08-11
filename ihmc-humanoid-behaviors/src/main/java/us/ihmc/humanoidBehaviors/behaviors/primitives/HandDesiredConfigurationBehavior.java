@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,7 +25,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    private final boolean DEBUG = false;
    private final IHMCROS2Publisher<HandDesiredConfigurationMessage> publisher;
 
-   public HandDesiredConfigurationBehavior(String robotName, String name, Ros2Node ros2Node, YoDouble yoTime)
+   public HandDesiredConfigurationBehavior(String robotName, String name, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, name, ros2Node);
       this.yoTime = yoTime;

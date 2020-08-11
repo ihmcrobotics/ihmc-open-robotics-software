@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -19,12 +19,12 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> publisher;
 
-   public HeadTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public HeadTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, null, ros2Node, yoTime);
    }
 
-   public HeadTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public HeadTrajectoryBehavior(String robotName, String namePrefix, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, namePrefix, ros2Node);
 

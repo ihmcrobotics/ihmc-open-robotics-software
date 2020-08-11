@@ -53,7 +53,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -160,7 +160,7 @@ public class AtlasCorridorNavigationTest
          AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
       }).start();
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
+      ROS2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
 
       if (VISUALIZE)
       {

@@ -11,8 +11,8 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 class ROS2ToolsTest
@@ -44,7 +44,7 @@ class ROS2ToolsTest
 
    public void testROS2Communication()
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
       IHMCROS2Publisher<Int64> intPublisher = new IHMCROS2Publisher<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
 

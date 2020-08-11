@@ -8,15 +8,15 @@ import javafx.stage.StageStyle;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class JavaFXROS2VideoViewer
 {
    private static final int width = 1024;
    private static final int height = 544;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
 
-   public JavaFXROS2VideoViewer(Ros2Node ros2Node)
+   public JavaFXROS2VideoViewer(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
       JavaFXApplicationCreator.createAJavaFXApplication();

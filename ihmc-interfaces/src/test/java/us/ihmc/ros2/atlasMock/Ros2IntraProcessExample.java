@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.Ros2Publisher;
 import us.ihmc.ros2.Ros2QosProfile;
 
@@ -16,7 +16,7 @@ public class Ros2IntraProcessExample
    {
       try
       {
-         Ros2Node node = new Ros2Node(PubSubImplementation.INTRAPROCESS, "MockAtlasController");
+         ROS2Node node = new ROS2Node(PubSubImplementation.INTRAPROCESS, "MockAtlasController");
          //      RosPublisher<AtlasRobotConfigurationData> publisher = node.createPublisher(new AtlasRobotConfigurationDataPubSubType(), "/robot_configuration_data");
          Ros2Publisher<RobotConfigurationData> publisher = node.createPublisher(new RobotConfigurationDataPubSubType(), "/robot_configuration_data");
 
@@ -41,7 +41,7 @@ public class Ros2IntraProcessExample
 
    public static void subscribeUsingIntraProcessNode() throws IOException, InterruptedException
    {
-      Ros2Node node = new Ros2Node(PubSubImplementation.INTRAPROCESS, "MockNetworkProcessor");
+      ROS2Node node = new ROS2Node(PubSubImplementation.INTRAPROCESS, "MockNetworkProcessor");
       node.createSubscription(new RobotConfigurationDataPubSubType(), subscriber -> {
          RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 

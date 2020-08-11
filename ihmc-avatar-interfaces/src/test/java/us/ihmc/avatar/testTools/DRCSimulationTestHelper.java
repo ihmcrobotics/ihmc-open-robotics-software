@@ -53,9 +53,9 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
@@ -84,7 +84,7 @@ public class DRCSimulationTestHelper
 
    private final SimulationTestingParameters simulationTestingParameters;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
+   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
 
    private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -678,7 +678,7 @@ public class DRCSimulationTestHelper
       return robotName;
    }
 
-   public Ros2Node getRos2Node()
+   public ROS2Node getRos2Node()
    {
       return ros2Node;
    }

@@ -20,7 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class AtlasSLAMModule extends SLAMModule
 {
@@ -40,7 +40,7 @@ public class AtlasSLAMModule extends SLAMModule
    protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
-   public AtlasSLAMModule(Ros2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel)
+   public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel)
    {
       super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera);
 
@@ -229,7 +229,7 @@ public class AtlasSLAMModule extends SLAMModule
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager)
+   public static AtlasSLAMModule createIntraprocessModule(ROS2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager)
    {
       return new AtlasSLAMModule(ros2Node, messager, drcRobotModel);
    }

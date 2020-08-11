@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import javafx.scene.paint.Color;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -36,7 +35,7 @@ import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class SLAMModule implements PerceptionModule
 {
@@ -70,7 +69,7 @@ public class SLAMModule implements PerceptionModule
    private Stopwatch stopwatch = new Stopwatch();
 
    private final boolean manageRosNode;
-   protected final Ros2Node ros2Node;
+   protected final ROS2Node ros2Node;
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
 
@@ -82,12 +81,12 @@ public class SLAMModule implements PerceptionModule
       this(messager, null);
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager)
+   public SLAMModule(ROS2Node ros2Node, Messager messager)
    {
       this(ros2Node, messager, new RigidBodyTransform());
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
+   public SLAMModule(ROS2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
    {
       this(ros2Node, messager, transformFromLocalFrameToSensor, null);
    }
@@ -97,17 +96,17 @@ public class SLAMModule implements PerceptionModule
       this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile)
+   public SLAMModule(ROS2Node ros2Node, Messager messager, File configurationFile)
    {
       this(ros2Node, messager, configurationFile, new RigidBodyTransform(), false);
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromLocalFrameToSensor, File configurationFile)
+   public SLAMModule(ROS2Node ros2Node, Messager messager, RigidBodyTransformReadOnly transformFromLocalFrameToSensor, File configurationFile)
    {
       this(ros2Node, messager, configurationFile, transformFromLocalFrameToSensor, false);
    }
 
-   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, RigidBodyTransformReadOnly transformFromLocalFrameToSensor, boolean manageRosNode)
+   public SLAMModule(ROS2Node ros2Node, Messager messager, File configurationFile, RigidBodyTransformReadOnly transformFromLocalFrameToSensor, boolean manageRosNode)
    {
       this.ros2Node = ros2Node;
       this.reaMessager = messager;
@@ -481,7 +480,7 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
-   public static SLAMModule createIntraprocessModule(Ros2Node ros2Node, Messager messager)
+   public static SLAMModule createIntraprocessModule(ROS2Node ros2Node, Messager messager)
    {
       return new SLAMModule(ros2Node, messager);
    }

@@ -6,7 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -42,7 +42,7 @@ public class AtlasPrimitiveActions
 
    public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters,
+   public AtlasPrimitiveActions(String robotName, ROS2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters,
                                 FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames,
                                 YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {

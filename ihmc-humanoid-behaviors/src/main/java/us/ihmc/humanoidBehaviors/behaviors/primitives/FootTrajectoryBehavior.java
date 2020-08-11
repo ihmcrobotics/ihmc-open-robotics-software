@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,7 +23,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<FootTrajectoryMessage> publisher;
 
-   public FootTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport)
+   public FootTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport)
    {
       super(robotName, ros2Node);
 

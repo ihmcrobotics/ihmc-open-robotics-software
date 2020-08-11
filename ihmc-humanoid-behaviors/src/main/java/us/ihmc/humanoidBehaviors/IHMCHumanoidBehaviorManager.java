@@ -34,7 +34,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -50,7 +50,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
@@ -255,7 +255,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    private void createAndRegisterBehaviors(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher, LogModelProvider logModelProvider,
                                            FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
-                                           YoDouble yoTime, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                           YoDouble yoTime, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
                                            CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters<?> wholeBodyControllerParameters,
                                            FootstepPlannerParametersBasics footstepPlannerParameters)
    {
@@ -487,7 +487,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private void createAndRegisterAutomaticDiagnostic(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
                                                      FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
-                                                     Ros2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
+                                                     ROS2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
                                                      WholeBodyControllerParameters wholeBodyControllerParameters,
                                                      FootstepPlannerParametersBasics footstepPlannerParameters, double timeToWait,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)

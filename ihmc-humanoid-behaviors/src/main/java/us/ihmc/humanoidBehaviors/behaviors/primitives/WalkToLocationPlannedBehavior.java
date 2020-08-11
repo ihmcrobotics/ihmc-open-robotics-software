@@ -18,7 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLocationStates>
@@ -47,7 +47,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private boolean performAStarSearch = false;
    private boolean assumeFlatGround = true;
 
-   public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+   public WalkToLocationPlannedBehavior(String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
                                         WalkingControllerParameters walkingControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
                                         YoDouble yoTime)
    {

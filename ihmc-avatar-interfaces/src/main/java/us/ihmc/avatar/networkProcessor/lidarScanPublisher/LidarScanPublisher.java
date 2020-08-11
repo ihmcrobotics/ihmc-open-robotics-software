@@ -33,9 +33,9 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -73,18 +73,18 @@ public class LidarScanPublisher
 
    private long publisherPeriodInMillisecond = 1L;
 
-   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic robotConfigurationDataTopicName)
+   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2Node ros2Node, ROS2Topic robotConfigurationDataTopicName)
    {
       this(modelFactory, defaultSensorFrameFactory(lidarName), ros2Node, robotConfigurationDataTopicName);
    }
 
-   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, Ros2Node ros2Node,
+   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node,
                              ROS2Topic robotConfigurationDataTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node, robotConfigurationDataTopicName);
    }
 
-   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, Ros2Node ros2Node,
+   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node,
                              ROS2Topic robotConfigurationDataTopicName)
    {
       this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, null, robotConfigurationDataTopicName);
@@ -96,7 +96,7 @@ public class LidarScanPublisher
       this(robotName, fullRobotModel, sensorFrameFactory, null, realtimeROS2Node, robotConfigurationDataTopicName);
    }
 
-   private LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, Ros2Node ros2Node,
+   private LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node,
                               RealtimeROS2Node realtimeROS2Node, ROS2Topic robotConfigurationDataTopicName)
    {
       this.robotName = robotName;

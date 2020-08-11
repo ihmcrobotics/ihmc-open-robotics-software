@@ -221,16 +221,16 @@ public class ROS2Tools
       }
    }
 
-   public static Ros2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   public static ROS2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       return createRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
    }
 
-   public static Ros2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
+   public static ROS2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
       try
       {
-         return new Ros2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new ROS2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {

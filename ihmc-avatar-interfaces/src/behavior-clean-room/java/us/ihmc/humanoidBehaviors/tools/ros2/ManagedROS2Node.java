@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ManagedROS2Node implements Ros2NodeInterface
 {
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final AtomicBoolean enabled = new AtomicBoolean(true);
 
-   public ManagedROS2Node(Ros2Node ros2Node)
+   public ManagedROS2Node(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
    }

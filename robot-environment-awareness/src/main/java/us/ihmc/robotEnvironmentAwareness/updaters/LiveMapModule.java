@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -15,7 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParam
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -29,7 +28,7 @@ public class LiveMapModule implements PerceptionModule
 {
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final Messager messager;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -59,7 +58,7 @@ public class LiveMapModule implements PerceptionModule
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> combinedMapPublisher;
 
-   private LiveMapModule(Ros2Node ros2Node, Messager messager)
+   private LiveMapModule(ROS2Node ros2Node, Messager messager)
    {
       this.ros2Node = ros2Node;
       this.messager = messager;
@@ -241,7 +240,7 @@ public class LiveMapModule implements PerceptionModule
       }
    }
 
-   public static LiveMapModule createIntraprocess(Ros2Node ros2Node, Messager messager)
+   public static LiveMapModule createIntraprocess(ROS2Node ros2Node, Messager messager)
    {
       return new LiveMapModule(ros2Node, messager);
    }

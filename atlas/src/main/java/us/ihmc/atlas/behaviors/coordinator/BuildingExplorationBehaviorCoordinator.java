@@ -8,17 +8,15 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -35,7 +33,7 @@ public class BuildingExplorationBehaviorCoordinator
    private static final double xyProximityToDoorToStopWalking = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final YoEnum<BuildingExplorationStateName> requestedState = YoEnum.create("requestedState", "", BuildingExplorationStateName.class, registry, true);
    private final StateMachine<BuildingExplorationStateName, State> stateMachine;
 
@@ -164,7 +162,7 @@ public class BuildingExplorationBehaviorCoordinator
 
       private final Pose3D bombPose = new Pose3D();
 
-      public LookAndStepState(Ros2Node ros2Node)
+      public LookAndStepState(ROS2Node ros2Node)
       {
          ROS2Topic<Pose3D> goalTopic = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class);
          ROS2Topic<Empty> resetTopic = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class);
@@ -203,7 +201,7 @@ public class BuildingExplorationBehaviorCoordinator
       final IHMCROS2Publisher<HumanoidBehaviorTypePacket> behaviorTypePublisher;
       final AtomicBoolean isDone = new AtomicBoolean();
 
-      public WalkThroughDoorState(String robotName, Ros2Node ros2Node)
+      public WalkThroughDoorState(String robotName, ROS2Node ros2Node)
       {
          ROS2Topic<?> inputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
          ROS2Topic<?> outputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();

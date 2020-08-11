@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FootLoadBearingBehavior extends AbstractBehavior
@@ -12,12 +12,12 @@ public class FootLoadBearingBehavior extends AbstractBehavior
    private FootLoadBearingMessage outgoingFootLoadBearingMessage;
    private final IHMCROS2Publisher<FootLoadBearingMessage> publisher;
 
-   public FootLoadBearingBehavior(String robotName, Ros2Node ros2Node)
+   public FootLoadBearingBehavior(String robotName, ROS2Node ros2Node)
    {
       this(robotName, null, ros2Node);
    }
 
-   public FootLoadBearingBehavior(String robotName, String prefix, Ros2Node ros2Node)
+   public FootLoadBearingBehavior(String robotName, String prefix, ROS2Node ros2Node)
    {
       super(robotName, prefix, ros2Node);
       publisher = createPublisherForController(FootLoadBearingMessage.class);

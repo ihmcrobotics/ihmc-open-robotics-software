@@ -11,7 +11,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.Ros2PublisherBasics;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class ManagedROS2NodeTest
    @Test
    public void test() throws IOException
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "TestNode");
+      ROS2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "TestNode");
       ManagedROS2Node managedROS2Node = new ManagedROS2Node(ros2Node);
 
       TypedNotification<java.lang.String> topicOneNotification = new TypedNotification<>();

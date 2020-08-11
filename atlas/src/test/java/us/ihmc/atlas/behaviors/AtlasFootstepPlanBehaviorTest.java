@@ -19,8 +19,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -42,7 +42,7 @@ public class AtlasFootstepPlanBehaviorTest
    private AtlasRobotModel robotModel;
    private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
 
    double lastX = 0.0;
    double lastY = 0.0;
@@ -68,7 +68,7 @@ public class AtlasFootstepPlanBehaviorTest
    {
       FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
-      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+      ros2Node = new ROS2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
       footstepDataListPublisher = ROS2Tools
             .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
@@ -155,7 +155,7 @@ public class AtlasFootstepPlanBehaviorTest
    {
       FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.INTRAPROCESS);
 
-      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+      ros2Node = new ROS2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
       footstepDataListPublisher = ROS2Tools
             .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),

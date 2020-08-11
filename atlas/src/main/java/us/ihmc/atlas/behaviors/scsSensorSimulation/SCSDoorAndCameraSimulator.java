@@ -31,7 +31,7 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.Robot;
@@ -61,7 +61,7 @@ public class SCSDoorAndCameraSimulator
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSDoorAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
+   public SCSDoorAndCameraSimulator(ROS2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
    {
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,
@@ -232,7 +232,7 @@ public class SCSDoorAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
 //      new SCSDoorAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());

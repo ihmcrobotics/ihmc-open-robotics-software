@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
@@ -21,7 +21,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    private volatile boolean enable = true;
 
-   public VideoPacketHandler(Ros2Node ros2Node)
+   public VideoPacketHandler(ROS2Node ros2Node)
    {
       publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
    }

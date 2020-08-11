@@ -18,8 +18,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression.PointCoordinateConsumer;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2Node;
 
 public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 {
@@ -31,7 +31,7 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
    private final IHMCROS2Publisher<T> packetPublisher;
    protected final AtomicReference<T> newPacket = new AtomicReference<>(null);
 
-   public AbstractObjectParameterCalculator(Ros2Node ros2Node, Class<T> messageType)
+   public AbstractObjectParameterCalculator(ROS2Node ros2Node, Class<T> messageType)
    {
       this.messageType = messageType;
       pointCloudToCalculate = new ArrayList<Point3DBasics>();

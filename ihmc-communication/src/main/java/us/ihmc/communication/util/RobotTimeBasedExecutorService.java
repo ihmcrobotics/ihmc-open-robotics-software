@@ -58,7 +58,7 @@ public class RobotTimeBasedExecutorService
     * @param timeUnit of the period.
     * @param runnable will be called at the specified period.
     */
-   public static void schedulePackageBased(Ros2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
+   public static void schedulePackageBased(ROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);

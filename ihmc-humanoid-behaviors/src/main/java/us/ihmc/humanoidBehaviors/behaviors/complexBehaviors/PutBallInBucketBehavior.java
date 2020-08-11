@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PutBallInBucketBehavior extends AbstractBehavior
@@ -20,7 +20,7 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public PutBallInBucketBehavior(String robotName, YoDouble yoTime,
-                                  HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+                                  HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);

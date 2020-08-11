@@ -28,8 +28,8 @@ import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -79,7 +79,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    public BehaviorDispatcher(String robotName, YoDouble yoTime, RobotDataReceiver robotDataReceiver,
                              BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
-                             Ros2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
+                             ROS2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
