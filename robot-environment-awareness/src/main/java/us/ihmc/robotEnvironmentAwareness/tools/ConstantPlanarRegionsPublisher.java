@@ -23,7 +23,7 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 public class ConstantPlanarRegionsPublisher
 {
    private final PlanarRegionsList planarRegionsList;
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
    private final REAPlanarRegionPublicNetworkProvider publisher;
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;

@@ -66,7 +66,7 @@ public class BehaviorUI
    {
       this.behaviorMessager = behaviorMessager;
 
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
       {

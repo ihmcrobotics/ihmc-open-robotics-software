@@ -54,7 +54,7 @@ public class KinematicsStreamingToolboxMessageReplay
       messages = loadMessages(inputStream);
       String name = getClass().getSimpleName();
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);

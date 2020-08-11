@@ -45,7 +45,7 @@ public class AtlasKinematicSimWithCamera
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
       AtlasKinematicSimulation.create(robotModel, kinematicsSimulationParameters);
 
-      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
+      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
 
       if (SHOW_ROBOT_VIEWER) ThreadTools.startAThread(this::robotViewer, "RobotViewer");
 

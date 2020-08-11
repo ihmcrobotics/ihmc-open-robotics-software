@@ -107,7 +107,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
       double trajectoryTime = 2.0;
 
-      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node());
+      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node());
 
       highLevelStateBehavior.initialize();
       highLevelStateBehavior.setInput(HumanoidMessageTools.createHighLevelStateMessage(desiredState));

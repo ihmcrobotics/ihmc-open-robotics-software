@@ -58,7 +58,7 @@ public class AtlasRealsenseROS1Bridge
          ThreadTools.sleep(2000);
       }
 
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_ros1_bridge");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_ros1_bridge");
 
       pointCloud2ROS2Publisher = new IHMCROS2Publisher<>(ros2Node, PointCloud2.class);
 

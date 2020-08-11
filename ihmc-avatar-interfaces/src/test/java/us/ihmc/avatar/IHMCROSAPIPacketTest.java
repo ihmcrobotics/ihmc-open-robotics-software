@@ -77,7 +77,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_ros_api_test");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_ros_api_test");
    }
 
    @AfterEach

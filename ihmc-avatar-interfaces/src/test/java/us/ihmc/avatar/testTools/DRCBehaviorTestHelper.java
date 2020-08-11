@@ -75,7 +75,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    private final BehaviorDispatcher behaviorDispatcher;
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
    private final IHMCROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
 
    public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
@@ -144,7 +144,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                                                                          IHMCHumanoidBehaviorManager.getInputTopic(robotName));
    }
 
-   public ROS2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }

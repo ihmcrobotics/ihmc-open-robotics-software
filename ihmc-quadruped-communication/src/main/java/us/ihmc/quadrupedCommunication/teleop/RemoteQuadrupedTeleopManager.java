@@ -389,7 +389,7 @@ public class RemoteQuadrupedTeleopManager
       return xGaitSettings;
    }
 
-   public ROS2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }

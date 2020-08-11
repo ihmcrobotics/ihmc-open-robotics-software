@@ -173,7 +173,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       YoVariableRegistry teleopRegistry = new YoVariableRegistry("TeleopRegistry");
       sdfRobot.getRobotsYoVariableRegistry().addChild(teleopRegistry);
 
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
       QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
 

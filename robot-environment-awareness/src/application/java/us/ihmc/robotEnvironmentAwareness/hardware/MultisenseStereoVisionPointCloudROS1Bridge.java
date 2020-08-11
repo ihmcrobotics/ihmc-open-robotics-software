@@ -35,7 +35,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
    private static final int MAX_NUMBER_OF_POINTS = 200000;
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 

@@ -10,7 +10,7 @@ import us.ihmc.ros2.ROS2QosProfile;
 
 import java.io.IOException;
 
-public class Ros2IntraProcessExample
+public class ROS2IntraProcessExample
 {
    public static void publishUsingIntraProcessNode()
    {

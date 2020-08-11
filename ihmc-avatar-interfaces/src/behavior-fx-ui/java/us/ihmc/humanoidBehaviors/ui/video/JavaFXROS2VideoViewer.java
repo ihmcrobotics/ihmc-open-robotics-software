@@ -48,6 +48,6 @@ public class JavaFXROS2VideoViewer
 
    public static void main(String[] args)
    {
-      new JavaFXROS2VideoViewer(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
+      new JavaFXROS2VideoViewer(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
    }
 }

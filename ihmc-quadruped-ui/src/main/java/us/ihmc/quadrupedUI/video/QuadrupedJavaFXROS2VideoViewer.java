@@ -18,7 +18,7 @@ public class QuadrupedJavaFXROS2VideoViewer extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer");
 
       QuadrupedJavaFXROS2VideoView ros2VideoView = new QuadrupedJavaFXROS2VideoView(width, height, false, false);
 

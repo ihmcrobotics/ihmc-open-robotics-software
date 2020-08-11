@@ -25,7 +25,7 @@ public class AtlasPerceptionSimulation
    public AtlasPerceptionSimulation(CommunicationMode communicationMode, PlanarRegionsList map, boolean runRealsenseSLAM, DRCRobotModel robotModel)
    {
       this.runRealsenseSLAM = runRealsenseSLAM;
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "perception");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception");
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(map, robotModel, ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(map, robotModel, ros2Node);
 

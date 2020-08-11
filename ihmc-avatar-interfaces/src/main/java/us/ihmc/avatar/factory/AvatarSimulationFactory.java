@@ -627,7 +627,7 @@ public class AvatarSimulationFactory
       this.guiInitialSetup.set(guiInitialSetup);
    }
 
-   public void setRealtimeRos2Node(RealtimeROS2Node realtimeROS2Node)
+   public void setRealtimeROS2Node(RealtimeROS2Node realtimeROS2Node)
    {
       this.realtimeROS2Node.set(realtimeROS2Node);
    }

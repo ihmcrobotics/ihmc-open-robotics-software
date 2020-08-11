@@ -374,7 +374,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          return;
       alreadyCreatedCommunicator = true;
 
-      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
    }
 
    /**
@@ -494,7 +494,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setRealtimeRos2Node(realtimeROS2Node);
+      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);

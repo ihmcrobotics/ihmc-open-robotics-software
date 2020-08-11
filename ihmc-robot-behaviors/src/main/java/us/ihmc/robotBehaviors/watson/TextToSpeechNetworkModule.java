@@ -14,7 +14,7 @@ public class TextToSpeechNetworkModule implements CloseableAndDisposable
 
    public TextToSpeechNetworkModule(PubSubImplementation pubSubImplementation)
    {
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_text_to_speech_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_text_to_speech_node");
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
    }
 

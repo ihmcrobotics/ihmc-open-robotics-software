@@ -150,11 +150,11 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
    }
 
-   public ROS2Node getOrCreateRos2Node()
+   public ROS2Node getOrCreateROS2Node()
    {
       if (ros2Node == null)
       {
-         ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
+         ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
          modulesToClose.add(ros2Node::destroy);
       }
       return ros2Node;
@@ -314,7 +314,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateRos2Node(),
+         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateROS2Node(),
                                                        PlanarRegionsListMessage.class,
                                                        REACommunicationProperties.outputTopic,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));

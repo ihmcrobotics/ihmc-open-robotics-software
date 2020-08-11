@@ -66,7 +66,7 @@ public class RosModule implements CloseableAndDisposable
       LogTools.info("Starting ROS Module");
 
       String simpleRobotName = robotModelFactory.getRobotDescription().getName();
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_ros_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_ros_node");
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       robotName = simpleRobotName.toLowerCase();
       String rosTopicPrefix = "/ihmc_ros/" + robotName;

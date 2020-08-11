@@ -35,7 +35,7 @@ public class ManagedROS2NodeTest
    @Test
    public void test() throws IOException
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "TestNode");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "TestNode");
       ManagedROS2Node managedROS2Node = new ManagedROS2Node(ros2Node);
 
       TypedNotification<java.lang.String> topicOneNotification = new TypedNotification<>();

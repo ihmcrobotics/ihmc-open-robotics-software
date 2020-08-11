@@ -23,7 +23,7 @@ import us.ihmc.ros2.ROS2Node;
 
 public class LidarScanLoggerController
 {
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidar_scan_logger");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidar_scan_logger");
 
    private final LidarScanLogWriter logWriter = new LidarScanLogWriter(ros2Node);
    private final LidarScanLogReader logReader = new LidarScanLogReader();

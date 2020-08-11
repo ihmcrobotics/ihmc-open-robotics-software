@@ -14,7 +14,7 @@ public class PlanarRegionsTopicViewer extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "planar_region_topic_viewer");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "planar_region_topic_viewer");
       
       View3DFactory view3dFactory = new View3DFactory(1200, 800);
       FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);

@@ -38,7 +38,7 @@ public class LidarFastSimulation
    public static final boolean VISUALIZE_GPU_LIDAR = false;
    private static final GroundType DEFAULT_GROUND = GroundType.OBSTACLE_COURSE;
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    public LidarFastSimulation() throws IOException
    {

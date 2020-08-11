@@ -115,7 +115,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       networkModuleParameters = new HumanoidNetworkProcessorParameters();
       networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), PubSubImplementation.INTRAPROCESS);
 
       footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,

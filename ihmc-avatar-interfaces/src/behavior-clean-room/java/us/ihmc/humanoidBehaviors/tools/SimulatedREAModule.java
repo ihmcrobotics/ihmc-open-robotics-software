@@ -49,7 +49,7 @@ public class SimulatedREAModule
    {
       this.map = map;
 
-      ROS2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput());
       realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput());

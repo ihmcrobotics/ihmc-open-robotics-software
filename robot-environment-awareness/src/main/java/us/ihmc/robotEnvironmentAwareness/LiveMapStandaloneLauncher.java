@@ -27,7 +27,7 @@ public class LiveMapStandaloneLauncher extends Application
       messager = new SharedMemoryJavaFXMessager(LiveMapModuleAPI.API);
       messager.startMessager();
 
-      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
       ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);
       module = LiveMapModule.createIntraprocess(ros2Node, messager);
 

@@ -160,9 +160,9 @@ public class ROS2Tools
     * @param nodeName the name of the new ROS node.
     * @return the ROS node.
     */
-   public static RealtimeROS2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return createRealtimeRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
+      return createRealtimeROS2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
    }
 
    /**
@@ -174,9 +174,9 @@ public class ROS2Tools
     * @param exceptionHandler how to handle exceptions thrown during the instantiation.
     * @return the ROS node.
     */
-   public static RealtimeROS2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
-      return createRealtimeRos2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, exceptionHandler);
+      return createRealtimeROS2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, exceptionHandler);
    }
 
    /**
@@ -188,11 +188,11 @@ public class ROS2Tools
     * @param nodeName the name of the new ROS node.
     * @return the ROS node.
     */
-   public static RealtimeROS2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation,
                                                          PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
                                                          String nodeName)
    {
-      return createRealtimeRos2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, RUNTIME_EXCEPTION);
+      return createRealtimeROS2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, RUNTIME_EXCEPTION);
    }
 
    /**
@@ -205,7 +205,7 @@ public class ROS2Tools
     * @param exceptionHandler how to handle exceptions thrown during the instantiation.
     * @return the ROS node.
     */
-   public static RealtimeROS2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation,
                                                          PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
                                                          String nodeName,
                                                          ExceptionHandler exceptionHandler)
@@ -221,12 +221,12 @@ public class ROS2Tools
       }
    }
 
-   public static ROS2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return createRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
+      return createROS2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
    }
 
-   public static ROS2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
+   public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
       try
       {

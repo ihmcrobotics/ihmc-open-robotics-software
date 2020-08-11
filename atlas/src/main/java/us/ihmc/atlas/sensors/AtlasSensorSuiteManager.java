@@ -33,7 +33,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private static final boolean USE_DEPTH_FRAME_ESTIMATED_BY_TRACKING = false;
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_sensor_suite_node");
 
    private final String robotName;
    private final FullHumanoidRobotModelFactory modelFactory;

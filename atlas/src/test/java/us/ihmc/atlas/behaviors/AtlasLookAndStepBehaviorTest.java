@@ -129,7 +129,7 @@ public class AtlasLookAndStepBehaviorTest
          ThreadTools.startAsDaemon(() -> kinematicSimulation(finishedSimulationSetup), "KinematicsSimulation");
       }
 
-      ros2Node = ROS2Tools.createRos2Node(INTRAPROCESS, "Helper");
+      ros2Node = ROS2Tools.createROS2Node(INTRAPROCESS, "Helper");
 
 
       AtlasRobotModel robotModelForBehavior = createRobotModel();

@@ -474,7 +474,7 @@ public class AvatarEstimatorThreadFactory
       return ekfStateEstimator;
    }
 
-   public RealtimeROS2Node getRealtimeRos2Node()
+   public RealtimeROS2Node getRealtimeROS2Node()
    {
       if (realtimeROS2NodeField.hasValue())
          return realtimeROS2NodeField.get();

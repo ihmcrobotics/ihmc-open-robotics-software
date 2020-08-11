@@ -28,7 +28,7 @@ public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
    private final IHMCROS2Publisher<Image32> imagePublisher;
 

@@ -84,7 +84,7 @@ public class DRCSimulationTestHelper
 
    private final SimulationTestingParameters simulationTestingParameters;
 
-   private final ROS2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
 
    private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -678,7 +678,7 @@ public class DRCSimulationTestHelper
       return robotName;
    }
 
-   public ROS2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }
