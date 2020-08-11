@@ -681,4 +681,31 @@ public class EuclidCoreMissingTools
       inputTangentialPartToPack.setReferenceFrame(input.getReferenceFrame());
       extractTangentialPart((Tuple3DReadOnly) input, (Vector3DReadOnly) normalAxis, (Tuple3DBasics) inputTangentialPartToPack);
    }
+
+   /**
+    * Modifies {@code tupleToModify} such that its normal part is equal to the normal part of
+    * {@code input}.
+    * <p>
+    * This method performs the following calculation: <tt>x = x - (x.n)n + (y.n)n</tt>, where:
+    * <ul>
+    * <li><tt>x</tt> is {@code tupleToModify}.
+    * <li></tt>n</tt> is {@code normalAxis}.
+    * <li><tt>y</tt> is {@code input}.
+    * </ul>
+    * </p>
+    * 
+    * @param input         the tuple containing the normal part used to update {@code tupleToModify}.
+    *                      Not modified.
+    * @param normalAxis    the normal vector. It is normalized internally if needed. Not modified.
+    * @param tupleToModify the tuple to modify the normal part of. Modified.
+    */
+   public static void setNormalPart(Tuple3DReadOnly input, Vector3DReadOnly normalAxis, Tuple3DBasics tupleToModify)
+   {
+      double normalX = normalAxis.getX();
+      double normalY = normalAxis.getY();
+      double normalZ = normalAxis.getZ();
+      double normalLengthSquared = EuclidCoreTools.normSquared(normalX, normalY, normalZ);
+      double dot = (TupleTools.dot(normalAxis, input) - TupleTools.dot(normalAxis, tupleToModify)) / normalLengthSquared;
+      tupleToModify.scaleAdd(dot, normalAxis, tupleToModify);
+   }
 }
