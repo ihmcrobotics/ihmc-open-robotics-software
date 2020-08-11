@@ -150,7 +150,7 @@ public class ROS2Tools
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
    private static final int DOMAIN_ID = FACTORY.getDomainId();
    private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
-   private static final Ros2Distro ROS2_DISTRO = Ros2Distro.fromEnvironment();
+   private static final ROS2Distro ROS2_DISTRO = ROS2Distro.fromEnvironment();
 
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
