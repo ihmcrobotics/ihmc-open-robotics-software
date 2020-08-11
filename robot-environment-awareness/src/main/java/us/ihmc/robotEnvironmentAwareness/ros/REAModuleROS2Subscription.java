@@ -5,7 +5,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.Ros2Subscription;
+import us.ihmc.ros2.ROS2Subscription;
 
 public class REAModuleROS2Subscription<T>
 {
@@ -13,7 +13,7 @@ public class REAModuleROS2Subscription<T>
    private final Class<T> messageType;
    private final NewMessageListener<T> listener;
 
-   private Ros2Subscription<T> subscription = null;
+   private ROS2Subscription<T> subscription = null;
 
    public REAModuleROS2Subscription(ROS2Node ros2Node, Messager messager, REASourceType reaSourceType, Class<T> messageType, NewMessageListener<T> listener)
    {

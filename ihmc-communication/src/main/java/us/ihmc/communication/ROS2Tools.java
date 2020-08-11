@@ -239,7 +239,7 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
                                                                              Class<T> messageType,
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
@@ -247,12 +247,12 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
       return createCallbackSubscription(ros2Node, topic.getType(), topic.getName(), newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     ROS2Topic<?> topicName,
                                                                     NewMessageListener<T> newMessageListener)
@@ -260,7 +260,7 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, messageType, topicName.toString(), newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener)
@@ -268,7 +268,7 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener,
