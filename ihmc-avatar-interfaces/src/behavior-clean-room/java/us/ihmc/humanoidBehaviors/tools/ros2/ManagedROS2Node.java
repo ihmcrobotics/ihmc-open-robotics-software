@@ -42,14 +42,14 @@ public class ManagedROS2Node implements ROS2NodeInterface
    }
 
    @Override
-   public <T> Ros2Subscription<T> createSubscription(TopicDataType<T> topicDataType, NewMessageListener<T> newMessageListener, String topicName)
+   public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType, NewMessageListener<T> newMessageListener, String topicName)
          throws IOException
    {
       return ros2Node.createSubscription(topicDataType, createManagedListener(newMessageListener), topicName);
    }
 
    @Override
-   public <T> Ros2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
+   public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
                                                      NewMessageListener<T> newMessageListener,
                                                      String topicName,
                                                      ROS2QosProfile qosProfile) throws IOException
@@ -58,7 +58,7 @@ public class ManagedROS2Node implements ROS2NodeInterface
    }
 
    @Override
-   public <T> Ros2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
+   public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
                                                      NewMessageListener<T> newMessageListener,
                                                      SubscriptionMatchedListener<T> subscriptionMatchedListener,
                                                      String topicName,
