@@ -43,6 +43,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -170,7 +171,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
    /** Variable to keep track of when the last solution was published. */
-   private final YoDouble timeSinceLastSolutionPublished = new YoDouble("timeSinceLastSolutionPublished", registry);
+   private final YoDouble timeLastSolutionPublished = new YoDouble("timeLastSolutionPublished", registry);
    /** Specifies time interval for publishing the solution. */
    private final YoDouble publishSolutionPeriod = new YoDouble("publishSolutionPeriod", registry);
    /**
@@ -708,12 +709,12 @@ public class KinematicsToolboxController extends ToolboxController
       updateTools();
       computeCollisions();
 
-      timeSinceLastSolutionPublished.add(updateDT);
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-      if (timeSinceLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
+      if (timeLastSolutionPublished.getValue() == 0.0 || currentTime - timeLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
       {
          reportMessage(inverseKinematicsSolution);
-         timeSinceLastSolutionPublished.set(0.0);
+         timeLastSolutionPublished.set(currentTime);
       }
       threadTimer.stop();
    }
