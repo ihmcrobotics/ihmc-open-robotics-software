@@ -26,7 +26,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -61,7 +61,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
    private HumanoidFloatingRootJointRobot toolboxGhost;
-   private RealtimeRos2Node toolboxRos2Node;
+   private RealtimeROS2Node toolboxRos2Node;
    protected static final YoAppearanceRGBColor toolboxGhostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
 
    public abstract DRCRobotModel newRobotModel();

@@ -36,7 +36,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposable
@@ -47,7 +47,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
    private static final int RIGHT_FOOT_INDEX = 1;
    private static final int CONVEX_HULL_INDEX = 2;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusMessage = new AtomicReference<>(null);

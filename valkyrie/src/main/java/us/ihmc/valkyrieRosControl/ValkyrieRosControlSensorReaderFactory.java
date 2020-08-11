@@ -12,7 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
@@ -224,8 +224,8 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       sensorReader.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
    }
 
-   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
-      sensorReader.setupLowLevelControlCommunication(robotName, realtimeRos2Node);
+      sensorReader.setupLowLevelControlCommunication(robotName, realtimeROS2Node);
    }
 }

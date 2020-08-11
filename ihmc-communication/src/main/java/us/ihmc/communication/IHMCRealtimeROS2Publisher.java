@@ -5,20 +5,20 @@ import us.ihmc.ros2.RealtimeRos2Publisher;
 
 public class IHMCRealtimeROS2Publisher<T>
 {
-   private final RealtimeRos2Publisher<T> realtimeRos2Publisher;
+   private final RealtimeRos2Publisher<T> realtimeROS2Publisher;
 
    int numberOfExceptions = 0;
 
-   IHMCRealtimeROS2Publisher(RealtimeRos2Publisher<T> realtimeRos2Publisher)
+   IHMCRealtimeROS2Publisher(RealtimeRos2Publisher<T> realtimeROS2Publisher)
    {
-      this.realtimeRos2Publisher = realtimeRos2Publisher;
+      this.realtimeROS2Publisher = realtimeROS2Publisher;
    }
 
    public boolean publish(T message)
    {
       try
       {
-         return realtimeRos2Publisher.publish(message);
+         return realtimeROS2Publisher.publish(message);
       }
       catch (Exception e)
       {

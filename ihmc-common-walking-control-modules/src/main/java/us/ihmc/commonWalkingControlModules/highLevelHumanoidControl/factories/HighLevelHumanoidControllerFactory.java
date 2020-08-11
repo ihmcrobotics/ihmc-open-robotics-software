@@ -48,7 +48,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -524,13 +524,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
-   public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic, commandInputManager,
                                                                                                 outputTopic, statusMessageOutputManager,
-                                                                                                realtimeRos2Node);
+                                                                                                realtimeROS2Node);
 
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());

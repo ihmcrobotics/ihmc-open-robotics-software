@@ -48,7 +48,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
@@ -91,7 +91,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
 
-   private RealtimeRos2Node realtimeRos2Node;
+   private RealtimeROS2Node realtimeROS2Node;
 
    /**
     * The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.)
@@ -374,7 +374,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          return;
       alreadyCreatedCommunicator = true;
 
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
+      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
    }
 
    /**
@@ -414,8 +414,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       if (automaticallySpawnSimulation)
          avatarSimulation.start();
 
-      if (realtimeRos2Node != null)
-         realtimeRos2Node.spin();
+      if (realtimeROS2Node != null)
+         realtimeROS2Node.spin();
 
       if (automaticallySpawnSimulation && automaticallySimulate)
          avatarSimulation.simulate();
@@ -468,7 +468,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
       for (int i = 0; i < highLevelControllerFactories.size(); i++)
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));
@@ -494,7 +494,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
+      avatarSimulationFactory.setRealtimeRos2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
@@ -628,9 +628,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void close()
    {
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
-         realtimeRos2Node.destroy();
+         realtimeROS2Node.destroy();
       }
 
       if (networkProcessor != null)

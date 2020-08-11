@@ -37,7 +37,7 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -60,7 +60,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    protected final String robotName;
    protected final FullHumanoidRobotModel fullRobotModel;
 
-   protected final RealtimeRos2Node realtimeRos2Node;
+   protected final RealtimeROS2Node realtimeROS2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
@@ -106,11 +106,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
       this.updatePeriodMilliseconds = updatePeriodMilliseconds;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      realtimeROS2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopic(), commandInputManager, getOutputTopic(),
-                                                                    statusOutputManager, realtimeRos2Node);
+                                                                    statusOutputManager, realtimeROS2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
@@ -129,7 +129,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, getInputTopic(), new NewMessageListener<ToolboxStateMessage>()
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ToolboxStateMessage.class, getInputTopic(), new NewMessageListener<ToolboxStateMessage>()
       {
          private final ToolboxStateMessage message = new ToolboxStateMessage();
          @Override
@@ -139,8 +139,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             receivedPacket(message);
          }
       });
-      registerExtraPuSubs(realtimeRos2Node);
-      realtimeRos2Node.spin();
+      registerExtraPuSubs(realtimeROS2Node);
+      realtimeROS2Node.spin();
    }
 
    public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
@@ -374,7 +374,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          yoVariableServer.close();
          yoVariableServer = null;
       }
-      realtimeRos2Node.destroy();
+      realtimeROS2Node.destroy();
 
       if (DEBUG)
          LogTools.debug("Destroyed");
@@ -428,7 +428,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
    }
 
-   abstract public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node);
+   abstract public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node);
 
    abstract public ToolboxController getToolboxController();
 

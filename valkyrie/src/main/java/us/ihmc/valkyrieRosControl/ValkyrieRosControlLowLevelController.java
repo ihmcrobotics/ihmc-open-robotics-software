@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
@@ -167,10 +167,10 @@ public class ValkyrieRosControlLowLevelController
       this.jointTorqueOffsetEstimator = jointTorqueOffsetEstimator;
    }
 
-   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
-         fingerController.setupCommunication(robotName, realtimeRos2Node);
+         fingerController.setupCommunication(robotName, realtimeROS2Node);
    }
 
    /**

@@ -114,7 +114,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -163,7 +163,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private FootstepPlannerParametersBasics footstepPlannerParameters = null;
    private BipedContinuousPlanningToolboxModule continuousPlanningModule = null;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
 
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> outputFromPlannerReference = new AtomicReference<>(null);
    private final AtomicReference<FootstepDataListMessage> fullStepListFromContinuousToolbox = new AtomicReference<>(null);

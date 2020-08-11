@@ -40,7 +40,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -76,7 +76,7 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
    private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
-   private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2Node = new RequiredFactoryField<>("realtimeRos2Node");
+   private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity");
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
@@ -245,8 +245,8 @@ public class AvatarSimulationFactory
       }
       else
       {
-         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), outputTopic);
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node.get(),
+         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
                                                        StampedPosePacket.class,
                                                        inputTopic,
                                               s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
@@ -254,7 +254,7 @@ public class AvatarSimulationFactory
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-      avatarEstimatorThreadFactory.setROS2Info(realtimeRos2Node.get(), robotName);
+      avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get());
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
@@ -274,7 +274,7 @@ public class AvatarSimulationFactory
                                                     highLevelHumanoidControllerFactory.get(),
                                                     contextDataFactory,
                                                     simulationOutputProcessor,
-                                                    realtimeRos2Node.get(),
+                                                    realtimeROS2Node.get(),
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
    }
@@ -295,7 +295,7 @@ public class AvatarSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
-      SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeRos2Node.get());
+      SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeROS2Node.get());
 
       // Previously done in estimator thread write
       if (simulationOutputWriter != null)
@@ -627,9 +627,9 @@ public class AvatarSimulationFactory
       this.guiInitialSetup.set(guiInitialSetup);
    }
 
-   public void setRealtimeRos2Node(RealtimeRos2Node realtimeRos2Node)
+   public void setRealtimeRos2Node(RealtimeROS2Node realtimeROS2Node)
    {
-      this.realtimeRos2Node.set(realtimeRos2Node);
+      this.realtimeROS2Node.set(realtimeROS2Node);
    }
 
    public void setAddActualCMPVisualization(boolean addActualCMPVisualization)
