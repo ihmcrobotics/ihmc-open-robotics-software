@@ -6,7 +6,7 @@ import us.ihmc.ros2.*;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ManagedROS2Node implements Ros2NodeInterface
+public class ManagedROS2Node implements ROS2NodeInterface
 {
    private final ROS2Node ros2Node;
    private final AtomicBoolean enabled = new AtomicBoolean(true);

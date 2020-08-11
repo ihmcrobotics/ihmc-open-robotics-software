@@ -7,7 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.Ros2PublisherBasics;
 import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
@@ -30,23 +30,23 @@ public class IHMCROS2Publisher<T>
    }
 
    @Deprecated
-   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType)
+   public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType)
    {
       this(ros2Node, messageType, ROS2Tools.IHMC_ROOT);
    }
 
-   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName)
+   public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName)
    {
       this(ros2Node, messageType, topicName.withType(messageType).toString());
    }
 
-   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
+   public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType), topicName),
                             DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
-   public static IHMCROS2Publisher<Pose3D> newPose3DPublisher(Ros2NodeInterface ros2Node, ROS2Topic topicName)
+   public static IHMCROS2Publisher<Pose3D> newPose3DPublisher(ROS2NodeInterface ros2Node, ROS2Topic topicName)
    {
       PosePubSubType.setImplementation(new Pose3DPubSubTypeImpl());
       IHMCROS2Publisher<Pose3D> ihmcROS2Publisher = new IHMCROS2Publisher<>();
