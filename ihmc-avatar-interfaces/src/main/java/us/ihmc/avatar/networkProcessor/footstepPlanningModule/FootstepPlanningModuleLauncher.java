@@ -133,7 +133,7 @@ public class FootstepPlanningModuleLauncher
          FootstepPlanningRequestPacket requestPacket = s.takeNextData();
          request.setFromPacket(requestPacket);
          generateLog.set(requestPacket.getGenerateLog());
-         new Thread(() -> footstepPlanningModule.handleRequest(request)).start();
+         new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
       });
    }
 
@@ -201,7 +201,7 @@ public class FootstepPlanningModuleLauncher
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerActionMessage.class, inputTopic, s ->
       {
          s.takeNextData(footstepPlannerActionMessage, null);
-         new Thread(callback).start();
+         new Thread(callback, "FootstepPlannerActionCallback").start();
       });
    }
 

@@ -186,7 +186,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
    {
-      new Thread(yoVariableServer::start).start();
+      new Thread(yoVariableServer::start, name + "ToolboxYoVariableServer").start();
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
