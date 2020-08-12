@@ -30,7 +30,7 @@ public class XTouchCompactTransmitter implements SliderBoardTransmitterInterface
          if (senderPool[midiControl.mapping] == null)
          {
             senderPool[midiControl.mapping] = new MessageSender();
-            new Thread(senderPool[midiControl.mapping]).start();
+            new Thread(senderPool[midiControl.mapping], "XTouchCompactTransmitter").start();
          }
 
          return senderPool[midiControl.mapping];
