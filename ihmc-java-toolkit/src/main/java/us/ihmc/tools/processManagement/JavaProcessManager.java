@@ -38,11 +38,11 @@ public class JavaProcessManager
 
    private final ArrayList<String> processNames = new ArrayList<>();
 
-   public static void teeToLogFile(Class<?> mainClass)
+   public static ArrayList<Process> teeToLogFile(Class<?> mainClass)
    {
       JavaProcessManager manager = new JavaProcessManager();
       manager.runOrRegister(mainClass);
-      manager.spawnProcesses(mainClass, null);
+      return manager.spawnProcesses(mainClass, null);
    }
 
    public JavaProcessManager()
