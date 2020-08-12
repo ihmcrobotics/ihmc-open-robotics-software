@@ -9,6 +9,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
@@ -27,6 +29,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +44,7 @@ public class BehaviorUI
    private final Messager behaviorMessager;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
+   private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
@@ -146,9 +150,11 @@ public class BehaviorUI
          primaryStage.show();
          primaryStage.toFront();
 
+         primaryStage.setOnCloseRequest(event -> onCloseRequestListeners.forEach(Runnable::run));
+
          guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
-         primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
-         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+         onCloseRequestListeners.add(guiRecorder::stop);
+         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
 
          if (RECORD_VIDEO)
          {
@@ -175,6 +181,16 @@ public class BehaviorUI
       startRecording.setDisable(false);
       stopRecording.setDisable(true);
       ThreadTools.startAThread(() -> guiRecorder.stop(), "RecordingStop");
+   }
+
+   public void addOnCloseRequestListener(Runnable onCloseRequest)
+   {
+      onCloseRequestListeners.add(onCloseRequest);
+   }
+
+   public void closeMessager()
+   {
+      ExceptionTools.handle(behaviorMessager::closeMessager, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
    private void onBehaviorSelection(ObservableValue<? extends String> observable, String oldValue, String newValue)

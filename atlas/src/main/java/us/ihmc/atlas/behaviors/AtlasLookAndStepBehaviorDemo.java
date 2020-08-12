@@ -1,9 +1,11 @@
 package us.ihmc.atlas.behaviors;
 
+import org.lwjgl.Sys;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
@@ -19,6 +21,7 @@ import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.rtps.impl.fastRTPS.FastRTPSDomain;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.tools.processManagement.JavaProcessManager;
@@ -45,6 +48,7 @@ public class AtlasLookAndStepBehaviorDemo
    private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
 
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
+
    {
       environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
                                                                0.0, 0.0, 0.0, 0.0));
@@ -58,15 +62,22 @@ public class AtlasLookAndStepBehaviorDemo
    private final Random random = new Random();
    private final EnvironmentInitialSetup environmentInitialSetup = environmentInitialSetups.get(random.nextInt(environmentInitialSetups.size()));
 
+   private BehaviorUI behaviorUI;
+   private final BehaviorModule behaviorModule;
+   private AtlasPerceptionSimulation perceptionStack;
+   private SCSLidarAndCameraSimulator lidarAndCameraSimulator;
+   private AtlasDynamicsSimulation dynamicSimulation;
+   private HumanoidKinematicsSimulation kinematicsSimulation;
+
    public AtlasLookAndStepBehaviorDemo()
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      ThreadTools.startAsDaemon(() -> new AtlasPerceptionSimulation(communicationMode,
-                                                                    environmentInitialSetup.getPlanarRegionsSupplier().get(),
-                                                                    RUN_REALSENSE_SLAM,
-                                                                    SHOW_REALSENSE_SLAM_UIS,
-                                                                    createRobotModel()),
+      ThreadTools.startAsDaemon(() -> perceptionStack = new AtlasPerceptionSimulation(communicationMode,
+                                                                                      environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                                                      RUN_REALSENSE_SLAM,
+                                                                                      SHOW_REALSENSE_SLAM_UIS,
+                                                                                      createRobotModel()),
                                 "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
 
@@ -75,23 +86,28 @@ public class AtlasLookAndStepBehaviorDemo
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
-      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), communicationMode, communicationMode);
+      behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), communicationMode, communicationMode);
 
       LogTools.info("Creating behavior user interface");
       if (communicationMode == CommunicationMode.INTERPROCESS)
       {
-         BehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
+         behaviorUI = BehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
       }
       else
       {
-         BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+         behaviorUI = BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
       }
+      behaviorUI.addOnCloseRequestListener(() -> ThreadTools.startAThread(() -> {
+         destroy();
+         Runtime.getRuntime().exit(0);
+      }, "DestroyViaUI"));
+
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DestroyViaKill"));
    }
 
    private void lidarAndCameraSimulator()
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "lidar_and_camera");
-      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
+      lidarAndCameraSimulator = new SCSLidarAndCameraSimulator(communicationMode.getPubSubImplementation(), createCommonAvatarEnvironment(), createRobotModel());
    }
 
    private void dynamicsSimulation()
@@ -99,22 +115,12 @@ public class AtlasLookAndStepBehaviorDemo
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
-      AtlasDynamicsSimulation.create(createRobotModel(),
-                                     createCommonAvatarEnvironment(),
-                                     communicationMode.getPubSubImplementation(),
-                                     recordFrequencySpeedup,
-                                     dataBufferSize).simulate();
-   }
-
-   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
-   {
-      String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
-      YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
-      return new PlanarRegionsListDefinedEnvironment(environmentName,
-                                                     environmentInitialSetup.getPlanarRegionsSupplier().get(),
-                                                     cinderBlockTexture,
-                                                     0.02,
-                                                     false);
+      dynamicSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
+                                                         createCommonAvatarEnvironment(),
+                                                         communicationMode.getPubSubImplementation(),
+                                                         recordFrequencySpeedup,
+                                                         dataBufferSize);
+      dynamicSimulation.simulate();
    }
 
    private void kinematicSimulation()
@@ -128,13 +134,48 @@ public class AtlasLookAndStepBehaviorDemo
       kinematicsSimulationParameters.setInitialRobotYaw(environmentInitialSetup.getInitialYaw());
       kinematicsSimulationParameters.setInitialRobotX(environmentInitialSetup.getInitialX());
       kinematicsSimulationParameters.setInitialRobotY(environmentInitialSetup.getInitialY());
-      AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
+      kinematicsSimulation = AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
+   }
+
+   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment()
+   {
+      String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
+      YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
+      return new PlanarRegionsListDefinedEnvironment(environmentName,
+                                                     environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                     cinderBlockTexture,
+                                                     0.02,
+                                                     false);
    }
 
    private AtlasRobotModel createRobotModel()
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
+   }
+
+   private boolean destroyed = false;
+
+   private void destroy()
+   {
+      if (!destroyed)
+      {
+         LogTools.info("Shutting down");
+         behaviorUI.closeMessager();
+         behaviorModule.destroy();
+         perceptionStack.destroy();
+         if (RUN_LIDAR_AND_CAMERA_SIMULATION)
+            lidarAndCameraSimulator.destroy();
+         if (USE_DYNAMICS_SIMULATION)
+            dynamicSimulation.destroy();
+         else
+            kinematicsSimulation.destroy();
+
+         if (USE_INTERPROCESS)
+            FastRTPSDomain.getInstance().stopAll();
+
+         destroyed = true;
+      }
    }
 
    public static void main(String[] args)
