@@ -1,7 +1,5 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
@@ -15,7 +13,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.*;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
@@ -59,6 +56,7 @@ public class IntraprocessYoVariableLogger
    private LongBuffer dataBufferAsLong;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
+   private volatile boolean shutdown = false;
 
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    private ConcurrentRingBuffer<VariableChangedMessage> variableChanged = new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(),
@@ -85,10 +83,6 @@ public class IntraprocessYoVariableLogger
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
       handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
       Handshake handshake = handshakeBuilder.getHandShake();
-
-      LogHandshake logHandshake = new LogHandshake();
-
-      ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
       try
       {
@@ -164,9 +158,9 @@ public class IntraprocessYoVariableLogger
       LogTools.info("Number of YoVariables: {}", registry.getNumberOfYoVariables());
       LogTools.info("Number of joint states: {}", numberOfJointStates);
 
-      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
+      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       variables = registry.getAllVariables();
       jointHolders = handshakeBuilder.getJointHolders();
 
@@ -184,19 +178,34 @@ public class IntraprocessYoVariableLogger
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
-         try
+         shutdown = true;
+         synchronized (this)
          {
-            dataChannel.close();
+            try
+            {
+               LogTools.info("Closing data channel...");
+               dataChannel.close();
+               LogTools.info("Data channel closed.");
+               LogTools.info("Closing index channel...");
+               indexChannel.close();
+               LogTools.info("Index channel closed.");
+            }
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
          }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-      }));
+      }, getClass().getSimpleName() + "Shutdown"));
    }
 
-   public void update(long timestamp)
+   public synchronized void update(long timestamp)
    {
+      if (shutdown)
+      {
+         LogTools.error("Logger has already shutdown!");
+         return;
+      }
+
       dataBuffer.clear();
       dataBufferAsLong.clear();
 
@@ -225,11 +234,11 @@ public class IntraprocessYoVariableLogger
       }
 
       dataBufferAsLong.flip();
-      dataBuffer.clear();
+      dataBuffer.position(0);
+      dataBuffer.limit(dataBufferAsLong.limit() * 8);
 
       try
       {
-         dataBuffer.clear();
          compressedBuffer.clear();
          SnappyUtils.compress(dataBuffer, compressedBuffer);
          compressedBuffer.flip();
