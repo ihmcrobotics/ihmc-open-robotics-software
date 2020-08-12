@@ -9,6 +9,7 @@ import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPointCloudPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -54,6 +55,7 @@ public class AtlasPerceptionSimulation
 
    public void destroy()
    {
+      LogTools.info("Shutting down");
       multisenseRegionsPublisher.stop();
       if (runRealsenseSLAM)
       {

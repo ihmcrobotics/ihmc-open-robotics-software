@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -468,6 +469,7 @@ public class HumanoidKinematicsSimulation
 
    public void destroy()
    {
+      LogTools.info("Shutting down");
       controlThread.stop();
       ros2Node.destroy();
       if (yoVariableServer != null)
