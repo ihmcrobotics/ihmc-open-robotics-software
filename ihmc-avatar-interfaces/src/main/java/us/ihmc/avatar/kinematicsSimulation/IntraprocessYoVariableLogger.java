@@ -1,11 +1,13 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
+import com.google.common.collect.Lists;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
@@ -46,11 +48,19 @@ public class IntraprocessYoVariableLogger
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final String SUMMARY_FILENAME = "summary.csv";
    public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc/logs");
-   private final String timestamp;
+
+   private final String logName;
+   private final LogModelProvider logModelProvider;
+   private final List<RegistrySendBufferBuilder> registrySendBufferBuilders;
+   private final int maxTicksToRecord;
+   private final double dt;
+   private final Path incomingLogsFolder;
+
+   private String timestamp;
    private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
-   private List<YoVariable<?>> variables;
+   private ArrayList<YoVariable<?>> variables = new ArrayList<>();
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
@@ -71,17 +81,43 @@ public class IntraprocessYoVariableLogger
                                        double dt,
                                        Path incomingLogsFolder)
    {
+      this(logName,
+           logModelProvider,
+           Lists.newArrayList(new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry)),
+           maxTicksToRecord,
+           dt,
+           incomingLogsFolder);
+   }
+
+   public IntraprocessYoVariableLogger(String logName,
+                                       LogModelProvider logModelProvider,
+                                       List<RegistrySendBufferBuilder> registrySendBufferBuilders,
+                                       int maxTicksToRecord,
+                                       double dt,
+                                       Path incomingLogsFolder)
+   {
+      this.logName = logName;
+      this.logModelProvider = logModelProvider;
+      this.registrySendBufferBuilders = registrySendBufferBuilders;
+      this.maxTicksToRecord = maxTicksToRecord;
+      this.dt = dt;
+      this.incomingLogsFolder = incomingLogsFolder;
+   }
+
+   public void start()
+   {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
       logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);
       deleteOldLogs(incomingLogsFolder, 10);
 
-      RegistrySendBufferBuilder registrySendBufferBuilder = new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry);
-
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
-      handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
+      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
+      {
+         handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
+      }
       Handshake handshake = handshakeBuilder.getHandShake();
 
       try
@@ -144,7 +180,6 @@ public class IntraprocessYoVariableLogger
          e.printStackTrace();
       }
 
-
       int numberOfJointStates = 0;
       for (int i = 0; i < handshake.getJoints().size(); i++)
       {
@@ -154,15 +189,31 @@ public class IntraprocessYoVariableLogger
 
       int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
-      LogTools.info("Buffer size: {}", bufferSize);
-      LogTools.info("Number of YoVariables: {}", registry.getNumberOfYoVariables());
-      LogTools.info("Number of joint states: {}", numberOfJointStates);
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
       compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
-      variables = registry.getAllVariables();
+      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
+      {
+         variables.addAll(registrySendBufferBuilder.getYoVariableRegistry().getAllVariables());
+      }
       jointHolders = handshakeBuilder.getJointHolders();
+
+      long numberOfYoGraphics = 0;
+      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
+      {
+         if (registrySendBufferBuilder.getYoGraphicsListRegistry() != null)
+         {
+            for (YoGraphicsList yoGraphicsList : registrySendBufferBuilder.getYoGraphicsListRegistry().getYoGraphicsLists())
+            {
+               numberOfYoGraphics += yoGraphicsList.getYoGraphics().size();
+            }
+         }
+      }
+      LogTools.info("Buffer size: {}", bufferSize);
+      LogTools.info("Number of YoVariables: {}", variables.size());
+      LogTools.info("Number of YoGraphics: {}", numberOfYoGraphics);
+      LogTools.info("Number of joint states: {}", numberOfJointStates);
 
       try
       {

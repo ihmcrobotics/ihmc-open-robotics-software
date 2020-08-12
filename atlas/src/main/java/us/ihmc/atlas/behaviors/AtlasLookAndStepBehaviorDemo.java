@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import org.lwjgl.Sys;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
@@ -9,7 +8,6 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -20,7 +18,6 @@ import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.rtps.impl.fastRTPS.FastRTPSDomain;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
@@ -43,6 +40,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam"));
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
+   private static boolean USE_ADDITIONAL_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("use.additional.contact.points"));
 
    private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
    private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
@@ -119,7 +117,8 @@ public class AtlasLookAndStepBehaviorDemo
                                                          createCommonAvatarEnvironment(),
                                                          communicationMode.getPubSubImplementation(),
                                                          recordFrequencySpeedup,
-                                                         dataBufferSize);
+                                                         dataBufferSize,
+                                                         LOG_TO_FILE);
       dynamicSimulation.simulate();
    }
 
@@ -150,8 +149,15 @@ public class AtlasLookAndStepBehaviorDemo
 
    private AtlasRobotModel createRobotModel()
    {
-      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
+      if (USE_ADDITIONAL_CONTACT_POINTS)
+      {
+         FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
+         return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
+      }
+      else
+      {
+         return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
+      }
    }
 
    private boolean destroyed = false;
