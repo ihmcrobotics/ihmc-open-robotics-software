@@ -36,19 +36,20 @@ public class AtlasDynamicsSimulation
                                                              int recordTicksPerControllerTick,
                                                              int dataBufferSize)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize, false);
    }
 
    public static AtlasDynamicsSimulation createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1, 1024);
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1, 1024, false);
    }
 
    public static AtlasDynamicsSimulation create(DRCRobotModel robotModel,
                                                 CommonAvatarEnvironmentInterface environment,
                                                 PubSubImplementation pubSubImplementation,
                                                 int recordTicksPerControllerTick,
-                                                int dataBufferSize)
+                                                int dataBufferSize,
+                                                boolean logToFile)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -101,6 +102,7 @@ public class AtlasDynamicsSimulation
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(false);
+      avatarSimulationFactory.setLogToFile(logToFile);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();

@@ -16,6 +16,7 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -31,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
@@ -82,11 +84,13 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
+   private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile");
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private YoVariableServer yoVariableServer;
+   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private SimulationConstructionSet simulationConstructionSet;
    private SensorReaderFactory sensorReaderFactory;
    private JointDesiredOutputWriter simulationOutputWriter;
@@ -347,6 +351,20 @@ public class AvatarSimulationFactory
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
+      if (logToFile.get())
+      {
+         ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+         builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), null, controllerThread.getYoGraphicsListRegistry()));
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
+                                                                         robotModel.getLogModelProvider(),
+                                                                         builders,
+                                                                         100000,
+                                                                         robotModel.getEstimatorDT(),
+                                                                         IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY);
+         estimatorTask.addRunnableOnTaskThread(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
+      }
+
       // If running with server setup the server registries and their updates.
       if (yoVariableServer != null)
       {
@@ -585,6 +603,7 @@ public class AvatarSimulationFactory
       avatarSimulation.setSimulationConstructionSet(simulationConstructionSet);
       avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       avatarSimulation.setYoVariableServer(yoVariableServer);
+      avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setStateEstimationThread(estimatorThread);
       avatarSimulation.setRobotController(robotController);
@@ -645,6 +664,11 @@ public class AvatarSimulationFactory
    public void setCreateYoVariableServer(boolean createYoVariableServer)
    {
       this.createYoVariableServer.set(createYoVariableServer);
+   }
+
+   public void setLogToFile(boolean logToFile)
+   {
+      this.logToFile.set(logToFile);
    }
 
    public void setGravity(double gravity)

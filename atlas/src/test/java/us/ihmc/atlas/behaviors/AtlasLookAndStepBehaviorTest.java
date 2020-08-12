@@ -241,7 +241,8 @@ public class AtlasLookAndStepBehaviorTest
                                                           createCommonAvatarEnvironment(environment),
                                                           INTRAPROCESS,
                                                           recordFrequencySpeedup,
-                                                          scsDataBufferSize);
+                                                          scsDataBufferSize,
+                                                          false);
       dynamicsSimulation.simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();

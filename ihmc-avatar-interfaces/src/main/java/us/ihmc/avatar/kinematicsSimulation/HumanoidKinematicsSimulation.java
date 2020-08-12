@@ -311,6 +311,7 @@ public class HumanoidKinematicsSimulation
                                                                          100000,
                                                                          0.01,
                                                                          incomingLogsDirectory);
+         intraprocessYoVariableLogger.start();
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
