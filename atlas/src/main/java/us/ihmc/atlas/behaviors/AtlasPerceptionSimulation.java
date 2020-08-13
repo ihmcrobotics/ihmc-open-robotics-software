@@ -55,7 +55,7 @@ public class AtlasPerceptionSimulation
 
    public void destroy()
    {
-      LogTools.info("Shutting down");
+      LogTools.info("Shutting down...");
       multisenseRegionsPublisher.stop();
       if (runRealsenseSLAM)
       {

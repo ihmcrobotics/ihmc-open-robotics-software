@@ -124,7 +124,7 @@ public class AtlasLookAndStepBehaviorDemo
 
    private void kinematicSimulation()
    {
-      LogTools.info("Creating kinematics  simulation");
+      LogTools.info("Creating kinematics simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(communicationMode.getPubSubImplementation());
       kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
