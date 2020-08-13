@@ -100,6 +100,7 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    @Test
+   @Disabled
    @Order(2)
    public void testLookAndStepOverRoughTerrain()
    {
