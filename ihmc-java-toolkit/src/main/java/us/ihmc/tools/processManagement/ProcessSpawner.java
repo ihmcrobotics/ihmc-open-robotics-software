@@ -47,27 +47,27 @@ public abstract class ProcessSpawner
       Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "IHMC-ProcessSpawnerShutdown"));
    }
 
-   protected Process spawn(String commandString,
+   protected Process spawn(String name,
                            String[] spawnString,
                            ProcessBuilder builder,
                            File outputFile,
                            File errorFile,
                            ExitListener exitListener)
    {
-      return spawn(commandString, spawnString, builder, outputFile, errorFile, null, null, defaultPrintingPrefix(commandString), exitListener);
+      return spawn(name, spawnString, builder, outputFile, errorFile, null, null, defaultPrintingPrefix(name), exitListener);
    }
 
-   protected Process spawn(String commandString,
+   protected Process spawn(String name,
                            String[] spawnString,
                            ProcessBuilder builder,
                            PrintStream outputStream,
                            PrintStream errorStream,
                            ExitListener exitListener)
    {
-      return spawn(commandString, spawnString, builder, null, null, outputStream, errorStream, defaultPrintingPrefix(commandString), exitListener);
+      return spawn(name, spawnString, builder, null, null, outputStream, errorStream, defaultPrintingPrefix(name), exitListener);
    }
 
-   protected Process spawn(String commandString,
+   protected Process spawn(String name,
                            String[] spawnString,
                            ProcessBuilder builder,
                            File outputFile,
@@ -91,14 +91,15 @@ public abstract class ProcessSpawner
       {
          LogTools.trace("Forking process: {}{}", System.getProperty("line.separator"), Arrays.toString(spawnString));
          Process process = builder.start();
-         ImmutablePair<Process, String> newPair = new ImmutablePair<>(process, commandString);
+         ImmutablePair<Process, String> newPair = new ImmutablePair<>(process, name);
          processes.add(newPair);
 
          setProcessExitListener(process, exitListener);
 
          if (outputFile == null)
          {
-            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString,
+            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(name,
+                                                                                 process,
                                                                                  process.getInputStream(),
                                                                                  outputStream == null ? System.out : outputStream,
                                                                                  processPrintingPrefix);
@@ -108,7 +109,8 @@ public abstract class ProcessSpawner
 
          if (errorFile == null)
          {
-            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(commandString,
+            ProcessStreamGobbler processStreamGobbler = new ProcessStreamGobbler(name,
+                                                                                 process,
                                                                                  process.getErrorStream(),
                                                                                  errorStream == null ? System.err : errorStream,
                                                                                  processPrintingPrefix);

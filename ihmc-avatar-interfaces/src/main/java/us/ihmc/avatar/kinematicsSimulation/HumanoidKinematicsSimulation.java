@@ -470,7 +470,7 @@ public class HumanoidKinematicsSimulation
 
    public void destroy()
    {
-      LogTools.info("Shutting down");
+      LogTools.info("Shutting down...");
       controlThread.stop();
       ros2Node.destroy();
       if (yoVariableServer != null)

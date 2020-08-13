@@ -102,7 +102,7 @@ public class BehaviorModule
 
    public void destroy()
    {
-      LogTools.info("Shutting down");
+      LogTools.info("Shutting down...");
       for (ImmutablePair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors)
       {
          behavior.getRight().setEnabled(false);

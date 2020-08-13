@@ -121,8 +121,8 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
 
          Process process = builder.start();
          LogTools.info("Spindle speed shellout process started");
-         new ProcessStreamGobbler("ROS spindle speed shellout err", process.getErrorStream(), System.err).start();
-         new ProcessStreamGobbler("ROS spindle speed shellout out", process.getInputStream(), printStream).start();
+         new ProcessStreamGobbler("ROS spindle speed shellout err", process, process.getErrorStream(), System.err).start();
+         new ProcessStreamGobbler("ROS spindle speed shellout out", process, process.getInputStream(), printStream).start();
          process.waitFor();
          LogTools.info("Spindle speed shellout process finished");
 
