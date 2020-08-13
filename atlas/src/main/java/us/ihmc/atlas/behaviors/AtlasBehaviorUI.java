@@ -8,7 +8,6 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 
 public class AtlasBehaviorUI
@@ -19,8 +18,7 @@ public class AtlasBehaviorUI
 
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      BehaviorUIRegistry registry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
-      BehaviorUI.createInterprocess(registry, drcRobotModel, NetworkParameters.getHost(NetworkParameterKeys.networkManager));
+      BehaviorUI.createInterprocess(BehaviorUIRegistry.DEFAULT_BEHAVIORS, drcRobotModel, NetworkParameters.getHost(NetworkParameterKeys.networkManager));
    }
 
    public static void main(String[] args)
