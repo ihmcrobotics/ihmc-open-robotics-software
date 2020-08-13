@@ -40,7 +40,7 @@ public class LookAndStepReset
          controllerStatusTracker.getFinishedWalkingNotification().blockingPoll();
       }
       statusLogger.info("Finished walking. Waiting for remaining {} s", lookAndStepParameters.getResetDuration());
-      resetTimer.waitUntilExpiration(lookAndStepParameters.getResetDuration());
+      resetTimer.sleepUntilExpiration(lookAndStepParameters.getResetDuration());
       statusLogger.info("Reset duration passed");
       output.run();
    }

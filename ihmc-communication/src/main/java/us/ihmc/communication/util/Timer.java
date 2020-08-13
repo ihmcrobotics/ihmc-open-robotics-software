@@ -17,7 +17,7 @@ public class Timer
       return stopwatch.totalElapsed();
    }
 
-   public void waitUntilExpiration(double expirationTime)
+   public void sleepUntilExpiration(double expirationTime)
    {
       TimerSnapshotWithExpiration snapshot = createSnapshot(expirationTime);
       if (snapshot.isRunning())
