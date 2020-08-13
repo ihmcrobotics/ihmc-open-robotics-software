@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
-import us.ihmc.tools.thread.SingleThreadExecutor;
+import us.ihmc.tools.thread.ResettableSingleThreadExecutor;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.humanoidBehaviors.tools.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 
 import java.util.function.Consumer;
@@ -16,7 +16,7 @@ public class LookAndStepReview<T>
    private String description;
    private TypedNotification<Boolean> approvalNotification;
    private Consumer<T> callback;
-   private SingleThreadExecutor executor;
+   private ResettableSingleThreadExecutor executor;
 
    private T data;
 
@@ -27,7 +27,7 @@ public class LookAndStepReview<T>
       this.approvalNotification = approvalNotification;
       this.callback = callback;
 
-      executor = new SingleThreadExecutor(FormattingTools.titleToPascalCase(description) + "Review");
+      executor = new ResettableSingleThreadExecutor(FormattingTools.titleToPascalCase(description) + "Review");
    }
 
    public void review(T data)
