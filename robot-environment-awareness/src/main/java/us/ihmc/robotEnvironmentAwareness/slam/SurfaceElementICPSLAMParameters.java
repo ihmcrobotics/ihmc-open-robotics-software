@@ -15,8 +15,6 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_BOUND_RATIO = 1.1;
 
    private static final double DEFAULT_MINIMUM_CORRESPONDING_DISTANCE = 0.06;
-   private static final double DEFAULT_MAXIMUM_CORRESPONDING_DISTANCE = 0.1;
-   private static final int DEFAULT_CONSTANT_CORRESPONDING_DISTANCE_ITERATION = 3;
 
    private static final int DEFAULT_STEADY_STATE_DETECTOR_ITERATION_THRESHOLD = 3;
    private static final double DEFAULT_QUALITY_CONVERGENCE_THRESHOLD = 0.001;
@@ -31,14 +29,22 @@ public class SurfaceElementICPSLAMParameters
 
    private static final boolean DEFAULT_INSERT_MISS_IN_OCTREE = true;
 
+   private static final double DEFAULT_TRANSLATION_PERTURBATION = 0.002;
+   private static final double DEFAULT_ROTATION_PERTURBATION = 0.00001;
+   private static final boolean DEFAULT_INCLUDE_PITCH_AND_ROLL = true;
+
+   private static final int DEFAULT_MAXIMUM_QUEUE_SIZE = Integer.MAX_VALUE;
+   private static final double DEFAULT_MAXIMUM_TIME_BETWEEN_FRAMES = 1.0;
+   private static final double DEFAULT_LONGEST_TIME_TO_LAG = Double.POSITIVE_INFINITY;
+
+   private static final int DEFAULT_MAXIMUM_NUMBER_OF_SURFACE_ELEMENTS = Integer.MAX_VALUE;
+
    private double surfaceElementResolution;
    private double windowMargin;
    private int minimumNumberOfHit;
    private double boundRatio;
 
    private double minimumCorrespondingDistance;
-   private double maximumCorrespondingDistance;
-   private int constantCorrespondingDistanceIteration;
 
    private int steadyStateDetectorIterationThreshold;
    private double qualityConvergenceThreshold;
@@ -52,6 +58,16 @@ public class SurfaceElementICPSLAMParameters
    private boolean computeSurfaceNormalsInFrame;
 
    private boolean insertMissInOcTree;
+
+   private double translationPerturbation;
+   private double rotationPerturbation;
+   private boolean includePitchAndRoll;
+
+   private int maximumQueueSize;
+   private double maximumTimeBetweenFrames;
+   private double longestTimeToLag;
+
+   private int maxNumberOfSurfaceElements;
 
    public SurfaceElementICPSLAMParameters()
    {
@@ -71,8 +87,6 @@ public class SurfaceElementICPSLAMParameters
       boundRatio = other.boundRatio;
 
       minimumCorrespondingDistance = other.minimumCorrespondingDistance;
-      maximumCorrespondingDistance = other.maximumCorrespondingDistance;
-      constantCorrespondingDistanceIteration = other.constantCorrespondingDistanceIteration;
 
       steadyStateDetectorIterationThreshold = other.steadyStateDetectorIterationThreshold;
       qualityConvergenceThreshold = other.qualityConvergenceThreshold;
@@ -86,6 +100,16 @@ public class SurfaceElementICPSLAMParameters
       computeSurfaceNormalsInFrame = other.computeSurfaceNormalsInFrame;
 
       insertMissInOcTree = other.insertMissInOcTree;
+
+      translationPerturbation = other.translationPerturbation;
+      rotationPerturbation = other.rotationPerturbation;
+      includePitchAndRoll = other.includePitchAndRoll;
+
+      maximumQueueSize = other.maximumQueueSize;
+      maximumTimeBetweenFrames = other.maximumTimeBetweenFrames;
+      longestTimeToLag = other.longestTimeToLag;
+
+      maxNumberOfSurfaceElements = other.maxNumberOfSurfaceElements;
    }
 
    public void setDefaultParameters()
@@ -96,8 +120,6 @@ public class SurfaceElementICPSLAMParameters
       boundRatio = DEFAULT_BOUND_RATIO;
 
       minimumCorrespondingDistance = DEFAULT_MINIMUM_CORRESPONDING_DISTANCE;
-      maximumCorrespondingDistance = DEFAULT_MAXIMUM_CORRESPONDING_DISTANCE;
-      constantCorrespondingDistanceIteration = DEFAULT_CONSTANT_CORRESPONDING_DISTANCE_ITERATION;
 
       steadyStateDetectorIterationThreshold = DEFAULT_STEADY_STATE_DETECTOR_ITERATION_THRESHOLD;
       qualityConvergenceThreshold = DEFAULT_QUALITY_CONVERGENCE_THRESHOLD;
@@ -111,6 +133,16 @@ public class SurfaceElementICPSLAMParameters
       computeSurfaceNormalsInFrame = DEFAULT_COMPUTE_SURFACE_NORMALS_IN_FRAME;
 
       insertMissInOcTree = DEFAULT_INSERT_MISS_IN_OCTREE;
+
+      translationPerturbation = DEFAULT_TRANSLATION_PERTURBATION;
+      rotationPerturbation = DEFAULT_ROTATION_PERTURBATION;
+      includePitchAndRoll = DEFAULT_INCLUDE_PITCH_AND_ROLL;
+
+      maximumQueueSize = DEFAULT_MAXIMUM_QUEUE_SIZE;
+      maximumTimeBetweenFrames = DEFAULT_MAXIMUM_TIME_BETWEEN_FRAMES;
+      longestTimeToLag = DEFAULT_LONGEST_TIME_TO_LAG;
+
+      maxNumberOfSurfaceElements = DEFAULT_MAXIMUM_NUMBER_OF_SURFACE_ELEMENTS;
    }
 
    public double getSurfaceElementResolution()
@@ -136,16 +168,6 @@ public class SurfaceElementICPSLAMParameters
    public double getMinimumCorrespondingDistance()
    {
       return minimumCorrespondingDistance;
-   }
-
-   public double getMaximumCorrespondingDistance()
-   {
-      return maximumCorrespondingDistance;
-   }
-
-   public int getConstantCorrespondingDistanceIteration()
-   {
-      return constantCorrespondingDistanceIteration;
    }
 
    public int getSteadyStateDetectorIterationThreshold()
@@ -193,6 +215,41 @@ public class SurfaceElementICPSLAMParameters
       return insertMissInOcTree;
    }
 
+   public double getTranslationPerturbation()
+   {
+      return translationPerturbation;
+   }
+
+   public double getRotationPerturbation()
+   {
+      return rotationPerturbation;
+   }
+
+   public boolean getIncludePitchAndRoll()
+   {
+      return includePitchAndRoll;
+   }
+
+   public int getMaximumQueueSize()
+   {
+      return maximumQueueSize;
+   }
+
+   public double getMaximumTimeBetweenFrames()
+   {
+      return maximumTimeBetweenFrames;
+   }
+
+   public double getLongestTimeToLag()
+   {
+      return longestTimeToLag;
+   }
+
+   public int getMaxNumberOfSurfaceElements()
+   {
+      return maxNumberOfSurfaceElements;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -216,16 +273,6 @@ public class SurfaceElementICPSLAMParameters
    public void setMinimumCorrespondingDistance(double minimumCorrespondingDistance)
    {
       this.minimumCorrespondingDistance = minimumCorrespondingDistance;
-   }
-
-   public void setMaximumCorrespondingDistance(double maximumCorrespondingDistance)
-   {
-      this.maximumCorrespondingDistance = maximumCorrespondingDistance;
-   }
-
-   public void setConstantCorrespondingDistanceIteration(int constantCorrespondingDistanceIteration)
-   {
-      this.constantCorrespondingDistanceIteration = constantCorrespondingDistanceIteration;
    }
 
    public void setSteadyStateDetectorIterationThreshold(int steadyStateDetectorIterationThreshold)
@@ -273,18 +320,54 @@ public class SurfaceElementICPSLAMParameters
       this.insertMissInOcTree = insertMissInOcTree;
    }
 
+   public void setTranslationPerturbation(double translationPerturbation)
+   {
+      this.translationPerturbation = translationPerturbation;
+   }
+
+   public void setRotationPerturbation(double rotationPerturbation)
+   {
+      this.rotationPerturbation = rotationPerturbation;
+   }
+
+   public void setIncludePitchAndRoll(boolean includePitchAndRoll)
+   {
+      this.includePitchAndRoll = includePitchAndRoll;
+   }
+
+   public void setMaximumQueueSize(int maximumQueueSize)
+   {
+      this.maximumQueueSize = maximumQueueSize;
+   }
+
+   public void setMaximumTimeBetweenFrames(double maximumTimeBetweenFrames)
+   {
+      this.maximumTimeBetweenFrames = maximumTimeBetweenFrames;
+   }
+
+   public void setLongestTimeToLag(double longestTimeToLag)
+   {
+      this.longestTimeToLag = longestTimeToLag;
+   }
+
+   public void setMaxNumberOfSurfaceElements(int maximumNumberOfSurfaceElements)
+   {
+      this.maxNumberOfSurfaceElements = maximumNumberOfSurfaceElements;
+   }
+
    @Override
    public String toString()
    {
       return "surfaceElementResolution: " + getSurfaceElementResolution() + ", windowMargin: " + getWindowMargin() + ", minimumNumberOfHit: "
              + getMinimumNumberOfHit() + ", boundRatio: " + getBoundRatio() + ", minimumCorrespondingDistance: " + getMinimumCorrespondingDistance()
-             + ", maximumCorrespondingDistance: " + getMaximumCorrespondingDistance() + ", constantCorrespondingDistanceIteration: "
-             + getConstantCorrespondingDistanceIteration() + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold()
-             + ", qualityConvergenceThreshold: " + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: "
-             + getTranslationalEffortConvergenceThreshold() + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold()
-             + ", enableInitialQualityFilter: " + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold()
-             + ", maxOptimizationIterations: " + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame()
-            + ", insertMissInOcTree: " + getInsertMissInOcTree();
+             + ", steadStateDetectorIterationThreshold: " + getSteadyStateDetectorIterationThreshold() + ", qualityConvergenceThreshold: "
+             + getQualityConvergenceThreshold() + ", translationalEffortConvergenceThreshold: " + getTranslationalEffortConvergenceThreshold()
+             + ", rotationalEffortConvergenceThreshold: " + getRotationalEffortConvergenceThreshold() + ", enableInitialQualityFilter: "
+             + isEnableInitialQualityFilter() + ", initialQualityThreshold: " + getInitialQualityThreshold() + ", maxOptimizationIterations: "
+             + getMaxOptimizationIterations() + " computeSurfaceNormalsInPlane: " + getComputeSurfaceNormalsInFrame() + ", insertMissInOcTree: "
+             + getInsertMissInOcTree() + ", includePitchAndRoll: " + getIncludePitchAndRoll() + ", translationPerturbation: " + getTranslationPerturbation()
+             + ", rotationPerturbation: " + getRotationPerturbation() + ", maximumQueueSize: " + getMaximumQueueSize() + ", maximumTimeBetweenFrames: "
+             + getMaximumTimeBetweenFrames() + ", longestTimeToLag: " + getLongestTimeToLag() + ", maximumNumberOfSurfaceElements: " + getMaxNumberOfSurfaceElements();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -298,8 +381,6 @@ public class SurfaceElementICPSLAMParameters
       parameters.setMinimumNumberOfHit(ScannerTools.readNextInt(scanner, parameters.getMinimumNumberOfHit()));
       parameters.setBoundRatio(ScannerTools.readNextDouble(scanner, parameters.getBoundRatio()));
       parameters.setMinimumCorrespondingDistance(ScannerTools.readNextDouble(scanner, parameters.getMinimumCorrespondingDistance()));
-      parameters.setMaximumCorrespondingDistance(ScannerTools.readNextDouble(scanner, parameters.getMaximumCorrespondingDistance()));
-      parameters.setConstantCorrespondingDistanceIteration(ScannerTools.readNextInt(scanner, parameters.getConstantCorrespondingDistanceIteration()));
       parameters.setSteadyStateDetectorIterationThreshold(ScannerTools.readNextInt(scanner, parameters.getSteadyStateDetectorIterationThreshold()));
       parameters.setQualityConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getQualityConvergenceThreshold()));
       parameters.setTranslationalEffortConvergenceThreshold(ScannerTools.readNextDouble(scanner, parameters.getTranslationalEffortConvergenceThreshold()));
@@ -309,6 +390,13 @@ public class SurfaceElementICPSLAMParameters
       parameters.setMaxOptimizationIterations(ScannerTools.readNextInt(scanner, parameters.getMaxOptimizationIterations()));
       parameters.setComputeSurfaceNormalsInFrame(ScannerTools.readNextBoolean(scanner, parameters.getComputeSurfaceNormalsInFrame()));
       parameters.setInsertMissInOcTree(ScannerTools.readNextBoolean(scanner, parameters.getInsertMissInOcTree()));
+      parameters.setIncludePitchAndRoll(ScannerTools.readNextBoolean(scanner, parameters.getIncludePitchAndRoll()));
+      parameters.setTranslationPerturbation(ScannerTools.readNextDouble(scanner, parameters.getTranslationPerturbation()));
+      parameters.setRotationPerturbation(ScannerTools.readNextDouble(scanner, parameters.getRotationPerturbation()));
+      parameters.setMaximumQueueSize(ScannerTools.readNextInt(scanner, parameters.getMaximumQueueSize()));
+      parameters.setMaximumTimeBetweenFrames(ScannerTools.readNextDouble(scanner, parameters.getMaximumTimeBetweenFrames()));
+      parameters.setLongestTimeToLag(ScannerTools.readNextDouble(scanner, parameters.getLongestTimeToLag()));
+      parameters.setMaxNumberOfSurfaceElements(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfSurfaceElements()));
       scanner.close();
       return parameters;
    }

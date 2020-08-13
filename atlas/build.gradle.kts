@@ -1,5 +1,5 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
+   id("us.ihmc.ihmc-build") version "0.21.0"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.scs") version "0.4"
@@ -46,6 +46,7 @@ mainDependencies {
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-simple-whole-body-walking:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
@@ -72,7 +73,7 @@ mainDependencies {
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
 
-   api("us.ihmc:ihmc-commons-testing:0.30.0")
+   api("us.ihmc:ihmc-commons-testing:0.30.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")

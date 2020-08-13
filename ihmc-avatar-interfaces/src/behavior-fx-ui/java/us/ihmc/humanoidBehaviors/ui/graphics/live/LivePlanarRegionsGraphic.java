@@ -64,7 +64,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
             executorService.submit(() ->
             {
                this.latestPlanarRegionsList = incomingData;
-               LogTools.debug("Received regions from behavior: {}: {}", LocalDateTime.now(), incomingData.hashCode());
+               LogTools.trace("Received regions from behavior: {}: {}", LocalDateTime.now(), incomingData.hashCode());
                generateMeshes(incomingData);
             });
          }

@@ -7,7 +7,7 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
+   id("us.ihmc.ihmc-build") version "0.21.0"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
@@ -69,7 +69,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.30.0")
+   api("us.ihmc:ihmc-commons-testing:0.30.2")
    api("us.ihmc:simulation-construction-set:0.19.0")
    api("us.ihmc:simulation-construction-set-test:0.19.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")

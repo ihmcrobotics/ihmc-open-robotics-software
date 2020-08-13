@@ -28,10 +28,13 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
+   private static boolean launchSegmentation = true;
+
    private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
    private final boolean spawnUIs;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
+   private Ros2Node ros2Node;
    private Messager slamMessager;
    private Messager segmentationMessager;
    private SLAMBasedEnvironmentAwarenessUI ui;
@@ -63,13 +66,16 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
       }
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
       slamMessager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
 
-      segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
-      segmentationMessager.startMessager();
+      if (launchSegmentation)
+      {
+         segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
+         segmentationMessager.startMessager();
+      }
 
       if (spawnUIs)
       {
@@ -78,39 +84,49 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager);
 
       Stage secondStage = null;
-      if (spawnUIs)
+      if (launchSegmentation)
       {
-         secondStage = new Stage();
-         planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
+         if (spawnUIs)
+         {
+            secondStage = new Stage();
+            planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
+         }
+         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
+         module.attachOcTreeConsumer(segmentationModule);
       }
-      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
-      module.attachOcTreeConsumer(segmentationModule);
 
       if (spawnUIs)
       {
-         primaryStage.setOnCloseRequest(event -> ExceptionTools.handle(this::stop, DefaultExceptionHandler.PRINT_STACKTRACE));
-         secondStage.setOnCloseRequest(event -> ExceptionTools.handle(this::stop, DefaultExceptionHandler.PRINT_STACKTRACE));
+         primaryStage.setOnCloseRequest(event -> stop());
+         if (secondStage != null)
+            secondStage.setOnCloseRequest(event -> stop());
 
          ui.show();
-         planarSegmentationUI.show();
+         if (planarSegmentationUI != null)
+            planarSegmentationUI.show();
       }
 
       module.start();
-      segmentationModule.start();
+      if (segmentationModule != null)
+         segmentationModule.start();
    }
 
-   public void stop() throws Exception
+   public void stop()
    {
-      ui.stop();
+      if (spawnUIs) ui.stop();
       module.stop();
 
-      planarSegmentationUI.stop();
-      segmentationModule.stop();
+      ExceptionTools.handle(() -> slamMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
 
-      slamMessager.closeMessager();
-      segmentationMessager.closeMessager();
+      if (launchSegmentation)
+      {
+         if (spawnUIs)
+            planarSegmentationUI.stop();
+         segmentationModule.stop();
+         ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
 
-      Platform.exit();
+      ros2Node.destroy();
    }
 
    public static void main(String[] args)

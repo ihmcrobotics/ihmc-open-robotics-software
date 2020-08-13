@@ -7,7 +7,10 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrameState;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
@@ -15,6 +18,7 @@ public class SLAMModuleAPI
 {
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("SLAM"));
+   private static final CategoryTheme SLAMModule = apiFactory.createCategoryTheme("SLAMModule");
 
    private static final CategoryTheme Module = apiFactory.createCategoryTheme("Module");
    private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
@@ -54,7 +58,6 @@ public class SLAMModuleAPI
    public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
 
    public static final Topic<Boolean> SLAMEnable = Root.child(Module).topic(Enable);
-   public static final Topic<Boolean> BiasEnable = Root.child(Module).child(SensorFrame).topic(Enable);
    public static final Topic<Boolean> SLAMClear = Root.child(Module).topic(Clear);
 
    public static final Topic<Boolean> ShowPlanarRegionsMap = Root.child(UI).child(PlanarRegions).topic(Show);
@@ -83,14 +86,23 @@ public class SLAMModuleAPI
 
    public static final Topic<Boolean> NormalEstimationClear = Root.child(Normal).topic(Clear);
    public static final Topic<Boolean> NormalEstimationEnable = Root.child(Normal).topic(Enable);
-   public static final Topic<NormalEstimationParameters> NormalEstimationParameters = Root.child(Normal).topic(Parameters);
+   public static final Topic<NormalEstimationParameters> NormalEstimationParameters = topic("NormalEstimationParameters");
+   public static final Topic<NormalEstimationParameters> FrameNormalEstimationParameters = topic("FrameNormalEstimationParameters");
 
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = Root.child(UI).child(DepthCloud).topic(Data);
-   public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
+   public static final Topic<SLAMFrameState> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
    public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = Root.child(UI).child(OcTree).topic(Data);
    public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);
    public static final Topic<StampedPosePacket> CustomizedFrameState = Root.child(UI).child(Custom).topic(Data);
    public static final Topic<Double> LatestFrameConfidenceFactor = Root.child(UI).child(SensorFrame).topic(Value);
+
+   public static final Topic<Boolean> UIOcTreeBoundingBoxShow = topic("UIOcTreeBoundingBoxShow");
+   public static final Topic<Boolean> OcTreeBoundingBoxEnable = topic("OcTreeBoundingBoxEnable");
+   public static final Topic<Boolean> RequestBoundingBox = topic("RequestBoundingBox");
+   public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = topic("OcTreeBoundingBoxParameters");
+   public static final Topic<BoxMessage> OcTreeBoundingBoxState = topic("OcTreeBoundingBoxState");
+   
+   public static final Topic<StereoVisionPointCloudMessage> UIStereoSLAMPointCloud = topic("UIUncorrectedPointCloud");
 
    public static final Topic<Boolean> UIRawDataExportRequest = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Request);
    public static final Topic<Boolean> UISLAMDataExportRequest = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Request);
@@ -103,4 +115,9 @@ public class SLAMModuleAPI
    public static final Topic<Boolean> ImportedPlanarRegionsVizClear = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Clear);
    
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
+
+   private static <T> Topic<T> topic(String name)
+   {
+      return Root.child(SLAMModule).topic(apiFactory.createTypedTopicTheme(name));
+   }
 }

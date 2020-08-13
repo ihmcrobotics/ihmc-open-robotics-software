@@ -53,7 +53,7 @@ public class SplinedHeightTrajectory
 
    public SplinedHeightTrajectory(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      polynomial = new YoOptimizedPolynomial("height", 7, registry);
+      polynomial = new YoOptimizedPolynomial("height", 8, registry);
       polynomial.setAccelerationMinimizationWeight(1.0e-3);
       polynomial.setJerkMinimizationWeight(1.0e-1);
 
