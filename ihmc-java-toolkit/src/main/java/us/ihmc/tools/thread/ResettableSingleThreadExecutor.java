@@ -7,12 +7,12 @@ import java.util.concurrent.*;
 /**
  * TODO: Add shutdown exception limit?
  */
-public class SingleThreadExecutor
+public class ResettableSingleThreadExecutor
 {
    private final String prefix;
    private ExecutorService executor;
 
-   public SingleThreadExecutor(String prefix)
+   public ResettableSingleThreadExecutor(String prefix)
    {
       this.prefix = prefix;
 
