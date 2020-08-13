@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
