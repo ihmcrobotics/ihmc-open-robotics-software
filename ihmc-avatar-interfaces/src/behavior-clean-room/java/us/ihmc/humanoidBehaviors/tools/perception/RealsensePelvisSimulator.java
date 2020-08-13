@@ -84,8 +84,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       return tempSensorFramePose;
    }
 
-   @Override
-   public PlanarRegionsList get()
+   public PlanarRegionsList computeRegions()
    {
       syncedRobot.update();
 
@@ -98,5 +97,16 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
          // blank result
          return new PlanarRegionsList();
       }
+   }
+
+   @Override
+   public PlanarRegionsList get()
+   {
+      return computeRegions();
+   }
+
+   public void setMap(PlanarRegionsList map)
+   {
+      this.map = map;
    }
 }

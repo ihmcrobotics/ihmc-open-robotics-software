@@ -30,8 +30,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
       simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, neckFrame);
    }
 
-   @Override
-   public PlanarRegionsList get()
+   public PlanarRegionsList computeRegions()
    {
       syncedRobot.update();
 
@@ -45,4 +44,15 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
          return new PlanarRegionsList();
       }
    }
+   @Override
+   public PlanarRegionsList get()
+   {
+      return computeRegions();
+   }
+
+   public void setMap(PlanarRegionsList map)
+   {
+      this.map = map;
+   }
+
 }
