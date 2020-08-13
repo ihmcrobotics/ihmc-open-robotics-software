@@ -3,6 +3,7 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
@@ -11,7 +12,6 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -85,7 +85,7 @@ public class AtlasLookAndStepBehaviorDemo
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
       AtlasDynamicsSimulation.create(createRobotModel(),
                                      createCommonAvatarEnvironment(),
-                                     communicationMode.getPubSubImplementation(),
+                                     communicationMode.getPubSubImplementation(), // TODO: Set X, Y, and Yaw!
                                      recordFrequencySpeedup,
                                      dataBufferSize).simulate();
    }

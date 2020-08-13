@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.*;
@@ -48,6 +49,7 @@ public class RemoteHumanoidRobotInterface
    private final ROS2ControllerPublisherMap controllerPublisherMap;
 
    private final ArrayList<TypedNotification<WalkingStatusMessage>> walkingCompletedNotifications = new ArrayList<>();
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
    private final ROS2Input<HighLevelStateChangeStatusMessage> controllerStateInput;
    private final ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
 
@@ -66,6 +68,7 @@ public class RemoteHumanoidRobotInterface
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       
       new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, topicName.withOutput(), this::acceptWalkingStatus);
+      new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), footstepStatusMessage::set);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
@@ -106,6 +109,11 @@ public class RemoteHumanoidRobotInterface
    public ROS2Callback<FootstepStatusMessage> createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
       return new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), consumer);
+   }
+
+   public FootstepStatusMessage getLatestFootstepStatusMessage()
+   {
+      return footstepStatusMessage.get();
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan)
