@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import us.ihmc.tools.thread.SingleThreadExecutor;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.humanoidBehaviors.tools.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 
 import java.util.function.Consumer;
