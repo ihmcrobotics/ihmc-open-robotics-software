@@ -63,7 +63,7 @@ public class FootstepPlanPostProcessHandler
       }
       else
       {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, walkingControllerParameters);
+         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, footstepPlannerParameters, walkingControllerParameters);
          this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
@@ -90,9 +90,7 @@ public class FootstepPlanPostProcessHandler
       if (request.getSwingPlannerType() == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
       {
          adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(request.getPlanarRegionsList());
-         RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
-         Pose3D initialStancePose = request.getStartFootPoses().get(initialStanceSide);
-         adaptiveSwingTrajectoryCalculator.setSwingParameters(initialStancePose, output.getFootstepPlan());
+         adaptiveSwingTrajectoryCalculator.setSwingParameters(request.getStartFootPoses(), output.getFootstepPlan());
       }
       else if (request.getSwingPlannerType() == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
       {

@@ -26,7 +26,6 @@ module controller_msgs
         /**
          * If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
          * along the swing foot trajectory and the planar regions in the environment.
-         * Field default value -1.0
          */
         @defaultValue(value=-1.0)
         double minimum_swing_foot_clearance;
@@ -34,62 +33,47 @@ module controller_msgs
          * If using the swing over planar regions module, this sets up how much less clearance is required on the fast approximation, since it doesn't usually have
          * the same amount of curve to the trajectory.
          */
+        @defaultValue(value=-1.0)
         double fast_approximation_less_clearance;
         /**
          * If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
-         * Field default value 100
          */
+        @defaultValue(value=100)
         unsigned long number_of_checks_per_swing;
         /**
          * If using the swing over planar regions module, this is the maximum number of iterations for adjusting the swing foot waypoints to attempt avoiding
          * collisions with the environment.
-         * Field default value 50
          */
+        @defaultValue(value=50)
         unsigned long maximum_number_of_adjustment_attempts;
         /**
          * If using the swing over planar regions module, this is the maximum adjustment distance of the swing waypoints that will be allowed.
-         * Field default value -1.0
          */
+        @defaultValue(value=-1.0)
         double maximum_waypoint_adjustment_distance;
         /**
          * If using the swing over planar regions module, this is the minimum distance that the swing waypoints will be adjusted by on each increment.
-         * Field default value -1.0
          */
+        @defaultValue(value=-1.0)
         double minimum_adjustment_increment_distance;
         /**
          * If using the swing over planar regions module, this is the maximum distance that the swing waypoints will be adjusted by on each increment.
-         * Field default value -1.0
          */
+        @defaultValue(value=-1.0)
         double maximum_adjustment_increment_distance;
         /**
          * If using the swing over planar regions module, this is the scale factor to be applied to the collision on each increment for adjustment.
-         * Field default value -1.0
          */
+        @defaultValue(value=-1.0)
         double adjustment_increment_distance_gain;
-        /**
-         * Field default value -1.0
-         */
+        @defaultValue(value=-1.0)
         double minimum_height_above_floor_for_collision;
         /**
-         * Specifies the minimum swing height in the swing waypoint proportion calculator
+         * Collision boxes are checked for the start and end of swing at the toe and heel, respectively.
+         * If a collision is detected at either, this swing height is used.
          */
         @defaultValue(value=-1.0)
-        double minimum_swing_height;
-        /**
-         * Specifies the maximum swing height in the swing waypoint proportion calculator
-         */
-        @defaultValue(value=-1.0)
-        double maximum_swing_height;
-        /**
-         * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the minimum swing height for that interpolation
-         */
-        @defaultValue(value=-1.0)
-        double maximum_step_height_for_minimum_swing_height;
-        /**
-         * The waypoint proportion calculator does a linear interpolation to compute swing height. This is the maximum swing height for that interpolation
-         */
-        @defaultValue(value=-1.0)
-        double minimum_step_height_for_maximum_swing_height;
+        double swing_height_if_collision_detected;
         /**
          * Specifies the maximum swing time in the swing waypoint proportion calculator
          */
@@ -100,26 +84,6 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double maximum_swing_time;
-        /**
-         * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step translation for that interpolation
-         */
-        @defaultValue(value=-1.0)
-        double maximum_step_translation_for_minimum_swing_time;
-        /**
-         * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the minimum step translation for that interpolation
-         */
-        @defaultValue(value=-1.0)
-        double minimum_step_translation_for_maximum_swing_time;
-        /**
-         * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-         */
-        @defaultValue(value=-1.0)
-        double maximum_step_height_for_minimum_swing_time;
-        /**
-         * The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-         */
-        @defaultValue(value=-1.0)
-        double minimum_step_height_for_maximum_swing_time;
         /**
          * The waypoint proportion calculator shifts the specified proportions if a foot collision is detected. This specifies the clearance of that collision
          */

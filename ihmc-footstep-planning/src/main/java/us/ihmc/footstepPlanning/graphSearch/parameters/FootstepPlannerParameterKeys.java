@@ -46,7 +46,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms              = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
    public static final DoubleStoredPropertyKey  cliffTopHeightToAvoid                        = keys.addDoubleKey ("Cliff top height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffTops                 = keys.addDoubleKey ("Min distance from cliff tops", 0.0);
-   public static final DoubleStoredPropertyKey minClearanceFromStance                        = keys.addDoubleKey ("Min clearance from stance", 0.0);
+   public static final DoubleStoredPropertyKey  minClearanceFromStance                       = keys.addDoubleKey ("Min clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxWidth                                 = keys.addDoubleKey ("Body box width", 0.7);
    public static final DoubleStoredPropertyKey  bodyBoxHeight                                = keys.addDoubleKey ("Body box height", 1.5);
    public static final DoubleStoredPropertyKey  bodyBoxDepth                                 = keys.addDoubleKey ("Body box depth", 0.3);
@@ -61,9 +61,9 @@ public class FootstepPlannerParameterKeys
    public static final IntegerStoredPropertyKey maximumBranchFactor                          = keys.addIntegerKey ("Max branch factor", -1);
    public static final BooleanStoredPropertyKey enableExpansionMask                          = keys.addBooleanKey("Enable expansion mask", true);
    public static final BooleanStoredPropertyKey enableShinCollisionCheck                     = keys.addBooleanKey("Enable shin collision check", false);
-   public static final DoubleStoredPropertyKey  shinRadius                                   = keys.addDoubleKey("Shin radius", 0.12);
    public static final DoubleStoredPropertyKey  shinLength                                   = keys.addDoubleKey("Shin length", 0.45);
-   public static final DoubleStoredPropertyKey  shinPitch                                    = keys.addDoubleKey("Shin pitch", 0.0);
+   public static final DoubleStoredPropertyKey  shinToeClearance                             = keys.addDoubleKey("Shin toe clearance", 0.0);
+   public static final DoubleStoredPropertyKey  shinHeelClearance                            = keys.addDoubleKey("Shin heel clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
    public static final DoubleStoredPropertyKey  distanceEpsilonToBridgeRegions               = keys.addDoubleKey("Distance epsilon to bridge regions", 0.0);
    public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);

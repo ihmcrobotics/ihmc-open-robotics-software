@@ -752,13 +752,13 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_7(data.getEnableShinCollisionCheck());
 
 
-      cdr.write_type_6(data.getShinRadius());
+      cdr.write_type_6(data.getShinToeClearance());
+
+
+      cdr.write_type_6(data.getShinHeelClearance());
 
 
       cdr.write_type_6(data.getShinLength());
-
-
-      cdr.write_type_6(data.getShinPitch());
 
 
       cdr.write_type_6(data.getShinHeightOffet());
@@ -969,13 +969,13 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setEnableShinCollisionCheck(cdr.read_type_7());
       	
 
-      data.setShinRadius(cdr.read_type_6());
+      data.setShinToeClearance(cdr.read_type_6());
+      	
+
+      data.setShinHeelClearance(cdr.read_type_6());
       	
 
       data.setShinLength(cdr.read_type_6());
-      	
-
-      data.setShinPitch(cdr.read_type_6());
       	
 
       data.setShinHeightOffet(cdr.read_type_6());
@@ -1123,11 +1123,11 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_7("enable_shin_collision_check", data.getEnableShinCollisionCheck());
 
-      ser.write_type_6("shin_radius", data.getShinRadius());
+      ser.write_type_6("shin_toe_clearance", data.getShinToeClearance());
+
+      ser.write_type_6("shin_heel_clearance", data.getShinHeelClearance());
 
       ser.write_type_6("shin_length", data.getShinLength());
-
-      ser.write_type_6("shin_pitch", data.getShinPitch());
 
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
 
@@ -1270,11 +1270,11 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setEnableShinCollisionCheck(ser.read_type_7("enable_shin_collision_check"));
 
-      data.setShinRadius(ser.read_type_6("shin_radius"));
+      data.setShinToeClearance(ser.read_type_6("shin_toe_clearance"));
+
+      data.setShinHeelClearance(ser.read_type_6("shin_heel_clearance"));
 
       data.setShinLength(ser.read_type_6("shin_length"));
-
-      data.setShinPitch(ser.read_type_6("shin_pitch"));
 
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
 

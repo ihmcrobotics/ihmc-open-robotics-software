@@ -74,7 +74,7 @@
             </HBox>
          </children>
       </VBox>
-      <VBox layoutX="927.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+      <VBox layoutX="927.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 2; -fx-border-color: lightblue; -fx-border-width: 1; -fx-padding: 1;">
          <children>
             <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Filter" textAlignment="CENTER">
                <font>
@@ -84,6 +84,8 @@
             <ToggleButton fx:id="enableInitialQualityFilter" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Enable" />
             <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="initial quality threshold" textAlignment="CENTER" />
             <Spinner fx:id="initialQualityThreshold" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="max queue size" textAlignment="CENTER" />
+            <Spinner fx:id="maxQueueSize" editable="true" maxWidth="1.7976931348623157E308" />
          </children>
       </VBox>
       <VBox layoutX="1137.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
@@ -95,6 +97,20 @@
             </Label>
             <ToggleButton fx:id="computeSurfaceNormalsInFrame" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Compute Frame Normals" />
             <ToggleButton fx:id="insertMissInOcTree" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Insert Miss in OcTree" />
+         </children>
+      </VBox>
+      <VBox layoutX="1347.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Optimization" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <ToggleButton fx:id="includePitchAndRoll" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Include Pitch and Roll" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="translation perturbation" textAlignment="CENTER" />
+            <Spinner fx:id="translationPerturbation" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="rotation perturbation" textAlignment="CENTER" />
+            <Spinner fx:id="rotationPerturbation" editable="true" maxWidth="1.7976931348623157E308" />
          </children>
       </VBox>
    </children>

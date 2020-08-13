@@ -30,6 +30,14 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
    private static double groundSize = 20.0;
    private static int greenId = 6;
 
+   public static PlanarRegionsList flatGround()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setId(greenId);
+      generator.addRectangle(groundSize, groundSize);
+      return generator.getPlanarRegionsList();
+   }
+
    public static PlanarRegionsList createTraversalRegionsRegions()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();

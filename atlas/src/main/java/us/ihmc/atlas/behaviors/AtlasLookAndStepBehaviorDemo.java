@@ -2,25 +2,20 @@ package us.ihmc.atlas.behaviors;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.sensors.AtlasSLAMBasedREAStandaloneLauncher;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
-import us.ihmc.humanoidBehaviors.tools.perception.*;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
 import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
-import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
@@ -39,9 +34,9 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
    private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam"));
-   private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
 
    private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
+   private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
 
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
    {
@@ -61,8 +56,12 @@ public class AtlasLookAndStepBehaviorDemo
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      ThreadTools.startAsDaemon(this::perceptionStack, "PerceptionStack");
-      ThreadTools.startAsDaemon(USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation, "Simulation");
+      ThreadTools.startAsDaemon(() -> new AtlasPerceptionSimulation(communicationMode,
+                                                                    environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                                    RUN_REALSENSE_SLAM,
+                                                                    createRobotModel()),
+                                "REAModule");
+      ThreadTools.startAsDaemon(simulation, "Simulation");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
@@ -79,37 +78,12 @@ public class AtlasLookAndStepBehaviorDemo
       }
    }
 
-   private void perceptionStack()
-   {
-      LogTools.info("Creating simulated multisense stereo regions module");
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "look_and_step_perception");
-      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(),
-                                                                                   createRobotModel(),
-                                                                                   ros2Node);
-      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(), createRobotModel(), ros2Node);
-
-      // might be a weird delay with threads at 0.5 hz depending on each other
-      double period = 1.0;
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, period, multisense).start(); // TODO: Disable while not in use?
-
-      if (RUN_REALSENSE_SLAM)
-      {
-         new PeriodicPointCloudPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD, period, realsense::getPointCloud, realsense::getSensorPose).start();
-         new AtlasSLAMBasedREAStandaloneLauncher(SHOW_REALSENSE_SLAM_UIS, communicationMode.getPubSubImplementation());
-      }
-      else
-      {
-         PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
-         new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, period, () -> realsenseSLAM.update(realsense.get())).start();
-      }
-   }
-
    private void dynamicsSimulation()
    {
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
-      AtlasBehaviorSimulation.create(createRobotModel(),
+      AtlasDynamicsSimulation.create(createRobotModel(),
                                      createCommonAvatarEnvironment(),
                                      communicationMode.getPubSubImplementation(), // TODO: Set X, Y, and Yaw!
                                      recordFrequencySpeedup,
