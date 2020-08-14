@@ -22,7 +22,11 @@ public class AtlasPerceptionSimulation
    private AtlasSLAMBasedREAStandaloneLauncher realsenseSLAMFramework;
    private PeriodicPointCloudPublisher realsensePointCloudPublisher;
 
-   public AtlasPerceptionSimulation(CommunicationMode communicationMode, PlanarRegionsList map, boolean runRealsenseSLAM, DRCRobotModel robotModel)
+   public AtlasPerceptionSimulation(CommunicationMode communicationMode,
+                                    PlanarRegionsList map,
+                                    boolean runRealsenseSLAM,
+                                    boolean spawnUIs,
+                                    DRCRobotModel robotModel)
    {
       this.runRealsenseSLAM = runRealsenseSLAM;
       Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "perception");
@@ -38,7 +42,7 @@ public class AtlasPerceptionSimulation
       {
          realsensePointCloudPublisher = new PeriodicPointCloudPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD, period, realsense::getPointCloud, realsense::getSensorPose);
          realsensePointCloudPublisher.start();
-         realsenseSLAMFramework = new AtlasSLAMBasedREAStandaloneLauncher(false, communicationMode.getPubSubImplementation());
+         realsenseSLAMFramework = new AtlasSLAMBasedREAStandaloneLauncher(spawnUIs, communicationMode.getPubSubImplementation());
       }
       else
       {

@@ -5,9 +5,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
@@ -15,6 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -91,14 +91,21 @@ public class BehaviorUI
             tabPane.getTabs().add(tab);
          }
 
+         AnchorPane mainAnchorPane = new AnchorPane();
+
          View3DFactory view3DFactory = View3DFactory.createSubscene();
          view3DFactory.addCameraController(0.05, 2000.0, true);
          view3DFactory.addWorldCoordinateSystem(0.3);
          view3DFactory.addDefaultLighting();
          SubScene subScene3D = view3DFactory.getSubScene();
          Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
+         StackPane view3DStackPane = new StackPane(view3DSubSceneWrappedInsidePane);
+         AnchorPane.setTopAnchor(view3DStackPane, 0.0);
+         AnchorPane.setBottomAnchor(view3DStackPane, 0.0);
+         AnchorPane.setLeftAnchor(view3DStackPane, 0.0);
+         AnchorPane.setRightAnchor(view3DStackPane, 0.0);
+         mainAnchorPane.getChildren().add(view3DStackPane);
 
-//         AnchorPane sideVisualizationArea = new AnchorPane();
          VBox sideVisualizationArea = new VBox();
 
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
@@ -121,16 +128,13 @@ public class BehaviorUI
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUIController.init(subScene3D, ros2Node, robotModel);
+         directRobotUIController.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
          view3DFactory.addNodeToView(directRobotUIController);
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-//         sideVisualizationArea.setPrefWidth(200.0);
-//         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
-         mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
+         mainSplitPane.getItems().add(mainAnchorPane);
          mainSplitPane.getItems().add(consoleScrollPane);
-//         mainSplitPane.getItems().add(sideVisualizationArea);
          mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();

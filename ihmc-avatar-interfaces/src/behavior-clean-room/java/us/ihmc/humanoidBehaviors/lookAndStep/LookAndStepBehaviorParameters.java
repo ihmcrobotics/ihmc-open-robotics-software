@@ -26,6 +26,9 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final DoubleStoredPropertyKey robotConfigurationDataExpiration = keys.addDoubleKey("Robot configuration data expiration");
    public static final IntegerStoredPropertyKey acceptableIncompleteFootsteps = keys.addIntegerKey("Acceptable incomplete footsteps");
    public static final DoubleStoredPropertyKey minimumSwingFootClearanceOverride = keys.addDoubleKey("Minimum swing foot clearance override");
+   public static final DoubleStoredPropertyKey neckPitchForBodyPath = keys.addDoubleKey("Neck pitch for body path");
+   public static final DoubleStoredPropertyKey neckPitchTolerance = keys.addDoubleKey("Neck pitch tolerance");
+   public static final DoubleStoredPropertyKey resetDuration = keys.addDoubleKey("Reset duration");
 
    public LookAndStepBehaviorParameters()
    {

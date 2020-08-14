@@ -9,6 +9,11 @@ public class TimerSnapshot
       this.timePassedSinceReset = timePassedSinceReset;
    }
 
+   public boolean isRunning(double expirationTime)
+   {
+      return Timer.isRunning(timePassedSinceReset, expirationTime);
+   }
+
    public boolean isExpired(double expirationTime)
    {
       return Timer.isExpired(timePassedSinceReset, expirationTime);
@@ -22,11 +27,6 @@ public class TimerSnapshot
    public double getTimePassedSinceReset()
    {
       return timePassedSinceReset;
-   }
-
-   public boolean isRunning(double expirationTime)
-   {
-      return hasBeenSet() && !isExpired(expirationTime);
    }
 
    public TimerSnapshotWithExpiration withExpiration(double expirationTime)

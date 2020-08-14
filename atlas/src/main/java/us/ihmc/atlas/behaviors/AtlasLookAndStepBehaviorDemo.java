@@ -2,11 +2,13 @@ package us.ihmc.atlas.behaviors;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -16,8 +18,10 @@ import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -32,8 +36,10 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean LOG_TO_FILE = Boolean.parseBoolean(System.getProperty("log.to.file"));
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
+   private static boolean RUN_LIDAR_AND_CAMERA_SIMULATION = Boolean.parseBoolean(System.getProperty("run.lidar.and.camera.simulation"));
    private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam"));
+   private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
 
    private final CommunicationMode communicationMode = USE_INTERPROCESS ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
    private final Runnable simulation = USE_DYNAMICS_SIMULATION ? this::dynamicsSimulation : this::kinematicSimulation;
@@ -59,9 +65,13 @@ public class AtlasLookAndStepBehaviorDemo
       ThreadTools.startAsDaemon(() -> new AtlasPerceptionSimulation(communicationMode,
                                                                     environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                     RUN_REALSENSE_SLAM,
+                                                                    SHOW_REALSENSE_SLAM_UIS,
                                                                     createRobotModel()),
-                                "REAModule");
+                                "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
+
+      if (RUN_LIDAR_AND_CAMERA_SIMULATION)
+         ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
@@ -76,6 +86,12 @@ public class AtlasLookAndStepBehaviorDemo
       {
          BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
       }
+   }
+
+   private void lidarAndCameraSimulator()
+   {
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(communicationMode.getPubSubImplementation(), "lidar_and_camera");
+      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
    }
 
    private void dynamicsSimulation()
@@ -123,6 +139,6 @@ public class AtlasLookAndStepBehaviorDemo
 
    public static void main(String[] args)
    {
-      new AtlasLookAndStepBehaviorDemo();
+      JavaProcessManager.teeToLogFile(AtlasLookAndStepBehaviorDemo.class);
    }
 }
