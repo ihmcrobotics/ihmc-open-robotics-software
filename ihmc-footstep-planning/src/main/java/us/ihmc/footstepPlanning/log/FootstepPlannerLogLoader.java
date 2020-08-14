@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,9 +27,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class FootstepPlannerLogLoader
 {
@@ -44,6 +47,72 @@ public class FootstepPlannerLogLoader
    public enum LoadResult
    {
       LOADED, CANCELLED, ERROR
+   }
+
+   public enum LoadRequestType
+   {
+      FILE_CHOOSER, LATEST, NEXT, PREVIOUS
+   }
+
+   public LoadResult load(LoadRequestType loadRequestType, FootstepPlannerLog alreadyOpenLog)
+   {
+      if (loadRequestType == LoadRequestType.FILE_CHOOSER)
+      {
+         return load();
+      }
+      else
+      {
+         if ((loadRequestType == LoadRequestType.PREVIOUS || loadRequestType == LoadRequestType.NEXT) && alreadyOpenLog == null)
+         {
+            LogTools.warn("Must have log open to view {} log", loadRequestType.name());
+            return LoadResult.ERROR;
+         }
+
+         SortedSet<Path> sortedLogFolderPaths = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+         PathTools.walkFlat(Paths.get(FootstepPlannerLogger.defaultLogsDirectory), (path, type) -> {
+            if (type == BasicPathVisitor.PathType.DIRECTORY
+                && path.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
+               sortedLogFolderPaths.add(path);
+            return FileVisitResult.CONTINUE;
+         });
+
+         if (loadRequestType == LoadRequestType.LATEST)
+         {
+            return load(sortedLogFolderPaths.last().toFile());
+         }
+         else
+         {
+            Path loadedLog = sortedLogFolderPaths.last().getParent().resolve(alreadyOpenLog.getLogName());
+
+            if (loadRequestType == LoadRequestType.PREVIOUS)
+            {
+               SortedSet<Path> headSet = sortedLogFolderPaths.headSet(loadedLog);
+               if (headSet.isEmpty())
+               {
+                  LogTools.warn("No earlier logs found!");
+                  return LoadResult.ERROR;
+               }
+               else
+               {
+                  return load(headSet.last().toFile());
+               }
+            }
+            else // if (type == LoadRequestType.NEXT)
+            {
+               SortedSet<Path> tailSet = sortedLogFolderPaths.tailSet(loadedLog);
+               tailSet.remove(tailSet.first());
+               if (tailSet.isEmpty())
+               {
+                  LogTools.warn("No newer logs found!");
+                  return LoadResult.ERROR;
+               }
+               else
+               {
+                  return load(tailSet.first().toFile());
+               }
+            }
+         }
+      }
    }
 
    public LoadResult load()
