@@ -4,7 +4,9 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -164,10 +166,13 @@ public class FootstepPlannerUI
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 
       mainPane = loader.load();
+      SplitPane splitPane = (SplitPane) mainPane.getCenter();
+      BorderPane centerBorderPane = (BorderPane) splitPane.getItems().get(0);
+      Node testDashboard = centerBorderPane.getLeft();
 
       if (!showTestDashboard)
       {
-         mainPane.getChildren().remove(mainPane.getLeft());
+         centerBorderPane.getChildren().remove(testDashboard);
       }
 
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
@@ -303,10 +308,10 @@ public class FootstepPlannerUI
          setupDataSetLoadBingings(auxiliaryRobotData);
       }
 
-      mainPane.setCenter(subScene);
+      centerBorderPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
-      Scene mainScene = new Scene(mainPane, 600, 400);
+      Scene mainScene = new Scene(mainPane, 1800, 913);
 
       mainScene.getStylesheets().add("us/ihmc/footstepPlanning/ui/FootstepPlannerUI.css");
 
