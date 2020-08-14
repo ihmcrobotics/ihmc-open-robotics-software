@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -84,7 +85,7 @@ public class HexapodSimulationController implements RobotController
 
       FeedbackControlCommandList feedbackControlCommandList = createFeedbackControlTemplate();
       WholeBodyControlCoreToolbox toolbox = makeControllerToolbox();
-      this.controllerCore = new WholeBodyControllerCore(toolbox, feedbackControlCommandList, lowLevelControllerCoreOutput, registry);
+      this.controllerCore = new WholeBodyControllerCore(toolbox, new FeedbackControllerTemplate(feedbackControlCommandList), lowLevelControllerCoreOutput, registry);
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {

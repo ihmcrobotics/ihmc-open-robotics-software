@@ -39,6 +39,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
  */
 public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -81,6 +82,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public void set(VirtualTorqueCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
 
       desiredAngularTorque.set(other.desiredAngularTorque);
@@ -99,6 +101,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       command.getAngularSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
@@ -425,6 +428,18 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -435,6 +450,8 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       {
          VirtualTorqueCommand other = (VirtualTorqueCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredAngularTorque.equals(other.desiredAngularTorque))

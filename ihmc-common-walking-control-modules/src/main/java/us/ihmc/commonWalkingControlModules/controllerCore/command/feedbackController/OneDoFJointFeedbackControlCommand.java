@@ -31,6 +31,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
  */
 public class OneDoFJointFeedbackControlCommand implements FeedbackControlCommand<OneDoFJointFeedbackControlCommand>
 {
+   private int commandId;
    private OneDoFJointBasics joint;
    /** Represents the expected control mode to execute this command. */
    private WholeBodyControllerCoreMode controlMode = null;
@@ -56,6 +57,7 @@ public class OneDoFJointFeedbackControlCommand implements FeedbackControlCommand
 
    public void clear()
    {
+      commandId = 0;
       controlMode = null;
       joint = null;
       referencePosition = 0.0;
@@ -69,6 +71,7 @@ public class OneDoFJointFeedbackControlCommand implements FeedbackControlCommand
    @Override
    public void set(OneDoFJointFeedbackControlCommand other)
    {
+      commandId = other.commandId;
       controlMode = other.controlMode;
       joint = other.joint;
       referencePosition = other.referencePosition;
@@ -336,6 +339,18 @@ public class OneDoFJointFeedbackControlCommand implements FeedbackControlCommand
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -346,6 +361,8 @@ public class OneDoFJointFeedbackControlCommand implements FeedbackControlCommand
       {
          OneDoFJointFeedbackControlCommand other = (OneDoFJointFeedbackControlCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (controlMode != other.controlMode)
             return false;
          if (joint != other.joint)

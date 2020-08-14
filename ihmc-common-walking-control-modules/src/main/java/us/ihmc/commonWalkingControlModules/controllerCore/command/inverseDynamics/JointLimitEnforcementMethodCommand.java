@@ -12,6 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class JointLimitEnforcementMethodCommand
       implements InverseKinematicsCommand<JointLimitEnforcementMethodCommand>, InverseDynamicsCommand<JointLimitEnforcementMethodCommand>
 {
+   private int commandId;
    private static final int initialCapacity = 40;
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final List<JointLimitEnforcement> methods = new ArrayList<>(initialCapacity);
@@ -19,6 +20,7 @@ public class JointLimitEnforcementMethodCommand
 
    public void clear()
    {
+      commandId = 0;
       joints.clear();
       methods.clear();
       parameters.clear();
@@ -56,6 +58,8 @@ public class JointLimitEnforcementMethodCommand
    {
       clear();
 
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
@@ -71,6 +75,18 @@ public class JointLimitEnforcementMethodCommand
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -81,6 +97,8 @@ public class JointLimitEnforcementMethodCommand
       {
          JointLimitEnforcementMethodCommand other = (JointLimitEnforcementMethodCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
 
