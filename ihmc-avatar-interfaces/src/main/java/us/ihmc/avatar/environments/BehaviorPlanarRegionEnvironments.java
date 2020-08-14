@@ -115,6 +115,30 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       }, createGroundPlane);
    }
 
+   public static PlanarRegionsList createFlatUpAndDownStairsWithFlatTop()
+   {
+      return generate((random, generator) -> {
+         offsetGrid(generator, 1.0, -0.5, 0.0, () ->
+         {
+            offsetGrid(generator, 0.0, 0.0, 0.0, () ->
+            {
+               generateFlatCinderBlockStairs(random, generator);
+            });
+            offsetGrid(generator, 1.0, 0.0, topRegionHeight, () ->
+            {
+               addTopFlatRegion(generator);
+            });
+            offsetGrid(generator, 3.0, 1.0, 0.0, () ->
+            {
+               rotate(generator, Math.PI, () ->
+               {
+                  generateFlatCinderBlockStairs(random, generator);
+               });
+            });
+         });
+      }, true);
+   }
+
    public static PlanarRegionsList generateStartingBlockRegions(RigidBodyTransform startingPose)
    {
       double platformXY = 1.0;
@@ -335,6 +359,20 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
                                                          0.0,
                                                          0.0,
                                                          Math.toRadians(CINDER_SLOPE_ANGLE),
+                                                         0.0);
+   }
+   private static void generateFlatCinderBlockStairs(Random random, PlanarRegionsListGenerator generator)
+   {
+      PlanarRegionsListExamples.generateCinderBlockSlope(generator,
+                                                         random,
+                                                         cinderSquareSurfaceSize,
+                                                         cinderThickness,
+                                                         3,
+                                                         3,
+                                                         Z_STEP_UP_PER_ROW + 0.04,
+                                                         0.0,
+                                                         0.0,
+                                                         0.0,
                                                          0.0);
    }
    private static void generateAngledCinderBlockStairs(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)

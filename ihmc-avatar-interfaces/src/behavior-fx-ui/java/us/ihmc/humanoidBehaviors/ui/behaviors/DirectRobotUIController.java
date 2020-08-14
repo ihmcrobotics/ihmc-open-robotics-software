@@ -7,6 +7,9 @@ import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commons.MathTools;
@@ -16,6 +19,8 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
+import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -36,6 +41,8 @@ public class DirectRobotUIController extends Group
    @FXML private CheckBox showRealsenseRegions;
    @FXML private CheckBox showMapRegions;
    @FXML private CheckBox showSupportRegions;
+   @FXML private CheckBox showMultisenseVideo;
+   @FXML private CheckBox showRealsenseVideo;
    @FXML private Slider stanceHeightSlider;
    @FXML private Slider leanForwardSlider;
    @FXML private Slider neckSlider;
@@ -49,8 +56,12 @@ public class DirectRobotUIController extends Group
    private LivePlanarRegionsGraphic realsenseRegionsGraphic;
    private LivePlanarRegionsGraphic mapRegionsGraphic;
    private LivePlanarRegionsGraphic supportRegionsGraphic;
+   private JavaFXROS2VideoViewOverlay multisenseVideoOverlay;
+   private StackPane multisenseVideoStackPane;
+   private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
+   private StackPane realsenseVideoStackPane;
 
-   public void init(SubScene subScene, Ros2Node ros2Node, DRCRobotModel robotModel)
+   public void init(AnchorPane mainAnchorPane, SubScene subScene, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -109,10 +120,29 @@ public class DirectRobotUIController extends Group
       supportRegionsGraphic.setEnabled(false);
       getChildren().add(supportRegionsGraphic);
 
+      multisenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, 1024, 544, false, false));
+      multisenseVideoStackPane = new StackPane(multisenseVideoOverlay.getNode());
+      multisenseVideoStackPane.setVisible(false);
+      AnchorPane.setTopAnchor(multisenseVideoStackPane, 10.0);
+      AnchorPane.setRightAnchor(multisenseVideoStackPane, 10.0);
+      multisenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> multisenseVideoOverlay.toggleMode());
+      mainAnchorPane.getChildren().add(multisenseVideoStackPane);
+
+      LogTools.info("REALSENSE D435 VIDEO {}", ROS2Tools.D435_VIDEO.getName());
+      realsenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 1024, 544, false, false)); // TODO: res
+      realsenseVideoStackPane = new StackPane(realsenseVideoOverlay.getNode());
+      realsenseVideoStackPane.setVisible(false);
+      AnchorPane.setBottomAnchor(realsenseVideoStackPane, 10.0);
+      AnchorPane.setRightAnchor(realsenseVideoStackPane, 10.0);
+      realsenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> realsenseVideoOverlay.toggleMode());
+      mainAnchorPane.getChildren().add(realsenseVideoStackPane);
+
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
+      supportRegionScale.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> sendSupportRegionParameters());
       enableSupportRegions.setSelected(true);
+      enableSupportRegions.selectedProperty().addListener(observable -> sendSupportRegionParameters());
 
       setupSlider(stanceHeightSlider, () -> LogTools.info("stanceHeightSlider: {}", stanceHeightSlider.getValue()));
       setupSlider(leanForwardSlider, () -> LogTools.info("leanForwardSlider: {}", leanForwardSlider.getValue()));
@@ -169,11 +199,12 @@ public class DirectRobotUIController extends Group
       robotLowLevelMessenger.setHydraulicPumpPSI(pumpPSI.getValue());
    }
 
-   @FXML public void sendSupportRegionParameters()
+   private void sendSupportRegionParameters()
    {
       BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
       supportPlanarRegionParametersMessage.setSupportRegionScaleFactor(supportRegionScale.getValue());
+      LogTools.info("Sending {}, {}", enableSupportRegions.isSelected(), supportRegionScale.getValue());
       supportRegionsParametersPublisher.publish(supportPlanarRegionParametersMessage);
    }
 
@@ -199,6 +230,32 @@ public class DirectRobotUIController extends Group
    {
       supportRegionsGraphic.setEnabled(showSupportRegions.isSelected());
       supportRegionsGraphic.clear();
+   }
+
+   @FXML public void showMultisenseVideo()
+   {
+      multisenseVideoStackPane.setVisible(showMultisenseVideo.isSelected());
+      if (showMultisenseVideo.isSelected())
+      {
+         multisenseVideoOverlay.start();
+      }
+      else
+      {
+         multisenseVideoOverlay.stop();
+      }
+   }
+
+   @FXML public void showRealsenseVideo()
+   {
+      realsenseVideoStackPane.setVisible(showRealsenseVideo.isSelected());
+      if (showRealsenseVideo.isSelected())
+      {
+         realsenseVideoOverlay.start();
+      }
+      else
+      {
+         realsenseVideoOverlay.stop();
+      }
    }
 
    @FXML public void clearREA()
