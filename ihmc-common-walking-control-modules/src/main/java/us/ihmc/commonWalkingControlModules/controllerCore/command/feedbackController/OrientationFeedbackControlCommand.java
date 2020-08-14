@@ -500,12 +500,6 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       return spatialAccelerationCommand;
    }
 
-   @Override
-   public ControllerCoreCommandType getCommandType()
-   {
-      return ControllerCoreCommandType.ORIENTATION;
-   }
-
    public PID3DGains getGains()
    {
       return gains;
@@ -514,6 +508,24 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public ReferenceFrame getAngularGainsFrame()
    {
       return angularGainsFrame;
+   }
+
+   @Override
+   public ControllerCoreCommandType getCommandType()
+   {
+      return ControllerCoreCommandType.ORIENTATION;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      spatialAccelerationCommand.setCommandId(id);
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return spatialAccelerationCommand.getCommandId();
    }
 
    @Override

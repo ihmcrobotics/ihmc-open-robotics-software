@@ -46,15 +46,28 @@ public class WholeBodyControllerCore
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
+   @Deprecated
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
       this(toolbox, allPossibleCommands, null, parentRegistry);
    }
 
+   @Deprecated
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
                                   JointDesiredOutputList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
    {
-      feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
+      this(toolbox, new FeedbackControllerTemplate(allPossibleCommands), lowLevelControllerOutput, parentRegistry);
+   }
+
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControllerTemplate feedbackControllerTemplate, YoVariableRegistry parentRegistry)
+   {
+      this(toolbox, feedbackControllerTemplate, null, parentRegistry);
+   }
+
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControllerTemplate feedbackControllerTemplate,
+                                  JointDesiredOutputList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
+   {
+      feedbackController = new WholeBodyFeedbackController(toolbox, feedbackControllerTemplate, registry);
 
       if (toolbox.isEnableInverseDynamicsModule())
          inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
@@ -319,7 +332,7 @@ public class WholeBodyControllerCore
       return rootJointDesiredConfigurationData;
    }
 
-   public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
+   public FeedbackControllerDataHolderReadOnly getWholeBodyFeedbackControllerDataHolder()
    {
       return feedbackController.getWholeBodyFeedbackControllerDataHolder();
    }

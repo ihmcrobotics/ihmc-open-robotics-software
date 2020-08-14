@@ -16,7 +16,6 @@ import us.ihmc.euclid.interfaces.Settable;
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  * @param <T> the final type of the command implementing this interface.
  */
 public interface FeedbackControlCommand<T extends FeedbackControlCommand<T>> extends Settable<T>
@@ -31,4 +30,19 @@ public interface FeedbackControlCommand<T extends FeedbackControlCommand<T>> ext
     * @return the type of this command.
     */
    ControllerCoreCommandType getCommandType();
+
+   /**
+    * Sets an id for this command, it will be passed over when copied in the the controller core and
+    * can be used to track control elements that are using this command.
+    * 
+    * @param id the new id for this command.
+    */
+   void setCommandId(int id);
+
+   /**
+    * Returns the id for this command.
+    * 
+    * @return this command's id.
+    */
+   int getCommandId();
 }
