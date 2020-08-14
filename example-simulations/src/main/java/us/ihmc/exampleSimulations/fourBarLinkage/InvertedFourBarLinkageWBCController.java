@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -139,7 +140,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
       controllerCoreToolbox.addKinematicLoopFunction(fourBarKinematicLoop);
       controllerCoreToolbox.setupForInverseDynamicsSolver(Collections.emptyList());
 
-      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, allPossibleCommands, registry);
+      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, new FeedbackControllerTemplate(allPossibleCommands), registry);
    }
 
    private static Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointCorrespondenceList(RigidBodyBasics rootBody, Robot robot)

@@ -14,9 +14,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -414,7 +414,7 @@ public class EndToEndTestTools
    public static Point3DReadOnly findFeedbackControllerDesiredPosition(String bodyName, YoVariableHolder yoVariableHolder)
    {
       return findYoFramePoint3D(FeedbackControllerToolbox.class.getSimpleName(),
-                                bodyName + Type.DESIRED.getName() + Space.POSITION.getName(),
+                                bodyName + Type.DESIRED.getName() + SpaceData3D.POSITION.getName(),
                                 yoVariableHolder);
    }
 
@@ -424,21 +424,21 @@ public class EndToEndTestTools
    public static QuaternionReadOnly findFeedbackControllerDesiredOrientation(String bodyName, YoVariableHolder yoVariableHolder)
    {
       return findYoFrameQuaternion(FeedbackControllerToolbox.class.getSimpleName(),
-                                   bodyName + Type.DESIRED.getName() + Space.ORIENTATION.getName(),
+                                   bodyName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName(),
                                    yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredLinearVelocity(String bodyName, YoVariableHolder yoVariableHolder)
    {
       return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(),
-                                 bodyName + Type.DESIRED.getName() + Space.LINEAR_VELOCITY.getName(),
+                                 bodyName + Type.DESIRED.getName() + SpaceData3D.LINEAR_VELOCITY.getName(),
                                  yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredAngularVelocity(String bodyName, YoVariableHolder yoVariableHolder)
    {
       return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(),
-                                 bodyName + Type.DESIRED.getName() + Space.ANGULAR_VELOCITY.getName(),
+                                 bodyName + Type.DESIRED.getName() + SpaceData3D.ANGULAR_VELOCITY.getName(),
                                  yoVariableHolder);
    }
 
