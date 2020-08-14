@@ -9,6 +9,7 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       ENABLED, DISABLED
    };
 
+   private int commandId;
    private double jointVelocityWeight = Double.NaN;
    private double jointAccelerationWeight = Double.NaN;
    public JointVelocityLimitMode jointVelocityLimitMode = null;
@@ -132,6 +133,7 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    @Override
    public void set(InverseKinematicsOptimizationSettingsCommand other)
    {
+      commandId = other.commandId;
       jointVelocityWeight = other.jointVelocityWeight;
       jointAccelerationWeight = other.jointAccelerationWeight;
       jointVelocityLimitMode = other.jointVelocityLimitMode;
@@ -141,6 +143,18 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 
    @Override
@@ -154,6 +168,8 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       {
          InverseKinematicsOptimizationSettingsCommand other = (InverseKinematicsOptimizationSettingsCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (Double.compare(jointVelocityWeight, other.jointVelocityWeight) != 0)
             return false;
          if (Double.compare(jointAccelerationWeight, other.jointAccelerationWeight) != 0)
