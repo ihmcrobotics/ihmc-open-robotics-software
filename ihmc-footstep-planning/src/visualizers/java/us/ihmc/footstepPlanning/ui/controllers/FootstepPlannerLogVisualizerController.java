@@ -29,6 +29,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -95,7 +96,7 @@ public class FootstepPlannerLogVisualizerController
 
    public void bindControls()
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, b -> loadLog());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
 
       AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
@@ -177,7 +178,7 @@ public class FootstepPlannerLogVisualizerController
       snapper = new FootstepNodeSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters());
    }
 
-   public void loadLog()
+   public void loadLog(LoadRequestType loadRequestType)
    {
       if(loadingLog.get())
          return;
@@ -185,7 +186,7 @@ public class FootstepPlannerLogVisualizerController
       loadingLog.set(true);
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
 
-      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load(loadRequestType, footstepPlannerLog);
       if(loadResult == FootstepPlannerLogLoader.LoadResult.LOADED)
       {
          footstepPlannerLog = logLoader.getLog();
