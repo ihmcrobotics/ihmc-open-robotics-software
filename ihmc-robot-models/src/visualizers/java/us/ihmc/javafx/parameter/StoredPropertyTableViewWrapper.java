@@ -12,6 +12,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.*;
 
 import javax.swing.*;
@@ -47,47 +48,8 @@ public class StoredPropertyTableViewWrapper
       this.tableColumns = tableColumns;
       this.parameterTable = parameterTable;
       this.javaFXStoredPropertyMap = javaFXStoredPropertyMap;
+
       setup();
-   }
-
-   public void setTableUpdatedCallback(Runnable tableUpdateCallback)
-   {
-      this.tableUpdateCallback = tableUpdateCallback;
-   }
-
-   /**
-    * Should be called after table is loaded, after Stage.show() is called on primary stage
-     */
-   public void removeHeader()
-   {
-      Pane header = (Pane) parameterTable.lookup("TableHeaderRow");
-      if (header.isVisible())
-      {
-         header.setMaxHeight(0);
-         header.setMinHeight(0);
-         header.setPrefHeight(0);
-         header.setVisible(false);
-      }
-
-      parameterTable.setSelectionModel(null);
-   }
-
-   /**
-    * Loads new file. Subsequent saves will write to the selected file
-    */
-   public void loadNewFile()
-   {
-      JFileChooser fileChooser = new JFileChooser();
-      Path saveFileDirectory = javaFXStoredPropertyMap.getStoredPropertySet().findSaveFileDirectory();
-      fileChooser.setCurrentDirectory(saveFileDirectory.toFile());
-      int chooserState = fileChooser.showOpenDialog(null);
-
-      if (chooserState == JFileChooser.APPROVE_OPTION)
-      {
-         File selectedFile = fileChooser.getSelectedFile();
-         String fileName = selectedFile.getName();
-         javaFXStoredPropertyMap.getStoredPropertySet().load(fileName);
-      }
    }
 
    private void setup()
@@ -139,6 +101,46 @@ public class StoredPropertyTableViewWrapper
 
       parameterTable.refresh();
 
+   }
+
+   public void setTableUpdatedCallback(Runnable tableUpdateCallback)
+   {
+      this.tableUpdateCallback = tableUpdateCallback;
+   }
+
+   /**
+    * Should be called after table is loaded, after Stage.show() is called on primary stage
+     */
+   public void removeHeader()
+   {
+      Pane header = (Pane) parameterTable.lookup("TableHeaderRow");
+      if (header.isVisible())
+      {
+         header.setMaxHeight(0);
+         header.setMinHeight(0);
+         header.setPrefHeight(0);
+         header.setVisible(false);
+      }
+
+      parameterTable.setSelectionModel(null);
+   }
+
+   /**
+    * Loads new file. Subsequent saves will write to the selected file
+    */
+   public void loadNewFile()
+   {
+      JFileChooser fileChooser = new JFileChooser();
+      Path saveFileDirectory = javaFXStoredPropertyMap.getStoredPropertySet().findSaveFileDirectory();
+      fileChooser.setCurrentDirectory(saveFileDirectory.toFile());
+      int chooserState = fileChooser.showOpenDialog(null);
+
+      if (chooserState == JFileChooser.APPROVE_OPTION)
+      {
+         File selectedFile = fileChooser.getSelectedFile();
+         String fileName = selectedFile.getName();
+         javaFXStoredPropertyMap.getStoredPropertySet().load(fileName);
+      }
    }
 
    public class ParametersTableRow

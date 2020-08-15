@@ -3,6 +3,7 @@ package us.ihmc.javafx.parameter;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.StoredPropertyBasics;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
@@ -23,10 +24,7 @@ public class JavaFXStoredPropertyMap
 
    public void put(CheckBox checkBox, StoredPropertyKey<Boolean> booleanKey)
    {
-      JavaFXPropertyHolder<Boolean> javaFXPropertyHolder = new JavaFXPropertyHolder<>(() -> checkBox.selectedProperty().getValue(),
-                                                                                      value -> checkBox.selectedProperty().setValue(value),
-                                                                                      runnable -> checkBox.selectedProperty()
-                                                                                                          .addListener(observable -> runnable.run()));
+      JavaFXPropertyHolder<Boolean> javaFXPropertyHolder = new JavaFXCheckBoxPropertyHolder(checkBox);
       StoredPropertyBasics<Boolean> storedProperty = storedPropertySet.getProperty(booleanKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
@@ -36,11 +34,7 @@ public class JavaFXStoredPropertyMap
 
    public <T> void put(Spinner<T> doubleSpinner, StoredPropertyKey<T> doubleKey)
    {
-      JavaFXPropertyHolder<T> javaFXPropertyHolder = new JavaFXPropertyHolder<>(() -> doubleSpinner.getValueFactory().valueProperty().getValue(),
-                                                                                value -> doubleSpinner.getValueFactory().valueProperty().setValue(value),
-                                                                                runnable -> doubleSpinner.getValueFactory()
-                                                                                                         .valueProperty()
-                                                                                                         .addListener(observable -> runnable.run()));
+      JavaFXPropertyHolder<T> javaFXPropertyHolder = new JavaFXSpinnerPropertyHolder<>(doubleSpinner);
       StoredPropertyBasics<T> storedProperty = storedPropertySet.getProperty(doubleKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
@@ -51,28 +45,8 @@ public class JavaFXStoredPropertyMap
    public void put(Slider slider, StoredPropertyKey<Double> doubleKey)
    {
       AtomicBoolean changing = new AtomicBoolean(false); // unfortunately this is necessary for both click and drag to work
-      JavaFXPropertyHolder<Double> javaFXPropertyHolder = new JavaFXPropertyHolder<>(slider::getValue,
-                                                                                     value -> slider.valueProperty().setValue(value),
-                                                                                     runnable ->
-                                                                                     {
-                                                                                        slider.valueProperty().addListener((observable, oldValue, newValue) ->
-                                                                                                                           {
-                                                                                                                              if (!changing.get())
-                                                                                                                              {
-                                                                                                                                 runnable.run();
-                                                                                                                              }
-                                                                                                                           });
-                                                                                        slider.valueChangingProperty()
-                                                                                              .addListener((observable, wasChanging, isChanging) ->
-                                                                                                           {
-                                                                                                              changing.set(isChanging);
-                                                                                                              if (wasChanging)
-                                                                                                              {
-                                                                                                                 runnable.run();
-                                                                                                              }
-                                                                                                           });
-                                                                                     });
-      StoredPropertyBasics<Double> storedProperty = storedPropertySet.getProperty(doubleKey);
+      JavaFXPropertyHolder javaFXPropertyHolder = new JavaFXDoubleSliderPropertyHolder(slider);
+      StoredPropertyBasics storedProperty = storedPropertySet.getProperty(doubleKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
 
@@ -82,29 +56,8 @@ public class JavaFXStoredPropertyMap
    public void putIntegerSlider(Slider slider, StoredPropertyKey<Integer> integerKey)
    {
       AtomicBoolean changing = new AtomicBoolean(false); // unfortunately this is necessary for both click and drag to work
-      JavaFXPropertyHolder<Integer> javaFXPropertyHolder = new JavaFXPropertyHolder<>(() -> (int) slider.getValue(),
-                                                                                      value -> slider.valueProperty().setValue(value),
-                                                                                      runnable ->
-                                                                                      {
-                                                                                         slider.valueProperty().addListener((observable, oldValue, newValue) ->
-                                                                                                                            {
-                                                                                                                               if (!changing.get())
-                                                                                                                               {
-                                                                                                                                  runnable.run();
-                                                                                                                               }
-                                                                                                                            });
-                                                                                         slider.valueChangingProperty()
-                                                                                               .addListener((observable, wasChanging, isChanging) ->
-                                                                                                            {
-                                                                                                               changing.set(isChanging);
-                                                                                                               if (wasChanging)
-                                                                                                               {
-                                                                                                                  runnable.run();
-                                                                                                               }
-                                                                                                            });
-                                                                                      });
-
-      StoredPropertyBasics<Integer> storedProperty = storedPropertySet.getProperty(integerKey);
+      JavaFXPropertyHolder javaFXPropertyHolder = new JavaFXIntegerSliderPropertyHolder(slider);
+      StoredPropertyBasics storedProperty = storedPropertySet.getProperty(integerKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
 
@@ -154,7 +107,10 @@ public class JavaFXStoredPropertyMap
    {
       StoredPropertyBasics storedProperty = storedPropertySet.getProperty(storedPropertyKey);
       JavaFXPropertyHolder javaFXProperty = fromStoredPropertyMap.get(storedProperty);
-      javaFXProperty.addValueChangedListener(runnable);
+      javaFXProperty.addValueChangedListener(() -> {
+         LogTools.info("Calling that runnable for {}", storedPropertyKey.getTitleCasedName());
+         runnable.run();
+      });
    }
 
    public StoredPropertySetBasics getStoredPropertySet()
