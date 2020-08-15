@@ -33,7 +33,6 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
@@ -214,7 +213,6 @@ public class FootstepPlannerLogVisualizerController
       // publish footstep parameters
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.set(footstepPlannerLog.getFootstepParametersPacket());
-      LogTools.info("Sending");
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
       // publish swing parameters
