@@ -22,13 +22,13 @@ mainDependencies {
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
    api("us.ihmc:euclid:0.15.0")
-   api("us.ihmc:ihmc-robot-description:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:ihmc-robot-description:0.20.0")
    api("us.ihmc:ihmc-graphics-description:0.19.0")
-   api("us.ihmc:ihmc-javafx-toolkit:0.18.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {
-   api("us.ihmc:simulation-construction-set-test:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:simulation-construction-set-test:0.20.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

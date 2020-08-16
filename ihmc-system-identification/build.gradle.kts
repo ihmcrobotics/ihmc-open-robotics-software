@@ -18,7 +18,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-yovariables:0.9.0")
    api("us.ihmc:ihmc-graphics-description:0.19.0")
-   api("us.ihmc:simulation-construction-set:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:simulation-construction-set:0.20.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

@@ -41,8 +41,8 @@ mainDependencies {
 testDependencies {
 
    api("us.ihmc:ihmc-commons-testing:0.30.3")
-   api("us.ihmc:simulation-construction-set:0.19.0-yovariables-0.9.0-alpha-1")
-   api("us.ihmc:simulation-construction-set-test:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:simulation-construction-set:0.20.0")
+   api("us.ihmc:simulation-construction-set-test:0.20.0")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
@@ -51,5 +51,5 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:simulation-construction-set:0.20.0")
 }

@@ -18,7 +18,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
 
    api("us.ihmc:ihmc-yovariables:0.9.0")
-   api("us.ihmc:ihmc-robot-description:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:ihmc-robot-description:0.20.0")
    api("us.ihmc:ihmc-graphics-description:0.19.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
@@ -28,15 +28,15 @@ visualizersDependencies {
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:ihmc-javafx-toolkit:0.18.0-yovariables-0.9.0-alpha-1")
-   api("us.ihmc:simulation-construction-set:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.0")
+   api("us.ihmc:simulation-construction-set:0.20.0")
 }
 
 gdxDependencies {
    api(ihmc.sourceSetProject("main"))
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.18.0")
+   api("us.ihmc:ihmc-graphics-description:0.19.0")
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.10")
    api("com.badlogicgames.gdx:gdx-platform:1.9.10:natives-desktop")
 }

@@ -35,7 +35,7 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:euclid:0.15.0")
    api("us.ihmc:euclid-geometry:0.15.0")
-   api("us.ihmc:simulation-construction-set:0.19.0-yovariables-0.9.0-alpha-1")
-   api("us.ihmc:simulation-construction-set-test:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:simulation-construction-set:0.20.0")
+   api("us.ihmc:simulation-construction-set-test:0.20.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
