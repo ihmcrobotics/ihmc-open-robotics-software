@@ -24,9 +24,9 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
@@ -560,11 +560,11 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
-      String varnamePositionDesired = footName + Type.DESIRED.getName() + Space.POSITION.getName();
+      String varnamePositionDesired = footName + Type.DESIRED.getName() + SpaceData3D.POSITION.getName();
       Vector3D currentDesiredPosition = EndToEndTestTools.findVector3D(namespacePositionDesired, varnamePositionDesired, scs);
 
       String namespaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
-      String varnameOrientationDesired = footName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
+      String varnameOrientationDesired = footName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName();
       Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, scs);
 
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);

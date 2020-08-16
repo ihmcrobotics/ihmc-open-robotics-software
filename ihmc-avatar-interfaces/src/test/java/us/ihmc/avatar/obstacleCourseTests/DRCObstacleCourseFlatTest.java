@@ -19,8 +19,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -915,7 +916,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel)
    {
       String pelvisName = fullRobotModel.getPelvis().getName();
-      String namePrefix = pelvisName + FeedbackControllerDataReadOnly.Type.ERROR.getName() + FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR.getName();
+      String namePrefix = pelvisName + Type.ERROR.getName() + SpaceData3D.ROTATION_VECTOR.getName();
       String varName = YoGeometryNameTools.createZName(namePrefix, "");
       return (YoDouble) scs.findVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
    }

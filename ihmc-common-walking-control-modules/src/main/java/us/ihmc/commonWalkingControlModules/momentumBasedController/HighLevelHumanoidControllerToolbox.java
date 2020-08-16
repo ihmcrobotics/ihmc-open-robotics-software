@@ -61,6 +61,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class HighLevelHumanoidControllerToolbox
 {
@@ -967,6 +968,11 @@ public class HighLevelHumanoidControllerToolbox
    public double getOmega0()
    {
       return omega0.getDoubleValue();
+   }
+   
+   public DoubleProvider getOmega0Provider()
+   {
+      return omega0;
    }
 
    public void getCoP(FramePoint3D copToPack)

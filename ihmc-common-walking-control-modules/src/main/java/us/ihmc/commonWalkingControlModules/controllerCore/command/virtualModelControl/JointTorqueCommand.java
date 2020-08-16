@@ -35,6 +35,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * beginning of the control.
     */
    private static final int initialCapacity = 15;
+   private int commandId;
    /** The list of joints for which desired torques are assigned. */
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
@@ -60,6 +61,9 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    public void set(JointTorqueCommand other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
@@ -73,6 +77,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     */
    public void clear()
    {
+      commandId = 0;
       joints.clear();
       desiredTorques.clear();
    }
@@ -215,6 +220,18 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -225,6 +242,8 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       {
          JointTorqueCommand other = (JointTorqueCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

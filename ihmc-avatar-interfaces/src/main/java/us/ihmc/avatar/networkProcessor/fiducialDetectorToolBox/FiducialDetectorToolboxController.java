@@ -34,6 +34,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -68,7 +69,8 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private final FramePose3D reportedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
    private AtomicReference<Boolean> inProcessingThread = new AtomicReference<Boolean>();
 
-   public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
+   public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel,
+                                            StatusMessageOutputManager statusOutputManager,
                                             YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -98,6 +100,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
    @Override
    public boolean initialize()
    {
+      LogTools.info("Initializing");
       return true;
    }
 

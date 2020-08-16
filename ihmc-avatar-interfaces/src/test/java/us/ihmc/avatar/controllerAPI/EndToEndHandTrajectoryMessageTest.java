@@ -24,9 +24,9 @@ import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commons.MathTools;
@@ -862,11 +862,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
-      String varnamePositionDesired = handName + Type.DESIRED.getName() + Space.POSITION.getName();
+      String varnamePositionDesired = handName + Type.DESIRED.getName() + SpaceData3D.POSITION.getName();
       Vector3D desiredPosition = EndToEndTestTools.findVector3D(namespacePositionDesired, varnamePositionDesired, scs);
 
       String namespaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
-      String varnameOrientationDesired = handName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
+      String varnameOrientationDesired = handName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName();
       Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, scs);
 
       lastPoint.changeFrame(worldFrame);
