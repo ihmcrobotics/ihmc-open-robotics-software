@@ -1,6 +1,6 @@
 buildscript {
    repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
+      maven { url = uri("https://plugins.gradle.org/m2/") }
       mavenCentral()
       maven { url "https://dl.bintray.com/ihmcrobotics/maven-release" }
       maven { url "https://dl.bintray.com/ihmcrobotics/maven-vendor" }
@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
+   id("us.ihmc.ihmc-build") version "0.21.0"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 

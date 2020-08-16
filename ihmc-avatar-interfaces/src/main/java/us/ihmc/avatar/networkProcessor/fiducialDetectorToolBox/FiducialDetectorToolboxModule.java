@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -63,24 +64,24 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<DetectedFiducialPacket> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<DetectedFiducialPacket> getOutputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
+      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withOutput().withType(DetectedFiducialPacket.class);
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<ToolboxStateMessage> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<ToolboxStateMessage> getInputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
+      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withInput().withType(ToolboxStateMessage.class);
    }
 }

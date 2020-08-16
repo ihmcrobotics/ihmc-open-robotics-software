@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -67,7 +67,7 @@ public class QuadrupedControlManagerFactory
       return jointSpaceManager;
    }
 
-   public FeedbackControlCommandList createFeedbackControlTemplate()
+   public FeedbackControllerTemplate createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
 
@@ -78,6 +78,6 @@ public class QuadrupedControlManagerFactory
       if (jointSpaceManager != null)
          ret.addCommand(jointSpaceManager.createFeedbackControlTemplate());
 
-      return ret;
+      return new FeedbackControllerTemplate(ret);
    }
 }

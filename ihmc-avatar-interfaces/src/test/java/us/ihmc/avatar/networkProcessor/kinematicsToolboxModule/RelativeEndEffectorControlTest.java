@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -130,7 +131,7 @@ public class RelativeEndEffectorControlTest
                                                            .collect(FeedbackControlCommandList::new,
                                                                     FeedbackControlCommandList::addCommand,
                                                                     FeedbackControlCommandList::addCommandList);
-      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, commandTemplate, mainRegistry);
+      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, new FeedbackControllerTemplate(commandTemplate), mainRegistry);
       controllerCore.compute();
    }
 

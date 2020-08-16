@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.inverseKinematics;
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -194,13 +195,13 @@ public class QuadrupedInverseKinematicsController implements RobotController
       return getName();
    }
 
-   private FeedbackControlCommandList getFeedbackCommandTemplate()
+   private FeedbackControllerTemplate getFeedbackCommandTemplate()
    {
       FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
       for (RobotQuadrant robotQuadrant : quadrants)
       {
          feedbackControlCommandList.addCommand(feedbackControlCommands.get(robotQuadrant));
       }
-      return feedbackControlCommandList;
+      return new FeedbackControllerTemplate(feedbackControlCommandList);
    }
 }
