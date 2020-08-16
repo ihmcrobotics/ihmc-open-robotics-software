@@ -1,8 +1,14 @@
 package us.ihmc.footstepPlanning.swing;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.awt.Color;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
@@ -13,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
@@ -51,14 +56,9 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-
-import java.awt.*;
-import java.util.List;
-
-import static us.ihmc.robotics.Assert.assertTrue;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverPlanarRegionsTest
 {
@@ -305,7 +305,7 @@ public class SwingOverPlanarRegionsTest
       startGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.blue));
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
 
       RobotSide swingSide = RobotSide.RIGHT;
@@ -350,7 +350,7 @@ public class SwingOverPlanarRegionsTest
          expander.attachVisualizer(visualizer::update);
 
          scs.setDT(1.0, 1);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          scs.setGroundVisible(false);
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
@@ -398,7 +398,7 @@ public class SwingOverPlanarRegionsTest
                                                                                           steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                                           steppingParameters.getMaxSwingHeightFromStanceFoot(),
                                                                                           steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          new YoVariableRegistry(getClass().getSimpleName()),
+                                                                                          new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
 
       RobotSide swingSide = footstepPlan.getFootstep(0).getRobotSide();

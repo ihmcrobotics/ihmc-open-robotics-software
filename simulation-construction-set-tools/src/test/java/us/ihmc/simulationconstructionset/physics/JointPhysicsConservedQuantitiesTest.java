@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointPhysicsConservedQuantitiesTest
@@ -115,7 +115,7 @@ public class JointPhysicsConservedQuantitiesTest
    private class ConservedQuantitiesChecker implements RobotController
    {
       private final Robot robot;
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
       private final FloatingJoint rootJoint;
       private final double epsilon = 1e-5;
 
@@ -127,7 +127,7 @@ public class JointPhysicsConservedQuantitiesTest
       {
          this.robot = robot;
          this.rootJoint = (FloatingJoint) robot.getRootJoints().get(0);
-         this.registry = new YoVariableRegistry(robot.getName() + getClass().getSimpleName());
+         this.registry = new YoRegistry(robot.getName() + getClass().getSimpleName());
       }
 
       @Override
@@ -136,7 +136,7 @@ public class JointPhysicsConservedQuantitiesTest
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }
@@ -181,7 +181,7 @@ public class JointPhysicsConservedQuantitiesTest
    private class SinusoidalTorqueController implements RobotController
    {
       private final Random random = new Random(3289023L);
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
       private final YoDouble t;
       private final ArrayList<Joint> joints = new ArrayList<>();
       private final ArrayList<Double> amplitudes = new ArrayList<>();
@@ -190,7 +190,7 @@ public class JointPhysicsConservedQuantitiesTest
       SinusoidalTorqueController(Robot robot)
       {
          this.t = robot.getYoTime();
-         this.registry = new YoVariableRegistry(robot.getName() + getClass().getSimpleName());
+         this.registry = new YoRegistry(robot.getName() + getClass().getSimpleName());
          Joint rootJoint = robot.getRootJoints().get(0);
 
          for(Joint childJoint : rootJoint.getChildrenJoints())
@@ -217,7 +217,7 @@ public class JointPhysicsConservedQuantitiesTest
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.function.DoubleConsumer;
 
@@ -44,7 +44,7 @@ public class LabelGraphic
       }
    }
 
-   public static void initializeYoVariables(YoVariableRegistry registry)
+   public static void initializeYoVariables(YoRegistry registry)
    {
       if (TUNING_MODE)
       {
@@ -125,7 +125,7 @@ public class LabelGraphic
 
    private void addParameterListener(DoubleParameter parameter, DoubleConsumer runnable)
    {
-      parameter.addParameterChangedListener(changedParameter ->
+      parameter.addListener(changedParameter ->
       {
          double value = ((DoubleParameter) changedParameter).getValue();
          Platform.runLater(() ->

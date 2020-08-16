@@ -37,7 +37,7 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -78,7 +78,7 @@ public class FootstepAngularMomentumPredictorTest
    private final double supportLegMass = angularMomentumEstimationParameters.getPercentageSupportLegMass() * robotMass;
 
    // Variables for testing
-   private final YoVariableRegistry testRegistry = new YoVariableRegistry("AngularMomentumTestRegistry");
+   private final YoRegistry testRegistry = new YoRegistry("AngularMomentumTestRegistry");
    private final YoDouble omega = new YoDouble("AngularMomentumTestOmega", testRegistry); // Taking the for Atlas
    private final YoInteger numberOfUpcomingFootsteps = new YoInteger("NumberOfUpcomingFootsteps", testRegistry);
    private final FramePoint3D currentLocation = new FramePoint3D();

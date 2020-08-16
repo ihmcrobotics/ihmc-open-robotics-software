@@ -280,18 +280,18 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0);
 
       // get YoVariables
-      YoBoolean walk = (YoBoolean) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
-      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean walk = (YoBoolean) scs.findVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       for (RobotSide robotSide : RobotSide.values)
       {
          //         System.out.println("DRCHumanoidBehaviorICPFaultDetectionTest: made it to the for loop " + robotSide.toString());
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          @SuppressWarnings("unchecked")
-         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(prefix + "FootControlModule", prefix
                + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
 
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));

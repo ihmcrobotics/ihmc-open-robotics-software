@@ -71,7 +71,7 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                        gravity,
                                                                                        sphereRobot1.getDesiredHeight(),
                                                                                        sphereRobot1.getOmega0Provider(),
-                                                                                       sphereRobot1.getScsRobot().getRobotsYoVariableRegistry(),
+                                                                                       sphereRobot1.getScsRobot().getRobotsYoRegistry(),
                                                                                        yoGraphicsListRegistry1);
          dcmPlan1.setNumberOfFootstepsToConsider(12);
          controller1 = new SimpleBasicSphereController(sphereRobot1, dcmPlan1, yoGraphicsListRegistry1);
@@ -96,7 +96,7 @@ public class SimpleLQRMomentumControllerSimulation
                                                                                         gravity,
                                                                                         sphereRobot2.getDesiredHeight(),
                                                                                         sphereRobot2.getOmega0Provider(),
-                                                                                        sphereRobot2.getScsRobot().getRobotsYoVariableRegistry(),
+                                                                                        sphereRobot2.getScsRobot().getRobotsYoRegistry(),
                                                                                         yoGraphicsListRegistry2);
          dcmPlan2.setNumberOfFootstepsToConsider(12);
          controller2 = new SimpleLQRSphereController(sphereRobot2, dcmPlan2, yoGraphicsListRegistry2);
@@ -148,7 +148,7 @@ public class SimpleLQRMomentumControllerSimulation
       double bXY = 100.0; //150.6;
       double kZ = 20.0; //50.0;
       double bZ = 50.0; //1000.0;
-      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, kXY, bXY, kZ, bZ, robot.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, kXY, bXY, kZ, bZ, robot.getRobotsYoRegistry());
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
       groundContactModel.setGroundProfile3D(groundProfile);

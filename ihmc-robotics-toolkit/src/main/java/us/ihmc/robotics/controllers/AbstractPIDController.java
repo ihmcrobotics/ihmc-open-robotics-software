@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AbstractPIDController
@@ -9,7 +9,7 @@ public abstract class AbstractPIDController
    private final YoDouble cumulativeError;
    private final YoDouble actionI;
 
-   protected AbstractPIDController(String suffix, YoVariableRegistry registry)
+   protected AbstractPIDController(String suffix, YoRegistry registry)
    {
       cumulativeError = new YoDouble("cumulativeError_" + suffix, registry);
       cumulativeError.set(0.0);

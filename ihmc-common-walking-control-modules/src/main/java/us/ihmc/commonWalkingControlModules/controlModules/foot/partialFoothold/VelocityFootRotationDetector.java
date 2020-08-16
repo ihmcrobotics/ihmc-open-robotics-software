@@ -5,7 +5,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -30,14 +30,14 @@ public class VelocityFootRotationDetector implements FootRotationDetector
                                        MovingReferenceFrame soleFrame,
                                        FootholdRotationParameters parameters,
                                        double dt,
-                                       YoVariableRegistry parentRegistry)
+                                       YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
       this.dt = dt;
 
       String namePrefix = side.getLowerCaseName() + "Velocity";
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
 
       omegaThresholdForEstimation = parameters.getOmegaMagnitudeThresholdForEstimation();

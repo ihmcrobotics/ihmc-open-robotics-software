@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.output;
 
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.OutputProcessor;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ public class OutputProcessorBuilder
 
    private class OutputProcessorBank implements OutputProcessor
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       private final ArrayList<OutputProcessorComponent> outputProcessors;
 
       public OutputProcessorBank(ArrayList<OutputProcessorComponent> outputProcessors)
@@ -38,7 +38,7 @@ public class OutputProcessorBuilder
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

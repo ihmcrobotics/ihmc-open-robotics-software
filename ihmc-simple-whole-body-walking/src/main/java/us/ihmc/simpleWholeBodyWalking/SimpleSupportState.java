@@ -7,7 +7,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -26,7 +32,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This is the active foot state when the foot is in flat support. Usually the command to the QP
@@ -40,7 +46,7 @@ public class SimpleSupportState extends SimpleFootControlState
 {
    private static final int dofs = Twist.SIZE;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
@@ -88,14 +94,14 @@ public class SimpleSupportState extends SimpleFootControlState
                              HighLevelHumanoidControllerToolbox controllerToolbox,
                              RobotSide robotSide,
                              FullHumanoidRobotModel fullRobotModel,
-                             PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
+                             PIDSE3GainsReadOnly holdPositionGains, YoRegistry parentRegistry)
    {
       super(contactableFoot, controllerToolbox, robotSide, fullRobotModel);
 
       this.gains = holdPositionGains;
 
       String prefix = robotSide.getLowerCaseName() + "Foot";
-      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      registry = new YoRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);

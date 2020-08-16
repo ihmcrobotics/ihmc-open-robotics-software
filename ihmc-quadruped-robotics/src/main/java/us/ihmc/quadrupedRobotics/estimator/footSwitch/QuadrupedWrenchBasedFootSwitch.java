@@ -5,10 +5,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
 {
@@ -24,7 +24,7 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
 
    private final double totalRobotWeight;
 
-   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator, ContactablePlaneBody contactablePlaneBody, double totalRobotWeight, YoVariableRegistry registry)
+   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator, ContactablePlaneBody contactablePlaneBody, double totalRobotWeight, YoRegistry registry)
    {
       this.wrenchCalculator = wrenchCalculator;
       this.totalRobotWeight = totalRobotWeight;

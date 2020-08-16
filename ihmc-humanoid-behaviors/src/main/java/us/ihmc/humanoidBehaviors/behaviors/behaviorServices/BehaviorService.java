@@ -10,13 +10,13 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class BehaviorService
 {
    private final Ros2Node ros2Node;
    private final Map<ROS2Topic, IHMCROS2Publisher<?>> publishers = new HashMap<>();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    protected final String robotName;
    private final ROS2Topic controllerInputTopic, controllerOutputTopic;
 
@@ -24,7 +24,7 @@ public abstract class BehaviorService
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
    }
@@ -86,7 +86,7 @@ public abstract class BehaviorService
       return ros2Node;
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

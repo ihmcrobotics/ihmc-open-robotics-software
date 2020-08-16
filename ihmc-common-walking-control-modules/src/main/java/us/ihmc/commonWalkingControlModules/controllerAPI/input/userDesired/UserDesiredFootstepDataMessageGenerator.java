@@ -19,8 +19,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -31,7 +31,7 @@ public class UserDesiredFootstepDataMessageGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final String namePrefix = "userDesiredStep";
    private final YoInteger stepsToTake = new YoInteger(namePrefix + "sToTake", registry);
@@ -82,7 +82,7 @@ public class UserDesiredFootstepDataMessageGenerator
    private final FootstepDataListCommand footstepCommandList = new FootstepDataListCommand();
 
    public UserDesiredFootstepDataMessageGenerator(final CommandInputManager commandInputManager, final SideDependentList<ContactableFoot> bipedFeet,
-         final WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+         final WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
       this.bipedFeet = bipedFeet;
       this.commandInputManager = commandInputManager;
@@ -106,10 +106,10 @@ public class UserDesiredFootstepDataMessageGenerator
       stepHeelPercentage.set(1.0);
       stepToePercentage.set(1.0);
 
-      sendSteps.addVariableChangedListener(new VariableChangedListener()
+      sendSteps.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (sendSteps.getBooleanValue())
             {

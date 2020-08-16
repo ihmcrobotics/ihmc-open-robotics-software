@@ -16,13 +16,13 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SimulatedSensorHolderAndReader implements SensorReader
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
+   private final YoRegistry registry = new YoRegistry("DRCPerfectSensorReader");
    protected final YoInteger step = new YoInteger("step", registry);
 
    protected final YoDouble yoTime;
@@ -38,7 +38,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    protected final SensorProcessing sensorProcessing;
 
    public SimulatedSensorHolderAndReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-         SensorProcessingConfiguration sensorProcessingConfiguration, YoDouble yoTime, YoVariableRegistry parentRegistry)
+         SensorProcessingConfiguration sensorProcessingConfiguration, YoDouble yoTime, YoRegistry parentRegistry)
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       this.yoTime = yoTime;

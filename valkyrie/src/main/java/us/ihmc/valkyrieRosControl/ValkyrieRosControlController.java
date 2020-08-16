@@ -62,7 +62,7 @@ import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotControll
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
 import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
@@ -475,10 +475,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       robotController.start();
    }
 
-   private void detachSecondaryRegistries(YoVariableRegistry drcControllerThreadRegistry)
+   private void detachSecondaryRegistries(YoRegistry drcControllerThreadRegistry)
    {
-      YoVariableRegistry drcMomentumBasedControllerRegistry = findChild(drcControllerThreadRegistry, "DRCMomentumBasedController");
-      YoVariableRegistry humanoidHighLevelControllerManagerRegistry = findChild(drcMomentumBasedControllerRegistry, "HumanoidHighLevelControllerManager");
+      YoRegistry drcMomentumBasedControllerRegistry = findChild(drcControllerThreadRegistry, "DRCMomentumBasedController");
+      YoRegistry humanoidHighLevelControllerManagerRegistry = findChild(drcMomentumBasedControllerRegistry, "HumanoidHighLevelControllerManager");
 
       removeChild(humanoidHighLevelControllerManagerRegistry, "ValkyrieCalibrationControllerState");
       removeChild(humanoidHighLevelControllerManagerRegistry, "StandPrepControllerState");
@@ -488,12 +488,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       removeChild(humanoidHighLevelControllerManagerRegistry, "LowLevelOneDoFJointDesiredDataHumanoidHighLevelControllerManager");
    }
 
-   private static YoVariableRegistry findChild(YoVariableRegistry parent, String childName)
+   private static YoRegistry findChild(YoRegistry parent, String childName)
    {
       return parent.getChildren().stream().filter(child -> child.getName().equals(childName)).findFirst().get();
    }
 
-   private static void removeChild(YoVariableRegistry parent, String nameOfChildToRemove)
+   private static void removeChild(YoRegistry parent, String nameOfChildToRemove)
    {
       parent.getChildren().remove(findChild(parent, nameOfChildToRemove));
    }

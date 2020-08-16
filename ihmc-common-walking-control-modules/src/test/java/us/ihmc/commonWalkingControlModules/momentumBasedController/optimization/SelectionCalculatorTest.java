@@ -122,7 +122,7 @@ public class SelectionCalculatorTest
 
    private static void visualize(ReferenceFrame taskFrame, ReferenceFrame selectionFrame, Vector3D objective, Vector3D result)
    {
-      //      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      //      YoRegistry registry = new YoRegistry("TestRegistry");
       //      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       //
       //      YoGraphicCoordinateSystem taskFrameViz = new YoGraphicCoordinateSystem("TaskFrame", "Viz", registry, 1.0, YoAppearance.Blue());

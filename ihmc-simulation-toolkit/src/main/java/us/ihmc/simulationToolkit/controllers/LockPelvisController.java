@@ -9,7 +9,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class LockPelvisController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ArrayList<ExternalForcePoint> externalForcePoints = new ArrayList<>();
    private final ArrayList<Vector3D> efp_offsetFromRootJoint = new ArrayList<>();
@@ -73,7 +73,7 @@ public class LockPelvisController implements RobotController
 
          String linkName = jointToAddExternalForcePoints.getLink().getName();
          ExternalForcePoint efp = new ExternalForcePoint("efp_" + linkName + "_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i),
-               robot.getRobotsYoVariableRegistry());
+               robot.getRobotsYoRegistry());
          externalForcePoints.add(efp);
          jointToAddExternalForcePoints.addExternalForcePoint(efp);
 
@@ -131,7 +131,7 @@ public class LockPelvisController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

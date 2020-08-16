@@ -24,7 +24,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class StraightLinePoseTrajectoryGeneratorTest
 {
@@ -38,7 +38,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
    @Test
    public void testCompareWithSingleFrameTrajectoryGenerators()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -104,7 +104,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
    @Test
    public void testNegativeTime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -149,7 +149,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
    @Test
    public void testTooBigTime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -194,7 +194,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
    @Test
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);

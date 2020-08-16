@@ -62,7 +62,7 @@ public class FootPathRunnerRobot extends Robot
       boolean useYawPitchRoll = true;
       double scale = 1.0;
 
-      bodyGraphicReferenceFrame = new YoGraphicReferenceFrame(bodyReferenceFrame, this.getRobotsYoVariableRegistry(), useYawPitchRoll, scale);
+      bodyGraphicReferenceFrame = new YoGraphicReferenceFrame(bodyReferenceFrame, this.getRobotsYoRegistry(), useYawPitchRoll, scale);
       yoGraphicsListRegistry.registerYoGraphic("ReferenceFrames", bodyGraphicReferenceFrame);
 
    }

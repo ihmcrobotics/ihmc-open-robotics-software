@@ -1,29 +1,29 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameQuaternionValidityChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoFrameQuaternion input;
 
    private final DoubleYoVariableValidityChecker[] validityCheckers = new DoubleYoVariableValidityChecker[4];
 
-   public YoFrameQuaternionValidityChecker(String inputName, YoVariableRegistry parentRegistry)
+   public YoFrameQuaternionValidityChecker(String inputName, YoRegistry parentRegistry)
    {
       this(inputName, null, parentRegistry);
    }
    
-   public YoFrameQuaternionValidityChecker(YoFrameQuaternion input, YoVariableRegistry parentRegistry)
+   public YoFrameQuaternionValidityChecker(YoFrameQuaternion input, YoRegistry parentRegistry)
    {
       this(input.getNamePrefix() + input.getNameSuffix(), input, parentRegistry);
    }
 
-   private YoFrameQuaternionValidityChecker(String inputName, YoFrameQuaternion input, YoVariableRegistry parentRegistry)
+   private YoFrameQuaternionValidityChecker(String inputName, YoFrameQuaternion input, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(inputName + "ValidityChecker");
+      registry = new YoRegistry(inputName + "ValidityChecker");
       parentRegistry.addChild(registry);
       this.input = input;
 

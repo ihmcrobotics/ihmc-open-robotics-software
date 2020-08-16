@@ -11,8 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoOrientationProviderTest
 {
@@ -20,7 +20,7 @@ public class YoOrientationProviderTest
 
    private String namePrefix = "namePrefix";
    private ReferenceFrame referenceFrame;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoFrameYawPitchRoll yoFrameOrientation;
    public FrameQuaternion frameOrientationToPack;
 
@@ -28,7 +28,7 @@ public class YoOrientationProviderTest
    public void setUp()
    {
       referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrame");
-      registry = new YoVariableRegistry("yoVariableRegistry");
+      registry = new YoRegistry("yoVariableRegistry");
       yoFrameOrientation = new YoFrameYawPitchRoll(namePrefix, referenceFrame, registry);
       frameOrientationToPack = new FrameQuaternion();
    }

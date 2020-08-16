@@ -1,7 +1,7 @@
 package us.ihmc.robotics.robotController;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
@@ -22,7 +22,7 @@ public class InitializingRobotController implements RobotController
    public InitializingRobotController(RobotController robotController)
    {
       this.robotController = robotController;
-      this.isInitialized = new YoBoolean("isInitialized", robotController.getYoVariableRegistry());
+      this.isInitialized = new YoBoolean("isInitialized", robotController.getYoRegistry());
       this.isInitialized.set(false);
    }
 
@@ -33,9 +33,9 @@ public class InitializingRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
-      return robotController.getYoVariableRegistry();
+      return robotController.getYoRegistry();
    }
 
    @Override

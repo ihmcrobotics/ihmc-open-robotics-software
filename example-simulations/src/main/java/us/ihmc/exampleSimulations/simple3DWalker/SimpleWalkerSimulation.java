@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ public class SimpleWalkerSimulation
       double simulationDT = 1e-4;
       
       SimpleWalkerRobot robot = new SimpleWalkerRobot(withFeet, false);
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
 
 
       SimpleWalkerController walkerController = new SimpleWalkerController(robot, simulationDT, withInertiaControl, withImpactControl, withTwan, withHeightOnly);
@@ -49,7 +49,6 @@ public class SimpleWalkerSimulation
 
       scs = new SimulationConstructionSet(robot);
       scs.setDT(simulationDT, 10);
-      scs.setMaxBufferSize(32000);
       scs.startOnAThread();
 
       simulationOverheadPlotter.setDrawHistory(true);
@@ -63,8 +62,8 @@ public class SimpleWalkerSimulation
       simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getCurrentRFootGraphicArtifact());
       //simulationOverheadPlotter.getPlotter().addArtifact(walkerController.getFootArtifact());
 
-      simulationOverheadPlotter.setXVariableToTrack((YoDouble) robot.getVariable("q_x"));
-      simulationOverheadPlotter.setYVariableToTrack((YoDouble) robot.getVariable("q_y"));
+      simulationOverheadPlotter.setXVariableToTrack((YoDouble) robot.findVariable("q_x"));
+      simulationOverheadPlotter.setYVariableToTrack((YoDouble) robot.findVariable("q_y"));
 
 
       scs.attachPlaybackListener(simulationOverheadPlotter);
@@ -106,7 +105,7 @@ public class SimpleWalkerSimulation
 
 /*
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("fullwalker");
+      YoRegistry registry = new YoRegistry("fullwalker");
       SimpleWalkerRobotModel simpleWalkerRobotModel = new SimpleWalkerRobotModel();
       SimpleWalkerControllerForModel scsController = new SimpleWalkerControllerForModel(simpleWalkerRobotModel, 0.001);
       SCSRobotFromInverseDynamicsRobotModel scsRobot = simpleWalkerRobotModel.getSCSRobot();

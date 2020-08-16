@@ -1,33 +1,31 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class PusherController implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble pushDuration;
    private final YoDouble pushForceMagnitude;
    private final YoFrameVector3D pushDirection;
@@ -49,7 +47,7 @@ public class PusherController implements RobotController
    {
       String name = pushableRobot.getName() + "_" + joint.getName();
       yoTime = pushableRobot.getYoTime();
-      registry = new YoVariableRegistry(name + "_" + getClass().getSimpleName());
+      registry = new YoRegistry(name + "_" + getClass().getSimpleName());
       forcePoint = new ExternalForcePoint(name + "_externalForcePoint", forcePointOffset, pushableRobot);
 
       pushDuration = new YoDouble(name + "_pushDuration", registry);
@@ -61,7 +59,7 @@ public class PusherController implements RobotController
       isBeingPushed = new YoBoolean(name + "_isBeingPushed", registry);
       pushDelay = new YoDouble(name + "_pushDelay", registry);
       applyPush = new YoBoolean(name + "_applyPush", registry);
-      applyPush.addVariableChangedListener(v -> {
+      applyPush.addListener(v -> {
          if (applyPush.getBooleanValue())
          {
             pushCondition = null;
@@ -186,7 +184,7 @@ public class PusherController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

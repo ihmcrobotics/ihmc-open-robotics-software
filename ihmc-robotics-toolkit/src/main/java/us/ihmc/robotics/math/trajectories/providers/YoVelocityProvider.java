@@ -3,9 +3,9 @@ package us.ihmc.robotics.math.trajectories.providers;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 public class YoVelocityProvider implements VectorProvider
@@ -17,7 +17,7 @@ public class YoVelocityProvider implements VectorProvider
       this.frameVector = frameVector;
    }
    
-   public YoVelocityProvider(String name, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   public YoVelocityProvider(String name, ReferenceFrame referenceFrame, YoRegistry registry)
    {
       this.frameVector = new YoFrameVector3D(name, referenceFrame, registry);
    }

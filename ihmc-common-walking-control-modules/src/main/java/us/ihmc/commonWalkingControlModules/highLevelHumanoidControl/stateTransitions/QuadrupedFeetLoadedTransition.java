@@ -7,13 +7,13 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 12.0;
    private static final double TIME_WINDOW = 3.0;
@@ -27,7 +27,7 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
    private final QuadrantDependentList<SimpleMovingAverageFilteredYoVariable> prepFootFzAverages = new QuadrantDependentList<>();
 
    public QuadrupedFeetLoadedTransition(QuadrantDependentList<FootSwitchInterface> footSwitches, double controlDT, double gravityZ, double totalMass,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
 

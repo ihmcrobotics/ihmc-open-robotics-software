@@ -19,7 +19,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -28,7 +28,7 @@ public class RigidBodyJointControlHelper
 {
    public static final String shortName = "JointControlHelper";
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final String warningPrefix;
    private final YoBoolean trajectoryDone;
 
@@ -61,10 +61,10 @@ public class RigidBodyJointControlHelper
 
    private final DoubleProvider time;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, YoVariableRegistry parentRegistry)
+   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, YoRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
-      registry = new YoVariableRegistry(bodyName + shortName);
+      registry = new YoRegistry(bodyName + shortName);
       trajectoryDone = new YoBoolean(shortName + "Done", registry);
 
       this.time = time;

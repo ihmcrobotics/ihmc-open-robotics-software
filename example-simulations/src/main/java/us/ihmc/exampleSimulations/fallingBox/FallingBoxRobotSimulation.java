@@ -44,7 +44,7 @@ public class FallingBoxRobotSimulation
       Robot gcpRobot = new RobotFromDescription(gcpRobotDescription);
       Robot csRobot = new RobotFromDescription(csRobotDescription);
 
-      GroundContactModel groundModel = new LinearGroundContactModel(gcpRobot, 1422, 15.6, 125.0, 300.0, gcpRobot.getRobotsYoVariableRegistry()); // same value with DRCSCSInitialSetup.
+      GroundContactModel groundModel = new LinearGroundContactModel(gcpRobot, 1422, 15.6, 125.0, 300.0, gcpRobot.getRobotsYoRegistry()); // same value with DRCSCSInitialSetup.
       groundModel.setGroundProfile3D(environment.getTerrainObject3D());
       gcpRobot.setGroundContactModel(groundModel);
 

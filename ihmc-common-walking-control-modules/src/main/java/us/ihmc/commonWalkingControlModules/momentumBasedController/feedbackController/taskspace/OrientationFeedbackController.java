@@ -40,7 +40,7 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -48,7 +48,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean isEnabled;
 
@@ -125,13 +125,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private int currentCommandId;
 
    public OrientationFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       this(endEffector, 0, ccToolbox, fbToolbox, parentRegistry);
    }
 
    public OrientationFeedbackController(RigidBodyBasics endEffector, int controllerIndex, WholeBodyControlCoreToolbox ccToolbox,
-                                        FeedbackControllerToolbox fbToolbox, YoVariableRegistry parentRegistry)
+                                        FeedbackControllerToolbox fbToolbox, YoRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       this.controllerIndex = controllerIndex;
@@ -155,7 +155,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
-      registry = new YoVariableRegistry(appendIndex(endEffectorName, controllerIndex) + "OrientationFBController");
+      registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "OrientationFBController");
       dt = ccToolbox.getControlDT();
       gains = fbToolbox.getOrCreateOrientationGains(endEffector, controllerIndex, computeIntegralTerm);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();

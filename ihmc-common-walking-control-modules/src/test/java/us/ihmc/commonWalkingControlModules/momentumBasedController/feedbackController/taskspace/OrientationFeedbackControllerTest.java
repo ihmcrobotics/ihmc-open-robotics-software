@@ -33,7 +33,7 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJoi
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OrientationFeedbackControllerTest
 {
@@ -44,7 +44,7 @@ public class OrientationFeedbackControllerTest
    {
       Random random = new Random(5641654L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       int numberOfRevoluteJoints = 10;
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
@@ -59,8 +59,8 @@ public class OrientationFeedbackControllerTest
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
-      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
-      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
+      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
       orientationFeedbackController.setEnabled(true);
       spatialFeedbackController.setEnabled(true);
 

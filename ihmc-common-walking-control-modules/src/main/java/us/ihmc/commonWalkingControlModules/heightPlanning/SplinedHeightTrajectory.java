@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -13,13 +17,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoOptimizedPolynomial;
 import us.ihmc.tools.lists.ListSorter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 public class SplinedHeightTrajectory
 {
@@ -51,7 +51,7 @@ public class SplinedHeightTrajectory
    private final YoDouble partialDsDx;
    private final YoDouble partialDsDy;
 
-   public SplinedHeightTrajectory(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SplinedHeightTrajectory(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       polynomial = new YoOptimizedPolynomial("height", 8, registry);
       polynomial.setAccelerationMinimizationWeight(1.0e-3);

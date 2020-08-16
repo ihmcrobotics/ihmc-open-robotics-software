@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.math.TimestampedVelocityYoVariable;
 
 /**
  * @author jrebula
@@ -51,7 +51,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 	private final YoBoolean useDecay;
 
-	public FilteredDiscreteVelocityYoVariable2(String name, String description, double alpha, YoDouble time, YoVariableRegistry registry)
+	public FilteredDiscreteVelocityYoVariable2(String name, String description, double alpha, YoDouble time, YoRegistry registry)
 	{
 		super(name, description, registry);
 
@@ -63,7 +63,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 
 		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
-		lastPosChangeDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
+		lastPosChangeDirection = new YoEnum<>(name + "_lastUpdateDirection", registry, Direction.class);
 		
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		unfilteredVelocity = new YoDouble(name + "_unfiltered", registry);
@@ -84,7 +84,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 	}
 
 	public FilteredDiscreteVelocityYoVariable2(String name, String description, double alpha, YoDouble positionVariable, YoDouble time,
-			YoVariableRegistry registry)
+			YoRegistry registry)
 	{
 		super(name, description, registry);
 
@@ -97,7 +97,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 
 		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
-		lastPosChangeDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
+      lastPosChangeDirection = new YoEnum<>(name + "_lastUpdateDirection", registry, Direction.class);
 
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		unfilteredVelocity = new YoDouble(name + "_unfiltered", registry);
@@ -118,7 +118,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 	}
 
 	public FilteredDiscreteVelocityYoVariable2(String name, String description, YoDouble alphaVariable, YoDouble positionVariable,
-			YoDouble time, YoVariableRegistry registry)
+			YoDouble time, YoRegistry registry)
 	{
 		super(name, description, registry);
 		position = positionVariable;
@@ -129,7 +129,7 @@ public class FilteredDiscreteVelocityYoVariable2 extends YoDouble
 
 
 		lastPosChangeTimeInterval = new YoDouble(name + "_lastUpdateTimeInterval", registry);
-		lastPosChangeDirection = YoEnum.create(name + "_lastUpdateDirection", Direction.class, registry);
+      lastPosChangeDirection = new YoEnum<>(name + "_lastUpdateDirection", registry, Direction.class);
 
 		finiteDifferenceVelocity = new TimestampedVelocityYoVariable(name + "_finiteDiff", "", position, time, registry, 1e-20);
 		unfilteredVelocity = new YoDouble(name + "_unfiltered", registry);

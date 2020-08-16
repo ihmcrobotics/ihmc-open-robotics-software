@@ -26,19 +26,19 @@ import us.ihmc.yoVariables.variable.*;
 
 public class YoVariableExporter extends YoVariableLogReader
 {
-   private final List<YoVariable<?>> variables;
-   private final Map<String, YoVariable<?>> fullnameToVariableMap;
-   private final Map<String, List<YoVariable<?>>> nameToVariablesMap = new HashMap<>();
+   private final List<YoVariable> variables;
+   private final Map<String, YoVariable> fullnameToVariableMap;
+   private final Map<String, List<YoVariable>> nameToVariablesMap = new HashMap<>();
 
-   public YoVariableExporter(SimulationConstructionSet scs, File logDirectory, LogProperties logProperties, List<YoVariable<?>> variables)
+   public YoVariableExporter(SimulationConstructionSet scs, File logDirectory, LogProperties logProperties, List<YoVariable> variables)
    {
       super(logDirectory, logProperties);
       this.variables = variables;
-      fullnameToVariableMap = variables.stream().collect(Collectors.toMap(YoVariable::getFullNameWithNameSpace, Function.identity()));
-      for (YoVariable<?> variable : variables)
+      fullnameToVariableMap = variables.stream().collect(Collectors.toMap(YoVariable::getFullNameString, Function.identity()));
+      for (YoVariable variable : variables)
       {
          String name = variable.getName();
-         List<YoVariable<?>> variableList = nameToVariablesMap.get(name);
+         List<YoVariable> variableList = nameToVariablesMap.get(name);
 
          if (variableList == null)
          {
@@ -129,7 +129,7 @@ public class YoVariableExporter extends YoVariableLogReader
       {
          for (String varname : vargroup.getVars())
          {
-            List<YoVariable<?>> variableList = findVariable(varname);
+            List<YoVariable> variableList = findVariable(varname);
 
             if (variableList == null || variableList.isEmpty())
             {
@@ -142,7 +142,7 @@ public class YoVariableExporter extends YoVariableLogReader
                LogTools.info("Found multiple variables for " + varname);
             }
 
-            for (YoVariable<?> variable : variableList)
+            for (YoVariable variable : variableList)
             {
                int offset = variables.indexOf(variable);
                if (offset == -1)
@@ -159,9 +159,9 @@ public class YoVariableExporter extends YoVariableLogReader
          return dataHolders;
    }
 
-   private List<YoVariable<?>> findVariable(String varName)
+   private List<YoVariable> findVariable(String varName)
    {
-      YoVariable<?> variable = fullnameToVariableMap.get(varName);
+      YoVariable variable = fullnameToVariableMap.get(varName);
 
       if (variable != null)
          return Collections.singletonList(variable);
@@ -169,7 +169,7 @@ public class YoVariableExporter extends YoVariableLogReader
          return nameToVariablesMap.get(varName);
    }
 
-   private DataHolder<?> createDataHolder(int offset, int elements, YoVariable<?> variable)
+   private DataHolder<?> createDataHolder(int offset, int elements, YoVariable variable)
    {
       int[] dims = {elements, 1};
       String name = variable.getName();

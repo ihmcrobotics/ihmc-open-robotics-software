@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble finalPosition;
    private final ArrayList<YoDouble> intermediatePositions;
    private final ArrayList<YoPolynomial> connectingPolynomials;
@@ -26,9 +26,9 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
    private final YoInteger currentNumberOfWaypoints;
 
    public OneDoFJointWayPointTrajectoryGenerator(String namePrefix, OneDoFJointBasics joint, DoubleProvider trajectoryTimeProvider, int maxNumberOfWayPoints,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.joint = joint;
       trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       subTrajectoryTime = new YoDouble(namePrefix + "SubTrajectoryTime", registry);

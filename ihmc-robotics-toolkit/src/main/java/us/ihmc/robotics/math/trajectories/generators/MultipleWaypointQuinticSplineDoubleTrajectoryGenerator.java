@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories.generators;
 
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Helper class to create a one degree of freedom trajectory using the quintic spline interpolator
@@ -19,7 +19,7 @@ public class MultipleWaypointQuinticSplineDoubleTrajectoryGenerator implements D
    private final double[] time;
    private final double[] positions;
 
-   public MultipleWaypointQuinticSplineDoubleTrajectoryGenerator(String name, int maximumNumberOfPoints, YoVariableRegistry parentRegistry)
+   public MultipleWaypointQuinticSplineDoubleTrajectoryGenerator(String name, int maximumNumberOfPoints, YoRegistry parentRegistry)
    {
       this.interpolator = new QuinticSplineInterpolator(name, maximumNumberOfPoints, 1, parentRegistry);
       this.time = new double[maximumNumberOfPoints];

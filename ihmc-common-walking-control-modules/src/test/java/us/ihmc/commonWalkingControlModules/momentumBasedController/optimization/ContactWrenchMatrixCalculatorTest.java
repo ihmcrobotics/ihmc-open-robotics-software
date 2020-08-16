@@ -31,7 +31,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ContactWrenchMatrixCalculatorTest
 {
@@ -124,7 +124,7 @@ public class ContactWrenchMatrixCalculatorTest
       double gravityZ = 9.81;
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rootJoint.getPredecessor());
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), rootBody);
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       return new WholeBodyControlCoreToolbox(controlDT,
                                              gravityZ,

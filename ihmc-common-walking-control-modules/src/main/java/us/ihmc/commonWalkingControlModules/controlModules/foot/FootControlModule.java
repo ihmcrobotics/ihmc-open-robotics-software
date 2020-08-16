@@ -6,7 +6,6 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.Constra
 import java.util.Arrays;
 import java.util.EnumMap;
 
-import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -21,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesDataBasics;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,14 +36,14 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FootControlModule
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
    public enum ConstraintType
@@ -113,7 +111,7 @@ public class FootControlModule
                             FootholdRotationParameters footholdRotationParameters,
                             DoubleProvider minWeightFractionPerFoot,
                             DoubleProvider maxWeightFractionPerFoot,
-                            YoVariableRegistry parentRegistry)
+                            YoRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
@@ -121,7 +119,7 @@ public class FootControlModule
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Foot";
-      registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide,
                                                 walkingControllerParameters,
@@ -139,7 +137,7 @@ public class FootControlModule
 
       workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
-      requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedState", "", registry, ConstraintType.class, true);
       requestedState.set(null);
 
       setupContactStatesMap();

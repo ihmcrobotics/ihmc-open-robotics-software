@@ -25,7 +25,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
@@ -60,7 +60,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       handControllerTime = new YoDouble("handControllerTime", registry);
 
       if (realtimeRos2Node != null)
@@ -212,7 +212,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    }
 
    @Override
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

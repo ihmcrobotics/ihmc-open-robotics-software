@@ -50,16 +50,16 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SimpleSwingState extends SimpleFootControlState
@@ -181,7 +181,7 @@ public class SimpleSwingState extends SimpleFootControlState
                            RobotSide robotSide,
                            FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
                            FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration,
-                           PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
+                           PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(contactableFoot, controllerToolbox, robotSide, fullRobotModel);
       this.gains = gains;
@@ -327,7 +327,7 @@ public class SimpleSwingState extends SimpleFootControlState
       setupViz(yoGraphicsListRegistry, registry);
    }
 
-   private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   private void setupViz(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       if (yoGraphicsListRegistry == null)
       {

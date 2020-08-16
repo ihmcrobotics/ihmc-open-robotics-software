@@ -3,14 +3,14 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.RawSensorReader;
 
 public class ModularRawSensorReader implements RawSensorReader
 {
    private final ArrayList<RawSensorReader> rawSensorReaders = new ArrayList<RawSensorReader>();
    private final String description;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    public ModularRawSensorReader(String name, String description, RawSensorReader rawSensorReader)
    {
@@ -41,13 +41,13 @@ public class ModularRawSensorReader implements RawSensorReader
    public ModularRawSensorReader(String name, String description)
    {
       this.description = description;
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
    }
 
    public void addRawSensorReader(RawSensorReader rawSensorReader)
    {
       this.rawSensorReaders.add(rawSensorReader);
-      this.registry.addChild(rawSensorReader.getYoVariableRegistry());
+      this.registry.addChild(rawSensorReader.getYoRegistry());
    }
 
    @Override
@@ -65,7 +65,7 @@ public class ModularRawSensorReader implements RawSensorReader
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

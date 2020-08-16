@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Calculates suggested swing time, swing height and waypoint proportions
@@ -34,7 +34,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private static final double boxHeight = 0.25;
    private static final double boxGroundClearance = 0.04;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicCoordinateSystem startOfSwingPoseGraphic;
    private final YoGraphicCoordinateSystem endOfSwingPoseGraphic;
    private final YoGraphicPolygon footstepGraphic;
@@ -66,7 +66,7 @@ public class AdaptiveSwingTrajectoryCalculator
                                             WalkingControllerParameters walkingControllerParameters,
                                             TickAndUpdatable tickAndUpdatable,
                                             YoGraphicsListRegistry graphicsListRegistry,
-                                            YoVariableRegistry parentRegistry)
+                                            YoRegistry parentRegistry)
    {
       this.swingPlannerParameters = swingPlannerParameters;
       this.footstepPlannerParameters = footstpePlannerParameters;

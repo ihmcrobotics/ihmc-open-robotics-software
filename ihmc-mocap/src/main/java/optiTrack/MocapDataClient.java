@@ -8,7 +8,7 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
 
 public class MocapDataClient
@@ -30,7 +30,7 @@ public class MocapDataClient
    {
       try
       {
-         callFrequencyCalculator = new CallFrequencyCalculator(new YoVariableRegistry("Mocap"), "MOCAP_");
+         callFrequencyCalculator = new CallFrequencyCalculator(new YoRegistry("Mocap"), "MOCAP_");
          Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
 
          System.out.println("\n\nNetwork adapters found:\n-----------------------------------");

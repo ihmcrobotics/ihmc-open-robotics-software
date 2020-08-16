@@ -4,12 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -21,12 +16,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -38,7 +33,7 @@ public class FootCoPOccupancyGrid
 
    private final String name = getClass().getSimpleName();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoInteger nLengthSubdivisions;
    private final YoInteger nWidthSubdivisions;
@@ -68,7 +63,7 @@ public class FootCoPOccupancyGrid
 
    public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
                                WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
-                               YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                               YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
       this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
@@ -83,7 +78,7 @@ public class FootCoPOccupancyGrid
       gridBoundaries.addVertex(new FramePoint2D(soleFrame, footLength / 2.0, footWidth / 2.0));
       gridBoundaries.update();
 
-      registry = new YoVariableRegistry(namePrefix + name);
+      registry = new YoRegistry(namePrefix + name);
 
       this.nLengthSubdivisions = new YoInteger(namePrefix + "NLengthSubdivisions", registry);
       this.nLengthSubdivisions.set(nLengthSubdivisions);
@@ -142,10 +137,10 @@ public class FootCoPOccupancyGrid
 
    private void setupChangedGridParameterListeners()
    {
-      VariableChangedListener changedGridSizeListener = new VariableChangedListener()
+      YoVariableChangedListener changedGridSizeListener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             counterGrid.reshape(nLengthSubdivisions.getIntegerValue(), nWidthSubdivisions.getIntegerValue());
             occupancyGrid.reshape(nLengthSubdivisions.getIntegerValue(), nWidthSubdivisions.getIntegerValue());
@@ -154,14 +149,14 @@ public class FootCoPOccupancyGrid
             cellArea.set(cellSize.getX() * cellSize.getY());
          }
       };
-      nLengthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      nWidthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      changedGridSizeListener.notifyOfVariableChange(null);
+      nLengthSubdivisions.addListener(changedGridSizeListener);
+      nWidthSubdivisions.addListener(changedGridSizeListener);
+      changedGridSizeListener.changed(null);
 
-      VariableChangedListener changedThresholdForCellActivationListener = new VariableChangedListener()
+      YoVariableChangedListener changedThresholdForCellActivationListener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             for (int i = 0; i < nLengthSubdivisions.getIntegerValue(); i++)
             {
@@ -175,13 +170,13 @@ public class FootCoPOccupancyGrid
             }
          }
       };
-      thresholdForCellActivation.addVariableChangedListener(changedThresholdForCellActivationListener);
-      changedThresholdForCellActivationListener.notifyOfVariableChange(null);
+      thresholdForCellActivation.addListener(changedThresholdForCellActivationListener);
+      changedThresholdForCellActivationListener.changed(null);
 
-      VariableChangedListener resetGridListener = new VariableChangedListener()
+      YoVariableChangedListener resetGridListener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (resetGridToEmpty.getBooleanValue())
             {
@@ -190,8 +185,8 @@ public class FootCoPOccupancyGrid
             resetGridToEmpty.set(false);
          }
       };
-      resetGridToEmpty.addVariableChangedListener(resetGridListener);
-      resetGridListener.notifyOfVariableChange(null);
+      resetGridToEmpty.addListener(resetGridListener);
+      resetGridListener.changed(null);
    }
 
    private final FramePoint3D cellPosition = new FramePoint3D();

@@ -2,7 +2,6 @@ package us.ihmc.simpleWholeBodyWalking;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simpleWholeBodyWalking.SimpleFootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -19,8 +18,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.simpleWholeBodyWalking.SimpleFootControlModule.ConstraintType;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimpleFeetManager
 {
@@ -28,7 +28,7 @@ public class SimpleFeetManager
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final SideDependentList<SimpleFootControlModule> footControlModules = new SideDependentList<>();
 
@@ -45,7 +45,7 @@ public class SimpleFeetManager
                             WalkingControllerParameters walkingControllerParameters,
                             PIDSE3GainsReadOnly swingFootGains,
                             PIDSE3GainsReadOnly holdFootGains,
-                            YoVariableRegistry parentRegistry)
+                            YoRegistry parentRegistry)
    {
       feet = controllerToolbox.getContactableFeet();
 

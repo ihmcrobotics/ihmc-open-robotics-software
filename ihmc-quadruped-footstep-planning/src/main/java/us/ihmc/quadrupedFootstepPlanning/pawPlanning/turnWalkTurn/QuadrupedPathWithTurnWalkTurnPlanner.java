@@ -15,14 +15,14 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapp
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAndPawPlanner
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
 
 
@@ -38,7 +38,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    public QuadrupedPathWithTurnWalkTurnPlanner(WaypointsForPawStepPlanner waypointPathPlanner, QuadrupedXGaitSettingsBasics xGaitSettings,
                                                YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
-                                               YoVariableRegistry parentRegistry)
+                                               YoRegistry parentRegistry)
    {
       this.waypointPathPlanner = waypointPathPlanner;
       YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);

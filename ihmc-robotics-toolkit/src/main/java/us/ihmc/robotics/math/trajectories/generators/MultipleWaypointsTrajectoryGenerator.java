@@ -9,7 +9,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -21,7 +21,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
 
    private final String namePrefix;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble currentTrajectoryTime;
 
@@ -37,17 +37,17 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final SettableDoubleProvider trajectoryTimeProvider = new SettableDoubleProvider();
    private final CubicPolynomialTrajectoryGenerator subTrajectory;
 
-   public MultipleWaypointsTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
       this(namePrefix, defaultMaximumNumberOfWaypoints, parentRegistry);
    }
 
-   public MultipleWaypointsTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       numberOfWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);

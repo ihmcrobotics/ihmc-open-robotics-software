@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -20,9 +20,9 @@ public class WrapperForMultiplePositionTrajectoryGenerators implements PositionT
    private final YoDouble timeIntoStep;
 
    public WrapperForMultiplePositionTrajectoryGenerators(ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators, String namePrefix,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + namePostfix);
+      YoRegistry registry = new YoRegistry(namePrefix + namePostfix);
       parentRegistry.addChild(registry);
 
       this.positionTrajectoryGenerators = positionTrajectoryGenerators;

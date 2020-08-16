@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.filters;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -20,12 +20,12 @@ public class SimpleMovingAverageFilteredYoVariable extends YoDouble
 
    private boolean bufferHasBeenFilled = false;
 
-   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoVariableRegistry registry)
+   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoRegistry registry)
    {
       this(name, windowSize, null, registry);
    }
 
-   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoDouble yoVariableToFilter, YoVariableRegistry registry)
+   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoDouble yoVariableToFilter, YoRegistry registry)
    {
       super(name, registry);
 

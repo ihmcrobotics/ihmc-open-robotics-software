@@ -8,7 +8,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AtlasPrimitiveActions
@@ -38,13 +38,13 @@ public class AtlasPrimitiveActions
    public final WalkToLocationBehavior walkToLocationBehavior;
    public final WholeBodyInverseKinematicsBehavior wholeBodyBehavior;
    public final WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
-   private final YoVariableRegistry behaviorRegistry;
+   private final YoRegistry behaviorRegistry;
 
    public HumanoidReferenceFrames referenceFrames;
 
    public AtlasPrimitiveActions(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters,
                                 FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory, HumanoidReferenceFrames referenceFrames,
-                                YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
+                                YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters, YoRegistry behaviorRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.behaviorRegistry = behaviorRegistry;
@@ -106,7 +106,7 @@ public class AtlasPrimitiveActions
    }
    private void addPrimitive(AbstractBehavior behavior)
    {
-      behaviorRegistry.addChild(behavior.getYoVariableRegistry());
+      behaviorRegistry.addChild(behavior.getYoRegistry());
    }
 
 

@@ -48,7 +48,7 @@ import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LogVisualizer
@@ -102,10 +102,10 @@ public class LogVisualizer
 
    private void printOutYoVariableNames()
    {
-      YoVariableRegistry rootRegistry = scs.getRootRegistry();
-      List<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
+      YoRegistry rootRegistry = scs.getRootRegistry();
+      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.collectSubtreeVariables();
 
-      for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
+      for (YoVariable yoVariable : allVariablesIncludingDescendants)
       {
          System.out.println(yoVariable.getName());
       }
@@ -187,7 +187,7 @@ public class LogVisualizer
       }
 
       robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, jointStates, parser.getYoVariablesList(), logProperties, scs);
-      scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
+      scs.setTimeVariableName(robot.getRobotsYoRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();
       System.out.println(getClass().getSimpleName() + ": dt set to " + dt);
@@ -313,7 +313,7 @@ public class LogVisualizer
       return new PlaybackListener()
       {
          @Override
-         public void notifyOfIndexChange(int newIndex)
+         public void indexChanged(int newIndex)
          {
             updateYoGraphics(yoGraphicsListRegistry);
          }

@@ -57,7 +57,7 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoJointStateHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -89,7 +89,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
                                                  List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
                                                  List<YoJointStateHandleHolder> yoJointStateHandleHolders, TimestampProvider monotonicTimeProvider,
                                                  StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-                                                 SensorProcessingConfiguration sensorProcessingConfiguration, YoVariableRegistry registry)
+                                                 SensorProcessingConfiguration sensorProcessingConfiguration, YoRegistry registry)
    {
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
@@ -141,7 +141,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
 
    private void configureFingerProcessing(SensorProcessing sensorProcessing)
    {
-      YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
+      YoRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       boolean areCoeffsLoaded = loadCoeffsFromFile(FINGER_TRANSMISSION_FILE, sideDependentScales, sideDependentBiases);
 
@@ -269,7 +269,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       }
    }
 
-   private Predicate<DoubleProvider> createFingerJointPositionSwitchTrigger(RobotSide robotSide, ValkyrieHandJointName jointName, YoVariableRegistry registry)
+   private Predicate<DoubleProvider> createFingerJointPositionSwitchTrigger(RobotSide robotSide, ValkyrieHandJointName jointName, YoRegistry registry)
    {
       YoBoolean isFingerJointEncoderDead = sideDependentEncoderDeadMap.get(robotSide).get(jointName);
 

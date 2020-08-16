@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -18,17 +22,16 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.List;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DCMPlanner implements DCMPlannerInterface
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final boolean VISUALIZE = true;
    private static final double POINT_SIZE = 0.005;
@@ -69,13 +72,13 @@ public class DCMPlanner implements DCMPlannerInterface
    private final boolean debug;
 
    public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity, ReferenceFrame supportFrame,
-                     QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                     QuadrantDependentList<MovingReferenceFrame> soleFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(dcmPlannerParameters, nominalHeight, gravity, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
    }
 
    public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double nominalHeight, double gravity, ReferenceFrame supportFrame,
-                     QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
+                     QuadrantDependentList<MovingReferenceFrame> soleFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                      boolean debug)
 
    {
@@ -84,7 +87,7 @@ public class DCMPlanner implements DCMPlannerInterface
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
-      comHeight.addVariableChangedListener(v ->
+      comHeight.addListener(v ->
             omega.set(Math.sqrt(gravity / comHeight.getDoubleValue())));
       comHeight.set(nominalHeight);
 

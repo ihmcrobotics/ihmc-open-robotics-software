@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @see FeedbackControllerData
@@ -20,7 +20,7 @@ public class FBRateLimitedVector3D extends RateLimitedYoMutableFrameVector3D imp
    private int commandId;
 
    public FBRateLimitedVector3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider maximumRate, double dt, FrameVector3DReadOnly rawVector,
-                                  YoVariableRegistry registry)
+                                  YoRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix + "RateLimited", type, space), "", registry, maximumRate, dt, rawVector);
 

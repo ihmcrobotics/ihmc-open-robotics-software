@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -53,7 +53,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class InvertedFourBarLinkageIDController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getName());
+   private final YoRegistry registry = new YoRegistry(getName());
    private final RigidBodyBasics rootBody;
    private final FourBarKinematicLoopFunction fourBarKinematicLoop;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -269,7 +269,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -377,7 +377,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
       private final DoubleProvider time;
 
-      public SineGenerator(String name, DoubleProvider timeProvider, YoVariableRegistry registry)
+      public SineGenerator(String name, DoubleProvider timeProvider, YoRegistry registry)
       {
          this.time = timeProvider;
          position = new YoDouble(name + "Position", registry);

@@ -5,23 +5,23 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 public class YoParabolicTrajectoryGenerator
 {
    private final String nameSuffix = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ReferenceFrame referenceFrame;
    private final YoFrameVector3D c0, c1, c2;
 
    private final FrameVector3D tempInitialize;
    private final FramePoint3D tempPackPosition;
 
-   public YoParabolicTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public YoParabolicTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + nameSuffix);
+      this.registry = new YoRegistry(namePrefix + nameSuffix);
       this.referenceFrame = referenceFrame;
 
       c0 = new YoFrameVector3D("c0", "", referenceFrame, registry);
