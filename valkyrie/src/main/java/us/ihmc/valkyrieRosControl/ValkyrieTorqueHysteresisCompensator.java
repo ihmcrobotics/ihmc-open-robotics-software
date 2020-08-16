@@ -9,12 +9,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJoi
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieTorqueHysteresisCompensator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("TorqueHysteresisCompensator");
+   private final YoRegistry registry = new YoRegistry("TorqueHysteresisCompensator");
 
    private final List<YoEffortJointHandleHolder> processedJointHandles = new ArrayList<>();
    private final List<TorqueHysteresisCompensatorYoVariable> hysteresisCompensators = new ArrayList<>();
@@ -31,7 +31,7 @@ public class ValkyrieTorqueHysteresisCompensator
     */
    private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Torso", "Shoulder", "Elbow"};
 
-   public ValkyrieTorqueHysteresisCompensator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public ValkyrieTorqueHysteresisCompensator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, YoDouble yoTime, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 

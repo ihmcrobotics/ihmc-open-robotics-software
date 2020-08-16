@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -14,7 +14,7 @@ public class StateMachineSimpleEncoderProcessor extends AbstractEncoderProcessor
 
    private boolean hasBeenCalled = false;
    
-   public StateMachineSimpleEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
+   public StateMachineSimpleEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 

@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @see FeedbackControllerData
@@ -16,7 +16,7 @@ public class FBQuaternion3D extends YoMutableFrameQuaternion implements Feedback
    private final Type type;
    private int commandId;
 
-   public FBQuaternion3D(String namePrefix, Type type, YoVariableRegistry registry)
+   public FBQuaternion3D(String namePrefix, Type type, YoRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix, type, SpaceData3D.ORIENTATION), "", registry);
 

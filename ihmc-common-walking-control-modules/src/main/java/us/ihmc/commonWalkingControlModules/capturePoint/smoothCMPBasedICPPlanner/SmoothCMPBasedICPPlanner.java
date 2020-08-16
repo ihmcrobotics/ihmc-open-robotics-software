@@ -20,13 +20,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -43,15 +37,15 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
 
 public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 {
@@ -63,7 +57,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    private static final double ZERO_TIME = 0.0;
    public static final double SUFFICIENTLY_LARGE = 100.0;
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final String namePrefix = "icpPlanner";
@@ -236,7 +230,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ReferenceFrame> soleZUpFrames, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                   MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
+                                   MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ, ICPPlannerParameters icpPlannerParameters)
    {
 
@@ -247,7 +241,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    public SmoothCMPBasedICPPlanner(double robotMass, SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
                                    SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, MomentumTrajectoryHandler momentumTrajectoryHandler,
-                                   YoDouble yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ,
+                                   YoDouble yoTime, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ,
                                    ICPPlannerParameters icpPlannerParameters)
    {
       isStanding.set(true);

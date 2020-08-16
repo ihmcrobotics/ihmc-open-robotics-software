@@ -27,18 +27,18 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final ForceSensorDataHolderReadOnly inputForceSensorDataHolder;
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
@@ -84,7 +84,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    public ForceSensorStateUpdater(FloatingJointBasics rootJoint, SensorOutputMapReadOnly sensorOutputMapReadOnly,
                                   ForceSensorDataHolder forceSensorDataHolderToUpdate, StateEstimatorParameters stateEstimatorParameters, double gravity,
                                   RobotMotionStatusHolder robotMotionStatusHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                  YoVariableRegistry parentreRegistry)
+                                  YoRegistry parentreRegistry)
    {
       this.gravity = Math.abs(gravity);
       inputForceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorOutputs();
@@ -93,7 +93,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       outputForceSensorDataHolder = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());
       outputForceSensorDataHolderWithGravityCancelled = new ForceSensorDataHolder(inputForceSensorDataHolder.getForceSensorDefinitions());
 
-      registry = new YoVariableRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
       parentreRegistry.addChild(registry);
 
       hasWristForceSensors = checkIfWristForceSensorsExist(stateEstimatorParameters);
@@ -114,10 +114,10 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          footTorqueCalibrationOffsets = new SideDependentList<>();
 
          calibrateFootForceSensors = new YoBoolean("calibrateFootForceSensors", registry);
-         calibrateFootForceSensors.addVariableChangedListener(new VariableChangedListener()
+         calibrateFootForceSensors.addListener(new YoVariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                if (calibrateFootForceSensors.getBooleanValue())
                   calibrateFootForceSensorsAtomic.set(true);

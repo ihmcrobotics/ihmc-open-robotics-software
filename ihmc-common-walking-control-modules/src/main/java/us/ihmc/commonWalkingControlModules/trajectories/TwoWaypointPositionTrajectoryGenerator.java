@@ -17,12 +17,12 @@ import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -37,7 +37,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    // distance times this fraction; waypoints that are close together are both set to their midpoint and passed through at a velocity of zero
 
    private final String namePostFix = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final int numberOfVisualizationMarkers = 50;
    private final YoBoolean visualize;
 
@@ -85,10 +85,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider,
          PositionProvider finalPositionProvider, VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double maxSwingHeightFromStanceFoot,
+         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double maxSwingHeightFromStanceFoot,
          boolean visualize)
    {
-      registry = new YoVariableRegistry(namePrefix + namePostFix);
+      registry = new YoRegistry(namePrefix + namePostFix);
       if (REGISTER_YOVARIABLES)
       {
          parentRegistry.addChild(registry);

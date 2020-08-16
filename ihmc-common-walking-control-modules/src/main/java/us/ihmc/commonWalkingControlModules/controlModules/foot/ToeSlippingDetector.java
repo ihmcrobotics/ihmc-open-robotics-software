@@ -10,16 +10,16 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class ToeSlippingDetector
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble alpha;
    private final AlphaFilteredYoVariable toeForceFiltered;
@@ -39,12 +39,12 @@ public class ToeSlippingDetector
    private final FootSwitchInterface footSwitch;
 
    public ToeSlippingDetector(String namePrefix, double controlDT, RigidBodyBasics foot, FootSwitchInterface footSwitch,
-                              YoVariableRegistry parentRegistry)
+                              YoRegistry parentRegistry)
    {
       dt = controlDT;
       this.foot = foot;
       this.footSwitch = footSwitch;
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       alpha = new YoDouble(namePrefix + "AlphaFilter", registry);
       toeForceFiltered = new AlphaFilteredYoVariable(namePrefix + "ToeForceFiltered", "", registry, alpha);

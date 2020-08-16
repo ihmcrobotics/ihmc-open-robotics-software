@@ -13,7 +13,7 @@ public class SpringBallSimulation
 
 
       // sim.setGroundVisible(false);
-      springBall.setGroundContactModel(new LinearGroundContactModel(springBall, 400.0, 10.0, 80.0, 100.0, springBall.getRobotsYoVariableRegistry()));
+      springBall.setGroundContactModel(new LinearGroundContactModel(springBall, 400.0, 10.0, 80.0, 100.0, springBall.getRobotsYoRegistry()));
 
       SpringBallController controller = new SpringBallController(springBall, "springBallController");
       springBall.setController(controller);

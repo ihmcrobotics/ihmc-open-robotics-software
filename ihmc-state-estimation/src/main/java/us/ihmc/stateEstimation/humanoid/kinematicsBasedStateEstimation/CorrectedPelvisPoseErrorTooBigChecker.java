@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CorrectedPelvisPoseErrorTooBigChecker
@@ -14,7 +14,7 @@ public class CorrectedPelvisPoseErrorTooBigChecker
    private static final double MAXIMUM_TRANSLATION_ERROR = 0.15;
    private static final double MAXIMUM_ANGLE_ERROR_IN_DEGRESS = 10.0;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
@@ -29,9 +29,9 @@ public class CorrectedPelvisPoseErrorTooBigChecker
    private final YoDouble translationErrorY;
    private final YoDouble translationErrorZ;
 
-   public CorrectedPelvisPoseErrorTooBigChecker(YoVariableRegistry parentRegistry)
+   public CorrectedPelvisPoseErrorTooBigChecker(YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
 
       maximumErrorAngleInDegrees = new YoDouble("maximumErrorAngleInDegrees", registry);
       maximumErrorAngleInDegrees.set(MAXIMUM_ANGLE_ERROR_IN_DEGRESS);

@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WorkspaceLimiterParameters
 {
    private static final double defaultMinVelocityDifference = 5e-4;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble percentOfLegLengthMarginToDisableSingularityAvoidance;
    private final YoDouble percentOfLegLengthMarginToAbortSingularityAvoidance;
@@ -24,7 +24,7 @@ public class WorkspaceLimiterParameters
    private final YoDouble correctionAlphaFilter;
    private final YoDouble alphaUnreachableFootstep;
 
-   public WorkspaceLimiterParameters(YoVariableRegistry parentRegistry)
+   public WorkspaceLimiterParameters(YoRegistry parentRegistry)
    {
       String namePrefix = "foot";
       alphaUnreachableFootstep = new YoDouble(namePrefix + "AlphaUnreachableFootstep", registry);

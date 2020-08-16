@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class BasicHeightController
 {
@@ -18,7 +18,7 @@ public class BasicHeightController
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FullRobotModel robotModel;
 
@@ -41,7 +41,7 @@ public class BasicHeightController
    private final double controlDT;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
-   public BasicHeightController(SphereControlToolbox controlToolbox, YoVariableRegistry parentRegistry)
+   public BasicHeightController(SphereControlToolbox controlToolbox, YoRegistry parentRegistry)
    {
       this.robotModel = controlToolbox.getFullRobotModel();
       this.controlDT = controlToolbox.getControlDT();

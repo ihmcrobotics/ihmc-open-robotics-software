@@ -3,14 +3,14 @@ package us.ihmc.avatar.externalForceEstimationToolboxModule;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DoublePendulumController implements RobotController
 {
    private static final double maxTau = 1000;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DoublePendulumRobot robot;
 
@@ -28,7 +28,7 @@ public class DoublePendulumController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

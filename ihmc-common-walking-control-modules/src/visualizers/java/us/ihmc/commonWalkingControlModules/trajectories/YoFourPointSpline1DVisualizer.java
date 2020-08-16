@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -7,12 +8,11 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFourPointSpline1DVisualizer
 {
@@ -21,7 +21,7 @@ public class YoFourPointSpline1DVisualizer
    public YoFourPointSpline1DVisualizer()
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("Visualizer");
+      YoRegistry registry = new YoRegistry("Visualizer");
 
       YoFourPointCubicSpline1D fourPointSpline1D = new YoFourPointCubicSpline1D("z", registry);
 
@@ -72,7 +72,7 @@ public class YoFourPointSpline1DVisualizer
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(true);
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"), parameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);

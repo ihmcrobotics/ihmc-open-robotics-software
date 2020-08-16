@@ -20,7 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.simulationconstructionset.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 {
    private static double controlDT = 5.0e-5;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private Robot robot;
    private OneDoFJointBasics[] joints;
@@ -61,7 +61,7 @@ import java.util.function.Consumer;
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
 
       scs.setFastSimulate(true, 15);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
       scs.setDT(controlDT, 10);
       scs.setGroundVisible(false);

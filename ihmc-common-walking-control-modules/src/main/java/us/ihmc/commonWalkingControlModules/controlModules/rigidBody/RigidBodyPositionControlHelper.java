@@ -29,12 +29,12 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class RigidBodyPositionControlHelper
 {
@@ -89,7 +89,7 @@ public class RigidBodyPositionControlHelper
 
    public RigidBodyPositionControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                          ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                         BooleanProvider useWeightFromMessage, DoubleProvider time, YoVariableRegistry registry,
+                                         BooleanProvider useWeightFromMessage, DoubleProvider time, YoRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.warningPrefix = warningPrefix;

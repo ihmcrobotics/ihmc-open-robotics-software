@@ -1,7 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -20,7 +20,7 @@ public class BacklashCompensatingPIDController extends PIDController
    
    private boolean gainReductionUpToDate = false;
    
-   public BacklashCompensatingPIDController(String suffix, YoVariableRegistry registry)
+   public BacklashCompensatingPIDController(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
       

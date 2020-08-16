@@ -14,7 +14,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.LogIndex;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -23,12 +23,12 @@ import us.ihmc.tools.compression.SnappyUtils;
 
 public class SpecificLogVariableUpdater
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("YoVariableSpecificLogVariablePlaybackRobot");
+   private final YoRegistry registry = new YoRegistry("YoVariableSpecificLogVariablePlaybackRobot");
    private final YoLong timestamp = new YoLong("timestamp", registry);
    private final YoDouble robotTime = new YoDouble("robotTime", registry);
 
    private final FileChannel logChannel;
-   private final List<YoVariable<?>> variables;
+   private final List<YoVariable> variables;
 
    // Compressed data helpers
    private final boolean compressed;
@@ -41,17 +41,17 @@ public class SpecificLogVariableUpdater
 
    private final long initialTimestamp;
 
-   private YoVariable<?>[] variablesToUpdate;
-   private final HashMap<YoVariable<?>, AtomicInteger> indexes = new HashMap<>();
+   private YoVariable[] variablesToUpdate;
+   private final HashMap<YoVariable, AtomicInteger> indexes = new HashMap<>();
 
    public SpecificLogVariableUpdater(File selectedFile, RobotDescription robotDescription,
-         List<JointState> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, YoVariable<?>... variablesToUpdate )
+         List<JointState> jointStates, List<YoVariable> variables, LogPropertiesReader logProperties, YoVariable... variablesToUpdate )
          throws IOException
    {
       this.variables = variables;
       this.variablesToUpdate = variablesToUpdate;
 
-      for(YoVariable<?> yoVariable : variablesToUpdate)
+      for(YoVariable yoVariable : variablesToUpdate)
       {
          indexes.put(yoVariable, new AtomicInteger(0));
       }
@@ -116,7 +116,7 @@ public class SpecificLogVariableUpdater
          
       for (int i = 0; i < variables.size(); i++)
       {
-         YoVariable<?> variable = variables.get(i);
+         YoVariable variable = variables.get(i);
          if(indexes.containsKey(variable))
          {
             indexes.get(variable).set(logLongArray.position());
@@ -140,7 +140,7 @@ public class SpecificLogVariableUpdater
 
          for (int i = 0; i < variablesToUpdate.length; i++)
          {
-            YoVariable<?> variable = variablesToUpdate[i];
+            YoVariable variable = variablesToUpdate[i];
             AtomicInteger position = indexes.get(variable);
             
             variable.setValueFromLongBits(logLongArray.get(position.get()), false);

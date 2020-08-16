@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ConstantAccelerationTrajectoryGeneratorTest
 {
    private String namePrefix = "namePrefix";
-   private YoVariableRegistry parentRegistry = new YoVariableRegistry("parentRegistry");
+   private YoRegistry parentRegistry = new YoRegistry("parentRegistry");
 
    private DoubleProvider initialPositionProvider;
    private DoubleProvider finalPositionProvider;

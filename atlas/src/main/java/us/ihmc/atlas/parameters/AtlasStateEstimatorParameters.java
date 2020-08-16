@@ -25,7 +25,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -92,7 +92,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
-      YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
+      YoRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       if (applyJointPositionPolynomialApproximation)
       {

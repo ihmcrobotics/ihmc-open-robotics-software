@@ -152,7 +152,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       {
          Point3D vertex = new Point3D();
          frameBox.getVertex(i, vertex);
-         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3D(vertex), this.getRobotsYoVariableRegistry());
+         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3D(vertex), this.getRobotsYoRegistry());
 
          floatingJoint.addGroundContactPoint(groundContactPoint);
       }

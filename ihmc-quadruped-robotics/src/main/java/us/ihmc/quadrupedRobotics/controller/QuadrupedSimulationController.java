@@ -9,7 +9,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedSimulationController implements RobotController
 {
@@ -17,7 +17,7 @@ public class QuadrupedSimulationController implements RobotController
    private static final Vector3D pinPosition = new Vector3D(0.0, 0.0, 1.0);
    private static final Vector3D zeroAngularVelocity = new Vector3D();
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final FloatingRootJointRobot sdfRobot;
    private final SensorReader sensorReader;
    private final OutputWriter outputWriter;
@@ -46,11 +46,11 @@ public class QuadrupedSimulationController implements RobotController
       this.gaitControlManager = gaitControlManager;
       this.stateEstimator = stateEstimator;
       this.robotVisualizer = robotVisualizer;
-      registry.addChild(gaitControlManager.getYoVariableRegistry());
+      registry.addChild(gaitControlManager.getYoRegistry());
 
       if (robotVisualizer != null)
       {
-         robotVisualizer.setMainRegistry(getYoVariableRegistry(), null, null);
+         robotVisualizer.setMainRegistry(getYoRegistry(), null, null);
       }
    }
 
@@ -61,7 +61,7 @@ public class QuadrupedSimulationController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

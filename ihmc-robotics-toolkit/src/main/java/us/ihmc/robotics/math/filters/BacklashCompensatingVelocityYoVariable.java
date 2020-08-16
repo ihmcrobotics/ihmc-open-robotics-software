@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -22,7 +22,7 @@ public class BacklashCompensatingVelocityYoVariable extends YoDouble implements 
    private final YoDouble timeInState;
 
    public BacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, YoDouble positionVariable, double dt,
-         YoDouble slopTime, YoVariableRegistry registry)
+         YoDouble slopTime, YoRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -44,7 +44,7 @@ public class BacklashCompensatingVelocityYoVariable extends YoDouble implements 
    }
 
    public BacklashCompensatingVelocityYoVariable(String name, String description, YoDouble alphaVariable, double dt, YoDouble slopTime,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);

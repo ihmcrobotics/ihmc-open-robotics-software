@@ -15,7 +15,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class QuadrupedRuntimeEnvironment
    private final double controlDT;
    private final YoDouble robotTimestamp;
    private final FullQuadrupedRobotModel fullRobotModel;
-   private final YoVariableRegistry parentRegistry;
+   private final YoRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
@@ -49,7 +49,7 @@ public class QuadrupedRuntimeEnvironment
 
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
-                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
+                                      YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
                                       QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches,
@@ -103,7 +103,7 @@ public class QuadrupedRuntimeEnvironment
       return jointDesiredOutputList;
    }
 
-   public YoVariableRegistry getParentRegistry()
+   public YoRegistry getParentRegistry()
    {
       return parentRegistry;
    }

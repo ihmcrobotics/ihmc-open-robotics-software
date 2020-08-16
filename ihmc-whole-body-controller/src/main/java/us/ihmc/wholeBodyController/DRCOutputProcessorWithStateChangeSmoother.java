@@ -11,12 +11,12 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProcessor
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble alphaForJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);
 
@@ -127,7 +127,7 @@ public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProce
    }
 
    @Override
-   public YoVariableRegistry getControllerYoVariableRegistry()
+   public YoRegistry getControllerYoVariableRegistry()
    {
       return registry;
    }

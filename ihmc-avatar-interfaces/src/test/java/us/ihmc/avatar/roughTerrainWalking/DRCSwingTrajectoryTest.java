@@ -47,7 +47,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -85,7 +85,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
    private class TestController implements RobotController
    {
-      YoVariableRegistry registry = new YoVariableRegistry("SwingHeightTestController");
+      YoRegistry registry = new YoRegistry("SwingHeightTestController");
       Random random = new Random();
       FullHumanoidRobotModel estimatorModel;
       YoDouble maxFootHeight = new YoDouble("maxFootHeight", registry);
@@ -124,7 +124,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoTimeInterval implements TimeIntervalBasics
@@ -9,7 +9,7 @@ public class YoTimeInterval implements TimeIntervalBasics
    private YoDouble startTime;
    private YoDouble endTime;
 
-   public YoTimeInterval(String prefix, YoVariableRegistry registry)
+   public YoTimeInterval(String prefix, YoRegistry registry)
    {
       this.startTime = new YoDouble(prefix + "StartTime", registry);
       this.endTime = new YoDouble(prefix + "EndTime", registry);

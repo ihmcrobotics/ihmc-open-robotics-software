@@ -1,14 +1,14 @@
 package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoAccelerationWeights
 {
    private final YoLinearAccelerationWeights yoLinearAccelerationWeights;
    private final YoAngularAccelerationWeights yoAngularAccelerationWeights;
 
-   public YoAccelerationWeights(String prefix, YoVariableRegistry registry)
+   public YoAccelerationWeights(String prefix, YoRegistry registry)
    {
       yoLinearAccelerationWeights = new YoLinearAccelerationWeights(prefix, registry);
       yoAngularAccelerationWeights = new YoAngularAccelerationWeights(prefix, registry);

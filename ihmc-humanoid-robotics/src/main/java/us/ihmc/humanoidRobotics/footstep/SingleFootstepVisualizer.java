@@ -21,10 +21,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SingleFootstepVisualizer
 {
@@ -39,7 +39,7 @@ public class SingleFootstepVisualizer
    private final YoGraphicPolygon footPolygonViz;
    private final RobotSide robotSide;
 
-   public SingleFootstepVisualizer(RobotSide robotSide, int maxContactPoints, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SingleFootstepVisualizer(RobotSide robotSide, int maxContactPoints, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       Integer index = indices.get(robotSide);
       String namePrefix = robotSide.getLowerCaseName() + "Foot" + index;
@@ -65,7 +65,7 @@ public class SingleFootstepVisualizer
       footPolygon.set(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(polyPoints)));
 
       soleFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "polygonPose", "", ReferenceFrame.getWorldFrame(), registry);
-      soleFramePose.setXYZ(0.0, 0.0, -1.0);
+      soleFramePose.setPosition(0.0, 0.0, -1.0);
 
       footPolygonViz = new YoGraphicPolygon(namePrefix + "graphicPolygon", footPolygon, soleFramePose, 1.0, footPolygonAppearances.get(robotSide));
 

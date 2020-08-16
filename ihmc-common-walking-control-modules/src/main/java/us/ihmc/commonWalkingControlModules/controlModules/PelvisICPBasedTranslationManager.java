@@ -10,12 +10,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -33,23 +28,23 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoi
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.listener.ParameterChangedListener;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class PelvisICPBasedTranslationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble supportPolygonSafeMargin = new YoDouble("supportPolygonSafeMargin", registry);
    private final DoubleProvider frozenOffsetDecayBreakFrequency = new DoubleParameter("frozenOffsetDecayBreakFrequency", registry, 0.0531);
@@ -115,7 +110,7 @@ public class PelvisICPBasedTranslationManager
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisXY");
 
    public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin,
-                                           BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
+                                           BipedSupportPolygons bipedSupportPolygons, YoRegistry parentRegistry)
    {
       dt = controllerToolbox.getControlDT();
 
@@ -138,10 +133,10 @@ public class PelvisICPBasedTranslationManager
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
 
-      manualMode.addParameterChangedListener(new ParameterChangedListener()
+      manualMode.addListener(new YoParameterChangedListener()
       {
          @Override
-         public void notifyOfParameterChange(YoParameter<?> v)
+         public void changed(YoParameter v)
          {
             initialize();
          }

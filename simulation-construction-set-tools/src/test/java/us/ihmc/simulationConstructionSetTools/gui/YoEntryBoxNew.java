@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayPanel;
 import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
@@ -30,7 +30,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 {
    public interface YoEntryContainer
    {
-      void bindToVariable(YoVariable<?> variable);
+      void bindToVariable(YoVariable variable);
 
       void focusGained(FocusEvent evt);
 
@@ -52,7 +52,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       private JTextField jTextField;
       private JLabel label;
       private NumberFormat numFormat;
-      private YoVariable<?> variableInThisBox;
+      private YoVariable variableInThisBox;
 
       public YoTextEntryBox(YoEntryBoxNew entryBox, String label)
       {
@@ -92,8 +92,8 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
                for (int i = 0; i < variableChangedListeners.size(); i++)
                {
-                  VariableChangedListener listener = variableChangedListeners.get(i);
-                  listener.notifyOfVariableChange(variableInThisBox);
+                  YoVariableChangedListener listener = variableChangedListeners.get(i);
+                  listener.changed(variableInThisBox);
                }
             }
 
@@ -111,7 +111,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       }
 
       @Override
-      public void bindToVariable(YoVariable<?> variable)
+      public void bindToVariable(YoVariable variable)
       {
          String textName = variable.getName();
 
@@ -226,14 +226,14 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
    private static final long serialVersionUID = -3598041913472018651L;
 
-   private static ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
+   private static ArrayList<YoVariableChangedListener> variableChangedListeners = new ArrayList<YoVariableChangedListener>();
 
-   public static void attachVariableChangedListener(VariableChangedListener listener)
+   public static void attachVariableChangedListener(YoVariableChangedListener listener)
    {
       variableChangedListeners.add(listener);
    }
 
-   public static void removeVariableChangedListener(VariableChangedListener listener)
+   public static void removeVariableChangedListener(YoVariableChangedListener listener)
    {
       variableChangedListeners.remove(listener);
    }
@@ -250,7 +250,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 // private JTextField jTextField;
    private SelectedVariableHolder selectedVariableHolder;
 
-   private YoVariable<?> variableInThisBox;
+   private YoVariable variableInThisBox;
 
    public YoEntryBoxNew(EntryBoxArrayPanel entryBoxArrayPanel, SelectedVariableHolder holder)
    {
@@ -310,7 +310,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
    }
 
-   public void addVariable(YoVariable<?> variable)
+   public void addVariable(YoVariable variable)
    {
       if ((entryBoxArrayPanel != null) && entryBoxArrayPanel.isHoldingVariable(variable))
          return;
@@ -321,7 +321,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 //    label.setText(textName);
       String toolTip = variableInThisBox.getDescription();
       if ((toolTip == null) || toolTip.equals(""))
-         toolTip = variableInThisBox.getFullNameWithNameSpace();
+         toolTip = variableInThisBox.getFullNameString();
       this.setToolTipText(toolTip);
 
 //    setTextField();
@@ -369,12 +369,12 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       return selectedVariableHolder;
    }
 
-   public YoVariable<?> getVariableInThisBox()
+   public YoVariable getVariableInThisBox()
    {
       return variableInThisBox;
    }
 
-   public boolean isHoldingVariable(YoVariable<?> v)
+   public boolean isHoldingVariable(YoVariable v)
    {
       return (this.variableInThisBox == v);
    }
@@ -417,7 +417,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
          {
             // YoVariable v = VarPanel.selectedVariable;
 
-            YoVariable<?> v = selectedVariableHolder.getSelectedVariable();
+            YoVariable v = selectedVariableHolder.getSelectedVariable();
             if (v != null)
                this.addVariable(v);
          }
@@ -484,7 +484,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
    }
 
 
-   public void removeVariable(YoVariable<?> variable)
+   public void removeVariable(YoVariable variable)
    {
       if (variableInThisBox == variable)
       {
@@ -507,7 +507,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
    }
 
 
-   public void setVariableInThisBox(YoVariable<?> variableInThisBox)
+   public void setVariableInThisBox(YoVariable variableInThisBox)
    {
       activeEntryContainer.bindToVariable(variableInThisBox);
 
@@ -515,7 +515,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
       String toolTip = variableInThisBox.getDescription();
       if ((toolTip == null) || toolTip.equals(""))
-         toolTip = variableInThisBox.getFullNameWithNameSpace();
+         toolTip = variableInThisBox.getFullNameString();
       this.setToolTipText(toolTip);
    }
 

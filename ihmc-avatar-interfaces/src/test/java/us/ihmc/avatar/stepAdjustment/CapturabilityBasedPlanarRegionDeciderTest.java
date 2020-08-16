@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
                                                                                                              9.81,
-                                                                                                             new YoVariableRegistry(""),
+                                                                                                             new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 
@@ -118,7 +118,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
                                                                                                              9.81,
-                                                                                                             new YoVariableRegistry(""),
+                                                                                                             new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 

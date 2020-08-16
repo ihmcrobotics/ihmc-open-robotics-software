@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface DRCOutputProcessor
 {
@@ -15,5 +15,5 @@ public interface DRCOutputProcessor
 
    public abstract void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController);
      
-   public abstract YoVariableRegistry getControllerYoVariableRegistry();
+   public abstract YoRegistry getControllerYoVariableRegistry();
 }

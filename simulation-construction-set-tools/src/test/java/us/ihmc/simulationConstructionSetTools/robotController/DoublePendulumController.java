@@ -2,13 +2,13 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DoublePendulumController");
+   private final YoRegistry registry = new YoRegistry("DoublePendulumController");
    private final YoDouble q_j1 = new YoDouble("q_j1", registry);
    private final YoDouble qd_j1 = new YoDouble("qd_j1", registry);
    private final YoDouble q_j2 = new YoDouble("q_j2", registry);
@@ -76,7 +76,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

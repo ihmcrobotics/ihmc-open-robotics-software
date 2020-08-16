@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule.RotationCalculatorType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -72,9 +72,9 @@ public class ExplorationParameters
    private static final double defaultCopCommandWeight = 0.001;
    private static final double defaultTimeBeforeExploring = 1.5;
 
-   public ExplorationParameters(YoVariableRegistry parentRegistry)
+   public ExplorationParameters(YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(this.getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(this.getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       String namePrefix = "ExplorationGeometric_";

@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -33,7 +33,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
    private final YoDouble lastPosition;
    private final YoBoolean hasBeenCalled;
 
-   public FilteredVelocityYoVariable(String name, String description, double alpha, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, double alpha, double dt, YoRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -49,7 +49,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, double alpha, YoDouble positionVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, double alpha, YoDouble positionVariable, double dt, YoRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -66,7 +66,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, YoDouble positionVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, YoDouble positionVariable, double dt, YoRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -82,7 +82,7 @@ public class FilteredVelocityYoVariable extends YoDouble implements ProcessingYo
       reset();
    }
 
-   public FilteredVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, double dt, YoVariableRegistry registry)
+   public FilteredVelocityYoVariable(String name, String description, DoubleProvider alphaVariable, double dt, YoRegistry registry)
    {
       super(name, description, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);

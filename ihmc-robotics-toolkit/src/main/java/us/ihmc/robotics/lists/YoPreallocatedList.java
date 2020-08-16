@@ -1,6 +1,6 @@
 package us.ihmc.robotics.lists;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.lang.reflect.Array;
@@ -19,12 +19,12 @@ public class YoPreallocatedList<T> implements List<T>
    private final T[] values;
    private final YoInteger position;
 
-   public YoPreallocatedList(Class<T> clazz, String prefix, int capacity, YoVariableRegistry registry)
+   public YoPreallocatedList(Class<T> clazz, String prefix, int capacity, YoRegistry registry)
    {
       this(clazz, new DefaultYoVariableAllocator<>(clazz, prefix, registry), prefix, registry, capacity);
    }
 
-   public YoPreallocatedList(Class<T> clazz, Supplier<T> allocator, String prefix, YoVariableRegistry registry, int capacity)
+   public YoPreallocatedList(Class<T> clazz, Supplier<T> allocator, String prefix, YoRegistry registry, int capacity)
    {
       this.clazz = clazz;
       this.position = new YoInteger(prefix + "Index", registry);
@@ -381,10 +381,10 @@ public class YoPreallocatedList<T> implements List<T>
    {
       private final Constructor<S> constructor;
       private final String prefix;
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
       private int index = 0;
 
-      public DefaultYoVariableAllocator(Class<S> clazz, String prefix, YoVariableRegistry registry)
+      public DefaultYoVariableAllocator(Class<S> clazz, String prefix, YoRegistry registry)
       {
          this.prefix = prefix;
          this.registry = registry;
@@ -395,7 +395,7 @@ public class YoPreallocatedList<T> implements List<T>
          }
          catch(NoSuchMethodException e)
          {
-            throw new RuntimeException("Could not find (String, YoVariableRegistry) constructor for class " + clazz.getSimpleName());
+            throw new RuntimeException("Could not find (String, YoRegistry) constructor for class " + clazz.getSimpleName());
          }
       }
 

@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.externalcontroller;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -18,7 +18,7 @@ public class ExternalControlAdapter implements RobotController
    ExternalControllerTCPConnection tcpConnection;
    private Robot terminator;
    public PinJointRobotSensor sensors;
-   YoVariableRegistry registry = new YoVariableRegistry("ExternalControl");
+   YoRegistry registry = new YoRegistry("ExternalControl");
 
    ArrayList<SensorInterface> sensorData = new ArrayList<SensorInterface>();
 
@@ -136,7 +136,7 @@ public class ExternalControlAdapter implements RobotController
 
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

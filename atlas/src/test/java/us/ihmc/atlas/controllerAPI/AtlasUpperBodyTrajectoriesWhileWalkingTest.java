@@ -47,7 +47,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 @Tag("controller-api-2")
 public class AtlasUpperBodyTrajectoriesWhileWalkingTest
@@ -78,7 +78,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
+      YoRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
       sendArmTrajectoryMessageWithRandomPoints(random, robotModel, fullRobotModel);
 
@@ -101,7 +101,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
+      YoRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
 
 
@@ -198,7 +198,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    }
 
    private double sendWalkingPacket(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       double swingTime = walkingControllerParameters.getDefaultSwingTime();

@@ -6,7 +6,7 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.VisibilityGraphPawPathPlanner;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedVisGraphWithTurnWalkTurnPlanner extends QuadrupedPathWithTurnWalkTurnPlanner
@@ -16,7 +16,7 @@ public class QuadrupedVisGraphWithTurnWalkTurnPlanner extends QuadrupedPathWithT
    public QuadrupedVisGraphWithTurnWalkTurnPlanner(QuadrupedXGaitSettingsBasics xGaitSettings, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                                    YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                    QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
-                                                   YoVariableRegistry parentRegistry)
+                                                   YoRegistry parentRegistry)
    {
       super(new VisibilityGraphPawPathPlanner(prefix, visibilityGraphsParameters, parentRegistry), xGaitSettings, timestamp, pointFootSnapperParameters,
             referenceFrames, graphicsListRegistry, parentRegistry);

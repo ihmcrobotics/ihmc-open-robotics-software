@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.flyballGovernor;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -19,13 +19,13 @@ public class FlyballGovernorSimulation
 
       flyballGovernor1.setController(new FlyballGovernorSimpleClosedLoopConstraintController(flyballGovernor1));
 
-      YoVariableRegistry robotsRegistry = flyballGovernor2.getRobotsYoVariableRegistry();
+      YoRegistry robotsRegistry = flyballGovernor2.getRobotsYoRegistry();
       new FlyballGovernorClosedLoopConstraintToIntegrate("Constraint1", flyballGovernor2.getConstraint1A(), flyballGovernor2.getConstraint1B(), flyballGovernor2, robotsRegistry);
       new FlyballGovernorClosedLoopConstraintToIntegrate("Constraint2", flyballGovernor2.getConstraint2A(), flyballGovernor2.getConstraint2B(), flyballGovernor2, robotsRegistry);
       
       sim = new SimulationConstructionSet(new Robot[]{flyballGovernor1, flyballGovernor2});
 
-      sim.addYoVariableRegistry(controllerParameters.getYoVariableRegistry());
+      sim.addYoRegistry(controllerParameters.getYoVariableRegistry());
 
       sim.setCameraPosition(0.25, 1.5, 0.2);
       sim.setCameraFix(0.25, 0.0, 0.15);

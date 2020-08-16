@@ -1,19 +1,20 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simpleWholeBodyWalking.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
+import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
+import us.ihmc.simpleWholeBodyWalking.SimpleFeetManager;
+import us.ihmc.simpleWholeBodyWalking.SimplePelvisOrientationManager;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class SimpleTransferState extends SimpleWalkingState
 {
@@ -39,7 +40,7 @@ public abstract class SimpleTransferState extends SimpleWalkingState
                               HighLevelHumanoidControllerToolbox controllerToolbox,
                               SimpleControlManagerFactory managerFactory,
                               WalkingFailureDetectionControlModule failureDetectionControlModule,
-                              YoVariableRegistry parentRegistry)
+                              YoRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferStateEnum.getTransferToSide();

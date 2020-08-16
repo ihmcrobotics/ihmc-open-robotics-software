@@ -52,10 +52,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 /**
  * The goal here is to validate control approach used in the {@code KinematicsToolboxModule} when
@@ -72,7 +72,7 @@ public class RelativeEndEffectorControlTest
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
-   private YoVariableRegistry mainRegistry;
+   private YoRegistry mainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private Robot robot;
@@ -84,7 +84,7 @@ public class RelativeEndEffectorControlTest
    public void setup(RobotDescription robotDescription)
    {
       if (mainRegistry == null)
-         mainRegistry = new YoVariableRegistry("main");
+         mainRegistry = new YoRegistry("main");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       if (desiredFullRobotModel == null)
@@ -95,7 +95,7 @@ public class RelativeEndEffectorControlTest
       robot = new RobotFromDescription(robotDescription);
       robot.setDynamic(false);
       robot.setGravity(0);
-      robot.addYoVariableRegistry(mainRegistry);
+      robot.addYoRegistry(mainRegistry);
 
       if (visualize)
       {
@@ -150,7 +150,7 @@ public class RelativeEndEffectorControlTest
 
       if (mainRegistry != null)
       {
-         mainRegistry.closeAndDispose();
+         mainRegistry.clear();
          mainRegistry = null;
       }
 
@@ -172,7 +172,7 @@ public class RelativeEndEffectorControlTest
    @Test
    public void testControlEndEffectorRelativeToOtherEndEffector()
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
       desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());
@@ -293,7 +293,7 @@ public class RelativeEndEffectorControlTest
    @Test
    public void testInequalityEndEffector()
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       UpperBodyWithTwoManipulators robotDescription = new UpperBodyWithTwoManipulators();
       desiredFullRobotModel = KinematicsToolboxControllerTestRobots.createInverseDynamicsRobot(robotDescription);
       rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getRight()[0].getPredecessor());

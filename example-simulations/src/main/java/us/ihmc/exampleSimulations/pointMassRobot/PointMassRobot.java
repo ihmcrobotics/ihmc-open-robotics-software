@@ -58,7 +58,7 @@ public class PointMassRobot extends Robot
       zLink.setLinkGraphics(zLinkLinkGraphics);
       zJoint.setLink(zLink);
 
-      externalForcePoint = new ExternalForcePoint("ef_" + name, new Vector3D(), this.getRobotsYoVariableRegistry());
+      externalForcePoint = new ExternalForcePoint("ef_" + name, new Vector3D(), this.getRobotsYoRegistry());
       zJoint.addExternalForcePoint(externalForcePoint);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

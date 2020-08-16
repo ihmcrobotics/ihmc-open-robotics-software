@@ -29,7 +29,7 @@ import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -74,7 +74,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
                                                    StatusMessageOutputManager statusOutputManager,
                                                    YoGraphicsListRegistry graphicsListRegistry,
                                                    int updateRateMillis,
-                                                   YoVariableRegistry parentRegistry)
+                                                   YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 

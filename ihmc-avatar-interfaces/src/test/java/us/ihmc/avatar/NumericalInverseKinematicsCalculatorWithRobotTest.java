@@ -25,28 +25,23 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
-import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
-import us.ihmc.robotics.kinematics.InverseKinematicsStepListener;
-import us.ihmc.robotics.kinematics.KinematicSolver;
-import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.robotics.kinematics.RandomRestartInverseKinematicsCalculator;
+import us.ihmc.robotics.kinematics.*;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
    private boolean PRINT_OUT_TROUBLESOME = false;
    private boolean VISUALIZE = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
@@ -103,7 +98,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       if (VISUALIZE)
       {
          scs = new SimulationConstructionSet(sdfRobot);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
 
          YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 

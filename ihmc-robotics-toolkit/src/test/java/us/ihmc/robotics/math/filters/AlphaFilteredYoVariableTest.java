@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredYoVariableTest
@@ -21,7 +21,7 @@ public class AlphaFilteredYoVariableTest
       // Use a reasonably large alpha for a reasonably large amount of noise
       double alpha = 0.8;
 
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble positionVariable = new YoDouble("positionVariable", registry);
       AlphaFilteredYoVariable alphaFilteredYoVariable = new AlphaFilteredYoVariable("alphaFilteredYoVariable", registry, alpha, positionVariable);
 

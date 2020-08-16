@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class AlphaFilteredYoMutableFrameVector3D extends YoMutableFrameVector3D implements ProcessingYoVariable
 {
@@ -16,31 +16,31 @@ public class AlphaFilteredYoMutableFrameVector3D extends YoMutableFrameVector3D 
    private final FrameTuple3DReadOnly position;
    private final YoBoolean hasBeenCalled;
 
-   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, ReferenceFrame referenceFrame)
+   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, double alpha, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry), referenceFrame);
    }
 
-   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha,
                                               ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, alpha, referenceFrame, null);
    }
 
-   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, double alpha,
                                               FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry),
            unfilteredFrameTuple3D.getReferenceFrame(), unfilteredFrameTuple3D);
    }
 
-   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+   public AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha,
                                               FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       this(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D.getReferenceFrame(), unfilteredFrameTuple3D);
    }
 
-   private AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+   private AlphaFilteredYoMutableFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha,
                                                ReferenceFrame referenceFrame, FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       super(namePrefix, nameSuffix, registry, referenceFrame);

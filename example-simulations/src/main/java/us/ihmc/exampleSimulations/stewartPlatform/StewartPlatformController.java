@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.stewartPlatform;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StewartPlatformController implements RobotController
@@ -29,7 +29,7 @@ public class StewartPlatformController implements RobotController
 
    private YoDouble ef_platform_x, ef_platform_y, ef_platform_z;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("StewartPlatformController");
+   private final YoRegistry registry = new YoRegistry("StewartPlatformController");
 
    private YoDouble x_offset = new YoDouble("x_offset", registry), y_offset = new YoDouble("y_offset", registry),
                       z_offset = new YoDouble("z_offset", registry);
@@ -80,59 +80,59 @@ public class StewartPlatformController implements RobotController
       this.name = name;
       this.rob = rob;
 
-      t = (YoDouble)rob.getVariable("t");
-      q_platform_x = (YoDouble)rob.getVariable("q_platform_x");
-      q_platform_y = (YoDouble)rob.getVariable("q_platform_y");
-      q_platform_z = (YoDouble)rob.getVariable("q_platform_z");
-      qd_platform_x = (YoDouble)rob.getVariable("qd_platform_x");
-      qd_platform_y = (YoDouble)rob.getVariable("qd_platform_y");
-      qd_platform_z = (YoDouble)rob.getVariable("qd_platform_z");
+      t = (YoDouble)rob.findVariable("t");
+      q_platform_x = (YoDouble)rob.findVariable("q_platform_x");
+      q_platform_y = (YoDouble)rob.findVariable("q_platform_y");
+      q_platform_z = (YoDouble)rob.findVariable("q_platform_z");
+      qd_platform_x = (YoDouble)rob.findVariable("qd_platform_x");
+      qd_platform_y = (YoDouble)rob.findVariable("qd_platform_y");
+      qd_platform_z = (YoDouble)rob.findVariable("qd_platform_z");
 
-      qd_platform_wx = (YoDouble)rob.getVariable("qd_platform_wx");
-      qd_platform_wy = (YoDouble)rob.getVariable("qd_platform_wy");
-      qd_platform_wz = (YoDouble)rob.getVariable("qd_platform_wz");
+      qd_platform_wx = (YoDouble)rob.findVariable("qd_platform_wx");
+      qd_platform_wy = (YoDouble)rob.findVariable("qd_platform_wy");
+      qd_platform_wz = (YoDouble)rob.findVariable("qd_platform_wz");
 
-      q_act0 = (YoDouble)rob.getVariable("q_act0");
-      q_act1 = (YoDouble)rob.getVariable("q_act1");
-      q_act2 = (YoDouble)rob.getVariable("q_act2");
-      q_act3 = (YoDouble)rob.getVariable("q_act3");
-      q_act4 = (YoDouble)rob.getVariable("q_act4");
-      q_act5 = (YoDouble)rob.getVariable("q_act5");
+      q_act0 = (YoDouble)rob.findVariable("q_act0");
+      q_act1 = (YoDouble)rob.findVariable("q_act1");
+      q_act2 = (YoDouble)rob.findVariable("q_act2");
+      q_act3 = (YoDouble)rob.findVariable("q_act3");
+      q_act4 = (YoDouble)rob.findVariable("q_act4");
+      q_act5 = (YoDouble)rob.findVariable("q_act5");
 
-      tau_act0 = (YoDouble)rob.getVariable("tau_act0");
-      tau_act1 = (YoDouble)rob.getVariable("tau_act1");
-      tau_act2 = (YoDouble)rob.getVariable("tau_act2");
-      tau_act3 = (YoDouble)rob.getVariable("tau_act3");
-      tau_act4 = (YoDouble)rob.getVariable("tau_act4");
-      tau_act5 = (YoDouble)rob.getVariable("tau_act5");
+      tau_act0 = (YoDouble)rob.findVariable("tau_act0");
+      tau_act1 = (YoDouble)rob.findVariable("tau_act1");
+      tau_act2 = (YoDouble)rob.findVariable("tau_act2");
+      tau_act3 = (YoDouble)rob.findVariable("tau_act3");
+      tau_act4 = (YoDouble)rob.findVariable("tau_act4");
+      tau_act5 = (YoDouble)rob.findVariable("tau_act5");
 
       for (int i = 0; i < 6; i++)
       {
-         ef_p_x[i] = (YoDouble)rob.getVariable("ef_p" + i + "_x");
-         ef_p_y[i] = (YoDouble)rob.getVariable("ef_p" + i + "_y");
-         ef_p_z[i] = (YoDouble)rob.getVariable("ef_p" + i + "_z");
-         ef_p_dx[i] = (YoDouble)rob.getVariable("ef_p" + i + "_dx");
-         ef_p_dy[i] = (YoDouble)rob.getVariable("ef_p" + i + "_dy");
-         ef_p_dz[i] = (YoDouble)rob.getVariable("ef_p" + i + "_dz");
-         ef_p_fx[i] = (YoDouble)rob.getVariable("ef_p" + i + "_fx");
-         ef_p_fy[i] = (YoDouble)rob.getVariable("ef_p" + i + "_fy");
-         ef_p_fz[i] = (YoDouble)rob.getVariable("ef_p" + i + "_fz");
+         ef_p_x[i] = (YoDouble)rob.findVariable("ef_p" + i + "_x");
+         ef_p_y[i] = (YoDouble)rob.findVariable("ef_p" + i + "_y");
+         ef_p_z[i] = (YoDouble)rob.findVariable("ef_p" + i + "_z");
+         ef_p_dx[i] = (YoDouble)rob.findVariable("ef_p" + i + "_dx");
+         ef_p_dy[i] = (YoDouble)rob.findVariable("ef_p" + i + "_dy");
+         ef_p_dz[i] = (YoDouble)rob.findVariable("ef_p" + i + "_dz");
+         ef_p_fx[i] = (YoDouble)rob.findVariable("ef_p" + i + "_fx");
+         ef_p_fy[i] = (YoDouble)rob.findVariable("ef_p" + i + "_fy");
+         ef_p_fz[i] = (YoDouble)rob.findVariable("ef_p" + i + "_fz");
 
-         ef_a_x[i] = (YoDouble)rob.getVariable("ef_a" + i + "_x");
-         ef_a_y[i] = (YoDouble)rob.getVariable("ef_a" + i + "_y");
-         ef_a_z[i] = (YoDouble)rob.getVariable("ef_a" + i + "_z");
-         ef_a_dx[i] = (YoDouble)rob.getVariable("ef_a" + i + "_dx");
-         ef_a_dy[i] = (YoDouble)rob.getVariable("ef_a" + i + "_dy");
-         ef_a_dz[i] = (YoDouble)rob.getVariable("ef_a" + i + "_dz");
-         ef_a_fx[i] = (YoDouble)rob.getVariable("ef_a" + i + "_fx");
-         ef_a_fy[i] = (YoDouble)rob.getVariable("ef_a" + i + "_fy");
-         ef_a_fz[i] = (YoDouble)rob.getVariable("ef_a" + i + "_fz");
+         ef_a_x[i] = (YoDouble)rob.findVariable("ef_a" + i + "_x");
+         ef_a_y[i] = (YoDouble)rob.findVariable("ef_a" + i + "_y");
+         ef_a_z[i] = (YoDouble)rob.findVariable("ef_a" + i + "_z");
+         ef_a_dx[i] = (YoDouble)rob.findVariable("ef_a" + i + "_dx");
+         ef_a_dy[i] = (YoDouble)rob.findVariable("ef_a" + i + "_dy");
+         ef_a_dz[i] = (YoDouble)rob.findVariable("ef_a" + i + "_dz");
+         ef_a_fx[i] = (YoDouble)rob.findVariable("ef_a" + i + "_fx");
+         ef_a_fy[i] = (YoDouble)rob.findVariable("ef_a" + i + "_fy");
+         ef_a_fz[i] = (YoDouble)rob.findVariable("ef_a" + i + "_fz");
 
       }
 
-      ef_platform_x = (YoDouble)rob.getVariable("ef_platform_x");
-      ef_platform_y = (YoDouble)rob.getVariable("ef_platform_y");
-      ef_platform_z = (YoDouble)rob.getVariable("ef_platform_z");
+      ef_platform_x = (YoDouble)rob.findVariable("ef_platform_x");
+      ef_platform_y = (YoDouble)rob.findVariable("ef_platform_y");
+      ef_platform_z = (YoDouble)rob.findVariable("ef_platform_z");
       initControl();
    }
 
@@ -299,7 +299,7 @@ public class StewartPlatformController implements RobotController
 
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

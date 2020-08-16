@@ -3,7 +3,7 @@ package us.ihmc.avatar.drcRobot;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvider implements RobotController
 {
@@ -19,9 +19,9 @@ public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvid
       set(0);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
-      return new YoVariableRegistry(getName());
+      return new YoRegistry(getName());
    }
 
    public String getName()

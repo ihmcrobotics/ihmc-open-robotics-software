@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.functionGenerator;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoFunctionGeneratorVisualizer implements RobotController
 {
-   private YoVariableRegistry registry = new YoVariableRegistry("YoFunGenViz");
+   private YoRegistry registry = new YoRegistry("YoFunGenViz");
    
    private YoDouble valueCheck;
    
@@ -28,7 +28,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
    {
       this.yoFunctionGenerator = yoFunctionGenerator;
       
-      mode = YoEnum.create("Mode", YoFunctionGeneratorMode.class, registry);
+      mode = new YoEnum<>("Mode", registry, YoFunctionGeneratorMode.class);
       
       resetTime = new YoDouble("resetTime", registry);
       
@@ -53,7 +53,7 @@ public class YoFunctionGeneratorVisualizer implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -8,14 +8,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
@@ -30,14 +30,14 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
-   public SimpleOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public SimpleOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry);
    }
 
-   public SimpleOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public SimpleOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentTime = new YoDouble(namePrefix + "Time", registry);
       parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);

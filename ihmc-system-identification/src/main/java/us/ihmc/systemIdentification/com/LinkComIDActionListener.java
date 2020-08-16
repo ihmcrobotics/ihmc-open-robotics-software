@@ -6,18 +6,18 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.buffer.YoBuffer;
 
 public class LinkComIDActionListener implements ActionListener
 {
 
    private String[] linkNames;
-   private DataBuffer dataBuffer;
+   private YoBuffer dataBuffer;
    private final Robot robot;
 
-   public LinkComIDActionListener(DataBuffer dataBuffer, Robot robot)
+   public LinkComIDActionListener(YoBuffer dataBuffer, Robot robot)
    {
       this.dataBuffer = dataBuffer;
       this.robot = robot;
@@ -56,14 +56,14 @@ public class LinkComIDActionListener implements ActionListener
                return;
             }
 
-            if (dataBuffer.getVariable("sensedCoPX") == null)
+            if (dataBuffer.findVariable("sensedCoPX") == null)
             {
                System.err.println("data must contain sensedCoPX,Y,Z for calibration");
                return;
             }
             System.out.println("IN/out" + dataBuffer.getInPoint() + " out " + dataBuffer.getOutPoint() + " " + dataBuffer.getBufferInOutLength());
 
-            ComCopResidual residual = new ComCopResidual(localRobot, targetLink, dataBuffer, dataBuffer.getKeyPoints().size() > 0 ? -1 : 1000);
+            ComCopResidual residual = new ComCopResidual(localRobot, targetLink, dataBuffer, dataBuffer.getKeyPointsHandler().getKeyPoints().size() > 0 ? -1 : 1000);
             LinkComID optimizer = new LinkComID(residual);
             residual.showSample(20, "PreOpt CoM: " + residual.getCurrentLinkCom());
 

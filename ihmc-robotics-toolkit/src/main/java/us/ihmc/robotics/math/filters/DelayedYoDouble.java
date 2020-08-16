@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DelayedYoDouble extends YoDouble
@@ -9,7 +9,7 @@ public class DelayedYoDouble extends YoDouble
 
    private final YoDouble[] previousYoVariables;
 
-   public DelayedYoDouble(String name, String description, YoDouble variableToDelay, int ticksToDelay, YoVariableRegistry registry)
+   public DelayedYoDouble(String name, String description, YoDouble variableToDelay, int ticksToDelay, YoRegistry registry)
    {
       super(name, description, registry);
 

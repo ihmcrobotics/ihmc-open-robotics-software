@@ -13,7 +13,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface DRCRobotJointMap extends HumanoidJointNameMap
 {
@@ -35,7 +35,7 @@ public interface DRCRobotJointMap extends HumanoidJointNameMap
 
    public abstract String[] getPositionControlledJointsForSimulation();
 
-   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
+   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry);
 
    public abstract String getHandName(RobotSide robotSide);
 

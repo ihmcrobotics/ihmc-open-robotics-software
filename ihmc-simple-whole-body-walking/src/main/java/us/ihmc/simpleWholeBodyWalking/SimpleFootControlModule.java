@@ -1,8 +1,10 @@
 package us.ihmc.simpleWholeBodyWalking;
 
+import java.util.Arrays;
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -22,16 +24,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-
 public class SimpleFootControlModule
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ContactableFoot contactableFoot;
 
    public enum ConstraintType
@@ -71,7 +70,7 @@ public class SimpleFootControlModule
                                   PIDSE3GainsReadOnly swingFootControlGains,
                                   PIDSE3GainsReadOnly holdPositionFootControlGains,
                                   HighLevelHumanoidControllerToolbox controllerToolbox,
-                                  YoVariableRegistry parentRegistry)
+                                  YoRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
@@ -79,13 +78,13 @@ public class SimpleFootControlModule
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Foot";
-      registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
 
-      requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedState", "", registry, ConstraintType.class, true);
       requestedState.set(null);
 
       setupContactStatesMap();

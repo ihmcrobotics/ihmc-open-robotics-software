@@ -1,14 +1,14 @@
 package us.ihmc.exampleSimulations.agileRobotArm;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AgileRobotArmController implements RobotController
 {
    private static final long serialVersionUID = 362874479072760137L;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("AgileRobotArmController");
+   private final YoRegistry registry = new YoRegistry("AgileRobotArmController");
 
 
    protected AgileRobotArmRobot rob;
@@ -88,25 +88,25 @@ public class AgileRobotArmController implements RobotController
    {
       this.rob = rob;
 
-      t = (YoDouble) rob.getVariable("t");
-      q_shoulder_yaw = (YoDouble) rob.getVariable("q_shoulder_yaw");
-      qd_shoulder_yaw = (YoDouble) rob.getVariable("qd_shoulder_yaw");
-      tau_shoulder_yaw = (YoDouble) rob.getVariable("tau_shoulder_yaw");
-      q_shoulder_pitch = (YoDouble) rob.getVariable("q_shoulder_pitch");
-      qd_shoulder_pitch = (YoDouble) rob.getVariable("qd_shoulder_pitch");
-      tau_shoulder_pitch = (YoDouble) rob.getVariable("tau_shoulder_pitch");
-      q_elbow_pitch = (YoDouble) rob.getVariable("q_elbow_pitch");
-      qd_elbow_pitch = (YoDouble) rob.getVariable("qd_elbow_pitch");
-      tau_elbow_pitch = (YoDouble) rob.getVariable("tau_elbow_pitch");
-      q_wrist_pitch = (YoDouble) rob.getVariable("q_wrist_pitch");
-      qd_wrist_pitch = (YoDouble) rob.getVariable("qd_wrist_pitch");
-      tau_wrist_pitch = (YoDouble) rob.getVariable("tau_wrist_pitch");
-      q_wrist_yaw = (YoDouble) rob.getVariable("q_wrist_yaw");
-      qd_wrist_yaw = (YoDouble) rob.getVariable("qd_wrist_yaw");
-      tau_wrist_yaw = (YoDouble) rob.getVariable("tau_wrist_yaw");
-      q_wrist_roll = (YoDouble) rob.getVariable("q_wrist_roll");
-      qd_wrist_roll = (YoDouble) rob.getVariable("qd_wrist_roll");
-      tau_wrist_roll = (YoDouble) rob.getVariable("tau_wrist_roll");
+      t = (YoDouble) rob.findVariable("t");
+      q_shoulder_yaw = (YoDouble) rob.findVariable("q_shoulder_yaw");
+      qd_shoulder_yaw = (YoDouble) rob.findVariable("qd_shoulder_yaw");
+      tau_shoulder_yaw = (YoDouble) rob.findVariable("tau_shoulder_yaw");
+      q_shoulder_pitch = (YoDouble) rob.findVariable("q_shoulder_pitch");
+      qd_shoulder_pitch = (YoDouble) rob.findVariable("qd_shoulder_pitch");
+      tau_shoulder_pitch = (YoDouble) rob.findVariable("tau_shoulder_pitch");
+      q_elbow_pitch = (YoDouble) rob.findVariable("q_elbow_pitch");
+      qd_elbow_pitch = (YoDouble) rob.findVariable("qd_elbow_pitch");
+      tau_elbow_pitch = (YoDouble) rob.findVariable("tau_elbow_pitch");
+      q_wrist_pitch = (YoDouble) rob.findVariable("q_wrist_pitch");
+      qd_wrist_pitch = (YoDouble) rob.findVariable("qd_wrist_pitch");
+      tau_wrist_pitch = (YoDouble) rob.findVariable("tau_wrist_pitch");
+      q_wrist_yaw = (YoDouble) rob.findVariable("q_wrist_yaw");
+      qd_wrist_yaw = (YoDouble) rob.findVariable("qd_wrist_yaw");
+      tau_wrist_yaw = (YoDouble) rob.findVariable("tau_wrist_yaw");
+      q_wrist_roll = (YoDouble) rob.findVariable("q_wrist_roll");
+      qd_wrist_roll = (YoDouble) rob.findVariable("qd_wrist_roll");
+      tau_wrist_roll = (YoDouble) rob.findVariable("tau_wrist_roll");
 
 
       initControl();
@@ -394,7 +394,7 @@ public class AgileRobotArmController implements RobotController
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

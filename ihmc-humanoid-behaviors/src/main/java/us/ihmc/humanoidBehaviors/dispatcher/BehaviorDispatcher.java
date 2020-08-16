@@ -31,7 +31,7 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -49,7 +49,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final String name = getClass().getSimpleName();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final YoDouble yoTime;
    private final YoVariableServer yoVariableServer;
@@ -79,7 +79,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    public BehaviorDispatcher(String robotName, YoDouble yoTime, RobotDataReceiver robotDataReceiver,
                              BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
-                             Ros2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry,
+                             Ros2Node ros2Node, YoVariableServer yoVariableServer, Class<E> behaviourEnum, E stopBehavior, YoRegistry parentRegistry,
                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
@@ -143,7 +143,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       try
       {
-         this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
+         this.registry.addChild(behaviorToAdd.getYoRegistry());
       }
       catch (Exception e)
       {
@@ -289,7 +289,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

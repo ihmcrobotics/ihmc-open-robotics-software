@@ -10,7 +10,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -27,7 +27,7 @@ public class PeterPlanarWalkerController implements RobotController
    private double deltaT;
 
    private PeterPlanarWalkerRobot robot;
-   private YoVariableRegistry registry = new YoVariableRegistry("Controller");
+   private YoRegistry registry = new YoRegistry("Controller");
    private SideDependentList<PIDController> kneeControllers = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> hipControllers = new SideDependentList<PIDController>();
 
@@ -290,7 +290,7 @@ public class PeterPlanarWalkerController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -8,14 +8,14 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SpinningCoinRobot
 {
@@ -26,7 +26,7 @@ public class SpinningCoinRobot
 
    private final ArrayList<Robot> robots = new ArrayList<>();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D linearMomentum = new YoFrameVector3D("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D angularMomentum = new YoFrameVector3D("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble translationalKineticEnergy = new YoDouble("translationalKineticEnergy", registry);
@@ -98,7 +98,7 @@ public class SpinningCoinRobot
          }
       });
 
-      coinRobot.addYoVariableRegistry(registry);
+      coinRobot.addYoRegistry(registry);
    }
 
    private Link createCylinderCoin(Robot robot)

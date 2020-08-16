@@ -21,7 +21,7 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.File;
@@ -53,7 +53,7 @@ public class IntraprocessYoVariableLogger
    private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
-   private List<YoVariable<?>> variables;
+   private List<YoVariable> variables;
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
@@ -66,7 +66,7 @@ public class IntraprocessYoVariableLogger
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
-                                       YoVariableRegistry registry,
+                                       YoRegistry registry,
                                        RigidBodyBasics rootBody,
                                        YoGraphicsListRegistry yoGraphicsListRegistry,
                                        int maxTicksToRecord,
@@ -161,13 +161,13 @@ public class IntraprocessYoVariableLogger
       int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
       LogTools.info("Buffer size: {}", bufferSize);
-      LogTools.info("Number of YoVariables: {}", registry.getNumberOfYoVariables());
+      LogTools.info("Number of YoVariables: {}", registry.getNumberOfVariables());
       LogTools.info("Number of joint states: {}", numberOfJointStates);
 
       compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
-      variables = registry.getAllVariables();
+      variables = registry.collectSubtreeVariables();
       jointHolders = handshakeBuilder.getJointHolders();
 
       try

@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -77,7 +77,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    private boolean visualize = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble jTopJoint5 = new YoDouble("jTopJoint5", registry);
    private final YoDouble jTopJoint6 = new YoDouble("jTopJoint6", registry);
@@ -89,7 +89,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    private final YoGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
    private final YoGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
 
-   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       switch (pushRodTransmissionJoint)
       {

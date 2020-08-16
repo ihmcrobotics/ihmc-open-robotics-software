@@ -21,10 +21,10 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PlanningTestTools
 {
@@ -52,17 +52,17 @@ public class PlanningTestTools
    }
 
    public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose3D goalPose, BodyPathPlanHolder bodyPath,
-                                        YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+                                        YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       visualizeAndSleep(planarRegionsList, footseps, goalPose, bodyPath, PlannerTools.createDefaultFootPolygon(), registry, graphicsListRegistry);
    }
 
    public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footsteps, FramePose3D goalPose, BodyPathPlanHolder bodyPath,
-                                        ConvexPolygon2D defaultFoothold, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+                                        ConvexPolygon2D defaultFoothold, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       if (registry != null)
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
       if (graphicsListRegistry != null)
          scs.addYoGraphicsListRegistry(graphicsListRegistry, true);
 
@@ -77,7 +77,7 @@ public class PlanningTestTools
       scs.setCameraPosition(-4.0, -4.0, 6.0);
       scs.setCameraFix(0.5, 0.0, 0.1);
 
-      YoVariableRegistry vizRegistry = new YoVariableRegistry("FootstepPlanningResult");
+      YoRegistry vizRegistry = new YoRegistry("FootstepPlanningResult");
       YoGraphicsListRegistry vizGraphicsListRegistry = new YoGraphicsListRegistry();
 
       if (goalPose != null)
@@ -138,7 +138,7 @@ public class PlanningTestTools
          }
       }
 
-      scs.addYoVariableRegistry(vizRegistry);
+      scs.addYoRegistry(vizRegistry);
       scs.addYoGraphicsListRegistry(vizGraphicsListRegistry, true);
       scs.startOnAThread();
       ThreadTools.sleepForever();

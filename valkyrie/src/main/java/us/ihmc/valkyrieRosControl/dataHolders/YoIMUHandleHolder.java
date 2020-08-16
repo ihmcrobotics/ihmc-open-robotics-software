@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -18,10 +18,10 @@ public class YoIMUHandleHolder
    private final YoDouble q_w, q_x, q_y, q_z;
    private final YoBoolean isLinearAccelerationValid, isAngularRateValid, isOrientationMeasurementValid;
 
-   public YoIMUHandleHolder(IMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
+   public YoIMUHandleHolder(IMUHandle handle, IMUDefinition imuDefinition, YoRegistry parentRegistry)
    {
       String name = handle.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      YoRegistry registry = new YoRegistry(name);
       
       this.handle = handle;
       this.imuDefinition = imuDefinition;

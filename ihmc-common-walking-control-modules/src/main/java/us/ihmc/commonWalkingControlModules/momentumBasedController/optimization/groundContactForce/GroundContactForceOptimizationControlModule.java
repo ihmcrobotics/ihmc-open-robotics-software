@@ -20,10 +20,10 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceOptimizationControlModule
@@ -32,7 +32,7 @@ public class GroundContactForceOptimizationControlModule
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
@@ -61,7 +61,7 @@ public class GroundContactForceOptimizationControlModule
    private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
    public GroundContactForceOptimizationControlModule(WrenchMatrixCalculator wrenchMatrixCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
-         ControllerCoreOptimizationSettings optimizationSettings, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         ControllerCoreOptimizationSettings optimizationSettings, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.wrenchMatrixCalculator = wrenchMatrixCalculator;
       this.contactablePlaneBodies = contactablePlaneBodies;

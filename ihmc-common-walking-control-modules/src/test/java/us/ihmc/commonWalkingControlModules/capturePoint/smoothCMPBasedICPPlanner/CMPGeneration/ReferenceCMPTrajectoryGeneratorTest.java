@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCMPTrajectoryGeneratorTest
@@ -37,7 +37,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
    private final int numberOfCoefficients = 10;
    private String testName = "CMPTest";
    private ReferenceCMPTrajectoryGenerator cmpTrajectoryGenerator;
-   private final YoVariableRegistry registry = new YoVariableRegistry(testName + "Registry");
+   private final YoRegistry registry = new YoRegistry(testName + "Registry");
    private List<CoPTrajectory> swingCoPTrajectories = new ArrayList<>();
    private List<CoPTrajectory> transferCoPTrajectories = new ArrayList<>();
    private List<AngularMomentumTrajectory> swingAngularMomentumTrajectories = new ArrayList<>();

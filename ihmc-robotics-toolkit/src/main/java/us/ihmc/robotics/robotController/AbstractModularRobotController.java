@@ -3,12 +3,12 @@ package us.ihmc.robotics.robotController;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class AbstractModularRobotController implements RobotController
 {
 
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    protected RawSensorReader rawSensorReader;
    protected SensorProcessor sensorProcessor;
    protected ArrayList<RobotController> robotControllers = new ArrayList<RobotController>();
@@ -17,7 +17,7 @@ public abstract class AbstractModularRobotController implements RobotController
 
    public AbstractModularRobotController(String name)
    {
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
    }
 
    public abstract void doControl();
@@ -40,7 +40,7 @@ public abstract class AbstractModularRobotController implements RobotController
          rawOutputWriter.initialize();
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -56,7 +56,7 @@ public abstract class AbstractModularRobotController implements RobotController
          throw new RuntimeException("Already have a rawSensorReader");
    
       this.rawSensorReader = rawSensorReader;
-      registry.addChild(rawSensorReader.getYoVariableRegistry());
+      registry.addChild(rawSensorReader.getYoRegistry());
    }
 
    public void setSensorProcessor(SensorProcessor sensorProcessor)
@@ -65,7 +65,7 @@ public abstract class AbstractModularRobotController implements RobotController
          throw new RuntimeException("Already have a sensorProcessor");
    
       this.sensorProcessor = sensorProcessor;
-      registry.addChild(sensorProcessor.getYoVariableRegistry());
+      registry.addChild(sensorProcessor.getYoRegistry());
    }
 
    public void addRobotController(RobotController robotController)
@@ -76,7 +76,7 @@ public abstract class AbstractModularRobotController implements RobotController
       }
       
       this.robotControllers.add(robotController);
-      YoVariableRegistry controllerRegistry = robotController.getYoVariableRegistry();
+      YoRegistry controllerRegistry = robotController.getYoRegistry();
       if (controllerRegistry != null)
          registry.addChild(controllerRegistry);
    }
@@ -89,7 +89,7 @@ public abstract class AbstractModularRobotController implements RobotController
       this.outputProcessor = outputProcessor;
       if(this.outputProcessor != null)
       {
-         registry.addChild(outputProcessor.getYoVariableRegistry());
+         registry.addChild(outputProcessor.getYoRegistry());
       }
    }
 
@@ -99,7 +99,7 @@ public abstract class AbstractModularRobotController implements RobotController
          throw new RuntimeException("Already have a rawOutputWriter");
    
       this.rawOutputWriter = rawOutputWriter;
-      registry.addChild(rawOutputWriter.getYoVariableRegistry());
+      registry.addChild(rawOutputWriter.getYoRegistry());
    }
 
    public RawSensorReader getRawSensorReader()

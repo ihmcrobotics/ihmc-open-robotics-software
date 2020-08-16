@@ -118,7 +118,7 @@ public class AtlasSDFVerificationTest
    private void pinRobotInAir(FloatingRootJointRobot sdfRobot)
    {
       sdfRobot.setPositionInWorld(new Vector3D(sdfRobot.getPositionInWorld().getX(), sdfRobot.getPositionInWorld().getY(), sdfRobot.getPositionInWorld().getZ() + 0.5));
-      ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());
+      ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoRegistry());
       fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3D()) / 2);
 
       sdfRobot.getJoint("l_arm_shx").addExternalForcePoint(fp);
@@ -164,7 +164,7 @@ public class AtlasSDFVerificationTest
    {
       HashMap<String, Double> yoVariables = new HashMap<>();
 
-      for (YoVariable<?> var : robot.getAllVariables())
+      for (YoVariable var : robot.getVariables())
       {
          if (var instanceof YoDouble)
          {

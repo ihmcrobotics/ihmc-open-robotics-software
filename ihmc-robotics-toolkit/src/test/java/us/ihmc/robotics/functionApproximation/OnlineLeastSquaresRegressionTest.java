@@ -3,7 +3,7 @@ package us.ihmc.robotics.functionApproximation;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.statistics.OnlineStandardDeviationCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
@@ -17,8 +17,8 @@ public class OnlineLeastSquaresRegressionTest
    public void testPerfectFunction()
    {
 
-      OnlineLeastSquaresRegression linearRegression = new OnlineLeastSquaresRegression("", new YoVariableRegistry("testRegistry"));
-      OnlineStandardDeviationCalculator residualStats = new OnlineStandardDeviationCalculator("", new YoVariableRegistry("testRegistry"));
+      OnlineLeastSquaresRegression linearRegression = new OnlineLeastSquaresRegression("", new YoRegistry("testRegistry"));
+      OnlineStandardDeviationCalculator residualStats = new OnlineStandardDeviationCalculator("", new YoRegistry("testRegistry"));
       int functionsToEstimate = 10;
       int valuesToUse = 200;
       Random random = new Random(1738L);
