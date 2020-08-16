@@ -32,7 +32,7 @@ testDependencies {
    api(ihmc.sourceSetProject("visualizers"))
 
    api("us.ihmc:ihmc-path-planning-data-sets:source")
-   api("us.ihmc:simulation-construction-set-test:0.19.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:simulation-construction-set-test:0.20.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
@@ -41,7 +41,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.18.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.19.0")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
