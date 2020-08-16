@@ -17,9 +17,9 @@ mainDependencies {
    api("javax.vecmath:vecmath:1.5.2")
    api("com.google.guava:guava:18.0")
 
-   api("us.ihmc:ihmc-yovariables:0.9.0-alpha-1")
+   api("us.ihmc:ihmc-yovariables:0.9.0")
    api("us.ihmc:ihmc-robot-description:0.19.0-yovariables-0.9.0-alpha-1")
-   api("us.ihmc:ihmc-graphics-description:0.18.0-yovariables-0.9.0-alpha-1")
+   api("us.ihmc:ihmc-graphics-description:0.19.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
