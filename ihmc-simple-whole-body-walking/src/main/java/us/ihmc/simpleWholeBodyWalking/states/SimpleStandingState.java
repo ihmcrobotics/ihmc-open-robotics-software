@@ -1,7 +1,6 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -12,10 +11,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
 import us.ihmc.simpleWholeBodyWalking.SimplePelvisOrientationManager;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimpleStandingState extends SimpleWalkingState
 {
@@ -31,7 +29,7 @@ public class SimpleStandingState extends SimpleWalkingState
    public SimpleStandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler,
                               HighLevelHumanoidControllerToolbox controllerToolbox, SimpleControlManagerFactory managerFactory,
                               WalkingFailureDetectionControlModule failureDetectionControlModule,
-                              YoVariableRegistry parentRegistry)
+                              YoRegistry parentRegistry)
    {
       super(SimpleWalkingStateEnum.STANDING, parentRegistry);
 
