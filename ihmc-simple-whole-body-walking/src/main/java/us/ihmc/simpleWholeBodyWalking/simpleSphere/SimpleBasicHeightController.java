@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleBasicHeightController
@@ -13,7 +13,7 @@ public class SimpleBasicHeightController
    private static final double ki = 0.0;
    private static final double kd = 10.0;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble yoDesiredHeight = new YoDouble("desiredHeight", registry);
    private final YoDouble weight = new YoDouble("weight", registry);
@@ -27,7 +27,7 @@ public class SimpleBasicHeightController
    private final FramePoint3DReadOnly centerOfMass;
    private final FrameVector3DReadOnly centerOfMassVelocity;
 
-   public SimpleBasicHeightController(SimpleSphereRobot sphereRobot, YoVariableRegistry parentRegistry)
+   public SimpleBasicHeightController(SimpleSphereRobot sphereRobot, YoRegistry parentRegistry)
    {
       this.controlDT = sphereRobot.getControlDT();
       this.sphereRobot = sphereRobot;

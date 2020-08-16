@@ -1,15 +1,15 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simpleWholeBodyWalking.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
+import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
+import us.ihmc.simpleWholeBodyWalking.SimpleFeetManager;
+import us.ihmc.simpleWholeBodyWalking.SimplePelvisOrientationManager;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleTransferToStandingState extends SimpleWalkingState
@@ -28,7 +28,7 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
                                         HighLevelHumanoidControllerToolbox controllerToolbox,
                                         SimpleControlManagerFactory managerFactory,
                                         WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                        YoVariableRegistry parentRegistry)
+                                        YoRegistry parentRegistry)
    {
       super(SimpleWalkingStateEnum.TO_STANDING, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
