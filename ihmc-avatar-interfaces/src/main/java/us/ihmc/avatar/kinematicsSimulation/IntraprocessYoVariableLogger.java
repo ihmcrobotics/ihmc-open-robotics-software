@@ -195,7 +195,7 @@ public class IntraprocessYoVariableLogger
       compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
       {
-         variables.addAll(registrySendBufferBuilder.getYoVariableRegistry().collectSubtreeVariables());
+         variables.addAll(registrySendBufferBuilder.getYoRegistry().collectSubtreeVariables());
       }
       jointHolders = handshakeBuilder.getJointHolders();
 
