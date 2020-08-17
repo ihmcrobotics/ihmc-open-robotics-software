@@ -68,6 +68,7 @@ public class StoredPropertyTableViewWrapper
       {
          controlMap.put(propertyKey, createEditor(propertyKey));
       }
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
 
       parameterTableRows.clear();
 
