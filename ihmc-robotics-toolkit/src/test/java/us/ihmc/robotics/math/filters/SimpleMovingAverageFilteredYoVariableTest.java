@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimpleMovingAverageFilteredYoVariableTest
 {
@@ -18,7 +18,7 @@ public class SimpleMovingAverageFilteredYoVariableTest
    {
       for (int i = 0; i < 100; i++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("Blop");
+         YoRegistry registry = new YoRegistry("Blop");
          Random random = new Random(6541654L);
          int windowSize = RandomNumbers.nextInt(random, 1, 1000);
          SimpleMovingAverageFilteredYoVariable sma = new SimpleMovingAverageFilteredYoVariable("tested", windowSize, registry);

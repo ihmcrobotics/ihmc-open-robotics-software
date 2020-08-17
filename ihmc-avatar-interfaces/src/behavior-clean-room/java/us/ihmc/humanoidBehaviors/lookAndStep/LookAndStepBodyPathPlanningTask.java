@@ -1,5 +1,14 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.State.BODY_PATH_PLANNING;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.PlanarRegionsForUI;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
@@ -23,15 +32,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.State.*;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -179,7 +180,7 @@ public class LookAndStepBodyPathPlanningTask
 
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      YoVariableRegistry parentRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry parentRegistry = new YoRegistry(getClass().getSimpleName());
       VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
 
       bodyPathPlanner.setGoal(goal);

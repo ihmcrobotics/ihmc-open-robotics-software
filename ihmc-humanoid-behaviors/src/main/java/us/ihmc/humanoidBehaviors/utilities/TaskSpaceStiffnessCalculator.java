@@ -7,11 +7,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class TaskSpaceStiffnessCalculator
 {
@@ -38,7 +38,7 @@ public class TaskSpaceStiffnessCalculator
    private final YoBoolean addSimulatedSensorNoise;
 
 
-   public TaskSpaceStiffnessCalculator(String namePrefix, double controlDT, YoVariableRegistry registry)
+   public TaskSpaceStiffnessCalculator(String namePrefix, double controlDT, YoRegistry registry)
    {
       alphaLowPass = new YoDouble(namePrefix + "Alpha", registry);
       alphaLowPass.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lowPassCutoffFreq_Hz, controlDT));

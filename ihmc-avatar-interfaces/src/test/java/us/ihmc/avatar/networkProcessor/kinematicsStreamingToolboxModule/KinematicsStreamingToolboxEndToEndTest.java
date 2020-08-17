@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.awt.*;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
-   protected YoVariableRegistry toolboxRegistry;
+   protected YoRegistry toolboxRegistry;
    protected YoGraphicsListRegistry yoGraphicsListRegistry;
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
@@ -110,7 +110,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return toolboxRegistry;
          }
@@ -151,7 +151,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       ROS2Topic toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
       desiredFullRobotModel = robotModel.createFullRobotModel();
-      toolboxRegistry = new YoVariableRegistry("toolboxMain");
+      toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));

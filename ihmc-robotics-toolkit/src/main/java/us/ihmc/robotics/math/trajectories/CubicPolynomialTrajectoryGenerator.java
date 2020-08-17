@@ -4,7 +4,7 @@ import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGenerator
 {
@@ -14,14 +14,14 @@ public class CubicPolynomialTrajectoryGenerator extends PolynomialTrajectoryGene
    private final DoubleProvider finalVelocityProvider;
 
    public CubicPolynomialTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider finalPositionProvider,
-         DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+         DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
       this(namePrefix, initialPositionProvider, new ConstantDoubleProvider(0.0), finalPositionProvider, new ConstantDoubleProvider(0.0), trajectoryTimeProvider,
             parentRegistry);
    }
 
    public CubicPolynomialTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider initialVelocityProvider,
-         DoubleProvider finalPositionProvider, DoubleProvider finalVelocityProvider, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+         DoubleProvider finalPositionProvider, DoubleProvider finalVelocityProvider, DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
       super(namePrefix, initialPositionProvider, finalPositionProvider, trajectoryTimeProvider, numberOfCoefficients, parentRegistry);
 

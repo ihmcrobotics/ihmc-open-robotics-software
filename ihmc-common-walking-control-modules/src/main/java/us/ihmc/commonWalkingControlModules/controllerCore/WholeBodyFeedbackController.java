@@ -25,12 +25,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WholeBodyFeedbackController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseDynamicsCommandList inverseDynamicsOutput = new InverseDynamicsCommandList();
    private final InverseKinematicsCommandList inverseKinematicsOutput = new InverseKinematicsCommandList();
    private final VirtualModelControlCommandList virtualModelControlOutput = new VirtualModelControlCommandList();
@@ -52,7 +52,7 @@ public class WholeBodyFeedbackController
    private final ExecutionTimer achievedComputationTimer = new ExecutionTimer("achievedComputationTimer", 1.0, registry);
 
    public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControllerTemplate feedbackControllerTemplate,
-                                      YoVariableRegistry parentRegistry)
+                                      YoRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
       feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);

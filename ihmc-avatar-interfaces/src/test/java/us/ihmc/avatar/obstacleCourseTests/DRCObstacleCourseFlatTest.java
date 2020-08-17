@@ -39,7 +39,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -51,6 +50,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
@@ -137,7 +137,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("HeightOffsetHandler",
+      YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("HeightOffsetHandler",
                                                                                                                        "offsetHeightAboveGround");
       offsetHeightAboveGround.set(0.15);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -917,7 +917,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       String pelvisName = fullRobotModel.getPelvis().getName();
       String namePrefix = pelvisName + Type.ERROR.getName() + SpaceData3D.ROTATION_VECTOR.getName();
-      String varName = YoFrameVariableNameTools.createZName(namePrefix, "");
-      return (YoDouble) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
+      String varName = YoGeometryNameTools.createZName(namePrefix, "");
+      return (YoDouble) scs.findVariable(FeedbackControllerToolbox.class.getSimpleName(), varName);
    }
 }

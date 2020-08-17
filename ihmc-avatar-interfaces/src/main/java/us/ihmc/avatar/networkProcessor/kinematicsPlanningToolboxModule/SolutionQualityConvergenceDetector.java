@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -29,7 +29,7 @@ public class SolutionQualityConvergenceDetector
    private final YoBoolean isGoodSolution;
    private final YoBoolean isStucked;
 
-   public SolutionQualityConvergenceDetector(SolutionQualityConvergenceSettings settings, YoVariableRegistry parentRegistry)
+   public SolutionQualityConvergenceDetector(SolutionQualityConvergenceSettings settings, YoRegistry parentRegistry)
    {
       name = this.getClass().getSimpleName();
 

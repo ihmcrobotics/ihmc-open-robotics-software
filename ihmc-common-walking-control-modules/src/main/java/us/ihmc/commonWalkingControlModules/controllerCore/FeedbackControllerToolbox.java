@@ -35,7 +35,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gain
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -53,7 +53,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 {
    public static final String centerOfMassName = "centerOfMass";
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private SingleFeedbackControllerDataPool centerOfMassDataPool;
    private final Map<RigidBodyBasics, List<SingleFeedbackControllerDataPool>> endEffectorDataPoolMap = new HashMap<>();
@@ -65,12 +65,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    private final InverseKinematicsCommandList lastFeedbackControllerInverseKinematicsOutput = new InverseKinematicsCommandList();
    private final VirtualModelControlCommandList lastFeedbackControllerVirtualModelControlOutput = new VirtualModelControlCommandList();
 
-   public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
+   public FeedbackControllerToolbox(YoRegistry parentRegistry)
    {
       this(FeedbackControllerSettings.getDefault(), parentRegistry);
    }
 
-   public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoVariableRegistry parentRegistry)
+   public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoRegistry parentRegistry)
    {
       errorVelocityFilterBreakFrequencies = new HashMap<>();
 
@@ -751,7 +751,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    private static class SingleFeedbackControllerDataPool
    {
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
       private final String namePrefix;
       private final EnumMap<Type, FBPoint3D> positionDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, FBQuaternion3D> orientationDataMap = new EnumMap<>(Type.class);
@@ -765,7 +765,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       private final List<FeedbackControllerData> clearableData = new ArrayList<>();
 
-      public SingleFeedbackControllerDataPool(String namePrefix, int controllerIndex, YoVariableRegistry registry)
+      public SingleFeedbackControllerDataPool(String namePrefix, int controllerIndex, YoRegistry registry)
       {
          this.namePrefix = appendIndex(namePrefix, controllerIndex);
          this.registry = registry;

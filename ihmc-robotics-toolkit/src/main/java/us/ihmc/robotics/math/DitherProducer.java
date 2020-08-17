@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class DitherProducer
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble desiredDitherFrequency;
    private final YoDouble ditherFrequency;
    private final YoDouble amplitude;
@@ -22,15 +22,15 @@ public class DitherProducer
 
    private final YoDouble dither;
 
-   public DitherProducer(String namePrefix, YoVariableRegistry parentRegistry, double controlDT)
+   public DitherProducer(String namePrefix, YoRegistry parentRegistry, double controlDT)
    {
-      registry = new YoVariableRegistry(namePrefix);
+      registry = new YoRegistry(namePrefix);
       desiredDitherFrequency = new YoDouble(namePrefix + "_dither_frequency_desired", registry);
       desiredDitherFrequency.set(0.0);
-      desiredDitherFrequency.addVariableChangedListener(new VariableChangedListener()
+      desiredDitherFrequency.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             checkFrequency();
          }
@@ -127,7 +127,7 @@ public class DitherProducer
 //   {
 //      double controlDT = 0.004;
 //      double desFreq = 1000;
-//      YoVariableRegistry registry = new YoVariableRegistry("test");
+//      YoRegistry registry = new YoRegistry("test");
 //      YoDouble time = new YoDouble("time", registry);
 //      YoDouble signal = new YoDouble("signal", registry);
 //      DitherProducer ditherProducer = new DitherProducer("dither", registry, controlDT);

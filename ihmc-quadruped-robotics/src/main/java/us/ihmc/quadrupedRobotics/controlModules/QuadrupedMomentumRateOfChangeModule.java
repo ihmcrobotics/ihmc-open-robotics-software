@@ -12,13 +12,13 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedMomentumRateOfChangeModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DivergentComponentOfMotionController dcmPositionController;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
@@ -45,12 +45,12 @@ public class QuadrupedMomentumRateOfChangeModule
 
    private final boolean debug;
 
-   public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       this(controllerToolbox, parentRegistry, false);
    }
 
-   public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry, boolean debug)
+   public QuadrupedMomentumRateOfChangeModule(QuadrupedControllerToolbox controllerToolbox, YoRegistry parentRegistry, boolean debug)
    {
       this.debug = debug;
       gravity = controllerToolbox.getRuntimeEnvironment().getGravity();

@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuaternionCalculusTest
 {
@@ -128,7 +128,7 @@ public class QuaternionCalculusTest
    public void testVelocityFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoVariableRegistry("null"));
+      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoRegistry("null"));
       double trajectoryTime = 1.0;
       traj.setTrajectoryTime(trajectoryTime);
       Random random = new Random(65265L);
@@ -221,7 +221,7 @@ public class QuaternionCalculusTest
    public void testAccelerationFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoVariableRegistry("null"));
+      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoRegistry("null"));
       double trajectoryTime = 1.0;
       traj.setTrajectoryTime(trajectoryTime);
       Random random = new Random(65265L);

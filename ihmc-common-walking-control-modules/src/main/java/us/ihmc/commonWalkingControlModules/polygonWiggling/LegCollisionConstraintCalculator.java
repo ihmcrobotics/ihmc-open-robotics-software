@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
@@ -11,20 +10,21 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCylinder;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LegCollisionConstraintCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final static double defaultLegRadiusGraphic = 0.21; // YoGraphicCylinder doesn't support changing radius on the fly...
 
    private Cylinder3D legCollisionShape = null;
@@ -54,7 +54,7 @@ public class LegCollisionConstraintCalculator
       gradientDirectionGraphic = null;
    }
 
-   public LegCollisionConstraintCalculator(YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public LegCollisionConstraintCalculator(YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       AppearanceDefinition appearance = YoAppearance.LightGoldenRodYellow();
       appearance.setTransparency(0.85);

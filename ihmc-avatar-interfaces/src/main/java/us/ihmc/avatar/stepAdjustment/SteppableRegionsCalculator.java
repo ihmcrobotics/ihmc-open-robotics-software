@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.PolygonClippingAndMerging;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.*;
@@ -108,7 +108,7 @@ public class SteppableRegionsCalculator
       }
    };
 
-   public SteppableRegionsCalculator(double maximumReach, YoVariableRegistry registry)
+   public SteppableRegionsCalculator(double maximumReach, YoRegistry registry)
    {
       maxAngleForSteppable = new YoDouble("maxAngleForSteppable", registry);
       minimumAreaForSteppable = new YoDouble("minimumAreaForSteppable", registry);

@@ -42,7 +42,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -59,7 +59,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 
    private RobotQuadrant startQuadrant;
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final PlanarRegionPawConstraintDataHolder highLevelConstraintDataHolder = new PlanarRegionPawConstraintDataHolder();
@@ -105,7 +105,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    public AStarPawStepPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, PawNodeChecker nodeChecker,
                               PawNodeTransitionChecker nodeTransitionChecker, PawPlanningCostToGoHeuristics heuristics, PawNodeExpansion nodeExpansion,
                               PawNodeCost stepCostCalculator, PawNodeSnapper snapper,
-                              PawStepPlannerListener listener, YoVariableRegistry parentRegistry)
+                              PawStepPlannerListener listener, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;
@@ -813,7 +813,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
    }
 
    public static AStarPawStepPlanner createPlanner(PawStepPlannerParametersReadOnly parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                   PawStepPlannerListener listener, YoVariableRegistry registry)
+                                                   PawStepPlannerListener listener, YoRegistry registry)
    {
       PawNodeSnapper snapper = new CliffAvoidancePlanarRegionFootstepNodeSnapper(parameters, true);
       PawNodeExpansion expansion = new ParameterBasedPawNodeExpansion(parameters, xGaitSettings);

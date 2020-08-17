@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.tools.property.YoVariablesForStoredProperties;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoVariablesForFootstepPlannerParameters extends YoVariablesForStoredProperties
 {
-   public YoVariablesForFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParametersBasics defaults)
+   public YoVariablesForFootstepPlannerParameters(YoRegistry parentRegistry, FootstepPlannerParametersBasics defaults)
    {
       super(defaults, FootstepPlannerParameterKeys.keys, YoVariablesForFootstepPlannerParameters.class.getSimpleName());
       parentRegistry.addChild(getRegistry());

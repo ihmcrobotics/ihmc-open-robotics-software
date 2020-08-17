@@ -3,17 +3,17 @@ package us.ihmc.exampleSimulations.flyballGovernor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionToIntegrate
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoFramePoint3D positionA, positionB;
    private final YoFrameVector3D velocityA, velocityB;
@@ -35,7 +35,7 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
    private Vector3D newForceB = new Vector3D();
 
    public FlyballGovernorClosedLoopConstraintToIntegrate(String name, ExternalForcePoint constraintA, ExternalForcePoint constraintB, Robot robot,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       positionA = constraintA.getYoPosition();
       positionB = constraintB.getYoPosition();
@@ -48,7 +48,7 @@ public class FlyballGovernorClosedLoopConstraintToIntegrate implements FunctionT
 
       robot.addFunctionToIntegrate(this);
 
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       positionErrorMagnitude = new YoDouble("positionErrorMagnitude", registry);
       parentRegistry.addChild(registry);
    }

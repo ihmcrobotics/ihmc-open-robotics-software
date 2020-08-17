@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
@@ -29,14 +29,14 @@ public class WrapperForPositionAndOrientationTrajectoryGeneratorsTest
    private PositionTrajectoryGenerator positionTrajectoryGenerator;
    private OrientationTrajectoryGenerator orientationTrajectoryGenerator;
    private FrameQuaternion orientation;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
    private OrientationProvider orientationProvider;
    private static double finalTime = 10.0;
 
    @BeforeEach
    public void setUp()
    {
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
       referenceFrame = EuclidFrameRandomTools.nextReferenceFrame(new Random(302L));
 
       orientation = new FrameQuaternion(referenceFrame);

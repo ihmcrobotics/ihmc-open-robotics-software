@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -31,7 +31,7 @@ public class YoSignalDerivative
    private YoDouble tolerance;
    private YoDouble lastSignalChange;
 
-   public YoSignalDerivative(String name, YoVariableRegistry registry)
+   public YoSignalDerivative(String name, YoRegistry registry)
    {
       this.name = name;
 

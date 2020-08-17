@@ -22,17 +22,17 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.robotics.robotDescription.InertiaTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotController
 {
    private final String name = getClass().getSimpleName();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoFrameVector3D inertiaEllipsoidGhostOffset = new YoFrameVector3D("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
@@ -59,7 +59,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
    private final ArrayList<RigidBodyVisualizationData> centerOfMassData = new ArrayList<RigidBodyVisualizationData>();
 
-   public CommonInertiaEllipsoidsVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonInertiaEllipsoidsVisualizer(RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this(rootBody, yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
@@ -196,7 +196,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       update();
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -2,11 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
@@ -16,15 +12,11 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.filters.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 
 /**
  * The FootRotationCalculator is a tool to detect if the foot is rotating around a steady line of rotation.
@@ -107,7 +99,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
    public VelocityFootRotationCalculator(String namePrefix, double dt, ContactablePlaneBody rotatingFoot, ExplorationParameters explorationParameters,
-                                         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                         YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.rotatingBody = rotatingFoot;
       this.soleFrame = rotatingFoot.getSoleFrame();
@@ -116,12 +108,12 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       footPolygonInSoleFrame.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(rotatingFoot.getContactPoints2d()));
 
       String name = getClass().getSimpleName();
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
+      YoRegistry registry = new YoRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
 
       angularVelocityAlphaFilter = new YoDouble(namePrefix + name + "AngularVelocityAlphaFilter", registry);
       angularVelocityFilterBreakFrequency = explorationParameters.getAngularVelocityFilterBreakFrequency();
-      angularVelocityFilterBreakFrequency.addVariableChangedListener((v) -> {
+      angularVelocityFilterBreakFrequency.addListener((v) -> {
          double freq = angularVelocityFilterBreakFrequency.getDoubleValue();
          angularVelocityAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(freq, controllerDt));
       });

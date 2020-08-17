@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -31,7 +31,7 @@ public class TwoVariableTransitionFilter extends YoDouble
    private final YoDouble time;
    private double lengthOfTransitionTime = 0.0;
 
-   public TwoVariableTransitionFilter(String name, YoVariableRegistry registry, YoDouble time)
+   public TwoVariableTransitionFilter(String name, YoRegistry registry, YoDouble time)
    {
       super(name, registry);
 
@@ -88,7 +88,7 @@ public class TwoVariableTransitionFilter extends YoDouble
 
    public static void main(String[] args)
    {
-      YoVariableRegistry reg = new YoVariableRegistry("main");
+      YoRegistry reg = new YoRegistry("main");
 
       YoDouble time = new YoDouble("time", "", null);
 

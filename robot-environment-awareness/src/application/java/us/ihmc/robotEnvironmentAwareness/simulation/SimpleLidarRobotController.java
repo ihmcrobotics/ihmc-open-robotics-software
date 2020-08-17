@@ -28,16 +28,16 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SimpleLidarRobotController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean spinLidar = new YoBoolean("spinLidar", registry);
    private final YoDouble desiredLidarVelocity = new YoDouble("desiredLidarVelocity", registry);
@@ -69,12 +69,12 @@ public class SimpleLidarRobotController implements RobotController
       lidarRange.set(30.0);
 
       final YoFrameYawPitchRoll lidarYawPitchRoll = new YoFrameYawPitchRoll("lidar", null, registry);
-      lidarYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
+      lidarYawPitchRoll.attachVariableChangedListener(new YoVariableChangedListener()
       {
          private final Quaternion localQuaternion = new Quaternion();
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             localQuaternion.set(lidarYawPitchRoll);
             rootJoint.setQuaternion(localQuaternion);
@@ -164,7 +164,7 @@ public class SimpleLidarRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -1,7 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTrajectoryTools;
 import us.ihmc.euclid.geometry.Line2D;
@@ -16,19 +22,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertTrue;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CapturePointTrajectoryToolsTest
 {
    int nTests = 20;
    Random random = new Random();
-   YoVariableRegistry registry = new YoVariableRegistry("");
+   YoRegistry registry = new YoRegistry("Dummy");
 
    private static final double EPSILON = 10e-6;
 

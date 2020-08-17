@@ -65,7 +65,7 @@ public class MultilevelGroundExampleSimulation
       rootJoint.setPosition(0.0, 0.0, 3.0);
       rootJoint.setYawPitchRoll(0.0, 0.0, 0.0);
 
-      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
+      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, robot.getRobotsYoRegistry());
       groundContactModel.setAlphaStickSlip(0.3, 0.2);
       groundContactModel.enableSlipping();
       groundContactModel.enableSurfaceNormal();

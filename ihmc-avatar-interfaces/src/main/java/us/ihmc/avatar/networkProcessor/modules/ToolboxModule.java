@@ -39,7 +39,7 @@ import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -55,7 +55,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   protected final YoRegistry registry = new YoRegistry(name);
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final String robotName;
    protected final FullHumanoidRobotModel fullRobotModel;
@@ -143,7 +143,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       realtimeRos2Node.spin();
    }
 
-   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
    {
       rootRegistry.addChild(registry);
       if (rootGraphicsListRegistry != null)

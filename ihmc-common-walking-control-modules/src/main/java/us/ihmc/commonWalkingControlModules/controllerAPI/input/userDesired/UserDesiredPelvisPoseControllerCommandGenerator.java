@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,22 +10,21 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class UserDesiredPelvisPoseControllerCommandGenerator
 {
    private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean userDoPelvisPose = new YoBoolean("userDoPelvisPose", registry);
    private final YoBoolean userStreamPelvisPose = new YoBoolean("userStreamPelvisPose", registry);
@@ -40,17 +40,17 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
    private final CommandInputManager controllerCommandInputManager;
 
    public UserDesiredPelvisPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel,
-         CommonHumanoidReferenceFrames commonHumanoidReferenceFrames, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+         CommonHumanoidReferenceFrames commonHumanoidReferenceFrames, double defaultTrajectoryTime, YoRegistry parentRegistry)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       midFeetZUpFrame = commonHumanoidReferenceFrames.getMidFeetZUpFrame();
       pelvisFrame = commonHumanoidReferenceFrames.getPelvisFrame();
       userDesiredPelvisPose = new YoFramePoseUsingYawPitchRoll("userDesiredPelvisPose", midFeetZUpFrame, registry);
 
-      userUpdateDesiredPelvisPose.addVariableChangedListener(new VariableChangedListener()
+      userUpdateDesiredPelvisPose.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userUpdateDesiredPelvisPose.getBooleanValue())
             {
@@ -62,10 +62,10 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
          }
       });
 
-      userDoPelvisPose.addVariableChangedListener(new VariableChangedListener()
+      userDoPelvisPose.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userDoPelvisPose.getBooleanValue())
             {
@@ -77,10 +77,10 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
          }
       });
 
-      userStreamPelvisPose.addVariableChangedListener(new VariableChangedListener()
+      userStreamPelvisPose.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userStreamPelvisPose.getBooleanValue())
             {
@@ -90,10 +90,10 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
          }
       });
 
-      userStreamPelvisOrientation.addVariableChangedListener(new VariableChangedListener()
+      userStreamPelvisOrientation.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userStreamPelvisOrientation.getBooleanValue())
             {
@@ -103,20 +103,20 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
          }
       });
 
-      userDesiredPelvisPose.attachVariableChangedListener(new VariableChangedListener()
+      userDesiredPelvisPose.attachVariableChangedListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userStreamPelvisPose.getBooleanValue())
                sendPelvisTrajectoryCommand();
          }
       });
 
-      userDesiredPelvisPose.getYawPitchRoll().attachVariableChangedListener(new VariableChangedListener()
+      userDesiredPelvisPose.getYawPitchRoll().attachVariableChangedListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userStreamPelvisOrientation.getBooleanValue())
                sendPelvisOrientationTrajectoryCommand();
@@ -135,7 +135,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private void sendPelvisTrajectoryCommand()
    {
-      userDesiredPelvisPose.getFramePoseIncludingFrame(framePose);
+      framePose.setIncludingFrame(userDesiredPelvisPose);
       framePose.changeFrame(worldFrame);
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();
@@ -152,7 +152,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
 
    private void sendPelvisOrientationTrajectoryCommand()
    {
-      userDesiredPelvisPose.getFramePoseIncludingFrame(framePose);
+      framePose.setIncludingFrame(userDesiredPelvisPose);
       framePose.changeFrame(worldFrame);
 
       double time = userDesiredPelvisPoseTrajectoryTime.getDoubleValue();

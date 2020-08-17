@@ -2,15 +2,15 @@ package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import java.util.Random;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RandomExternalForceApplier implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("PushApplier");
+   private final YoRegistry registry = new YoRegistry("PushApplier");
    private String name;
 
    private final ForcePerturbable perturbable;
@@ -45,7 +45,7 @@ public class RandomExternalForceApplier implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

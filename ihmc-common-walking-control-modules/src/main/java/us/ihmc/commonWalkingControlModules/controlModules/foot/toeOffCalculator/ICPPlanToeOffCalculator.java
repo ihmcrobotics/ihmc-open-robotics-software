@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.*;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ICPPlanToeOffCalculator implements ToeOffCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final String namePrefix = "icpProj";
 
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
@@ -35,7 +35,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    private final YoBoolean hasComputedToeOffContactLine;
 
    public ICPPlanToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

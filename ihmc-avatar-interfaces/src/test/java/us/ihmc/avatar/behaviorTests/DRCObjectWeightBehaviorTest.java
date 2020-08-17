@@ -73,8 +73,8 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       assertTrue(success);
 
       ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node());
-      YoDouble rightMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("rightTool", "rightToolObjectMass");
-      YoDouble leftMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftTool", "leftToolObjectMass");
+      YoDouble rightMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().findVariable("rightTool", "rightToolObjectMass");
+      YoDouble leftMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().findVariable("leftTool", "leftToolObjectMass");
 
       double weightLeft = 1.5;
       objectWeightBehavior.initialize();

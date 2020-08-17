@@ -121,7 +121,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       }
 
       GroundContactModel groundContactModel = new LinearGroundContactModel(drillRobot, groundContactGroupIdentifier, 1422.0, 150.6, 50.0, 600.0,
-            drillRobot.getRobotsYoVariableRegistry());
+            drillRobot.getRobotsYoRegistry());
       groundContactModel.setGroundProfile3D(combinedTerrainObject);
       drillRobot.setGroundContactModel(groundContactModel);
 

@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ContactableValveRobotTest
 {
@@ -45,7 +45,7 @@ public class ContactableValveRobotTest
    private SliderJoint horizontalJoint;
    private SliderJoint verticalJoint;
 
-   private YoVariableRegistry valveTestRegistry;
+   private YoRegistry valveTestRegistry;
 
    @AfterEach
    public void tearDown()
@@ -57,7 +57,7 @@ public class ContactableValveRobotTest
    public void testValveIsClosing()
    {
       boolean isValveClosed = false;
-      valveTestRegistry = new YoVariableRegistry("valveTestRegistry");
+      valveTestRegistry = new YoRegistry("valveTestRegistry");
 
       createValveRobot();
       createFloatingRobot();
@@ -68,7 +68,7 @@ public class ContactableValveRobotTest
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationTestingParameters);
 
-      scs.addYoVariableRegistry(valveTestRegistry);
+      scs.addYoRegistry(valveTestRegistry);
 
       Thread myThread = new Thread(scs);
       myThread.start();
@@ -83,7 +83,7 @@ public class ContactableValveRobotTest
          PrintTools.error(this, e.getMessage());
       }
 
-      if (robots[1].getVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
+      if (robots[1].findVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
          isValveClosed = true;
 
       assertTrue(isValveClosed);
@@ -188,7 +188,7 @@ public class ContactableValveRobotTest
    {
       floatingRobotController = new RobotController()
       {
-         private YoVariableRegistry robotControllerRegistry = new YoVariableRegistry("robotControllerRegistry");
+         private YoRegistry robotControllerRegistry = new YoRegistry("robotControllerRegistry");
 
          @Override
          public void initialize()
@@ -200,7 +200,7 @@ public class ContactableValveRobotTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return robotControllerRegistry;
          }

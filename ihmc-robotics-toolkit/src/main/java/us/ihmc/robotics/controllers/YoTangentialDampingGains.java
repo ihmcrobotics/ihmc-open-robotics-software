@@ -1,6 +1,6 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -12,7 +12,7 @@ public class YoTangentialDampingGains implements TangentialDampingGains
    private final YoDouble dampingParallelToMotionDeadband;
    private final YoDouble positionErrorForMinimumKd;
 
-   public YoTangentialDampingGains(String suffix, YoVariableRegistry registry)
+   public YoTangentialDampingGains(String suffix, YoRegistry registry)
    {
       kdParallelMaxReductionRatio = new YoDouble("kdParallelMaxReductionRatio" + suffix, registry);
       dampingParallelToMotionDeadband = new YoDouble("parallelDampingDeadband" + suffix, registry);

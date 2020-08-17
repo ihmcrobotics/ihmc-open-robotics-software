@@ -21,11 +21,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -45,7 +45,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private final boolean DEBUG;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final int maxNumberOfFootstepsToConsider;
    private final TrajectoryMathTools trajectoryMathTools;
 
@@ -110,30 +110,30 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private int numberOfStepsToConsider;
 
-   public FootstepAngularMomentumPredictor(String namePrefix, YoDouble omega0, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
+   public FootstepAngularMomentumPredictor(String namePrefix, YoDouble omega0, int maxNumberOfFootstepsToConsider, YoRegistry parentRegistry)
    {
       this(namePrefix, omega0, false, maxNumberOfFootstepsToConsider, parentRegistry);
    }
 
-   public FootstepAngularMomentumPredictor(String namePrefix, YoDouble omega0, boolean debug, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
+   public FootstepAngularMomentumPredictor(String namePrefix, YoDouble omega0, boolean debug, int maxNumberOfFootstepsToConsider, YoRegistry parentRegistry)
    {
       this.DEBUG = debug;
       String fullPrefix = namePrefix + "AngularMomentum";
       this.trajectoryMathTools = new TrajectoryMathTools(2 * maxNumberOfTrajectoryCoefficients);
       this.gravityZ = new YoDouble("AngularMomentumGravityZ", parentRegistry);
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
-      omega0.addVariableChangedListener(new VariableChangedListener()
+      omega0.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             comHeight.set(gravityZ.getDoubleValue() / (omega0.getDoubleValue() * omega0.getDoubleValue()));
          }
       });
-      gravityZ.addVariableChangedListener(new VariableChangedListener()
+      gravityZ.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             comHeight.set(gravityZ.getDoubleValue() / (omega0.getDoubleValue() * omega0.getDoubleValue()));
          }
@@ -705,7 +705,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private class TrajectoryDebug extends YoSegmentedFrameTrajectory3D
    {
-      public TrajectoryDebug(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
+      public TrajectoryDebug(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoRegistry registry)
       {
          super(name, maxNumberOfSegments, maxNumberOfCoefficients, registry);
       }

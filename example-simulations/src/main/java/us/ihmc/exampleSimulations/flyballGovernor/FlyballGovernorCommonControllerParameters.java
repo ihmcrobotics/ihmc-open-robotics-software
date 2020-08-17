@@ -1,12 +1,12 @@
 package us.ihmc.exampleSimulations.flyballGovernor;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class FlyballGovernorCommonControllerParameters
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble k_feedback = new YoDouble("k_feedback", registry);
    private final YoDouble q_d_cylinder_z = new YoDouble("q_d_cylinder_z", registry);
    
@@ -31,7 +31,7 @@ public class FlyballGovernorCommonControllerParameters
       return q_d_cylinder_z;
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

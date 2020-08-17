@@ -102,7 +102,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
       linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
-      registry.addChild(walkingController.getYoVariableRegistry());
+      registry.addChild(walkingController.getYoRegistry());
    }
 
    public void initialize()

@@ -66,7 +66,7 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
                                                                               robotSensorInfo,
                                                                               walkingControllerParameters,
                                                                               null);
-      scs.addYoVariableRegistry(collaborativeBehavior.getYoVariableRegistry());
+      scs.addYoRegistry(collaborativeBehavior.getYoRegistry());
 
       drcBehaviorTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 1.0), new Point3D(10.0, 10.0, 3.0));
       ThreadTools.sleep(1000);

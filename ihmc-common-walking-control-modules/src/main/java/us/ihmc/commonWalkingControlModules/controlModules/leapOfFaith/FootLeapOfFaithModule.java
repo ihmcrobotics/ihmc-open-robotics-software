@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -16,7 +16,7 @@ public class FootLeapOfFaithModule
 {
    private static final String yoNamePrefix = "leapOfFaith";
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    
    private final YoDouble swingDuration;
 
@@ -30,7 +30,7 @@ public class FootLeapOfFaithModule
    private final YoDouble horizontalFootWeightScaleFraction = new YoDouble(yoNamePrefix + "HorizontalFootWeightScaleFraction", registry);
    private final DoubleProvider minimumHorizontalWeight;
 
-   public FootLeapOfFaithModule(YoDouble swingDuration, LeapOfFaithParameters parameters, YoVariableRegistry parentRegistry)
+   public FootLeapOfFaithModule(YoDouble swingDuration, LeapOfFaithParameters parameters, YoRegistry parentRegistry)
    {
       this.swingDuration = swingDuration;
 

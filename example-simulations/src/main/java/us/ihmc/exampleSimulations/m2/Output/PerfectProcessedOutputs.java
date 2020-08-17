@@ -51,19 +51,19 @@ public class PerfectProcessedOutputs
 
    public void init()
    {
-      tau_left_hip_yaw = (YoDouble)robot.getVariable("tau_left_hip_yaw");
-      tau_left_hip_roll = (YoDouble)robot.getVariable("tau_left_hip_roll");
-      tau_left_hip_pitch =(YoDouble) robot.getVariable("tau_left_hip_pitch");
-      tau_left_knee = (YoDouble)robot.getVariable("tau_left_knee");
-      tau_left_ankle_pitch =(YoDouble) robot.getVariable("tau_left_ankle_pitch");
-      tau_left_ankle_roll = (YoDouble)robot.getVariable("tau_left_ankle_roll");
+      tau_left_hip_yaw = (YoDouble)robot.findVariable("tau_left_hip_yaw");
+      tau_left_hip_roll = (YoDouble)robot.findVariable("tau_left_hip_roll");
+      tau_left_hip_pitch =(YoDouble) robot.findVariable("tau_left_hip_pitch");
+      tau_left_knee = (YoDouble)robot.findVariable("tau_left_knee");
+      tau_left_ankle_pitch =(YoDouble) robot.findVariable("tau_left_ankle_pitch");
+      tau_left_ankle_roll = (YoDouble)robot.findVariable("tau_left_ankle_roll");
 
-      tau_right_hip_yaw = (YoDouble)robot.getVariable("tau_right_hip_yaw");
-      tau_right_hip_roll = (YoDouble)robot.getVariable("tau_right_hip_roll");
-      tau_right_hip_pitch = (YoDouble)robot.getVariable("tau_right_hip_pitch");
-      tau_right_knee = (YoDouble)robot.getVariable("tau_right_knee");
-      tau_right_ankle_pitch = (YoDouble)robot.getVariable("tau_right_ankle_pitch");
-      tau_right_ankle_roll =(YoDouble)robot.getVariable("tau_right_ankle_roll");
+      tau_right_hip_yaw = (YoDouble)robot.findVariable("tau_right_hip_yaw");
+      tau_right_hip_roll = (YoDouble)robot.findVariable("tau_right_hip_roll");
+      tau_right_hip_pitch = (YoDouble)robot.findVariable("tau_right_hip_pitch");
+      tau_right_knee = (YoDouble)robot.findVariable("tau_right_knee");
+      tau_right_ankle_pitch = (YoDouble)robot.findVariable("tau_right_ankle_pitch");
+      tau_right_ankle_roll =(YoDouble)robot.findVariable("tau_right_ankle_roll");
 
       limbJointPositions = new YoDouble[][]
       {

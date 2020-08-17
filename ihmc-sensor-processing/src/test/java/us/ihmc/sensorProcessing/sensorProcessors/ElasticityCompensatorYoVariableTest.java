@@ -10,7 +10,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ElasticityCompensatorYoVariableTest
@@ -23,7 +23,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -57,7 +57,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -91,7 +91,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -115,7 +115,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -139,7 +139,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -171,7 +171,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -196,7 +196,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -223,7 +223,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);
@@ -249,7 +249,7 @@ public class ElasticityCompensatorYoVariableTest
       Random random = new Random(1561651L);
       
       String name = "compensator";
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoDouble stiffness = new YoDouble("stiffness", registry);
       YoDouble maximumDeflection = new YoDouble("maximumDeflection", registry);
       YoDouble rawJointPosition = new YoDouble("rawJointPosition", registry);

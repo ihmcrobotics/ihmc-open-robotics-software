@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @see FeedbackControllerData
@@ -21,7 +21,7 @@ public class FBAlphaFilteredVector3D extends AlphaFilteredYoMutableFrameVector3D
    private int commandId;
 
    public FBAlphaFilteredVector3D(String namePrefix, Type type, SpaceData3D space, DoubleProvider breakFrequency, double dt, FrameVector3DReadOnly rawVector,
-                                  YoVariableRegistry registry)
+                                  YoRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix + "Filtered", type, space), "", registry, toAlpha(breakFrequency, dt), rawVector);
 

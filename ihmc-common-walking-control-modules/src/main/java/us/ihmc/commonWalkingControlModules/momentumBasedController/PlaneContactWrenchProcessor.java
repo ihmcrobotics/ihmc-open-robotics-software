@@ -18,10 +18,10 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * @author twan
@@ -34,7 +34,7 @@ public class PlaneContactWrenchProcessor
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Map<ContactablePlaneBody, YoDouble> normalTorques = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoDouble> groundReactionForceMagnitudes = new LinkedHashMap<>();
    private final Map<ContactablePlaneBody, YoFramePoint3D> centersOfPressureWorld = new LinkedHashMap<>();
@@ -46,7 +46,7 @@ public class PlaneContactWrenchProcessor
    private final CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
 
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       List<RigidBodyBasics> feet = new ArrayList<>();
 

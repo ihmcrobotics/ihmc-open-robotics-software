@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FinishableStateTest
@@ -17,7 +17,7 @@ public class FinishableStateTest
    @Test
    public void testExampleStateMachineWithFinishableStates()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble time = new YoDouble("time", registry);
 
       StateMachine<StateEnum> stateMachine = new StateMachine<StateEnum>("stateMachine", "switchTime", StateEnum.class, time, registry);

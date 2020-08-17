@@ -26,7 +26,7 @@ import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RhinoBeetleSimpleSimulation
@@ -39,7 +39,7 @@ public class RhinoBeetleSimpleSimulation
    {
       RhinoBeetleModelFactory modelFactory = new RhinoBeetleModelFactory();
       FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
-      YoVariableRegistry registry = sdfRobot.getRobotsYoVariableRegistry();
+      YoRegistry registry = sdfRobot.getRobotsYoRegistry();
       FullRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
@@ -59,8 +59,8 @@ public class RhinoBeetleSimpleSimulation
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       SimulationOverheadPlotter overheadPlotter = simulationOverheadPlotterFactory.createOverheadPlotter();
-      overheadPlotter.setXVariableToTrack((YoDouble) sdfRobot.getVariable("q_x"));
-      overheadPlotter.setYVariableToTrack((YoDouble) sdfRobot.getVariable("q_y"));
+      overheadPlotter.setXVariableToTrack((YoDouble) sdfRobot.findVariable("q_x"));
+      overheadPlotter.setYVariableToTrack((YoDouble) sdfRobot.findVariable("q_y"));
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(SIMULATION_DT, 10);
@@ -96,7 +96,7 @@ public class RhinoBeetleSimpleSimulation
    {
       FlatGroundProfile groundProfile3D = new FlatGroundProfile(0.0);
 
-      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(sdfRobot, sdfRobot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(sdfRobot, sdfRobot.getRobotsYoRegistry());
       groundContactModel.setZStiffness(groundContactParameters.getZStiffness());
       groundContactModel.setZDamping(groundContactParameters.getZDamping());
       groundContactModel.setXYStiffness(groundContactParameters.getXYStiffness());

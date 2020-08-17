@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.data;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePose3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePose3D;
 
 /**
  * @see FeedbackControllerData

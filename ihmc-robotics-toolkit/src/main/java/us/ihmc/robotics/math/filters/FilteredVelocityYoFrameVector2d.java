@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class FilteredVelocityYoFrameVector2d extends YoFrameVector2D
 {
@@ -20,12 +20,12 @@ public class FilteredVelocityYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #FilteredVelocityYoFrameVector2d(String, String, DoubleProvider, double, YoVariableRegistry, FrameTuple2DReadOnly)}
+    *             {@link #FilteredVelocityYoFrameVector2d(String, String, DoubleProvider, double, YoRegistry, FrameTuple2DReadOnly)}
     *             instead.
     */
    @Deprecated
    public static FilteredVelocityYoFrameVector2d createFilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt,
-                                                                                       YoVariableRegistry registry,
+                                                                                       YoRegistry registry,
                                                                                        FrameTuple2DReadOnly frameTuple2DToDifferentiate)
    {
       return new FilteredVelocityYoFrameVector2d(namePrefix, nameSuffix, alpha, dt, registry, frameTuple2DToDifferentiate);
@@ -33,12 +33,12 @@ public class FilteredVelocityYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #FilteredVelocityYoFrameVector2d(String, String, DoubleProvider, double, YoVariableRegistry, FrameTuple2DReadOnly)}
+    *             {@link #FilteredVelocityYoFrameVector2d(String, String, DoubleProvider, double, YoRegistry, FrameTuple2DReadOnly)}
     *             instead.
     */
    @Deprecated
    public static FilteredVelocityYoFrameVector2d createFilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, String description,
-                                                                                       DoubleProvider alpha, double dt, YoVariableRegistry registry,
+                                                                                       DoubleProvider alpha, double dt, YoRegistry registry,
                                                                                        FrameTuple2DReadOnly frameTuple2DToDifferentiate)
    {
       return new FilteredVelocityYoFrameVector2d(namePrefix, nameSuffix, alpha, dt, registry, frameTuple2DToDifferentiate);
@@ -46,17 +46,17 @@ public class FilteredVelocityYoFrameVector2d extends YoFrameVector2D
 
    /**
     * @deprecated Use
-    *             {@link #FilteredVelocityYoFrameVector2d(String, String, DoubleProvider, double, YoVariableRegistry, ReferenceFrame)}
+    *             {@link #FilteredVelocityYoFrameVector2d(String, String, DoubleProvider, double, YoRegistry, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
    public static FilteredVelocityYoFrameVector2d createFilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt,
-                                                                                       YoVariableRegistry registry, ReferenceFrame referenceFrame)
+                                                                                       YoRegistry registry, ReferenceFrame referenceFrame)
    {
       return new FilteredVelocityYoFrameVector2d(namePrefix, nameSuffix, alpha, dt, registry, referenceFrame);
    }
 
-   public FilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoVariableRegistry registry,
+   public FilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoRegistry registry,
                                           FrameTuple2DReadOnly frameTuple2DToDifferentiate)
    {
       super(namePrefix, nameSuffix, frameTuple2DToDifferentiate.getReferenceFrame(), registry);
@@ -69,7 +69,7 @@ public class FilteredVelocityYoFrameVector2d extends YoFrameVector2D
       reset();
    }
 
-   public FilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoVariableRegistry registry,
+   public FilteredVelocityYoFrameVector2d(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoRegistry registry,
                                           ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

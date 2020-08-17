@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class TransferToFlamingoStanceState extends TransferState
 {
@@ -23,7 +23,7 @@ public class TransferToFlamingoStanceState extends TransferState
    public TransferToFlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                         WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
+                                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
             rhoMin, parentRegistry);

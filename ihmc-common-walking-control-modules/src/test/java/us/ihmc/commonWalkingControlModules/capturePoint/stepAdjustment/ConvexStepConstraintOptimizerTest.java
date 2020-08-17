@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 
@@ -46,7 +46,7 @@ public class ConvexStepConstraintOptimizerTest
 
 
       ConstraintOptimizerParameters parameters = new ConstraintOptimizerParameters();
-      ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer(new YoVariableRegistry("test"));
+      ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer(new YoRegistry("test"));
       RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters);
 
       assertFalse(wiggleTransform == null);

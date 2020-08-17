@@ -56,7 +56,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AutomatedDiagnosticSimulationFactory implements RobotController
@@ -65,7 +65,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
    private InputStream gainStream;
    private InputStream setpointStream;
-   private final YoVariableRegistry simulationRegistry = new YoVariableRegistry("AutomatedDiagnosticSimulation");
+   private final YoRegistry simulationRegistry = new YoRegistry("AutomatedDiagnosticSimulation");
    private final YoDouble controllerTime = new YoDouble("controllerTime", simulationRegistry);
    private final AlphaFilteredYoVariable averageControllerTime = new AlphaFilteredYoVariable("averageControllerTime", simulationRegistry, 0.99, controllerTime);
    private SensorReader sensorReader;
@@ -198,7 +198,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, processedSensorOutputMap,
                                                             centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration,
                                                             footSwitchMap, null, robotMotionStatusHolder, bipedFeetMap, null);
-      simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
+      simulationRegistry.addChild(stateEstimator.getYoRegistry());
 
       forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
                                                             processedSensorOutputMap,
@@ -297,7 +297,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return simulationRegistry;
    }

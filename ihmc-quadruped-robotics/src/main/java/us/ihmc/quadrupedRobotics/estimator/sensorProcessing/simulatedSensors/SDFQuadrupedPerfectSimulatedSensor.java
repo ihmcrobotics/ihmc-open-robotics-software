@@ -68,12 +68,12 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
             if (groundContactPoint.getParentJoint().getName().equals(jointBeforeFoot.getName()))
             {
                footSwitches.set(quadrant,
-                                new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, super.getYoVariableRegistry()));
+                                new SimulatedContactBasedFootSwitch(prefix + groundContactPoint.getName(), groundContactPoint, super.getYoRegistry()));
             }
          }
       }
 
-      enableDrives = new YoBoolean("enableDrives", getYoVariableRegistry());
+      enableDrives = new YoBoolean("enableDrives", getYoRegistry());
       enableDrives.set(true);
    }
 

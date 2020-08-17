@@ -5,7 +5,7 @@ import java.util.EnumMap;
 
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -35,23 +35,23 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    protected ArrayList<T> states = new ArrayList<T>();
 
-   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, E initialState, YoDouble timeVariable, YoVariableRegistry registry)
+   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, E initialState, YoDouble timeVariable, YoRegistry registry)
    {
       this(name, switchTimeName, enumType, initialState, new YoVariableDoubleProvider(timeVariable), registry);
    }
 
-   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, YoDouble timeVariable, YoVariableRegistry registry)
+   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, YoDouble timeVariable, YoRegistry registry)
    {
       this(name, switchTimeName, enumType, null, new YoVariableDoubleProvider(timeVariable), registry);
    }
 
-   public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
+   public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoRegistry registry)
    {
       this(stateYoVariableName, switchTimeName, enumType, null, timeProvider, registry);
    }
 
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, E initialState, DoubleProvider timeProvider,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       stateYoVariable = new YoEnum<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, false);
       previousStateYoVariable = new YoEnum<E>(stateYoVariableName + "PreviousState", "State machine variable to keep track of the previous state.",

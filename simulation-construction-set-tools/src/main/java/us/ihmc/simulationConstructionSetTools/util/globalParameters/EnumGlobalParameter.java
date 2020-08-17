@@ -20,7 +20,7 @@ public class EnumGlobalParameter extends GlobalParameter
    {
       super(parents, listener);
 
-      yoVariable = YoEnum.create(name, description, enumType, registry, false);
+      yoVariable = new YoEnum<>(name, description, registry, enumType, false);
 
       if (changedListener != null)
          changedListener.globalParameterCreated(this);

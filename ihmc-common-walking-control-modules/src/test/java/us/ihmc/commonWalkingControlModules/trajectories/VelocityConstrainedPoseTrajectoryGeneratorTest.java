@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VelocityConstrainedPoseTrajectoryGeneratorTest
 {
@@ -41,7 +41,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
    @Test
    public void testCompareWithStraightLinePoseTrajectoryGeneratorPositionOnly()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
       StraightLinePoseTrajectoryGenerator trajToCompare = new StraightLinePoseTrajectoryGenerator("Traj2", worldFrame, registry);
@@ -100,7 +100,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
    @Test
    public void testPositionAndVelocityConsistencyWithInitialVelocity()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("PositionAndVelocityConsistency");
+      YoRegistry registry = new YoRegistry("PositionAndVelocityConsistency");
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
@@ -207,7 +207,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
    @Test
    public void testPositionAndVelocityConsistencyWithInitialAndFinalVelocity()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("PositionAndVelocityConsistency");
+      YoRegistry registry = new YoRegistry("PositionAndVelocityConsistency");
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
@@ -331,7 +331,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
    @Test
    public void testTooBigTime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("youpiloup");
+      YoRegistry registry = new YoRegistry("youpiloup");
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);

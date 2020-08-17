@@ -1,19 +1,16 @@
 package us.ihmc.robotics.occupancyGrid;
 
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OccupancyGridVisualizer
 {
@@ -25,7 +22,7 @@ public class OccupancyGridVisualizer
    public OccupancyGridVisualizer(String namePrefix,
                                   OccupancyGrid gridToVisualize,
                                   int maxPoints,
-                                  YoVariableRegistry registry,
+                                  YoRegistry registry,
                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, gridToVisualize, maxPoints, YoAppearance.Orange(), registry, yoGraphicsListRegistry);
@@ -35,7 +32,7 @@ public class OccupancyGridVisualizer
                                   OccupancyGrid gridToVisualize,
                                   int maxPoints,
                                   AppearanceDefinition color,
-                                  YoVariableRegistry registry,
+                                  YoRegistry registry,
                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.gridToVisualize = gridToVisualize;

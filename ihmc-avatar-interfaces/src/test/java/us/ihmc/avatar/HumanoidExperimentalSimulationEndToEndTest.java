@@ -30,12 +30,6 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    protected DRCSimulationTestHelper drcSimulationTestHelper = null;
 
-   @BeforeAll
-   public static void disableStackTrace()
-   {
-      YoVariable.SAVE_STACK_TRACE = false;
-   }
-
    @AfterEach
    public void tearDown()
    {

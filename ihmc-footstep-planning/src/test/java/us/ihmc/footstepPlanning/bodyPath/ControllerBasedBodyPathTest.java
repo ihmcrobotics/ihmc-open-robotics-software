@@ -1,9 +1,14 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import com.google.common.util.concurrent.AtomicDouble;
+
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -33,13 +38,10 @@ import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ControllerBasedBodyPathTest
 {

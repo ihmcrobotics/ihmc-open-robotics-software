@@ -28,7 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -71,9 +71,9 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       setValveProperties(valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, valveNumberOfPossibleTurns, valveMass);
       setPoseInWorld(valvePoseInWorld);
       setMass(valveMass);
-      valveDamping = new YoDouble(getName() + "ValveDamping", yoVariableRegistry);
+      valveDamping = new YoDouble(getName() + "ValveDamping", yoRegistry);
       valveDamping.set(DEFAULT_DAMPING);
-      valveClosePercentage = new YoDouble("valveClosePercentage", yoVariableRegistry);
+      valveClosePercentage = new YoDouble("valveClosePercentage", yoRegistry);
       valveClosePercentage.set(0.0);
    }
 
@@ -180,11 +180,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
       yoGraphicsListRegistries.add(graphListRegistry);
 
-      valvePinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
+      valvePinJoint.getQYoVariable().addListener(new YoVariableChangedListener()
       {
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             valveClosePercentage.set(valvePinJoint.getQYoVariable().getDoubleValue() / (2 * Math.PI) * 100 / valveNumberOfPossibleTurns);
          }

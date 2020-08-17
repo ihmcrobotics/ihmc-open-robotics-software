@@ -10,14 +10,14 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class PelvisPoseNoiseGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrame rootJointFrame;
@@ -70,11 +70,11 @@ public class PelvisPoseNoiseGenerator
    private final YoDouble noiseScalar_pitch;
    private final YoDouble noiseScalar_roll;
    
-   public PelvisPoseNoiseGenerator(FullInverseDynamicsStructure inverseDynamicsStructure, YoVariableRegistry parentRegistry)
+   public PelvisPoseNoiseGenerator(FullInverseDynamicsStructure inverseDynamicsStructure, YoRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
-      registry = new YoVariableRegistry("PelvisPoseNoiseGenerator");
+      registry = new YoRegistry("PelvisPoseNoiseGenerator");
       parentRegistry.addChild(registry);
       
       rotationError.setIdentity();

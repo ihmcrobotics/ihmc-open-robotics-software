@@ -1,19 +1,20 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.filters.WeightedAverageYoFrameVector3D;
 import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WeightedAverageWrenchCalculator implements WrenchCalculator
 {
@@ -27,7 +28,7 @@ public class WeightedAverageWrenchCalculator implements WrenchCalculator
 
    private final Wrench wrench = new Wrench();
 
-   public WeightedAverageWrenchCalculator(String prefix, String variableSuffix, YoVariableRegistry registry, PairList<DoubleProvider,
+   public WeightedAverageWrenchCalculator(String prefix, String variableSuffix, YoRegistry registry, PairList<DoubleProvider,
          WrenchCalculator> wrenchCalculatorPairs)
    {
       wrench.setToZero(ReferenceFrame.getWorldFrame());

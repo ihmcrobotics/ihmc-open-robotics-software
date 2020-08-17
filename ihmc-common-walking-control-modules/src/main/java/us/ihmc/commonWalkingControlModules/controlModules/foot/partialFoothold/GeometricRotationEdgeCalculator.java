@@ -1,19 +1,22 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.euclid.referenceFrame.*;
+import java.awt.Color;
+
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.awt.Color;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This calculates the edge by looking at the direction of rotation as the cross product between the foot normal and the ground plane normal. The location of
@@ -43,13 +46,13 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
                                           MovingReferenceFrame soleFrame,
                                           FootholdRotationParameters rotationParameters,
                                           double dt,
-                                          YoVariableRegistry parentRegistry,
+                                          YoRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
       String namePrefix = side.getLowerCaseName() + "Geometric";
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       YoFramePoint2D point = new YoFramePoint2D(namePrefix + "PointOfRotation", soleFrame, registry);
       YoFrameVector2D direction = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);

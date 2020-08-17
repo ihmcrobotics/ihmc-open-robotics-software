@@ -13,12 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -38,13 +33,13 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
@@ -64,8 +59,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final SideDependentList<EnumMap<ArmJointName, OneDegreeOfFreedomJoint>> armSCSJoints = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final double fingerJointLimit = 1.57079632679;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("SliderBoardRegistry");
-   private final YoVariableRegistry dontRecordRegistry = new YoVariableRegistry("dontRecordRegistry");
+   private final YoRegistry registry = new YoRegistry("SliderBoardRegistry");
+   private final YoRegistry dontRecordRegistry = new YoRegistry("dontRecordRegistry");
 
    private final YoEnum<SliderSpace> sliderSpace = new YoEnum<SliderSpace>("sliderSpace", "", registry, SliderSpace.class, false);
    private final YoEnum<SliderBodyPart> sliderBodyPart = new YoEnum<SliderBodyPart>("sliderBodyPart", "", registry, SliderBodyPart.class, false);
@@ -170,7 +165,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderSpace.set(SliderSpace.JOINT);
       sliderBodyPart.set(SliderBodyPart.LEFT_LEG);
 
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       sliderBoard = new MidiSliderBoard(scs);
 
       UpdateInverseKinematicsListener updateInverseKinematicsListener = new UpdateInverseKinematicsListener();
@@ -191,30 +186,30 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         isLegControlRequested.get(robotSide).addVariableChangedListener(listener);
-         isArmControlRequested.get(robotSide).addVariableChangedListener(listener);
+         isLegControlRequested.get(robotSide).addListener(listener);
+         isArmControlRequested.get(robotSide).addListener(listener);
       }
-      isPelvisControlRequested.addVariableChangedListener(listener);
-      isChestControlRequested.addVariableChangedListener(listener);
+      isPelvisControlRequested.addListener(listener);
+      isChestControlRequested.addListener(listener);
 
       PelvisRotationListener pelvisListener = new PelvisRotationListener();
-      q_yaw.addVariableChangedListener(pelvisListener);
-      q_pitch.addVariableChangedListener(pelvisListener);
-      q_roll.addVariableChangedListener(pelvisListener);
+      q_yaw.addListener(pelvisListener);
+      q_pitch.addListener(pelvisListener);
+      q_roll.addListener(pelvisListener);
 
       if (this.controlFingers.getBooleanValue())
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            q_hands.get(robotSide).addVariableChangedListener(new HandListener(robotSide));
+            q_hands.get(robotSide).addListener(new HandListener(robotSide));
          }
       }
 
       isLeftLegControlRequested.set(true);
 
-      isSymmetricModeRequested.addVariableChangedListener(new VariableChangedListener()
+      isSymmetricModeRequested.addListener(new YoVariableChangedListener()
       {
-         public void notifyOfVariableChange(YoVariable<?> yoVariable)
+         public void changed(YoVariable yoVariable)
          {
             symmetricMode = isSymmetricModeRequested.getBooleanValue();
          }
@@ -284,12 +279,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       baseControlTargetPoints[3].set(-0.08, 0.15, 0.0);
 
       SupportBaseControlRequestedListener supportBaseControlRequestedListener = new SupportBaseControlRequestedListener();
-      isSupportBaseControlRequested.addVariableChangedListener(supportBaseControlRequestedListener);
-      isSupportBaseToggleRequested.addVariableChangedListener(supportBaseControlRequestedListener);
+      isSupportBaseControlRequested.addListener(supportBaseControlRequestedListener);
+      isSupportBaseToggleRequested.addListener(supportBaseControlRequestedListener);
 
       SupportBaseControlTargetRequestedListener supportBaseControlTargetRequestedListener = new SupportBaseControlTargetRequestedListener();
-      isSupportBaseControlTargetRequested.addVariableChangedListener(supportBaseControlTargetRequestedListener);
-      isSupportBaseTargetToggleRequested.addVariableChangedListener(supportBaseControlTargetRequestedListener);
+      isSupportBaseControlTargetRequested.addListener(supportBaseControlTargetRequestedListener);
+      isSupportBaseTargetToggleRequested.addListener(supportBaseControlTargetRequestedListener);
 
       addSupportBaseControlGraphics(yoGraphicsListRegistry);
       addSupportBaseControlTargetGraphics(yoGraphicsListRegistry);
@@ -453,7 +448,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             double sign = unitVectorOtherSide.dot(unitVectorThisSide);
 
             SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQYoVariable(), robotSide, sign);
-            thisJoint.getQYoVariable().addVariableChangedListener(symmetricModeListener);
+            thisJoint.getQYoVariable().addListener(symmetricModeListener);
          }
 
          for (LegJointName jointName : legSCSJoints.get(robotSide).keySet())
@@ -468,7 +463,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             double sign = unitVectorOtherSide.dot(unitVectorThisSide);
 
             SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQYoVariable(), robotSide, sign);
-            thisJoint.getQYoVariable().addVariableChangedListener(symmetricModeListener);
+            thisJoint.getQYoVariable().addListener(symmetricModeListener);
          }
       }
       
@@ -485,11 +480,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
                for (int j = 0; j <= 2; j++)
                {
                   @SuppressWarnings("deprecation")
-                  YoDouble thisVariable = (YoDouble) scs.getVariable(thisSidePrefix + f + "_j" + j);
+                  YoDouble thisVariable = (YoDouble) scs.findVariable(thisSidePrefix + f + "_j" + j);
                   @SuppressWarnings("deprecation")
-                  YoDouble oppositeSideVariable = (YoDouble) scs.getVariable(oppositeSidePrefix + f + "_j" + j);
+                  YoDouble oppositeSideVariable = (YoDouble) scs.findVariable(oppositeSidePrefix + f + "_j" + j);
                   SymmetricModeListener symmetricModeListener = new SymmetricModeListener(oppositeSideVariable, robotSide, 1.0);
-                  thisVariable.addVariableChangedListener(symmetricModeListener);
+                  thisVariable.addListener(symmetricModeListener);
                }
             }
          }
@@ -689,9 +684,9 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       System.out.println("Pelvis is at " + framePose);
    }
 
-   private class ChangeCurrentPartBeingControlledListener implements VariableChangedListener
+   private class ChangeCurrentPartBeingControlledListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          if (!(v instanceof YoBoolean))
             return;
@@ -725,11 +720,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
    }
 
-   private class SupportBaseControlRequestedListener implements VariableChangedListener
+   private class SupportBaseControlRequestedListener implements YoVariableChangedListener
    {
       private int displayState = 0;
 
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          setupSlidersForSupportBaseControl();
          if(v.equals(isSupportBaseToggleRequested))
@@ -805,11 +800,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
    }
 
-   private class SupportBaseControlTargetRequestedListener implements VariableChangedListener
+   private class SupportBaseControlTargetRequestedListener implements YoVariableChangedListener
    {
       private int displayState = 0;
 
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          setupSlidersForSupportBaseTargetControl();
          if(v.equals(isSupportBaseTargetToggleRequested))
@@ -885,11 +880,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
    }
 
-   private class UpdateInverseKinematicsListener implements VariableChangedListener
+   private class UpdateInverseKinematicsListener implements YoVariableChangedListener
    {
       private final RigidBodyTransform desiredTransform = new RigidBodyTransform();
 
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          if (legInverseKinematicsCalculators == null)
             return;
@@ -919,7 +914,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
    }
 
-   private class SymmetricModeListener implements VariableChangedListener
+   private class SymmetricModeListener implements YoVariableChangedListener
    {
       private final YoDouble variableToSet;
       private final RobotSide robotSide;
@@ -932,7 +927,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          this.respectiveSign = sign;
       }
 
-      public void notifyOfVariableChange(YoVariable<?> yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          if (symmetricMode && (robotSide == symmetricControlSide))
          {
@@ -941,9 +936,9 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
    }
 
-   private class PelvisRotationListener implements VariableChangedListener
+   private class PelvisRotationListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          if (!(v instanceof YoDouble))
             return;
@@ -953,7 +948,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
    }
 
-   private class HandListener implements VariableChangedListener
+   private class HandListener implements YoVariableChangedListener
    {
       private final RobotSide robotSide;
 
@@ -963,7 +958,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
 
       @SuppressWarnings("deprecation")
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          if (!controlFingers.getBooleanValue())
             return;
@@ -973,7 +968,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          {
             for (int j = 1; j <= 2; j++)
             {
-               ((YoDouble) scs.getVariable(handSideString.get(robotSide) + f + "_j" + j)).set(q_val);
+               ((YoDouble) scs.findVariable(handSideString.get(robotSide) + f + "_j" + j)).set(q_val);
             }
          }
       }
@@ -996,7 +991,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       q_qz.set(q.getZ());
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }
@@ -1036,43 +1031,43 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       yoGraphicsList.hideYoGraphics();
    }
 
-   public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)
+   public void addCaptureSnapshotListener(YoVariableChangedListener variableChangedListener)
    {
-      isCaptureSnapshotRequested.addVariableChangedListener(variableChangedListener);
+      isCaptureSnapshotRequested.addListener(variableChangedListener);
    }
 
-   public void addSaveSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addSaveSequenceRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isSaveSequenceRequested.addVariableChangedListener(variableChangedListener);
+      isSaveSequenceRequested.addListener(variableChangedListener);
    }
 
-   public void addLoadSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addLoadSequenceRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isLoadSequenceRequested.addVariableChangedListener(variableChangedListener);
+      isLoadSequenceRequested.addListener(variableChangedListener);
    }
 
-   public void addClearSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addClearSequenceRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isClearSequenceRequested.addVariableChangedListener(variableChangedListener);
+      isClearSequenceRequested.addListener(variableChangedListener);
    }
 
-   public void addLoadFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addLoadFrameByFrameSequenceRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isLoadFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
+      isLoadFrameByFrameSequenceRequested.addListener(variableChangedListener);
    }
    
-   public void addLoadLastSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addLoadLastSequenceRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isLoadLastSequenceRequested.addVariableChangedListener(variableChangedListener);
+      isLoadLastSequenceRequested.addListener(variableChangedListener);
    }
 
-   public void addPlayPoseFromFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   public void addPlayPoseFromFrameByFrameSequenceRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isPlayPoseFromFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
+      isPlayPoseFromFrameByFrameSequenceRequested.addListener(variableChangedListener);
    }
 
-   public void addResetToBasePoseRequestedListener(VariableChangedListener variableChangedListener)
+   public void addResetToBasePoseRequestedListener(YoVariableChangedListener variableChangedListener)
    {
-      isResetToBasePoseRequested.addVariableChangedListener(variableChangedListener);
+      isResetToBasePoseRequested.addListener(variableChangedListener);
    }
 }

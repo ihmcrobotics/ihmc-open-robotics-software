@@ -86,7 +86,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       for (AbstractBehavior behavior : behaviors)
       {
-         registry.addChild(behavior.getYoVariableRegistry());
+         registry.addChild(behavior.getYoRegistry());
       }
    }
 
