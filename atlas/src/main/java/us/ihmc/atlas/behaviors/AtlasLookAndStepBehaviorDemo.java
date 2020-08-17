@@ -48,13 +48,13 @@ public class AtlasLookAndStepBehaviorDemo
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
 
    {
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
                                                                0.0, 0.0, 0.0, 0.0));
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
                                                                0.0, Math.PI, 6.0, 0.0));
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
                                                                BehaviorPlanarRegionEnvironments.topPlatformHeight, Math.PI, 3.0, 0.0));
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
                                                                BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 3.0, 0.0));
    }
    private final Random random = new Random();
