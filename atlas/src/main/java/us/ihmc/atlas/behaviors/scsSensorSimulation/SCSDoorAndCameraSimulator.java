@@ -220,7 +220,7 @@ public class SCSDoorAndCameraSimulator
                                                   DefaultExceptionHandler.PRINT_STACKTRACE);
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture(image);
       return new PlanarRegionsListDefinedEnvironment(environmentName,
-                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStairsWithFlatTop(),
+                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStepsWithFlatTop(),
                                                      cinderBlockTexture,
                                                      0.02,
                                                      false);

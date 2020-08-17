@@ -120,7 +120,7 @@ public class AtlasLookAndStepBehaviorTest
       boolean useDynamicsSimulation = true;
       boolean runRealsenseSLAM = false;
       assertTimeoutPreemptively(Duration.ofMinutes(5),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
                                                  waypoints));
@@ -143,7 +143,7 @@ public class AtlasLookAndStepBehaviorTest
       boolean useDynamicsSimulation = false;
       boolean runRealsenseSLAM = true;
       assertTimeoutPreemptively(Duration.ofMinutes(5),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStairsWithFlatTop,
+                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
                                                  waypoints));
