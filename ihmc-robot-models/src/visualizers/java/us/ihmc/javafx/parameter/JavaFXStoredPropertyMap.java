@@ -8,7 +8,6 @@ import us.ihmc.tools.property.StoredPropertyBasics;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -115,10 +114,8 @@ public class JavaFXStoredPropertyMap
 
    public void addAnyJavaFXValueChangedListener(Runnable runnable)
    {
-      LogTools.info("Registering runnable");
       for (JavaFXPropertyHolder javaFXProperty : toStoredPropertyMap.keySet())
       {
-      LogTools.info("Registering runnable to {}", javaFXProperty);
          javaFXProperty.addValueChangedListener(runnable);
       }
    }
