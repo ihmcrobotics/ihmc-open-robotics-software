@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This class calculates the alpha value given a break frequency provider
@@ -42,7 +42,7 @@ public class AlphaBasedOnBreakFrequencyProvider implements DoubleProvider
     * @param registry Parent registry for the break frequency parameter
     * @param defaultBreakFrequency Default value for the break frequency
     */
-   public AlphaBasedOnBreakFrequencyProvider(String name, double dt, YoVariableRegistry registry, double defaultBreakFrequency)
+   public AlphaBasedOnBreakFrequencyProvider(String name, double dt, YoRegistry registry, double defaultBreakFrequency)
    {
       this(new DoubleParameter(name, registry, defaultBreakFrequency), dt);
    }
@@ -54,7 +54,7 @@ public class AlphaBasedOnBreakFrequencyProvider implements DoubleProvider
     * @param dt Time step
     * @param registry Parent registry for the break frequency parameter
     */
-   public AlphaBasedOnBreakFrequencyProvider(String name, double dt, YoVariableRegistry registry)
+   public AlphaBasedOnBreakFrequencyProvider(String name, double dt, YoRegistry registry)
    {
       this.breakFrequencyProvider = new DoubleParameter(name, registry, Double.NaN);
       this.dt = dt;

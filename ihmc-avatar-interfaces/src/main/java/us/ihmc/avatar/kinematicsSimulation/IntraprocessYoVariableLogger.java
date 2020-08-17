@@ -20,7 +20,7 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.File;
@@ -60,7 +60,7 @@ public class IntraprocessYoVariableLogger
    private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
-   private ArrayList<YoVariable<?>> variables = new ArrayList<>();
+   private ArrayList<YoVariable> variables = new ArrayList<>();
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
@@ -74,7 +74,7 @@ public class IntraprocessYoVariableLogger
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
-                                       YoVariableRegistry registry,
+                                       YoRegistry registry,
                                        RigidBodyBasics rootBody,
                                        YoGraphicsListRegistry yoGraphicsListRegistry,
                                        int maxTicksToRecord,
@@ -195,7 +195,7 @@ public class IntraprocessYoVariableLogger
       compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
       {
-         variables.addAll(registrySendBufferBuilder.getYoVariableRegistry().getAllVariables());
+         variables.addAll(registrySendBufferBuilder.getYoVariableRegistry().collectSubtreeVariables());
       }
       jointHolders = handshakeBuilder.getJointHolders();
 

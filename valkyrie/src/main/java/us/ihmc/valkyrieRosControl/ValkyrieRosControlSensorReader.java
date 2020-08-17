@@ -25,7 +25,7 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoJointStateHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieRosControlSensorReader implements SensorReader, JointTorqueOffsetProcessor
 {
@@ -55,7 +55,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
                                          TimestampProvider monotonicTimeProvider, List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                          List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
                                          List<YoJointStateHandleHolder> yoJointStateHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
-                                         List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoVariableRegistry registry)
+                                         List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoRegistry registry)
    {
 
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)

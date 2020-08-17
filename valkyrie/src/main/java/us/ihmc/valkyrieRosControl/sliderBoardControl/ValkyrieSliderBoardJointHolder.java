@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl.sliderBoardControl;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -14,7 +14,7 @@ abstract class ValkyrieSliderBoardJointHolder
    protected final ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard;
    protected final OneDoFJointBasics joint;
    protected final double dt;
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    protected final PDController pdController;
    protected final YoDouble q;
    protected final YoDouble qd;
@@ -27,14 +27,14 @@ abstract class ValkyrieSliderBoardJointHolder
    protected final YoDouble jointCommand_function;
    protected final YoDouble tau_d;
 
-   public ValkyrieSliderBoardJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJointBasics joint, YoVariableRegistry parentRegistry, double dt)
+   public ValkyrieSliderBoardJointHolder(ValkyrieRosControlSliderBoard valkyrieRosControlSliderBoard, OneDoFJointBasics joint, YoRegistry parentRegistry, double dt)
    {
       this.valkyrieRosControlSliderBoard = valkyrieRosControlSliderBoard;
       this.joint = joint;
       this.dt = dt;
 
       String jointName = joint.getName();
-      this.registry = new YoVariableRegistry(jointName);
+      this.registry = new YoRegistry(jointName);
       this.pdController = new PDController(jointName, registry);
       pdController.setProportionalGain(ValkyrieRosControlSliderBoard.KP_DEFAULT);
       pdController.setDerivativeGain(ValkyrieRosControlSliderBoard.KD_DEFAULT);

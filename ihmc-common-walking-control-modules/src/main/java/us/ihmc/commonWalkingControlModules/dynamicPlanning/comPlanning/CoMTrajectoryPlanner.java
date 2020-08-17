@@ -19,10 +19,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * <p>
@@ -53,7 +53,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DMatrixRMaj coefficientMultipliers = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj coefficientMultipliersInv = new DMatrixRMaj(0, 0);
@@ -118,11 +118,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private CornerPointViewer viewer = null;
 
-   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
+   public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
 
-      comHeight.addVariableChangedListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
+      comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
 
       parentRegistry.addChild(registry);

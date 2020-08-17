@@ -7,10 +7,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoRootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataBasics
 {
@@ -26,9 +26,9 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    private final DMatrixRMaj desiredVelocity = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj desiredAcceleration = new DMatrixRMaj(6, 0);
 
-   public YoRootJointDesiredConfigurationData(FloatingJointBasics rootJoint, YoVariableRegistry parentRegistry)
+   public YoRootJointDesiredConfigurationData(FloatingJointBasics rootJoint, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("RootJointDesiredConfigurationData");
+      YoRegistry registry = new YoRegistry("RootJointDesiredConfigurationData");
       parentRegistry.addChild(registry);
       ReferenceFrame frameAfterJoint = rootJoint.getFrameAfterJoint();
 

@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
@@ -26,7 +26,7 @@ public class MomentumTrajectoryHandlerTest
    @Test
    public void testSimpleExample()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
       MomentumTrajectoryCommand command = new MomentumTrajectoryCommand();
 
@@ -64,7 +64,7 @@ public class MomentumTrajectoryHandlerTest
    @Test
    public void testSamplingDurations()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
       MomentumTrajectoryCommand command = new MomentumTrajectoryCommand();
 
@@ -139,7 +139,7 @@ public class MomentumTrajectoryHandlerTest
    @Test
    public void testOutOfBounds()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
       MomentumTrajectoryCommand command = new MomentumTrajectoryCommand();
 
@@ -169,7 +169,7 @@ public class MomentumTrajectoryHandlerTest
    @Test
    public void testQueuing()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
 
       MomentumTrajectoryCommand command1 = new MomentumTrajectoryCommand();

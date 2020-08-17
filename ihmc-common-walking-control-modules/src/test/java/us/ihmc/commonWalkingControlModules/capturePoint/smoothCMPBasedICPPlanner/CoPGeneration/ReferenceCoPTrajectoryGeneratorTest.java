@@ -37,7 +37,7 @@ import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -64,7 +64,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
    private final SideDependentList<ContactableFoot> contactableFeet = new SideDependentList<>();
    private final SideDependentList<RigidBodyBasics> feetBodies = new SideDependentList<>();
-   private final YoVariableRegistry parentRegistry = new YoVariableRegistry("TestRegistry");
+   private final YoRegistry parentRegistry = new YoRegistry("TestRegistry");
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
    private final SmoothCMPPlannerParameters plannerParameters = new TestSmoothCMPPlannerParameters();;
    private final YoInteger numberOfFootstepsToConsider = new YoInteger("numberOfFootstepsToConsider", parentRegistry);

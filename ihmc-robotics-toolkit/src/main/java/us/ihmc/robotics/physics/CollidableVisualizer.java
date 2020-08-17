@@ -8,11 +8,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameCapsule3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameCylinder3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePointShape3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
@@ -26,9 +22,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CollidableVisualizer
 {
@@ -37,7 +33,7 @@ public class CollidableVisualizer
    private final Collidable collidable;
    private final Shape3DGraphicUpdater shape3DGraphicUpdater;
 
-   public CollidableVisualizer(String name, String groupName, Collidable collidable, AppearanceDefinition appearanceDefinition, YoVariableRegistry registry,
+   public CollidableVisualizer(String name, String groupName, Collidable collidable, AppearanceDefinition appearanceDefinition, YoRegistry registry,
                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.collidable = collidable;
@@ -108,7 +104,7 @@ public class CollidableVisualizer
       private final YoGraphicPosition graphicSphere;
       private final FrameSphere3DReadOnly shape;
 
-      public Sphere3DGraphicUpdater(String name, FrameSphere3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Sphere3DGraphicUpdater(String name, FrameSphere3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          position = new YoFramePoint3D(name, worldFrame, registry);
@@ -144,7 +140,7 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicBox;
       private final FrameBox3DReadOnly shape;
 
-      public Box3DGraphicUpdater(String name, FrameBox3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Box3DGraphicUpdater(String name, FrameBox3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
@@ -181,7 +177,7 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicCapsule;
       private final FrameCapsule3DReadOnly shape;
 
-      public Capsule3DGraphicUpdater(String name, FrameCapsule3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Capsule3DGraphicUpdater(String name, FrameCapsule3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
@@ -222,7 +218,7 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicCylinder;
       private final FrameCylinder3DReadOnly shape;
 
-      public Cylinder3DGraphicUpdater(String name, FrameCylinder3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Cylinder3DGraphicUpdater(String name, FrameCylinder3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
@@ -264,7 +260,7 @@ public class CollidableVisualizer
       private final YoGraphicPosition graphicSphere;
       private final FramePointShape3DReadOnly shape;
 
-      public Point3DGraphicUpdater(String name, FramePointShape3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
+      public Point3DGraphicUpdater(String name, FramePointShape3DReadOnly shape, YoRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
          position = new YoFramePoint3D(name, worldFrame, registry);
@@ -296,7 +292,7 @@ public class CollidableVisualizer
       private final YoGraphicShape graphicConvexPolytope;
       private final FrameConvexPolytope3DReadOnly shape;
 
-      public ConvexPolytope3DGraphicUpdater(String name, FrameConvexPolytope3DReadOnly shape, YoVariableRegistry registry,
+      public ConvexPolytope3DGraphicUpdater(String name, FrameConvexPolytope3DReadOnly shape, YoRegistry registry,
                                             AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;

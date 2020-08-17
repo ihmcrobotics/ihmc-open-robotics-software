@@ -13,14 +13,14 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedStepPlanarRegionProjectionTest
 {
    @Test
    public void testSimpleProjection()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       QuadrupedStepPlanarRegionProjection projectionCalculator = new QuadrupedStepPlanarRegionProjection(registry);
       double epsilon = 1e-10;
 

@@ -1,14 +1,11 @@
 package us.ihmc.robotics.math.filters;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createXName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createYName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
-
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 
 public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
@@ -25,11 +22,11 @@ public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector3D im
    }
 
    public static SimpleMovingAverageFilteredYoFrameVector createSimpleMovingAverageFilteredYoFrameVector(String namePrefix, String nameSuffix, int windowSize,
-         ReferenceFrame referenceFrame, YoVariableRegistry registry)
+         ReferenceFrame referenceFrame, YoRegistry registry)
    {
-      String xName = createXName(namePrefix, nameSuffix);
-      String yName = createYName(namePrefix, nameSuffix);
-      String zName = createZName(namePrefix, nameSuffix);
+      String xName = YoGeometryNameTools.createXName(namePrefix, nameSuffix);
+      String yName = YoGeometryNameTools.createYName(namePrefix, nameSuffix);
+      String zName = YoGeometryNameTools.createZName(namePrefix, nameSuffix);
 
       SimpleMovingAverageFilteredYoVariable x = new SimpleMovingAverageFilteredYoVariable(xName, windowSize, registry);
       SimpleMovingAverageFilteredYoVariable y = new SimpleMovingAverageFilteredYoVariable(yName, windowSize, registry);
@@ -39,11 +36,11 @@ public class SimpleMovingAverageFilteredYoFrameVector extends YoFrameVector3D im
    }
 
    public static SimpleMovingAverageFilteredYoFrameVector createSimpleMovingAverageFilteredYoFrameVector(String namePrefix, String nameSuffix, int windowSize,
-         YoFrameVector3D unfilteredVector, YoVariableRegistry registry)
+         YoFrameVector3D unfilteredVector, YoRegistry registry)
    {
-      String xName = createXName(namePrefix, nameSuffix);
-      String yName = createYName(namePrefix, nameSuffix);
-      String zName = createZName(namePrefix, nameSuffix);
+      String xName = YoGeometryNameTools.createXName(namePrefix, nameSuffix);
+      String yName = YoGeometryNameTools.createYName(namePrefix, nameSuffix);
+      String zName = YoGeometryNameTools.createZName(namePrefix, nameSuffix);
 
       SimpleMovingAverageFilteredYoVariable x = new SimpleMovingAverageFilteredYoVariable(xName, windowSize, unfilteredVector.getYoX(), registry);
       SimpleMovingAverageFilteredYoVariable y = new SimpleMovingAverageFilteredYoVariable(yName, windowSize, unfilteredVector.getYoY(), registry);

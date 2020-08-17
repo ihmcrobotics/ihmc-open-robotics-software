@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverPlanarRegionsStandaloneVisualizer
 {
@@ -22,13 +22,13 @@ public class SwingOverPlanarRegionsStandaloneVisualizer
    private static final AppearanceDefinition[] appearances = {YoAppearance.Gray(), YoAppearance.Gray()};
 
    private final SimulationConstructionSet scs;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
    private final SwingOverPlanarRegionsVisualizer visualizer;
 
-   public SwingOverPlanarRegionsStandaloneVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public SwingOverPlanarRegionsStandaloneVisualizer(SimulationConstructionSet scs, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
                                                      WalkingControllerParameters walkingControllerParameters, ConvexPolygon2DReadOnly footPolygon)
    {
       this.scs = scs;
@@ -42,10 +42,10 @@ public class SwingOverPlanarRegionsStandaloneVisualizer
 
    public SwingOverPlanarRegionsStandaloneVisualizer(WalkingControllerParameters walkingControllerParameters, ConvexPolygon2DReadOnly footPolygon)
    {
-      this(new SimulationConstructionSet(new Robot("Robot")), new YoVariableRegistry(SwingOverPlanarRegionsStandaloneVisualizer.class.getSimpleName()),
+      this(new SimulationConstructionSet(new Robot("Robot")), new YoRegistry(SwingOverPlanarRegionsStandaloneVisualizer.class.getSimpleName()),
            new YoGraphicsListRegistry(), walkingControllerParameters, footPolygon);
 
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(1.0, 1);
       scs.setCameraFix(0.4, 0.0, 0.0);

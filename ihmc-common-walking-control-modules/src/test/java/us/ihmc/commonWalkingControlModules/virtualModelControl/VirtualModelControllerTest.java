@@ -26,7 +26,7 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VirtualModelControllerTest
 {
@@ -555,7 +555,7 @@ public class VirtualModelControllerTest
       CommonOps_DDRM.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps_DDRM.invert(transposeJacobianMatrix);
 
-      YoVariableRegistry registry = new YoVariableRegistry(this.getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(this.getClass().getSimpleName());
       VirtualModelController virtualModelController = new VirtualModelController(pelvis, centerOfMassFrame, registry, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
@@ -754,7 +754,7 @@ public class VirtualModelControllerTest
 
    private void submitAndCheckVMC(RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DMatrixRMaj selectionMatrix)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       simulationTestingParameters.setKeepSCSUp(false);
 

@@ -16,13 +16,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final String namePrefix = "centProj";
 
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
@@ -48,7 +48,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final FramePoint2D[] intersectionWithRay = new FramePoint2D[] {new FramePoint2D(), new FramePoint2D()};
 
    public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-                                             ToeOffParameters toeOffParameters, YoVariableRegistry parentRegistry)
+                                             ToeOffParameters toeOffParameters, YoRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

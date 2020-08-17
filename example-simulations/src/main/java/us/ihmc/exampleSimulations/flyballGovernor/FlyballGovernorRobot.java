@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @SuppressWarnings("unused")
@@ -184,7 +184,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
    private YoDouble tau_rotation, q_cylinder_z, qd_cylinder_z;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FlyballGovernorController");
+   private final YoRegistry registry = new YoRegistry("FlyballGovernorController");
    
    private final YoDouble k_feedback, q_d_cylinder_z;
 
@@ -195,9 +195,9 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
    public void initControl()
    {
-      tau_rotation = (YoDouble)this.getVariable("tau_rotation");
-      q_cylinder_z = (YoDouble)this.getVariable("q_cylinder_z");
-      qd_cylinder_z = (YoDouble)this.getVariable("qd_cylinder_z");
+      tau_rotation = (YoDouble)this.findVariable("tau_rotation");
+      q_cylinder_z = (YoDouble)this.findVariable("q_cylinder_z");
+      qd_cylinder_z = (YoDouble)this.findVariable("qd_cylinder_z");
    }
 
    public void doControl()
@@ -205,7 +205,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       tau_rotation.set(k_feedback.getDoubleValue() * (q_d_cylinder_z.getDoubleValue() - q_cylinder_z.getDoubleValue()));
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

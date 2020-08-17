@@ -1,13 +1,13 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PDControllerWithGainSetter extends AbstractPDController
 {
    private PDGainsReadOnly gains;
 
-   public PDControllerWithGainSetter(String suffix, YoVariableRegistry registry)
+   public PDControllerWithGainSetter(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
    }

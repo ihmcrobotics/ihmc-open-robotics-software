@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoMinimumJerkTrajectoryTest
 {
 	@Test
    public void testRandomInitialFinalConditions()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("test", registry);
 
@@ -62,7 +62,7 @@ public class YoMinimumJerkTrajectoryTest
    @Test
    public void testTimeExtensionRuntime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
+      YoRegistry registry = new YoRegistry("TestMinimumJerkTrajectory");
       YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("tester", registry);
       
       long starttime, endtime;
@@ -88,7 +88,7 @@ public class YoMinimumJerkTrajectoryTest
    @Test
    public void testFindMaxVals()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
+      YoRegistry registry = new YoRegistry("TestMinimumJerkTrajectory");
       YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("tester", registry);
       
       double t = 0.0;
@@ -115,7 +115,7 @@ public class YoMinimumJerkTrajectoryTest
    @Test
    public void testTimeExtension()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
+      YoRegistry registry = new YoRegistry("TestMinimumJerkTrajectory");
       YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("tester", registry);
       
       double t = 0.0;
@@ -133,7 +133,7 @@ public class YoMinimumJerkTrajectoryTest
    @Test
    public void testZeroLength()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
+      YoRegistry registry = new YoRegistry("TestMinimumJerkTrajectory");
       YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("tester", registry);
       
       double t = 0.5e-7;
@@ -164,7 +164,7 @@ public class YoMinimumJerkTrajectoryTest
    @Test
    public void testBadInitialParams()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestMinimumJerkTrajectory");
+      YoRegistry registry = new YoRegistry("TestMinimumJerkTrajectory");
       YoMinimumJerkTrajectory minimumJerkTrajectory = new YoMinimumJerkTrajectory("tester", registry);
       
       double maxV = 10;

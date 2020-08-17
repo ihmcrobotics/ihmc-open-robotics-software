@@ -10,7 +10,6 @@ import java.util.Set;
 
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.capturePoint.SimpleLinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -58,14 +57,14 @@ import us.ihmc.simpleWholeBodyWalking.states.SimpleTransferToStandingState;
 import us.ihmc.simpleWholeBodyWalking.states.SimpleTransferToSwingState;
 import us.ihmc.simpleWholeBodyWalking.states.SimpleWalkingState;
 import us.ihmc.simpleWholeBodyWalking.states.SimpleWalkingStateEnum;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatusProvider
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final YoDouble yoTime;
 
@@ -710,7 +709,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       return balanceManager.getLinearMomentumRateControlModuleInput();
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -18,8 +18,8 @@ import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -43,7 +43,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
    }
 
    @Override
-   public void starting(final SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
+   public void starting(final SimulationConstructionSet scs, Robot robot, YoRegistry registry)
    {
       if (SETUP_SLIDER_BOARD)
       {
@@ -51,7 +51,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          createSliderBoard(scs, registry);
       }
 
-      final YoEnum<?> requestHighLevelControlMode = (YoEnum<?>) scs.getVariable(HighLevelHumanoidControllerFactory.class.getSimpleName(),
+      final YoEnum<?> requestHighLevelControlMode = (YoEnum<?>) scs.findVariable(HighLevelHumanoidControllerFactory.class.getSimpleName(),
                                                                                 "requestedHighLevelControllerState");
 
       HighLevelControllerName[] valuesToDisplay = {HighLevelControllerName.CALIBRATION, HighLevelControllerName.STAND_TRANSITION_STATE, HighLevelControllerName.EXIT_WALKING};
@@ -100,10 +100,10 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
          }
       });
 
-      requestHighLevelControlMode.addVariableChangedListener(new VariableChangedListener()
+      requestHighLevelControlMode.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             try
             {
@@ -121,10 +121,10 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       scs.addComboBox(requestControlModeComboBox);
    }
 
-   private void createSliderBoard(final SimulationConstructionSet scs, YoVariableRegistry registry)
+   private void createSliderBoard(final SimulationConstructionSet scs, YoRegistry registry)
    {
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
-      sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
+      sliderBoardConfigurationManager.setButton(1, registry.findVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
       sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.3, 0.3);
       sliderBoardConfigurationManager.setSlider(2, "desiredICPOffsetY", registry, -0.3, 0.3);
       sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);

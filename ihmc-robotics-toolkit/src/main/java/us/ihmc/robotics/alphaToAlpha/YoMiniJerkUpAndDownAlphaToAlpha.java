@@ -1,6 +1,6 @@
 package us.ihmc.robotics.alphaToAlpha;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
@@ -104,7 +104,7 @@ public class YoMiniJerkUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
 
    public static void main(String[] args)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       YoDouble startOfRampUp = new YoDouble("startOfRampUp", registry);
       YoDouble endOfRamp = new YoDouble("endOfRamp", registry);
       YoDouble startOfRampDown = new YoDouble("startOfRampDown", registry);

@@ -1,10 +1,10 @@
 package us.ihmc.simulationToolkit.controllers;
 
+import java.util.HashMap;
+import java.util.List;
+
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotController.ModularRobotController;
@@ -13,10 +13,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.HashMap;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootMotionOnTouchdownSlipper extends ModularRobotController
 {
@@ -48,11 +49,11 @@ public class FootMotionOnTouchdownSlipper extends ModularRobotController
          for (GroundContactPoint groundContactPoint : robot.getFootGroundContactPoints(robotSide))
          {
             groundContactTouchdownMap.put(groundContactPoint, new YoFramePoint3D(groundContactPoint.getName() + "AtTouchdown", ReferenceFrame.getWorldFrame(),
-                                                                                 getYoVariableRegistry()));
+                                                                                 getYoRegistry()));
          }
 
          YoBoolean footIsInContact = new YoBoolean(robotSide.getCamelCaseName() + "FootIsInContact", registry);
-         footIsInContact.addVariableChangedListener((v) -> {
+         footIsInContact.addListener((v) -> {
             if (footIsInContact.getBooleanValue())
             {
                timeAtContact.set(time.getDoubleValue());

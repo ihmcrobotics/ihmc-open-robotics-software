@@ -7,7 +7,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleTransferToSwingState extends SimpleTransferState
@@ -24,7 +24,7 @@ public class SimpleTransferToSwingState extends SimpleTransferState
                                      HighLevelHumanoidControllerToolbox controllerToolbox,
                                      SimpleControlManagerFactory managerFactory,
                                      WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                     YoVariableRegistry parentRegistry)
+                                     YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, parentRegistry);
    }

@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
 public class ICPControlPlane
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble controlPlaneHeight;
    private final ReferenceFrame centerOfMassFrame;
@@ -46,7 +46,7 @@ public class ICPControlPlane
 
    private final double gravityZ;
 
-   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
+   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.gravityZ = gravityZ;

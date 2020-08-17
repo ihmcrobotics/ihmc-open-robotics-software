@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PeterPlanarWalkerSimulation
@@ -11,7 +11,7 @@ public class PeterPlanarWalkerSimulation
       double simulationDT = 1e-4;
       
       PeterPlanarWalkerRobot robot = new PeterPlanarWalkerRobot();
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       
       PeterPlanarWalkerController walkerController = new PeterPlanarWalkerController(robot, simulationDT);
 //      FMSPeterPlanarWalkerController walkerController = new FMSPeterPlanarWalkerController(robot, simulationDT);
@@ -21,8 +21,6 @@ public class PeterPlanarWalkerSimulation
       
       
       scs.setDT(simulationDT, 100);
-      
-      scs.setMaxBufferSize(32000);
       
       scs.startOnAThread();
    }

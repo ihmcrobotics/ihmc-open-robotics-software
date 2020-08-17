@@ -1,30 +1,30 @@
 package us.ihmc.robotics.math.filters;
 
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.Random;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class WeightedAverageYoFrameVector3DTest
 {
    private static final int iters = 1000;
    private static final double epsilon = 1e-8;
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoFrameVector3D yoVariable1ToAverage;
    private YoFrameVector3D yoVariable2ToAverage;
    private YoDouble yoVariable1Weight;
@@ -34,7 +34,7 @@ public class WeightedAverageYoFrameVector3DTest
    @BeforeEach
    public void setUp()
    {
-      registry = new YoVariableRegistry("testRegistry");
+      registry = new YoRegistry("testRegistry");
       yoVariable1ToAverage = new YoFrameVector3D("variable1ToFilter", ReferenceFrame.getWorldFrame(), registry);
       yoVariable2ToAverage = new YoFrameVector3D("variable2ToFilter", ReferenceFrame.getWorldFrame(), registry);
       yoVariable1Weight = new YoDouble("variable1Weight", registry);

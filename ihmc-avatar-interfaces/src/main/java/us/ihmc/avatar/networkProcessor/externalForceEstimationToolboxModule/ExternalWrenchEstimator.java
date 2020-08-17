@@ -31,10 +31,10 @@ import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * Module to estimate unknown external wrenches, i.e. contacts that are not expected from the controller
@@ -49,7 +49,7 @@ public class ExternalWrenchEstimator implements RobotController
    private static final double defaultEstimatorGain = 0.7;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoBoolean requestInitialize = new YoBoolean("requestInitialize", registry);
 
    private final YoDouble wrenchEstimationGain = new YoDouble("wrenchEstimationGain", registry);
@@ -100,7 +100,7 @@ public class ExternalWrenchEstimator implements RobotController
                                   BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter,
                                   Consumer<DMatrixRMaj> tauSetter,
                                   YoGraphicsListRegistry graphicsListRegistry,
-                                  YoVariableRegistry parentRegistry)
+                                  YoRegistry parentRegistry)
    {
       this.joints = joints;
       this.tauSetter = tauSetter;
@@ -380,7 +380,7 @@ public class ExternalWrenchEstimator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GlitchFilteredYoInteger extends YoInteger
@@ -11,12 +11,12 @@ public class GlitchFilteredYoInteger extends YoInteger
    private final IntegerProvider windowSize;
    private final YoInteger counter;
 
-   public GlitchFilteredYoInteger(String name, int windowSize, YoVariableRegistry registry)
+   public GlitchFilteredYoInteger(String name, int windowSize, YoRegistry registry)
    {
       this(name, windowSize, null, registry);
    }
 
-   public GlitchFilteredYoInteger(String name, int windowSize, YoInteger position, YoVariableRegistry registry)
+   public GlitchFilteredYoInteger(String name, int windowSize, YoInteger position, YoRegistry registry)
    {
       super(name, GlitchFilteredYoInteger.class.getSimpleName(), registry);
 
@@ -29,12 +29,12 @@ public class GlitchFilteredYoInteger extends YoInteger
       this.windowSize = yoWindowSize;
    }
 
-   public GlitchFilteredYoInteger(String name, IntegerProvider windowSize, YoVariableRegistry registry)
+   public GlitchFilteredYoInteger(String name, IntegerProvider windowSize, YoRegistry registry)
    {
       this(name, windowSize, null, registry);
    }
 
-   public GlitchFilteredYoInteger(String name, IntegerProvider windowSize, YoInteger position, YoVariableRegistry registry)
+   public GlitchFilteredYoInteger(String name, IntegerProvider windowSize, YoInteger position, YoRegistry registry)
    {
       super(name, GlitchFilteredYoInteger.class.getSimpleName(), registry);
 
@@ -46,11 +46,11 @@ public class GlitchFilteredYoInteger extends YoInteger
    }
 
    @Override
-   public void set(int value)
+   public boolean set(int value)
    {
-      super.set(value);
       if (counter != null)
          counter.set(0);
+      return super.set(value);
    }
 
    @Override

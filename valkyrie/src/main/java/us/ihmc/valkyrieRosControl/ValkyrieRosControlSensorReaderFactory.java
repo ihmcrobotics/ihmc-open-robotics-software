@@ -34,7 +34,7 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoSwitchableFilterModeIMUHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
@@ -77,9 +77,9 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
 
    @Override
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
    {
-      YoVariableRegistry sensorReaderRegistry = new YoVariableRegistry("ValkyrieRosControlSensorReader");
+      YoRegistry sensorReaderRegistry = new YoRegistry("ValkyrieRosControlSensorReader");
 
       ArrayList<YoEffortJointHandleHolder> yoEffortJointHandleHolders = new ArrayList<>();
       ArrayList<YoPositionJointHandleHolder> yoPositionJointHandleHolders = new ArrayList<>();

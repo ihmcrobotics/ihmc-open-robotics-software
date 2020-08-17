@@ -98,7 +98,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
    {
       String headOrientatManagerName = bodyName + "Manager";
       String headControlStateName = headOrientatManagerName + "CurrentState";
-      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) scs.findVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
    }
 
    public static double[] findQPOutputJointAccelerations(OneDoFJointBasics[] neckJoints, SimulationConstructionSet scs)
@@ -106,7 +106,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       double[] qdd_ds = new double[neckJoints.length];
       for (int i = 0; i < neckJoints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + neckJoints[i].getName()).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(WholeBodyInverseDynamicsSolver.class.getSimpleName(), "qdd_qp_" + neckJoints[i].getName()).getValueAsDouble();
       }
       return qdd_ds;
    }
@@ -114,12 +114,12 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
    public static double[] findControllerDesiredJointAccelerations(OneDoFJointBasics[] neckJoints, String bodyName, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[neckJoints.length];
-      String nameSpace = bodyName + "UserControlModule";
+      String namespace = bodyName + "UserControlModule";
 
       for (int i = 0; i < neckJoints.length; i++)
       {
          String variable = bodyName + "UserMode_" + neckJoints[i].getName() + "_qdd_d";
-         qdd_ds[i] = scs.getVariable(nameSpace, variable).getValueAsDouble();
+         qdd_ds[i] = scs.findVariable(namespace, variable).getValueAsDouble();
       }
       return qdd_ds;
    }

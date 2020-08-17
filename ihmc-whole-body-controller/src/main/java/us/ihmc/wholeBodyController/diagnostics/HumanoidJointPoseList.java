@@ -10,13 +10,13 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class HumanoidJointPoseList
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    
    private final YoInteger humanoidJointPoseIndex = new YoInteger("humanoidJointPoseIndex", registry);
    
@@ -30,7 +30,7 @@ public class HumanoidJointPoseList
    {
    }
    
-   public void setParentRegistry(YoVariableRegistry parentRegistry)
+   public void setParentRegistry(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

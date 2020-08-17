@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
@@ -18,11 +18,11 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements Proce
 
    /**
     * @deprecated Use
-    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, double, ReferenceFrame)}
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoRegistry, double, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, double alpha,
                                                                              ReferenceFrame referenceFrame)
    {
       return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, referenceFrame);
@@ -30,11 +30,11 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements Proce
 
    /**
     * @deprecated Use
-    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, DoubleProvider, ReferenceFrame)}
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoRegistry, DoubleProvider, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                              DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, referenceFrame);
@@ -42,11 +42,11 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements Proce
 
    /**
     * @deprecated Use
-    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, double, FrameTuple3DReadOnly)}
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoRegistry, double, FrameTuple3DReadOnly)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, double alpha,
                                                                              FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D);
@@ -54,40 +54,40 @@ public class AlphaFilteredYoFrameVector extends YoFrameVector3D implements Proce
 
    /**
     * @deprecated Use
-    *             {@link #AlphaFilteredYoFrameVector(String, String, YoVariableRegistry, DoubleProvider, FrameTuple3DReadOnly)}
+    *             {@link #AlphaFilteredYoFrameVector(String, String, YoRegistry, DoubleProvider, FrameTuple3DReadOnly)}
     *             instead.
     */
    @Deprecated
-   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry,
+   public static AlphaFilteredYoFrameVector createAlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry,
                                                                              DoubleProvider alpha, FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       return new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D);
    }
 
-   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha, ReferenceFrame referenceFrame)
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, double alpha, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry), referenceFrame);
    }
 
-   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, alpha, referenceFrame, null);
    }
 
-   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, double alpha,
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, double alpha,
                                      FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       this(namePrefix, nameSuffix, registry, AlphaFilteredYoVariable.createAlphaYoDouble(namePrefix + nameSuffix, alpha, registry),
            unfilteredFrameTuple3D.getReferenceFrame(), unfilteredFrameTuple3D);
    }
 
-   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha,
+   public AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha,
                                      FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       this(namePrefix, nameSuffix, registry, alpha, unfilteredFrameTuple3D.getReferenceFrame(), unfilteredFrameTuple3D);
    }
 
-   private AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame,
+   private AlphaFilteredYoFrameVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alpha, ReferenceFrame referenceFrame,
                                       FrameTuple3DReadOnly unfilteredFrameTuple3D)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

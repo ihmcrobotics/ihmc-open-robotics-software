@@ -6,9 +6,10 @@ import java.util.HashMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 
-public class RobotAllJointsDataChecker implements DataProcessingFunction
+public class RobotAllJointsDataChecker implements YoBufferProcessor
 {
    private double TOLERANCE_FACTOR = 0.1;
    private double MINIMUM_TIME_TO_ACCLERATE = 1.0/20.0;
@@ -339,21 +340,21 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    }
 
    @Override
-   public void initializeProcessing()
+   public void initialize(YoVariableHolder yoVariableHolder)
    {
       for(YoVariableValueDataChecker checkers : listOfCheckers.values())
       {
-         checkers.initializeProcessing();
+         checkers.initialize(yoVariableHolder);
       }
       
    }
 
    @Override
-   public void processData()
+   public void process(int startIndex, int endIndex, int currentIndex)
    {
       for(YoVariableValueDataChecker checkers : listOfCheckers.values())
       {
-         checkers.processData();
+         checkers.process(startIndex, endIndex, currentIndex);
       }
       
    }

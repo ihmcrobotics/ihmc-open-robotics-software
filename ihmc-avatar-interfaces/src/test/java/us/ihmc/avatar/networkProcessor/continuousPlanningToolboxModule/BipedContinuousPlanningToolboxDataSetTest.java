@@ -120,7 +120,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 @Disabled
@@ -220,10 +220,10 @@ public class BipedContinuousPlanningToolboxDataSetTest
       DRCRobotModel robotModel = getRobotModel();
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
+      YoRegistry testRegistry = new YoRegistry("testRegistry");
       continuousPlanningModule = new BipedContinuousPlanningToolboxModule(robotModel, null, false, pubSubImplementation);
       continuousPlanningModule.setRootRegistry(testRegistry, null);
-      planningFailed = ((YoBoolean) testRegistry.getVariable("planningFailed"));
+      planningFailed = ((YoBoolean) testRegistry.findVariable("planningFailed"));
 
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");

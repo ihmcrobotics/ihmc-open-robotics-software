@@ -31,7 +31,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Controller demonstrating the usage of the {@link WholeBodyControllerCore} in the presence of a
@@ -39,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class InvertedFourBarLinkageWBCController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getName());
+   private final YoRegistry registry = new YoRegistry(getName());
    private final RigidBodyBasics rootBody;
    private final FourBarKinematicLoopFunction fourBarKinematicLoop;
    private final WholeBodyControllerCore controllerCore;
@@ -247,7 +247,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

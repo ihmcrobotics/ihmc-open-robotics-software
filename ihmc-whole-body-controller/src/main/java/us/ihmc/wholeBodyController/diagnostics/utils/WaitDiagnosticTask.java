@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.diagnostics.utils;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WaitDiagnosticTask extends DiagnosticTask
 {
@@ -39,7 +39,7 @@ public class WaitDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   public void attachParentYoVariableRegistry(YoRegistry parentRegistry)
    {
       // No registry, do nothing.
    }

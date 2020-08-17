@@ -12,7 +12,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This factory helps by adding complete do nothing state implementations for every enum value
@@ -34,7 +34,7 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
       factory = new StateMachineFactory<>(keyType);
       this.keyType = keyType;
       String name = keyType.getSimpleName() + "Machine";
-      getFactory().setNamePrefix(name).setRegistry(new YoVariableRegistry(name + "Registry"));
+      getFactory().setNamePrefix(name).setRegistry(new YoRegistry(name + "Registry"));
 
       stateMap = new HashMap<>();
       for (K value : EnumSet.allOf(keyType))

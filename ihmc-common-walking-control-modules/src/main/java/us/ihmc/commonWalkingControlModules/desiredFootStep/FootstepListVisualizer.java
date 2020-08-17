@@ -10,7 +10,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,12 +22,12 @@ public class FootstepListVisualizer
    public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
    public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<Color>(defaultLeftColor, defaultRightColor);
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final SideDependentList<List<FootstepVisualizer>> footstepVisualizers = new SideDependentList<>();
 
    public FootstepListVisualizer(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       String graphicListName = "FootstepVisualizer";
 

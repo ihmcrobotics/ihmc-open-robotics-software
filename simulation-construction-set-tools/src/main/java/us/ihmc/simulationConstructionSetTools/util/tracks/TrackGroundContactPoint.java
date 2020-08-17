@@ -5,7 +5,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TrackGroundContactPoint extends GroundContactPoint
@@ -13,7 +13,7 @@ public class TrackGroundContactPoint extends GroundContactPoint
    private static final long serialVersionUID = -936610163728292801L;
    public YoDouble dx_track, dy_track, dz_track;
 
-   public TrackGroundContactPoint(String name, YoVariableRegistry registry)
+   public TrackGroundContactPoint(String name, YoRegistry registry)
    {
       super(name, registry);
 

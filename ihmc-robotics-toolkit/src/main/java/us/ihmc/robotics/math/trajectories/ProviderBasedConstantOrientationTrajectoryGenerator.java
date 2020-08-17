@@ -4,24 +4,24 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public class ProviderBasedConstantOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ReferenceFrame referenceFrame;
    private final OrientationProvider orientationProvider;
    private final YoDouble time;
    private final YoDouble finalTime;
 
    public ProviderBasedConstantOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, OrientationProvider orientationProvider,
-         double finalTime, YoVariableRegistry parentRegistry)
+         double finalTime, YoRegistry parentRegistry)
    {
       MathTools.checkIntervalContains(finalTime, 0.0, Double.POSITIVE_INFINITY);
 
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.referenceFrame = referenceFrame;
       this.orientationProvider = orientationProvider;
       this.finalTime = new YoDouble("finalTime", registry);

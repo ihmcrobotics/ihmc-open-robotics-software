@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import java.util.List;
+
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.List;
 
 public class CapturePointTrajectoryTools
 {

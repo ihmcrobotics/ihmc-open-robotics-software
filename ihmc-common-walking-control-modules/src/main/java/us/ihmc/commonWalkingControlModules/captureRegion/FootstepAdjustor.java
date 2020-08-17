@@ -15,7 +15,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Provides the function adjustFootstep which takes a footstep and a capture region
@@ -32,7 +32,7 @@ public class FootstepAdjustor
    private static final boolean VISUALIZE = true;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
+   private final YoRegistry registry = new YoRegistry("FootstepAdjustor");
 
    private final SideDependentList<ConvexPolygon2D> defaultSupportPolygons;
 
@@ -41,7 +41,7 @@ public class FootstepAdjustor
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry,
+   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       parentRegistry.addChild(registry);

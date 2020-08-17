@@ -11,11 +11,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ekf.filter.FilterTools;
 import us.ihmc.ekf.filter.FilterTools.ProccessNoiseModel;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -32,10 +28,10 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 @Disabled // FIXME This test didn't work when merging the PR. The estimator seems to being poorly setup or updated.
 public class EKFHeadPoseEstimatorTest
@@ -47,7 +43,7 @@ public class EKFHeadPoseEstimatorTest
    @Test
    public void testSimpleTrajectory() throws IOException
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       FilterTools.proccessNoiseModel = ProccessNoiseModel.PIECEWISE_CONTINUOUS_ACCELERATION;
 
       double duration = 30.0;
@@ -77,7 +73,7 @@ public class EKFHeadPoseEstimatorTest
 
       // Create an EKF based orientation estimator:
       EKFHeadPoseEstimator poseEstimator = new EKFHeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true);
-      registry.addChild(poseEstimator.getYoVariableRegistry());
+      registry.addChild(poseEstimator.getYoRegistry());
       XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
       Set<String> defaultParameters = new HashSet<>();
       Set<String> unmatchedParameters = new HashSet<>();

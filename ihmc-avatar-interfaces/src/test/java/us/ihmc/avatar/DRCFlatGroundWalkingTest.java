@@ -154,21 +154,21 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
-      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
+      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
+      YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
       if (comError == null)
       {
-         comError = (YoDouble) scs.getVariable("pelvisErrorPositionZ");
+         comError = (YoDouble) scs.findVariable("pelvisErrorPositionZ");
       }
-      YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) scs.getVariable("userUpdateDesiredPelvisPose");
-      YoBoolean userDoPelvisPose = (YoBoolean) scs.getVariable("userDoPelvisPose");
-      YoDouble userDesiredPelvisPoseYaw = (YoDouble) scs.getVariable("userDesiredPelvisPoseYaw");
-      YoDouble userDesiredPelvisPoseTrajectoryTime = (YoDouble) scs.getVariable("userDesiredPelvisPoseTrajectoryTime");
-      YoDouble icpErrorX = (YoDouble) scs.getVariable("icpErrorX");
-      YoDouble icpErrorY = (YoDouble) scs.getVariable("icpErrorY");
+      YoBoolean userUpdateDesiredPelvisPose = (YoBoolean) scs.findVariable("userUpdateDesiredPelvisPose");
+      YoBoolean userDoPelvisPose = (YoBoolean) scs.findVariable("userDoPelvisPose");
+      YoDouble userDesiredPelvisPoseYaw = (YoDouble) scs.findVariable("userDesiredPelvisPoseYaw");
+      YoDouble userDesiredPelvisPoseTrajectoryTime = (YoDouble) scs.findVariable("userDesiredPelvisPoseTrajectoryTime");
+      YoDouble icpErrorX = (YoDouble) scs.findVariable("icpErrorX");
+      YoDouble icpErrorY = (YoDouble) scs.findVariable("icpErrorY");
 
-      YoDouble controllerICPErrorX = (YoDouble) scs.getVariable("controllerICPErrorX");
-      YoDouble controllerICPErrorY = (YoDouble) scs.getVariable("controllerICPErrorY");
+      YoDouble controllerICPErrorX = (YoDouble) scs.findVariable("controllerICPErrorX");
+      YoDouble controllerICPErrorY = (YoDouble) scs.findVariable("controllerICPErrorY");
 
       drcSimulationTestHelper.simulateAndBlock(standingTimeDuration);
 
@@ -257,23 +257,23 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private void verifyDesiredICPIsContinous(SimulationConstructionSet scs)
    {
-      YoDouble desiredICPX = (YoDouble) scs.getVariable("desiredICPX");
-      YoDouble desiredICPY = (YoDouble) scs.getVariable("desiredICPY");
-      YoDouble t = (YoDouble) scs.getVariable("t");
+      YoDouble desiredICPX = (YoDouble) scs.findVariable("desiredICPX");
+      YoDouble desiredICPY = (YoDouble) scs.findVariable("desiredICPY");
+      YoDouble t = (YoDouble) scs.findVariable("t");
 
       scs.gotoInPointNow();
       while(Math.abs(desiredICPX.getDoubleValue()) < 1e-4)
       {
-         scs.tick(1);
+         scs.tickAndReadFromBuffer(1);
       }
       scs.setInPoint();
 
       scs.cropBuffer();
-      double[] desiredICPXData = scs.getDataBuffer().getEntry(desiredICPX).getData();
-      double[] desiredICPYData = scs.getDataBuffer().getEntry(desiredICPY).getData();
+      double[] desiredICPXData = scs.getDataBuffer().getEntry(desiredICPX).getBuffer();
+      double[] desiredICPYData = scs.getDataBuffer().getEntry(desiredICPY).getBuffer();
 
 
-      double[] tValues = scs.getDataBuffer().getEntry(t).getData();
+      double[] tValues = scs.getDataBuffer().getEntry(t).getBuffer();
       double dt = tValues[1] - tValues[0];
 
       // Setting max velocity of desired ICP to 3.0.

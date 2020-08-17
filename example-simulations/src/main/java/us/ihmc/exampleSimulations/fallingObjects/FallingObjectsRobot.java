@@ -31,7 +31,7 @@ public class FallingObjectsRobot extends Robot {
 
 
         GroundContactModel groundModel = new LinearGroundContactModel(this, 1422, 150.6, 50.0, 1000.0,
-                this.getRobotsYoVariableRegistry());
+                this.getRobotsYoRegistry());
         GroundProfile3D profile = new BumpyGroundProfile();
         groundModel.setGroundProfile3D(profile);
         this.setGroundContactModel(groundModel);

@@ -20,8 +20,8 @@ import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -40,7 +40,7 @@ public class IndividualRobotiqHandController implements RobotController
    private final boolean DEBUG = false;
    
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final RobotSide robotSide;
 
@@ -70,10 +70,10 @@ public class IndividualRobotiqHandController implements RobotController
    private StateMachine<GraspState, State> stateMachine;
 
    public IndividualRobotiqHandController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FloatingRootJointRobot simulatedRobot,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-      registry = new YoVariableRegistry(sidePrefix + name);
+      registry = new YoRegistry(sidePrefix + name);
       parentRegistry.addChild(registry);
       this.robotSide = robotSide;
       this.yoTime = yoTime;
@@ -123,10 +123,10 @@ public class IndividualRobotiqHandController implements RobotController
       hasTrajectoryTimeChanged = new YoBoolean(sidePrefix + "HasTrajectoryTimeChanged", registry);
       isStopped = new YoBoolean(sidePrefix + "IsStopped", registry);
       isStopped.set(false);
-      trajectoryTime.addVariableChangedListener(new VariableChangedListener()
+      trajectoryTime.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             hasTrajectoryTimeChanged.set(true);
          }
@@ -867,7 +867,7 @@ public class IndividualRobotiqHandController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

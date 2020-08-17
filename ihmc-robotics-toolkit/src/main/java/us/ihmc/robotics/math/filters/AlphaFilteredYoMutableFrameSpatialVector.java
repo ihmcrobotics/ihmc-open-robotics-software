@@ -5,14 +5,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AlphaFilteredYoMutableFrameSpatialVector extends YoMutableFrameSpatialVector
 {
    private final AlphaFilteredYoMutableFrameVector3D alphaFilteredAngularPart;
    private final AlphaFilteredYoMutableFrameVector3D alphaFilteredLinearPart;
 
-   public AlphaFilteredYoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaAngularPart,
+   public AlphaFilteredYoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alphaAngularPart,
                                        DoubleProvider alphaLinearPart, FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
       super(new AlphaFilteredYoMutableFrameVector3D(namePrefix, nameSuffix, registry, alphaAngularPart, rawAngularPart),
@@ -21,7 +21,7 @@ public class AlphaFilteredYoMutableFrameSpatialVector extends YoMutableFrameSpat
       this.alphaFilteredLinearPart = (AlphaFilteredYoMutableFrameVector3D) getLinearPart();
    }
 
-   public AlphaFilteredYoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaAngularPart,
+   public AlphaFilteredYoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alphaAngularPart,
                                        DoubleProvider alphaLinearPart, YoFixedFrameSpatialVector rawSpatialVector)
    {
       super(new AlphaFilteredYoMutableFrameVector3D(namePrefix, nameSuffix, registry, alphaAngularPart, rawSpatialVector.getAngularPart()),

@@ -3,14 +3,14 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 
 public class ModularRawOutputWriter implements RawOutputWriter
 {
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
    private final String description;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    public ModularRawOutputWriter(String name, String description, RawOutputWriter rawOutputWriter)
    {
@@ -41,13 +41,13 @@ public class ModularRawOutputWriter implements RawOutputWriter
    public ModularRawOutputWriter(String name, String description)
    {
       this.description = description;
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
    }
 
    public void addRawOutputWriter(RawOutputWriter rawOutputWriter)
    {
       this.rawOutputWriters.add(rawOutputWriter);
-      this.registry.addChild(rawOutputWriter.getYoVariableRegistry());
+      this.registry.addChild(rawOutputWriter.getYoRegistry());
    }
 
    @Override
@@ -69,7 +69,7 @@ public class ModularRawOutputWriter implements RawOutputWriter
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

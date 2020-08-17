@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DelayedYoBoolean extends YoBoolean
@@ -9,7 +9,7 @@ public class DelayedYoBoolean extends YoBoolean
 
    private final YoBoolean[] previousYoVariables;
 
-   public DelayedYoBoolean(String name, String description, YoBoolean variableToDelay, int ticksToDelay, YoVariableRegistry registry)
+   public DelayedYoBoolean(String name, String description, YoBoolean variableToDelay, int ticksToDelay, YoRegistry registry)
    {
       super(name, description, registry);
 

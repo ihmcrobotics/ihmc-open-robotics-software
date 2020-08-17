@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PIDControllerTest
@@ -34,7 +34,7 @@ public class PIDControllerTest
 	@Test
    public void testPIDControllerConstructor()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       YoDouble proportional = new YoDouble("proportional", registry);
       proportional.set(2.0);
 
@@ -57,7 +57,7 @@ public class PIDControllerTest
    @Test
    public void testPIDControllerConstructorFromGains()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double proportional = random.nextDouble();
       double integral = random.nextDouble();
@@ -89,7 +89,7 @@ public class PIDControllerTest
    @Test
    public void testPIDControllerConstructorFromGains2()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double proportional = random.nextDouble();
       double integral = random.nextDouble();
@@ -119,7 +119,7 @@ public class PIDControllerTest
    @Test
    public void testPIDControllerConstructorFromGains3()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double proportional = random.nextDouble();
       double integral = random.nextDouble();
@@ -147,7 +147,7 @@ public class PIDControllerTest
    @Test
    public void testPIDControllerConstructorFromGains4()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double proportional = random.nextDouble();
       double integral = random.nextDouble();
@@ -173,7 +173,7 @@ public class PIDControllerTest
 	@Test
    public void testGetProportionalGain()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       assertEquals(0.0, pid.getProportionalGain(), 0.001);
    }
@@ -181,7 +181,7 @@ public class PIDControllerTest
 	@Test
    public void testGetIntegralGain()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       assertEquals(0.0, pid.getIntegralGain(), 0.001);
    }
@@ -189,7 +189,7 @@ public class PIDControllerTest
 	@Test
    public void testGetDerivativeGain()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       assertEquals(0.0, pid.getDerivativeGain(), 0.001);
    }
@@ -197,7 +197,7 @@ public class PIDControllerTest
    @Test
    public void testGetDeadband()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       PIDController pid = new PIDController("", registry);
       assertEquals(0.0, pid.getPositionDeadband(), 0.001);
    }
@@ -205,7 +205,7 @@ public class PIDControllerTest
 	@Test
    public void testGetMaxIntegralError()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       assertEquals(Double.POSITIVE_INFINITY, pid.getMaxIntegralError(), 0.001);
    }
@@ -213,7 +213,7 @@ public class PIDControllerTest
 	@Test
    public void testGetCumulativeError()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       assertEquals(0.0, pid.getCumulativeError(), 0.001);
    }
@@ -221,7 +221,7 @@ public class PIDControllerTest
    @Test
    public void testGetLeakRate()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       PIDController pid = new PIDController("", registry);
       assertEquals(1.0, pid.getIntegralLeakRatio(), 0.001);
    }
@@ -229,7 +229,7 @@ public class PIDControllerTest
 	@Test
    public void testSetProportionalGain()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       pid.setProportionalGain(5.0);
       assertEquals(5.0, pid.getProportionalGain(), 0.001);
@@ -238,7 +238,7 @@ public class PIDControllerTest
 	@Test
    public void testSetIntegralGain()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       pid.setIntegralGain(5.0);
       assertEquals(5.0, pid.getIntegralGain(), 0.001);
@@ -247,7 +247,7 @@ public class PIDControllerTest
 	@Test
    public void testSetDerivativeGain()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       pid.setDerivativeGain(5.0);
       assertEquals(5.0, pid.getDerivativeGain(), 0.001);
@@ -258,7 +258,7 @@ public class PIDControllerTest
    {
       double deadband = random.nextDouble() * 10.0;
 
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       PIDController pid = new PIDController("", registry);
       pid.setPositionDeadband(deadband);
       assertEquals(deadband, pid.getPositionDeadband(), 0.001);
@@ -267,7 +267,7 @@ public class PIDControllerTest
 	@Test
    public void testSetMaxIntegralError()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       pid.setMaxIntegralError(5.0);
       assertEquals(5.0, pid.getMaxIntegralError(), 0.001);
@@ -276,7 +276,7 @@ public class PIDControllerTest
 	@Test
    public void testSetCumulativeError()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       PIDController pid = new PIDController("", registry);
       pid.setCumulativeError(5.0);
       assertEquals(5.0, pid.getCumulativeError(), 0.001);
@@ -286,7 +286,7 @@ public class PIDControllerTest
    public void testSetIntegralLeakRatio()
    {
       double leakRatio = random.nextDouble();
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       PIDController pid = new PIDController("", registry);
       pid.setIntegralLeakRatio(leakRatio);
       assertEquals(leakRatio, pid.getIntegralLeakRatio(), 0.001);
@@ -295,7 +295,7 @@ public class PIDControllerTest
    @Test
    public void testSetIntegralLeakRatio2()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       PIDController pid = new PIDController("", registry);
 
       double leakRatio = random.nextDouble() * 100.0;
@@ -312,10 +312,10 @@ public class PIDControllerTest
    @Test
    public void testSetIntegralLeakRatio3()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       PIDController pid = new PIDController("", registry);
 
-      YoDouble yoLeakRatio = (YoDouble)registry.getVariable("leak_");
+      YoDouble yoLeakRatio = (YoDouble)registry.findVariable("leak_");
 
       double leakRatio = random.nextDouble();
       yoLeakRatio.set(leakRatio);
@@ -336,7 +336,7 @@ public class PIDControllerTest
 	@Test
    public void testCompute()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("mike");
+      YoRegistry registry = new YoRegistry("mike");
       YoDouble proportional = new YoDouble("proportional", registry);
       proportional.set(3.0);
 
@@ -362,7 +362,7 @@ public class PIDControllerTest
    @Test
    public void testComputeFromYoPIDGains()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double proportional = 3.0;
       double integral = 2.0;
@@ -503,7 +503,7 @@ public class PIDControllerTest
    @Test
    public void testCompute_all_PID_From_YoPID()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       YoPIDGains pidGains = new YoPIDGains("", registry);
       double proportional = 2.0;

@@ -17,7 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeInterval;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -34,7 +34,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
    private static final double nominalLength = 1.0;
    private static final double nominalWidth = 0.5;
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoDouble omega;
    private YoDouble time;
    private QuadrantDependentList<MovingReferenceFrame> soleFrames;
@@ -44,7 +44,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
    @BeforeEach
    public void construct()
    {
-      registry = new YoVariableRegistry("test");
+      registry = new YoRegistry("test");
       omega = new YoDouble("omega", registry);
       omega.set(omegaValue);
 

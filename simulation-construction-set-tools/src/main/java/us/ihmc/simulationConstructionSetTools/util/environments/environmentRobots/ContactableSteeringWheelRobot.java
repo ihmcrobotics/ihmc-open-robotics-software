@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -87,9 +87,9 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       setProperties(steeringWheelRadius, steerigColunmLength, steeringWheelThickness, spokesThickness, totalNumberOfPossibleTurns, mass);
       setPoseInWorld(steeringWheelPoseInWorld);
       setMass(mass);
-      steeringDamping = new YoDouble(getName() + "SteeringDamping", yoVariableRegistry);
+      steeringDamping = new YoDouble(getName() + "SteeringDamping", yoRegistry);
       steeringDamping.set(DEFAULT_DAMPING);
-      steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion = new YoDouble("steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion", yoVariableRegistry);
+      steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion = new YoDouble("steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion", yoRegistry);
       steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set(0.0);
    }
 
@@ -239,11 +239,11 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
       yoGraphicsListRegistries.add(graphListRegistry);
 
-      steeringWheelPinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
+      steeringWheelPinJoint.getQYoVariable().addListener(new YoVariableChangedListener()
       {
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             double rangeOfMotion = 2 * Math.PI * totalNumberOfPossibleTurns;
             steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQYoVariable().getDoubleValue())

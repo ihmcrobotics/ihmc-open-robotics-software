@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @see FeedbackControllerData
@@ -17,7 +17,7 @@ public class FBVector3D extends YoMutableFrameVector3D implements FeedbackContro
    private final SpaceData3D space;
    private int commandId;
 
-   public FBVector3D(String namePrefix, Type type, SpaceData3D space, YoVariableRegistry registry)
+   public FBVector3D(String namePrefix, Type type, SpaceData3D space, YoRegistry registry)
    {
       super(FeedbackControllerData.createNamePrefix(namePrefix, type, space), "", registry);
 

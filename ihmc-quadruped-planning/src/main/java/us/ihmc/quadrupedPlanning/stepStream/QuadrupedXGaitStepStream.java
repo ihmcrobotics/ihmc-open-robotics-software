@@ -7,7 +7,7 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class QuadrupedXGaitStepStream
 {
    private static int NUMBER_OF_PREVIEW_STEPS = 16;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble minimumStepClearance = new YoDouble("minimumStepClearance", registry);
    private final YoDouble timestamp;
 
@@ -29,7 +29,7 @@ public class QuadrupedXGaitStepStream
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
 
    public QuadrupedXGaitStepStream(QuadrupedXGaitSettingsBasics gaitSettings, YoDouble timestamp,
-                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, DoubleProvider firstStepDelay, YoVariableRegistry parentRegistry)
+                                   QuadrupedPlanarBodyPathProvider bodyPathProvider, DoubleProvider firstStepDelay, YoRegistry parentRegistry)
    {
       this.xGaitSettings = gaitSettings;
       this.timestamp = timestamp;

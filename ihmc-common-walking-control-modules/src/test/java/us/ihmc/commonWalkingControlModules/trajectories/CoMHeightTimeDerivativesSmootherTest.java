@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CoMHeightTimeDerivativesSmootherTest
@@ -39,7 +39,7 @@ public class CoMHeightTimeDerivativesSmootherTest
    public void testConstantHeight()
    {
       double dt = 0.001;
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       CoMHeightTimeDerivativesSmoother smoother = new CoMHeightTimeDerivativesSmoother(dt, registry);
 
       YoCoMHeightTimeDerivativesData comHeightDataOut = new YoCoMHeightTimeDerivativesData("out", registry);
@@ -73,14 +73,14 @@ public class CoMHeightTimeDerivativesSmootherTest
       boolean visualize = false;
 
       double dt = 0.002;
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       YoDouble testTime = new YoDouble("testTime", registry);
 
       SimulationConstructionSet scs = null;
       if (visualize)
       {
          scs = new SimulationConstructionSet(new Robot("Null"));
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
 
@@ -165,7 +165,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       boolean visualize = false;
 
       double dt = 0.002;
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       YoDouble testTime = new YoDouble("testTime", registry);
 
       YoDouble amplitude = new YoDouble("amplitude", registry);
@@ -178,7 +178,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       if (visualize)
       {
          scs = new SimulationConstructionSet(new Robot("Null"));
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
 

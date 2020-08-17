@@ -48,12 +48,6 @@ public class MultiContactImpulseCalculatorTest
    private static final double EPSILON = 2.0e-12;
    private static final double POST_IMPULSE_VELOCITY_EPSILON = 5.0e-8;
 
-   @BeforeAll
-   public static void disableStackTrace()
-   {
-      YoVariable.SAVE_STACK_TRACE = false;
-   }
-
    @Test
    public void testTwoFloatingBodies() throws Throwable
    {

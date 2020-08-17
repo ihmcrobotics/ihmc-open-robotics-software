@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController.diagnostics.utils;
 import java.util.ArrayDeque;
 import java.util.logging.Logger;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -12,7 +12,7 @@ public class DiagnosticTaskExecutor
 {
    private Logger logger;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoInteger currentTaskIndex;
    private final YoInteger numberOfTasksRemaining;
    private final YoBoolean isDone;
@@ -24,7 +24,7 @@ public class DiagnosticTaskExecutor
    private DiagnosticTask currentTask;
    private final ArrayDeque<DiagnosticTask> taskQueue = new ArrayDeque<>();
 
-   public DiagnosticTaskExecutor(String namePrefix, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public DiagnosticTaskExecutor(String namePrefix, YoDouble yoTime, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 

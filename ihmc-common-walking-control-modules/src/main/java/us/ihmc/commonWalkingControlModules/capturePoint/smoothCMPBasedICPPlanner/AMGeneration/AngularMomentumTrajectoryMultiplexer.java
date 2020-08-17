@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHan
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -21,7 +21,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
 {
    private static final int maxNumberOfStepsToConsider = 4;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean usingReferenceAngularMomentum = new YoBoolean("usingReferenceAngularMomentum", registry);
 
    /** Reference angular momentum trajectory supplied externally */
@@ -34,13 +34,13 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    private boolean planTransferAngularMomentum;
 
    public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
-                                               boolean debug, YoVariableRegistry parentRegistry)
+                                               boolean debug, YoRegistry parentRegistry)
    {
       this(namePrefix, momentumTrajectoryHandler, yoTime, omega0, debug, true, parentRegistry);
    }
 
    public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
-                                               boolean debug, boolean createAngularMomentumPredictor, YoVariableRegistry parentRegistry)
+                                               boolean debug, boolean createAngularMomentumPredictor, YoRegistry parentRegistry)
    {
       if (createAngularMomentumPredictor)
       {

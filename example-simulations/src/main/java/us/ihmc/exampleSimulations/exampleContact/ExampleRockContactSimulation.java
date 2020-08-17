@@ -21,19 +21,15 @@ import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobot
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationConstructionSetTools.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.GroundContactModel;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ExampleRockContactSimulation
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("ExampleRockContactSimulation");
+   private final YoRegistry registry = new YoRegistry("ExampleRockContactSimulation");
    private final YoFramePoint3D groundCheckPoint = new YoFramePoint3D("groundCheckPoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D groundClosestPoint = new YoFramePoint3D("groundClosestPoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D groundClosestNormal = new YoFrameVector3D("groundClosestNormal", ReferenceFrame.getWorldFrame(), registry);
@@ -100,7 +96,7 @@ public class ExampleRockContactSimulation
 //            kXY, bXY, kZ, bZ, alphaSlip, alphaStick, contactableBoxRobot.getRobotsYoVariableRegistry());  
       
       GroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(contactableBoxRobot, 
-            kXY, bXY, kZ, bZ, alphaSlip, alphaStick, contactableBoxRobot.getRobotsYoVariableRegistry()); 
+            kXY, bXY, kZ, bZ, alphaSlip, alphaStick, contactableBoxRobot.getRobotsYoRegistry()); 
       
       groundContactModel.setGroundProfile3D(combinedTerrainObject);
       contactableBoxRobot.setGroundContactModel(groundContactModel);
@@ -117,7 +113,7 @@ public class ExampleRockContactSimulation
 //      scs.setDT(1e-4 / tics, (int)(5*tics));
       scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
       
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       
       scs.setGroundVisible(false);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);

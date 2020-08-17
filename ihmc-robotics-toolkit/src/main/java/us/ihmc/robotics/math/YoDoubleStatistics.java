@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoDoubleStatistics
 {
    private final YoDouble variable;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    
    private YoDouble min;
    private YoDouble max;
@@ -17,15 +17,15 @@ public class YoDoubleStatistics
    private long ticks = 0;
    private double total = 0;
    
-   public YoDoubleStatistics(YoDouble variable, YoVariableRegistry registry)
+   public YoDoubleStatistics(YoDouble variable, YoRegistry registry)
    {
       this.variable = variable;
       this.registry = registry;
       
-      variable.addVariableChangedListener(this::update);
+      variable.addListener(this::update);
    }
    
-   private void update(YoVariable<?> v)
+   private void update(YoVariable v)
    {
       double value = variable.getDoubleValue();
       

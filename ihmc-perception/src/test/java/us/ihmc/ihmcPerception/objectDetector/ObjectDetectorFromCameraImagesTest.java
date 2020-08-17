@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -57,7 +57,7 @@ public class ObjectDetectorFromCameraImagesTest
       RigidBodyTransform transformFromReportedToFiducialFrame = new RigidBodyTransform();
       transformFromReportedToFiducialFrame.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI / 2.0);
 
-      final ObjectDetectorFromCameraImages detector = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, simpleRobotWithCamera.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      final ObjectDetectorFromCameraImages detector = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, simpleRobotWithCamera.getRobotsYoRegistry(), yoGraphicsListRegistry);
 
       detector.setFieldOfView(fieldOfView, fieldOfView);
 
@@ -121,22 +121,22 @@ public class ObjectDetectorFromCameraImagesTest
 
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 
-      YoBoolean objectTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.getVariable("objectTargetIDHasBeenLocated");
+      YoBoolean objectTargetIDHasBeenLocated = (YoBoolean) scsForDetecting.findVariable("objectTargetIDHasBeenLocated");
 
-      YoDouble objectReportedPoseWorldFrameX = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameX");
-      YoDouble objectReportedPoseWorldFrameY = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameY");
-      YoDouble objectReportedPoseWorldFrameZ = (YoDouble) scsForDetecting.getVariable("objectReportedPoseWorldFrameZ");
+      YoDouble objectReportedPoseWorldFrameX = (YoDouble) scsForDetecting.findVariable("objectReportedPoseWorldFrameX");
+      YoDouble objectReportedPoseWorldFrameY = (YoDouble) scsForDetecting.findVariable("objectReportedPoseWorldFrameY");
+      YoDouble objectReportedPoseWorldFrameZ = (YoDouble) scsForDetecting.findVariable("objectReportedPoseWorldFrameZ");
 
-      YoDouble q_object_x = (YoDouble) scsForDetecting.getVariable("q_object_x");
-      YoDouble q_object_y = (YoDouble) scsForDetecting.getVariable("q_object_y");
-      YoDouble q_object_z = (YoDouble) scsForDetecting.getVariable("q_object_z");
+      YoDouble q_object_x = (YoDouble) scsForDetecting.findVariable("q_object_x");
+      YoDouble q_object_y = (YoDouble) scsForDetecting.findVariable("q_object_y");
+      YoDouble q_object_z = (YoDouble) scsForDetecting.findVariable("q_object_z");
 
       final YoDouble time = simpleRobotWithCamera.getYoTime();
 
-      time.addVariableChangedListener(new VariableChangedListener()
+      time.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             double t = time.getDoubleValue();
             double ampX = 0.05;

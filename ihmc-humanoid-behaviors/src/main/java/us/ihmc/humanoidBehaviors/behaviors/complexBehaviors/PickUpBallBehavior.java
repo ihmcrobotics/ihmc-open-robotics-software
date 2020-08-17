@@ -142,7 +142,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       for (AbstractBehavior behavior : behaviors)
       {
-         registry.addChild(behavior.getYoVariableRegistry());
+         registry.addChild(behavior.getYoRegistry());
       }
    }
 

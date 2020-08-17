@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private static final double maxSwingSpeed = 1.0;
 
    public FootstepDataListWithSwingOverTrajectoriesAssembler(HumanoidReferenceFrames humanoidReferenceFrames,
-                                                             WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry,
+                                                             WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry,
                                                              YoGraphicsListRegistry graphicsListRegistry)
    {
       this.humanoidReferenceFrames = humanoidReferenceFrames;

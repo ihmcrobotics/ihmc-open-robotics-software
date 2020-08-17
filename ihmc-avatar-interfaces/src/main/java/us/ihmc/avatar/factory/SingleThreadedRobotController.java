@@ -4,19 +4,19 @@ import java.util.List;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.SingleThreadedScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.Task;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class SingleThreadedRobotController<C> implements DisposableRobotController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final SingleThreadedScheduler<C> singleThreadedScheduler;
    private final YoLong schedulerTick;
 
    public SingleThreadedRobotController(String name, List<? extends Task<C>> tasks, C masterContext)
    {
       singleThreadedScheduler = new SingleThreadedScheduler<>(tasks, masterContext);
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       schedulerTick = new YoLong("SchedulerTick", registry);
    }
 
@@ -26,7 +26,7 @@ public class SingleThreadedRobotController<C> implements DisposableRobotControll
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

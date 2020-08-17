@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ControllerFailedTransitionFactory implements ControllerStateTransitionFactory<HighLevelControllerName>
 {
@@ -34,7 +34,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
    @Override
    public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends State> controllerStateMap,
                                                                               HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                                              YoVariableRegistry parentRegistry)
+                                                                              YoRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;

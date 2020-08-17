@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPQPIndexHandlerTest
 {
    @Test
    public void testRegisterFootstep()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
       indexHandler.registerFootstep();
 
       Assert.assertTrue(indexHandler.useStepAdjustment());
@@ -23,7 +23,7 @@ public class ICPQPIndexHandlerTest
    @Test
    public void testSizing()
    {
-      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoVariableRegistry("dummy"));
+      ICPQPIndexHandler indexHandler = new ICPQPIndexHandler(new YoRegistry("dummy"));
 
       Assert.assertEquals(0, indexHandler.getCoPFeedbackIndex());
       Assert.assertFalse(indexHandler.hasCMPFeedbackTask());
