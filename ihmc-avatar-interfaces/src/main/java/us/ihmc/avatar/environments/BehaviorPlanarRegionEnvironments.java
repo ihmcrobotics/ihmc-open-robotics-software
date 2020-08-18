@@ -364,7 +364,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
    
    private static void generateFlatCinderBlockSteps(PlanarRegionsListGenerator generator)
    {
-      PlanarRegionsListExamples.generateFlatCinderBlockSteps(generator, cinderSquareSurfaceSize, cinderThickness, 3, 3, Z_STEP_UP_PER_ROW + 0.04);
+      PlanarRegionsListExamples.generateFlatCinderBlockSteps(generator, cinderSquareSurfaceSize, cinderThickness, 3, 3, 0.11 + 0.04);
    }
    private static void generateAngledCinderBlockSteps(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
    {
