@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
@@ -116,7 +115,6 @@ public class LQRJumpMomentumController
    final DMatrixRMaj A2Exponential = new DMatrixRMaj(6, 6);
    final DMatrixRMaj timeScaledA2 = new DMatrixRMaj(6, 6);
    final DMatrixRMaj summedBetas = new DMatrixRMaj(6, 1);
-   final DMatrixRMaj summedGammas = new DMatrixRMaj(6, 1);
 
    private final DMatrixRMaj finalVRPState = new DMatrixRMaj(6, 1);
 
@@ -127,8 +125,6 @@ public class LQRJumpMomentumController
 
    final RecyclingArrayList<DMatrixRMaj> alphas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
    final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> betas = new RecyclingArrayList<>(
-         () -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
-   final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> gammas = new RecyclingArrayList<>(
          () -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
 
    final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
@@ -142,7 +138,7 @@ public class LQRJumpMomentumController
    private boolean shouldUpdateP = true;
 
    private final HashMap<Trajectory3D, CDRESolver> s1Contact = new HashMap<>();
-   private final HashMap<Trajectory3D, QuadraticS1Function> s1Flight = new HashMap<>();
+   private final HashMap<Trajectory3D, FlightS1Function> s1Flight = new HashMap<>();
 
    public LQRJumpMomentumController(DoubleProvider omega)
    {
@@ -316,7 +312,7 @@ public class LQRJumpMomentumController
             tempMatrix.set(Ad2);
             CommonOps_DDRM.addEquals(tempMatrix, duration, Ad1);
 
-            QuadraticS1Function s1Function = new QuadraticS1Function();
+            FlightS1Function s1Function = new FlightS1Function();
             s1Function.set(Ad1, tempMatrix, nextInitialS1);
 
             s1Flight.put(thisVRPTrajectory, s1Function);
@@ -346,18 +342,14 @@ public class LQRJumpMomentumController
    {
       for (int i = 0; i < betas.size(); i++)
          betas.get(i).clear();
-      for (int i = 0; i < gammas.size(); i++)
-         gammas.get(i).clear();
 
       betas.clear();
-      gammas.clear();
       alphas.clear();
 
       for (int j = 0; j < relativeVRPTrajectories.size(); j++)
       {
          alphas.add().zero();
          betas.add();
-         gammas.add();
       }
    }
 
@@ -374,10 +366,6 @@ public class LQRJumpMomentumController
          for (int i = 0; i <= k; i++)
          {
             betas.get(j).add().zero();
-         }
-         for (int i = 0; i < 3; i++)
-         {
-            gammas.get(j).add().zero();
          }
 
          if (contactStateProviders.get(j).getContactState().isLoadBearing())
@@ -448,19 +436,7 @@ public class LQRJumpMomentumController
             CommonOps_DDRM.multTransA(Ad1, S1Hat, Ad1TransposeS1);
             CommonOps_DDRM.multTransA(Ad2, S1Hat, Ad2TransposeS1);
 
-            // gamma 0 = 2 Ad2Transpose S1 Bd2 g
-            CommonOps_DDRM.mult(2, Ad2TransposeS1, Bd2g, gammas.get(j).get(0));
 
-            // gamma 1 = 2 Ad1Transpose S1 Bd2 g + 2 Ad2Transpose S1 Bd1 g
-            CommonOps_DDRM.mult(2, Ad1TransposeS1, Bd2g, gammas.get(j).get(1));
-            CommonOps_DDRM.multAdd(2, Ad2TransposeS1, Bd1g, gammas.get(j).get(1));
-
-            // gamma 3 = 2 Ad1Transpose S1 Bd1 g
-            CommonOps_DDRM.mult(2, Ad1TransposeS1, Bd1g, gammas.get(j).get(2));
-
-            CommonOps_DDRM.scale(duration, gammas.get(j).get(0), s2Hat);
-            CommonOps_DDRM.addEquals(s2Hat, d2, gammas.get(j).get(1));
-            CommonOps_DDRM.addEquals(s2Hat, d3, gammas.get(j).get(2));
          }
       }
    }
