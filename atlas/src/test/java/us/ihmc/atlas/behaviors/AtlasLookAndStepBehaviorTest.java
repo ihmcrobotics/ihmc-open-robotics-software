@@ -267,7 +267,7 @@ public class AtlasLookAndStepBehaviorTest
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(INTRAPROCESS);
-      kinematicsSimulationParameters.setLogToFile(true);
+      kinematicsSimulationParameters.setLogToFile(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
          kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos")); // TODO: Get logging on Bamboo working
