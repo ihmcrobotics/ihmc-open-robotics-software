@@ -11,7 +11,6 @@ import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.property.StoredPropertyKey;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
 
@@ -32,7 +31,7 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Rectangle clearanceBox;
    @FXML
-   private CheckBox logTuningMode;
+   private CheckBox tuningMode;
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
    private static final double leftFootOriginX = 30;
@@ -59,7 +58,7 @@ public class FootstepPlannerParametersUIController
       tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
       tableViewWrapper.setTableUpdatedCallback(() ->
       {
-         if (logTuningMode.isSelected())
+         if (tuningMode.isSelected())
          {
             LogTools.info("Log tuning mode: Replanning...");
             messager.submitMessage(ComputePath, true);
