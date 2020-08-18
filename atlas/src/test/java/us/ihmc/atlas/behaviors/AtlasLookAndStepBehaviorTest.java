@@ -140,7 +140,7 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(1).goalPose = new Pose3D(6.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 5.2;
 
-      boolean useDynamicsSimulation = false;
+      boolean useDynamicsSimulation = true;
       boolean runRealsenseSLAM = true;
       assertTimeoutPreemptively(Duration.ofMinutes(5),
                                 () -> runTheTest(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
@@ -243,7 +243,7 @@ public class AtlasLookAndStepBehaviorTest
 
    private void perceptionStack(Supplier<PlanarRegionsList> environment, boolean runRealsenseSLAM)
    {
-      perceptionStack = new AtlasPerceptionSimulation(CommunicationMode.INTRAPROCESS, environment.get(), runRealsenseSLAM, VISUALIZE, createRobotModel());
+      perceptionStack = new AtlasPerceptionSimulation(CommunicationMode.INTRAPROCESS, environment.get(), runRealsenseSLAM, false, createRobotModel());
    }
 
    private void dynamicsSimulation(Supplier<PlanarRegionsList> environment, Notification finishedSettingUp)
@@ -270,8 +270,7 @@ public class AtlasLookAndStepBehaviorTest
       kinematicsSimulationParameters.setLogToFile(true);
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
-         kinematicsSimulationParameters.setLogToFile(true); // TODO: Get logging on Bamboo working
-         kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos"));
+         kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos")); // TODO: Get logging on Bamboo working
       }
       kinematicsSimulationParameters.setCreateYoVariableServer(false);
       kinematicsSimulation = AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
