@@ -309,13 +309,26 @@ public class FootstepPlannerUI
       }
 
       centerBorderPane.setCenter(subScene);
+
       primaryStage.setTitle(getClass().getSimpleName());
-      primaryStage.setMaximized(true);
-      Scene mainScene = new Scene(mainPane, 1800, 913);
+//      primaryStage.setMaximized(true);
+
+      primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+            splitPane.setDividerPositions(0.7);
+      });
+      splitPane.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+         if (newValue.doubleValue() > 0.75)
+         {
+            splitPane.getDividers().get(0).positionProperty().setValue(0.75);
+         }
+      });
+      Scene mainScene = new Scene(mainPane);
 
       mainScene.getStylesheets().add("us/ihmc/footstepPlanning/ui/FootstepPlannerUI.css");
 
       primaryStage.setScene(mainScene);
+      primaryStage.setWidth(1910);
+      primaryStage.setHeight(1070);
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
