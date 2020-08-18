@@ -351,7 +351,7 @@ public class AvatarSimulationFactory
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
-      if (logToFile.get())
+      if (logToFile.hasValue() && logToFile.get())
       {
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
