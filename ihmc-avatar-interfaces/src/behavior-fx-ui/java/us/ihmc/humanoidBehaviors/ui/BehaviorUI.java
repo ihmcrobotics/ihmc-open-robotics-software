@@ -171,7 +171,7 @@ public class BehaviorUI
    {
       startRecording.setDisable(true);
       stopRecording.setDisable(false);
-      guiRecorder.deleteOldLogs(10);
+      guiRecorder.deleteOldLogs(15);
       ThreadTools.startAThread(() -> guiRecorder.start(), "RecordingStart");
       ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 3600.0);
    }

@@ -181,7 +181,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
             request.setGenerateLog(true);
-            FootstepPlannerLogger.deleteOldLogs(10);
+            FootstepPlannerLogger.deleteOldLogs(30);
 
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 

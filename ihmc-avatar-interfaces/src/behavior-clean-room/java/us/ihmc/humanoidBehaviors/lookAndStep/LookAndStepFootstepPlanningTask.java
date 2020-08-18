@@ -247,7 +247,7 @@ public class LookAndStepFootstepPlanningTask
       // print log duration?
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(30), "FootstepPlanLogDeletion");
+      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
 
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {
