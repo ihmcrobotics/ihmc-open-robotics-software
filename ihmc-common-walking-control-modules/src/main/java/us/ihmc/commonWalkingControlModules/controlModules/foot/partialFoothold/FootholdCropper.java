@@ -188,7 +188,7 @@ public class FootholdCropper
 
       boolean sidesAreConsistent = sideOfFootToCropFromOccupancy != null && sideOfFootToCropFromHull != null;
       sidesAreConsistent &= sideOfFootToCropFromOccupancy == sideOfFootToCropFromHull;
-      boolean sideIsntBad = sideOfFootToCropFromDrop == null || sideOfFootToCropFromDrop == sideOfFootToCropFromOccupancy;
+      boolean sideIsntBad = sideOfFootToCropFromDrop != null && sideOfFootToCropFromDrop == sideOfFootToCropFromOccupancy;
 
       if (sidesAreConsistent && sideIsntBad)
          return sideOfFootToCropFromOccupancy;

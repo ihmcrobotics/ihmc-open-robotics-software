@@ -58,12 +58,12 @@ public class PartialFootholdCropperModule
          return;
       }
 
-      if (!edgeCalculator.compute(measuredCoP))
-         return;
+      boolean isEdgeTrusted = edgeCalculator.compute(measuredCoP);
 
       FrameLine2DReadOnly lineOfRotation = edgeCalculator.getLineOfRotation();
       RobotSide sideToCrop = footholdCropper.computeSideToCrop(lineOfRotation);
-      if (sideToCrop != null)
+      
+      if (isEdgeTrusted && sideToCrop != null)
       {
          shouldShrinkFoothold.set(cropVerifier.verifyFootholdCrop(desiredCoP, sideToCrop, lineOfRotation));
          if (shouldShrinkFoothold.getBooleanValue())
