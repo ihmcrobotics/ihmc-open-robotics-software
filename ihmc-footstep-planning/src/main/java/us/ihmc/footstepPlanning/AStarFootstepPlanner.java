@@ -267,14 +267,13 @@ public class AStarFootstepPlanner
 
    private void markSolutionEdges()
    {
-      // TODO add solution edge flag
-//      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
+      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
 
-//      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
-//      for (int i = 1; i < path.size(); i++)
-//      {
-//         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
-//      }
+      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
+      for (int i = 1; i < path.size(); i++)
+      {
+         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+      }
    }
 
    private void recordIterationData(AStarIterationData<FootstepNode> iterationData)

@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
+import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -36,7 +37,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 import java.util.Map;
@@ -173,7 +173,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
-   public static final Topic<Pair<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>>> GraphData = topic("GraphData");
+   public static final Topic<Triple<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>, List<VariableDescriptor>>> GraphData = topic("GraphData");
    public static final Topic<Pair<FootstepNode, FootstepNodeSnapData>> LoggedStanceStepToVisualize = topic("LoggedStanceStepToVisualize");
    public static final Topic<FootstepPlannerEdgeData> LoggedCandidateStepToVisualize = topic("LoggedCandidateStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
@@ -184,7 +184,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
 
-   // Test dashboard, only shown if launched from test class
+   // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
    public static final Topic<DataSet> TestDataSetSelected = topic("TestDataSetSelected");
 

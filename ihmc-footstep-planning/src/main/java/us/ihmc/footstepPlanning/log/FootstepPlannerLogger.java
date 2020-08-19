@@ -43,6 +43,7 @@ public class FootstepPlannerLogger
    /** package-private */ static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
    /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
+   // File names
    static final String requestPacketFileName = "RequestPacket.json";
    static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
@@ -256,7 +257,7 @@ public class FootstepPlannerLogger
             }
          }
 
-         fileWriter.write("enums:" + newLine);
+         fileWriter.write("enums:" + enumDescriptions.size() + newLine);
          for (int i = 0; i < enumDescriptions.size(); i++)
          {
             fileWriter.write(tab);
@@ -271,7 +272,7 @@ public class FootstepPlannerLogger
             fileWriter.write(newLine);
          }
 
-         fileWriter.write("variables:" + newLine);
+         fileWriter.write("variables:" + allVariables.size() + newLine);
          for (int i = 0; i < allVariables.size(); i++)
          {
             YoVariable yoVariable = allVariables.get(i);
@@ -282,19 +283,14 @@ public class FootstepPlannerLogger
             fileWriter.write(tab);
             fileWriter.write(name + ",");
             fileWriter.write(type + ",");
-            fileWriter.write(registryName + ",");
+            fileWriter.write(registryName);
 
             if (type == YoVariableType.ENUM)
             {
                YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
                Class<?> enumType = yoEnum.getEnumType();
-               fileWriter.write(enumIndexMap.get(enumType) + ",");
-               fileWriter.write(Boolean.toString(yoEnum.isNullAllowed()));
-            }
-            else
-            {
-               fileWriter.write("-1,");
-               fileWriter.write(Boolean.toString(false));
+               fileWriter.write( "," + enumIndexMap.get(enumType));
+               fileWriter.write( "," + yoEnum.isNullAllowed());
             }
 
             fileWriter.write(newLine);
@@ -320,10 +316,6 @@ public class FootstepPlannerLogger
          FileTools.ensureFileExists(plannerDataFile.toPath());
          fileWriter = new FileWriter(plannerIterationDataFileName);
 
-         writeLine(0,
-                   "edgeData:" + "rejectionReason, " + "footAreaPercentage, " + "stepWidth, " + "stepLength, " + "stepHeight, " + "stepReach, "
-                   + "costFromStart, " + "edgeCost, " + "heuristicCost," + "solutionEdge");
-
          List<FootstepPlannerIterationData> iterationDataList = planner.getIterationData();
          for (int i = 0; i < iterationDataList.size(); i++)
          {
@@ -341,6 +333,7 @@ public class FootstepPlannerLogger
                // indicate start of data
                writeLine(1, "Edge:");
                writeNode(2, "candidateNode", edgeData.getCandidateNode());
+               writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
                writeSnapData(2, edgeData.getCandidateNodeSnapData());
 
                // write additional data as doubles
