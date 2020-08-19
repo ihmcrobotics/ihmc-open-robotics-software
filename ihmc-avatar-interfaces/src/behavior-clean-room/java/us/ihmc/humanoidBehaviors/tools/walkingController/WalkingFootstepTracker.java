@@ -13,6 +13,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
+import static us.ihmc.tools.string.StringTools.format;
 
 /**
  * The purpose of this class is to check on the robot progress
@@ -39,6 +40,9 @@ public class WalkingFootstepTracker
    {
       if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.COMPLETED)
       {
+         int priorNumerator = stepsCompleted;
+         int priorDenominator = stepsCommanded;
+
          synchronized (this)
          {
             ++stepsCompleted;
@@ -50,7 +54,12 @@ public class WalkingFootstepTracker
             }
          }
 
-         LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}",
+                              RobotSide.fromByte(footstepStatusMessage.getRobotSide()),
+                              priorNumerator,
+                              priorDenominator,
+                              stepsCompleted,
+                              stepsCommanded));
       }
    }
 
@@ -58,6 +67,8 @@ public class WalkingFootstepTracker
    {
       ExecutionMode executionMode = ExecutionMode.fromByte(footstepDataListMessage.getQueueingProperties().getExecutionMode());
       int size = footstepDataListMessage.getFootstepDataList().size();
+      int priorNumerator = stepsCompleted;
+      int priorDenominator = stepsCommanded;
 
       synchronized (this)
       {
@@ -77,7 +88,14 @@ public class WalkingFootstepTracker
          lastCommandedFootsteps.set(RobotSide.fromByte(footstep.getRobotSide()), footstep);
       }
 
-      LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+      LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}",
+                           executionMode.name(),
+                           size,
+                           size > 1 ? "s" : "",
+                           priorNumerator,
+                           priorDenominator,
+                           stepsCompleted,
+                           stepsCommanded));
    }
 
    public ImmutablePair<FootstepDataMessage, FootstepDataMessage> getLastCommandedFootsteps()
