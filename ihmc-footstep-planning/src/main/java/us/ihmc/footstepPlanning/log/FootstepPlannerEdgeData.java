@@ -8,6 +8,7 @@ public class FootstepPlannerEdgeData
    private FootstepNode stanceNode = null;
    private FootstepNode candidateNode = null;
    private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
+   private boolean solutionEdge = false;
 
    private final int capacity;
    private final long[] dataBuffer;
@@ -23,6 +24,7 @@ public class FootstepPlannerEdgeData
       stanceNode = null;
       candidateNode = null;
       candidateNodeSnapData.clear();
+      solutionEdge = false;
    }
 
    public FootstepPlannerEdgeData getCopyAndClear()
@@ -31,6 +33,7 @@ public class FootstepPlannerEdgeData
       copy.stanceNode = stanceNode;
       copy.candidateNode = candidateNode;
       copy.candidateNodeSnapData.set(candidateNodeSnapData);
+      copy.solutionEdge = solutionEdge;
       for (int i = 0; i < dataBuffer.length; i++)
       {
          copy.dataBuffer[i] = dataBuffer[i];
@@ -61,6 +64,11 @@ public class FootstepPlannerEdgeData
       return dataBuffer;
    }
 
+   public boolean isSolutionEdge()
+   {
+      return solutionEdge;
+   }
+
    //////////////// SETTERS ////////////////
 
    public void setStanceNode(FootstepNode stanceNode)
@@ -77,7 +85,12 @@ public class FootstepPlannerEdgeData
    {
       this.candidateNodeSnapData.set(candidateNodeSnapData);
    }
-   
+
+   public void setSolutionEdge(boolean solutionEdge)
+   {
+      this.solutionEdge = solutionEdge;
+   }
+
    public void setData(int index, long data)
    {
       dataBuffer[index] = data;

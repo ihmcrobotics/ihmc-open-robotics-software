@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -107,9 +108,11 @@ public class FootstepPlannerLogVisualizerController
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
 
       AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
-      // TODO update messager api to take in var descriptors
-//      messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
-//                                     graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(), graphData.getLeft(), graphData.getRight())));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
+                                     graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(),
+                                                                                          graphData.getLeft(),
+                                                                                          graphData.getMiddle(),
+                                                                                          graphData.getRight())));
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, showStanceStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, showUnsnappedStep.selectedProperty(), true);
@@ -386,12 +389,12 @@ public class FootstepPlannerLogVisualizerController
 
       for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
-//         FootstepNode childNode = iterationData.getChildNodes().get(i);
-//         if(edgeDataMap.get(new GraphEdge<>(stanceNode, childNode)).getSolutionEdge())
-//         {
-//            iterationDataList.stream().filter(data -> data.getStanceNode().equals(childNode)).findAny().ifPresent(nextData -> recursivelyBuildPath(nextData, iterationDataList, edgeDataMap));
-//            return;
-//         }
+         FootstepNode childNode = iterationData.getChildNodes().get(i);
+         if(edgeDataMap.get(new GraphEdge<>(stanceNode, childNode)).isSolutionEdge())
+         {
+            iterationDataList.stream().filter(data -> data.getStanceNode().equals(childNode)).findAny().ifPresent(nextData -> recursivelyBuildPath(nextData, iterationDataList, edgeDataMap));
+            return;
+         }
       }
    }
 
@@ -434,13 +437,12 @@ public class FootstepPlannerLogVisualizerController
       ParentStepProperty stepProperty = new ParentStepProperty(iterationData);
       parentTableItems.add(stepProperty);
 
-      // TODO revisit sorting
-//      candidateStepTable.getSortOrder().clear();
-//      candidateStepTable.getSortOrder().add(childColumnHolder.solutionStep);
-//      childColumnHolder.solutionStep.setSortType(TableColumn.SortType.DESCENDING);
-//      candidateStepTable.getSortOrder().add(childColumnHolder.totalCostColumn);
-//      childColumnHolder.totalCostColumn.setSortType(TableColumn.SortType.ASCENDING);
-//      candidateStepTable.sort();
+      candidateStepTable.getSortOrder().clear();
+      ObservableList<TableColumn> columns = candidateStepTable.getColumns();
+      TableColumn solutionEdgeColumn = columns.get(4);
+      candidateStepTable.getSortOrder().add(solutionEdgeColumn);
+      solutionEdgeColumn.setSortType(TableColumn.SortType.DESCENDING);
+      candidateStepTable.sort();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedStanceStepToVisualize, Pair.of(stepProperty.stanceNode, stepProperty.snapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
@@ -485,19 +487,22 @@ public class FootstepPlannerLogVisualizerController
 
    private static List<TableColumn> createDefaultColumns()
    {
-      TableColumn<ChildStepProperty, String> xIndexColumn = new TableColumn<>("X Index");
-      TableColumn<ChildStepProperty, String> yIndexColumn = new TableColumn<>("Y Index");
-      TableColumn<ChildStepProperty, String> yawIndexColumn = new TableColumn<>("Yaw Index");
+      TableColumn<ChildStepProperty, String> xIndexColumn = new TableColumn<>("X");
+      TableColumn<ChildStepProperty, String> yIndexColumn = new TableColumn<>("Y");
+      TableColumn<ChildStepProperty, String> yawIndexColumn = new TableColumn<>("Yaw");
       TableColumn<ChildStepProperty, String> robotSideColumn = new TableColumn<>("Side");
+      TableColumn<ChildStepProperty, String> solutionColumn = new TableColumn<>("Solution");
 
       xIndexColumn.setCellValueFactory(new PropertyValueFactory<>("xIndex"));
       yIndexColumn.setCellValueFactory(new PropertyValueFactory<>("yIndex"));
       yawIndexColumn.setCellValueFactory(new PropertyValueFactory<>("yawIndex"));
       robotSideColumn.setCellValueFactory(new PropertyValueFactory<>("side"));
+      solutionColumn.setCellValueFactory(new PropertyValueFactory<>("solution"));
 
       xIndexColumn.setPrefWidth(75);
       yIndexColumn.setPrefWidth(75);
       yawIndexColumn.setPrefWidth(75);
+      robotSideColumn.setPrefWidth(75);
       robotSideColumn.setPrefWidth(75);
 
       List<TableColumn> defaultColumns = new ArrayList<>();
@@ -505,6 +510,7 @@ public class FootstepPlannerLogVisualizerController
       defaultColumns.add(yIndexColumn);
       defaultColumns.add(yawIndexColumn);
       defaultColumns.add(robotSideColumn);
+      defaultColumns.add(solutionColumn);
 
       return defaultColumns;
    }
@@ -560,6 +566,11 @@ public class FootstepPlannerLogVisualizerController
       {
          return stanceNode.getRobotSide().toString();
       }
+
+      public String getSolution()
+      {
+         return "";
+      }
    }
 
    public class ChildStepProperty
@@ -610,6 +621,11 @@ public class FootstepPlannerLogVisualizerController
       public String getSide()
       {
          return candidateNode.getRobotSide().toString();
+      }
+
+      public String getSolution()
+      {
+         return Boolean.toString(edgeData.isSolutionEdge());
       }
    }
 

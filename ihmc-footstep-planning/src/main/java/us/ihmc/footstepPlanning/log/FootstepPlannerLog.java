@@ -15,6 +15,7 @@ public class FootstepPlannerLog
 {
    private final String logName;
 
+   // Packets
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
@@ -22,6 +23,7 @@ public class FootstepPlannerLog
    private final SplitFractionCalculatorParametersPacket splitFractionParametersPacket = new SplitFractionCalculatorParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
+   // Logged data
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
    private final List<VariableDescriptor> variableNames = new ArrayList<>();
    private final Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();

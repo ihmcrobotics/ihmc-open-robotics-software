@@ -229,23 +229,19 @@ public class FootstepPlannerLogLoader
 
          List<String[]> enumValues = new ArrayList<>();
 
-         dataFileReader.readLine();
-         while (true)
+         int numberOfEnums = getIntCSV(true, dataFileReader.readLine())[0];
+         for (int i = 0; i < numberOfEnums; i++)
          {
             String line = dataFileReader.readLine();
             if (line == null)
             {
-               throw new RuntimeException("Reached end of header file without finding variables");
+               throw new RuntimeException("Reached end of header file before expected");
             }
-            else if (line.contains("variables:"))
-            {
-               break;
-            }
-
             enumValues.add(line.split(":")[1].split(","));
          }
 
-         while (true)
+         int numberOfVariables = getIntCSV(true, dataFileReader.readLine())[0];
+         for (int i = 0; i < numberOfVariables; i++)
          {
             String line = dataFileReader.readLine();
             if (line == null)
@@ -270,10 +266,7 @@ public class FootstepPlannerLogLoader
          File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
          dataFileReader = new BufferedReader(new FileReader(dataFile));
 
-         // data variables
-         dataFileReader.readLine();
-
-         while(dataFileReader.readLine() != null)
+         while (dataFileReader.readLine() != null)
          {
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setStanceNode(readNode(dataFileReader.readLine()));
@@ -291,13 +284,14 @@ public class FootstepPlannerLogLoader
                // edge marker
                dataFileReader.readLine();
 
-               int numberOfVariables = log.getVariableDescriptors().size();
                FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData(numberOfVariables);
                edgeData.setStanceNode(iterationData.getStanceNode());
                edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
+               edgeData.setSolutionEdge(getBooleanCSV(true, dataFileReader.readLine())[0]);
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+               edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
 
                long[] longCSV = getLongCSV(true, dataFileReader.readLine());
                for (int j = 0; j < longCSV.length; j++)
@@ -443,6 +437,17 @@ public class FootstepPlannerLogLoader
       for (int i = 0; i < csvString.length; i++)
       {
          data[i] = Double.parseDouble(csvString[i]);
+      }
+      return data;
+   }
+
+   private static boolean[] getBooleanCSV(boolean removeKey, String dataFileLine)
+   {
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
+      boolean[] data = new boolean[csvString.length];
+      for (int i = 0; i < csvString.length; i++)
+      {
+         data[i] = Boolean.parseBoolean(csvString[i]);
       }
       return data;
    }
