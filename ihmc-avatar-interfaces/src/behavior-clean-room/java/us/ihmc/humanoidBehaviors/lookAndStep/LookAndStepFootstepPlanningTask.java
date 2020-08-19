@@ -251,20 +251,21 @@ public class LookAndStepFootstepPlanningTask
 
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {
+         statusLogger.info("Footstep planning failure. Aborting task...");
          planningFailedNotifier.run();
       }
       else
       {
          uiPublisher.publishToUI(FootstepPlanForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
-      }
 
-      if (operatorReviewEnabledSupplier.get())
-      {
-         review.review(footstepPlannerOutput.getFootstepPlan());
-      }
-      else
-      {
-         autonomousOutput.accept(footstepPlannerOutput.getFootstepPlan());
+         if (operatorReviewEnabledSupplier.get())
+         {
+            review.review(footstepPlannerOutput.getFootstepPlan());
+         }
+         else
+         {
+            autonomousOutput.accept(footstepPlannerOutput.getFootstepPlan());
+         }
       }
    }
 }
