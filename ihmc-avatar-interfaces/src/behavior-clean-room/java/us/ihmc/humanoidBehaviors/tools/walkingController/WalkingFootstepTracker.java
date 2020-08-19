@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -12,6 +11,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2NodeInterface;
+
+import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 
 /**
  * The purpose of this class is to check on the robot progress
@@ -28,8 +29,8 @@ public class WalkingFootstepTracker
 
    public WalkingFootstepTracker(Ros2NodeInterface ros2Node, String robotName)
    {
-      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
-      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
+      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
+      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
 
       // TODO: Observe when footsteps are cancelled / walking aborted?
    }
