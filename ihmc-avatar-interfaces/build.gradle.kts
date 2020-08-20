@@ -29,7 +29,7 @@ mainDependencies {
    api("us.ihmc:euclid-geometry:0.15.0")
    api("us.ihmc:ihmc-yovariables:0.9.3")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.20.3")
+   api("us.ihmc:simulation-construction-set:0.20.4")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
