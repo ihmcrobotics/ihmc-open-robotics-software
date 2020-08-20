@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -31,16 +30,29 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
+      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+   }
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds,
+                                  PubSubImplementation pubSubImplementation)
+   {
+      this(robotModel, startYoVariableServer, updatePeriodMilliseconds, true, pubSubImplementation);
+   }
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds, boolean setupInitialConfiguration,
+                                  PubSubImplementation pubSubImplementation)
+   {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+            updatePeriodMilliseconds, pubSubImplementation);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
                                                                             robotModel,
-                                                                            Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
+                                                                            0.001, // Note that the gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period.
                                                                             yoGraphicsListRegistry,
                                                                             registry);
-      kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
+      if (setupInitialConfiguration)
+         kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
