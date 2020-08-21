@@ -49,6 +49,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private ToggleButton computeSurfaceNormalsInFrame;
    @FXML
    private ToggleButton insertMissInOcTree;
+   @FXML
+   private ToggleButton computeFramesInParallel;
 
    @FXML
    private ToggleButton includePitchAndRoll;
@@ -101,6 +103,7 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInsertMissInOcTree(insertMissInOcTree.selectedProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeFramesInParallel(computeFramesInParallel.selectedProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalIncludePitchAndRoll(includePitchAndRoll.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalTranslationPerturbation(translationPerturbation.getValueFactory().valueProperty());
