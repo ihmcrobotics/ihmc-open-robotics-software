@@ -54,7 +54,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
-      int maxNumberOfSurfels = Integer.MAX_VALUE;
+      int maxNumberOfSurfels = surfaceElementICPSLAMParameters.getMaxNumberOfSurfaceElements();
       frame.registerSurfaceElements(getMapOcTree(),
                                     windowMargin,
                                     surfaceElementResolution,
