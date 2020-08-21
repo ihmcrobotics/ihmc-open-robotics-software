@@ -40,6 +40,8 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
                                                                               SurfaceElementICPSLAMParameters::setComputeSurfaceNormalsInFrame);
    private final BooleanField insertMissInOcTree = new BooleanField(SurfaceElementICPSLAMParameters::getInsertMissInOcTree,
                                                                     SurfaceElementICPSLAMParameters::setInsertMissInOcTree);
+   private final BooleanField computeFramesInParallel = new BooleanField(SurfaceElementICPSLAMParameters::getComputeFramesInParallel,
+                                                                         SurfaceElementICPSLAMParameters::setComputeFramesInParallel);
 
    private final BooleanField includePitchAndRoll = new BooleanField(SurfaceElementICPSLAMParameters::getIncludePitchAndRoll,
                                                                      SurfaceElementICPSLAMParameters::setIncludePitchAndRoll);
@@ -126,6 +128,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalInsertMissInOcTree(Property<Boolean> property)
    {
       bindFieldBidirectionalToBooleanProperty(property, insertMissInOcTree);
+   }
+
+   public void bindBidirectionalComputeFramesInParallel(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, computeFramesInParallel);
    }
 
    public void bindBidirectionalIncludePitchAndRoll(Property<Boolean> property)

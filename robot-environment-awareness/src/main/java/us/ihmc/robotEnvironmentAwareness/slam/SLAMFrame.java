@@ -29,7 +29,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
 {
-   private static final boolean calculateInParallel = true;
+   private static final boolean calculateInParallel = false;
 
    private final Long timestamp;
    private final SLAMFrame previousFrame;
