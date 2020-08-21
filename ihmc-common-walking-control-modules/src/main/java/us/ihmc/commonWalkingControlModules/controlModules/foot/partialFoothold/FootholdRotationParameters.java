@@ -83,7 +83,7 @@ public class FootholdRotationParameters
       distanceFromRotationToCrop = new DoubleParameter(namePrefix + "DistanceFromRotationToCrop", registry, 0.0);
 
       useCoPOccupancyGridForCropping = new BooleanParameter(namePrefix + "UseCopOccupancyGrid", registry, true);
-      footDropThresholdForCrop = new DoubleParameter(namePrefix + "FootDropThresholdForCrop", registry, 0.03);
+      footDropThresholdForCrop = new DoubleParameter(namePrefix + "FootDropThresholdForCrop", registry, 0.01);
 
       doPartialFootholdDetection = new BooleanParameter("doPartialFootholdDetection", registry, true);
       applyPartialFootholds = new BooleanParameter("applyPartialFootholds", registry, false);

@@ -16,9 +16,9 @@ mainDependencies {
    api("us.ihmc:euclid:0.15.0")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:ihmc-yovariables:0.9.0")
-   api("us.ihmc:ihmc-graphics-description:0.19.0")
-   api("us.ihmc:simulation-construction-set:0.20.1")
+   api("us.ihmc:ihmc-yovariables:0.9.3")
+   api("us.ihmc:ihmc-graphics-description:0.19.1")
+   api("us.ihmc:simulation-construction-set:0.20.4")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
