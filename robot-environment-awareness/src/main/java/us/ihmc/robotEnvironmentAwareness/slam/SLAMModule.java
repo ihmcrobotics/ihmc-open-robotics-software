@@ -316,6 +316,7 @@ public class SLAMModule implements PerceptionModule
       slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
 
       boolean success;
+      slam.setComputeInParallel(slamParameters.get().getComputeFramesInParallel());
       if (slam.isEmpty())
       {
          LogTools.debug("addKeyFrame queueSize: {} pointCloudSize: {} timestamp: {}",

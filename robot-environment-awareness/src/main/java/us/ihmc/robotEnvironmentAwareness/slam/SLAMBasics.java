@@ -39,6 +39,8 @@ public class SLAMBasics implements SLAMInterface
 
    private final NormalEstimationParameters frameNormalEstimationParameters = new NormalEstimationParameters();
 
+   private boolean computeInParallel = false;
+
    public SLAMBasics(double octreeResolution)
    {
       this(octreeResolution, new RigidBodyTransform());
@@ -75,10 +77,15 @@ public class SLAMBasics implements SLAMInterface
       mapOcTree.updateNodesNormals(leafNodesToUpdate);
    }
 
+   public void setComputeInParallel(boolean computeInParallel)
+   {
+      this.computeInParallel = computeInParallel;
+   }
+
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters);
+      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters, computeInParallel);
       setLatestFrame(frame);
       insertNewPointCloud(frame, insertMiss);
 
@@ -88,7 +95,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters, computeInParallel);
 
       long startTime = System.nanoTime();
       RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);
