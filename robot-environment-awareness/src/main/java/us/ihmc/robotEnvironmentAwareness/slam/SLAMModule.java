@@ -62,7 +62,7 @@ public class SLAMModule implements PerceptionModule
    
    protected final SurfaceElementICPSLAM slam;
 
-   private static final int SLAM_PERIOD_MILLISECONDS = 20;
+   private static final int SLAM_PERIOD_MILLISECONDS = 250;
    private static final int QUEUE_PERIOD_MILLISECONDS = 5;
    private static final int MAIN_PERIOD_MILLISECONDS = 200;
 
@@ -142,11 +142,12 @@ public class SLAMModule implements PerceptionModule
       reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
       NormalEstimationParameters normalEstimationParametersLocal = new NormalEstimationParameters();
-      normalEstimationParametersLocal.setNumberOfIterations(10);
+      normalEstimationParametersLocal.setNumberOfIterations(1);
       normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
       NormalEstimationParameters frameNormalEstimationParametersLocal = new NormalEstimationParameters();
       frameNormalEstimationParametersLocal.setNumberOfIterations(10);
+
       frameNormalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParametersLocal);
 
 
@@ -280,10 +281,9 @@ public class SLAMModule implements PerceptionModule
          return;
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
-      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
          slam.clearNormals();
-      if (enableNormalEstimation.get() && useBoundingBox.get())
+      if (enableNormalEstimation.get())
          slam.updateSurfaceNormals();
    }
 
@@ -313,6 +313,8 @@ public class SLAMModule implements PerceptionModule
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
       lastTimestampProcessed.set(pointCloudToCompute.getTimestamp());
 
+      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
+
       boolean success;
       if (slam.isEmpty())
       {
@@ -333,8 +335,7 @@ public class SLAMModule implements PerceptionModule
          LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
-      slam.setNormalEstimationParameters(normalEstimationParameters.get());
-      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
+      slam.setNormalEstimationParameters(frameNormalEstimationParameters.get());
       if (enableNormalEstimation.get())
          slam.updateSurfaceNormalsInBoundingBox();
          
