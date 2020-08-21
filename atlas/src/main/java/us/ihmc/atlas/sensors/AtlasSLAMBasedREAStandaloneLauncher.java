@@ -31,7 +31,8 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 {
    private static boolean launchSegmentation = true;
 
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
+   private static final String SLAM_CONFIGURATION_FILE_NAME = "./Configurations/atlasSLAMModuleConfiguration.txt";
+   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "./Configurations/atlasSLAMSegmentationModuleConfiguration.txt";
    private final boolean spawnUIs;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
@@ -93,7 +94,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       {
          ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
       }
-      module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager);
+      module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager, SLAM_CONFIGURATION_FILE_NAME);
 
       Stage secondStage = null;
       if (launchSegmentation)
@@ -103,7 +104,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
             secondStage = new Stage();
             planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
          }
-         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
+         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(SEGMENTATION_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
          module.attachOcTreeConsumer(segmentationModule);
       }
 
