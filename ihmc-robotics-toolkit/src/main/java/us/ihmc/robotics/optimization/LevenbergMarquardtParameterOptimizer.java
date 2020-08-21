@@ -69,8 +69,8 @@ public class LevenbergMarquardtParameterOptimizer
 
    private int maximumNumberOfCorrespondences = Integer.MAX_VALUE;
 
-   private double computationTime;
    private int iteration;
+   private int numberOfCorrespondences;
    private boolean optimized;
 
    /**
@@ -142,7 +142,7 @@ public class LevenbergMarquardtParameterOptimizer
 
       outputCalculator.setIndicesToCompute(currentOutputSpace.correspondingIndices);
 
-      int numberOfCorrespondences = currentOutputSpace.getNumberOfCorrespondingPoints();
+      numberOfCorrespondences = currentOutputSpace.getNumberOfCorrespondingPoints();
       jacobian.reshape(numberOfCorrespondences, inputDimension);
       invMultJacobianTranspose.reshape(inputDimension, numberOfCorrespondences);
 
@@ -202,7 +202,7 @@ public class LevenbergMarquardtParameterOptimizer
 
    public int getNumberOfCorrespondingPoints()
    {
-      return currentOutputSpace.getNumberOfCorrespondingPoints();
+      return numberOfCorrespondences;
    }
 
    public DMatrixRMaj getOptimalParameter()
@@ -228,11 +228,6 @@ public class LevenbergMarquardtParameterOptimizer
    public int getIteration()
    {
       return iteration;
-   }
-
-   public double getComputationTime()
-   {
-      return computationTime;
    }
 
    public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction(boolean includePitchAndRoll)

@@ -1,8 +1,12 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
@@ -66,16 +70,19 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       OutputCalculator outputCalculator = new OutputCalculator()
       {
-         private TIntArrayList indicesToCompute;
+         private List<Point3DReadOnly> surfaceElementPoints = new ArrayList<>();
 
          public void setIndicesToCompute(TIntArrayList indicesToCompute)
          {
-            this.indicesToCompute = indicesToCompute;
+            surfaceElementPoints.clear();
+            for (int i = 0; i < indicesToCompute.size(); i++)
+               surfaceElementPoints.add(frame.getSurfaceElementsInLocalFrame().get(indicesToCompute.get(i)).getPoint());
          }
 
          public void resetIndicesToCompute()
          {
-            this.indicesToCompute = null;
+            Stream<Plane3DReadOnly> planeStream = frame.getSurfaceElementsInLocalFrame().stream();
+            surfaceElementPoints = planeStream.map(Plane3DReadOnly::getPoint).collect(Collectors.toList());
          }
 
          @Override
@@ -85,16 +92,21 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             RigidBodyTransformBasics correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
             correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            int size = indicesToCompute != null ? indicesToCompute.size() : numberOfSurfel;
+            int size = surfaceElementPoints.size();
             correctedCorrespondingPointLocation = new Point3D[size];
             DMatrixRMaj errorSpace = new DMatrixRMaj(size, 1);
 
+            Stream<Point3DReadOnly> surfelPointStream = surfaceElementPoints.stream();
+            List<Point3D> surfelPointsInWorld = surfelPointStream.map(point ->
+                                                              {
+                                                                 Point3D correctedSurfelInWorld = new Point3D();
+                                                                 correctedLocalPoseInWorld.transform(point, correctedSurfelInWorld);
+                                                                 return correctedSurfelInWorld;
+                                                              }).collect(Collectors.toList());
+
             for (int i = 0; i < size; i++)
             {
-               int index = indicesToCompute != null ? indicesToCompute.get(i) : i;
-
-               Point3D correctedSurfelInWorld = new Point3D();
-               correctedLocalPoseInWorld.transform(frame.getSurfaceElementsInLocalFrame().get(index).getPoint(), correctedSurfelInWorld);
+               Point3D correctedSurfelInWorld = surfelPointsInWorld.get(i);
 
                correctedCorrespondingPointLocation[i] = correctedSurfelInWorld;
 
@@ -200,6 +212,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       driftCorrectionResult.setNumberOfSurfels(numberOfSurfel);
       driftCorrectionResult.setDriftCorrectionTransformer(driftCompensationTransform);
       driftCorrectionResult.setIcpIterations(iterations);
+      driftCorrectionResult.setNumberOfCorrespondances(optimizer.getNumberOfCorrespondingPoints());
       if (iterations < 0)
       {
          driftCorrectionResult.setSuccess(false);
