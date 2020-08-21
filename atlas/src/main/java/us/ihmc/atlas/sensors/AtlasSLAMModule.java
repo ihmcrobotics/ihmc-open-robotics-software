@@ -1,5 +1,7 @@
 package us.ihmc.atlas.sensors;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,9 +42,9 @@ public class AtlasSLAMModule extends SLAMModule
    protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
-   public AtlasSLAMModule(Ros2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel)
+   public AtlasSLAMModule(Ros2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel, File configurationFile)
    {
-      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera);
+      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera, configurationFile);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
@@ -229,8 +231,26 @@ public class AtlasSLAMModule extends SLAMModule
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager)
+   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager, String configurationFilePath)
    {
-      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel);
+      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel, setupConfigurationFile(configurationFilePath));
+   }
+
+   private static File setupConfigurationFile(String configurationFilePath)
+
+   {
+      File configurationFile = new File(configurationFilePath);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         LogTools.info(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
+      return configurationFile;
    }
 }

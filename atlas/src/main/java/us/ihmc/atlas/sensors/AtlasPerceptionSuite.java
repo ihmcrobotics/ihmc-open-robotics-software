@@ -14,6 +14,8 @@ import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionSuite;
 
 public class AtlasPerceptionSuite extends PerceptionSuite
 {
+   private static final String SLAM_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/atlasSLAMModuleConfiguration.txt";
+
    private final DRCRobotModel robotModel;
 
    public AtlasPerceptionSuite(Messager messager)
@@ -26,7 +28,7 @@ public class AtlasPerceptionSuite extends PerceptionSuite
    @Override
    protected SLAMModule createSLAMModule(Messager messager)
    {
-      return AtlasSLAMModule.createIntraprocessModule(ros2Node, robotModel, messager);
+      return AtlasSLAMModule.createIntraprocessModule(ros2Node, robotModel, messager, SLAM_MODULE_CONFIGURATION_FILE_NAME);
    }
 
    public static AtlasPerceptionSuite createIntraprocess(Messager messager)
