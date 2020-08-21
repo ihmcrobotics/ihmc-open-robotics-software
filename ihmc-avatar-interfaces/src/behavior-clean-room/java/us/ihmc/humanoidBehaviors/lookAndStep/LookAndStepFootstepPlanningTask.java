@@ -204,7 +204,7 @@ public class LookAndStepFootstepPlanningTask
       RobotSide stanceSide;
       if (lastStanceSide != null)
       {
-         stanceSide = lastStanceSide.getOppositeSide(); // TODO: Instead, maybe just wait for more perception data? Seems drastic
+         stanceSide = lastStanceSide;
       }
       else // if first step, step with furthest foot from the goal
       {
