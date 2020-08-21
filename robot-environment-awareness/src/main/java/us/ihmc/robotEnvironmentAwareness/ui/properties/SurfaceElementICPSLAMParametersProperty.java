@@ -34,6 +34,9 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    private final IntegerField maxQueueSize = new IntegerField(SurfaceElementICPSLAMParameters::getMaximumQueueSize,
                                                               SurfaceElementICPSLAMParameters::setMaximumQueueSize);
 
+   private final DoubleField longestTimeToLag = new DoubleField(SurfaceElementICPSLAMParameters::getLongestTimeToLag,
+                                                                SurfaceElementICPSLAMParameters::setLongestTimeToLag);
+
    private final IntegerField maxOptimizationIterations = new IntegerField(SurfaceElementICPSLAMParameters::getMaxOptimizationIterations,
                                                                            SurfaceElementICPSLAMParameters::setMaxOptimizationIterations);
    private final BooleanField computeSurfaceNormalsInFrame = new BooleanField(SurfaceElementICPSLAMParameters::getComputeSurfaceNormalsInFrame,
@@ -113,6 +116,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalMaxQueueSize(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxQueueSize);
+   }
+
+   public void bindBidirectionalLongestTimeToLag(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, longestTimeToLag);
    }
 
    public void bindBidirectionalMaxOptimizationIterations(Property<? extends Number> property)
