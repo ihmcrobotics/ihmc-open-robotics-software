@@ -192,9 +192,10 @@ public class StoredPropertyTableViewWrapper
             {
                super.updateItem(tableCell, empty);
 
+               hBox.getChildren().clear();
+               
                if (tableCell != null && !tableCell.isEmpty())
                {
-                  hBox.getChildren().clear();
                   StoredPropertyKey<?> propertyKey = tableCell.parameter;
 
                   hBox.getChildren().add(label);

@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-yovariables:0.9.0")
+   api("us.ihmc:ihmc-yovariables:0.9.3")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

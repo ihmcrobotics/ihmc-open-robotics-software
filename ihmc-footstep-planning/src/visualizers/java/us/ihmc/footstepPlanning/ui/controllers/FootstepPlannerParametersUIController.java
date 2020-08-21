@@ -31,7 +31,7 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Rectangle clearanceBox;
    @FXML
-   private CheckBox tuningMode;
+   private CheckBox autoReplan;
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
    private static final double leftFootOriginX = 30;
@@ -58,9 +58,9 @@ public class FootstepPlannerParametersUIController
       tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
       tableViewWrapper.setTableUpdatedCallback(() ->
       {
-         if (tuningMode.isSelected())
+         if (autoReplan.isSelected())
          {
-            LogTools.info("Log tuning mode: Replanning...");
+            LogTools.info("Auto replan active. Replanning...");
             messager.submitMessage(ComputePath, true);
          }
 
