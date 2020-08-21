@@ -32,8 +32,8 @@
                 <Separator orientation="VERTICAL" prefWidth="20" />
 
                 <VBox alignment="TOP_CENTER" prefWidth="1500" BorderPane.alignment="CENTER">
-                    <TableView fx:id="stanceStepTable" maxHeight="24" />
-                    <TableView fx:id="candidateStepTable" prefHeight="300" />
+                    <TableView fx:id="parentTable" maxHeight="24" />
+                    <TableView fx:id="childTable" prefHeight="300" />
                 </VBox>
 
                 <VBox>

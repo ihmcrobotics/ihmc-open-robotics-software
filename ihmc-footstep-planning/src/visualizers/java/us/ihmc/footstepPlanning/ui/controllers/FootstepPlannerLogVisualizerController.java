@@ -52,8 +52,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerLogVisualizerController
 {
-   private final ObservableList<ChildStepProperty> childTableItems = FXCollections.observableArrayList();
    private final ObservableList<ParentStepProperty> parentTableItems = FXCollections.observableArrayList();
+   private final ObservableList<ChildStepProperty> childTableItems = FXCollections.observableArrayList();
+
    private JavaFXMessager messager;
    private FootstepPlannerLog footstepPlannerLog = null;
    private List<FootstepNode> path = new ArrayList<>();
@@ -69,15 +70,15 @@ public class FootstepPlannerLogVisualizerController
    private final List<VariableDescriptor> variablesToChart = new ArrayList<>();
 
    private static final List<TableColumn> parentTableDefaultColumns = createDefaultColumns();
-   private static final List<TableColumn> candidateTableDefaultColumns = createDefaultColumns();
+   private static final List<TableColumn> childTableDefaultColumns = createDefaultColumns();
 
    private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("stepLength", "stepWidth", "stepHeight", "edgeCost", "heuristicCost");
    private boolean additionalColumnsLoaded = false;
 
    @FXML
-   private TableView stanceStepTable;
+   private TableView<ParentStepProperty> parentTable;
    @FXML
-   private TableView candidateStepTable;
+   private TableView<ChildStepProperty> childTable;
    @FXML
    private TextField searchTextField;
    @FXML
@@ -135,15 +136,15 @@ public class FootstepPlannerLogVisualizerController
 
    public void onPrimaryStageLoaded()
    {
-      clearAndAddDefaultColumns(stanceStepTable, parentTableDefaultColumns);
-      clearAndAddDefaultColumns(candidateStepTable, candidateTableDefaultColumns);
+      clearAndAddDefaultColumns(parentTable, parentTableDefaultColumns);
+      clearAndAddDefaultColumns(childTable, childTableDefaultColumns);
 
       parentTableItems.clear();
-      stanceStepTable.setItems(parentTableItems);
+      parentTable.setItems(parentTableItems);
       childTableItems.clear();
-      candidateStepTable.setItems(childTableItems);
+      childTable.setItems(childTableItems);
 
-      Pane header = (Pane) stanceStepTable.lookup("TableHeaderRow");
+      Pane header = (Pane) parentTable.lookup("TableHeaderRow");
       if (header.isVisible())
       {
          header.setMaxHeight(0);
@@ -152,7 +153,7 @@ public class FootstepPlannerLogVisualizerController
          header.setVisible(false);
       }
 
-      candidateStepTable.setRowFactory(tableValue ->
+      childTable.setRowFactory(tableValue ->
                                         {
                                            TableRow<ChildStepProperty> row = new TableRow<>();
                                            row.setOnMouseClicked(event ->
@@ -162,17 +163,13 @@ public class FootstepPlannerLogVisualizerController
                                                                        if (event.isControlDown())
                                                                        {
                                                                           // remove column
-                                                                          ObservableList<TablePosition> selectedCells = candidateStepTable.getSelectionModel()
-                                                                                                                                          .getSelectedCells();
+                                                                          ObservableList<TablePosition> selectedCells = childTable.getSelectionModel()
+                                                                                                                                  .getSelectedCells();
                                                                           if (!selectedCells.isEmpty())
                                                                           {
-                                                                             TableColumn tableColumn = selectedCells.get(0).getTableColumn();
-                                                                             int column = selectedCells.get(0).getColumn();
-                                                                             if (column >= candidateTableDefaultColumns.size())
-                                                                             {
-                                                                                variablesToChart.remove(column - candidateTableDefaultColumns.size());
-                                                                                updateTable();
-                                                                             }
+                                                                             String variableName = selectedCells.get(0).getTableColumn().getText();
+                                                                             variablesToChart.removeIf(v -> v.getName().equals(variableName));
+                                                                             updateTable();
                                                                           }
                                                                        }
                                                                        else if (event.getClickCount() == 2 && (!row.isEmpty()))
@@ -191,7 +188,7 @@ public class FootstepPlannerLogVisualizerController
                                            return row;
                                         });
 
-      stanceStepTable.setRowFactory(tableValue ->
+      parentTable.setRowFactory(tableValue ->
                                          {
                                             TableRow<ParentStepProperty> row = new TableRow<>();
                                             row.setOnMouseClicked(event ->
@@ -203,9 +200,9 @@ public class FootstepPlannerLogVisualizerController
                                             return row;
                                          });
 
-      stanceStepTable.addEventFilter(ScrollEvent.ANY, Event::consume);
+      parentTable.addEventFilter(ScrollEvent.ANY, Event::consume);
       searchTextField.textProperty().addListener((observable, oldValue, newValue) -> search(newValue));
-      candidateStepTable.getSelectionModel().setCellSelectionEnabled(true);
+      childTable.getSelectionModel().setCellSelectionEnabled(true);
 
       variableListView.setOnMouseClicked(event ->
                                          {
@@ -421,7 +418,7 @@ public class FootstepPlannerLogVisualizerController
          return;
       }
 
-      clearAndAddDefaultColumns(candidateStepTable, candidateTableDefaultColumns);
+      clearAndAddDefaultColumns(childTable, childTableDefaultColumns);
 
       if (!additionalColumnsLoaded)
       {
@@ -441,7 +438,7 @@ public class FootstepPlannerLogVisualizerController
 
          column.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(formatValue(c.getValue().edgeData.getDataBuffer()[variableIndex], variableDescriptor)));
          column.setPrefWidth(125);
-         candidateStepTable.getColumns().add(column);
+         childTable.getColumns().add(column);
       }
 
       FootstepPlannerIterationData iterationData = iterationDataOptional.get();
@@ -457,22 +454,22 @@ public class FootstepPlannerLogVisualizerController
       ParentStepProperty stepProperty = new ParentStepProperty(iterationData);
       parentTableItems.add(stepProperty);
 
-      candidateStepTable.getSortOrder().clear();
-      ObservableList<TableColumn> columns = candidateStepTable.getColumns();
-      TableColumn solutionEdgeColumn = columns.get(0);
-      TableColumn expandedColumn = columns.get(1);
+      childTable.getSortOrder().clear();
+      ObservableList<TableColumn<ChildStepProperty, ?>> columns = childTable.getColumns();
+      TableColumn<ChildStepProperty, ?> solutionEdgeColumn = columns.get(0);
+      TableColumn<ChildStepProperty, ?> expandedColumn = columns.get(1);
       solutionEdgeColumn.setSortType(TableColumn.SortType.DESCENDING);
       expandedColumn.setSortType(TableColumn.SortType.DESCENDING);
-      candidateStepTable.getSortOrder().add(solutionEdgeColumn);
-      candidateStepTable.getSortOrder().add(expandedColumn);
-      candidateStepTable.sort();
+      childTable.getSortOrder().add(solutionEdgeColumn);
+      childTable.getSortOrder().add(expandedColumn);
+      childTable.sort();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedStanceStepToVisualize, Pair.of(stepProperty.stanceNode, stepProperty.snapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
 
-      candidateStepTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
-      candidateStepTable.getSelectionModel().select(0);
-      candidateStepTable.getFocusModel().focus(0);
+      childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
+      childTable.getSelectionModel().select(0);
+      childTable.getFocusModel().focus(0);
    }
 
    private ChangeListener<ChildStepProperty> onStepSelected()
