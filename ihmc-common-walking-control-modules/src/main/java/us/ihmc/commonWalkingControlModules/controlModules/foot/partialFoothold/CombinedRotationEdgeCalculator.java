@@ -72,10 +72,8 @@ public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
    {
       if (copHistoryEdgeCalculator.isRotationEdgeTrusted())
          return copHistoryEdgeCalculator.getLineOfRotation();
-      if (copAndVelocityEdgeCalculator.isRotationEdgeTrusted())
-         return copAndVelocityEdgeCalculator.getLineOfRotation();
-      else
-         return null;
+
+      return copAndVelocityEdgeCalculator.getLineOfRotation();
    }
 
    @Override
