@@ -74,6 +74,7 @@ public class FootstepNodeChecker
    {
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, stanceNode, parameters.getWiggleWhilePlanning());
       candidateNodeSnapData.set(snapData);
+      goodPositionChecker.setApproximateStepDimensions(candidateNode, stanceNode);
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
       {

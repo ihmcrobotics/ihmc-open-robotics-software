@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,6 +42,7 @@ public class FootstepPoseChecker
    private final YoDouble stepLength = new YoDouble("stepLength", registry);
    private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
    private final YoDouble stepReachXY = new YoDouble("stepReachXY", registry);
+   private final YoDouble stepYaw = new YoDouble("stepYaw", registry);
 
    public FootstepPoseChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
@@ -181,6 +183,23 @@ public class FootstepPoseChecker
       }
 
       return null;
+   }
+
+   void setApproximateStepDimensions(FootstepNode candidateNode, FootstepNode stanceNode)
+   {
+      double dx = candidateNode.getX() - stanceNode.getX();
+      double dy = candidateNode.getY() - stanceNode.getY();
+
+      double stepLength = dx * Math.cos(stanceNode.getYaw()) + dy * Math.sin(stanceNode.getYaw());
+      double stepWidth = - dx * Math.sin(stanceNode.getYaw()) + dy * Math.cos(stanceNode.getYaw());
+      stepWidth = stanceNode.getRobotSide().negateIfLeftSide(stepWidth);
+
+      double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw());
+      stepYaw = stanceNode.getRobotSide().negateIfLeftSide(stepYaw);
+
+      this.stepLength.set(stepLength);
+      this.stepWidth.set(stepWidth);
+      this.stepYaw.set(stepYaw);
    }
 
    void clearLoggedVariables()
