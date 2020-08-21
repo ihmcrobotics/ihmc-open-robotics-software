@@ -139,8 +139,6 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       int numberOfSteadyIterations = 0;
       int steadyIterationsThreshold = surfaceElementICPSLAMParameters.getSteadyStateDetectorIterationThreshold();
       // do ICP.
-      double quality = 0.0;
-      double translationalEffort = 0.0;
       RotationMatrix rotationalEffort = new RotationMatrix();
       RigidBodyTransform driftCompensationTransform = new RigidBodyTransform();
       int iterations = -1;
@@ -149,8 +147,8 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          optimizer.iterate();
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
-         quality = optimizer.getQuality();
-         translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
+         double quality = optimizer.getQuality();
+         double translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
          rotationalEffort.set(driftCompensationTransform.getRotation());
 
          if (qualitySteady.isSteady(quality) && translationalSteady.isSteady(translationalEffort) && rotationalSteady.isSteady(rotationalEffort))
