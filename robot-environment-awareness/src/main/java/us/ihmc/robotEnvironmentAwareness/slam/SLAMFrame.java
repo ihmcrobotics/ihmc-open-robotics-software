@@ -29,7 +29,10 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
 {
-   private static final boolean calculateInParallel = false;
+   /**
+    * Whether or not to perform calculations using parallel streams. Set at construction.
+    */
+   private final boolean computeInParallel;
 
    private final Long timestamp;
    private final SLAMFrame previousFrame;
@@ -96,32 +99,36 @@ public class SLAMFrame
    private boolean isCorrectedPointCloudUpToDate = false;
    private boolean areSurfaceElementsUpToDate = false;
 
-   public SLAMFrame(StereoVisionPointCloudMessage message, NormalEstimationParameters normalEstimationParameters)
+   public SLAMFrame(StereoVisionPointCloudMessage message, NormalEstimationParameters normalEstimationParameters, boolean computeInParallel)
    {
-      this(null, new RigidBodyTransform(), message, normalEstimationParameters);
+      this(null, new RigidBodyTransform(), message, normalEstimationParameters, computeInParallel);
    }
 
    public SLAMFrame(RigidBodyTransformReadOnly localToSensorTransform,
                     StereoVisionPointCloudMessage message,
-                    NormalEstimationParameters normalEstimationParameters)
+                    NormalEstimationParameters normalEstimationParameters,
+                    boolean computeInParallel)
    {
-      this(null, localToSensorTransform, message, normalEstimationParameters);
+      this(null, localToSensorTransform, message, normalEstimationParameters, computeInParallel);
    }
 
-   public SLAMFrame(SLAMFrame frame,
+   public SLAMFrame(SLAMFrame previousFrame,
                     StereoVisionPointCloudMessage message,
-                    NormalEstimationParameters normalEstimationParameters)
+                    NormalEstimationParameters normalEstimationParameters,
+                    boolean computeInParallel)
    {
-      this(frame, new RigidBodyTransform(), message, normalEstimationParameters);
+      this(previousFrame, new RigidBodyTransform(), message, normalEstimationParameters, computeInParallel);
    }
 
-   public SLAMFrame(SLAMFrame frame,
+   public SLAMFrame(SLAMFrame previousFrame,
                     RigidBodyTransformReadOnly localToSensorTransform,
                     StereoVisionPointCloudMessage message,
-                    NormalEstimationParameters normalEstimationParameters)
+                    NormalEstimationParameters normalEstimationParameters,
+                    boolean computeInParallel)
    {
       timestamp = message.getTimestamp();
-      previousFrame = frame;
+      this.previousFrame = previousFrame;
+      this.computeInParallel = computeInParallel;
 
       this.normalEstimationParameters = normalEstimationParameters;
 
@@ -134,7 +141,8 @@ public class SLAMFrame
       correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
       uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
-      pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld, calculateInParallel);
+      pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld,
+                                                                           computeInParallel);
 
       updateOptimizedPointCloudAndSensorPose();
    }
@@ -161,7 +169,7 @@ public class SLAMFrame
 
    private void updateCorrectedPointCloudInWorld()
    {
-      Stream<Point3DReadOnly> pointCloudStream = calculateInParallel ? pointCloudInLocalFrame.parallelStream() : pointCloudInLocalFrame.stream();
+      Stream<Point3DReadOnly> pointCloudStream = computeInParallel ? pointCloudInLocalFrame.parallelStream() : pointCloudInLocalFrame.stream();
       correctedPointCloudInWorld = pointCloudStream.map(pointInLocal ->
                                                         {
                                                            Point3D pointInWorld = new Point3D();
@@ -173,7 +181,7 @@ public class SLAMFrame
 
    private void updateSurfaceElements()
    {
-      Stream<Plane3DReadOnly> surfaceElementInLocalStream = calculateInParallel ? surfaceElementsInLocalFrame.parallelStream() : surfaceElementsInLocalFrame.stream();
+      Stream<Plane3DReadOnly> surfaceElementInLocalStream = computeInParallel ? surfaceElementsInLocalFrame.parallelStream() : surfaceElementsInLocalFrame.stream();
       surfaceElements = surfaceElementInLocalStream.map(surfaceElementInLocal ->
                                                         {
                                                            Plane3D surfel = new Plane3D();
@@ -202,8 +210,7 @@ public class SLAMFrame
       frameMap.insertScan(SLAMTools.toScan(getUncorrectedPointCloudInWorld(),
                                            getUncorrectedLocalPoseInWorld().getTranslation(),
                                            mapHullInWorld,
-                                           windowMargin,
-                                           calculateInParallel), false);
+                                           windowMargin, computeInParallel), false);
       frameMap.enableParallelComputationForNormals(true);
 
       frameMap.setNormalEstimationParameters(normalEstimationParameters);
@@ -211,7 +218,7 @@ public class SLAMFrame
          frameMap.updateNormals();
 
       OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createLeafIterable(frameMap.getRoot());
-      Stream<NormalOcTreeNode> nodeStream = StreamSupport.stream(iterable.spliterator(), calculateInParallel);
+      Stream<NormalOcTreeNode> nodeStream = StreamSupport.stream(iterable.spliterator(), computeInParallel);
       surfaceElements = nodeStream.filter(node -> isValidNode(node, minimumNumberOfHits, 0.00005, updateNormal)).map(node ->
                                                                                                                      {
                                                                                                                         Plane3D surfaceElement = new Plane3D();
@@ -222,7 +229,7 @@ public class SLAMFrame
 
       randomlySampleSurfaceElements(surfaceElements, maxNumberOfSurfaceElements);
 
-      Stream<Plane3D> surfaceElementStream = calculateInParallel ? surfaceElements.parallelStream() : surfaceElements.stream();
+      Stream<Plane3D> surfaceElementStream = computeInParallel ? surfaceElements.parallelStream() : surfaceElements.stream();
       surfaceElementsInLocalFrame = surfaceElementStream.map(surfaceElement -> SLAMTools.createConvertedSurfaceElementToSensorPose(
             getUncorrectedLocalPoseInWorld(),
             surfaceElement)).collect(Collectors.toList());
