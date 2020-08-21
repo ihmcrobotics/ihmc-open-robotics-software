@@ -53,6 +53,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    private final DoubleField rotationPerturbation = new DoubleField(SurfaceElementICPSLAMParameters::getRotationPerturbation,
                                                                     SurfaceElementICPSLAMParameters::setRotationPerturbation);
 
+   private final IntegerField maxNumberOfSurfaceElements = new IntegerField(SurfaceElementICPSLAMParameters::getMaxNumberOfSurfaceElements,
+                                                                            SurfaceElementICPSLAMParameters::setMaxNumberOfSurfaceElements);
+   private final IntegerField maxNumberOfCorrespondences = new IntegerField(SurfaceElementICPSLAMParameters::getMaxNumberOfCorrespondences,
+                                                                            SurfaceElementICPSLAMParameters::setMaxNumberOfCorrespondences);
+
    public SurfaceElementICPSLAMParametersProperty(Object bean, String name)
    {
       super(bean, name, new SurfaceElementICPSLAMParameters());
@@ -156,6 +161,16 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalRotationPerturbation(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, rotationPerturbation);
+   }
+
+   public void bindBidirectionalMaxNumberOfSurfels(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxNumberOfSurfaceElements);
+   }
+
+   public void bindBidirectionalMaxNumberOfCorrespondences(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxNumberOfCorrespondences);
    }
 
    @Override
