@@ -99,9 +99,21 @@ public class SLAMFrame
    private boolean isCorrectedPointCloudUpToDate = false;
    private boolean areSurfaceElementsUpToDate = false;
 
+   public SLAMFrame(StereoVisionPointCloudMessage message, NormalEstimationParameters normalEstimationParameters)
+   {
+      this(message, normalEstimationParameters, false);
+   }
+
    public SLAMFrame(StereoVisionPointCloudMessage message, NormalEstimationParameters normalEstimationParameters, boolean computeInParallel)
    {
       this(null, new RigidBodyTransform(), message, normalEstimationParameters, computeInParallel);
+   }
+
+   public SLAMFrame(RigidBodyTransformReadOnly localToSensorTransform,
+                    StereoVisionPointCloudMessage message,
+                    NormalEstimationParameters normalEstimationParameters)
+   {
+      this(null, localToSensorTransform, message, normalEstimationParameters, false);
    }
 
    public SLAMFrame(RigidBodyTransformReadOnly localToSensorTransform,
@@ -114,10 +126,25 @@ public class SLAMFrame
 
    public SLAMFrame(SLAMFrame previousFrame,
                     StereoVisionPointCloudMessage message,
+                    NormalEstimationParameters normalEstimationParameters)
+   {
+      this(previousFrame, new RigidBodyTransform(), message, normalEstimationParameters, false);
+   }
+
+   public SLAMFrame(SLAMFrame previousFrame,
+                    StereoVisionPointCloudMessage message,
                     NormalEstimationParameters normalEstimationParameters,
                     boolean computeInParallel)
    {
       this(previousFrame, new RigidBodyTransform(), message, normalEstimationParameters, computeInParallel);
+   }
+
+   public SLAMFrame(SLAMFrame previousFrame,
+                    RigidBodyTransformReadOnly localToSensorTransform,
+                    StereoVisionPointCloudMessage message,
+                    NormalEstimationParameters normalEstimationParameters)
+   {
+      this(previousFrame, localToSensorTransform, message, normalEstimationParameters, false);
    }
 
    public SLAMFrame(SLAMFrame previousFrame,
