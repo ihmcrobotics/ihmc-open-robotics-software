@@ -30,7 +30,7 @@
             <children>
                   <Button alignment="CENTER" onAction="#saveToFile" prefWidth="130.0" text="Save Parameters" />
                   <Button alignment="CENTER" onAction="#loadFile" prefWidth="130.0" text="Load File" GridPane.rowIndex="1" />
-               <CheckBox fx:id="tuningMode" mnemonicParsing="false" text="Tuning mode" wrapText="true" GridPane.columnIndex="1">
+               <CheckBox fx:id="autoReplan" mnemonicParsing="false" text="Tuning mode" wrapText="true" GridPane.columnIndex="1">
                   <font>
                      <Font size="12.0" />
                   </font>
