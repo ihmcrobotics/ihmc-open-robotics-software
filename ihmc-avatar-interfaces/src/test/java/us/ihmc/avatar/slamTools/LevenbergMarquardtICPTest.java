@@ -322,7 +322,6 @@ public class LevenbergMarquardtICPTest
          }
          System.out.println(i + " " + optimizer.getQuality());
       }
-      LogTools.info("Computation is done " + optimizer.getComputationTime() + " sec.");
       System.out.println("is solved? " + isSolved + " " + optimizer.getIteration() + " " + optimizer.getQuality());
       optimizer.getOptimalParameter().print();
 
