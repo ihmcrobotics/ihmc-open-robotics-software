@@ -17,7 +17,7 @@ public class SurfaceElementICPSLAMParameters
    private static final double DEFAULT_MINIMUM_CORRESPONDING_DISTANCE = 0.06;
 
    private static final int DEFAULT_STEADY_STATE_DETECTOR_ITERATION_THRESHOLD = 3;
-   private static final double DEFAULT_QUALITY_CONVERGENCE_THRESHOLD = 0.001;
+   private static final double DEFAULT_QUALITY_CONVERGENCE_THRESHOLD = Double.POSITIVE_INFINITY;
    private static final double DEFAULT_TRANSLATIONAL_EFFORT_CONVERGENCE_THRESHOLD = 0.001;
    private static final double DEFAULT_ROTATIONAL_EFFORT_CONVERGENCE_THRESHOLD = 0.005;
 
