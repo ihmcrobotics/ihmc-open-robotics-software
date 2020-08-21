@@ -13,12 +13,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxWithCenterAndYaw;
+import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,8 +68,13 @@ public class SLAMBasics implements SLAMInterface
 
    public void updateSurfaceNormals()
    {
-      // TODO update the node normals only within the bounding box.
       mapOcTree.updateNormals();
+   }
+
+   public void updateSurfaceNormalsInBoundingBox()
+   {
+      List<NormalOcTreeNode> leafNodesToUpdate = OcTreeIteratorFactory.createLeafBoundingBoxIteratable(mapOcTree.getRoot(), mapOcTree.getBoundingBox()).toList();
+      mapOcTree.updateNodesNormals(leafNodesToUpdate);
    }
 
    @Override
