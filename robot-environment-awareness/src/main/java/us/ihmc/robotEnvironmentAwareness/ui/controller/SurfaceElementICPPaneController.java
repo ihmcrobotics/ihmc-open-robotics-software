@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
@@ -60,6 +61,14 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private Spinner<Double> translationPerturbation;
    @FXML
    private Spinner<Double> rotationPerturbation;
+
+   @FXML
+   private Spinner<Double> minCorrespondingDistance;
+
+   @FXML
+   private Slider maxNumberOfSurfels;
+   @FXML
+   private Slider maxNumberOfCorrespondences;
    
    private final SurfaceElementICPSLAMParametersProperty surfaceElementICPSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "surfaceElementICPSLAMParametersProperty");
    
@@ -83,6 +92,14 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       rotationPerturbation.setValueFactory(createDoubleValueFactory(0.00001, 0.0001, 0.00001, 0.00001));
 
       maxQueueSize.setValueFactory(createIntegerValueFactory(1, Integer.MAX_VALUE, 100, 5));
+
+      minCorrespondingDistance.setValueFactory(createDoubleValueFactory(0.0, 0.1, 0.06, 0.005));
+
+      maxNumberOfSurfels.setMax(1000);
+      maxNumberOfSurfels.setMin(50);
+
+      maxNumberOfCorrespondences.setMax(1000);
+      maxNumberOfCorrespondences.setMin(50);
    }
    
    @Override
@@ -112,7 +129,12 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalIncludePitchAndRoll(includePitchAndRoll.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalTranslationPerturbation(translationPerturbation.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalRotationPerturbation(rotationPerturbation.getValueFactory().valueProperty());
-      
+
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMinimumCorrespondingDistance(minCorrespondingDistance.getValueFactory().valueProperty());
+
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxNumberOfSurfels(maxNumberOfSurfels.valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxNumberOfCorrespondences(maxNumberOfCorrespondences.valueProperty());
+
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, surfaceElementICPSLAMParametersProperty);
    }
 
