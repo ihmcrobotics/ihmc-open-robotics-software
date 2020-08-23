@@ -26,7 +26,7 @@ public class FlightS1Function implements S1Function
 
    public void compute(double timeInState, DMatrixRMaj S1ToPack)
    {
-      MatrixTools.setMatrixBlock(Afl, 3, 3, identity, 0, 0, 3, 3, timeInState);
+      MatrixTools.setMatrixBlock(Afl, 0, 3, identity, 0, 0, 3, 3, timeInState);
       NativeCommonOps.multQuad(Afl, finalS1, S1ToPack);
    }
 }
