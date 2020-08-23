@@ -62,8 +62,12 @@ public class SLAMModule implements PerceptionModule
    
    protected final SurfaceElementICPSLAM slam;
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
-   private static final int THREAD_PERIOD_MILLISECONDS = 1;
+   private static final int SLAM_PERIOD_MILLISECONDS = 250;
+   private static final int QUEUE_PERIOD_MILLISECONDS = 5;
+   private static final int MAIN_PERIOD_MILLISECONDS = 200;
+
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> scheduledQueue;
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
@@ -138,11 +142,12 @@ public class SLAMModule implements PerceptionModule
       reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
       NormalEstimationParameters normalEstimationParametersLocal = new NormalEstimationParameters();
-      normalEstimationParametersLocal.setNumberOfIterations(10);
+      normalEstimationParametersLocal.setNumberOfIterations(1);
       normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
       NormalEstimationParameters frameNormalEstimationParametersLocal = new NormalEstimationParameters();
       frameNormalEstimationParametersLocal.setNumberOfIterations(10);
+
       frameNormalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParametersLocal);
 
 
@@ -193,14 +198,11 @@ public class SLAMModule implements PerceptionModule
    {
       LogTools.info("Starting SLAM Module");
       if (scheduledMain == null)
-      {
-         scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-      }
-
+         scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, MAIN_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      if (scheduledQueue == null)
+         scheduledQueue = executorService.scheduleAtFixedRate(this::updateQueue, 0, QUEUE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       if (scheduledSLAM == null)
-      {
-         scheduledSLAM = executorService.scheduleAtFixedRate(this::updateSLAM, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-      }
+         scheduledSLAM = executorService.scheduleAtFixedRate(this::updateSLAM, 0, SLAM_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    @Override
@@ -215,6 +217,12 @@ public class SLAMModule implements PerceptionModule
       catch (Exception e)
       {
          e.printStackTrace();
+      }
+
+      if (scheduledQueue != null)
+      {
+         scheduledQueue.cancel(true);
+         scheduledQueue = null;
       }
 
       if (scheduledMain != null)
@@ -244,6 +252,11 @@ public class SLAMModule implements PerceptionModule
       return Thread.interrupted() || scheduledMain == null || scheduledMain.isCancelled();
    }
 
+   private boolean isQueueThreadInterrupted()
+   {
+      return Thread.interrupted() || scheduledQueue == null || scheduledQueue.isCancelled();
+   }
+
    private boolean isSLAMThreadInterrupted()
    {
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
@@ -262,7 +275,19 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxParameters, atomicBoundingBoxParameters.get());
    }
 
-   public void updateSLAM()
+   public void updateMain()
+   {
+      if (isMainThreadInterrupted())
+         return;
+
+      slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      if (clearNormals.getAndSet(false))
+         slam.clearNormals();
+      if (enableNormalEstimation.get())
+         slam.updateSurfaceNormals();
+   }
+
+   private void updateSLAM()
    {
       stopwatch.start();
       if (updateSLAMInternal())
@@ -288,6 +313,8 @@ public class SLAMModule implements PerceptionModule
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
       lastTimestampProcessed.set(pointCloudToCompute.getTimestamp());
 
+      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
+
       boolean success;
       if (slam.isEmpty())
       {
@@ -308,12 +335,9 @@ public class SLAMModule implements PerceptionModule
          LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
-      slam.setNormalEstimationParameters(normalEstimationParameters.get());
-      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
-      if (clearNormals.getAndSet(false))
-         slam.clearNormals();
+      slam.setNormalEstimationParameters(frameNormalEstimationParameters.get());
       if (enableNormalEstimation.get())
-         slam.updateSurfaceNormals();
+         slam.updateSurfaceNormalsInBoundingBox();
          
       dequeue();
 
@@ -406,9 +430,9 @@ public class SLAMModule implements PerceptionModule
    }
 
 
-   public void updateMain()
+   public void updateQueue()
    {
-      if (isMainThreadInterrupted())
+      if (isQueueThreadInterrupted())
          return;
 
       if (enable.get())
