@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class FootstepPlanWithTextGraphic extends Group
 {
@@ -30,7 +29,7 @@ public class FootstepPlanWithTextGraphic extends Group
    private final ArrayList<LabelGraphic> existingLabels = new ArrayList<>();
    private final ArrayList<LabelGraphic> labelsToAdd = new ArrayList<>();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ExecutorService executorService = ThreadTools.newSingleThreadExecutor(getClass().getSimpleName());
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
    private Mesh mesh;

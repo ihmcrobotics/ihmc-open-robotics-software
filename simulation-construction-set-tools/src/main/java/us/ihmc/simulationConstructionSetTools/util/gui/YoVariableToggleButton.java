@@ -88,7 +88,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
             setEnabled(true);
          }
-      }).start();
+      }, "SCSToggleButton").start();
    }
 
    public void setTrueString(String trueString)

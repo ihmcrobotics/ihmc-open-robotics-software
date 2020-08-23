@@ -429,4 +429,19 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       return keys;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (this == object)
+         return true;
+      else if (!(object instanceof StoredPropertySet))
+         return false;
+      else
+      {
+         StoredPropertySet other = (StoredPropertySet) object;
+
+         return Objects.deepEquals(values, other.values);
+      }
+   }
 }

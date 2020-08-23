@@ -62,7 +62,7 @@ public class UIFootstepPlanManager
 
       // Send plan to robot when requested
       Runnable dispathPlanRunnable = () -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, adjustedPath.get());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send -> new Thread(dispathPlanRunnable).start());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send -> new Thread(dispathPlanRunnable, "SendPlan").start());
    }
 
    private void updatePartialFootholds(boolean ignorePartialFootholds)

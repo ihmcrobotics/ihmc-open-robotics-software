@@ -157,6 +157,28 @@ public class PlanarRegionsListExamples
                                0.6);
    }
 
+   public static void generateFlatCinderBlockSteps(PlanarRegionsListGenerator generator,
+                                                   double cinderBlockSurfaceSquareSize,
+                                                   double cinderBlockThickness,
+                                                   int courseLengthXNumberOfBlocks,
+                                                   int courseWidthYNumberOfBlocks,
+                                                   double zStepUpPerRow
+   )
+   {
+      for (int x = 0; x < courseLengthXNumberOfBlocks; x++)
+      {
+         double halfCinderBlockSizeX = cinderBlockSurfaceSquareSize / 2;
+         double cinderBlockSizeY = cinderBlockSurfaceSquareSize * courseWidthYNumberOfBlocks;
+         double halfCinderBlockSizeY = cinderBlockSizeY / 2;
+         generator.translate(halfCinderBlockSizeX, halfCinderBlockSizeY, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(cinderBlockSurfaceSquareSize, cinderBlockSizeY, cinderBlockThickness);
+         generator.translate(-halfCinderBlockSizeX, -halfCinderBlockSizeY, 0.0);
+         generator.translate(0.0, 0.0, zStepUpPerRow);
+         generator.translate(cinderBlockSurfaceSquareSize, 0.0, 0.0);
+      }
+      generator.translate(-cinderBlockSurfaceSquareSize * courseLengthXNumberOfBlocks, 0.0, -zStepUpPerRow * courseLengthXNumberOfBlocks);
+   }
+
    public static void generateCinderBlockSlope(PlanarRegionsListGenerator generator,
                                                Random random,
                                                double cinderBlockSurfaceSquareSize,

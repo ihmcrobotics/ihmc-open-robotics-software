@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -35,19 +36,20 @@ public class AtlasDynamicsSimulation
                                                              int recordTicksPerControllerTick,
                                                              int dataBufferSize)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize, false);
    }
 
    public static AtlasDynamicsSimulation createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1, 1024);
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1, 1024, false);
    }
 
    public static AtlasDynamicsSimulation create(DRCRobotModel robotModel,
                                                 CommonAvatarEnvironmentInterface environment,
                                                 PubSubImplementation pubSubImplementation,
                                                 int recordTicksPerControllerTick,
-                                                int dataBufferSize)
+                                                int dataBufferSize,
+                                                boolean logToFile)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -100,6 +102,7 @@ public class AtlasDynamicsSimulation
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
       avatarSimulationFactory.setCreateYoVariableServer(false);
+      avatarSimulationFactory.setLogToFile(logToFile);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
@@ -126,6 +129,7 @@ public class AtlasDynamicsSimulation
 
    public void destroy()
    {
+      LogTools.info("Shutting down");
       avatarSimulation.destroy();
       realtimeRos2Node.destroy();
    }

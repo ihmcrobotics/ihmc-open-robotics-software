@@ -136,21 +136,21 @@ public class AtlasCorridorNavigationTest
 
    private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal, ArrayDeque<Pose3D> waypointsToHit)
    {
-      new Thread(() ->
+      ThreadTools.startAThread(() ->
       {
          LogTools.info("Creating simulated REA module");
          SimulatedREAModule simulatedREAModule = new SimulatedREAModule(map, createRobotModel(), pubSubMode);
          simulatedREAModule.start();
-      }).start();
+      }, "REAModule");
 
-      new Thread(() ->
+      ThreadTools.startAThread(() ->
       {
          LogTools.info("Creating planar regions mapping module");
          PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
          slamUpdated = planarRegionsMappingModule.getSlamUpdated();
-      }).start();
+      }, "MappingModule");
 
-      new Thread(() ->
+      ThreadTools.startAThread(() ->
       {
          LogTools.info("Creating simulation");
          HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
@@ -158,7 +158,7 @@ public class AtlasCorridorNavigationTest
          kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
          kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
          AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
-      }).start();
+      }, "KinematicsSimulation");
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
 
@@ -167,11 +167,11 @@ public class AtlasCorridorNavigationTest
          // option to launch SCS 2
 //         new Thread(() -> JavaFXMissingTools.runApplication(new SessionV))
 
-         new Thread(() ->
+         ThreadTools.startAThread(() ->
          {
             LogTools.info("Creating robot and map viewer");
             robotAndMapViewer = new RobotAndMapViewer(createRobotModel(), ros2Node);
-         }).start();
+         }, "RobotAndMapViewer");
       }
 
       ThreadTools.sleepSeconds(5.0); // wait a bit for other threads to start

@@ -10,6 +10,9 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
+import us.ihmc.log.LogTools;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
 
 public class FootstepPlannerParametersUIController
 {
@@ -27,6 +30,8 @@ public class FootstepPlannerParametersUIController
    private Rectangle swingFootShape;
    @FXML
    private Rectangle clearanceBox;
+   @FXML
+   private CheckBox autoReplan;
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
    private static final double leftFootOriginX = 30;
@@ -44,21 +49,33 @@ public class FootstepPlannerParametersUIController
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.planningParameters = parameters;
-      this.javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
       stepShapeManager.update();
    }
 
    public void bindControls()
    {
       tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
-      tableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters));
+      tableViewWrapper.setTableUpdatedCallback(() ->
+      {
+         if (autoReplan.isSelected())
+         {
+            LogTools.info("Auto replan active. Replanning...");
+            messager.submitMessage(ComputePath, true);
+         }
+
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
+      });
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
       {
-         planningParameters.set(parameters);
-         javaFXStoredPropertyMap.copyStoredToJavaFX();
-         stepShapeManager.update();
+         if (!parameters.equals(planningParameters)) // stop feedback loop
+         {
+            planningParameters.set(parameters);
+            javaFXStoredPropertyMap.copyStoredToJavaFX();
+            stepShapeManager.update();
+         }
       });
 
       // these dimensions work best for valkyrie

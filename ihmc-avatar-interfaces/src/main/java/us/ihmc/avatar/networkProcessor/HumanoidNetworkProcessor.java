@@ -133,7 +133,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          LogTools.info("Shutting down network processor modules.");
          closeAndDispose();
          ThreadTools.sleep(10);
-      }));
+      }, getClass().getSimpleName() + "Shutdown"));
    }
 
    public void setRosURI(URI rosURI)

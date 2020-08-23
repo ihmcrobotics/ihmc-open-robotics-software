@@ -9,8 +9,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
@@ -26,7 +29,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
@@ -53,19 +55,22 @@ import java.io.IOException;
  */
 public class SCSLidarAndCameraSimulator
 {
+   private final Ros2Node ros2Node;
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
    private final RemoteSyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
    {
-      this(ros2Node, environment.getTerrainObject3D(), robotModel);
+      this(pubSubImplementation, environment.getTerrainObject3D(), robotModel);
    }
 
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
    {
+      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "lidar_and_camera");
+
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,
                                                ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withInput());
@@ -201,10 +206,18 @@ public class SCSLidarAndCameraSimulator
                                                   DefaultExceptionHandler.PRINT_STACKTRACE);
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture(image);
       return new PlanarRegionsListDefinedEnvironment(environmentName,
-                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStairsWithFlatTop(),
+                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStepsWithFlatTop(),
                                                      cinderBlockTexture,
                                                      0.02,
                                                      false);
+   }
+
+   public void destroy()
+   {
+      LogTools.info("Shutting down");
+      ThreadTools.startAsDaemon(scs::stopSimulationThread, "WaitForSimulationThreadToStop");
+      scs.closeAndDispose();
+      ros2Node.destroy();
    }
 
    public static void main(String[] args) throws IOException
@@ -213,9 +226,8 @@ public class SCSLidarAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
-      new SCSLidarAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
+      new SCSLidarAndCameraSimulator(PubSubImplementation.INTRAPROCESS, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
    }
 }

@@ -80,7 +80,7 @@ public class LogVisualizer
 
       if (logFile != null)
       {
-         System.out.println("loading log from folder:" + logFile);
+         LogTools.info("Loading log from folder: " + logFile);
 
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          parameters.setCreateGUI(true);
@@ -130,7 +130,7 @@ public class LogVisualizer
       YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
 
-      System.out.println("This log contains " + parser.getNumberOfVariables() + " YoVariables");
+      LogTools.info("This log contains " + parser.getNumberOfVariables() + " YoVariables");
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
       List<JointState> jointStates = parser.getJointStates();
@@ -190,7 +190,7 @@ public class LogVisualizer
       scs.setTimeVariableName(robot.getRobotsYoRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();
-      System.out.println(getClass().getSimpleName() + ": dt set to " + dt);
+      LogTools.info("DT set to " + dt);
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
 
@@ -216,7 +216,7 @@ public class LogVisualizer
       }
       catch (Exception e)
       {
-         System.err.println("Couldn't load video file!");
+         LogTools.error("Couldn't load video file!");
          e.printStackTrace();
       }
 
