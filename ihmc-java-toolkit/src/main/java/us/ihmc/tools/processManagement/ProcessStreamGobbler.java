@@ -1,5 +1,9 @@
 package us.ihmc.tools.processManagement;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,14 +11,14 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ProcessStreamGobbler extends Thread
 {
+   private final Process process;
    private final PrintStream outputStream;
    private final InputStream inputStream;
    private final String processName;
-   private final AtomicReference<String> processPrintingPrefix = new AtomicReference<>();
+   private final String processPrintingPrefix;
    private Timer currentTimer;
 
    private BufferedReader bufferedReader;
@@ -22,19 +26,21 @@ public class ProcessStreamGobbler extends Thread
    private final Object monitor = new Object();
    private boolean shutdown = false;
 
-   public ProcessStreamGobbler(final String processName, InputStream inputStream, PrintStream outputStream)
+   public ProcessStreamGobbler(final String processName, Process process, InputStream inputStream, PrintStream outputStream)
    {
-      this(processName, inputStream, outputStream, "[Process: " + processName + "] ");
+      this(processName, process, inputStream, outputStream, "[Process: " + processName + "] ");
    }
 
-   public ProcessStreamGobbler(final String processName, InputStream inputStream, PrintStream outputStream, String processPrintingPrefix)
+   public ProcessStreamGobbler(final String processName, Process process, InputStream inputStream, PrintStream outputStream, String processPrintingPrefix)
    {
       super("ProcessStreamGobbler_" + processName);
+      this.process = process;
       this.inputStream = inputStream;
       this.outputStream = outputStream;
       this.processName = processName;
-      this.processPrintingPrefix.set(processPrintingPrefix);
-//      Runtime.getRuntime().addShutdownHook(new Thread(() -> { }, "IHMC-ProcessStreamGobblerShutdown"));
+      this.processPrintingPrefix = processPrintingPrefix;
+
+      Runtime.getRuntime().addShutdownHook(new Thread(this::onJVMShutdown, "IHMC-ProcessStreamGobblerShutdown"));
    }
 
    @Override
@@ -46,6 +52,13 @@ public class ProcessStreamGobbler extends Thread
          bufferedReader = new BufferedReader(inputStreamReader);
          while (!shutdown)
          {
+            if (!process.isAlive())
+            {
+               LogTools.info("{} is no longer alive. Shutting down...", processName);
+               startShutdown();
+               break;
+            }
+
             if (!bufferedReader.ready())
             {
                startTimer();
@@ -85,6 +98,12 @@ public class ProcessStreamGobbler extends Thread
          {
             try
             {
+               if (!process.isAlive())
+               {
+                  LogTools.info("{} is no longer alive. Shutting down...", processName);
+                  startShutdown();
+               }
+
                if (bufferedReader.ready())
                {
                   synchronized (monitor)
@@ -105,19 +124,40 @@ public class ProcessStreamGobbler extends Thread
 
    private void processStreams(BufferedReader bufferedReader) throws IOException
    {
-      String line;
-      line = bufferedReader.readLine();
-      if (line != null && outputStream != null)
+      try
       {
-         String prefix = processPrintingPrefix.get();
-         outputStream.println(prefix == null ? line : prefix + line);
-         outputStream.flush();
+         String line = bufferedReader.readLine();
+         if (line != null)
+         {
+            outputStream.println(processPrintingPrefix == null ? line : processPrintingPrefix + line);
+            outputStream.flush();
+         }
       }
+      catch (IOException ioException)
+      {
+         if (ioException.getMessage().equals("Stream closed"))
+         {
+            LogTools.info("{}: Input stream closed. Shutting down...", processName);
+            startShutdown();
+         }
+         else
+         {
+            throw ioException;
+         }
+      }
+   }
+
+   private void onJVMShutdown()
+   {
+      currentTimer.cancel();
+      currentTimer.purge();
+      interrupt();
+      ExceptionTools.handle(() -> bufferedReader.close(), DefaultExceptionHandler.PRINT_MESSAGE);
    }
 
    public synchronized void startShutdown()
    {
-      this.shutdown = true;
+      shutdown = true;
       currentTimer.cancel();
       currentTimer.purge();
       synchronized (monitor)

@@ -177,7 +177,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       startingBlockTransform.getRotation().setYawPitchRoll(Math.toRadians(20.0), 0.0, 0.0);
 
       addRegions(BehaviorPlanarRegionEnvironments.generateStartingBlockRegions(startingBlockTransform), YoAppearance.Grey());
-      addRegions(BehaviorPlanarRegionEnvironments.createRoughUpAndDownStairsWithFlatTop(false), YoAppearance.Grey());
+      addRegions(BehaviorPlanarRegionEnvironments.createRoughUpAndDownStepsWithFlatTop(false), YoAppearance.Grey());
 
       if (addDebris)
       {

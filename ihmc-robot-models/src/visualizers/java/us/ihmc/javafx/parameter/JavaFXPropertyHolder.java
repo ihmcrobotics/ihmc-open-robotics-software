@@ -1,33 +1,67 @@
 package us.ihmc.javafx.parameter;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
-public class JavaFXPropertyHolder<T>
+import java.util.ArrayList;
+import java.util.Objects;
+
+public abstract class JavaFXPropertyHolder<T>
 {
-   private final Supplier<T> valueSupplier;
-   private final Consumer<T> setter;
-   private final Consumer<Runnable> registerChangeListener;
+   private final ArrayList<Runnable> changedListeners = new ArrayList<>();
+   protected ChangeListener<T> changeListener = this::changed;
+   protected ChangeListener<Boolean> changingListener = this::changing;
+   private volatile boolean skipNextChange = false;
+   private volatile boolean isChanging = false;
 
-   public JavaFXPropertyHolder(Supplier<T> valueSupplier, Consumer<T> setter, Consumer<Runnable> registerChangeListener)
+   public JavaFXPropertyHolder()
    {
-      this.valueSupplier = valueSupplier;
-      this.setter = setter;
-      this.registerChangeListener = registerChangeListener;
+
    }
 
-   public T getValue()
+   protected void changed(ObservableValue<? extends T> observable, T oldValue, T newValue)
    {
-      return valueSupplier.get();
+      if (!skipNextChange && !isChanging && !Objects.equals(oldValue, newValue))
+      {
+         for (Runnable changedListener : changedListeners)
+         {
+            changedListener.run();
+         }
+      }
+
+      skipNextChange = false;
    }
 
-   public void setValue(T value)
+   protected void changing(ObservableValue<? extends Boolean> observable, Boolean wasChanging, Boolean isChanging)
    {
-      setter.accept(value);
+      this.isChanging = isChanging;
+      if (wasChanging) // necessary for both click and drag to work for sliders
+      {
+         for (Runnable changedListener : changedListeners)
+         {
+            changedListener.run();
+         }
+      }
+   }
+
+   protected void setValue(T value, boolean notifyListeners)
+   {
+      if (!notifyListeners)
+         skipNextChange = true;
+      setValueInternal(value);
    }
 
    public void addValueChangedListener(Runnable onChanged)
    {
-      registerChangeListener.accept(onChanged);
+      changedListeners.add(onChanged);
    }
+
+   public void setValue(T value)
+   {
+      setValue(value, true);
+   }
+
+   public abstract T getValue();
+
+   protected abstract void setValueInternal(T value);
 }

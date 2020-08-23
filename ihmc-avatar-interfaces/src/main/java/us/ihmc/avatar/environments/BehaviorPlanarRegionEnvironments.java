@@ -86,19 +86,19 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       return generator.getPlanarRegionsList();
    }
 
-   public static PlanarRegionsList createRoughUpAndDownStairsWithFlatTop()
+   public static PlanarRegionsList createRoughUpAndDownStepsWithFlatTop()
    {
-      return createRoughUpAndDownStairsWithFlatTop(true);
+      return createRoughUpAndDownStepsWithFlatTop(true);
    }
 
-   public static PlanarRegionsList createRoughUpAndDownStairsWithFlatTop(boolean createGroundPlane)
+   public static PlanarRegionsList createRoughUpAndDownStepsWithFlatTop(boolean createGroundPlane)
    {
       return generate((random, generator) -> {
          offsetGrid(generator, 1.0, -0.5, 0.0, () ->
          {
             offsetGrid(generator, 0.0, 0.0, 0.0, () ->
             {
-               generateAngledCinderBlockStairs(random, generator);
+               generateAngledCinderBlockSteps(random, generator);
             });
             offsetGrid(generator, 1.0, 0.0, topRegionHeight, () ->
             {
@@ -108,21 +108,21 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
             {
                rotate(generator, Math.PI, () ->
                {
-                  generateAngledCinderBlockStairs(random, generator);
+                  generateAngledCinderBlockSteps(random, generator);
                });
             });
          });
       }, createGroundPlane);
    }
 
-   public static PlanarRegionsList createFlatUpAndDownStairsWithFlatTop()
+   public static PlanarRegionsList createFlatUpAndDownStepsWithFlatTop()
    {
       return generate((random, generator) -> {
          offsetGrid(generator, 1.0, -0.5, 0.0, () ->
          {
             offsetGrid(generator, 0.0, 0.0, 0.0, () ->
             {
-               generateFlatCinderBlockStairs(random, generator);
+               generateFlatCinderBlockSteps(generator);
             });
             offsetGrid(generator, 1.0, 0.0, topRegionHeight, () ->
             {
@@ -132,7 +132,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
             {
                rotate(generator, Math.PI, () ->
                {
-                  generateFlatCinderBlockStairs(random, generator);
+                  generateFlatCinderBlockSteps(generator);
                });
             });
          });
@@ -232,12 +232,12 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
       generator.translate(1.0, -superGridSize / 2, 0.0);
       addTopFlatRegionOld(generator);
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
 
       generator.rotate(Math.PI, Axis3D.Z);
       generator.translate(2.0, -1.2, 0.0);
       addTopFlatRegionOld(generator);
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
 
       return generator.getPlanarRegionsList();
    }
@@ -279,14 +279,14 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
    {
       addTopFlatRegionOld(generator);
 
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
 
@@ -321,16 +321,16 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
    private static void addPlusFormationSlopes(Random random, PlanarRegionsListGenerator generator)
    {
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
-      generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generateAngledCinderBlockSteps(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
       generator.rotate(Math.PI/2, Axis3D.Z);
    }
@@ -347,7 +347,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       generator.addCubeReferencedAtBottomNegativeXYCorner(superGridSize, superGridSize, cinderThickness);
    }
 
-   private static void generateAngledCinderBlockStairs(Random random, PlanarRegionsListGenerator generator)
+   private static void generateAngledCinderBlockSteps(Random random, PlanarRegionsListGenerator generator)
    {
       PlanarRegionsListExamples.generateCinderBlockSlope(generator,
                                                          random,
@@ -361,21 +361,12 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
                                                          Math.toRadians(CINDER_SLOPE_ANGLE),
                                                          0.0);
    }
-   private static void generateFlatCinderBlockStairs(Random random, PlanarRegionsListGenerator generator)
+   
+   private static void generateFlatCinderBlockSteps(PlanarRegionsListGenerator generator)
    {
-      PlanarRegionsListExamples.generateCinderBlockSlope(generator,
-                                                         random,
-                                                         cinderSquareSurfaceSize,
-                                                         cinderThickness,
-                                                         3,
-                                                         3,
-                                                         Z_STEP_UP_PER_ROW + 0.04,
-                                                         0.0,
-                                                         0.0,
-                                                         0.0,
-                                                         0.0);
+      PlanarRegionsListExamples.generateFlatCinderBlockSteps(generator, cinderSquareSurfaceSize, cinderThickness, 3, 3, 0.11 + 0.04);
    }
-   private static void generateAngledCinderBlockStairs(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
+   private static void generateAngledCinderBlockSteps(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
    {
       PlanarRegionsListExamples.generateCinderBlockSlope(generator,
                                                          random,
@@ -426,7 +417,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
    public static void main(String[] args)
    {
-      PlanarRegionsList roughUpAndDownStairsWithFlatTop = createRoughUpAndDownStairsWithFlatTop();
+      PlanarRegionsList roughUpAndDownStairsWithFlatTop = createRoughUpAndDownStepsWithFlatTop();
       PlanarRegionFileTools.exportPlanarRegionData(Paths.get(System.getProperty("user.home") + File.separator + "PlanarRegions" + File.separator), roughUpAndDownStairsWithFlatTop);
    }
 
