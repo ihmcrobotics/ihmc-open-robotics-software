@@ -1,14 +1,15 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
-import javafx.stage.Stage;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.ui.LiveMapUI;
@@ -19,8 +20,6 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.ros2.Ros2Node;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class PerceptionSuite
 {
@@ -63,7 +62,7 @@ public class PerceptionSuite
                                                           PerceptionSuiteAPI.GUIRunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
                                                       () -> new REAPerceptionSuiteElement(m -> LIDARBasedREAModule.createIntraprocessModule(
-                                                            LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME,
+                                                            new FilePropertyHelper(LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME),
                                                             lidarREANetworkProvider), (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s)),
                                                       messager,
                                                       PerceptionSuiteAPI.RunLidarREA,
@@ -117,7 +116,7 @@ public class PerceptionSuite
 
    private LIDARBasedREAModule createRealSenseREAModule(REANetworkProvider networkProvider) throws Exception
    {
-      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME,
+      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME),
                                                                                 networkProvider,
                                                                                 NetworkPorts.REA_MODULE2_UI_PORT);
       module.setParametersForStereo();
