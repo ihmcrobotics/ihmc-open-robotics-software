@@ -23,6 +23,18 @@ public enum SwingPlannerType
       }
    }
 
+   public static SwingPlannerType fromInt(int index)
+   {
+      if (index == -1)
+      {
+         return null;
+      }
+      else
+      {
+         return values()[index];
+      }
+   }
+
    public byte toByte()
    {
       return (byte) ordinal();

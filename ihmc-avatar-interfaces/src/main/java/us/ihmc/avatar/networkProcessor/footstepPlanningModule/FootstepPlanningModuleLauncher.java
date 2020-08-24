@@ -216,7 +216,7 @@ public class FootstepPlanningModuleLauncher
                                                });
    }
 
-   private static SideDependentList<ConvexPolygon2D> createFootPolygons(DRCRobotModel robotModel)
+   public static SideDependentList<ConvexPolygon2D> createFootPolygons(DRCRobotModel robotModel)
    {
       if (robotModel.getContactPointParameters() == null)
       {
