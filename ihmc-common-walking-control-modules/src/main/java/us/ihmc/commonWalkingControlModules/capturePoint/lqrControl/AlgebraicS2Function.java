@@ -31,6 +31,11 @@ public class AlgebraicS2Function implements S2Function
       }
    }
 
+   public AlgebraicS2Segment getSegment(int i)
+   {
+      return s2Segments.get(i);
+   }
+
    @Override
    public void compute(double timeInState, DMatrixRMaj s2ToPack)
    {
