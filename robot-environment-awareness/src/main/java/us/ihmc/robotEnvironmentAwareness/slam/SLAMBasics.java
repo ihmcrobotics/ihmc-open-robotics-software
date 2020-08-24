@@ -71,10 +71,10 @@ public class SLAMBasics implements SLAMInterface
       mapOcTree.updateNormals();
    }
 
-   public void updateSurfaceNormalsInBoundingBox()
+   public void updateSurfaceNormalsInBoundingBox(NormalEstimationParameters normalEstimationParameters)
    {
       List<NormalOcTreeNode> leafNodesToUpdate = OcTreeIteratorFactory.createLeafBoundingBoxIteratable(mapOcTree.getRoot(), mapOcTree.getBoundingBox()).toList();
-      mapOcTree.updateNodesNormals(leafNodesToUpdate);
+      mapOcTree.updateNodesNormals(leafNodesToUpdate, normalEstimationParameters);
    }
 
    public void setComputeInParallel(boolean computeInParallel)
