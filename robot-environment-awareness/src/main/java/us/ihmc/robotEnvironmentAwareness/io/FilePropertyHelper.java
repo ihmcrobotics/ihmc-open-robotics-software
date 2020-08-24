@@ -1,9 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.io;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -16,6 +18,32 @@ public final class FilePropertyHelper
    public FilePropertyHelper(File configurationFile)
    {
       this.configurationFile = configurationFile;
+   }
+
+   public FilePropertyHelper(String configurationFilePath)
+   {
+      this.configurationFile = ensureFileExists(new File(configurationFilePath));
+   }
+
+   public FilePropertyHelper(URL configurationFileURL)
+   {
+      this.configurationFile = ensureFileExists(new File(configurationFileURL.toExternalForm()));
+   }
+
+   private File ensureFileExists(File file)
+   {
+      try
+      {
+         file.getParentFile().mkdirs();
+         file.createNewFile();
+         return file;
+      }
+      catch (IOException e)
+      {
+         System.out.println(file.getAbsolutePath());
+         e.printStackTrace();
+         return null;
+      }
    }
 
    public void saveProperty(String propertyName, double propertyValue)
@@ -40,22 +68,25 @@ public final class FilePropertyHelper
 
    public void saveProperty(String propertyName, String propertyValue)
    {
-      FileOutputStream fileOut = null;
+      if (configurationFile == null)
+         return;
+
+      Properties properties = new Properties()
+      {
+         private static final long serialVersionUID = -8814683165980261816L;
+
+         @Override
+         public synchronized Enumeration<Object> keys()
+         {
+            return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+         }
+      };
+
       FileInputStream fileIn = null;
+      FileOutputStream fileOut = null;
 
       try
       {
-         Properties properties = new Properties()
-         {
-            private static final long serialVersionUID = -8814683165980261816L;
-
-            @Override
-            public synchronized Enumeration<Object> keys()
-            {
-               return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-            }
-         };
-
          if (configurationFile.exists() && configurationFile.isFile())
          {
             fileIn = new FileInputStream(configurationFile);
@@ -65,7 +96,6 @@ public final class FilePropertyHelper
          properties.setProperty(propertyName, propertyValue);
          fileOut = new FileOutputStream(configurationFile);
          properties.store(fileOut, "");
-         fileOut.close();
       }
       catch (Exception ex)
       {
@@ -73,23 +103,8 @@ public final class FilePropertyHelper
       }
       finally
       {
-         try
-         {
-            if (fileIn != null)
-               fileIn.close();
-         }
-         catch (Exception e)
-         {
-         }
-
-         try
-         {
-            if (fileOut != null)
-               fileOut.close();
-         }
-         catch (IOException e)
-         {
-         }
+         closeStreamSilently(fileIn);
+         closeStreamSilently(fileOut);
       }
    }
 
@@ -151,11 +166,11 @@ public final class FilePropertyHelper
 
    public String loadProperty(String propertyName)
    {
+      if (configurationFile == null || !configurationFile.exists() || !configurationFile.isFile())
+         return null;
+
       FileInputStream fileIn = null;
       String propertyValue = null;
-
-      if (!configurationFile.exists() || !configurationFile.isFile())
-         return null;
 
       try
       {
@@ -171,16 +186,21 @@ public final class FilePropertyHelper
       }
       finally
       {
-         try
-         {
-            fileIn.close();
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
+         closeStreamSilently(fileIn);
       }
 
       return propertyValue;
+   }
+
+   private static void closeStreamSilently(Closeable streamToClose)
+   {
+      try
+      {
+         if (streamToClose != null)
+            streamToClose.close();
+      }
+      catch (Exception e)
+      {
+      }
    }
 }

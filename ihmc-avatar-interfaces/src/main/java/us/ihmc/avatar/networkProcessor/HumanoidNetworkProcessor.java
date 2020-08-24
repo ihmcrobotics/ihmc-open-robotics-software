@@ -31,6 +31,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
@@ -487,10 +488,12 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
                                                                                        lidarOutputTopic,
                                                                                        stereoOutputTopic,
                                                                                        depthOutputTopic);
-         if (reaConfigurationFilePath == null)
-            module = LIDARBasedREAModule.createRemoteModule(DEFAULT_REA_CONFIG_FILE_PATH, networkProvider);
+         FilePropertyHelper filePropertyHelper;
+         if (reaConfigurationFilePath != null)
+            filePropertyHelper = new FilePropertyHelper(reaConfigurationFilePath);
          else
-            module = LIDARBasedREAModule.createRemoteModule(reaConfigurationFilePath, networkProvider);
+            filePropertyHelper = new FilePropertyHelper(DEFAULT_REA_CONFIG_FILE_PATH);
+         module = LIDARBasedREAModule.createRemoteModule(filePropertyHelper, networkProvider);
          modulesToClose.add(module::stop);
          modulesToStart.add(module::start);
          return module;
