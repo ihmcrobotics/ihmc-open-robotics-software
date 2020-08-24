@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -188,17 +189,18 @@ public class LookAndStepBehavior implements BehaviorInterface
             swingPlannerParameters,
             helper::publishToUI,
             helper.getOrCreateFootstepPlanner(),
+            FootstepPlanningModuleLauncher.createFootPolygons(helper.getRobotModel()),
             lastStanceSide,
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference::get,
             controllerStatusTracker,
-            footstepPlan ->
+            footstepPlanEtc ->
             {
                if (!isBeingReset.get())
                {
                   behaviorStateReference.set(LookAndStepBehavior.State.STEPPING);
-                  stepping.acceptFootstepPlan(footstepPlan);
+                  stepping.acceptFootstepPlan(footstepPlanEtc);
                }
             },
             approvalNotification
@@ -216,6 +218,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             robotInterface.newSyncedRobot(),
             lookAndStepParameters,
             helper::publishToUI,
+            helper.createFootstepPlanPostProcessor(),
             robotInterface::requestWalk,
             () ->
             {

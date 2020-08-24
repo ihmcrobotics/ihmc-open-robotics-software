@@ -29,6 +29,7 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final DoubleStoredPropertyKey neckPitchForBodyPath = keys.addDoubleKey("Neck pitch for body path");
    public static final DoubleStoredPropertyKey neckPitchTolerance = keys.addDoubleKey("Neck pitch tolerance");
    public static final DoubleStoredPropertyKey resetDuration = keys.addDoubleKey("Reset duration");
+   public static final IntegerStoredPropertyKey swingPlannerType = keys.addIntegerKey("Swing planner type");
 
    public LookAndStepBehaviorParameters()
    {

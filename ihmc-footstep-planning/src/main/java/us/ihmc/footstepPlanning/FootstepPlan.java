@@ -12,6 +12,23 @@ public class FootstepPlan implements FootstepPlanReadOnly
    private double finalTransferSplitFraction = -1.0;
    private double finalTransferWeightDistribution = -1.0;
 
+   public FootstepPlan()
+   {
+
+   }
+
+   /** deep copy */
+   public FootstepPlan(FootstepPlan otherFootstepPlan)
+   {
+      for (PlannedFootstep otherFootstep : otherFootstepPlan.footsteps)
+      {
+         footsteps.add(new PlannedFootstep(otherFootstep));
+      }
+
+      this.finalTransferSplitFraction = otherFootstepPlan.finalTransferSplitFraction;
+      this.finalTransferWeightDistribution = otherFootstepPlan.finalTransferWeightDistribution;
+   }
+
    @Override
    public int getNumberOfSteps()
    {

@@ -9,11 +9,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -24,12 +22,13 @@ public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
+   protected FootstepPlanPostProcessHandler footstepPlanPostProcessor;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
 
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable replanFootstepsOutput;
 
-   protected FootstepPlan footstepPlan;
+   protected FootstepPlanEtcetera footstepPlanEtc;
    protected RemoteSyncedRobotModel syncedRobot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
@@ -38,37 +37,37 @@ public class LookAndStepSteppingTask
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
       private SingleThreadSizeOneQueueExecutor executor;
-      private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
+      private final TypedInput<FootstepPlanEtcetera> footstepPlanEtcInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
-      private ControllerStatusTracker controllerStatusTracker;
 
       public void initialize(StatusLogger statusLogger,
                              RemoteSyncedRobotModel syncedRobot,
                              LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                              UIPublisher uiPublisher,
+                             FootstepPlanPostProcessHandler footstepPlanPostProcessor,
                              RobotWalkRequester robotWalkRequester,
                              Runnable replanFootstepsOutput,
                              ControllerStatusTracker controllerStatusTracker,
                              Supplier<LookAndStepBehavior.State> behaviorStateReference,
                              SideDependentList<PlannedFootstepReadOnly> lastCommandedFoosteps)
       {
-         this.controllerStatusTracker = controllerStatusTracker;
          this.lastCommandedFoosteps = lastCommandedFoosteps;
          this.statusLogger = statusLogger;
          this.syncedRobot = syncedRobot;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
          this.uiPublisher = uiPublisher;
+         this.footstepPlanPostProcessor = footstepPlanPostProcessor;
          this.robotWalkRequester = robotWalkRequester;
          this.replanFootstepsOutput = replanFootstepsOutput;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
-         footstepPlanInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
+         footstepPlanEtcInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
          suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
-         suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
+         suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlanEtc == null ? null : footstepPlanEtc.getNumberOfSteps())
                                        + ". Planning again...",
-                                 () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), replanFootstepsOutput::run);
+                                 () -> !(footstepPlanEtc != null && footstepPlanEtc.getNumberOfSteps() > 0), replanFootstepsOutput);
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
       }
@@ -79,14 +78,14 @@ public class LookAndStepSteppingTask
          previousStepMessageId = 0L;
       }
 
-      public void acceptFootstepPlan(FootstepPlan footstepPlan)
+      public void acceptFootstepPlan(FootstepPlanEtcetera footstepPlanEtc)
       {
-         footstepPlanInput.set(footstepPlan);
+         footstepPlanEtcInput.set(footstepPlanEtc);
       }
 
       private void evaluateAndRun()
       {
-         footstepPlan = footstepPlanInput.getLatest();
+         footstepPlanEtc = footstepPlanEtcInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepBehaviorParameters.getRobotConfigurationDataExpiration());
@@ -101,12 +100,20 @@ public class LookAndStepSteppingTask
    protected void performTask()
    {
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
-      if (footstepPlan.getNumberOfSteps() > 0)
+      if (footstepPlanEtc.getNumberOfSteps() > 0)
       {
-         PlannedFootstep footstepToTake = footstepPlan.getFootstep(0);
+         PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
          shortenedFootstepPlan.addFootstep(footstepToTake);
          lastCommandedFoosteps.put(footstepToTake.getRobotSide(), footstepToTake);
       }
+
+      footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
+                                                      footstepPlanEtc,
+                                                      footstepPlanEtc.getStartFootPoses(),
+                                                      footstepPlanEtc.getStartFootholds(),
+                                                      footstepPlanEtc.getSwingPlannerType(),
+                                                      true,
+                                                      true);
 
       statusLogger.warn("Requesting walk");
       double swingTime = lookAndStepBehaviorParameters.getSwingTime();

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
@@ -12,8 +13,11 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlanPostProcessHandler;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
@@ -78,7 +82,6 @@ public class BehaviorHelper
    private RemoteREAInterface rea;
    private RemoteEnvironmentMapInterface environmentMap;
    private FootstepPlanningModule footstepPlanner;
-   private VisibilityGraphPathPlanner bodyPathPlanner;
    private StatusLogger statusLogger;
 
 
@@ -108,6 +111,48 @@ public class BehaviorHelper
       if (footstepPlannerToolbox == null)
          footstepPlannerToolbox = new RemoteFootstepPlannerInterface(managedROS2Node, robotModel, managedMessager);
       return footstepPlannerToolbox; // planner toolbox
+   }
+
+   public RemoteREAInterface getOrCreateREAInterface()
+   {
+      if (rea == null)
+         rea = new RemoteREAInterface(managedROS2Node);
+      return rea; // REA toolbox
+   }
+
+   public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
+   {
+      if (environmentMap == null)
+         environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
+      return environmentMap;
+   }
+
+   public FootstepPlanningModule getOrCreateFootstepPlanner()
+   {
+      if (footstepPlanner == null)
+         footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      return footstepPlanner;
+   }
+
+   public StatusLogger getOrCreateStatusLogger()
+   {
+      if (statusLogger == null)
+         statusLogger = new StatusLogger(this::publishToUI);
+      return statusLogger;
+   }
+
+   public FootstepPlanPostProcessHandler createFootstepPlanPostProcessor()
+   {
+      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      SplitFractionCalculatorParametersBasics splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
+      return new FootstepPlanPostProcessHandler(footstepPlannerParameters,
+                                                swingPlannerParameters,
+                                                splitFractionParameters,
+                                                walkingControllerParameters,
+                                                footPolygons);
    }
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
@@ -160,34 +205,6 @@ public class BehaviorHelper
    public void publishROS2(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
-   }
-
-   public RemoteREAInterface getOrCreateREAInterface()
-   {
-      if (rea == null)
-         rea = new RemoteREAInterface(managedROS2Node);
-      return rea; // REA toolbox
-   }
-
-   public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
-   {
-      if (environmentMap == null)
-         environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
-      return environmentMap;
-   }
-
-   public FootstepPlanningModule getOrCreateFootstepPlanner()
-   {
-      if (footstepPlanner == null)
-         footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      return footstepPlanner;
-   }
-
-   public StatusLogger getOrCreateStatusLogger()
-   {
-      if (statusLogger == null)
-         statusLogger = new StatusLogger(this::publishToUI);
-      return statusLogger;
    }
 
    // UI Communication Methods:

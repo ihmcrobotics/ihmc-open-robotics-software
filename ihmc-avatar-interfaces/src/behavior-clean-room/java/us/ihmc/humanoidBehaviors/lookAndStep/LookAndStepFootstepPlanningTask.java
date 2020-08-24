@@ -1,11 +1,13 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -16,6 +18,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -41,10 +44,11 @@ public class LookAndStepFootstepPlanningTask
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
    protected UIPublisher uiPublisher;
    protected FootstepPlanningModule footstepPlanningModule;
+   protected SideDependentList<ConvexPolygon2D> defaultFootPolygons;
    protected Supplier<Boolean> operatorReviewEnabledSupplier;
    protected RemoteSyncedRobotModel syncedRobot;
-   protected LookAndStepReview<FootstepPlan> review = new LookAndStepReview<>();
-   protected Consumer<FootstepPlan> autonomousOutput;
+   protected LookAndStepReview<FootstepPlanEtcetera> review = new LookAndStepReview<>();
+   protected Consumer<FootstepPlanEtcetera> autonomousOutput;
    protected Runnable planningFailedNotifier;
    protected AtomicReference<RobotSide> lastStanceSideReference;
 
@@ -68,12 +72,13 @@ public class LookAndStepFootstepPlanningTask
                              SwingPlannerParametersReadOnly swingPlannerParameters,
                              UIPublisher uiPublisher,
                              FootstepPlanningModule footstepPlanningModule,
+                             SideDependentList<ConvexPolygon2D> defaultFootPolygons,
                              AtomicReference<RobotSide> lastStanceSideReference,
                              Supplier<Boolean> operatorReviewEnabledSupplier,
                              RemoteSyncedRobotModel syncedRobot,
                              Supplier<LookAndStepBehavior.State> behaviorStateReference,
                              ControllerStatusTracker controllerStatusTracker,
-                             Consumer<FootstepPlan> autonomousOutput,
+                             Consumer<FootstepPlanEtcetera> autonomousOutput,
                              TypedNotification<Boolean> approvalNotification)
       {
          this.statusLogger = statusLogger;
@@ -82,6 +87,7 @@ public class LookAndStepFootstepPlanningTask
          this.swingPlannerParameters = swingPlannerParameters;
          this.uiPublisher = uiPublisher;
          this.footstepPlanningModule = footstepPlanningModule;
+         this.defaultFootPolygons = defaultFootPolygons;
          this.lastStanceSideReference = lastStanceSideReference;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
          this.behaviorStateReference = behaviorStateReference;
@@ -114,6 +120,8 @@ public class LookAndStepFootstepPlanningTask
          suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
                                        + " > " + lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps(),
                                  () -> numberOfIncompleteFootsteps > lookAndStepBehaviorParameters.getAcceptableIncompleteFootsteps());
+         suppressor.addCondition(() -> "Swing planner type parameter not valid: " + lookAndStepBehaviorParameters.getSwingPlannerType(),
+                                 () -> swingPlannerType == null);
       }
 
       public void acceptFootstepCompleted()
@@ -150,6 +158,7 @@ public class LookAndStepFootstepPlanningTask
          lastStanceSide = lastStanceSideReference.get();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
+         swingPlannerType = SwingPlannerType.fromInt(lookAndStepBehaviorParameters.getSwingPlannerType());
 
          if (suppressor.evaulateShouldAccept())
          {
@@ -167,6 +176,7 @@ public class LookAndStepFootstepPlanningTask
    protected RobotSide lastStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
+   protected SwingPlannerType swingPlannerType;
 
    protected void performTask()
    {
@@ -208,8 +218,8 @@ public class LookAndStepFootstepPlanningTask
       }
       else // if first step, step with furthest foot from the goal
       {
-         if (startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition())
-             <= startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
+         if (startFootPoses.get(RobotSide.LEFT ).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition())
+          <= startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
          {
             stanceSide = RobotSide.LEFT;
          }
@@ -228,17 +238,19 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
+      // TODO: Set start footholds!!
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.getFootstepPlannerTimeout());
       footstepPlannerRequest.setPerformPositionBasedSplitFractionCalculation(true);
-      footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.PROPORTION);
+      footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
-      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
+      footstepPlanningModule.addCustomTerminationCondition(
+            (plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
 
-      statusLogger.info("Footstep planner started...");
+      statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       statusLogger.info("Footstep planner completed with {}, {} step(s)",
                         footstepPlannerOutput.getFootstepPlanningResult(),
@@ -258,13 +270,21 @@ public class LookAndStepFootstepPlanningTask
       {
          uiPublisher.publishToUI(FootstepPlanForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
 
+
+         FootstepPlanEtcetera footstepPlanEtc = new FootstepPlanEtcetera(footstepPlannerOutput.getFootstepPlan(),
+                                                                         planarRegions,
+                                                                         new SideDependentList<>(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
+                                                                                                 startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld()),
+                                                                         defaultFootPolygons,
+                                                                         swingPlannerType);
+
          if (operatorReviewEnabledSupplier.get())
          {
-            review.review(footstepPlannerOutput.getFootstepPlan());
+            review.review(footstepPlanEtc);
          }
          else
          {
-            autonomousOutput.accept(footstepPlannerOutput.getFootstepPlan());
+            autonomousOutput.accept(footstepPlanEtc);
          }
       }
    }
