@@ -22,7 +22,6 @@ public class SLAMModuleAPI
 
    private static final CategoryTheme Module = apiFactory.createCategoryTheme("Module");
    private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
-   private static final CategoryTheme StereoVision = apiFactory.createCategoryTheme("StereoVision");
    private static final CategoryTheme DepthCloud = apiFactory.createCategoryTheme("DepthCloud");
    private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorFrame");
    private static final CategoryTheme VelocityLimit = apiFactory.createCategoryTheme("VelocityLimit");
@@ -38,7 +37,6 @@ public class SLAMModuleAPI
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
-   private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
@@ -78,11 +76,12 @@ public class SLAMModuleAPI
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = Root.child(Module).child(PlanarRegions).topic(Data);
    public static final Topic<SurfaceElementICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
 
-   public static final Topic<DisplayType> SLAMOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
-   public static final Topic<String> SLAMStatus = Root.child(Module).topic(Status);
+   public static final Topic<String> FrameComputationTime = Root.child(Module).topic(Status);
+   public static final Topic<String> SLAMComputationTime = topic("SLAMComputationTime");
+   public static final Topic<String> AverageComputationTime = topic("AverageComputationTime");
+   public static final Topic<String> ListenerComputationTime = topic("ListenerComputationTime");
+   public static final Topic<String> TotalComputationTime = topic("TotalComputationTime");
    public static final Topic<String> QueuedBuffers = Root.child(Module).child(Buffer).topic(Status);
-
-   public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = Root.child(UI).child(StereoVision).topic(Data);
 
    public static final Topic<Boolean> NormalEstimationClear = Root.child(Normal).topic(Clear);
    public static final Topic<Boolean> NormalEstimationEnable = Root.child(Normal).topic(Enable);

@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -20,7 +19,19 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private TextField queuedBufferSize;
 
    @FXML
-   private TextField slamStatus;
+   private TextField frameComputationTime;
+
+   @FXML
+   private TextField slamComputationTime;
+
+   @FXML
+   private TextField averageComputationTime;
+
+   @FXML
+   private TextField listenerComputationTime;
+
+   @FXML
+   private TextField totalComputationTime;
 
    @FXML
    private ToggleButton latestFrameEnable;
@@ -29,7 +40,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private ToggleButton octreeMapEnable;
 
    @FXML
-   private CheckBox showNormal;
+   private ToggleButton showNormal;
 
    @FXML
    private ToggleButton sensorFrameEnable;
@@ -62,7 +73,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMEnable, enableSLAMButton.selectedProperty());
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.QueuedBuffers, queuedBufferSize.textProperty());
-      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMStatus, slamStatus.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.FrameComputationTime, frameComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMComputationTime, slamComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.AverageComputationTime, averageComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ListenerComputationTime, listenerComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.TotalComputationTime, totalComputationTime.textProperty());
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowLatestFrame, latestFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());
