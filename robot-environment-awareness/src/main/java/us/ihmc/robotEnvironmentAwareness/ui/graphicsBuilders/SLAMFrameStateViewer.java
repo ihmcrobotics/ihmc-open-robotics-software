@@ -12,6 +12,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrameState;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SLAMFrameStateViewer implements Runnable
@@ -72,9 +73,9 @@ public class SLAMFrameStateViewer implements Runnable
 
    private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] uncorrectedPointCloudBuffer,
                                                                                         Point3DReadOnly[] correspondingPointCloudBuffer,
-                                                                                        Point3DReadOnly[] correctedPointCloudBuffer)
+                                                                                        List<? extends Point3DReadOnly> correctedPointCloudBuffer)
    {
-      int numberOfPointsToPack = uncorrectedPointCloudBuffer.length + correspondingPointCloudBuffer.length + correctedPointCloudBuffer.length;
+      int numberOfPointsToPack = uncorrectedPointCloudBuffer.length + correspondingPointCloudBuffer.length + correctedPointCloudBuffer.size();
 
       Point3D[] pointCloudBuffer = new Point3D[numberOfPointsToPack];
       int[] colorBuffer = new int[numberOfPointsToPack];
@@ -90,7 +91,7 @@ public class SLAMFrameStateViewer implements Runnable
       }
       for (int i = uncorrectedPointCloudBuffer.length + correspondingPointCloudBuffer.length; i < numberOfPointsToPack; i++)
       {
-         pointCloudBuffer[i] = new Point3D(correctedPointCloudBuffer[i - uncorrectedPointCloudBuffer.length - correspondingPointCloudBuffer.length]);
+         pointCloudBuffer[i] = new Point3D(correctedPointCloudBuffer.get(i - uncorrectedPointCloudBuffer.length - correspondingPointCloudBuffer.length));
          colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
       }
       return PointCloudCompression.compressPointCloud(19870612L, pointCloudBuffer, colorBuffer, numberOfPointsToPack, 0.001, null);
@@ -99,7 +100,7 @@ public class SLAMFrameStateViewer implements Runnable
    private void unpackPointCloud(SLAMFrameState message)
    {
       Point3DReadOnly[] uncorrectedPointCloudBuffer = message.getUncorrectedPointCloudInWorld();
-      Point3DReadOnly[] correctedPointCloudBuffer = message.getCorrectedPointCloudInWorld();
+      List<? extends Point3DReadOnly> correctedPointCloudBuffer = message.getCorrectedPointCloudInWorld();
       Point3DReadOnly[] correspondingPointCloudBuffer = message.setCorrespondingPointsInWorld();
 
       StereoVisionPointCloudMessage convertedMessage = createLatestFrameStereoVisionPointCloudMessage(uncorrectedPointCloudBuffer, correspondingPointCloudBuffer, correctedPointCloudBuffer);

@@ -42,6 +42,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private Spinner<Double> initialQualityThreshold;
    @FXML
    private Spinner<Integer> maxQueueSize;
+   @FXML
+   private Spinner<Double> longestTimeToLag;
 
    @FXML
    private Spinner<Integer> maxOptimizationIterations;
@@ -49,6 +51,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private ToggleButton computeSurfaceNormalsInFrame;
    @FXML
    private ToggleButton insertMissInOcTree;
+   @FXML
+   private ToggleButton computeFramesInParallel;
 
    @FXML
    private ToggleButton includePitchAndRoll;
@@ -73,6 +77,7 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       
       initialQualityThreshold.setValueFactory(createDoubleValueFactory(0.05, 0.3, 0.1, 0.05));
 
+      longestTimeToLag.setValueFactory(createDoubleValueFactory(0.0, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 1.0));
       maxOptimizationIterations.setValueFactory(createIntegerValueFactory(1, 100, 40, 1));
       translationPerturbation.setValueFactory(createDoubleValueFactory(0.0001, 0.01, 0.002, 0.0005));
       rotationPerturbation.setValueFactory(createDoubleValueFactory(0.00001, 0.0001, 0.00001, 0.00001));
@@ -97,10 +102,12 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalEnableInitialQualityFilter(enableInitialQualityFilter.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInitialQualityThreshold(initialQualityThreshold.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxQueueSize(maxQueueSize.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalLongestTimeToLag(longestTimeToLag.getValueFactory().valueProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInsertMissInOcTree(insertMissInOcTree.selectedProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeFramesInParallel(computeFramesInParallel.selectedProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalIncludePitchAndRoll(includePitchAndRoll.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalTranslationPerturbation(translationPerturbation.getValueFactory().valueProperty());
