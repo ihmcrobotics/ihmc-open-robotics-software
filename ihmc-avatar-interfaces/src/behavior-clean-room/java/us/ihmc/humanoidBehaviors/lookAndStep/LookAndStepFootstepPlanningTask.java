@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -51,6 +50,7 @@ public class LookAndStepFootstepPlanningTask
    protected Consumer<FootstepPlanEtcetera> autonomousOutput;
    protected Runnable planningFailedNotifier;
    protected AtomicReference<RobotSide> lastStanceSideReference;
+   protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -144,6 +144,7 @@ public class LookAndStepFootstepPlanningTask
       {
          executor.interruptAndReset();
          review.reset();
+         plannerFailedLastTime.set(false);
       }
 
       private void evaluateAndRun()
@@ -214,7 +215,8 @@ public class LookAndStepFootstepPlanningTask
       RobotSide stanceSide;
       if (lastStanceSide != null)
       {
-         stanceSide = lastStanceSide;
+         // if planner failed last time, do not switch sides
+         stanceSide = plannerFailedLastTime.get() ? lastStanceSide : lastStanceSide.getOppositeSide();
       }
       else // if first step, step with furthest foot from the goal
       {
@@ -228,6 +230,7 @@ public class LookAndStepFootstepPlanningTask
             stanceSide = RobotSide.RIGHT;
          }
       }
+      plannerFailedLastTime.set(false);
 
       lastStanceSideReference.set(stanceSide);
 
@@ -264,6 +267,7 @@ public class LookAndStepFootstepPlanningTask
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {
          statusLogger.info("Footstep planning failure. Aborting task...");
+         plannerFailedLastTime.set(true);
          planningFailedNotifier.run();
       }
       else
