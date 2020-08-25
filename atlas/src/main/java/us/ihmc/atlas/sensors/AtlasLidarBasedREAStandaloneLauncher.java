@@ -8,8 +8,12 @@ import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class AtlasLidarBasedREAStandaloneLauncher extends Application
 {
@@ -24,7 +28,9 @@ public class AtlasLidarBasedREAStandaloneLauncher extends Application
                                                                                     stereoOutputTopic,
                                                                                     depthOutputTopic);
       ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(this.getClass().getResource("atlasREAModuleConfiguration.txt")), networkProvider);
+      Path configurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
+      configurationFilePath = Paths.get(configurationFilePath.toString(), "/src/main/resources/atlasREAModuleConfiguration.txt");
+      module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(configurationFilePath.toFile()), networkProvider);
 
       ui.show();
       module.start();

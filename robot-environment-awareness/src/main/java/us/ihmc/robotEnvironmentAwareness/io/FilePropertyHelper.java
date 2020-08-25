@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -17,17 +16,12 @@ public final class FilePropertyHelper
 
    public FilePropertyHelper(File configurationFile)
    {
-      this.configurationFile = configurationFile;
+      this.configurationFile = ensureFileExists(configurationFile);
    }
 
    public FilePropertyHelper(String configurationFilePath)
    {
       this.configurationFile = ensureFileExists(new File(configurationFilePath));
-   }
-
-   public FilePropertyHelper(URL configurationFileURL)
-   {
-      this.configurationFile = ensureFileExists(new File(configurationFileURL.toExternalForm()));
    }
 
    private File ensureFileExists(File file)
