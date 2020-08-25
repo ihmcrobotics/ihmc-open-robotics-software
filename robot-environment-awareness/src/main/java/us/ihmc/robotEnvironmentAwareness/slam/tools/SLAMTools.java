@@ -1,8 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.slam.tools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
@@ -35,49 +38,41 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 
 public class SLAMTools
 {
-   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition)
+   public static Scan toScan(List<? extends Point3DReadOnly> points, Tuple3DReadOnly sensorPosition)
    {
       PointCloud pointCloud = new PointCloud();
-
-      for (int i = 0; i < points.length; i++)
-      {
-         double x = points[i].getX();
-         double y = points[i].getY();
-         double z = points[i].getZ();
-         pointCloud.add(x, y, z);
-      }
+      points.forEach(pointCloud::add);
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition, ConvexPolygon2DReadOnly mapHull, double windowMargin)
+   public static Scan toScan(Point3DReadOnly[] points,
+                             Tuple3DReadOnly sensorPosition,
+                             ConvexPolygon2DReadOnly mapHull,
+                             double windowMargin,
+                             boolean filterInParallel)
    {
       PointCloud pointCloud = new PointCloud();
 
-      for (int i = 0; i < points.length; i++)
-      {
-         if (!mapHull.getBoundingBox().isInsideEpsilon(points[i].getX(), points[i].getY(), -windowMargin))
-            continue;
+      Stream<Point3DReadOnly> pointStream = filterInParallel ? Arrays.stream(points).parallel() : Arrays.stream(points);
+      List<Point3DReadOnly> filteredPoints = pointStream.filter(point ->
+                                                                {
+                                                                   if (!mapHull.getBoundingBox().isInsideEpsilon(point.getX(), point.getY(), -windowMargin))
+                                                                      return false;
 
-         if (mapHull.isPointInside(points[i].getX(), points[i].getY(), -windowMargin))
-         {
-            double x = points[i].getX();
-            double y = points[i].getY();
-            double z = points[i].getZ();
-            pointCloud.add(x, y, z);
-         }
-      }
+                                                                   return mapHull.isPointInside(point.getX(), point.getY(), -windowMargin);
+                                                                }).collect(Collectors.toList());
+
+      filteredPoints.forEach(pointCloud::add);
+
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
+   public static List<Point3DReadOnly> createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose,
+                                                                         Point3DReadOnly[] pointCloud,
+                                                                         boolean calculateInParallel)
    {
-      Point3D[] convertedPoints = new Point3D[pointCloud.length];
-      for (int i = 0; i < pointCloud.length; i++)
-      {
-         convertedPoints[i] = createConvertedPointToSensorPose(sensorPose, pointCloud[i]);
-      }
-
-      return convertedPoints;
+      Stream<Point3DReadOnly> pointCloudStream = calculateInParallel ? Arrays.stream(pointCloud).parallel() : Arrays.stream(pointCloud);
+      return pointCloudStream.map(point -> createConvertedPointToSensorPose(sensorPose, point)).collect(Collectors.toList());
    }
 
    public static Plane3D createConvertedSurfaceElementToSensorPose(RigidBodyTransformReadOnly sensorPose, Plane3DReadOnly surfaceElement)
@@ -96,10 +91,10 @@ public class SLAMTools
       return convertedPoint;
    }
 
-   public static NormalOcTree computeOctreeData(Point3DReadOnly[] pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
+   public static NormalOcTree computeOctreeData(List<? extends Point3DReadOnly> pointCloud, Tuple3DReadOnly sensorPosition, double octreeResolution)
    {
       ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = pointCloud.length;
+      int numberOfPoints = pointCloud.size();
 
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(toScan(pointCloud, sensorPosition));
