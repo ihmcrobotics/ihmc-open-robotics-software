@@ -247,6 +247,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.getFootstepPlannerTimeout());
       footstepPlannerRequest.setPerformPositionBasedSplitFractionCalculation(true);
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
+      footstepPlannerRequest.setSnapGoalSteps(true);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
