@@ -20,12 +20,21 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.io.WorkspacePathTools;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class PerceptionSuite
 {
-   private static final String SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
-   private static final String LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
-   private static final String REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultRealSenseREAModuleConfiguration.txt";
+   private static final String SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME = "defaultSegmentationModuleConfiguration.txt";
+   private static final String LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME = "defaultREAModuleConfiguration.txt";
+   private static final String REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME = "defaultRealSenseREAModuleConfiguration.txt";
+
+//   private final Path slamConfigurationFilePath;
+   private final Path segmentationConfigurationFilePath;
+   private final Path lidarREAConfigurationFilePath;
+   private final Path realsenseREAConfigurationFilePath;
 
    private final PerceptionSuiteComponent<SLAMModule, SLAMBasedEnvironmentAwarenessUI> slamModule;
    private final PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
@@ -40,6 +49,14 @@ public class PerceptionSuite
    public PerceptionSuite(Messager messager)
    {
       this.messager = messager;
+
+      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/robot-environment-awareness");
+      String directory = "/src/main/resources/";
+
+//      slamConfigurationFilePath = Paths.get(rootPath.toString(), directory + SLAM_CONFIGURATION_FILE_NAME);
+      segmentationConfigurationFilePath = Paths.get(rootPath.toString(), directory + SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME);
+      lidarREAConfigurationFilePath = Paths.get(rootPath.toString(), directory + LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME);
+      realsenseREAConfigurationFilePath = Paths.get(rootPath.toString(), directory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME);
 
       REANetworkProvider lidarREANetworkProvider = new LidarREANetworkProvider(ros2Node, outputTopic, lidarOutputTopic);
       REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoOutputTopic);
@@ -62,7 +79,7 @@ public class PerceptionSuite
                                                           PerceptionSuiteAPI.GUIRunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
                                                       () -> new REAPerceptionSuiteElement(m -> LIDARBasedREAModule.createIntraprocessModule(
-                                                            new FilePropertyHelper(LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME),
+                                                            new FilePropertyHelper(lidarREAConfigurationFilePath.toFile()),
                                                             lidarREANetworkProvider), (m, s) -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(s)),
                                                       messager,
                                                       PerceptionSuiteAPI.RunLidarREA,
@@ -105,7 +122,7 @@ public class PerceptionSuite
 
    private PlanarSegmentationModule createSegmentationModule(Messager messager) throws Exception
    {
-      PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME,
+      PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath,
                                                                                                       ros2Node,
                                                                                                       messager);
       if (slamModule.getElement() != null)
@@ -116,7 +133,7 @@ public class PerceptionSuite
 
    private LIDARBasedREAModule createRealSenseREAModule(REANetworkProvider networkProvider) throws Exception
    {
-      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME),
+      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(realsenseREAConfigurationFilePath.toFile()),
                                                                                 networkProvider,
                                                                                 NetworkPorts.REA_MODULE2_UI_PORT);
       module.setParametersForStereo();
