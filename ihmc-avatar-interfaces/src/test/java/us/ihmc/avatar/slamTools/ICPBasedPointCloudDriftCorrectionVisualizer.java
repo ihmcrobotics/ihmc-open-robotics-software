@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -32,6 +33,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -195,7 +197,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
    private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, List<Point3DReadOnly> sourcePointsInLocalFrame,
                                                                 RigidBodyTransformReadOnly uncorrectedLocalPoseInWorld)
    {
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
