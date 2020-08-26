@@ -284,18 +284,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean wiggle_while_planning_;
 
    /**
+            * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+            */
+   public boolean reject_if_wiggle_not_satisfied_;
+
+   /**
             * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
             * this toggles between them.
             */
    public boolean enable_concave_hull_wiggler_;
-
-   /**
-            * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-            * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-            * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-            * candidate footstep will be rejected if this method returns {@code true}.
-            */
-   public boolean reject_if_cannot_fully_wiggle_inside_;
 
    /**
             * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
@@ -737,10 +734,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       wiggle_while_planning_ = other.wiggle_while_planning_;
 
 
+      reject_if_wiggle_not_satisfied_ = other.reject_if_wiggle_not_satisfied_;
+
+
       enable_concave_hull_wiggler_ = other.enable_concave_hull_wiggler_;
-
-
-      reject_if_cannot_fully_wiggle_inside_ = other.reject_if_cannot_fully_wiggle_inside_;
 
 
       maximum_xy_wiggle_distance_ = other.maximum_xy_wiggle_distance_;
@@ -1519,6 +1516,22 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
+            * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+            */
+   public void setRejectIfWiggleNotSatisfied(boolean reject_if_wiggle_not_satisfied)
+   {
+      reject_if_wiggle_not_satisfied_ = reject_if_wiggle_not_satisfied;
+   }
+   /**
+            * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+            */
+   public boolean getRejectIfWiggleNotSatisfied()
+   {
+      return reject_if_wiggle_not_satisfied_;
+   }
+
+
+   /**
             * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
             * this toggles between them.
             */
@@ -1533,28 +1546,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean getEnableConcaveHullWiggler()
    {
       return enable_concave_hull_wiggler_;
-   }
-
-
-   /**
-            * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-            * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-            * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-            * candidate footstep will be rejected if this method returns {@code true}.
-            */
-   public void setRejectIfCannotFullyWiggleInside(boolean reject_if_cannot_fully_wiggle_inside)
-   {
-      reject_if_cannot_fully_wiggle_inside_ = reject_if_cannot_fully_wiggle_inside;
-   }
-   /**
-            * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-            * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-            * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-            * candidate footstep will be rejected if this method returns {@code true}.
-            */
-   public boolean getRejectIfCannotFullyWiggleInside()
-   {
-      return reject_if_cannot_fully_wiggle_inside_;
    }
 
 
@@ -2448,10 +2439,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.wiggle_while_planning_, other.wiggle_while_planning_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reject_if_wiggle_not_satisfied_, other.reject_if_wiggle_not_satisfied_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_concave_hull_wiggler_, other.enable_concave_hull_wiggler_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reject_if_cannot_fully_wiggle_inside_, other.reject_if_cannot_fully_wiggle_inside_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_xy_wiggle_distance_, other.maximum_xy_wiggle_distance_, epsilon)) return false;
@@ -2674,10 +2665,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.wiggle_while_planning_ != otherMyClass.wiggle_while_planning_) return false;
 
 
+      if(this.reject_if_wiggle_not_satisfied_ != otherMyClass.reject_if_wiggle_not_satisfied_) return false;
+
+
       if(this.enable_concave_hull_wiggler_ != otherMyClass.enable_concave_hull_wiggler_) return false;
-
-
-      if(this.reject_if_cannot_fully_wiggle_inside_ != otherMyClass.reject_if_cannot_fully_wiggle_inside_) return false;
 
 
       if(this.maximum_xy_wiggle_distance_ != otherMyClass.maximum_xy_wiggle_distance_) return false;
@@ -2897,11 +2888,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("wiggle_while_planning=");
       builder.append(this.wiggle_while_planning_);      builder.append(", ");
 
+      builder.append("reject_if_wiggle_not_satisfied=");
+      builder.append(this.reject_if_wiggle_not_satisfied_);      builder.append(", ");
+
       builder.append("enable_concave_hull_wiggler=");
       builder.append(this.enable_concave_hull_wiggler_);      builder.append(", ");
-
-      builder.append("reject_if_cannot_fully_wiggle_inside=");
-      builder.append(this.reject_if_cannot_fully_wiggle_inside_);      builder.append(", ");
 
       builder.append("maximum_xy_wiggle_distance=");
       builder.append(this.maximum_xy_wiggle_distance_);      builder.append(", ");
