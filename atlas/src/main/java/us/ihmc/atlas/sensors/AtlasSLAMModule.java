@@ -2,6 +2,7 @@ package us.ihmc.atlas.sensors;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,6 +20,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -231,26 +233,8 @@ public class AtlasSLAMModule extends SLAMModule
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager, String configurationFilePath)
+   public static AtlasSLAMModule createIntraprocessModule(Ros2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager, Path configurationFilePath)
    {
-      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel, setupConfigurationFile(configurationFilePath));
-   }
-
-   private static File setupConfigurationFile(String configurationFilePath)
-
-   {
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         LogTools.info(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      return configurationFile;
+      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel, configurationFilePath.toFile());
    }
 }

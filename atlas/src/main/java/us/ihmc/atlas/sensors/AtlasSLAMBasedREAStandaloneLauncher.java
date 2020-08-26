@@ -1,5 +1,7 @@
 package us.ihmc.atlas.sensors;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javafx.application.Platform;
@@ -25,14 +27,15 @@ import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
    private static boolean launchSegmentation = true;
 
-   private static final String SLAM_CONFIGURATION_FILE_NAME = "./Configurations/atlasSLAMModuleConfiguration.txt";
-   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "./Configurations/atlasSLAMSegmentationModuleConfiguration.txt";
+   private static final String SLAM_CONFIGURATION_FILE_NAME = "atlasSLAMModuleConfiguration.txt";
+   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSLAMSegmentationModuleConfiguration.txt";
    private final boolean spawnUIs;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
@@ -94,7 +97,9 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       {
          ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
       }
-      module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager, SLAM_CONFIGURATION_FILE_NAME);
+      Path slamConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
+      slamConfigurationFilePath = Paths.get(slamConfigurationFilePath.toString(), "/src/main/resources/" + SLAM_CONFIGURATION_FILE_NAME);
+      module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager, slamConfigurationFilePath);
 
       Stage secondStage = null;
       if (launchSegmentation)
@@ -104,7 +109,11 @@ public class AtlasSLAMBasedREAStandaloneLauncher
             secondStage = new Stage();
             planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
          }
-         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(SEGMENTATION_CONFIGURATION_FILE_NAME, ros2Node, segmentationMessager);
+
+         Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
+         segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+
+         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath, ros2Node, segmentationMessager);
          module.attachOcTreeConsumer(segmentationModule);
       }
 
