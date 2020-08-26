@@ -324,6 +324,7 @@ public class FootstepPlannerLogger
 
       int regionIndex = snapData.getRegionIndex();
       writeLine(numTabs, "regionIndex:" + regionIndex);
+      writeLine(numTabs, "deltaInside:" + snapData.getAchievedInsideDelta());
    }
 
    private void writeTransform(int numTabs, String name, QuaternionReadOnly orientation, Tuple3DReadOnly translation) throws IOException

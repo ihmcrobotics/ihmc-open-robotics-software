@@ -1,12 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -23,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.ToDoubleFunction;
 
 public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 {
@@ -40,6 +39,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
@@ -184,14 +184,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
       tempTransform.set(snapData.getSnapTransform());
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-      ConvexPolygon2D footPolygonInSnapFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+      ConvexPolygon2D footPolygonInRegionFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
       RigidBodyTransform wiggleTransformInLocal;
       boolean concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
       if (concaveWigglerRequested)
       {
          gradientDescentStepConstraintInput.clear();
-         gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInSnapFrame);
+         gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInRegionFrame);
          gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
          gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
 
@@ -222,14 +222,16 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         if (isConvexConstraintSatisfied(footPolygonInSnapFrame, planarRegionToPack, parameters.getWiggleInsideDelta()))
+         double initialDeltaInside = computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, false);
+         if (initialDeltaInside > parameters.getWiggleInsideDelta())
          {
+            snapData.setAchievedInsideDelta(initialDeltaInside);
             snapData.getWiggleTransformInWorld().setIdentity();
             return;
          }
          else
          {
-            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInSnapFrame)) == null)
+            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
             {
                snapData.getWiggleTransformInWorld().setIdentity();
                return;
@@ -237,6 +239,11 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          }
       }
 
+      // compute achieved delta inside
+      footPolygonInRegionFrame.applyTransform(wiggleTransformInLocal, false);
+      snapData.setAchievedInsideDelta(computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, concaveWigglerRequested));
+
+      // compute wiggle transform in world
       snapData.getWiggleTransformInWorld().set(planarRegionToPack.getTransformToLocal());
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
@@ -399,18 +406,37 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
    }
 
-   private static boolean isConvexConstraintSatisfied(ConvexPolygon2DReadOnly footPolygon, PlanarRegion planarRegion, double wiggleInsideDelta)
+   /** package-private for testing */
+   static double computeAchievedDeltaInside(ConvexPolygon2DReadOnly footPolygon, PlanarRegion planarRegion, boolean useConcaveHull)
    {
+      double achievedDeltaInside = Double.POSITIVE_INFINITY;
+      ToDoubleFunction<Point2DReadOnly> deltaInsideCalculator;
+
+      if (useConcaveHull)
+      {
+         Vertex2DSupplier concaveHullVertices = Vertex2DSupplier.asVertex2DSupplier(planarRegion.getConcaveHull());
+         deltaInsideCalculator = vertex ->
+         {
+            boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concaveHullVertices, vertex);
+            double distanceSquaredFromPerimeter = FootPlacementConstraintCalculator.distanceSquaredFromPerimeter(concaveHullVertices, vertex, null);
+            return (pointIsInside ? 1 : -1) * Math.sqrt(distanceSquaredFromPerimeter);
+         };
+      }
+      else
+      {
+         deltaInsideCalculator = vertex -> - planarRegion.getConvexHull().signedDistance(vertex);
+      }
+
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly vertex = footPolygon.getVertex(i);
-         if (planarRegion.getConvexHull().signedDistance(vertex) > - wiggleInsideDelta)
+         double insideDelta = deltaInsideCalculator.applyAsDouble(footPolygon.getVertex(i));
+         if (insideDelta < achievedDeltaInside)
          {
-            return false;
+            achievedDeltaInside = insideDelta;
          }
       }
 
-      return true;
+      return achievedDeltaInside;
    }
 
    /**

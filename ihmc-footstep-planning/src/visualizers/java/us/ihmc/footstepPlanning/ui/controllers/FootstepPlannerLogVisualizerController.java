@@ -434,6 +434,7 @@ public class FootstepPlannerLogVisualizerController
       private final TableColumn<ChildStepProperty, String> heuristicCostColumn = new TableColumn<>("Heuristic Cost");
       private final TableColumn<ChildStepProperty, String> totalCostColumn = new TableColumn<>("Total Cost");
       private final TableColumn<ChildStepProperty, String> rejectionReasonColumn = new TableColumn<>("Rejection Reason");
+      private final TableColumn<ChildStepProperty, String> deltaInsideColumn = new TableColumn<>("Delta Inside");
       private final TableColumn<ChildStepProperty, String> expandedColumn = new TableColumn<>("Expanded");
       private final TableColumn<ChildStepProperty, String> solutionStep = new TableColumn<>("Solution");
 
@@ -456,6 +457,7 @@ public class FootstepPlannerLogVisualizerController
          heuristicCostColumn.setCellValueFactory(new PropertyValueFactory<>("heuristicCost"));
          totalCostColumn.setCellValueFactory(new PropertyValueFactory<>("totalCost"));
          rejectionReasonColumn.setCellValueFactory(new PropertyValueFactory<>("rejectionReason"));
+         deltaInsideColumn.setCellValueFactory(new PropertyValueFactory<>("deltaInside"));
          expandedColumn.setCellValueFactory(new PropertyValueFactory<>("expanded"));
          solutionStep.setCellValueFactory(new PropertyValueFactory<>("solution"));
 
@@ -479,6 +481,7 @@ public class FootstepPlannerLogVisualizerController
             table.getColumns().add(heuristicCostColumn);
             table.getColumns().add(totalCostColumn);
             table.getColumns().add(rejectionReasonColumn);
+            table.getColumns().add(deltaInsideColumn);
             table.getColumns().add(expandedColumn);
             table.getColumns().add(solutionStep);
          }
@@ -500,6 +503,7 @@ public class FootstepPlannerLogVisualizerController
          heuristicCostColumn.setPrefWidth(80);
          totalCostColumn.setPrefWidth(110);
          rejectionReasonColumn.setPrefWidth(200);
+         deltaInsideColumn.setPrefWidth(80);
          expandedColumn.setPrefWidth(80);
          solutionStep.setPrefWidth(80);
       }
@@ -688,6 +692,11 @@ public class FootstepPlannerLogVisualizerController
       public String getRejectionReason()
       {
          return edgeData.getRejectionReason() == null ? "" : edgeData.getRejectionReason().toString();
+      }
+
+      public String getDeltaInside()
+      {
+         return doubleFormat.format(edgeData.getCandidateNodeSnapData().getAchievedInsideDelta());
       }
 
       public String getSolution()
