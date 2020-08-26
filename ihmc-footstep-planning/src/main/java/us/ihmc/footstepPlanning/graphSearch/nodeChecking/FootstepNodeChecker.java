@@ -86,6 +86,16 @@ public class FootstepNodeChecker
          return BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP;
       }
 
+      // Check wiggle parameters satisfied
+      if (parameters.getWiggleWhilePlanning() && parameters.getRejectIfWiggleNotSatisfied())
+      {
+         double epsilon = 1e-5;
+         if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDelta() - epsilon)
+         {
+            return BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET;
+         }
+      }
+
       // Check incline
       RigidBodyTransform snappedSoleTransform = candidateNodeSnapData.getSnappedNodeTransform(candidateNode);
       double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());

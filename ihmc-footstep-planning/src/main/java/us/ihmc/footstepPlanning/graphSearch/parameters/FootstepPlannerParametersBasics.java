@@ -193,6 +193,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.wiggleWhilePlanning, wiggleWhilePlanning);
    }
 
+   default void setRejectIfWiggleNotSatisfied(boolean rejectIfWiggleNotSatisfied)
+   {
+      set(FootstepPlannerParameterKeys.rejectIfWiggleNotSatisfied, rejectIfWiggleNotSatisfied);
+   }
+
    default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
    {
       set(FootstepPlannerParameterKeys.enableConcaveHullWiggler, enableConcaveHullWiggler);
@@ -413,6 +418,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
       setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
+      setRejectIfWiggleNotSatisfied(parametersPacket.getRejectIfWiggleNotSatisfied());
       setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
