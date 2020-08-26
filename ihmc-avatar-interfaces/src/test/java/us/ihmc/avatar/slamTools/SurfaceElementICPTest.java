@@ -31,6 +31,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 
 @Tag("point-cloud-drift-correction-test")
 public class SurfaceElementICPTest
@@ -200,7 +201,7 @@ public class SurfaceElementICPTest
             return transform;
          }
       };
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)

@@ -1,13 +1,19 @@
 package us.ihmc.robotics.optimization;
 
+import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -35,16 +41,14 @@ public class LevenbergMarquardtParameterOptimizer
 {
    private static final boolean DEBUG = false;
    private int inputDimension;
-   private int outputDimension;
 
    private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction;
-   private final UnaryOperator<DMatrixRMaj> outputCalculator;
+   private final OutputCalculator outputCalculator;
 
    private final DMatrixRMaj currentInput;
    private final OutputSpace currentOutputSpace;
    private final DMatrixRMaj perturbationVector;
    private final DMatrixRMaj perturbedInput;
-   private final DMatrixRMaj perturbedOutput;
    private final DMatrixRMaj jacobian;
 
    private final DMatrixRMaj squaredJacobian;
@@ -63,29 +67,30 @@ public class LevenbergMarquardtParameterOptimizer
    private static final double DEFAULT_DAMPING_COEFFICIENT = 0.001;
    private boolean useDamping = true;
 
-   private double computationTime;
+   private int maximumNumberOfCorrespondences = Integer.MAX_VALUE;
+
    private int iteration;
+   private int numberOfCorrespondences;
    private boolean optimized;
 
    /**
     * iterate the direction to minimize output space, -inv(J^T * J + W_N) * J^T * e
     */
-   public LevenbergMarquardtParameterOptimizer(Function<DMatrixRMaj, RigidBodyTransform> inputFunction, UnaryOperator<DMatrixRMaj> outputCalculator,
-                                               int inputParameterDimension, int outputDimension)
+   public LevenbergMarquardtParameterOptimizer(Function<DMatrixRMaj, RigidBodyTransform> inputFunction,
+                                               OutputCalculator outputCalculator,
+                                               int inputParameterDimension,
+                                               int outputDimension)
    {
       this.inputFunction = inputFunction;
       this.inputDimension = inputParameterDimension;
-      this.outputDimension = outputDimension;
       this.outputCalculator = outputCalculator;
 
       currentInput = new DMatrixRMaj(inputParameterDimension, 1);
       currentOutputSpace = new OutputSpace(outputDimension);
 
       perturbationVector = new DMatrixRMaj(inputParameterDimension, 1);
-      for (int i = 0; i < inputParameterDimension; i++)
-         perturbationVector.set(i, DEFAULT_PERTURBATION);
+      CommonOps_DDRM.fill(perturbationVector, DEFAULT_PERTURBATION);
       perturbedInput = new DMatrixRMaj(inputParameterDimension, 1);
-      perturbedOutput = new DMatrixRMaj(outputDimension, 1);
       jacobian = new DMatrixRMaj(outputDimension, inputParameterDimension);
 
       squaredJacobian = new DMatrixRMaj(inputParameterDimension, inputParameterDimension);
@@ -107,11 +112,18 @@ public class LevenbergMarquardtParameterOptimizer
       this.correspondenceThreshold = correspondenceThreshold;
    }
 
+   public void setMaximumNumberOfCorrespondences(int maximumNumberOfCorrespondences)
+   {
+      this.maximumNumberOfCorrespondences = maximumNumberOfCorrespondences;
+   }
+
    public boolean initialize()
    {
       iteration = 0;
       optimized = false;
       MatrixTools.setDiagonal(dampingMatrix, DEFAULT_DAMPING_COEFFICIENT);
+
+      outputCalculator.resetIndicesToCompute();
       currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
 
       boolean result = currentOutputSpace.computeCorrespondence();
@@ -125,15 +137,14 @@ public class LevenbergMarquardtParameterOptimizer
       iteration++;
       long startTime = System.nanoTime();
 
-      // TODO because of the way the operations are ordered, on the first iteration, the current output space is already valid, as it was called in the
-      // TODO initialize function. This is a relatively expensive operation, so figuring out how to reorder things would reduce the number of "update output
-      // TODO space" calls by 1, which would be helpful.
-      currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
-      if (!currentOutputSpace.computeCorrespondence())
-      {
+      if (currentOutputSpace.getNumberOfCorrespondingPoints() < 1)
          return -1;
-      }
-      currentOutputSpace.computeQuality();
+
+      outputCalculator.setIndicesToCompute(currentOutputSpace.correspondingIndices);
+
+      numberOfCorrespondences = currentOutputSpace.getNumberOfCorrespondingPoints();
+      jacobian.reshape(numberOfCorrespondences, inputDimension);
+      invMultJacobianTranspose.reshape(inputDimension, numberOfCorrespondences);
 
       // start.      
       // compute jacobian.
@@ -142,18 +153,13 @@ public class LevenbergMarquardtParameterOptimizer
       {
          perturbedInput.add(i, 0, perturbationVector.get(i));
 
-         perturbedOutput.set(outputCalculator.apply(perturbedInput));
-         for (int j = 0; j < outputDimension; j++)
+         DMatrixRMaj perturbedOutput = outputCalculator.apply(perturbedInput);
+         DMatrixRMaj currentOutput = currentOutputSpace.getCorrespondingOutput();
+
+         for (int j = 0; j < numberOfCorrespondences; j++)
          {
-            if (currentOutputSpace.isCorresponding(j))
-            {
-               double partialValue = (perturbedOutput.get(j) - currentOutputSpace.getOutput().get(j)) / perturbationVector.get(i);
-               jacobian.set(j, i, partialValue);
-            }
-            else
-            {
-               jacobian.set(j, i, 0.0);
-            }
+            double partialValue = (perturbedOutput.get(j) - currentOutput.get(j)) / perturbationVector.get(i);
+            jacobian.set(j, i, partialValue);
          }
 
          perturbedInput.add(i, 0, -perturbationVector.get(i));
@@ -168,16 +174,21 @@ public class LevenbergMarquardtParameterOptimizer
       CommonOps_DDRM.invert(squaredJacobian);
 
       CommonOps_DDRM.multTransB(squaredJacobian, jacobian, invMultJacobianTranspose);
-      CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutputSpace.getOutput(), optimizeDirection);
+      CommonOps_DDRM.mult(invMultJacobianTranspose, currentOutputSpace.getCorrespondingOutput(), optimizeDirection);
 
       // update currentInput.
-      CommonOps_DDRM.subtract(currentInput, optimizeDirection, currentInput);
+      CommonOps_DDRM.subtractEquals(currentInput, optimizeDirection);
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       if (DEBUG)
       {
          System.out.println("elapsed iteration time is " + iterateTime);
       }
+
+      outputCalculator.resetIndicesToCompute();
+      currentOutputSpace.updateOutputSpace(outputCalculator.apply(currentInput));
+      currentOutputSpace.computeCorrespondence();
+      currentOutputSpace.computeQuality();
 
       return currentOutputSpace.getCorrespondingQuality();
    }
@@ -191,7 +202,7 @@ public class LevenbergMarquardtParameterOptimizer
 
    public int getNumberOfCorrespondingPoints()
    {
-      return currentOutputSpace.getNumberOfCorrespondingPoints();
+      return numberOfCorrespondences;
    }
 
    public DMatrixRMaj getOptimalParameter()
@@ -219,11 +230,6 @@ public class LevenbergMarquardtParameterOptimizer
       return iteration;
    }
 
-   public double getComputationTime()
-   {
-      return computationTime;
-   }
-
    public static Function<DMatrixRMaj, RigidBodyTransform> createSpatialInputFunction(boolean includePitchAndRoll)
    {
       return new Function<DMatrixRMaj, RigidBodyTransform>()
@@ -246,8 +252,9 @@ public class LevenbergMarquardtParameterOptimizer
    private class OutputSpace
    {
       private final DMatrixRMaj output;
+      private DMatrixRMaj correspondingOutput;
       private final boolean[] correspondence;
-      private int numberOfCorrespondingPoints;
+      private final TIntArrayList correspondingIndices = new TIntArrayList();
       private double correspondingQuality;
       private double quality;
 
@@ -270,25 +277,38 @@ public class LevenbergMarquardtParameterOptimizer
        */
       boolean computeCorrespondence()
       {
-         numberOfCorrespondingPoints = 0;
+         correspondingIndices.clear();
          for (int i = 0; i < output.getNumRows(); i++)
          {
             if (output.get(i, 0) < correspondenceThreshold)
             {
                correspondence[i] = true;
-               numberOfCorrespondingPoints++;
+               correspondingIndices.add(i);
             }
             else
             {
                correspondence[i] = false;
             }
          }
-         if (numberOfCorrespondingPoints == 0)
-         {
-            return false;
-         }
-         return true;
+
+         randomlySampleCorrespondences(correspondingIndices, maximumNumberOfCorrespondences);
+
+         correspondingOutput = new DMatrixRMaj(correspondingIndices.size(), 1);
+         int index = 0;
+         TIntIterator iterator = correspondingIndices.iterator();
+         while (iterator.hasNext())
+            correspondingOutput.set(index++, 0, output.get(iterator.next()));
+
+         return correspondingIndices.size() != 0;
       }
+
+      private void randomlySampleCorrespondences(TIntArrayList correpsondencesToSample, int maxNumberOfCorrespondences)
+      {
+         Random random = new Random();
+         while (correpsondencesToSample.size() > maxNumberOfCorrespondences)
+            correpsondencesToSample.remove(RandomNumbers.nextInt(random, 0, correpsondencesToSample.size() - 1));
+      }
+
 
       /**
        * there are two kinds of quality. one is distance between corresponding points
@@ -298,13 +318,14 @@ public class LevenbergMarquardtParameterOptimizer
       {
          correspondingQuality = 0.0;
          quality = 0.0;
+
          for (int i = 0; i < output.getNumRows(); i++)
          {
             double norm = output.get(i, 0) * output.get(i, 0);
-            quality = quality + norm;
+            quality += norm;
             if (correspondence[i])
             {
-               correspondingQuality = correspondingQuality + norm;
+               correspondingQuality += norm;
             }
          }
       }
@@ -314,14 +335,14 @@ public class LevenbergMarquardtParameterOptimizer
          return output;
       }
 
-      boolean isCorresponding(int index)
+      DMatrixRMaj getCorrespondingOutput()
       {
-         return correspondence[index];
+         return correspondingOutput;
       }
 
       int getNumberOfCorrespondingPoints()
       {
-         return numberOfCorrespondingPoints;
+         return correspondingIndices.size();
       }
 
       double getCorrespondingQuality()
