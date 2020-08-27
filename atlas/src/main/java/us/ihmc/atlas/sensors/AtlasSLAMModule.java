@@ -3,6 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -180,6 +181,8 @@ public class AtlasSLAMModule extends SLAMModule
       reasonableVelocityFlagQueue.clear();
    }
 
+   private final DecimalFormat df = new DecimalFormat("#.##");
+
    private void handleRobotConfigurationData(Subscriber<RobotConfigurationData> subscriber)
    {
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
@@ -187,23 +190,10 @@ public class AtlasSLAMModule extends SLAMModule
 
       if (reaMessager.isMessagerOpen())
       {
-         if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < PELVIS_VELOCITY_STATIONARY_THRESHOLD)
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, true);
-         }
-         else
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, false);
-         }
-
-         if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < TOLERANCE_PELVIS_VELOCITY)
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, true);
-         }
-         else
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, false);
-         }
+         double pelvisVelocity = robotConfigurationData.getPelvisLinearVelocity().lengthSquared();
+         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, pelvisVelocity < PELVIS_VELOCITY_STATIONARY_THRESHOLD);
+         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, pelvisVelocity < TOLERANCE_PELVIS_VELOCITY);
+         reaMessager.submitMessage(SLAMModuleAPI.SensorSpeed, "" + df.format(pelvisVelocity));
       }
    }
 

@@ -72,6 +72,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
       });
    }
 
+
    private void updateVelocityLimitStatus(boolean moving)
    {
       if (moving)
@@ -106,7 +107,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
       initializeSetup();
 
-      uiMessager.bindPropertyToTopic(SLAMModuleAPI.SensorStatus, sensorMovingProperty);
       updateSensorStatusViz(false);
       sensorMovingProperty.addListener((o, oldValue, newValue) ->
       {
@@ -121,6 +121,8 @@ public class SLAMAnchorPaneController extends REABasicUIController
          if (newValue != oldValue)
             updateVelocityLimitStatus(newValue);
       });
+      uiMessager.registerTopicListener(SLAMModuleAPI.SensorSpeed, stationaryFlag::setText);
+      uiMessager.registerTopicListener(SLAMModuleAPI.SensorSpeed, velocityLimitFlag::setText);
    }
 
    private void initializeSetup()
