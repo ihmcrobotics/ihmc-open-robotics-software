@@ -23,11 +23,11 @@ mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc.thirdparty.jinput:jinput:200128")
 
-   api("us.ihmc:euclid:0.15.0")
-   api("us.ihmc:euclid-geometry:0.15.0")
-   api("us.ihmc:euclid-frame:0.15.0")
-   api("us.ihmc:euclid-shape:0.15.0")
-   api("us.ihmc:euclid-frame-shape:0.15.0")
+   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:euclid-geometry:0.15.1")
+   api("us.ihmc:euclid-frame:0.15.1")
+   api("us.ihmc:euclid-shape:0.15.1")
+   api("us.ihmc:euclid-frame-shape:0.15.1")
    api("us.ihmc:mecano:0.7.1")
    api("us.ihmc:mecano-yovariables:0.7.1")
    api("us.ihmc:ihmc-yovariables:0.9.3")
@@ -61,11 +61,11 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:euclid:0.15.0")
-   api("us.ihmc:euclid-geometry:0.15.0")
-   api("us.ihmc:euclid-frame:0.15.0")
-   api("us.ihmc:euclid-shape:0.15.0")
-   api("us.ihmc:euclid-frame-shape:0.15.0")
+   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:euclid-geometry:0.15.1")
+   api("us.ihmc:euclid-frame:0.15.1")
+   api("us.ihmc:euclid-shape:0.15.1")
+   api("us.ihmc:euclid-frame-shape:0.15.1")
    api("us.ihmc:mecano:0.7.1")
    api("us.ihmc:mecano-yovariables:0.7.1")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
