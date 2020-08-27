@@ -125,4 +125,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(swingPlannerType);
    }
+
+   default boolean getRejectIfWiggleNotSatisfiedOverride()
+   {
+      return get(rejectIfWiggleNotSatisfiedOverride);
+   }
 }
