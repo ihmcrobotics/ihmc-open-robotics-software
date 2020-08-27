@@ -45,6 +45,11 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private Spinner<Integer> maxQueueSize;
    @FXML
    private Spinner<Double> longestTimeToLag;
+   @FXML
+   private Spinner<Double> stationaryVelocity;
+   @FXML
+   private Spinner<Double> maxVelocity;
+
 
    @FXML
    private Spinner<Integer> maxOptimizationIterations;
@@ -92,6 +97,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       rotationPerturbation.setValueFactory(createDoubleValueFactory(0.00001, 0.0001, 0.00001, 0.00001));
 
       maxQueueSize.setValueFactory(createIntegerValueFactory(1, Integer.MAX_VALUE, 100, 5));
+      stationaryVelocity.setValueFactory(createDoubleValueFactory(0.00, 0.15, 0.002, 0.0005));
+      maxVelocity.setValueFactory(createDoubleValueFactory(0.0, 0.5, 0.00001, 0.05));
 
       minCorrespondingDistance.setValueFactory(createDoubleValueFactory(0.0, 0.1, 0.06, 0.005));
 
@@ -120,6 +127,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInitialQualityThreshold(initialQualityThreshold.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxQueueSize(maxQueueSize.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalLongestTimeToLag(longestTimeToLag.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalStationaryVelocity(stationaryVelocity.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxVelocity(maxVelocity.getValueFactory().valueProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());

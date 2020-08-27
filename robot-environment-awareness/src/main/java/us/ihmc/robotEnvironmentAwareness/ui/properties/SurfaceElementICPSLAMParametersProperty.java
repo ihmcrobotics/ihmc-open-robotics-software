@@ -36,6 +36,10 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
 
    private final DoubleField longestTimeToLag = new DoubleField(SurfaceElementICPSLAMParameters::getLongestTimeToLag,
                                                                 SurfaceElementICPSLAMParameters::setLongestTimeToLag);
+   private final DoubleField stationaryVelocity = new DoubleField(SurfaceElementICPSLAMParameters::getStationaryVelocity,
+                                                                  SurfaceElementICPSLAMParameters::setStationaryVelocity);
+   private final DoubleField maxVelocity = new DoubleField(SurfaceElementICPSLAMParameters::getMaxVelocity,
+                                                           SurfaceElementICPSLAMParameters::setMaxVelocity);
 
    private final IntegerField maxOptimizationIterations = new IntegerField(SurfaceElementICPSLAMParameters::getMaxOptimizationIterations,
                                                                            SurfaceElementICPSLAMParameters::setMaxOptimizationIterations);
@@ -126,6 +130,16 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalLongestTimeToLag(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, longestTimeToLag);
+   }
+
+   public void bindBidirectionalStationaryVelocity(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stationaryVelocity);
+   }
+
+   public void bindBidirectionalMaxVelocity(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxVelocity);
    }
 
    public void bindBidirectionalMaxOptimizationIterations(Property<? extends Number> property)
