@@ -1,9 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+package us.ihmc.atlas.sensors;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -13,11 +8,15 @@ import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.tools.io.WorkspacePathTools;
 
-public class LidarBasedREAStandaloneLauncher extends Application
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class AtlasLidarBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
-
    private LIDARBasedEnvironmentAwarenessUI ui;
    private LIDARBasedREAModule module;
 
@@ -29,7 +28,9 @@ public class LidarBasedREAStandaloneLauncher extends Application
                                                                                     stereoOutputTopic,
                                                                                     depthOutputTopic);
       ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(MODULE_CONFIGURATION_FILE_NAME), networkProvider);
+      Path configurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      configurationFilePath = Paths.get(configurationFilePath.toString(), "/atlas/src/main/resources/atlasREAModuleConfiguration.txt");
+      module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(configurationFilePath.toFile()), networkProvider);
 
       ui.show();
       module.start();
