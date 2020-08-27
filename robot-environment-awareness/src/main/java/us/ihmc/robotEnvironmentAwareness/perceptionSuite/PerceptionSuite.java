@@ -53,13 +53,15 @@ public class PerceptionSuite
       this(messager,
            Paths.get(defaultRootPath.toString(), defaultDirectory + SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME),
            Paths.get(defaultRootPath.toString(), defaultDirectory + LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME),
-           Paths.get(defaultRootPath.toString(), defaultDirectory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME));
+           Paths.get(defaultRootPath.toString(), defaultDirectory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME),
+           null);
    }
 
    public PerceptionSuite(Messager messager,
                           Path segmentationConfigurationFilePath,
                           Path lidarREAConfigurationFilePath,
-                          Path realsenseREAConfigurationFilePath)
+                          Path realsenseREAConfigurationFilePath,
+                          String liveMapProject)
    {
       this.messager = messager;
       this.segmentationConfigurationFilePath = segmentationConfigurationFilePath;
@@ -104,7 +106,7 @@ public class PerceptionSuite
                                                           PerceptionSuiteAPI.GUIRunMapSegmentation,
                                                           PerceptionSuiteAPI.GUIRunMapSegmentationUI);
       liveMapModule = new PerceptionSuiteComponent<>("LiveMap",
-                                                     () -> new LiveMapPerceptionSuiteElement(m -> LiveMapModule.createIntraprocess(ros2Node, m),
+                                                     () -> new LiveMapPerceptionSuiteElement(m -> LiveMapModule.createIntraprocess(ros2Node, m, liveMapProject),
                                                                                              LiveMapUI::createIntraprocessUI),
                                                      messager,
                                                      PerceptionSuiteAPI.RunLiveMap,
