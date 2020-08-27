@@ -44,30 +44,30 @@ public class PerceptionSuite
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
+   private static final Path defaultRootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/robot-environment-awareness");
+   private static final String defaultDirectory = "/src/main/resources/";
+
    private final Messager messager;
 
    public PerceptionSuite(Messager messager)
    {
       this(messager,
-           SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME,
-           LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME,
-           REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME);
+           Paths.get(defaultRootPath.toString(), defaultDirectory + SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME),
+           Paths.get(defaultRootPath.toString(), defaultDirectory + LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME),
+           Paths.get(defaultRootPath.toString(), defaultDirectory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME));
    }
 
    public PerceptionSuite(Messager messager,
-                          String segmentationModuleConfigurationFileName,
-                          String lidarREAModuleConfigurationFileName,
-                          String realsenseREAModuleConfigurationFileName)
+                          Path segmentationConfigurationFilePath,
+                          Path lidarREAConfigurationFilePath,
+                          Path realsenseREAConfigurationFilePath)
    {
       this.messager = messager;
-
-      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/robot-environment-awareness");
-      String directory = "/src/main/resources/";
+      this.segmentationConfigurationFilePath = segmentationConfigurationFilePath;
+      this.lidarREAConfigurationFilePath = lidarREAConfigurationFilePath;
+      this.realsenseREAConfigurationFilePath = realsenseREAConfigurationFilePath;
 
 //      slamConfigurationFilePath = Paths.get(rootPath.toString(), directory + SLAM_CONFIGURATION_FILE_NAME);
-      segmentationConfigurationFilePath = Paths.get(rootPath.toString(), directory + segmentationModuleConfigurationFileName);
-      lidarREAConfigurationFilePath = Paths.get(rootPath.toString(), directory + lidarREAModuleConfigurationFileName);
-      realsenseREAConfigurationFilePath = Paths.get(rootPath.toString(), directory + realsenseREAModuleConfigurationFileName);
 
       REANetworkProvider lidarREANetworkProvider = new LidarREANetworkProvider(ros2Node, outputTopic, lidarOutputTopic);
       REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoOutputTopic);
