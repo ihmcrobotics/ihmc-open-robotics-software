@@ -131,6 +131,10 @@
             <Spinner fx:id="longestTimeToLag" editable="true" maxWidth="1.7976931348623157E308" />
             <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="max queue size" textAlignment="CENTER" />
             <Spinner fx:id="maxQueueSize" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="stationary velocity" textAlignment="CENTER" />
+            <Spinner fx:id="stationaryVelocity" editable="true" maxWidth="1.7976931348623157E308" />
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="max velocity" textAlignment="CENTER" />
+            <Spinner fx:id="maxVelocity" editable="true" maxWidth="1.7976931348623157E308" />
          </children>
       </VBox>
    </children>
