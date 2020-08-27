@@ -33,7 +33,6 @@ public class PerceptionSuite
 
 //   private final Path slamConfigurationFilePath;
    private final Path segmentationConfigurationFilePath;
-   private final Path lidarREAConfigurationFilePath;
    private final Path realsenseREAConfigurationFilePath;
 
    private final PerceptionSuiteComponent<SLAMModule, SLAMBasedEnvironmentAwarenessUI> slamModule;
@@ -44,8 +43,8 @@ public class PerceptionSuite
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
-   private static final Path defaultRootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/robot-environment-awareness");
-   private static final String defaultDirectory = "/src/main/resources/";
+   private static final Path defaultRootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+   private static final String defaultDirectory = "/robot-environment-awareness/src/main/resources/";
 
    private final Messager messager;
 
@@ -64,7 +63,6 @@ public class PerceptionSuite
    {
       this.messager = messager;
       this.segmentationConfigurationFilePath = segmentationConfigurationFilePath;
-      this.lidarREAConfigurationFilePath = lidarREAConfigurationFilePath;
       this.realsenseREAConfigurationFilePath = realsenseREAConfigurationFilePath;
 
 //      slamConfigurationFilePath = Paths.get(rootPath.toString(), directory + SLAM_CONFIGURATION_FILE_NAME);

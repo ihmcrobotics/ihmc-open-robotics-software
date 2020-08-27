@@ -19,8 +19,8 @@ import java.nio.file.Paths;
 
 public class AtlasPerceptionSuite extends PerceptionSuite
 {
-   private static final Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
-   private static final String directory = "/src/main/resources/";
+   private static final Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+   private static final String directory = "/atlas/src/main/resources/";
 
    private static final String SLAM_MODULE_CONFIGURATION_FILE_NAME = "atlasSLAMModuleConfiguration.txt";
    private static final String SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME = "atlasSegmentationModuleConfiguration.txt";
