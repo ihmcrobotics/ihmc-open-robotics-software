@@ -93,6 +93,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          statusLogger.info("Accepting new footstep planner parameters");
          footstepPlannerParameters.setAllFromStrings(parameters);
+         updateOverrideParameters();
       }); // TODO: This overrides overrides?
 
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
@@ -240,6 +241,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.getWiggleInsideDeltaOverride());
       footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
       footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
+      footstepPlannerParameters.setRejectIfWiggleNotSatisfied(lookAndStepParameters.getRejectIfWiggleNotSatisfiedOverride());
       swingPlannerParameters.setMinimumSwingFootClearance(lookAndStepParameters.getMinimumSwingFootClearanceOverride());
    }
 
