@@ -49,6 +49,9 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private Label stationaryFlag;
    @FXML
    private Label velocityLimitFlag;
+   
+   @FXML
+   private TextField speed;
 
    private final BooleanProperty sensorMovingProperty = new SimpleBooleanProperty(this, "sensorMovingProperty", false);
    private final BooleanProperty velocityLimitProperty = new SimpleBooleanProperty(this, "velocityLimitProperty", false);
@@ -61,11 +64,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    }
 
-   private void updateSensorStatusViz(boolean moving)
+   private void updateSensorStatusViz(boolean notMoving)
    {
       Platform.runLater(() ->
       {
-         if (moving)
+         if (!notMoving)
             stationaryFlag.setStyle("-fx-background-color: red;");
          else
             stationaryFlag.setStyle("-fx-background-color: green;");
@@ -73,9 +76,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
    }
 
 
-   private void updateVelocityLimitStatus(boolean moving)
+   private void updateVelocityLimitStatus(boolean notMoving)
    {
-      if (moving)
+      Platform.runLater(() ->
+      {
+      if (!notMoving)
       {
          velocityLimitFlag.setStyle("-fx-background-color: red;");
       }
@@ -83,6 +88,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
       {
          velocityLimitFlag.setStyle("-fx-background-color: green;");
       }
+      });
    }
 
 
@@ -121,8 +127,8 @@ public class SLAMAnchorPaneController extends REABasicUIController
          if (newValue != oldValue)
             updateVelocityLimitStatus(newValue);
       });
-      uiMessager.registerTopicListener(SLAMModuleAPI.SensorSpeed, stationaryFlag::setText);
-      uiMessager.registerTopicListener(SLAMModuleAPI.SensorSpeed, velocityLimitFlag::setText);
+
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SensorSpeed, speed.textProperty());
    }
 
    private void initializeSetup()
