@@ -202,11 +202,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
 
-      FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
-      loadConfigurationFile(filePropertyHelper);
-
-      reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
-
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
 
       PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
@@ -226,6 +221,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
       reaMessager.submitMessage(SegmentationModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.PLANE);
       reaMessager.submitMessage(SegmentationModuleAPI.UIOcTreeColoringMode, OcTreeMeshBuilder.ColoringType.REGION);
+
+      FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
+      loadConfigurationFile(filePropertyHelper);
+
+      reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
