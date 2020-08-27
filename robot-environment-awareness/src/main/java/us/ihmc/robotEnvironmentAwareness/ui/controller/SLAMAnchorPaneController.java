@@ -47,8 +47,13 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    @FXML
    private Label stationaryFlag;
+   @FXML
+   private Label velocityLimitFlag;
 
    private final BooleanProperty sensorMovingProperty = new SimpleBooleanProperty(this, "sensorMovingProperty", false);
+   private final BooleanProperty velocityLimitProperty = new SimpleBooleanProperty(this, "velocityLimitProperty", false);
+
+
    private final SurfaceElementICPSLAMParametersProperty ihmcSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
@@ -66,6 +71,19 @@ public class SLAMAnchorPaneController extends REABasicUIController
             stationaryFlag.setStyle("-fx-background-color: green;");
       });
    }
+
+   private void updateVelocityLimitStatus(boolean moving)
+   {
+      if (moving)
+      {
+         velocityLimitFlag.setStyle("-fx-background-color: red;");
+      }
+      else
+      {
+         velocityLimitFlag.setStyle("-fx-background-color: green;");
+      }
+   }
+
 
    @Override
    public void bindControls()
@@ -95,6 +113,14 @@ public class SLAMAnchorPaneController extends REABasicUIController
          if (newValue != oldValue)
             updateSensorStatusViz(newValue);
       });
+      
+      uiMessager.bindPropertyToTopic(SLAMModuleAPI.VelocityLimitStatus, velocityLimitProperty);
+      updateVelocityLimitStatus(false);
+      velocityLimitProperty.addListener((o, oldValue, newValue) ->
+      {
+         if (newValue != oldValue)
+            updateVelocityLimitStatus(newValue);
+      });
    }
 
    private void initializeSetup()
@@ -103,7 +129,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(SLAMModuleAPI.ShowLatestFrame, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.ShowSLAMOctreeMap, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.ShowSLAMSensorTrajectory, true);
-      uiMessager.broadcastMessage(SLAMModuleAPI.ShowPlanarRegionsMap, true);
    }
 
    @FXML
