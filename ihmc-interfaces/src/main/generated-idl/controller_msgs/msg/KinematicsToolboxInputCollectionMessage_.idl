@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__KinematicsToolboxInputCollectionMessage__idl__
 
 #include "controller_msgs/msg/./KinematicsToolboxCenterOfMassMessage_.idl"
+#include "controller_msgs/msg/./KinematicsToolboxContactStateMessage_.idl"
 #include "controller_msgs/msg/./KinematicsToolboxOneDoFJointMessage_.idl"
 #include "controller_msgs/msg/./KinematicsToolboxRigidBodyMessage_.idl"
 module controller_msgs
@@ -34,6 +35,10 @@ module controller_msgs
          * Inputs for controlling 1-DoF joints.
          */
         sequence<controller_msgs::msg::dds::KinematicsToolboxOneDoFJointMessage, 20> joint_inputs;
+        /**
+         * Input for overriding the default support polygon with a custom one.
+         */
+        sequence<controller_msgs::msg::dds::KinematicsToolboxContactStateMessage, 1> contact_state_input;
       };
     };
   };

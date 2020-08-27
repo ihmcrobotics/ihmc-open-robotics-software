@@ -56,6 +56,10 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       return current_alignment - initial_alignment;
    }
 
@@ -91,6 +95,12 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType.getCdrSerializedSize(data.getJointInputs().get(i0), current_alignment);}
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getContactStateInput().size(); ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType.getCdrSerializedSize(data.getContactStateInput().get(i0), current_alignment);}
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -114,6 +124,11 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
       cdr.write_type_e(data.getJointInputs());else
           throw new RuntimeException("joint_inputs field exceeds the maximum length");
 
+
+      if(data.getContactStateInput().size() <= 1)
+      cdr.write_type_e(data.getContactStateInput());else
+          throw new RuntimeException("contact_state_input field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.CDR cdr)
@@ -128,6 +143,8 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
 
       cdr.read_type_e(data.getJointInputs());	
 
+      cdr.read_type_e(data.getContactStateInput());	
+
    }
 
    @Override
@@ -141,6 +158,8 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
       ser.write_type_e("rigid_body_inputs", data.getRigidBodyInputs());
 
       ser.write_type_e("joint_inputs", data.getJointInputs());
+
+      ser.write_type_e("contact_state_input", data.getContactStateInput());
    }
 
    @Override
@@ -154,6 +173,8 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
       ser.read_type_e("rigid_body_inputs", data.getRigidBodyInputs());
 
       ser.read_type_e("joint_inputs", data.getJointInputs());
+
+      ser.read_type_e("contact_state_input", data.getContactStateInput());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage src, controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage dest)
