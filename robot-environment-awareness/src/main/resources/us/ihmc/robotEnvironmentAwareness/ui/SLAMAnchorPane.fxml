@@ -54,6 +54,8 @@
                   <Label fx:id="stationaryFlag" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" textAlignment="CENTER" />
 				   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Reasonable Velocity" textAlignment="CENTER" />
 				   <Label fx:id="velocityLimitFlag" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" textAlignment="CENTER" />
+		<TextField fx:id="speed" alignment="CENTER" editable="false" />
+				   
                </children>
             </VBox>
 	         </children>

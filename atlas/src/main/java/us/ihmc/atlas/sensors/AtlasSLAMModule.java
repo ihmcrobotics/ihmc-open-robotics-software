@@ -1,7 +1,6 @@
 package us.ihmc.atlas.sensors;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
@@ -21,7 +20,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -181,7 +179,7 @@ public class AtlasSLAMModule extends SLAMModule
       reasonableVelocityFlagQueue.clear();
    }
 
-   private final DecimalFormat df = new DecimalFormat("#.##");
+   private final DecimalFormat df = new DecimalFormat("#.####");
 
    private void handleRobotConfigurationData(Subscriber<RobotConfigurationData> subscriber)
    {
@@ -193,7 +191,7 @@ public class AtlasSLAMModule extends SLAMModule
          double pelvisVelocity = robotConfigurationData.getPelvisLinearVelocity().lengthSquared();
          reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, pelvisVelocity < slamParameters.get().getStationaryVelocity());
          reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, pelvisVelocity < slamParameters.get().getMaxVelocity());
-         reaMessager.submitMessage(SLAMModuleAPI.SensorSpeed, "" + df.format(pelvisVelocity));
+         reaMessager.submitMessage(SLAMModuleAPI.SensorSpeed, "" + df.format(Math.sqrt(pelvisVelocity)));
       }
    }
 
