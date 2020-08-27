@@ -28,8 +28,8 @@ public class AtlasLidarBasedREAStandaloneLauncher extends Application
                                                                                     stereoOutputTopic,
                                                                                     depthOutputTopic);
       ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      Path configurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
-      configurationFilePath = Paths.get(configurationFilePath.toString(), "/src/main/resources/atlasREAModuleConfiguration.txt");
+      Path configurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      configurationFilePath = Paths.get(configurationFilePath.toString(), "/atlas/src/main/resources/atlasREAModuleConfiguration.txt");
       module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(configurationFilePath.toFile()), networkProvider);
 
       ui.show();
