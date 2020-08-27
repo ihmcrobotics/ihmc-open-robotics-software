@@ -237,6 +237,12 @@ public class AStarFootstepPlanner
             footstep.getFootstepPose().setZ(flatGroundHeight);
          }
 
+         if (!footstepPlannerParameters.getWiggleWhilePlanning())
+         {
+            // log wiggle transform if not yet computed
+            edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).getCandidateNodeSnapData().set(snapData);
+         }
+
          footstep.getFoothold().set(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
