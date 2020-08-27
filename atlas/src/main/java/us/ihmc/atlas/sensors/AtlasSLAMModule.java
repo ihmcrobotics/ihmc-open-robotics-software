@@ -191,8 +191,8 @@ public class AtlasSLAMModule extends SLAMModule
       if (reaMessager.isMessagerOpen())
       {
          double pelvisVelocity = robotConfigurationData.getPelvisLinearVelocity().lengthSquared();
-         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, pelvisVelocity < PELVIS_VELOCITY_STATIONARY_THRESHOLD);
-         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, pelvisVelocity < TOLERANCE_PELVIS_VELOCITY);
+         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, pelvisVelocity < slamParameters.get().getStationaryVelocity());
+         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, pelvisVelocity < slamParameters.get().getMaxVelocity());
          reaMessager.submitMessage(SLAMModuleAPI.SensorSpeed, "" + df.format(pelvisVelocity));
       }
    }
