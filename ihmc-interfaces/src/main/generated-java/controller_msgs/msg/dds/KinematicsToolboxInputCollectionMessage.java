@@ -33,6 +33,11 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage>  joint_inputs_;
 
+   /**
+            * Input for overriding the default support polygon with a custom one.
+            */
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage>  contact_state_input_;
+
    public KinematicsToolboxInputCollectionMessage()
    {
 
@@ -42,6 +47,8 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
       rigid_body_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage> (20, new controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType());
 
       joint_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage> (20, new controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType());
+
+      contact_state_input_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage> (1, new controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType());
 
    }
 
@@ -62,6 +69,8 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
       rigid_body_inputs_.set(other.rigid_body_inputs_);
 
       joint_inputs_.set(other.joint_inputs_);
+
+      contact_state_input_.set(other.contact_state_input_);
    }
 
 
@@ -111,6 +120,16 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    }
 
 
+
+   /**
+            * Input for overriding the default support polygon with a custom one.
+            */
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage>  getContactStateInput()
+   {
+      return contact_state_input_;
+   }
+
+
    public static Supplier<KinematicsToolboxInputCollectionMessagePubSubType> getPubSubType()
    {
       return KinematicsToolboxInputCollectionMessagePubSubType::new;
@@ -156,6 +175,14 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
       }
 
 
+      if (this.contact_state_input_.size() != other.contact_state_input_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.contact_state_input_.size(); i++)
+         {  if (!this.contact_state_input_.get(i).epsilonEquals(other.contact_state_input_.get(i), epsilon)) return false; }
+      }
+
+
       return true;
    }
 
@@ -178,6 +205,8 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
 
       if (!this.joint_inputs_.equals(otherMyClass.joint_inputs_)) return false;
 
+      if (!this.contact_state_input_.equals(otherMyClass.contact_state_input_)) return false;
+
       return true;
    }
 
@@ -198,7 +227,10 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
       builder.append(this.rigid_body_inputs_);      builder.append(", ");
 
       builder.append("joint_inputs=");
-      builder.append(this.joint_inputs_);
+      builder.append(this.joint_inputs_);      builder.append(", ");
+
+      builder.append("contact_state_input=");
+      builder.append(this.contact_state_input_);
       builder.append("}");
       return builder.toString();
    }

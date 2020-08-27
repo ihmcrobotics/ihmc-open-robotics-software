@@ -13,4 +13,7 @@ controller_msgs/KinematicsToolboxRigidBodyMessage[] rigid_body_inputs
 # Inputs for controlling 1-DoF joints.
 controller_msgs/KinematicsToolboxOneDoFJointMessage[] joint_inputs
 
+# Input for overriding the default support polygon with a custom one.
+controller_msgs/KinematicsToolboxContactStateMessage[] contact_state_input
+
 

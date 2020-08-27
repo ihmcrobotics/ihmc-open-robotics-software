@@ -10,3 +10,5 @@ KinematicsToolboxCenterOfMassMessage[<=3] center_of_mass_inputs
 KinematicsToolboxRigidBodyMessage[<=20] rigid_body_inputs
 # Inputs for controlling 1-DoF joints.
 KinematicsToolboxOneDoFJointMessage[<=20] joint_inputs
+# Input for overriding the default support polygon with a custom one.
+KinematicsToolboxContactStateMessage[<=1] contact_state_input
