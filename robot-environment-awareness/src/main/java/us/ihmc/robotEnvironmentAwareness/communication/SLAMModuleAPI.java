@@ -67,6 +67,7 @@ public class SLAMModuleAPI
    public static final Topic<FootstepDataMessage> FootstepDataState = Root.child(UI).child(Footstep).topic(Data);
 
    public static final Topic<Boolean> SensorStatus = Root.child(Module).child(SensorFrame).topic(Moving);
+   public static final Topic<String> SensorSpeed = topic("SensorSpeed");
    public static final Topic<Boolean> VelocityLimitStatus = Root.child(Module).child(VelocityLimit).topic(Moving);
 
    public static final Topic<SurfaceElementICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
