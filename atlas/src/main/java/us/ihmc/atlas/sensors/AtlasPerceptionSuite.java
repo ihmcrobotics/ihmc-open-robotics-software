@@ -35,7 +35,8 @@ public class AtlasPerceptionSuite extends PerceptionSuite
       super(messager,
             Paths.get(rootPath.toString(), directory + SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME),
             Paths.get(rootPath.toString(), directory + LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME),
-            Paths.get(rootPath.toString(), directory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME));
+            Paths.get(rootPath.toString(), directory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME),
+            "atlas");
 
       this.slamConfigurationFilePath = Paths.get(rootPath.toString(), directory + SLAM_MODULE_CONFIGURATION_FILE_NAME);
 
