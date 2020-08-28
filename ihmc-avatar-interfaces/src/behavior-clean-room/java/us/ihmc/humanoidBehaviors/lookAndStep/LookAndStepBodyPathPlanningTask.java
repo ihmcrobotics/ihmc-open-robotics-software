@@ -32,6 +32,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LookAndStepBodyPathPlanningTask
@@ -136,7 +137,7 @@ public class LookAndStepBodyPathPlanningTask
       public void acceptGoal(Pose3D goal)
       {
          goalInput.set(goal);
-         LogTools.info("Body path goal received: {}", goal);
+         LogTools.info(StringTools.format("Body path goal received: x: {} y: {} z: {} yaw: {}", goal.getX(), goal.getY(), goal.getZ(), goal.getYaw()));
       }
 
       public void reset()

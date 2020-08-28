@@ -9,7 +9,6 @@ import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -185,20 +184,19 @@ public class LookAndStepFootstepPlanningTask
 
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
-      FramePose3D subGoalPoseBetweenFeet = localizationResult.getSubGoalPoseBetweenFeet();
+      Pose3DReadOnly midFeetAlongPath = localizationResult.getMidFeetAlongPath();
       List<? extends Pose3DReadOnly> bodyPathPlan = localizationResult.getBodyPathPlan();
       SideDependentList<MinimalFootstep> startFootPoses = localizationResult.getStanceForPlanning();
 
       // move point along body path plan by plan horizon
-      Point3D subGoalPoint = new Point3D();
+      Pose3D subGoalPoseBetweenFeet = new Pose3D();
       int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
                                                                            closestPointAlongPath,
-                                                                           subGoalPoint,
+                                                                           subGoalPoseBetweenFeet.getPosition(),
                                                                            closestSegmentIndex,
                                                                            lookAndStepBehaviorParameters.getPlanHorizon());
 
-      statusLogger.info("Found next sub goal: {}", subGoalPoint);
-      subGoalPoseBetweenFeet.getPosition().set(subGoalPoint);
+      statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // update last stepped poses to plan from; initialize to current poses
