@@ -140,8 +140,9 @@ public class REAUIMessager
       MessageBidirectionalBinding<T, T> bind = MessageBidirectionalBinding.createSingleTypedBinding(messageContent -> broadcastMessage(topic, messageContent),
                                                                                                     property);
       property.addListener(bind);
-      internalMessager.registerTopicListener(topic, bind);
-      reaMessagerToModule.registerTopicListener(topic, bind);
+      // TODO Workaround to prevent modification of the topic from another thread. Needs to be better implemented and propagated to the rest of this class.
+      internalMessager.registerJavaFXSyncedTopicListener(topic, bind);
+      reaMessagerToModule.registerTopicListener(topic, message -> internalMessager.submitMessage(topic, message));
    }
 
    public <T> void bindPropertyToTopic(Topic<T> topic, Property<T> propertyToBind)
