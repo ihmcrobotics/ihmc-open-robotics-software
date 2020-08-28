@@ -46,7 +46,7 @@
 
                 <Label style="-fx-font-weight: bold" text="Arm IK" GridPane.columnIndex="7" GridPane.rowIndex="0" />
                 <ToggleButton text="Enable" fx:id="enableIK" GridPane.columnIndex="7" GridPane.rowIndex="1" />
-                <Button text="Reset" fx:id="resetIK" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                <Button text="Reset" fx:id="resetIK" onAction="#resetIKSliders" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                 <Label text="IK Mode" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                 <Label text="x" GridPane.columnIndex="7" GridPane.rowIndex="4" />
                 <Label text="y" GridPane.columnIndex="7" GridPane.rowIndex="5" />

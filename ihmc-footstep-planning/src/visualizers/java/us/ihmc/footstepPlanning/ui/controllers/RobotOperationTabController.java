@@ -88,6 +88,8 @@ public class RobotOperationTabController
    private final Map<UserInterfaceIKMode, GeometricJacobian> limbJacobians = new HashMap<>();
 
    private final AtomicBoolean initializeIKFlag = new AtomicBoolean();
+   private final AtomicBoolean positionSliderUpdatedFlag = new AtomicBoolean();
+   private final AtomicBoolean orientationSliderUpdatedFlag = new AtomicBoolean();
    private final AtomicReference<UserInterfaceIKMode> currentMode = new AtomicReference<>();
    private final FramePose3D initialPose = new FramePose3D();
    private final FramePose3D targetPose = new FramePose3D();
@@ -120,9 +122,15 @@ public class RobotOperationTabController
             }
 
             UserInterfaceIKMode selectedMode = currentMode.get();
+            boolean includePosition = selectedMode.isArmMode() || selectedMode.isLegMode();
+
+            if (!orientationSliderUpdatedFlag.getAndSet(false) && !(includePosition && positionSliderUpdatedFlag.getAndSet(false)))
+            {
+               return;
+            }
 
             targetPose.setIncludingFrame(initialPose);
-            if (selectedMode.isArmMode() || selectedMode.isLegMode())
+            if (includePosition)
             {
                targetPose.getPosition().add(xIKSlider.getValue(), yIKSlider.getValue(), zIKSlider.getValue());
             }
@@ -155,15 +163,6 @@ public class RobotOperationTabController
       ikMode.setItems(FXCollections.observableArrayList(UserInterfaceIKMode.values()));
       ikMode.setValue(UserInterfaceIKMode.LEFT_ARM);
       ikMode.itemsProperty().addListener((observable, oldValue, newValue) -> initializeIKFlag.set(true));
-      resetIK.onActionProperty().addListener((observable, oldValue, newValue) ->
-                                             {
-                                                xIKSlider.setValue(0.0);
-                                                yIKSlider.setValue(0.0);
-                                                zIKSlider.setValue(0.0);
-                                                yawIKSlider.setValue(0.0);
-                                                pitchIKSlider.setValue(0.0);
-                                                rollIKSlider.setValue(0.0);
-                                             });
 
       enableIK.selectedProperty().addListener((observable, oldValue, newValue) ->
                                               {
@@ -178,6 +177,13 @@ public class RobotOperationTabController
                                                     ikAnimationTimer.stop();
                                                  }
                                               });
+
+      xIKSlider.valueProperty().addListener(observable -> positionSliderUpdatedFlag.set(true));
+      yIKSlider.valueProperty().addListener(observable -> positionSliderUpdatedFlag.set(true));
+      zIKSlider.valueProperty().addListener(observable -> positionSliderUpdatedFlag.set(true));
+      yawIKSlider.valueProperty().addListener(observable -> orientationSliderUpdatedFlag.set(true));
+      pitchIKSlider.valueProperty().addListener(observable -> orientationSliderUpdatedFlag.set(true));
+      rollIKSlider.valueProperty().addListener(observable -> orientationSliderUpdatedFlag.set(true));
    }
 
    private void updateButtons()
@@ -294,12 +300,10 @@ public class RobotOperationTabController
 
    private void initializeIK()
    {
-      xIKSlider.setValue(0.0);
-      yIKSlider.setValue(0.0);
-      zIKSlider.setValue(0.0);
-      yawIKSlider.setValue(0.0);
-      pitchIKSlider.setValue(0.0);
-      rollIKSlider.setValue(0.0);
+      resetIKSliders();
+
+      positionSliderUpdatedFlag.set(false);
+      orientationSliderUpdatedFlag.set(false);
 
       copyRobotState(realRobotModel, workRobotModel);
       UserInterfaceIKMode selectedMode = ikMode.getValue();
@@ -313,6 +317,17 @@ public class RobotOperationTabController
       currentMode.set(selectedMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.IKEnabled, true);
+   }
+
+   @FXML
+   public void resetIKSliders()
+   {
+      xIKSlider.setValue(0.0);
+      yIKSlider.setValue(0.0);
+      zIKSlider.setValue(0.0);
+      yawIKSlider.setValue(0.0);
+      pitchIKSlider.setValue(0.0);
+      rollIKSlider.setValue(0.0);
    }
 
    private static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination)
