@@ -5,7 +5,6 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
@@ -16,6 +15,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.communication.UserInterfaceIKMode;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -64,7 +64,7 @@ public class RobotOperationTabController
    @FXML
    private Button resetIK;
    @FXML
-   private ComboBox<RobotSide> ikMode;
+   private ComboBox<UserInterfaceIKMode> ikMode;
    @FXML
    private Slider xIKSlider;
    @FXML
@@ -79,10 +79,15 @@ public class RobotOperationTabController
    private Slider rollIKSlider;
 
    private final AnimationTimer ikAnimationTimer;
-   private final SideDependentList<DdoglegInverseKinematicsCalculator> ikSolvers = new SideDependentList<>();
+
+   private final SideDependentList<DdoglegInverseKinematicsCalculator> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<GeometricJacobian> armJacobians = new SideDependentList<>();
+
+   private DdoglegInverseKinematicsCalculator neckIKSolver;
+   private GeometricJacobian neckJacobian;
+
    private final AtomicBoolean initializeIKFlag = new AtomicBoolean();
-   private final AtomicReference<RobotSide> currentSide = new AtomicReference<>();
+   private final AtomicReference<UserInterfaceIKMode> currentMode = new AtomicReference<>();
    private final FramePose3D initialPose = new FramePose3D();
    private final FramePose3D targetPose = new FramePose3D();
    private final RigidBodyTransform targetTransform = new RigidBodyTransform();
@@ -113,24 +118,49 @@ public class RobotOperationTabController
                }
             }
 
+            UserInterfaceIKMode selectedMode = currentMode.get();
+
             targetPose.setIncludingFrame(initialPose);
-            targetPose.getPosition().add(xIKSlider.getValue(), yIKSlider.getValue(), zIKSlider.getValue());
+
+            if (selectedMode.isArmMode())
+            {
+               targetPose.getPosition().add(xIKSlider.getValue(), yIKSlider.getValue(), zIKSlider.getValue());
+            }
+
             targetPose.getOrientation().prependYawRotation(yawIKSlider.getValue());
             targetPose.getOrientation().prependPitchRotation(pitchIKSlider.getValue());
             targetPose.getOrientation().prependRollRotation(rollIKSlider.getValue());
 
-            DdoglegInverseKinematicsCalculator ikSolver = ikSolvers.get(currentSide.get());
-            targetTransform.set(targetPose.getOrientation(), targetPose.getPosition());
-            boolean success = ikSolver.solve(targetTransform);
 
-            GeometricJacobian armJacobian = armJacobians.get(currentSide.get());
-            double[] solutionJointAngles = new double[armJacobian.getNumberOfColumns()];
-            for (int i = 0; i < solutionJointAngles.length; i++)
+            if (selectedMode.isArmMode())
             {
-               solutionJointAngles[i] = ((OneDoFJoint) armJacobian.getJointsInOrder()[i]).getQ();
-            }
+               RobotSide selectedSide = selectedMode.getSide();
+               DdoglegInverseKinematicsCalculator ikSolver = armIKSolvers.get(selectedSide);
+               targetTransform.set(targetPose.getOrientation(), targetPose.getPosition());
+               boolean success = ikSolver.solve(targetTransform);
 
-            messager.submitMessage(FootstepPlannerMessagerAPI.IKSolution, solutionJointAngles);
+               GeometricJacobian armJacobian = armJacobians.get(selectedSide);
+               double[] solutionJointAngles = new double[armJacobian.getNumberOfColumns()];
+               for (int i = 0; i < solutionJointAngles.length; i++)
+               {
+                  solutionJointAngles[i] = ((OneDoFJoint) armJacobian.getJointsInOrder()[i]).getQ();
+               }
+
+               messager.submitMessage(FootstepPlannerMessagerAPI.IKSolution, solutionJointAngles);
+            }
+            else if (selectedMode == UserInterfaceIKMode.NECK)
+            {
+               targetTransform.set(targetPose.getOrientation(), targetPose.getPosition());
+               boolean success = neckIKSolver.solve(targetTransform);
+
+               double[] solutionJointAngles = new double[neckJacobian.getNumberOfColumns()];
+               for (int i = 0; i < solutionJointAngles.length; i++)
+               {
+                  solutionJointAngles[i] = ((OneDoFJoint) neckJacobian.getJointsInOrder()[i]).getQ();
+               }
+
+               messager.submitMessage(FootstepPlannerMessagerAPI.IKSolution, solutionJointAngles);
+            }
          }
       };
    }
@@ -140,8 +170,8 @@ public class RobotOperationTabController
       updateButtons();
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 2.0, 0.1));
 
-      ikMode.setItems(FXCollections.observableArrayList(RobotSide.values()));
-      ikMode.setValue(RobotSide.LEFT);
+      ikMode.setItems(FXCollections.observableArrayList(UserInterfaceIKMode.values()));
+      ikMode.setValue(UserInterfaceIKMode.LEFT_ARM);
       ikMode.itemsProperty().addListener((observable, oldValue, newValue) -> initializeIKFlag.set(true));
 
       enableIK.selectedProperty().addListener((observable, oldValue, newValue) ->
@@ -195,7 +225,8 @@ public class RobotOperationTabController
                                                             workRobotModel.getHand(robotSide).getBodyFixedFrame());
          armJacobians.put(robotSide, armJacobian);
 
-         double orientationDiscount = 0.2;
+         double positionCost = 1.0;
+         double orientationCost = 0.2;
          int maxIterations = 500;
          boolean solveOrientation = true;
          double convergenceTolerance = 4.0e-6;
@@ -203,9 +234,10 @@ public class RobotOperationTabController
          double angleTolerance = 0.02;
          double parameterChangePenalty = 0.1;
 
-         ikSolvers.put(robotSide,
-                       new DdoglegInverseKinematicsCalculator(armJacobian,
-                                                                  orientationDiscount,
+         armIKSolvers.put(robotSide,
+                          new DdoglegInverseKinematicsCalculator(armJacobian,
+                                                                  positionCost,
+                                                                  orientationCost,
                                                                   maxIterations,
                                                                   solveOrientation,
                                                                   convergenceTolerance,
@@ -213,6 +245,26 @@ public class RobotOperationTabController
                                                                   angleTolerance,
                                                                   parameterChangePenalty));
       }
+
+      this.neckJacobian = new GeometricJacobian(workRobotModel.getChest(), workRobotModel.getHead(), workRobotModel.getHead().getBodyFixedFrame());
+
+      double positionCost = 0.05;
+      double orientationCost = 1.0;
+      int maxIterations = 200;
+      boolean solveOrientation = true;
+      double convergenceTolerance = 5.0e-5;
+      double positionTolerance = Double.MAX_VALUE;
+      double angleTolerance = 0.02;
+      double parameterChangePenalty = 0.1;
+      neckIKSolver = new DdoglegInverseKinematicsCalculator(neckJacobian,
+                                                            positionCost,
+                                                            orientationCost,
+                                                            maxIterations,
+                                                            solveOrientation,
+                                                            convergenceTolerance,
+                                                            positionTolerance,
+                                                            angleTolerance,
+                                                            parameterChangePenalty);
    }
 
    private void initializeIK()
@@ -224,11 +276,16 @@ public class RobotOperationTabController
       pitchIKSlider.setValue(0.0);
       rollIKSlider.setValue(0.0);
 
-      RobotSide selectedSide = ikMode.getValue();
-      initialPose.setToZero(realRobotModel.getHand(selectedSide).getBodyFixedFrame());
-      initialPose.changeFrame(realRobotModel.getChest().getBodyFixedFrame());
-      currentSide.set(selectedSide);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKSide, selectedSide);
+      UserInterfaceIKMode selectedMode = ikMode.getValue();
+      if (selectedMode.isArmMode())
+      {
+         RobotSide selectedSide = selectedMode.getSide();
+         initialPose.setToZero(realRobotModel.getHand(selectedSide).getBodyFixedFrame());
+         initialPose.changeFrame(realRobotModel.getChest().getBodyFixedFrame());
+      }
+
+      currentMode.set(selectedMode);
+      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.IKEnabled, true);
    }
 

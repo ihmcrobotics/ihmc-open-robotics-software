@@ -170,7 +170,7 @@ public class FootstepPlannerMessagerAPI
 
    // IK
    public static final Topic<Boolean> IKEnabled = topic("IKEnabled");
-   public static final Topic<RobotSide> SelectedIKSide = topic("SelectedIKSide");
+   public static final Topic<UserInterfaceIKMode> SelectedIKMode = topic("SelectedIKMode");
    public static final Topic<double[]> IKSolution = topic("IKSolution");
 
    // Logging
