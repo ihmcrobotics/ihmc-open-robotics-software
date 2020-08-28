@@ -18,12 +18,16 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import java.util.Stack;
+
 import static us.ihmc.robotics.geometry.PlanerRegionBuilderTools.*;
 
 public class PlanarRegionsListBuilder
 {
    private PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private PoseReferenceFrame placementFrame = new PoseReferenceFrame("placementFrame", ReferenceFrame.getWorldFrame());
+
+   private Stack<Pose3D> placementFrameStack = new Stack<>();
 
    public PoseReferenceFrame getPlacementFrame()
    {
@@ -81,6 +85,41 @@ public class PlanarRegionsListBuilder
       });
    }
 
+   public void pushOffset(double yaw)
+   {
+      pushOffset(new AxisAngle(Axis3D.Z, yaw));
+   }
+
+   public void pushOffset(Orientation3DReadOnly orientationOffset)
+   {
+      pushOffset(null, orientationOffset);
+   }
+
+   public void pushOffset(Tuple2DReadOnly positionOffset)
+   {
+      pushOffset(new Point3D(positionOffset), null);
+   }
+
+   public void pushOffset(double x, double y)
+   {
+      pushOffset(new Point3D(x, y, 0.0), null);
+   }
+
+   public void pushOffset(double x, double y, double z, Axis3D axis, double angle)
+   {
+      pushOffset(new Point3D(x, y, z), new AxisAngle(axis, angle));
+   }
+
+   public void pushOffset(double x, double y, double z)
+   {
+      pushOffset(new Point3D(x, y, z), null);
+   }
+
+   public void pushOffset(Tuple3DReadOnly positionOffset)
+   {
+      pushOffset(positionOffset, null);
+   }
+
    public void placeWithOffset(double yaw, Runnable runnable)
    {
       placeWithOffset(new AxisAngle(Axis3D.Z, yaw), runnable);
@@ -101,6 +140,11 @@ public class PlanarRegionsListBuilder
       placeWithOffset(new Point3D(x, y, 0.0), runnable);
    }
 
+   public void placeWithOffset(double x, double y, double z, Axis3D axis, double angle, Runnable runnable)
+   {
+      placeWithOffset(new Point3D(x, y, z), new AxisAngle(axis, angle), runnable);
+   }
+
    public void placeWithOffset(double x, double y, double z, Runnable runnable)
    {
       placeWithOffset(new Point3D(x, y, z), runnable);
@@ -113,14 +157,34 @@ public class PlanarRegionsListBuilder
 
    public void placeWithOffset(Tuple3DReadOnly positionOffset, Orientation3DReadOnly orientationOffset, Runnable userPlacement)
    {
+      pushOffset(positionOffset, orientationOffset);
+      userPlacement.run();
+      popOffset();
+   }
+
+   public void pushOffset(Tuple3DReadOnly positionOffset, Orientation3DReadOnly orientationOffset)
+   {
       Pose3D originalPlacementFrame = new Pose3D(placementFrame.getPosition(), placementFrame.getOrientation());
+      placementFrameStack.push(originalPlacementFrame);
       Pose3D offsetPose = new Pose3D(originalPlacementFrame);
       if (positionOffset != null)
-         offsetPose.getPosition().add(positionOffset);
+         offsetPose.appendTranslation(positionOffset);
       if (orientationOffset != null)
-         offsetPose.getOrientation().append(orientationOffset);
+         offsetPose.appendRotation(orientationOffset);
       placementFrame.setPoseAndUpdate(offsetPose);
-      userPlacement.run();
-      placementFrame.setPoseAndUpdate(originalPlacementFrame);
+   }
+
+   public void popOffset()
+   {
+      placementFrame.setPoseAndUpdate(placementFrameStack.pop());
+   }
+
+   public void popAllRemainingOffsets()
+   {
+      while (!placementFrameStack.isEmpty())
+      {
+         popOffset();
+
+      }
    }
 }
