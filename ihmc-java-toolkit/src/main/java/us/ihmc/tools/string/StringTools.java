@@ -6,6 +6,11 @@ import java.util.function.Supplier;
 
 public class StringTools
 {
+   private StringTools()
+   {
+      // disallow construction
+   }
+
    public static String getEveryUppercaseLetter(String string)
    {
       String ret = "";
