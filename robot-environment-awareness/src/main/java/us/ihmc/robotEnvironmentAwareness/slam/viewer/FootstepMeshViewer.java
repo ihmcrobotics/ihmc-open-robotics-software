@@ -61,7 +61,10 @@ public class FootstepMeshViewer extends AnimationTimer
                                                            () -> false));
       }
 
-      uiMessager.registerTopicListener(showviz, show -> footstepMesheManagers.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
+      uiMessager.registerTopicListener(showviz, show -> Platform.runLater(() ->
+      {
+         footstepMesheManagers.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show));
+      }));
       uiMessager.registerModuleMessagerStateListener(isMessagerOpen ->
       {
          if (isMessagerOpen)

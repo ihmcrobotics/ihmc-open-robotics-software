@@ -1,5 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -34,6 +37,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
    @FXML
    private Label stationaryFlag;
 
+   private final BooleanProperty sensorMovingProperty = new SimpleBooleanProperty(this, "sensorMovingProperty", false);
    private final SurfaceElementICPSLAMParametersProperty ihmcSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
@@ -43,14 +47,13 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    private void updateSensorStatusViz(boolean moving)
    {
-      if (moving)
+      Platform.runLater(() ->
       {
-         stationaryFlag.setStyle("-fx-background-color: red;");
-      }
-      else
-      {
-         stationaryFlag.setStyle("-fx-background-color: green;");
-      }
+         if (moving)
+            stationaryFlag.setStyle("-fx-background-color: red;");
+         else
+            stationaryFlag.setStyle("-fx-background-color: green;");
+      });
    }
 
    @Override
@@ -70,7 +73,13 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
       initializeSetup();
 
-      uiMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, (moving) -> updateSensorStatusViz(moving));
+      uiMessager.bindPropertyToTopic(SLAMModuleAPI.SensorStatus, sensorMovingProperty);
+      updateSensorStatusViz(false);
+      sensorMovingProperty.addListener((o, oldValue, newValue) ->
+      {
+         if (newValue != oldValue)
+            updateSensorStatusViz(newValue);
+      });
    }
 
    private void initializeSetup()
