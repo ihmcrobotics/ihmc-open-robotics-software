@@ -91,7 +91,7 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       
       initialQualityThreshold.setValueFactory(createDoubleValueFactory(0.05, 0.3, 0.1, 0.05));
 
-      longestTimeToLag.setValueFactory(createDoubleValueFactory(0.0, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 1.0));
+      longestTimeToLag.setValueFactory(createDoubleValueFactory(0.0, 1000.0, 1000.0, 0.1));
       maxOptimizationIterations.setValueFactory(createIntegerValueFactory(1, 100, 40, 1));
       translationPerturbation.setValueFactory(createDoubleValueFactory(0.0001, 0.01, 0.002, 0.0005));
       rotationPerturbation.setValueFactory(createDoubleValueFactory(0.00001, 0.0001, 0.00001, 0.00001));
