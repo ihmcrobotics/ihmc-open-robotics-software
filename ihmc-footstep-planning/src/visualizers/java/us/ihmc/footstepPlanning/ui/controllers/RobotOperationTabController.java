@@ -1,8 +1,6 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -18,6 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UserInterfaceIKMode;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -82,18 +81,21 @@ public class RobotOperationTabController
    @FXML
    private Slider rollIKSlider;
 
+   private static final double defaultTrajectoryTime = 1.5;
    private final AnimationTimer ikAnimationTimer;
 
    private final Map<UserInterfaceIKMode, DdoglegInverseKinematicsCalculator> ikSolvers = new HashMap<>();
    private final Map<UserInterfaceIKMode, GeometricJacobian> limbJacobians = new HashMap<>();
 
    private final AtomicBoolean initializeIKFlag = new AtomicBoolean();
-   private final AtomicBoolean positionSliderUpdatedFlag = new AtomicBoolean();
-   private final AtomicBoolean orientationSliderUpdatedFlag = new AtomicBoolean();
-   private final AtomicReference<UserInterfaceIKMode> currentMode = new AtomicReference<>();
-   private final FramePose3D initialPose = new FramePose3D();
-   private final FramePose3D targetPose = new FramePose3D();
-   private final RigidBodyTransform targetTransform = new RigidBodyTransform();
+   private final AtomicBoolean ikPositionSliderUpdatedFlag = new AtomicBoolean();
+   private final AtomicBoolean ikOrientationSliderUpdatedFlag = new AtomicBoolean();
+   private final AtomicReference<UserInterfaceIKMode> currentIKMode = new AtomicReference<>();
+   private final FramePose3D initialIKPose = new FramePose3D();
+   private final FramePose3D targetIKPose = new FramePose3D();
+   private final RigidBodyTransform targetIKTransform = new RigidBodyTransform();
+
+   private final AtomicReference<double[]> latestIKSolution = new AtomicReference<>();
 
    public RobotOperationTabController()
    {
@@ -121,35 +123,42 @@ public class RobotOperationTabController
                }
             }
 
-            UserInterfaceIKMode selectedMode = currentMode.get();
+            UserInterfaceIKMode selectedMode = currentIKMode.get();
             boolean includePosition = selectedMode.isArmMode() || selectedMode.isLegMode();
 
-            if (!orientationSliderUpdatedFlag.getAndSet(false) && !(includePosition && positionSliderUpdatedFlag.getAndSet(false)))
+            if (!ikOrientationSliderUpdatedFlag.getAndSet(false) && !(includePosition && ikPositionSliderUpdatedFlag.getAndSet(false)))
             {
                return;
             }
 
-            targetPose.setIncludingFrame(initialPose);
+            targetIKPose.setIncludingFrame(initialIKPose);
             if (includePosition)
             {
-               targetPose.getPosition().add(xIKSlider.getValue(), yIKSlider.getValue(), zIKSlider.getValue());
+               targetIKPose.getPosition().add(xIKSlider.getValue(), yIKSlider.getValue(), zIKSlider.getValue());
             }
 
-            targetPose.getOrientation().prependYawRotation(yawIKSlider.getValue());
-            targetPose.getOrientation().prependPitchRotation(pitchIKSlider.getValue());
-            targetPose.getOrientation().prependRollRotation(rollIKSlider.getValue());
+            targetIKPose.getOrientation().prependYawRotation(yawIKSlider.getValue());
+            targetIKPose.getOrientation().prependPitchRotation(pitchIKSlider.getValue());
+            targetIKPose.getOrientation().prependRollRotation(rollIKSlider.getValue());
 
             DdoglegInverseKinematicsCalculator ikSolver = ikSolvers.get(selectedMode);
-            targetTransform.set(targetPose.getOrientation(), targetPose.getPosition());
-            boolean success = ikSolver.solve(targetTransform);
+            targetIKTransform.set(targetIKPose.getOrientation(), targetIKPose.getPosition());
+            boolean success = ikSolver.solve(targetIKTransform);
+
+            if (!success)
+            {
+               return;
+            }
 
             GeometricJacobian limbJacobian = limbJacobians.get(selectedMode);
             double[] solutionJointAngles = new double[limbJacobian.getNumberOfColumns()];
+
             for (int i = 0; i < solutionJointAngles.length; i++)
             {
                solutionJointAngles[i] = ((OneDoFJoint) limbJacobian.getJointsInOrder()[i]).getQ();
             }
 
+            latestIKSolution.set(solutionJointAngles);
             messager.submitMessage(FootstepPlannerMessagerAPI.IKSolution, solutionJointAngles);
          }
       };
@@ -178,12 +187,12 @@ public class RobotOperationTabController
                                                  }
                                               });
 
-      xIKSlider.valueProperty().addListener(observable -> positionSliderUpdatedFlag.set(true));
-      yIKSlider.valueProperty().addListener(observable -> positionSliderUpdatedFlag.set(true));
-      zIKSlider.valueProperty().addListener(observable -> positionSliderUpdatedFlag.set(true));
-      yawIKSlider.valueProperty().addListener(observable -> orientationSliderUpdatedFlag.set(true));
-      pitchIKSlider.valueProperty().addListener(observable -> orientationSliderUpdatedFlag.set(true));
-      rollIKSlider.valueProperty().addListener(observable -> orientationSliderUpdatedFlag.set(true));
+      xIKSlider.valueProperty().addListener(observable -> ikPositionSliderUpdatedFlag.set(true));
+      yIKSlider.valueProperty().addListener(observable -> ikPositionSliderUpdatedFlag.set(true));
+      zIKSlider.valueProperty().addListener(observable -> ikPositionSliderUpdatedFlag.set(true));
+      yawIKSlider.valueProperty().addListener(observable -> ikOrientationSliderUpdatedFlag.set(true));
+      pitchIKSlider.valueProperty().addListener(observable -> ikOrientationSliderUpdatedFlag.set(true));
+      rollIKSlider.valueProperty().addListener(observable -> ikOrientationSliderUpdatedFlag.set(true));
    }
 
    private void updateButtons()
@@ -300,27 +309,26 @@ public class RobotOperationTabController
 
    private void initializeIK()
    {
-      resetIKSliders();
+      resetIK();
 
-      positionSliderUpdatedFlag.set(false);
-      orientationSliderUpdatedFlag.set(false);
+      ikPositionSliderUpdatedFlag.set(false);
+      ikOrientationSliderUpdatedFlag.set(false);
 
-      copyRobotState(realRobotModel, workRobotModel);
-      UserInterfaceIKMode selectedMode = ikMode.getValue();
-      GeometricJacobian limbJacobian = limbJacobians.get(selectedMode);
+      UserInterfaceIKMode selectedIKMode = ikMode.getValue();
+      GeometricJacobian limbJacobian = limbJacobians.get(selectedIKMode);
 
       MovingReferenceFrame bodyFixedFrame = limbJacobian.getEndEffector().getBodyFixedFrame();
-      initialPose.setToZero(bodyFixedFrame);
+      initialIKPose.setToZero(bodyFixedFrame);
       ReferenceFrame baseFrame = limbJacobian.getBase().getBodyFixedFrame();
-      initialPose.changeFrame(baseFrame);
+      initialIKPose.changeFrame(baseFrame);
 
-      currentMode.set(selectedMode);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedMode);
+      currentIKMode.set(selectedIKMode);
+      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedIKMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.IKEnabled, true);
    }
 
    @FXML
-   public void resetIKSliders()
+   public void resetIK()
    {
       xIKSlider.setValue(0.0);
       yIKSlider.setValue(0.0);
@@ -328,6 +336,99 @@ public class RobotOperationTabController
       yawIKSlider.setValue(0.0);
       pitchIKSlider.setValue(0.0);
       rollIKSlider.setValue(0.0);
+      copyRobotState(realRobotModel, workRobotModel);
+   }
+
+   @FXML
+   public void sendJointspaceTrajectory()
+   {
+      UserInterfaceIKMode currentIKMode = this.currentIKMode.get();
+      double[] latestIKSolution = this.latestIKSolution.get();
+
+      if (latestIKSolution == null)
+      {
+         return;
+      }
+
+      switch (currentIKMode)
+      {
+         case LEFT_ARM:
+         case RIGHT_ARM:
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(currentIKMode.getSide(), defaultTrajectoryTime,
+                                                                                                        latestIKSolution);
+            messager.submitMessage(FootstepPlannerMessagerAPI.ArmTrajectoryMessageTopic, armTrajectoryMessage);
+            break;
+         }
+         case NECK:
+         {
+            NeckTrajectoryMessage neckTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(defaultTrajectoryTime, latestIKSolution);
+            messager.submitMessage(FootstepPlannerMessagerAPI.NeckTrajectoryMessageTopic, neckTrajectoryMessage);
+            break;
+         }
+         case CHEST:
+         {
+            SpineTrajectoryMessage spineTrajectoryMessage = HumanoidMessageTools.createSpineTrajectoryMessage(defaultTrajectoryTime, latestIKSolution);
+            messager.submitMessage(FootstepPlannerMessagerAPI.SpineTrajectoryMessageTopic, spineTrajectoryMessage);
+         }
+         case LEFT_LEG:
+         case RIGHT_LEG:
+         {
+            // TODO message non-existant. maybe add a jointspace "LegTrajectoryMessage"?
+         }
+      }
+   }
+
+   @FXML
+   public void sendTaskspaceTrajectory()
+   {
+      UserInterfaceIKMode currentIKMode = this.currentIKMode.get();
+      double[] latestIKSolution = this.latestIKSolution.get();
+
+      if (latestIKSolution == null)
+      {
+         return;
+      }
+
+      switch (currentIKMode)
+      {
+         case LEFT_ARM:
+         case RIGHT_ARM:
+         {
+            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(currentIKMode.getSide(),
+                                                                                                           defaultTrajectoryTime,
+                                                                                                           targetIKPose,
+                                                                                                           targetIKPose.getReferenceFrame());
+            messager.submitMessage(FootstepPlannerMessagerAPI.HandTrajectoryMessageTopic, handTrajectoryMessage);
+            break;
+         }
+         case NECK:
+         {
+            HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(defaultTrajectoryTime,
+                                                                                                           targetIKPose.getOrientation(),
+                                                                                                           targetIKPose.getReferenceFrame());
+            messager.submitMessage(FootstepPlannerMessagerAPI.HeadTrajectoryMessageTopic, headTrajectoryMessage);
+            break;
+         }
+         case CHEST:
+         {
+            ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(defaultTrajectoryTime,
+                                                                                                              targetIKPose.getOrientation(),
+                                                                                                              targetIKPose.getReferenceFrame());
+            messager.submitMessage(FootstepPlannerMessagerAPI.ChestTrajectoryMessageTopic, chestTrajectoryMessage);
+         }
+         case LEFT_LEG:
+         case RIGHT_LEG:
+         {
+            ReferenceFrame originalFrame = targetIKPose.getReferenceFrame();
+            targetIKPose.changeFrame(ReferenceFrame.getWorldFrame());
+            FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(currentIKMode.getSide(),
+                                                                                                           defaultTrajectoryTime,
+                                                                                                           targetIKPose);
+            messager.submitMessage(FootstepPlannerMessagerAPI.FootTrajectoryMessageTopic, footTrajectoryMessage);
+            targetIKPose.changeFrame(originalFrame);
+         }
+      }
    }
 
    private static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination)
