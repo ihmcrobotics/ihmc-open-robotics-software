@@ -41,12 +41,12 @@
             <Button fx:id="clearREA" mnemonicParsing="false" onAction="#clearREA" text="Clear" GridPane.columnIndex="5" GridPane.rowIndex="1" />
 
                 <Label style="-fx-font-weight: bold" text="Arms" GridPane.columnIndex="6" GridPane.rowIndex="0" />
-                <Button fx:id="leftArmIn" onAction="#sendLeftArmIn" text="Left Arm In" GridPane.columnIndex="6" GridPane.rowIndex="1" />
-                <Button fx:id="rightArmIn" onAction="#sendRightArmIn" text="Right Arm In" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+                <Button onAction="#sendLeftArmIn" text="Left Arm In" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                <Button onAction="#sendRightArmIn" text="Right Arm In" GridPane.columnIndex="6" GridPane.rowIndex="2" />
 
-                <Label style="-fx-font-weight: bold" text="Arm IK" GridPane.columnIndex="7" GridPane.rowIndex="0" />
+                <Label style="-fx-font-weight: bold" text="Kinematics control" GridPane.columnIndex="7" GridPane.rowIndex="0" />
                 <ToggleButton text="Enable" fx:id="enableIK" GridPane.columnIndex="7" GridPane.rowIndex="1" />
-                <Button text="Reset" fx:id="resetIK" onAction="#resetIKSliders" GridPane.columnIndex="7" GridPane.rowIndex="2" />
+                <Button text="Reset" fx:id="resetIK" onAction="#resetIK" GridPane.columnIndex="7" GridPane.rowIndex="2" />
                 <Label text="IK Mode" GridPane.columnIndex="7" GridPane.rowIndex="3" />
                 <Label text="x" GridPane.columnIndex="7" GridPane.rowIndex="4" />
                 <Label text="y" GridPane.columnIndex="7" GridPane.rowIndex="5" />
@@ -55,6 +55,8 @@
                 <Label text="pitch" GridPane.columnIndex="7" GridPane.rowIndex="8" />
                 <Label text="roll" GridPane.columnIndex="7" GridPane.rowIndex="9" />
 
+                <Button text="Send jointspace trajectory" onAction="#sendJointspaceTrajectory" GridPane.columnIndex="8" GridPane.rowIndex="1" GridPane.columnSpan="2"/>
+                <Button text="Send taskspace trajectory" onAction="#sendTaskspaceTrajectory" GridPane.columnIndex="8" GridPane.rowIndex="2" GridPane.columnSpan="2"/>
                 <ComboBox fx:id="ikMode" prefWidth="120.0" GridPane.columnIndex="8" GridPane.rowIndex="3" />
                 <Slider fx:id="xIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                 <Slider fx:id="yIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="5" GridPane.rowIndex="5" />
