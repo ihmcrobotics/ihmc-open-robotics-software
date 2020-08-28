@@ -16,7 +16,7 @@ import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class UIRobotController
+public class RobotOperationTabController
 {
    private JavaFXMessager messager;
    private RobotLowLevelMessenger robotLowLevelMessenger;

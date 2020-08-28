@@ -103,7 +103,7 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerTestDashboardController footstepPlannerTestDashboardController;
    @FXML
-   private UIRobotController uiRobotController;
+   private RobotOperationTabController robotOperationTabController;
    @FXML
    private VisualizationController visibilityGraphsUIController;
 
@@ -194,7 +194,7 @@ public class FootstepPlannerUI
       splitFractionParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
-      uiRobotController.attachMessager(messager);
+      robotOperationTabController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -236,7 +236,7 @@ public class FootstepPlannerUI
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       new UIFootstepPlanManager(messager);
       this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
-      this.uiRobotController.setAuxiliaryRobotData(auxiliaryRobotData);
+      this.robotOperationTabController.setAuxiliaryRobotData(auxiliaryRobotData);
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -271,7 +271,7 @@ public class FootstepPlannerUI
       }
       else
       {
-//         recursivelyModifyGraphics(previewModel.getRobotDescription().getChildrenJoints().get(0), YoAppearance.AliceBlue());
+         recursivelyModifyGraphics(previewModelFactory.getRobotDescription().getChildrenJoints().get(0), YoAppearance.AliceBlue());
          walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
          walkingPreviewVisualizer.getRootNode().setMouseTransparent(true);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
@@ -404,12 +404,12 @@ public class FootstepPlannerUI
 
    public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
    {
-      uiRobotController.setRobotLowLevelMessenger(robotLowLevelMessenger);
+      robotOperationTabController.setRobotLowLevelMessenger(robotLowLevelMessenger);
    }
 
    public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
    {
-      uiRobotController.setREAStateRequestPublisher(reaStateRequestPublisher);
+      robotOperationTabController.setREAStateRequestPublisher(reaStateRequestPublisher);
    }
 
    public JavaFXMessager getMessager()
