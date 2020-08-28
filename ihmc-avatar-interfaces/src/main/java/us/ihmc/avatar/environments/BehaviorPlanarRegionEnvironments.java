@@ -2,6 +2,8 @@ package us.ihmc.avatar.environments;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -10,8 +12,7 @@ import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
 import java.io.File;
@@ -139,6 +140,11 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       }, true);
    }
 
+   public static PlanarRegionsList generateStartingBlockRegions()
+   {
+      return generateStartingBlockRegions(new RigidBodyTransform());
+   }
+
    public static PlanarRegionsList generateStartingBlockRegions(RigidBodyTransform startingPose)
    {
       double platformXY = 1.0;
@@ -201,6 +207,46 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       }
 
       return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList generateRealisticEasierStartingBlockRegions()
+   {
+      return generateRealisticEasierStartingBlockRegions(new Pose3D());
+   }
+
+   public static PlanarRegionsList generateRealisticEasierStartingBlockRegions(Pose3DReadOnly poseInWorld)
+   {
+      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder();
+
+      builder.addPalletStackReferencedAtNegativeXY(2);
+
+      builder.pushOffset(RealisticLabTerrainBuilder.PALLET_LENGTH, 0.0);
+      builder.addPalletStackReferencedAtNegativeXY(1, () ->
+      {
+         builder.placeSmallCinderBlockGroup(0.05, 0.4, Math.toRadians(-70), 2);
+         builder.placeMediumCinderBlockGroup(0.7, 0.5, Math.toRadians(50), 2);
+      });
+
+      builder.pushOffset(RealisticLabTerrainBuilder.PALLET_LENGTH, 0.0);
+      builder.addPalletStackReferencedAtNegativeXY(1, () ->
+      {
+         builder.placeMediumCinderBlockGroup(0.25, 0.02, Math.toRadians(40), 3);
+         builder.placeLargeCinderBlockGroup(0.6, 0.55, Math.toRadians(10), 2);
+         builder.placeMediumCinderBlockGroup(0.9, 0.05, Math.toRadians(-10), 2);
+      });
+
+      builder.pushOffset(RealisticLabTerrainBuilder.PALLET_LENGTH, 0.0);
+      builder.addPalletStackReferencedAtNegativeXY(1, () ->
+      {
+         builder.placeSmallCinderBlockGroup(0.55, 0.6, Math.toRadians(90), 2);
+         builder.placeMediumCinderBlockGroup(0.7, 0.04, Math.toRadians(30), 2);
+      });
+
+      builder.popAllRemainingOffsets();
+
+      builder.setRegionIds(greenId);
+
+      return builder.getPlanarRegionsList();
    }
 
    private static PlanarRegionsList generate(GenerationInterface generationInterface, boolean createGroundPlane)
