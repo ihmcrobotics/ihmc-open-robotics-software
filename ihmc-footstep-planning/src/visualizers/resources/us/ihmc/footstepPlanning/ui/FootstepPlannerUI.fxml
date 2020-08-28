@@ -67,7 +67,7 @@
       
                       <Tab text="Robot Operation">
                           <content>
-                              <fx:include fx:id="uiRobot" source="RobotOperationTab.fxml" />
+                              <fx:include fx:id="robotOperationTab" source="RobotOperationTab.fxml" />
                           </content>
                       </Tab>
       
