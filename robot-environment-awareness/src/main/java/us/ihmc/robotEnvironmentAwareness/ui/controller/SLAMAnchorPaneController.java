@@ -80,14 +80,10 @@ public class SLAMAnchorPaneController extends REABasicUIController
    {
       Platform.runLater(() ->
       {
-      if (!notMoving)
-      {
-         velocityLimitFlag.setStyle("-fx-background-color: red;");
-      }
-      else
-      {
-         velocityLimitFlag.setStyle("-fx-background-color: green;");
-      }
+         if (!notMoving)
+            velocityLimitFlag.setStyle("-fx-background-color: red;");
+         else
+            velocityLimitFlag.setStyle("-fx-background-color: green;");
       });
    }
 
