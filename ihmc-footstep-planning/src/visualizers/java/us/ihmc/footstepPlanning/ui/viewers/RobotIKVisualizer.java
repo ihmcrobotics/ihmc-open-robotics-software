@@ -159,13 +159,19 @@ public class RobotIKVisualizer
    {
       RobotDescription robotDescription = fullHumanoidRobotModelFactory.getRobotDescription();
 
-      // Arm graphics
       for (RobotSide robotSide : RobotSide.values)
       {
-         UserInterfaceIKMode ikMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_ARM : UserInterfaceIKMode.RIGHT_ARM;
+         // Arm graphics
+         UserInterfaceIKMode armIKMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_ARM : UserInterfaceIKMode.RIGHT_ARM;
          String firstArmJointName = jointMap.getArmJointNamesAsStrings(robotSide).get(0);
          JointBasics firstArmJoint = fullRobotModel.getOneDoFJointByName(firstArmJointName);
-         setupGraphics(ikMode, firstArmJoint, fullRobotModel.getHand(robotSide), robotDescription);
+         setupGraphics(armIKMode, firstArmJoint, fullRobotModel.getHand(robotSide), robotDescription);
+
+         // Leg graphics
+         UserInterfaceIKMode legIKMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_LEG : UserInterfaceIKMode.RIGHT_LEG;
+         String firstLegJointName = jointMap.getLegJointNamesAsStrings(robotSide).get(0);
+         JointBasics firstLegJoint = fullRobotModel.getOneDoFJointByName(firstLegJointName);
+         setupGraphics(legIKMode, firstLegJoint, fullRobotModel.getFoot(robotSide), robotDescription);
       }
 
       // Neck graphics

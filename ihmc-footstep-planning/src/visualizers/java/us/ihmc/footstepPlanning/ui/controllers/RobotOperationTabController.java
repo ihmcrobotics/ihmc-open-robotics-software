@@ -13,17 +13,19 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UserInterfaceIKMode;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -120,8 +122,7 @@ public class RobotOperationTabController
             UserInterfaceIKMode selectedMode = currentMode.get();
 
             targetPose.setIncludingFrame(initialPose);
-
-            if (selectedMode.isArmMode())
+            if (selectedMode.isArmMode() || selectedMode.isLegMode())
             {
                targetPose.getPosition().add(xIKSlider.getValue(), yIKSlider.getValue(), zIKSlider.getValue());
             }
@@ -210,11 +211,8 @@ public class RobotOperationTabController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         UserInterfaceIKMode ikMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_ARM : UserInterfaceIKMode.RIGHT_ARM;
-         GeometricJacobian armJacobian = new GeometricJacobian(workRobotModel.getChest(),
-                                                               workRobotModel.getHand(robotSide),
-                                                               workRobotModel.getHand(robotSide).getBodyFixedFrame());
-         limbJacobians.put(ikMode, armJacobian);
+         UserInterfaceIKMode armIKMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_ARM : UserInterfaceIKMode.RIGHT_ARM;
+         UserInterfaceIKMode legIKMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_LEG : UserInterfaceIKMode.RIGHT_LEG;
 
          double positionCost = 1.0;
          double orientationCost = 0.2;
@@ -225,8 +223,27 @@ public class RobotOperationTabController
          double angleTolerance = 0.02;
          double parameterChangePenalty = 0.1;
 
-         ikSolvers.put(ikMode,
+         GeometricJacobian armJacobian = new GeometricJacobian(workRobotModel.getChest(),
+                                                               workRobotModel.getHand(robotSide),
+                                                               workRobotModel.getHand(robotSide).getBodyFixedFrame());
+         limbJacobians.put(armIKMode, armJacobian);
+         ikSolvers.put(armIKMode,
                        new DdoglegInverseKinematicsCalculator(armJacobian,
+                                                              positionCost,
+                                                              orientationCost,
+                                                              maxIterations,
+                                                              solveOrientation,
+                                                              convergenceTolerance,
+                                                              positionTolerance,
+                                                              angleTolerance,
+                                                              parameterChangePenalty));
+
+         GeometricJacobian legJacobian = new GeometricJacobian(workRobotModel.getPelvis(),
+                                                               workRobotModel.getFoot(robotSide),
+                                                               workRobotModel.getFoot(robotSide).getBodyFixedFrame());
+         limbJacobians.put(legIKMode, legJacobian);
+         ikSolvers.put(legIKMode,
+                       new DdoglegInverseKinematicsCalculator(legJacobian,
                                                               positionCost,
                                                               orientationCost,
                                                               maxIterations,
@@ -284,17 +301,31 @@ public class RobotOperationTabController
       pitchIKSlider.setValue(0.0);
       rollIKSlider.setValue(0.0);
 
+      copyRobotState(realRobotModel, workRobotModel);
       UserInterfaceIKMode selectedMode = ikMode.getValue();
-      if (selectedMode.isArmMode())
-      {
-         RobotSide selectedSide = selectedMode.getSide();
-         initialPose.setToZero(realRobotModel.getHand(selectedSide).getBodyFixedFrame());
-         initialPose.changeFrame(realRobotModel.getChest().getBodyFixedFrame());
-      }
+      GeometricJacobian limbJacobian = limbJacobians.get(selectedMode);
+
+      MovingReferenceFrame bodyFixedFrame = limbJacobian.getEndEffector().getBodyFixedFrame();
+      initialPose.setToZero(bodyFixedFrame);
+      ReferenceFrame baseFrame = limbJacobian.getBase().getBodyFixedFrame();
+      initialPose.changeFrame(baseFrame);
 
       currentMode.set(selectedMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.IKEnabled, true);
+   }
+
+   private static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination)
+   {
+      OneDoFJointBasics[] sourceJoints = source.getOneDoFJoints();
+      OneDoFJointBasics[] destinationJoints = destination.getOneDoFJoints();
+      for (int i = 0; i < sourceJoints.length; i++)
+      {
+         destinationJoints[i].setQ(sourceJoints[i].getQ());
+      }
+
+      destination.getRootJoint().getJointPose().set(source.getRootJoint().getJointPose());
+      destination.updateFrames();
    }
 
    @FXML
