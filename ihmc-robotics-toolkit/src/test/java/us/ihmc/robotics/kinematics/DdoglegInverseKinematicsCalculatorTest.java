@@ -47,7 +47,7 @@ public class DdoglegInverseKinematicsCalculatorTest
       GeometricJacobian jacobian = new GeometricJacobian(randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getLeafBody(),
                                       randomFloatingChain.getLeafBody().getBodyFixedFrame());
 
-      DdoglegInverseKinematicsCalculator calculator = new DdoglegInverseKinematicsCalculator(jacobian, 1.0, 2000, true, 1e-12,0.01,0.1, 0.1);
+      DdoglegInverseKinematicsCalculator calculator = new DdoglegInverseKinematicsCalculator(jacobian, 1.0, 1.0, 2000, true, 1e-12,0.01,0.1, 0.1);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
 
@@ -91,7 +91,7 @@ public class DdoglegInverseKinematicsCalculatorTest
       GeometricJacobian jacobian = new GeometricJacobian(randomFloatingChain.getRootJoint().getSuccessor(), randomFloatingChain.getLeafBody(),
                                       randomFloatingChain.getLeafBody().getBodyFixedFrame());
 
-      DdoglegInverseKinematicsCalculator calculator = new DdoglegInverseKinematicsCalculator(jacobian, 1.0, 2000, true, 1e-12,0.01,0.1, 0.0);
+      DdoglegInverseKinematicsCalculator calculator = new DdoglegInverseKinematicsCalculator(jacobian, 1.0, 1.0, 2000, true, 1e-12,0.01,0.1, 0.0);
 
       List<RevoluteJoint> revoluteJoints = randomFloatingChain.getRevoluteJoints();
 

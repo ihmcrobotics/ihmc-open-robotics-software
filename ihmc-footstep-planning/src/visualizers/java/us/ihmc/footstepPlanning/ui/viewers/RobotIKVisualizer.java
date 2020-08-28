@@ -6,10 +6,12 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.communication.UserInterfaceIKMode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -17,13 +19,14 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToDoubleFunction;
@@ -31,23 +34,22 @@ import java.util.zip.CRC32;
 
 public class RobotIKVisualizer
 {
-   private JavaFXGraphics3DNode robotRootNode;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final SideDependentList<OneDoFJointBasics[]> armJointPaths = new SideDependentList<>();
-   private final SideDependentList<GraphicsIDRobot> armGraphics = new SideDependentList<>();
-   private final SideDependentList<JavaFXGraphics3DNode> armGraphicsNodes = new SideDependentList<>();
+   private final Map<UserInterfaceIKMode, OneDoFJointBasics[]> ikJointPaths = new HashMap<>();
+   private final Map<UserInterfaceIKMode, GraphicsIDRobot> limbGraphics = new HashMap<>();
+   private final Map<UserInterfaceIKMode, JavaFXGraphics3DNode> ikLimbGraphicsNodes = new HashMap<>();
 
    private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
    private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
 
    private final AtomicReference<Boolean> ikEnabled;
    private final AtomicReference<double[]> ikSolution;
-   private final AtomicReference<RobotSide> ikSide;
-   private final AtomicBoolean newSideFlag = new AtomicBoolean();
+   private final AtomicReference<UserInterfaceIKMode> ikMode;
+   private final AtomicBoolean newModeFlag = new AtomicBoolean();
 
    private boolean isRobotLoaded = false;
    private final Group rootNode = new Group();
@@ -63,8 +65,8 @@ public class RobotIKVisualizer
 
       ikEnabled = messager.createInput(FootstepPlannerMessagerAPI.IKEnabled, false);
       ikSolution = messager.createInput(FootstepPlannerMessagerAPI.IKSolution);
-      ikSide = messager.createInput(FootstepPlannerMessagerAPI.SelectedIKSide);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SelectedIKSide, b -> newSideFlag.set(true));
+      ikMode = messager.createInput(FootstepPlannerMessagerAPI.SelectedIKMode);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SelectedIKMode, b -> newModeFlag.set(true));
 
       new Thread(() -> loadRobotModelAndGraphics(fullHumanoidRobotModelFactory, jointMap), "RobotVisualizerLoading").start();
 
@@ -73,7 +75,7 @@ public class RobotIKVisualizer
          @Override
          public void handle(long now)
          {
-            RobotSide selectedSide = ikSide.get();
+            UserInterfaceIKMode selectedMode = ikMode.get();
 
             if (!isRobotLoaded)
             {
@@ -81,7 +83,7 @@ public class RobotIKVisualizer
             }
             else if (ikEnabled.get() && rootNode.getChildren().isEmpty())
             {
-               rootNode.getChildren().add(armGraphicsNodes.get(selectedSide));
+               rootNode.getChildren().add(ikLimbGraphicsNodes.get(selectedMode));
             }
             else if (!ikEnabled.get())
             {
@@ -108,26 +110,26 @@ public class RobotIKVisualizer
                }
             }
 
-            double[] newIKArmSolution = ikSolution.getAndSet(null);
-            GraphicsIDRobot selectedArmGraphics = armGraphics.get(selectedSide);
-            OneDoFJointBasics[] armJointPath = armJointPaths.get(selectedSide);
+            double[] newIKSolution = ikSolution.getAndSet(null);
+            GraphicsIDRobot selectedLimbGraphics = limbGraphics.get(selectedMode);
+            OneDoFJointBasics[] jointPath = ikJointPaths.get(selectedMode);
 
-            if (newIKArmSolution != null && newIKArmSolution.length == armJointPath.length)
+            if (newIKSolution != null && newIKSolution.length == jointPath.length)
             {
-               for (int i = 0; i < newIKArmSolution.length; i++)
+               for (int i = 0; i < newIKSolution.length; i++)
                {
-                  armJointPath[i].setQ(newIKArmSolution[i]);
+                  jointPath[i].setQ(newIKSolution[i]);
                }
             }
 
             fullRobotModel.getElevator().updateFramesRecursively();
 
-            selectedArmGraphics.update();
+            selectedLimbGraphics.update();
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            transformToWorld.set(armJointPath[0].getFrameAfterJoint().getTransformToWorldFrame());
-            selectedArmGraphics.getGraphicsNode(armJointPath[0]).getTransform().set(transformToWorld);
+            transformToWorld.set(jointPath[0].getFrameAfterJoint().getTransformToWorldFrame());
+            selectedLimbGraphics.getGraphicsNode(jointPath[0]).getTransform().set(transformToWorld);
 
-            armGraphicsNodes.get(selectedSide).update();
+            ikLimbGraphicsNodes.get(selectedMode).update();
          }
       };
    }
@@ -157,21 +159,34 @@ public class RobotIKVisualizer
    {
       RobotDescription robotDescription = fullHumanoidRobotModelFactory.getRobotDescription();
 
+      // Arm graphics
       for (RobotSide robotSide : RobotSide.values)
       {
+         UserInterfaceIKMode ikMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_ARM : UserInterfaceIKMode.RIGHT_ARM;
          String firstArmJointName = jointMap.getArmJointNamesAsStrings(robotSide).get(0);
          JointBasics firstArmJoint = fullRobotModel.getOneDoFJointByName(firstArmJointName);
-         armJointPaths.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(firstArmJoint.getPredecessor(), fullRobotModel.getHand(robotSide)));
-         armGraphics.put(robotSide, new GraphicsIDRobot(robotDescription.getName(), Collections.singletonList(firstArmJoint), robotDescription, false));
-
-         JavaFXGraphics3DNode jfxArmGraphicsNode = new JavaFXGraphics3DNode(armGraphics.get(robotSide).getRootNode());
-         jfxArmGraphicsNode.setMouseTransparent(true);
-         addNodesRecursively(armGraphics.get(robotSide).getRootNode(), jfxArmGraphicsNode);
-         jfxArmGraphicsNode.update();
-         armGraphicsNodes.put(robotSide, jfxArmGraphicsNode);
+         setupGraphics(ikMode, firstArmJoint, fullRobotModel.getHand(robotSide), robotDescription);
       }
 
+      // Neck graphics
+      UserInterfaceIKMode neckMode = UserInterfaceIKMode.NECK;
+      String firstNeckJointName = jointMap.getNeckJointNamesAsStrings().get(0);
+      JointBasics firstNeckJoint = fullRobotModel.getOneDoFJointByName(firstNeckJointName);
+      setupGraphics(neckMode, firstNeckJoint, fullRobotModel.getHead(), robotDescription);
+
       isRobotLoaded = true;
+   }
+
+   private void setupGraphics(UserInterfaceIKMode ikMode, JointBasics firstJoint, RigidBodyBasics terminalBody, RobotDescription robotDescription)
+   {
+      ikJointPaths.put(ikMode, MultiBodySystemTools.createOneDoFJointPath(firstJoint.getPredecessor(), terminalBody));
+      limbGraphics.put(ikMode, new GraphicsIDRobot(ikMode.name(), Collections.singletonList(firstJoint), robotDescription, false));
+
+      JavaFXGraphics3DNode jfxArmGraphicsNode = new JavaFXGraphics3DNode(limbGraphics.get(ikMode).getRootNode());
+      jfxArmGraphicsNode.setMouseTransparent(true);
+      addNodesRecursively(limbGraphics.get(ikMode).getRootNode(), jfxArmGraphicsNode);
+      jfxArmGraphicsNode.update();
+      ikLimbGraphicsNodes.put(ikMode, jfxArmGraphicsNode);
    }
 
    public void start()
