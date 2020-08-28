@@ -174,13 +174,24 @@ public class RobotIKVisualizer
       JointBasics firstNeckJoint = fullRobotModel.getOneDoFJointByName(firstNeckJointName);
       setupGraphics(neckMode, firstNeckJoint, fullRobotModel.getHead(), robotDescription);
 
+      // Chest graphics
+      UserInterfaceIKMode chestMode = UserInterfaceIKMode.CHEST;
+      String firstSpineJointName = jointMap.getSpineJointNamesAsStrings().get(0);
+      JointBasics firstSpineJoint = fullRobotModel.getOneDoFJointByName(firstSpineJointName);
+      setupGraphics(chestMode, firstSpineJoint, fullRobotModel.getChest(), robotDescription);
+
       isRobotLoaded = true;
    }
 
    private void setupGraphics(UserInterfaceIKMode ikMode, JointBasics firstJoint, RigidBodyBasics terminalBody, RobotDescription robotDescription)
    {
       ikJointPaths.put(ikMode, MultiBodySystemTools.createOneDoFJointPath(firstJoint.getPredecessor(), terminalBody));
-      limbGraphics.put(ikMode, new GraphicsIDRobot(ikMode.name(), Collections.singletonList(firstJoint), robotDescription, false));
+      limbGraphics.put(ikMode,
+                       new GraphicsIDRobot(ikMode.name(),
+                                           Collections.singletonList(firstJoint),
+                                           robotDescription,
+                                           false,
+                                           Collections.singletonList(terminalBody)));
 
       JavaFXGraphics3DNode jfxArmGraphicsNode = new JavaFXGraphics3DNode(limbGraphics.get(ikMode).getRootNode());
       jfxArmGraphicsNode.setMouseTransparent(true);
