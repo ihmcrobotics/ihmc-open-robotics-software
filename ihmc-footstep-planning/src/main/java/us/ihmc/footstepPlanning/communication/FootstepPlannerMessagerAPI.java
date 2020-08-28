@@ -168,6 +168,11 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
+   // IK
+   public static final Topic<Boolean> IKEnabled = topic("IKEnabled");
+   public static final Topic<RobotSide> SelectedIKSide = topic("SelectedIKSide");
+   public static final Topic<double[]> IKSolution = topic("IKSolution");
+
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");

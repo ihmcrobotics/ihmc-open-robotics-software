@@ -259,6 +259,7 @@ public class FootstepPlannerUI
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
          messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
+         robotOperationTabController.setFullRobotModel(robotVisualizer.getFullRobotModel(), fullHumanoidRobotModelFactory);
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();
          messager.registerTopicListener(ShowRobot, show -> robotVisualizer.getRootNode().setVisible(show));
@@ -279,7 +280,7 @@ public class FootstepPlannerUI
          walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
          walkingPreviewVisualizer.start();
 
-         robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap);
+         robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap, messager);
          messager.registerTopicListener(RobotConfigurationData, robotIKVisualizer::submitNewConfiguration);
          view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
          robotIKVisualizer.start();
