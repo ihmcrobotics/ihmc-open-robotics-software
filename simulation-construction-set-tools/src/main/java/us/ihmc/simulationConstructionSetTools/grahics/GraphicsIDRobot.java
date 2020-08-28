@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
@@ -32,28 +33,44 @@ public class GraphicsIDRobot extends GraphicsRobot
 
    public GraphicsIDRobot(String name, List<JointBasics> jointsToVisualize, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {
+      this(name, jointsToVisualize, graphicsObjectsHolder, useCollisionMeshes, null);
+   }
+
+   public GraphicsIDRobot(String name,
+                          List<JointBasics> jointsToVisualize,
+                          GraphicsObjectsHolder graphicsObjectsHolder,
+                          boolean useCollisionMeshes,
+                          List<RigidBodyReadOnly> terminalRigidBodies)
+   {
       super(new Graphics3DNode(name, Graphics3DNodeType.TRANSFORM));
 
       for (JointBasics joint : jointsToVisualize)
       {
          GraphicsJoint rootGraphicsJoint = createJoint(joint, Graphics3DNodeType.ROOTJOINT, graphicsObjectsHolder, useCollisionMeshes);
          getRootNode().addChild(rootGraphicsJoint);
-         addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), rootGraphicsJoint, graphicsObjectsHolder, useCollisionMeshes);
+         addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), rootGraphicsJoint, graphicsObjectsHolder, useCollisionMeshes, terminalRigidBodies);
          jointToGraphicsNodeMap.put(joint, rootGraphicsJoint);
       }
 
       update();
    }
 
-   private void addInverseDynamicsJoints(List<? extends JointBasics> joints, GraphicsJoint parentJoint, GraphicsObjectsHolder graphicsObjectsHolder,
-                                         boolean useCollisionMeshes)
+   private void addInverseDynamicsJoints(List<? extends JointBasics> joints,
+                                         GraphicsJoint parentJoint,
+                                         GraphicsObjectsHolder graphicsObjectsHolder,
+                                         boolean useCollisionMeshes,
+                                         List<RigidBodyReadOnly> terminalRigidBodies)
    {
       for (JointBasics joint : joints)
       {
          GraphicsJoint graphicsJoint = createJoint(joint, Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
          parentJoint.addChild(graphicsJoint);
-         addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), graphicsJoint, graphicsObjectsHolder, useCollisionMeshes);
          jointToGraphicsNodeMap.put(joint, graphicsJoint);
+
+         if (terminalRigidBodies == null || !terminalRigidBodies.contains(joint.getSuccessor()))
+         {
+            addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), graphicsJoint, graphicsObjectsHolder, useCollisionMeshes, terminalRigidBodies);
+         }
       }
    }
 

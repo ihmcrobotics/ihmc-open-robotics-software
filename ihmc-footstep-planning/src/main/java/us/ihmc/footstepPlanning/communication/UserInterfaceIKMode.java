@@ -4,7 +4,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum UserInterfaceIKMode
 {
-   LEFT_ARM, RIGHT_ARM, NECK;
+   LEFT_ARM, RIGHT_ARM, NECK, CHEST;
 
    public boolean isArmMode()
    {
