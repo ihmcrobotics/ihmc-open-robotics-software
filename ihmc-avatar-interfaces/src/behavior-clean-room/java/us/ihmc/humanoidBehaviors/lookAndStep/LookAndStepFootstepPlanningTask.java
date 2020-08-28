@@ -197,6 +197,7 @@ public class LookAndStepFootstepPlanningTask
                                                                            lookAndStepBehaviorParameters.getPlanHorizon());
 
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
+      // TODO: Calculate orientation based on a trajectory
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // update last stepped poses to plan from; initialize to current poses
