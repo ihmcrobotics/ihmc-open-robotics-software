@@ -274,7 +274,6 @@ public class LookAndStepFootstepPlanningTask
       {
          uiPublisher.publishToUI(FootstepPlanForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
 
-
          FootstepPlanEtcetera footstepPlanEtc = new FootstepPlanEtcetera(footstepPlannerOutput.getFootstepPlan(),
                                                                          planarRegions,
                                                                          new SideDependentList<>(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),

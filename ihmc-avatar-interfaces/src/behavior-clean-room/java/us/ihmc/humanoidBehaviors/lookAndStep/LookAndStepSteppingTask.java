@@ -12,11 +12,15 @@ import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.FootstepPlanForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LastCommandedFootsteps;
 
 public class LookAndStepSteppingTask
 {
@@ -100,12 +104,10 @@ public class LookAndStepSteppingTask
    protected void performTask()
    {
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
-      if (footstepPlanEtc.getNumberOfSteps() > 0)
-      {
-         PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
-         shortenedFootstepPlan.addFootstep(footstepToTake);
-         lastCommandedFoosteps.put(footstepToTake.getRobotSide(), footstepToTake);
-      }
+      PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
+      shortenedFootstepPlan.addFootstep(footstepToTake);
+      lastCommandedFoosteps.put(footstepToTake.getRobotSide(), footstepToTake);
+      uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.reduceFootstepsForUIMessager(lastCommandedFoosteps));
 
       footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
                                                       footstepPlanEtc,

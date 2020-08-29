@@ -36,6 +36,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private Messager behaviorMessager;
    private ROS2PublisherMap ros2Publisher;
+   private FootstepPlanWithTextGraphic commandedFootsteps;
    private FootstepPlanWithTextGraphic footstepPlanGraphic;
    private FootstepPlanWithTextGraphic startAndGoalFootPoses;
    private LivePlanarRegionsGraphic planarRegionsRegionsGraphic;
@@ -87,33 +89,15 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       rectangle.setFill(Color.BLUE);
       view2DGroup.getChildren().add(rectangle);
 
-      NumberAxis xAxis = new NumberAxis(0.0, 10.0, 1.0);
-      NumberAxis yAxis = new NumberAxis(0.0, 10.0, 1.0);
-      ScatterChart<Number, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
-
-      XYChart.Series series1 = new XYChart.Series();
-      series1.setName("Set1");
-      series1.getData().add(new XYChart.Data(0.0, 3.0));
-      series1.getData().add(new XYChart.Data(1.0, 5.0));
-      series1.getData().add(new XYChart.Data(2.0, 3.0));
-      series1.getData().add(new XYChart.Data(3.0, 3.0));
-      series1.getData().add(new XYChart.Data(4.0, 3.0));
-      series1.getData().add(new XYChart.Data(5.0, 3.0));
-      series1.getData().add(new XYChart.Data(6.0, 3.0));
-      series1.getData().add(new XYChart.Data(7.0, 3.0));
-      series1.getData().add(new XYChart.Data(8.0, 3.0));
-      series1.getData().add(new XYChart.Data(9.0, 3.0));
-      series1.getData().add(new XYChart.Data(10.0, 3.0));
-
-      scatterChart.getData().add(series1);
-
-//      scatterChart.setPrefWidth(200.0);
-
-      visualizationPane.getChildren().addAll(scatterChart);
-
       startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
+      startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
+      startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
+      startAndGoalFootPoses.setTransparency(0.4);
       behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
+      commandedFootsteps = new FootstepPlanWithTextGraphic();
+      behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanWithTextGraphic();
+      footstepPlanGraphic.setTransparency(0.2);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
       planarRegionsRegionsGraphic = new LivePlanarRegionsGraphic(false);
@@ -193,6 +177,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().remove(planarRegionsRegionsGraphic));
          Platform.runLater(() -> getChildren().remove(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().remove(footstepPlanGraphic));
+         Platform.runLater(() -> getChildren().remove(commandedFootsteps));
       }
       else
       {
@@ -203,6 +188,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().add(planarRegionsRegionsGraphic));
          Platform.runLater(() -> getChildren().add(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
+         Platform.runLater(() -> getChildren().add(commandedFootsteps));
       }
    }
 
