@@ -1,6 +1,8 @@
 package us.ihmc.tools.string;
 
 import org.apache.logging.log4j.message.ParameterizedMessageFactory;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 
 import java.util.function.Supplier;
 
@@ -28,5 +30,13 @@ public class StringTools
    public static Supplier<String> format(String message, Object... parameters)
    {
       return () -> ParameterizedMessageFactory.INSTANCE.newMessage(message, parameters).getFormattedMessage();
+   }
+
+   public static String zUpPoseString(Pose3DReadOnly pose)
+   {
+      return "(" + FormattingTools.getFormattedDecimal3D(pose.getX())
+            + ", " + FormattingTools.getFormattedDecimal3D(pose.getY())
+            + ", " + FormattingTools.getFormattedDecimal3D(pose.getZ())
+            + ") yaw: " + FormattingTools.getFormattedDecimal3D(pose.getYaw());
    }
 }
