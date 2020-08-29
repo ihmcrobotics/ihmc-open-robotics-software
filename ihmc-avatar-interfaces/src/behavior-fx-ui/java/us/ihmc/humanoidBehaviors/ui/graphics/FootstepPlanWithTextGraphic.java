@@ -16,6 +16,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,12 +35,28 @@ public class FootstepPlanWithTextGraphic extends Group
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
    private Mesh mesh;
    private Material material;
+   private SideDependentList<Color> footstepColors = new SideDependentList<>();
 
    public FootstepPlanWithTextGraphic()
    {
+      footstepColors.set(RobotSide.LEFT, Color.RED);
+      footstepColors.set(RobotSide.RIGHT, Color.GREEN);
+
       getChildren().addAll(meshView);
 
       animationTimer.start();
+   }
+
+   public void setTransparency(double opacity)
+   {
+      footstepColors.set(RobotSide.LEFT, new Color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue(), opacity));
+      footstepColors.set(RobotSide.RIGHT, new Color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue(), opacity));
+   }
+
+   public void setColor(RobotSide side, Color color)
+   {
+      double priorOpacity = footstepColors.get(side).getOpacity();
+      footstepColors.set(side, new Color(color.getRed(), color.getGreen(), color.getBlue(), priorOpacity));
    }
 
    /**
@@ -63,7 +80,7 @@ public class FootstepPlanWithTextGraphic extends Group
       for (int i = 0; i < message.size(); i++)
       {
          MinimalFootstep minimalFootstep = message.get(i);
-         Color regionColor = minimalFootstep.getSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
+         Color regionColor = footstepColors.get(minimalFootstep.getSide());
 
          minimalFootstep.getSolePoseInWorld().get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
