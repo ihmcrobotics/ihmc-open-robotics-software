@@ -283,7 +283,6 @@ public class FootstepPlannerUI
          robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap, messager);
          messager.registerTopicListener(RobotConfigurationData, robotIKVisualizer::submitNewConfiguration);
          view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
-         robotIKVisualizer.start();
       }
 
       if(walkingControllerParameters != null)

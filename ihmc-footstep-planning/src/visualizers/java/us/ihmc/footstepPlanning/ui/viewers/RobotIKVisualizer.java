@@ -24,9 +24,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToDoubleFunction;
@@ -39,7 +37,7 @@ public class RobotIKVisualizer
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final Map<UserInterfaceIKMode, OneDoFJointBasics[]> ikJointPaths = new HashMap<>();
+   private final Map<UserInterfaceIKMode, List<OneDoFJointBasics>> ikJointPaths = new HashMap<>();
    private final Map<UserInterfaceIKMode, GraphicsIDRobot> limbGraphics = new HashMap<>();
    private final Map<UserInterfaceIKMode, JavaFXGraphics3DNode> ikLimbGraphicsNodes = new HashMap<>();
 
@@ -75,6 +73,11 @@ public class RobotIKVisualizer
          @Override
          public void handle(long now)
          {
+            if (newModeFlag.getAndSet(false))
+            {
+               rootNode.getChildren().clear();
+            }
+
             UserInterfaceIKMode selectedMode = ikMode.get();
 
             if (!isRobotLoaded)
@@ -85,40 +88,18 @@ public class RobotIKVisualizer
             {
                rootNode.getChildren().add(ikLimbGraphicsNodes.get(selectedMode));
             }
-            else if (!ikEnabled.get())
-            {
-               if (!rootNode.getChildren().isEmpty())
-               {
-                  rootNode.getChildren().clear();
-               }
-
-               return;
-            }
-
-            RigidBodyTransform newRootJointPose = newRootJointPoseReference.getAndSet(null);
-            if (newRootJointPose != null)
-            {
-               fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
-            }
-
-            float[] newJointConfiguration = newJointConfigurationReference.getAndSet(null);
-            if (newJointConfiguration != null)
-            {
-               for (int i = 0; i < allJoints.length; i++)
-               {
-                  allJoints[i].setQ(newJointConfiguration[i]);
-               }
-            }
 
             double[] newIKSolution = ikSolution.getAndSet(null);
             GraphicsIDRobot selectedLimbGraphics = limbGraphics.get(selectedMode);
-            OneDoFJointBasics[] jointPath = ikJointPaths.get(selectedMode);
+            List<OneDoFJointBasics> ikJointPath = ikJointPaths.get(selectedMode);
 
-            if (newIKSolution != null && newIKSolution.length == jointPath.length)
+            setRobotState(ikJointPath);
+
+            if (newIKSolution != null && newIKSolution.length == ikJointPath.size())
             {
                for (int i = 0; i < newIKSolution.length; i++)
                {
-                  jointPath[i].setQ(newIKSolution[i]);
+                  ikJointPath.get(i).setQ(newIKSolution[i]);
                }
             }
 
@@ -126,12 +107,50 @@ public class RobotIKVisualizer
 
             selectedLimbGraphics.update();
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            transformToWorld.set(jointPath[0].getFrameAfterJoint().getTransformToWorldFrame());
-            selectedLimbGraphics.getGraphicsNode(jointPath[0]).getTransform().set(transformToWorld);
+            transformToWorld.set(ikJointPath.get(0).getFrameAfterJoint().getTransformToWorldFrame());
+            selectedLimbGraphics.getGraphicsNode(ikJointPath.get(0)).getTransform().set(transformToWorld);
 
             ikLimbGraphicsNodes.get(selectedMode).update();
          }
       };
+
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.IKEnabled, enabled ->
+      {
+         if (enabled)
+         {
+            setRobotState(null);
+            animationTimer.start();
+         }
+         else
+         {
+            animationTimer.stop();
+            rootNode.getChildren().clear();
+         }
+      });
+   }
+
+   private void setRobotState(List<OneDoFJointBasics> jointsToExclude)
+   {
+      RigidBodyTransform newRootJointPose = newRootJointPoseReference.getAndSet(null);
+      float[] newJointConfiguration = newJointConfigurationReference.getAndSet(null);
+
+      if (newRootJointPose != null)
+      {
+         fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
+      }
+
+      if (newJointConfiguration != null)
+      {
+         for (int i = 0; i < allJoints.length; i++)
+         {
+            OneDoFJointBasics joint = allJoints[i];
+            if (jointsToExclude == null || !jointsToExclude.contains(joint))
+            {
+               joint.setQ(newJointConfiguration[i]);
+            }
+         }
+      }
    }
 
    public static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
@@ -191,7 +210,8 @@ public class RobotIKVisualizer
 
    private void setupGraphics(UserInterfaceIKMode ikMode, JointBasics firstJoint, RigidBodyBasics terminalBody, RobotDescription robotDescription)
    {
-      ikJointPaths.put(ikMode, MultiBodySystemTools.createOneDoFJointPath(firstJoint.getPredecessor(), terminalBody));
+      OneDoFJointBasics[] jointPathArray = MultiBodySystemTools.createOneDoFJointPath(firstJoint.getPredecessor(), terminalBody);
+      ikJointPaths.put(ikMode, Arrays.asList(jointPathArray));
       limbGraphics.put(ikMode,
                        new GraphicsIDRobot(ikMode.name(),
                                            Collections.singletonList(firstJoint),
@@ -204,16 +224,6 @@ public class RobotIKVisualizer
       addNodesRecursively(limbGraphics.get(ikMode).getRootNode(), jfxArmGraphicsNode);
       jfxArmGraphicsNode.update();
       ikLimbGraphicsNodes.put(ikMode, jfxArmGraphicsNode);
-   }
-
-   public void start()
-   {
-      animationTimer.start();
-   }
-
-   public void stop()
-   {
-      animationTimer.stop();
    }
 
    private void addNodesRecursively(Graphics3DNode graphics3dNode, JavaFXGraphics3DNode parentNode)

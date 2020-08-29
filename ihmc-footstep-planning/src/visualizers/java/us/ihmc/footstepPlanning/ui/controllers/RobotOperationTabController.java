@@ -81,7 +81,7 @@ public class RobotOperationTabController
    @FXML
    private Slider rollIKSlider;
 
-   private static final double defaultTrajectoryTime = 1.5;
+   private static final double defaultTrajectoryTime = 3.0;
    private final AnimationTimer ikAnimationTimer;
 
    private final Map<UserInterfaceIKMode, DdoglegInverseKinematicsCalculator> ikSolvers = new HashMap<>();
@@ -171,7 +171,7 @@ public class RobotOperationTabController
 
       ikMode.setItems(FXCollections.observableArrayList(UserInterfaceIKMode.values()));
       ikMode.setValue(UserInterfaceIKMode.LEFT_ARM);
-      ikMode.itemsProperty().addListener((observable, oldValue, newValue) -> initializeIKFlag.set(true));
+      ikMode.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> initializeIKFlag.set(true));
 
       enableIK.selectedProperty().addListener((observable, oldValue, newValue) ->
                                               {
@@ -233,9 +233,9 @@ public class RobotOperationTabController
          double orientationCost = 0.2;
          int maxIterations = 500;
          boolean solveOrientation = true;
-         double convergenceTolerance = 4.0e-6;
+         double convergenceTolerance = 1.0e-4;
          double positionTolerance = 0.005;
-         double angleTolerance = 0.02;
+         double angleTolerance = Math.toRadians(4.0);
          double parameterChangePenalty = 0.1;
 
          GeometricJacobian armJacobian = new GeometricJacobian(workRobotModel.getChest(),
@@ -271,9 +271,9 @@ public class RobotOperationTabController
 
       double positionCost = 0.05;
       double orientationCost = 1.0;
-      int maxIterations = 200;
+      int maxIterations = 500;
       boolean solveOrientation = true;
-      double convergenceTolerance = 5.0e-5;
+      double convergenceTolerance = 1.0e-4;
       double positionTolerance = Double.MAX_VALUE;
       double angleTolerance = 0.02;
       double parameterChangePenalty = 0.1;
@@ -309,7 +309,7 @@ public class RobotOperationTabController
 
    private void initializeIK()
    {
-      resetIK();
+      resetIKOffset();
 
       ikPositionSliderUpdatedFlag.set(false);
       ikOrientationSliderUpdatedFlag.set(false);
@@ -323,12 +323,12 @@ public class RobotOperationTabController
       initialIKPose.changeFrame(baseFrame);
 
       currentIKMode.set(selectedIKMode);
-      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedIKMode);
       messager.submitMessage(FootstepPlannerMessagerAPI.IKEnabled, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedIKMode, selectedIKMode);
    }
 
    @FXML
-   public void resetIK()
+   public void resetIKOffset()
    {
       xIKSlider.setValue(0.0);
       yIKSlider.setValue(0.0);
