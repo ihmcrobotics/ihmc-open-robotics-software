@@ -2,12 +2,15 @@ package us.ihmc.tools.processManagement;
 
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.fusesource.jansi.AnsiPrintStream;
+import org.fusesource.jansi.WindowsAnsiPrintStream;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,8 +77,8 @@ public class JavaProcessManager
 
 //               new AnsiPrintStream() // TODO: Filter out ANSI codes to file
 
-               TeeOutputStream outputTee = new TeeOutputStream(System.out, Files.newOutputStream(logFilePath));
-               TeeOutputStream errorTee = new TeeOutputStream(System.err, Files.newOutputStream(logFilePath));
+               TeeOutputStream outputTee = new TeeOutputStream(System.out, createJansiFilteredStream(Files.newOutputStream(logFilePath)));
+               TeeOutputStream errorTee = new TeeOutputStream(System.err, createJansiFilteredStream(Files.newOutputStream(logFilePath)));
                PrintStream outputStream = new PrintStream(outputTee);
                PrintStream errorStream = new PrintStream(errorTee);
 
@@ -95,6 +98,18 @@ public class JavaProcessManager
       }
 
       return null;
+   }
+
+   private PrintStream createJansiFilteredStream(OutputStream outputStream) throws IOException
+   {
+      if (SystemUtils.IS_OS_WINDOWS)
+      {
+         return new WindowsAnsiPrintStream(new PrintStream(outputStream));
+      }
+      else
+      {
+         return new AnsiPrintStream(new PrintStream(outputStream));
+      }
    }
 
    public boolean isSpawnerProcess()
