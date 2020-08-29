@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -8,7 +9,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -93,7 +93,7 @@ public class LookAndStepLocalizationTask
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          syncedRobot.update();
 
-         stanceForChecking = new SideDependentList<>();
+         eventualStanceFeet = new SideDependentList<>();
          for (RobotSide side : RobotSide.values)
          {
             FramePose3D solePose = new FramePose3D();
@@ -108,14 +108,14 @@ public class LookAndStepLocalizationTask
                {
                   foothold.addVertex(vertex);
                }
-               stanceForChecking.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
+               eventualStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
             }
             else
             {
                lastCommandedFootsteps.get(side).getFootstepPose(solePose);
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
-               stanceForChecking.set(side,
-                                     new MinimalFootstep(side,
+               eventualStanceFeet.set(side,
+                                      new MinimalFootstep(side,
                                                          solePose,
                                                          lastCommandedFootsteps.get(side).getFoothold(),
                                                          side.getPascalCaseName() + " Commanded Stance"));
@@ -127,15 +127,15 @@ public class LookAndStepLocalizationTask
    }
 
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
-   protected SideDependentList<MinimalFootstep> stanceForChecking;
+   protected SideDependentList<MinimalFootstep> eventualStanceFeet;
    protected CapturabilityBasedStatus capturabilityBasedStatus;
 
    protected void run()
    {
       statusLogger.info("Localizing eventual pose to body path...");
 
-      Pose3D midFeetPose = new Pose3D(stanceForChecking.get(RobotSide.LEFT).getSolePoseInWorld());
-      midFeetPose.interpolate(stanceForChecking.get(RobotSide.RIGHT).getSolePoseInWorld(), 0.5);
+      Pose3D midFeetPose = new Pose3D(eventualStanceFeet.get(RobotSide.LEFT).getSolePoseInWorld());
+      midFeetPose.interpolate(eventualStanceFeet.get(RobotSide.RIGHT).getSolePoseInWorld(), 0.5);
 
       Vector3D midFeetZNormal = new Vector3D(Axis3D.Z);
       midFeetPose.getOrientation().transform(midFeetZNormal);
@@ -147,9 +147,9 @@ public class LookAndStepLocalizationTask
       Point3D closestPointAlongPath = new Point3D();
       int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, midFeetPose.getPosition(), closestPointAlongPath);
 
-      Pose3D closestPointAlongPathForUI = new Pose3D(midFeetPose);
-      closestPointAlongPathForUI.getPosition().set(closestPointAlongPath);
-      uiPublisher.publishToUI(ClosestPointForUI, closestPointAlongPathForUI);
+      Pose3D eventualPoseAlongPath = new Pose3D(midFeetPose);
+      eventualPoseAlongPath.getPosition().set(closestPointAlongPath);
+      uiPublisher.publishToUI(ClosestPointForUI, eventualPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
@@ -164,17 +164,16 @@ public class LookAndStepLocalizationTask
       }
       else
       {
-         statusLogger.info(StringTools.format("Subgoal x: {} y: {} z: {} yaw: {} Remaining distanceXY: {} yaw: {}",
-                                              distanceToExactGoal,
-                                              yawToExactGoal));
+         statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
          statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
-                                              distanceToExactGoal,
-                                              yawToExactGoal));
+                                              FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
+                                              lookAndStepBehaviorParameters.getGoalSatisfactionRadius(),
+                                              FormattingTools.getFormattedDecimal3D(yawToExactGoal),
+                                              lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
          LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
                                                                                   closestSegmentIndex,
                                                                                   midFeetPose,
-                                                                                  bodyPathPlan,
-                                                                                  stanceForChecking);
+                                                                                  bodyPathPlan, eventualStanceFeet);
          footstepPlanningOutput.accept(result);
       }
    }
