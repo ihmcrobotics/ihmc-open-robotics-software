@@ -6,7 +6,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -73,24 +72,24 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic<DoorLocationPacket> getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic<DoorLocationPacket> getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput().withType(DoorLocationPacket.class);
+      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic<ToolboxStateMessage> getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic<ToolboxStateMessage> getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withInput().withType(ToolboxStateMessage.class);
+      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
    }
 }
