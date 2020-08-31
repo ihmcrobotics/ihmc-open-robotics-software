@@ -89,9 +89,8 @@ public class WalkingControllerState extends HighLevelControllerState
       if (setupInverseKinematicsSolver)
          toolbox.setupForInverseKinematicsSolver();
       if (setupVirtualModelControlSolver)
-      {
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
-      }
+      fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
       FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
       // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
       template.setAllowDynamicControllerConstruction(false);
