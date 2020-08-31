@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
@@ -23,6 +24,10 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableType;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
@@ -38,6 +43,7 @@ public class FootstepPlannerLogger
    /** package-private */ static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
    /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
+   // File names
    static final String requestPacketFileName = "RequestPacket.json";
    static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
@@ -45,6 +51,7 @@ public class FootstepPlannerLogger
    static final String splitFractionParametersFileName = "SplitFractionParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
    static final String bodyPathPlanFileName = "BodyPathPlanData.log";
+   static final String headerFileName = "Header.txt";
    static final String dataFileName = "PlannerIterationData.log";
 
    private final FootstepPlanningModule planner;
@@ -218,6 +225,89 @@ public class FootstepPlannerLogger
          return false;
       }
 
+      // log planner iteration header file
+      String plannerHeaderFileName = sessionDirectory + headerFileName;
+      Map<Class<?>, Integer> enumIndexMap = new HashMap<>();
+
+      try
+      {
+         File plannerHeaderFile = new File(plannerHeaderFileName);
+         FileTools.ensureFileExists(plannerHeaderFile.toPath());
+         fileWriter = new FileWriter(plannerHeaderFile);
+
+         YoRegistry registry = planner.getAStarPlannerRegistry();
+         List<YoVariable> allVariables = registry.collectSubtreeVariables();
+
+         List<Pair<Class<?>, Enum<?>[]>> enumDescriptions = new ArrayList<>();
+
+         for (int i = 0; i < allVariables.size(); i++)
+         {
+            YoVariable yoVariable = allVariables.get(i);
+            if (yoVariable.getType() == YoVariableType.ENUM)
+            {
+               YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+               Class<?> enumType = yoEnum.getEnumType();
+               Enum<?>[] enumValues = yoEnum.getEnumValues();
+
+               if (!enumIndexMap.containsKey(enumType))
+               {
+                  enumIndexMap.put(enumType, enumDescriptions.size());
+                  enumDescriptions.add(Pair.of(enumType, enumValues));
+               }
+            }
+         }
+
+         fileWriter.write("enums:" + enumDescriptions.size() + newLine);
+         for (int i = 0; i < enumDescriptions.size(); i++)
+         {
+            fileWriter.write(tab);
+            fileWriter.write(enumDescriptions.get(i).getKey().getSimpleName() + ":");
+
+            Enum<?>[] enumValues = enumDescriptions.get(i).getRight();
+            for (int j = 0; j < enumValues.length; j++)
+            {
+               fileWriter.write(enumValues[j] + (j == enumValues.length - 1 ? "" : ","));
+            }
+
+            fileWriter.write(newLine);
+         }
+
+         fileWriter.write("variables:" + allVariables.size() + newLine);
+         for (int i = 0; i < allVariables.size(); i++)
+         {
+            YoVariable yoVariable = allVariables.get(i);
+            String name = yoVariable.getName();
+            YoVariableType type = yoVariable.getType();
+            String registryName = yoVariable.getRegistry().getName();
+
+            fileWriter.write(tab);
+            fileWriter.write(name + ",");
+            fileWriter.write(type + ",");
+            fileWriter.write(registryName);
+
+            if (type == YoVariableType.ENUM)
+            {
+               YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+               Class<?> enumType = yoEnum.getEnumType();
+               fileWriter.write( "," + enumIndexMap.get(enumType));
+               fileWriter.write( "," + yoEnum.isNullAllowed());
+            }
+
+            fileWriter.write(newLine);
+         }
+
+         fileWriter.flush();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging header file");
+         fileWriter = null;
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return false;
+      }
+
       // log planner iteration data
       String plannerIterationDataFileName = sessionDirectory + dataFileName;
       try
@@ -225,10 +315,6 @@ public class FootstepPlannerLogger
          File plannerDataFile = new File(plannerIterationDataFileName);
          FileTools.ensureFileExists(plannerDataFile.toPath());
          fileWriter = new FileWriter(plannerIterationDataFileName);
-
-         writeLine(0,
-                   "edgeData:" + "rejectionReason, " + "footAreaPercentage, " + "stepWidth, " + "stepLength, " + "stepHeight, " + "stepReach, "
-                   + "costFromStart, " + "edgeCost, " + "heuristicCost," + "solutionEdge");
 
          List<FootstepPlannerIterationData> iterationDataList = planner.getIterationData();
          for (int i = 0; i < iterationDataList.size(); i++)
@@ -247,24 +333,17 @@ public class FootstepPlannerLogger
                // indicate start of data
                writeLine(1, "Edge:");
                writeNode(2, "candidateNode", edgeData.getCandidateNode());
+               writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
                writeSnapData(2, edgeData.getCandidateNodeSnapData());
 
                // write additional data as doubles
-               writeLine(2,
-                         "edgeData:" + EuclidCoreIOTools.getStringOf(",",
-                                                                     EuclidCoreIOTools.getStringFormat(8, 8),
-                                                                     edgeData.getRejectionReason() == null ?
-                                                                           -1.0 :
-                                                                           (double) edgeData.getRejectionReason().ordinal(),
-                                                                     edgeData.getFootAreaPercentage(),
-                                                                     edgeData.getStepWidth(),
-                                                                     edgeData.getStepLength(),
-                                                                     edgeData.getStepHeight(),
-                                                                     edgeData.getStepReach(),
-                                                                     edgeData.getCostFromStart(),
-                                                                     edgeData.getEdgeCost(),
-                                                                     edgeData.getHeuristicCost(),
-                                                                     edgeData.getSolutionEdge() ? 1.0 : 0.0));
+               fileWriter.write(tab + tab + "data:");
+               long[] dataBuffer = edgeData.getDataBuffer();
+               for (int k = 0; k < dataBuffer.length; k++)
+               {
+                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+               }
+               fileWriter.write(newLine);
             }
          }
 

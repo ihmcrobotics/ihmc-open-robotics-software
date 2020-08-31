@@ -2,28 +2,31 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.function.UnaryOperator;
 
-public class GoodFootstepPositionChecker
+public class FootstepPoseChecker
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapAndWiggler snapper;
-   private final FootstepPlannerEdgeData edgeData;
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
@@ -33,20 +36,19 @@ public class GoodFootstepPositionChecker
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D candidateFootPose = new FramePose3D();
 
-   private BipedalFootstepPlannerNodeRejectionReason rejectionReason;
    private UnaryOperator<FootstepNode> parentNodeSupplier;
 
-   // Variables to log
-   private double stepWidth;
-   private double stepLength;
-   private double stepHeight;
-   private double stepReachXY;
+   private final YoDouble stepWidth = new YoDouble("stepWidth", registry);
+   private final YoDouble stepLength = new YoDouble("stepLength", registry);
+   private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
+   private final YoDouble stepReachXY = new YoDouble("stepReachXY", registry);
+   private final YoDouble stepYaw = new YoDouble("stepYaw", registry);
 
-   public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, FootstepPlannerEdgeData edgeData)
+   public FootstepPoseChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
-      this.edgeData = edgeData;
+      parentRegistry.addChild(registry);
    }
 
    public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
@@ -54,7 +56,7 @@ public class GoodFootstepPositionChecker
       this.parentNodeSupplier = parentNodeSupplier;
    }
 
-   public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
+   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(FootstepNode candidateNode, FootstepNode stanceNode)
    {
       RobotSide stepSide = candidateNode.getRobotSide();
 
@@ -71,92 +73,83 @@ public class GoodFootstepPositionChecker
       stanceFootPose.setToZero(stanceFootFrame);
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      stepLength = candidateFootPose.getX();
-      stepWidth = stepSide.negateIfRightSide(candidateFootPose.getY());
-      stepReachXY = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
-      stepHeight = candidateFootPose.getZ();
+      stepLength.set(candidateFootPose.getX());
+      stepWidth.set(stepSide.negateIfRightSide(candidateFootPose.getY()));
+      stepReachXY.set(EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(stepWidth.getValue() - parameters.getIdealFootstepWidth())));
+      stepHeight.set(candidateFootPose.getZ());
       double maximumStepZ = stepSide == RobotSide.LEFT ? parameters.getMaximumLeftStepZ() : parameters.getMaximumRightStepZ();
 
-      if (stepWidth < parameters.getMinimumStepWidth())
+      if (stepWidth.getValue() < parameters.getMinimumStepWidth())
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
       }
-      else if (stepWidth > parameters.getMaximumStepWidth())
+      else if (stepWidth.getValue() > parameters.getMaximumStepWidth())
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
       }
-      else if (stepLength < parameters.getMinimumStepLength())
+      else if (stepLength.getValue() < parameters.getMinimumStepLength())
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
       }
-      else if (Math.abs(stepHeight) > maximumStepZ)
+      else if (Math.abs(stepHeight.getValue()) > maximumStepZ)
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
       }
 
       double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
       double minZFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(maximumStepZ), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alphaPitchedBack);
       double maxXFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alphaPitchedBack);
-      double stepDownFraction = - stepHeight / minZFromPitchContraint;
-      double stepForwardFraction = stepLength / maxXFromPitchContraint;
+      double stepDownFraction = - stepHeight.getValue() / minZFromPitchContraint;
+      double stepForwardFraction = stepLength.getValue() / maxXFromPitchContraint;
 
       boolean stepIsPitchedBack = alphaPitchedBack > 0.0;
-      boolean stepTooLow = stepLength > 0.0 && stepDownFraction > 1.0;
-      boolean stepTooForward = stepHeight < 0.0 && stepForwardFraction > 1.0;
+      boolean stepTooLow = stepLength.getValue() > 0.0 && stepDownFraction > 1.0;
+      boolean stepTooForward = stepHeight.getValue() < 0.0 && stepForwardFraction > 1.0;
 
       if (stepIsPitchedBack && (stepTooLow || stepTooForward))
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
       }
 
       double maxReach = parameters.getMaximumStepReach();
-      if (stepHeight < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
+      if (stepHeight.getValue() < -Math.abs(parameters.getMaximumStepZWhenForwardAndDown()))
       {
-         if (stepLength > parameters.getMaximumStepXWhenForwardAndDown())
+         if (stepLength.getValue() > parameters.getMaximumStepXWhenForwardAndDown())
          {
-            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
          }
 
-         if (stepWidth > parameters.getMaximumStepYWhenForwardAndDown())
+         if (stepWidth.getValue() > parameters.getMaximumStepYWhenForwardAndDown())
          {
-            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
          }
 
          maxReach = EuclidCoreTools.norm(parameters.getMaximumStepXWhenForwardAndDown(), parameters.getMaximumStepYWhenForwardAndDown() - parameters.getIdealFootstepWidth());
       }
 
-      if (stepReachXY > parameters.getMaximumStepReach())
+      if (stepReachXY.getValue() > parameters.getMaximumStepReach())
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR;
       }
 
-      if (stepHeight > parameters.getMaximumStepZWhenSteppingUp())
+      if (stepHeight.getValue() > parameters.getMaximumStepZWhenSteppingUp())
       {
-         if (stepReachXY > parameters.getMaximumStepReachWhenSteppingUp())
+         if (stepReachXY.getValue() > parameters.getMaximumStepReachWhenSteppingUp())
          {
-            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
          }
-         if (stepWidth > parameters.getMaximumStepWidthWhenSteppingUp())
+         if (stepWidth.getValue() > parameters.getMaximumStepWidthWhenSteppingUp())
          {
-            rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
          }
 
          maxReach = parameters.getMaximumStepReachWhenSteppingUp();
       }
 
-      double stepReach3D = EuclidCoreTools.norm(stepReachXY, stepHeight);
-      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(stepHeight / maximumStepZ));
+      double stepReach3D = EuclidCoreTools.norm(stepReachXY.getValue(), stepHeight.getValue());
+      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(stepHeight.getValue() / maximumStepZ));
       maxInterpolationFactor = Math.min(maxInterpolationFactor, 1.0);
+
       double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw(),
                                                            maxInterpolationFactor);
       double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw(),
@@ -164,8 +157,7 @@ public class GoodFootstepPositionChecker
       double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw());
       if (!MathTools.intervalContains(stepSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
       {
-         rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
       }
 
       // Check reach from start of swing
@@ -185,36 +177,36 @@ public class GoodFootstepPositionChecker
          {
             if (swingReach > alphaSoS * parameters.getMaximumStepReachWhenSteppingUp())
             {
-               rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-               return false;
+               return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
             }
          }
       }
 
-      return true;
+      return null;
    }
 
-   void logVariables()
+   void setApproximateStepDimensions(FootstepNode candidateNode, FootstepNode stanceNode)
    {
-      if (edgeData != null)
-      {
-         edgeData.setStepWidth(stepWidth);
-         edgeData.setStepLength(stepLength);
-         edgeData.setStepHeight(stepHeight);
-         edgeData.setStepReach(stepReachXY);
-      }
+      double dx = candidateNode.getX() - stanceNode.getX();
+      double dy = candidateNode.getY() - stanceNode.getY();
+
+      double stepLength = dx * Math.cos(stanceNode.getYaw()) + dy * Math.sin(stanceNode.getYaw());
+      double stepWidth = - dx * Math.sin(stanceNode.getYaw()) + dy * Math.cos(stanceNode.getYaw());
+      stepWidth = stanceNode.getRobotSide().negateIfLeftSide(stepWidth);
+
+      double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw());
+      stepYaw = stanceNode.getRobotSide().negateIfLeftSide(stepYaw);
+
+      this.stepLength.set(stepLength);
+      this.stepWidth.set(stepWidth);
+      this.stepYaw.set(stepYaw);
    }
 
    void clearLoggedVariables()
    {
-      stepWidth = Double.NaN;
-      stepLength = Double.NaN;
-      stepHeight = Double.NaN;
-      stepReachXY = Double.NaN;
-   }
-
-   public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
-   {
-      return rejectionReason;
+      stepWidth.setToNaN();
+      stepLength.setToNaN();
+      stepHeight.setToNaN();
+      stepReachXY.setToNaN();
    }
 }
