@@ -33,3 +33,10 @@ bool enable_collision_avoidance false
 bool disable_input_persistence false
 # In case input persistence has been disabled, use this flat to re-enable it while leaving disable_input_persistence to false.
 bool enable_input_persistence false
+
+# When true, the solver enforces the solution to have the projection of the center of mass contained
+# inside the current support polygon. The support polygon can be determined automatically using the controller's ouput if running.
+# The support polygon can also be defined by the user by sending a KinematicsToolboxContactStateMessage.
+bool enable_support_polygon_constraint
+# When true, this disables the support polygon constraint on the center of mass.
+bool disable_support_polygon_constraint
