@@ -39,6 +39,7 @@ public class FootstepNodeChecker
    private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> rejectionReason = new YoEnum<>("rejectionReason", "", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
    private final YoDouble footAreaPercentage = new YoDouble("footAreaPercentage", registry);
    private final YoInteger footstepIndex = new YoInteger("footstepIndex", registry);
+   private final YoDouble achievedDeltaInside = new YoDouble("achievedDeltaInside", registry);
 
    public FootstepNodeChecker(FootstepPlannerParametersReadOnly parameters,
                               SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
@@ -92,6 +93,7 @@ public class FootstepNodeChecker
       if (parameters.getWiggleWhilePlanning() && parameters.getRejectIfWiggleNotSatisfied())
       {
          double epsilon = 1e-5;
+         this.achievedDeltaInside.set(snapData.getAchievedInsideDelta());
          if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDelta() - epsilon)
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);
@@ -170,7 +172,7 @@ public class FootstepNodeChecker
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
             return;
          }
-     }
+      }
    }
 
    private boolean boundingBoxCollisionDetected(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -215,6 +217,7 @@ public class FootstepNodeChecker
       footAreaPercentage.setToNaN();
       rejectionReason.set(null);
       footstepIndex.set(-1);
+      achievedDeltaInside.setToNaN();
 
       candidateNodeSnapData.clear();
       goodPositionChecker.clearLoggedVariables();
