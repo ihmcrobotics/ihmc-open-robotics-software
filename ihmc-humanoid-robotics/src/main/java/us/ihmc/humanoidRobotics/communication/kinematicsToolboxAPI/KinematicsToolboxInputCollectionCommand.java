@@ -15,6 +15,8 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
    private final RecyclingArrayList<KinematicsToolboxCenterOfMassCommand> centerOfMassInputs = new RecyclingArrayList<>(KinematicsToolboxCenterOfMassCommand::new);
    private final RecyclingArrayList<KinematicsToolboxRigidBodyCommand> rigidBodyInputs = new RecyclingArrayList<>(KinematicsToolboxRigidBodyCommand::new);
    private final RecyclingArrayList<KinematicsToolboxOneDoFJointCommand> jointInputs = new RecyclingArrayList<>(KinematicsToolboxOneDoFJointCommand::new);
+   private boolean hasConstactStateInput = false;
+   private final KinematicsToolboxContactStateCommand contactStateInput = new KinematicsToolboxContactStateCommand();
 
    @Override
    public void clear()
@@ -23,6 +25,8 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
       centerOfMassInputs.clear();
       rigidBodyInputs.clear();
       jointInputs.clear();
+      hasConstactStateInput = false;
+      contactStateInput.clear();
    }
 
    @Override
@@ -46,6 +50,9 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
       {
          jointInputs.add().set(other.jointInputs.get(i));
       }
+
+      hasConstactStateInput = other.hasConstactStateInput;
+      contactStateInput.set(other.contactStateInput);
    }
 
    @Override
@@ -79,6 +86,10 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
       {
          jointInputs.add().set(message.getJointInputs().get(i), jointHashCodeResolver);
       }
+
+      hasConstactStateInput = !message.getContactStateInput().isEmpty();
+      if (hasConstactStateInput)
+         contactStateInput.set(message.getContactStateInput().get(0), rigidBodyHashCodeResolver);
    }
 
    @Override
@@ -115,6 +126,16 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
    public RecyclingArrayList<KinematicsToolboxOneDoFJointCommand> getJointInputs()
    {
       return jointInputs;
+   }
+
+   public boolean hasConstactStateInput()
+   {
+      return hasConstactStateInput;
+   }
+
+   public KinematicsToolboxContactStateCommand getContactStateInput()
+   {
+      return contactStateInput;
    }
 
    @Override
