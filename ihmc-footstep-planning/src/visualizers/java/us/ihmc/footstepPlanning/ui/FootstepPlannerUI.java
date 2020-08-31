@@ -47,6 +47,7 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -79,6 +80,7 @@ public class FootstepPlannerUI
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
    private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
+   private final RobotIKVisualizer robotIKVisualizer;
 
    private final List<Runnable> shutdownHooks = new ArrayList<>();
 
@@ -139,6 +141,7 @@ public class FootstepPlannerUI
            splitFractionCalculatorParameters,
            fullHumanoidRobotModelFactory,
            null,
+           null,
            walkingControllerParameters,
            null,
            showTestDashboard,
@@ -153,6 +156,7 @@ public class FootstepPlannerUI
                             SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
+                            DRCRobotJointMap jointMap,
                             WalkingControllerParameters walkingControllerParameters,
                             UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
@@ -263,16 +267,22 @@ public class FootstepPlannerUI
       if(previewModelFactory == null)
       {
          walkingPreviewVisualizer = null;
+         robotIKVisualizer = null;
       }
       else
       {
-         recursivelyModifyGraphics(previewModelFactory.getRobotDescription().getChildrenJoints().get(0), YoAppearance.AliceBlue());
+//         recursivelyModifyGraphics(previewModel.getRobotDescription().getChildrenJoints().get(0), YoAppearance.AliceBlue());
          walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
          walkingPreviewVisualizer.getRootNode().setMouseTransparent(true);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
          mainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
          walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
          walkingPreviewVisualizer.start();
+
+         robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap);
+         messager.registerTopicListener(RobotConfigurationData, robotIKVisualizer::submitNewConfiguration);
+         view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
+         robotIKVisualizer.start();
       }
 
       if(walkingControllerParameters != null)
@@ -346,6 +356,7 @@ public class FootstepPlannerUI
             robotRootJoint.getRotation().setYawPitchRoll(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0);
             robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
             robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+            robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
 
             messager.submitMessage(GoalMidFootPosition, dataSet.getPlannerInput().getGoalPosition());
             messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0));
@@ -459,6 +470,7 @@ public class FootstepPlannerUI
                                                     SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
+                                                    DRCRobotJointMap jointMap,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters,
                                                     UIAuxiliaryRobotData auxiliaryRobotData) throws Exception
@@ -477,6 +489,7 @@ public class FootstepPlannerUI
                                    splitFractionCalculatorParameters,
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
+                                   jointMap,
                                    walkingControllerParameters,
                                    auxiliaryRobotData,
                                    false,
