@@ -446,6 +446,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * If {@link #getWiggleWhilePlanning} is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+    */
+   default boolean getRejectIfWiggleNotSatisfied()
+   {
+      return get(rejectIfWiggleNotSatisfied);
+   }
+
+   /**
     * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
     * distance the planner will use
     */
