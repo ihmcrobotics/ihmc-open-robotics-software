@@ -1,5 +1,19 @@
 package us.ihmc.robotEnvironmentAwareness.slam.viewer;
 
+import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
+import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.BoundingBoxMeshView;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OccupancyMapMeshBuilder;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.SLAMFrameStateViewer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,26 +22,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.paint.Material;
-import javafx.scene.shape.Mesh;
-import javafx.scene.shape.MeshView;
-import javafx.util.Pair;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.BoundingBoxMeshView;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OccupancyMapMeshBuilder;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.SLAMFrameStateViewer;
 
 public class SLAMMeshViewer
 {
@@ -38,14 +32,10 @@ public class SLAMMeshViewer
    private final Group root = new Group();
 
    private final List<ScheduledFuture<?>> meshBuilderScheduledFutures = new ArrayList<>();
-   private final MeshView planarRegionMeshView = new MeshView();
-   private final MeshView importedPlanarRegionMeshView = new MeshView();
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(5, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
    private final AnimationTimer renderMeshAnimation;
 
-   private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
-   private final PlanarRegionsMeshBuilder importedPlanarRegionsMeshBuilder;
    private final OccupancyMapMeshBuilder occupancyMapViewer;
    private final BoundingBoxMeshView boundingBoxMeshView;
    private final SLAMFrameStateViewer latestFrameStateViewer;
@@ -55,20 +45,6 @@ public class SLAMMeshViewer
 
    public SLAMMeshViewer(REAUIMessager uiMessager)
    {
-      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager,
-                                                              SLAMModuleAPI.SLAMPlanarRegionsState,
-                                                              SLAMModuleAPI.ShowPlanarRegionsMap,
-                                                              SLAMModuleAPI.SLAMVizClear,
-                                                              SLAMModuleAPI.SLAMClear,
-                                                              SLAMModuleAPI.RequestPlanarRegions);
-
-      importedPlanarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager,
-                                                                      SLAMModuleAPI.ImportedPlanarRegionsState,
-                                                                      SLAMModuleAPI.ShowImportedPlanarRegions,
-                                                                      SLAMModuleAPI.SLAMVizClear,
-                                                                      SLAMModuleAPI.ImportedPlanarRegionsVizClear,
-                                                                      SLAMModuleAPI.RequestPlanarRegions);
-
       occupancyMapViewer = new OccupancyMapMeshBuilder(uiMessager);
 
       latestFrameStateViewer = new SLAMFrameStateViewer(uiMessager,
@@ -82,11 +58,8 @@ public class SLAMMeshViewer
       occupancyMapViewer.getRoot().setMouseTransparent(true);
       boundingBoxMeshView.setMouseTransparent(true);
       latestFrameStateViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(planarRegionMeshView, importedPlanarRegionMeshView, occupancyMapViewer.getRoot(), latestFrameStateViewer.getRoot(),
-                                boundingBoxMeshView);
+      root.getChildren().addAll(occupancyMapViewer.getRoot(), latestFrameStateViewer.getRoot(), boundingBoxMeshView);
 
-      addViewer(uiMessager, planarRegionMeshView, SLAMModuleAPI.ShowPlanarRegionsMap);
-      addViewer(uiMessager, importedPlanarRegionMeshView, SLAMModuleAPI.ShowImportedPlanarRegions);
       addViewer(uiMessager, occupancyMapViewer.getRoot(), SLAMModuleAPI.ShowSLAMOctreeMap);
       addViewer(uiMessager, latestFrameStateViewer.getRoot(), SLAMModuleAPI.ShowLatestFrame);
 
@@ -97,11 +70,6 @@ public class SLAMMeshViewer
          {
             occupancyMapViewer.render();
             latestFrameStateViewer.render();
-
-            if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
-               updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());
-            if (importedPlanarRegionsMeshBuilder.hasNewMeshAndMaterial())
-               updateMeshView(importedPlanarRegionMeshView, importedPlanarRegionsMeshBuilder.pollMeshAndMaterial());
          }
       };
 
@@ -159,8 +127,6 @@ public class SLAMMeshViewer
       if (!meshBuilderScheduledFutures.isEmpty())
          return;
       renderMeshAnimation.start();
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(importedPlanarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(occupancyMapViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestFrameStateViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
@@ -180,12 +146,6 @@ public class SLAMMeshViewer
    public void stop()
    {
       sleep();
-   }
-
-   private void updateMeshView(MeshView meshViewToUpdate, Pair<Mesh, Material> meshMaterial)
-   {
-      meshViewToUpdate.setMesh(meshMaterial.getKey());
-      meshViewToUpdate.setMaterial(meshMaterial.getValue());
    }
 
    public Node getRoot()

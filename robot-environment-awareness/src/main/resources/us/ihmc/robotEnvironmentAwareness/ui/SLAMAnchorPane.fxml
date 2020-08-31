@@ -22,13 +22,23 @@
 	                     </font>
 	                  </Label>
 	                  <ToggleButton fx:id="enableSLAMButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Enable" />
-	                  <ToggleButton fx:id="biasButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="false" text="BiasHeight" />
-	                  <TextField fx:id="queuedBufferSize" alignment="CENTER" editable="false" text="0" />
-	                  <TextField fx:id="slamStatus" alignment="CENTER" editable="false" />
-	                  <ToggleButton fx:id="latestFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Latest Frame" textAlignment="CENTER" />
-	                  <ToggleButton fx:id="octreeMapEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Octree Map" textAlignment="CENTER" />
-                  <CheckBox fx:id="showNormal" alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Normal" textAlignment="CENTER" />
-	                  <ToggleButton fx:id="sensorFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Sensor Frame" textAlignment="CENTER" />
+					   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Queue Size" textAlignment="CENTER" />
+					   <TextField fx:id="queuedBufferSize" alignment="CENTER" editable="false" text="0" />
+					   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Frame Computation (s)" textAlignment="CENTER" />
+					   <TextField fx:id="frameComputationTime" alignment="CENTER" editable="false" />
+					   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="SLAM Computation (s)" textAlignment="CENTER" />
+					   <TextField fx:id="slamComputationTime" alignment="CENTER" editable="false" />
+					   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Average Computation (s)" textAlignment="CENTER" />
+					   <TextField fx:id="averageComputationTime" alignment="CENTER" editable="false" />
+					   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Listener Computation (s)" textAlignment="CENTER" />
+					   <TextField fx:id="listenerComputationTime" alignment="CENTER" editable="false" />
+					   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Total Computation (s)" textAlignment="CENTER" />
+					   <TextField fx:id="totalComputationTime" alignment="CENTER" editable="false" />
+
+					   <ToggleButton fx:id="latestFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show Latest Frame" textAlignment="CENTER" />
+	                  <ToggleButton fx:id="octreeMapEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show Octree Map" textAlignment="CENTER" />
+                  <ToggleButton fx:id="showNormal" alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Normal" textAlignment="CENTER" />
+	                  <ToggleButton fx:id="sensorFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Show Sensor Frame" textAlignment="CENTER" />
 	                  <Button contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearFootsteps" text="ClearFootsteps" />
 	                  <Button contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
 	               </children>
@@ -40,8 +50,12 @@
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </Label>
-                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Sensor Status" textAlignment="CENTER" />
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Stationary" textAlignment="CENTER" />
                   <Label fx:id="stationaryFlag" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" textAlignment="CENTER" />
+				   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Reasonable Velocity" textAlignment="CENTER" />
+				   <Label fx:id="velocityLimitFlag" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" textAlignment="CENTER" />
+		<TextField fx:id="speed" alignment="CENTER" editable="false" />
+				   
                </children>
             </VBox>
 	         </children>

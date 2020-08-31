@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import javafx.scene.paint.Color;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -71,7 +72,9 @@ public class SLAMModule implements PerceptionModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
-   private Stopwatch stopwatch = new Stopwatch();
+   private final Mean average = new Mean();
+   private final Stopwatch totalStopWatch = new Stopwatch();
+   private final Stopwatch updateStopwatch = new Stopwatch();
 
    private final boolean manageRosNode;
    protected final Ros2Node ros2Node;
@@ -197,6 +200,9 @@ public class SLAMModule implements PerceptionModule
    public void start()
    {
       LogTools.info("Starting SLAM Module");
+      totalStopWatch.start();
+      updateStopwatch.start();
+      average.clear();
       if (scheduledMain == null)
          scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, MAIN_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       if (scheduledQueue == null)
@@ -289,7 +295,8 @@ public class SLAMModule implements PerceptionModule
 
    private void updateSLAM()
    {
-      stopwatch.start();
+      totalStopWatch.lap();
+      updateStopwatch.lap();
       if (updateSLAMInternal())
       {
          publishResults();
@@ -336,9 +343,10 @@ public class SLAMModule implements PerceptionModule
          LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
-      slam.setNormalEstimationParameters(frameNormalEstimationParameters.get());
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters(this.normalEstimationParameters.get());
+      normalEstimationParameters.setNumberOfIterations(2 * this.normalEstimationParameters.get().getNumberOfIterations());
       if (enableNormalEstimation.get())
-         slam.updateSurfaceNormalsInBoundingBox();
+         slam.updateSurfaceNormalsInBoundingBox(normalEstimationParameters);
          
       dequeue();
 
@@ -394,24 +402,36 @@ public class SLAMModule implements PerceptionModule
       pointCloudQueue.removeFirst();
    }
 
+   private final DecimalFormat df = new DecimalFormat("#.##");
+
    protected void publishResults()
    {
-      String stringToReport = "";
       reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
-      stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
+
+      String stringToReport = slam.getComputationTimeForLatestFrame() + " (sec) ";
+      reaMessager.submitMessage(SLAMModuleAPI.FrameComputationTime, stringToReport);
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMComputationTime, df.format(updateStopwatch.lapElapsed()) + "(sec)");
+      average.increment(updateStopwatch.lapElapsed());
+      reaMessager.submitMessage(SLAMModuleAPI.AverageComputationTime, df.format(average.getResult()) + " (sec)");
+
 
       NormalOcTree octreeMap = slam.getMapOcTree();
       SLAMFrame latestFrame = slam.getLatestFrame();
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getMapOcTree()));
 
-      LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
+
+      long startTime = System.nanoTime();
       Pose3D pose = new Pose3D(slam.getLatestFrame().getCorrectedSensorPoseInWorld());
+
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, pose);
       }
+      long endTime = System.nanoTime();
+      stringToReport = df.format(Conversions.nanosecondsToSeconds(endTime - startTime)) + " (sec)";
+      reaMessager.submitMessage(SLAMModuleAPI.ListenerComputationTime, stringToReport);
+
       Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();
       List<? extends Point3DReadOnly> correctedPointCloud = latestFrame.getCorrectedPointCloudInWorld();
       Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePoints();
@@ -428,6 +448,13 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
       history.addLatestFrameHistory(latestFrame);
       history.addDriftCorrectionHistory(slam.getDriftCorrectionResult());
+
+
+
+      LogTools.debug("Took: {} ocTree size: {}", totalStopWatch.lapElapsed(), octreeMap.size());
+
+      stringToReport = df.format(totalStopWatch.lapElapsed()) + " (sec)";
+      reaMessager.submitMessage(SLAMModuleAPI.TotalComputationTime, stringToReport);
    }
 
 

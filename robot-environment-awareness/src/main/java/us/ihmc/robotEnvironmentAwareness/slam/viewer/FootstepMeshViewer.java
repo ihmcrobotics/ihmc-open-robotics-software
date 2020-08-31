@@ -2,12 +2,14 @@ package us.ihmc.robotEnvironmentAwareness.slam.viewer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -33,6 +35,8 @@ public class FootstepMeshViewer extends AnimationTimer
    private final List<FootstepMeshManager> footstepMesheManagers = new ArrayList<>();
 
    private final AtomicReference<Boolean> enable;
+   private boolean isRunning = false;
+   private final AtomicBoolean clearRequested = new AtomicBoolean(false);
 
    public FootstepMeshViewer(REAUIMessager uiMessager, Function<RobotSide, ConvexPolygon2D> contactPointsProvider)
    {
@@ -57,7 +61,10 @@ public class FootstepMeshViewer extends AnimationTimer
                                                            () -> false));
       }
 
-      uiMessager.registerTopicListener(showviz, show -> footstepMesheManagers.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
+      uiMessager.registerTopicListener(showviz, show -> Platform.runLater(() ->
+      {
+         footstepMesheManagers.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show));
+      }));
       uiMessager.registerModuleMessagerStateListener(isMessagerOpen ->
       {
          if (isMessagerOpen)
@@ -67,7 +74,7 @@ public class FootstepMeshViewer extends AnimationTimer
       });
    }
 
-   public void render()
+   private void render()
    {
       int numberOfFootstepsToViz = numberOfFootstepsToRender.get();
       for (int i = 0; i < numberOfFootstepsToViz; i++)
@@ -85,11 +92,10 @@ public class FootstepMeshViewer extends AnimationTimer
 
    public void clear()
    {
-      for (int i = 0; i < footstepMesheManagers.size(); i++)
-      {
-         footstepMesheManagers.get(i).clear();
-      }
-      numberOfFootstepsToRender.set(0);
+      if (isRunning)
+         clearRequested.set(true);
+      else
+         Platform.runLater(this::clearNow);
    }
 
    public Node getRoot()
@@ -98,8 +104,27 @@ public class FootstepMeshViewer extends AnimationTimer
    }
 
    @Override
-   public void handle(long arg0)
+   public void start()
    {
+      super.start();
+      isRunning = true;
+   }
+
+   @Override
+   public void stop()
+   {
+      super.stop();
+      isRunning = false;
+   }
+
+   @Override
+   public void handle(long now)
+   {
+      if (clearRequested.getAndSet(false))
+      {
+         clearNow();
+      }
+
       if (!enable.get())
          return;
 
@@ -109,5 +134,14 @@ public class FootstepMeshViewer extends AnimationTimer
          return;
 
       addFootstepDataMessage(newFootstepDataMessage.getAndSet(null));
+   }
+
+   private void clearNow()
+   {
+      for (int i = 0; i < footstepMesheManagers.size(); i++)
+      {
+         footstepMesheManagers.get(i).clear();
+      }
+      numberOfFootstepsToRender.set(0);
    }
 }
