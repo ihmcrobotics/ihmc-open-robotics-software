@@ -53,7 +53,7 @@ public class KinematicsToolboxContactStateCommand implements Command<KinematicsT
 
       for (int i = 0; i < message.getContactPointsInBodyFrame().size(); i++)
       {
-         RigidBodyBasics rigidBody = rigidBodyHashCodeResolver.castAndGetRigidBody(message.getContatingBodyIds().get(i));
+         RigidBodyBasics rigidBody = rigidBodyHashCodeResolver.castAndGetRigidBody(message.getContactingBodyIds().get(i));
          Point3D contactPointPosition = message.getContactPointsInBodyFrame().get(i);
          contactPoints.add().set(rigidBody, contactPointPosition);
       }

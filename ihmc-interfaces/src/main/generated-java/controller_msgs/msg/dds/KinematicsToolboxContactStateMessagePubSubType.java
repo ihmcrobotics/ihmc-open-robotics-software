@@ -82,7 +82,7 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getContatingBodyIds().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getContactingBodyIds().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -103,9 +103,9 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
           throw new RuntimeException("contact_points_in_body_frame field exceeds the maximum length");
 
 
-      if(data.getContatingBodyIds().size() <= 20)
-      cdr.write_type_e(data.getContatingBodyIds());else
-          throw new RuntimeException("contating_body_ids field exceeds the maximum length");
+      if(data.getContactingBodyIds().size() <= 20)
+      cdr.write_type_e(data.getContactingBodyIds());else
+          throw new RuntimeException("contacting_body_ids field exceeds the maximum length");
 
    }
 
@@ -120,7 +120,7 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
 
       cdr.read_type_e(data.getContactPointsInBodyFrame());	
 
-      cdr.read_type_e(data.getContatingBodyIds());	
+      cdr.read_type_e(data.getContactingBodyIds());	
 
    }
 
@@ -134,7 +134,7 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
 
       ser.write_type_e("contact_points_in_body_frame", data.getContactPointsInBodyFrame());
 
-      ser.write_type_e("contating_body_ids", data.getContatingBodyIds());
+      ser.write_type_e("contacting_body_ids", data.getContactingBodyIds());
    }
 
    @Override
@@ -147,7 +147,7 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
 
       ser.read_type_e("contact_points_in_body_frame", data.getContactPointsInBodyFrame());
 
-      ser.read_type_e("contating_body_ids", data.getContatingBodyIds());
+      ser.read_type_e("contacting_body_ids", data.getContactingBodyIds());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxContactStateMessage src, controller_msgs.msg.dds.KinematicsToolboxContactStateMessage dest)
