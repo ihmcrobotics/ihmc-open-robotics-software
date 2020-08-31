@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,15 +17,15 @@ import us.ihmc.footstepPlanning.communication.UserInterfaceIKMode;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +37,9 @@ public class RobotOperationTabController
    private JavaFXMessager messager;
    private RobotLowLevelMessenger robotLowLevelMessenger;
    private UIAuxiliaryRobotData auxiliaryRobotData;
+
    private FullHumanoidRobotModel realRobotModel;
-   private FullHumanoidRobotModel workRobotModel;
+   private FullHumanoidRobotModel ikWorkRobotModel;
 
    @FXML
    private Button homeAll;
@@ -65,8 +65,6 @@ public class RobotOperationTabController
    @FXML
    private ToggleButton enableIK;
    @FXML
-   private Button resetIK;
-   @FXML
    private ComboBox<UserInterfaceIKMode> ikMode;
    @FXML
    private Slider xIKSlider;
@@ -81,7 +79,8 @@ public class RobotOperationTabController
    @FXML
    private Slider rollIKSlider;
 
-   private static final double defaultTrajectoryTime = 3.0;
+   private static final double minimumTrajectoryDuration = 0.5;
+   private static final double defaultMaxRadianPerSecond = 5.0;
    private final AnimationTimer ikAnimationTimer;
 
    private final Map<UserInterfaceIKMode, DdoglegInverseKinematicsCalculator> ikSolvers = new HashMap<>();
@@ -93,6 +92,7 @@ public class RobotOperationTabController
    private final AtomicReference<UserInterfaceIKMode> currentIKMode = new AtomicReference<>();
    private final FramePose3D initialIKPose = new FramePose3D();
    private final FramePose3D targetIKPose = new FramePose3D();
+   private final FramePose3D handControlFramePose = new FramePose3D();
    private final RigidBodyTransform targetIKTransform = new RigidBodyTransform();
 
    private final AtomicReference<double[]> latestIKSolution = new AtomicReference<>();
@@ -222,7 +222,7 @@ public class RobotOperationTabController
    public void setFullRobotModel(FullHumanoidRobotModel realRobotModel, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory)
    {
       this.realRobotModel = realRobotModel;
-      this.workRobotModel = fullHumanoidRobotModelFactory.createFullRobotModel();
+      this.ikWorkRobotModel = fullHumanoidRobotModelFactory.createFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -238,9 +238,9 @@ public class RobotOperationTabController
          double angleTolerance = Math.toRadians(4.0);
          double parameterChangePenalty = 0.1;
 
-         GeometricJacobian armJacobian = new GeometricJacobian(workRobotModel.getChest(),
-                                                               workRobotModel.getHand(robotSide),
-                                                               workRobotModel.getHand(robotSide).getBodyFixedFrame());
+         GeometricJacobian armJacobian = new GeometricJacobian(ikWorkRobotModel.getChest(),
+                                                               ikWorkRobotModel.getHand(robotSide),
+                                                               ikWorkRobotModel.getHand(robotSide).getBodyFixedFrame());
          limbJacobians.put(armIKMode, armJacobian);
          ikSolvers.put(armIKMode,
                        new DdoglegInverseKinematicsCalculator(armJacobian,
@@ -253,9 +253,9 @@ public class RobotOperationTabController
                                                               angleTolerance,
                                                               parameterChangePenalty));
 
-         GeometricJacobian legJacobian = new GeometricJacobian(workRobotModel.getPelvis(),
-                                                               workRobotModel.getFoot(robotSide),
-                                                               workRobotModel.getFoot(robotSide).getBodyFixedFrame());
+         GeometricJacobian legJacobian = new GeometricJacobian(ikWorkRobotModel.getPelvis(),
+                                                               ikWorkRobotModel.getFoot(robotSide),
+                                                               ikWorkRobotModel.getFoot(robotSide).getBodyFixedFrame());
          limbJacobians.put(legIKMode, legJacobian);
          ikSolvers.put(legIKMode,
                        new DdoglegInverseKinematicsCalculator(legJacobian,
@@ -278,7 +278,7 @@ public class RobotOperationTabController
       double angleTolerance = 0.02;
       double parameterChangePenalty = 0.1;
 
-      GeometricJacobian neckJacobian = new GeometricJacobian(workRobotModel.getChest(), workRobotModel.getHead(), workRobotModel.getHead().getBodyFixedFrame());
+      GeometricJacobian neckJacobian = new GeometricJacobian(ikWorkRobotModel.getChest(), ikWorkRobotModel.getHead(), ikWorkRobotModel.getHead().getBodyFixedFrame());
       limbJacobians.put(UserInterfaceIKMode.NECK, neckJacobian);
       ikSolvers.put(UserInterfaceIKMode.NECK,
                     new DdoglegInverseKinematicsCalculator(neckJacobian,
@@ -291,9 +291,9 @@ public class RobotOperationTabController
                                                            angleTolerance,
                                                            parameterChangePenalty));
 
-      GeometricJacobian chestJacobian = new GeometricJacobian(workRobotModel.getPelvis(),
-                                                              workRobotModel.getChest(),
-                                                              workRobotModel.getChest().getBodyFixedFrame());
+      GeometricJacobian chestJacobian = new GeometricJacobian(ikWorkRobotModel.getPelvis(),
+                                                              ikWorkRobotModel.getChest(),
+                                                              ikWorkRobotModel.getChest().getBodyFixedFrame());
       limbJacobians.put(UserInterfaceIKMode.CHEST, chestJacobian);
       ikSolvers.put(UserInterfaceIKMode.CHEST,
                     new DdoglegInverseKinematicsCalculator(chestJacobian,
@@ -317,8 +317,7 @@ public class RobotOperationTabController
       UserInterfaceIKMode selectedIKMode = ikMode.getValue();
       GeometricJacobian limbJacobian = limbJacobians.get(selectedIKMode);
 
-      MovingReferenceFrame bodyFixedFrame = limbJacobian.getEndEffector().getBodyFixedFrame();
-      initialIKPose.setToZero(bodyFixedFrame);
+      initialIKPose.setToZero(limbJacobian.getJacobianFrame());
       ReferenceFrame baseFrame = limbJacobian.getBase().getBodyFixedFrame();
       initialIKPose.changeFrame(baseFrame);
 
@@ -336,7 +335,7 @@ public class RobotOperationTabController
       yawIKSlider.setValue(0.0);
       pitchIKSlider.setValue(0.0);
       rollIKSlider.setValue(0.0);
-      copyRobotState(realRobotModel, workRobotModel);
+      copyRobotState(realRobotModel, ikWorkRobotModel);
    }
 
    @FXML
@@ -350,25 +349,27 @@ public class RobotOperationTabController
          return;
       }
 
+      double trajectoryDuration = computeTrajectoryDuration(currentIKMode, latestIKSolution);
       switch (currentIKMode)
       {
          case LEFT_ARM:
          case RIGHT_ARM:
          {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(currentIKMode.getSide(), defaultTrajectoryTime,
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(currentIKMode.getSide(),
+                                                                                                        trajectoryDuration,
                                                                                                         latestIKSolution);
             messager.submitMessage(FootstepPlannerMessagerAPI.ArmTrajectoryMessageTopic, armTrajectoryMessage);
             break;
          }
          case NECK:
          {
-            NeckTrajectoryMessage neckTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(defaultTrajectoryTime, latestIKSolution);
+            NeckTrajectoryMessage neckTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(trajectoryDuration, latestIKSolution);
             messager.submitMessage(FootstepPlannerMessagerAPI.NeckTrajectoryMessageTopic, neckTrajectoryMessage);
             break;
          }
          case CHEST:
          {
-            SpineTrajectoryMessage spineTrajectoryMessage = HumanoidMessageTools.createSpineTrajectoryMessage(defaultTrajectoryTime, latestIKSolution);
+            SpineTrajectoryMessage spineTrajectoryMessage = HumanoidMessageTools.createSpineTrajectoryMessage(trajectoryDuration, latestIKSolution);
             messager.submitMessage(FootstepPlannerMessagerAPI.SpineTrajectoryMessageTopic, spineTrajectoryMessage);
          }
          case LEFT_LEG:
@@ -390,21 +391,24 @@ public class RobotOperationTabController
          return;
       }
 
+      double trajectoryDuration = computeTrajectoryDuration(currentIKMode, latestIKSolution);
       switch (currentIKMode)
       {
          case LEFT_ARM:
          case RIGHT_ARM:
          {
+            handControlFramePose.setToZero(ikWorkRobotModel.getHandControlFrame(currentIKMode.getSide()));
+            handControlFramePose.changeFrame(ikWorkRobotModel.getChest().getBodyFixedFrame());
             HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(currentIKMode.getSide(),
-                                                                                                           defaultTrajectoryTime,
-                                                                                                           targetIKPose,
-                                                                                                           targetIKPose.getReferenceFrame());
+                                                                                                           trajectoryDuration,
+                                                                                                           handControlFramePose,
+                                                                                                           handControlFramePose.getReferenceFrame());
             messager.submitMessage(FootstepPlannerMessagerAPI.HandTrajectoryMessageTopic, handTrajectoryMessage);
             break;
          }
          case NECK:
          {
-            HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(defaultTrajectoryTime,
+            HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryDuration,
                                                                                                            targetIKPose.getOrientation(),
                                                                                                            targetIKPose.getReferenceFrame());
             messager.submitMessage(FootstepPlannerMessagerAPI.HeadTrajectoryMessageTopic, headTrajectoryMessage);
@@ -412,7 +416,7 @@ public class RobotOperationTabController
          }
          case CHEST:
          {
-            ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(defaultTrajectoryTime,
+            ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryDuration,
                                                                                                               targetIKPose.getOrientation(),
                                                                                                               targetIKPose.getReferenceFrame());
             messager.submitMessage(FootstepPlannerMessagerAPI.ChestTrajectoryMessageTopic, chestTrajectoryMessage);
@@ -423,12 +427,35 @@ public class RobotOperationTabController
             ReferenceFrame originalFrame = targetIKPose.getReferenceFrame();
             targetIKPose.changeFrame(ReferenceFrame.getWorldFrame());
             FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(currentIKMode.getSide(),
-                                                                                                           defaultTrajectoryTime,
+                                                                                                           trajectoryDuration,
                                                                                                            targetIKPose);
             messager.submitMessage(FootstepPlannerMessagerAPI.FootTrajectoryMessageTopic, footTrajectoryMessage);
             targetIKPose.changeFrame(originalFrame);
          }
       }
+   }
+
+   private double computeTrajectoryDuration(UserInterfaceIKMode currentIKMode, double[] latestIKSolution)
+   {
+      JointBasics[] limbJoints = limbJacobians.get(currentIKMode).getJointsInOrder();
+      if (limbJoints.length != latestIKSolution.length)
+      {
+         return 3.0;
+      }
+
+      double maximumJointDelta = 0.0;
+      for (int i = 0; i < latestIKSolution.length; i++)
+      {
+         double qActual = realRobotModel.getOneDoFJointByName(limbJoints[i].getName()).getQ();
+         double qDesired = latestIKSolution[i];
+         double qDelta = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(qActual, qDesired));
+         if (qDelta > maximumJointDelta)
+         {
+            maximumJointDelta = qDelta;
+         }
+      }
+
+      return Math.max(maximumJointDelta * defaultMaxRadianPerSecond, minimumTrajectoryDuration);
    }
 
    private static void copyRobotState(FullHumanoidRobotModel source, FullHumanoidRobotModel destination)
