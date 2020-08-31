@@ -11,11 +11,25 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParam
 public class PlanarRegionSLAMParametersUIController extends REABasicUIController
 {
    private StoredPropertyTableViewWrapper tableViewWrapper;
-   private final PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
-   private final JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(slamParameters);
+   private PlanarRegionSLAMParameters slamParameters;
+   private JavaFXStoredPropertyMap javaFXStoredPropertyMap;
 
    @FXML
    private TableView<ParametersTableRow> parameterTable;
+
+   public void setupParameters(String configurationProject)
+   {
+      if (configurationProject != null)
+      {
+         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap", configurationProject);
+      }
+      else
+      {
+         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
+      }
+      javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(slamParameters);
+
+   }
 
    public void bindControls()
    {
