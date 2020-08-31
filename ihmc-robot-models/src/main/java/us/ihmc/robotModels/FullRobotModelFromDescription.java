@@ -15,6 +15,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -23,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -35,6 +39,8 @@ import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
+import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -120,6 +126,11 @@ public class FullRobotModelFromDescription implements FullRobotModel
       for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
       {
          addJointsRecursively((OneDoFJointDescription) jointDescription, rootLink);
+      }
+
+      for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
+      {
+         addLoopClosureConstraintRecursive(jointDescription, rootLink);
       }
 
       oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
@@ -440,6 +451,39 @@ public class FullRobotModelFromDescription implements FullRobotModel
       {
          addJointsRecursively((OneDoFJointDescription) sdfJoint, rigidBody);
       }
+   }
+
+   protected void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
+   {
+      JointBasics joint = parentBody.getChildrenJoints().stream().filter(child -> child.getName().equals(jointDescription.getName())).findFirst().get();
+      RigidBodyBasics constraintPredecessor = joint.getSuccessor();
+
+      List<LoopClosureConstraintDescription> constraintDescriptions = jointDescription.getChildrenConstraintDescriptions();
+
+      for (LoopClosureConstraintDescription constraintDescription : constraintDescriptions)
+      {
+         String name = constraintDescription.getName();
+         Vector3DBasics offsetFromParentJoint = constraintDescription.getOffsetFromParentJoint();
+         Vector3DBasics offsetFromLinkParentJoint = constraintDescription.getOffsetFromLinkParentJoint();
+         RigidBodyBasics constraintSuccessor = MultiBodySystemTools.getRootBody(parentBody).subtreeStream()
+                                                                   .filter(body -> body.getName().equals(constraintDescription.getLink().getName())).findFirst()
+                                                                   .get();
+
+         if (constraintDescription instanceof LoopClosurePinConstraintDescription)
+         {
+            Vector3DBasics axis = ((LoopClosurePinConstraintDescription) constraintDescription).getAxis();
+            RevoluteJoint constraintJoint = new RevoluteJoint(name, constraintPredecessor, offsetFromParentJoint, axis);
+            constraintJoint.setupLoopClosure(constraintSuccessor, new RigidBodyTransform(new Quaternion(), offsetFromLinkParentJoint));
+            oneDoFJoints.put(constraintJoint.getName(), constraintJoint);
+         }
+         else
+         {
+            LogTools.error("The constraint type {} is not handled, skipping it.", constraintDescription.getClass().getSimpleName());
+         }
+      }
+
+      for (JointDescription childJoint : jointDescription.getChildrenJoints())
+         addLoopClosureConstraintRecursive(childJoint, constraintPredecessor);
    }
 
    protected void mapRigidBody(JointDescription joint, OneDoFJointBasics inverseDynamicsJoint, RigidBodyBasics rigidBody)
