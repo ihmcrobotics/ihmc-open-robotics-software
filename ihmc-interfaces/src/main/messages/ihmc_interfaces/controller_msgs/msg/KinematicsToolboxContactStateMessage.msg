@@ -15,4 +15,4 @@ float64 center_of_mass_margin -1
 # Each contact point is expected to be expressed in body frame.
 geometry_msgs/Point[<=20] contact_points_in_body_frame
 # The id used to retrieve the contacting body for each contact point.
-int32[<=20] contating_body_ids
+int32[<=20] contacting_body_ids

@@ -37,7 +37,7 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
    /**
             * The id used to retrieve the contacting body for each contact point.
             */
-   public us.ihmc.idl.IDLSequence.Integer  contating_body_ids_;
+   public us.ihmc.idl.IDLSequence.Integer  contacting_body_ids_;
 
    public KinematicsToolboxContactStateMessage()
    {
@@ -46,7 +46,7 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
 
       contact_points_in_body_frame_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (20, new geometry_msgs.msg.dds.PointPubSubType());
 
-      contating_body_ids_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
+      contacting_body_ids_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
 
 
    }
@@ -68,7 +68,7 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
 
       contact_points_in_body_frame_.set(other.contact_points_in_body_frame_);
 
-      contating_body_ids_.set(other.contating_body_ids_);
+      contacting_body_ids_.set(other.contacting_body_ids_);
    }
 
 
@@ -119,9 +119,9 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
    /**
             * The id used to retrieve the contacting body for each contact point.
             */
-   public us.ihmc.idl.IDLSequence.Integer  getContatingBodyIds()
+   public us.ihmc.idl.IDLSequence.Integer  getContactingBodyIds()
    {
-      return contating_body_ids_;
+      return contacting_body_ids_;
    }
 
 
@@ -157,7 +157,7 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
       }
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.contating_body_ids_, other.contating_body_ids_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.contacting_body_ids_, other.contacting_body_ids_, epsilon)) return false;
 
 
       return true;
@@ -181,7 +181,7 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
 
       if (!this.contact_points_in_body_frame_.equals(otherMyClass.contact_points_in_body_frame_)) return false;
 
-      if (!this.contating_body_ids_.equals(otherMyClass.contating_body_ids_)) return false;
+      if (!this.contacting_body_ids_.equals(otherMyClass.contacting_body_ids_)) return false;
 
       return true;
    }
@@ -202,8 +202,8 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
       builder.append("contact_points_in_body_frame=");
       builder.append(this.contact_points_in_body_frame_);      builder.append(", ");
 
-      builder.append("contating_body_ids=");
-      builder.append(this.contating_body_ids_);
+      builder.append("contacting_body_ids=");
+      builder.append(this.contacting_body_ids_);
       builder.append("}");
       return builder.toString();
    }

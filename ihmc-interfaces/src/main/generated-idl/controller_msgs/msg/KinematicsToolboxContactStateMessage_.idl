@@ -38,7 +38,7 @@ module controller_msgs
         /**
          * The id used to retrieve the contacting body for each contact point.
          */
-        sequence<long, 20> contating_body_ids;
+        sequence<long, 20> contacting_body_ids;
       };
     };
   };
