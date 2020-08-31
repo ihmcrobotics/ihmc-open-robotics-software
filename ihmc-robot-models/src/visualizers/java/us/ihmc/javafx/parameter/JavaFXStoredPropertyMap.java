@@ -39,7 +39,7 @@ public class JavaFXStoredPropertyMap
       StoredPropertyBasics<Boolean> storedProperty = storedPropertySet.getProperty(booleanKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
-      javaFXPropertyHolder.setValue(storedPropertySet.get(booleanKey), false);
+      javaFXPropertyHolder.setValue(storedPropertySet.get(booleanKey), true);
    }
 
    public <T> void put(Spinner<T> doubleSpinner, StoredPropertyKey<T> doubleKey)
@@ -48,7 +48,7 @@ public class JavaFXStoredPropertyMap
       StoredPropertyBasics<T> storedProperty = storedPropertySet.getProperty(doubleKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
-      javaFXPropertyHolder.setValue(storedPropertySet.get(doubleKey), false);
+      javaFXPropertyHolder.setValue(storedPropertySet.get(doubleKey), true);
    }
 
    public void put(Slider slider, StoredPropertyKey<Double> doubleKey)
@@ -57,7 +57,7 @@ public class JavaFXStoredPropertyMap
       StoredPropertyBasics storedProperty = storedPropertySet.getProperty(doubleKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
-      javaFXPropertyHolder.setValue(storedPropertySet.get(doubleKey), false);
+      javaFXPropertyHolder.setValue(storedPropertySet.get(doubleKey), true);
    }
 
    public void putIntegerSlider(Slider slider, StoredPropertyKey<Integer> integerKey)
@@ -66,7 +66,7 @@ public class JavaFXStoredPropertyMap
       StoredPropertyBasics storedProperty = storedPropertySet.getProperty(integerKey);
       toStoredPropertyMap.put(javaFXPropertyHolder, storedProperty);
       fromStoredPropertyMap.put(storedProperty, javaFXPropertyHolder);
-      javaFXPropertyHolder.setValue(storedPropertySet.get(integerKey), false);
+      javaFXPropertyHolder.setValue(storedPropertySet.get(integerKey), true);
    }
 
    public boolean copyJavaFXToStored()
