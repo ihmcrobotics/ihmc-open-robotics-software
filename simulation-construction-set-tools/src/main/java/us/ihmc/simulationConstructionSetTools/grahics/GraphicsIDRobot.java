@@ -1,6 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.grahics;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -16,6 +18,8 @@ import us.ihmc.simulationconstructionset.util.CommonJoint;
 
 public class GraphicsIDRobot extends GraphicsRobot
 {
+   private final Map<JointBasics, Graphics3DNode> jointToGraphicsNodeMap = new HashMap<>();
+
    public GraphicsIDRobot(String name, RigidBodyBasics rootBody, GraphicsObjectsHolder graphicsObjectsHolder)
    {
       this(name, rootBody, graphicsObjectsHolder, false);
@@ -23,13 +27,19 @@ public class GraphicsIDRobot extends GraphicsRobot
 
    public GraphicsIDRobot(String name, RigidBodyBasics rootBody, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
    {
+      this(name, rootBody.getChildrenJoints(), graphicsObjectsHolder, useCollisionMeshes);
+   }
+
+   public GraphicsIDRobot(String name, List<JointBasics> jointsToVisualize, GraphicsObjectsHolder graphicsObjectsHolder, boolean useCollisionMeshes)
+   {
       super(new Graphics3DNode(name, Graphics3DNodeType.TRANSFORM));
 
-      for (JointBasics joint : rootBody.getChildrenJoints())
+      for (JointBasics joint : jointsToVisualize)
       {
          GraphicsJoint rootGraphicsJoint = createJoint(joint, Graphics3DNodeType.ROOTJOINT, graphicsObjectsHolder, useCollisionMeshes);
          getRootNode().addChild(rootGraphicsJoint);
          addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), rootGraphicsJoint, graphicsObjectsHolder, useCollisionMeshes);
+         jointToGraphicsNodeMap.put(joint, rootGraphicsJoint);
       }
 
       update();
@@ -43,6 +53,7 @@ public class GraphicsIDRobot extends GraphicsRobot
          GraphicsJoint graphicsJoint = createJoint(joint, Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
          parentJoint.addChild(graphicsJoint);
          addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), graphicsJoint, graphicsObjectsHolder, useCollisionMeshes);
+         jointToGraphicsNodeMap.put(joint, graphicsJoint);
       }
    }
 
@@ -64,6 +75,11 @@ public class GraphicsIDRobot extends GraphicsRobot
 
       registerJoint(wrapJointBasics, graphicsJoint);
       return graphicsJoint;
+   }
+
+   public Graphics3DNode getGraphicsNode(JointBasics joint)
+   {
+      return jointToGraphicsNodeMap.get(joint);
    }
 
    private Graphics3DObject generateGraphics3DObjectFromCollisionMeshes(List<CollisionMeshDescription> collisionObjects)
