@@ -68,6 +68,12 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -90,6 +96,14 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -149,6 +163,12 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       cdr.write_type_7(data.getEnableInputPersistence());
 
+
+      cdr.write_type_7(data.getEnableSupportPolygonConstraint());
+
+
+      cdr.write_type_7(data.getDisableSupportPolygonConstraint());
+
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -181,6 +201,12 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       data.setEnableInputPersistence(cdr.read_type_7());
       	
 
+      data.setEnableSupportPolygonConstraint(cdr.read_type_7());
+      	
+
+      data.setDisableSupportPolygonConstraint(cdr.read_type_7());
+      	
+
    }
 
    @Override
@@ -204,6 +230,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       ser.write_type_7("disable_input_persistence", data.getDisableInputPersistence());
 
       ser.write_type_7("enable_input_persistence", data.getEnableInputPersistence());
+
+      ser.write_type_7("enable_support_polygon_constraint", data.getEnableSupportPolygonConstraint());
+
+      ser.write_type_7("disable_support_polygon_constraint", data.getDisableSupportPolygonConstraint());
    }
 
    @Override
@@ -227,6 +257,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       data.setDisableInputPersistence(ser.read_type_7("disable_input_persistence"));
 
       data.setEnableInputPersistence(ser.read_type_7("enable_input_persistence"));
+
+      data.setEnableSupportPolygonConstraint(ser.read_type_7("enable_support_polygon_constraint"));
+
+      data.setDisableSupportPolygonConstraint(ser.read_type_7("disable_support_polygon_constraint"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)

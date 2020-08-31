@@ -69,8 +69,22 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             */
    public boolean enable_input_persistence_;
 
+   /**
+            * When true, the solver enforces the solution to have the projection of the center of mass contained
+            * inside the current support polygon. The support polygon can be determined automatically using the controller's ouput if running.
+            * The support polygon can also be defined by the user by sending a KinematicsToolboxContactStateMessage.
+            */
+   public boolean enable_support_polygon_constraint_;
+
+   /**
+            * When true, this disables the support polygon constraint on the center of mass.
+            */
+   public boolean disable_support_polygon_constraint_;
+
    public KinematicsToolboxConfigurationMessage()
    {
+
+
 
 
 
@@ -117,6 +131,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
       enable_input_persistence_ = other.enable_input_persistence_;
+
+
+      enable_support_polygon_constraint_ = other.enable_support_polygon_constraint_;
+
+
+      disable_support_polygon_constraint_ = other.disable_support_polygon_constraint_;
 
    }
 
@@ -287,6 +307,42 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    }
 
 
+   /**
+            * When true, the solver enforces the solution to have the projection of the center of mass contained
+            * inside the current support polygon. The support polygon can be determined automatically using the controller's ouput if running.
+            * The support polygon can also be defined by the user by sending a KinematicsToolboxContactStateMessage.
+            */
+   public void setEnableSupportPolygonConstraint(boolean enable_support_polygon_constraint)
+   {
+      enable_support_polygon_constraint_ = enable_support_polygon_constraint;
+   }
+   /**
+            * When true, the solver enforces the solution to have the projection of the center of mass contained
+            * inside the current support polygon. The support polygon can be determined automatically using the controller's ouput if running.
+            * The support polygon can also be defined by the user by sending a KinematicsToolboxContactStateMessage.
+            */
+   public boolean getEnableSupportPolygonConstraint()
+   {
+      return enable_support_polygon_constraint_;
+   }
+
+
+   /**
+            * When true, this disables the support polygon constraint on the center of mass.
+            */
+   public void setDisableSupportPolygonConstraint(boolean disable_support_polygon_constraint)
+   {
+      disable_support_polygon_constraint_ = disable_support_polygon_constraint;
+   }
+   /**
+            * When true, this disables the support polygon constraint on the center of mass.
+            */
+   public boolean getDisableSupportPolygonConstraint()
+   {
+      return disable_support_polygon_constraint_;
+   }
+
+
    public static Supplier<KinematicsToolboxConfigurationMessagePubSubType> getPubSubType()
    {
       return KinematicsToolboxConfigurationMessagePubSubType::new;
@@ -332,6 +388,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_input_persistence_, other.enable_input_persistence_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_support_polygon_constraint_, other.enable_support_polygon_constraint_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_support_polygon_constraint_, other.disable_support_polygon_constraint_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -372,6 +434,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if(this.enable_input_persistence_ != otherMyClass.enable_input_persistence_) return false;
 
 
+      if(this.enable_support_polygon_constraint_ != otherMyClass.enable_support_polygon_constraint_) return false;
+
+
+      if(this.disable_support_polygon_constraint_ != otherMyClass.disable_support_polygon_constraint_) return false;
+
+
       return true;
    }
 
@@ -407,7 +475,13 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append(this.disable_input_persistence_);      builder.append(", ");
 
       builder.append("enable_input_persistence=");
-      builder.append(this.enable_input_persistence_);
+      builder.append(this.enable_input_persistence_);      builder.append(", ");
+
+      builder.append("enable_support_polygon_constraint=");
+      builder.append(this.enable_support_polygon_constraint_);      builder.append(", ");
+
+      builder.append("disable_support_polygon_constraint=");
+      builder.append(this.disable_support_polygon_constraint_);
       builder.append("}");
       return builder.toString();
    }
