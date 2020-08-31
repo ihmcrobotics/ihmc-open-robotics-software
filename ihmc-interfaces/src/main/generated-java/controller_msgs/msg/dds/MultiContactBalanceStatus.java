@@ -31,12 +31,17 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
    public us.ihmc.euclid.tuple3D.Point3D center_of_mass_3d_;
 
    /**
-            * List of the active contact points. The coordinates are in world frame. Only x and y coordinates are relevant.
+            * List of the active contact points expressed in world frame. Only x and y coordinates are relevant.
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_polygon_;
 
    /**
-            * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon list.
+            * List of the active contact points expressed in local body-fixed frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  contact_points_in_body_;
+
+   /**
+            * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
             */
    public us.ihmc.idl.IDLSequence.Integer  support_rigid_body_ids_;
 
@@ -59,6 +64,8 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       center_of_mass_3d_ = new us.ihmc.euclid.tuple3D.Point3D();
 
       support_polygon_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (16, new geometry_msgs.msg.dds.PointPubSubType());
+
+      contact_points_in_body_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (16, new geometry_msgs.msg.dds.PointPubSubType());
 
       support_rigid_body_ids_ = new us.ihmc.idl.IDLSequence.Integer (16, "type_2");
 
@@ -86,6 +93,8 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.center_of_mass_3d_, center_of_mass_3d_);
 
       support_polygon_.set(other.support_polygon_);
+
+      contact_points_in_body_.set(other.contact_points_in_body_);
 
       support_rigid_body_ids_.set(other.support_rigid_body_ids_);
 
@@ -133,7 +142,7 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
 
 
    /**
-            * List of the active contact points. The coordinates are in world frame. Only x and y coordinates are relevant.
+            * List of the active contact points expressed in world frame. Only x and y coordinates are relevant.
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getSupportPolygon()
    {
@@ -143,7 +152,17 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
 
 
    /**
-            * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon list.
+            * List of the active contact points expressed in local body-fixed frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getContactPointsInBody()
+   {
+      return contact_points_in_body_;
+   }
+
+
+
+   /**
+            * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
             */
    public us.ihmc.idl.IDLSequence.Integer  getSupportRigidBodyIds()
    {
@@ -204,6 +223,14 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
       }
 
 
+      if (this.contact_points_in_body_.size() != other.contact_points_in_body_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.contact_points_in_body_.size(); i++)
+         {  if (!this.contact_points_in_body_.get(i).epsilonEquals(other.contact_points_in_body_.get(i), epsilon)) return false; }
+      }
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.support_rigid_body_ids_, other.support_rigid_body_ids_, epsilon)) return false;
 
 
@@ -233,6 +260,8 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
 
       if (!this.support_polygon_.equals(otherMyClass.support_polygon_)) return false;
 
+      if (!this.contact_points_in_body_.equals(otherMyClass.contact_points_in_body_)) return false;
+
       if (!this.support_rigid_body_ids_.equals(otherMyClass.support_rigid_body_ids_)) return false;
 
       if (!this.ground_plane_estimate_origin_.equals(otherMyClass.ground_plane_estimate_origin_)) return false;
@@ -260,6 +289,9 @@ public class MultiContactBalanceStatus extends Packet<MultiContactBalanceStatus>
 
       builder.append("support_polygon=");
       builder.append(this.support_polygon_);      builder.append(", ");
+
+      builder.append("contact_points_in_body=");
+      builder.append(this.contact_points_in_body_);      builder.append(", ");
 
       builder.append("support_rigid_body_ids=");
       builder.append(this.support_rigid_body_ids_);      builder.append(", ");

@@ -32,11 +32,15 @@ module controller_msgs
          */
         geometry_msgs::msg::dds::Point center_of_mass_3d;
         /**
-         * List of the active contact points. The coordinates are in world frame. Only x and y coordinates are relevant.
+         * List of the active contact points expressed in world frame. Only x and y coordinates are relevant.
          */
         sequence<geometry_msgs::msg::dds::Point, 16> support_polygon;
         /**
-         * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon list.
+         * List of the active contact points expressed in local body-fixed frame.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 16> contact_points_in_body;
+        /**
+         * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
          */
         sequence<long, 16> support_rigid_body_ids;
         /**
