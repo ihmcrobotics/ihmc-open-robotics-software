@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -24,6 +23,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoVariableType;
 
 import javax.swing.*;
 import java.io.*;
@@ -222,15 +222,51 @@ public class FootstepPlannerLogLoader
             log.getVisibilityGraphHolder().addNavigableRegion(navigableRegion);
          }
 
+         // load header file
+         dataFileReader.close();
+         File headerFile = new File(logDirectory, FootstepPlannerLogger.headerFileName);
+         dataFileReader = new BufferedReader(new FileReader(headerFile));
+
+         List<String[]> enumValues = new ArrayList<>();
+
+         int numberOfEnums = getIntCSV(true, dataFileReader.readLine())[0];
+         for (int i = 0; i < numberOfEnums; i++)
+         {
+            String line = dataFileReader.readLine();
+            if (line == null)
+            {
+               throw new RuntimeException("Reached end of header file before expected");
+            }
+            enumValues.add(line.split(":")[1].split(","));
+         }
+
+         int numberOfVariables = getIntCSV(true, dataFileReader.readLine())[0];
+         for (int i = 0; i < numberOfVariables; i++)
+         {
+            String line = dataFileReader.readLine();
+            if (line == null)
+            {
+               break;
+            }
+
+            String[] descriptorStrings = line.replaceAll("\\s+", "").split(",");
+            YoVariableType type = YoVariableType.valueOf(descriptorStrings[1]);
+            if (type == YoVariableType.ENUM)
+            {
+               log.getVariableDescriptors().add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2], enumValues.get(Integer.parseInt(descriptorStrings[3]))));
+            }
+            else
+            {
+               log.getVariableDescriptors().add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2]));
+            }
+         }
+
          // load data file
          dataFileReader.close();
          File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
          dataFileReader = new BufferedReader(new FileReader(dataFile));
 
-         // data variables
-         dataFileReader.readLine();
-
-         while(dataFileReader.readLine() != null)
+         while (dataFileReader.readLine() != null)
          {
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setStanceNode(readNode(dataFileReader.readLine()));
@@ -248,28 +284,22 @@ public class FootstepPlannerLogLoader
                // edge marker
                dataFileReader.readLine();
 
-               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData(numberOfVariables);
                edgeData.setStanceNode(iterationData.getStanceNode());
                edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
+               edgeData.setSolutionEdge(getBooleanCSV(true, dataFileReader.readLine())[0]);
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
-               edgeData.getCandidateNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
 
-               double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
-               edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
-               edgeData.setFootAreaPercentage(doubleCSV[1]);
-               edgeData.setStepWidth(doubleCSV[2]);
-               edgeData.setStepLength(doubleCSV[3]);
-               edgeData.setStepHeight(doubleCSV[4]);
-               edgeData.setStepReach(doubleCSV[5]);
-               edgeData.setCostFromStart(doubleCSV[6]);
-               edgeData.setEdgeCost(doubleCSV[7]);
-               edgeData.setHeuristicCost(doubleCSV[8]);
-               edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
+               long[] longCSV = getLongCSV(true, dataFileReader.readLine());
+               for (int j = 0; j < longCSV.length; j++)
+               {
+                  edgeData.setData(j, longCSV[j]);
+               }
+
                iterationData.getChildNodes().add(edgeData.getCandidateNode());
-
                log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
             }
          }
@@ -383,6 +413,20 @@ public class FootstepPlannerLogLoader
       return data;
    }
 
+   private static long[] getLongCSV(boolean removeKey, String dataFileLine)
+   {
+      if(dataFileLine.contains("null"))
+         return new long[0];
+
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
+      long[] data = new long[csvString.length];
+      for (int i = 0; i < csvString.length; i++)
+      {
+         data[i] = Long.parseLong(csvString[i]);
+      }
+      return data;
+   }
+
    private static double[] getDoubleCSV(boolean removeKey, String dataFileLine)
    {
       if(dataFileLine.contains("null"))
@@ -393,6 +437,17 @@ public class FootstepPlannerLogLoader
       for (int i = 0; i < csvString.length; i++)
       {
          data[i] = Double.parseDouble(csvString[i]);
+      }
+      return data;
+   }
+
+   private static boolean[] getBooleanCSV(boolean removeKey, String dataFileLine)
+   {
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
+      boolean[] data = new boolean[csvString.length];
+      for (int i = 0; i < csvString.length; i++)
+      {
+         data[i] = Boolean.parseBoolean(csvString[i]);
       }
       return data;
    }

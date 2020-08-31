@@ -15,6 +15,7 @@ public class FootstepPlannerLog
 {
    private final String logName;
 
+   // Packets
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
@@ -22,7 +23,9 @@ public class FootstepPlannerLog
    private final SplitFractionCalculatorParametersPacket splitFractionParametersPacket = new SplitFractionCalculatorParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
+   // Logged data
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
+   private final List<VariableDescriptor> variableNames = new ArrayList<>();
    private final Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
 
@@ -71,6 +74,11 @@ public class FootstepPlannerLog
       return visibilityGraphHolder;
    }
 
+   public List<VariableDescriptor> getVariableDescriptors()
+   {
+      return variableNames;
+   }
+
    public Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
@@ -104,7 +112,8 @@ public class FootstepPlannerLog
             FootstepNode childNode = iterationData.get(iterationIndex).getChildNodes().get(i);
             GraphEdge<FootstepNode> edge = new GraphEdge<>(stanceNode, childNode);
 
-            if (edgeDataMap.get(edge).getSolutionEdge())
+            // TODO
+//            if (edgeDataMap.get(edge).getSolutionEdge())
             {
                footstepNodes.add(childNode);
                for (int j = 0; j < iterationData.size(); j++)
