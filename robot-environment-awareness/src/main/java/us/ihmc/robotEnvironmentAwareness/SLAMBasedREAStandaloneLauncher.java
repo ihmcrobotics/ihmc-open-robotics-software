@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 
 public class SLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSLAMSegmentationModuleConfiguration.txt";
+   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "defaultSLAMSegmentationModuleConfiguration.txt";
 
    private Messager slamMessager;
    private SLAMModule slamModule;
@@ -38,8 +38,8 @@ public class SLAMBasedREAStandaloneLauncher extends Application
       segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
       segmentationMessager.startMessager();
 
-      Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
-      segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+      Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/robot-environment-awareness/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
 
       Stage secondStage = new Stage();
       planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
