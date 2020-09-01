@@ -94,6 +94,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    public abstract boolean doPelvisWarmup();
 
+   public boolean getUsePerfectSensors()
+   {
+      return false;
+   }
+
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -105,6 +110,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       DRCRobotModel robotModel = getRobotModel();
       boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
