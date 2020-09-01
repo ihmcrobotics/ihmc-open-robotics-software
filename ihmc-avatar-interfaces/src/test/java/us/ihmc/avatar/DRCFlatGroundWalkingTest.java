@@ -110,10 +110,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       DRCRobotModel robotModel = getRobotModel();
       boolean doPelvisWarmup = doPelvisWarmup();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.getSCSInitialSetup().setUsePerfectSensors(getUsePerfectSensors());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.setAddFootstepMessageGenerator(true);
       drcSimulationTestHelper.setUseHeadingAndVelocityScript(useVelocityAndHeadingScript);
