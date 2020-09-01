@@ -168,6 +168,18 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
+   // IK
+   public static final Topic<Boolean> IKEnabled = topic("IKEnabled");
+   public static final Topic<UserInterfaceIKMode> SelectedIKMode = topic("SelectedIKMode");
+   public static final Topic<double[]> IKSolution = topic("IKSolution");
+   public static final Topic<ArmTrajectoryMessage> ArmTrajectoryMessageTopic = topic("ArmTrajectoryMessageTopic");
+   public static final Topic<HandTrajectoryMessage> HandTrajectoryMessageTopic = topic("HandTrajectoryMessageTopic");
+   public static final Topic<FootTrajectoryMessage> FootTrajectoryMessageTopic = topic("FootTrajectoryMessageTopic");
+   public static final Topic<ChestTrajectoryMessage> ChestTrajectoryMessageTopic = topic("ChestTrajectoryMessageTopic");
+   public static final Topic<SpineTrajectoryMessage> SpineTrajectoryMessageTopic = topic("SpineTrajectoryMessageTopic");
+   public static final Topic<HeadTrajectoryMessage> HeadTrajectoryMessageTopic = topic("HeadTrajectoryMessageTopic");
+   public static final Topic<NeckTrajectoryMessage> NeckTrajectoryMessageTopic = topic("NeckTrajectoryMessageTopic");
+
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");

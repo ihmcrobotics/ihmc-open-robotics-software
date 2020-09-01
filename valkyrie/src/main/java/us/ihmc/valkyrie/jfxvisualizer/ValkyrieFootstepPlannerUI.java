@@ -54,6 +54,7 @@ public class ValkyrieFootstepPlannerUI extends Application
                                               model.getSplitFractionCalculatorParameters(),
                                               model,
                                               previewModel,
+                                              model.getJointMap(),
                                               model.getContactPointParameters(),
                                               model.getWalkingControllerParameters(),
                                               new ValkyrieUIAuxiliaryData());
