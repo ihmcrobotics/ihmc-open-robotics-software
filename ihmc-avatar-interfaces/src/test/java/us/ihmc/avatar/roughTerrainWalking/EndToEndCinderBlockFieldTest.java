@@ -75,12 +75,12 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    public void testWalkingOverCinderBlockField() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses(), getStepHeightOffset());
 
       simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      simulationTestHelper.getSCSInitialSetup().setUsePerfectSensors(getUsePerfectSensors());
       simulationTestHelper.setTestEnvironment(cinderBlockFieldEnvironment);
       simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
