@@ -142,7 +142,8 @@ public class LookAndStepBodyPathPlanningTask
                                                                                    goal.getX(),
                                                                                    goal.getY(),
                                                                                    goal.getZ(),
-                                                                                   goal.getYaw())));
+                                                                                   goal.getYaw())
+                                                                           .get()));
       }
 
       public void reset()
