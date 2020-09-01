@@ -65,6 +65,11 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public boolean getUsePerfectSensors()
+   {
+      return false;
+   }
+
    @Test
    @Tag("fast")
    public void testWalkingOverCinderBlockField() throws Exception
@@ -75,6 +80,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses(), getStepHeightOffset());
 
       simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      simulationTestHelper.getSCSInitialSetup().setUsePerfectSensors(getUsePerfectSensors());
       simulationTestHelper.setTestEnvironment(cinderBlockFieldEnvironment);
       simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
