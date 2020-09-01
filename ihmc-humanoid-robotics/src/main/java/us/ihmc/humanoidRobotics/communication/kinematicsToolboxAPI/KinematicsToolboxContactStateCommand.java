@@ -111,7 +111,7 @@ public class KinematicsToolboxContactStateCommand implements Command<KinematicsT
       private void set(KinematicsToolboxContactPoint other)
       {
          rigidBody = other.rigidBody;
-         position.setIncludingFrame(position);
+         position.setIncludingFrame(other.position);
       }
 
       public RigidBodyBasics getRigidBody()
