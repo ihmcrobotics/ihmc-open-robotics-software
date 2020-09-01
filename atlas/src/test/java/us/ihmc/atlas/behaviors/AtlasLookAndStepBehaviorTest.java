@@ -293,6 +293,18 @@ public class AtlasLookAndStepBehaviorTest
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
    }
 
+   @BeforeAll
+   public static void beforeAll()
+   {
+      Platform.setImplicitExit(false);
+   }
+
+   @AfterAll
+   public static void afterAll()
+   {
+      Platform.exit();
+   }
+
    @AfterEach
    public void afterEach()
    {

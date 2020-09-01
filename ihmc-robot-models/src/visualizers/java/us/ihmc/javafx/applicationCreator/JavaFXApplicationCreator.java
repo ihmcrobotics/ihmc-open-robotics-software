@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 /**
@@ -70,6 +71,11 @@ public class JavaFXApplicationCreator extends Application
       }
    }
 
+   public static void keepJavaFXAliveEvenAfterAllWindowsAreClosed()
+   {
+      Platform.setImplicitExit(false);
+   }
+
    /**
     * Call this method to spin up the JavaFX engine. If it is already spun up, then
     * it will ignore the call. 
@@ -81,14 +87,7 @@ public class JavaFXApplicationCreator extends Application
       if (createdJavaFXApplicationSingleton != null)
          return createdJavaFXApplicationSingleton;
 
-      new Thread()
-      {
-         @Override
-         public void run()
-         {
-            javafx.application.Application.launch(JavaFXApplicationCreator.class);
-         }
-      }.start();
+      new Thread(() -> Application.launch(JavaFXApplicationCreator.class)).start();
 
       createdJavaFXApplicationSingleton = JavaFXApplicationCreator.waitForStartUpTest();
 
