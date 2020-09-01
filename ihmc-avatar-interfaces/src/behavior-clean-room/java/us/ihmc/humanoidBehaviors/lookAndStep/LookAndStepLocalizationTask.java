@@ -157,6 +157,12 @@ public class LookAndStepLocalizationTask
       double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFeetPose.getYaw(), terminalGoal.getYaw()));
       reachedGoalZone &= yawToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
 
+      statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
+      statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
+                                           FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
+                                           lookAndStepBehaviorParameters.getGoalSatisfactionRadius(),
+                                           FormattingTools.getFormattedDecimal3D(yawToExactGoal),
+                                           lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
       if (reachedGoalZone)
       {
          statusLogger.warn("Goal reached.");
@@ -164,12 +170,6 @@ public class LookAndStepLocalizationTask
       }
       else
       {
-         statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
-         statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
-                                              FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
-                                              lookAndStepBehaviorParameters.getGoalSatisfactionRadius(),
-                                              FormattingTools.getFormattedDecimal3D(yawToExactGoal),
-                                              lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
          LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
                                                                                   closestSegmentIndex,
                                                                                   midFeetPose,
