@@ -29,6 +29,8 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments.TRIPLE_PLATFORM_HEIGHT;
+
 public class AtlasLookAndStepBehaviorDemo
 {
    private static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -49,22 +51,22 @@ public class AtlasLookAndStepBehaviorDemo
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
 
    {
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
-//                                                               0.0, 0.0, 0.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
-//                                                               0.0, Math.PI, 6.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
-//                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, Math.PI, 3.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
-//                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 3.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
-//                                                               0.0, 0.0, 0.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
-//                                                               0.0, Math.PI, 6.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
-//                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, Math.PI, 3.0, 0.0));
-//      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
-//                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 3.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
+                                                               0.0, 0.0, 0.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
+                                                               0.0, Math.PI, 6.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, Math.PI, 2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, 0.0,2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               0.0, 0.0, 0.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               0.0, Math.PI, 6.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, Math.PI, 2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, 0.0, 2.8, 0.0));
       environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateRealisticEasierStartingBlockRegions,
                                                                RealisticLabTerrainBuilder.PALLET_HEIGHT * 2.0, 0.0, 0.5, 0.5));
 

@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameRamp3D;
@@ -12,10 +12,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Ramp3D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.Stack;
@@ -47,6 +44,18 @@ public class PlanarRegionsListBuilder
    public void setRegionIds(int startId)
    {
       PlanerRegionBuilderTools.setRegionsIds(startId, planarRegionsList);
+   }
+
+   public void addXYPlaneSquareReferencedAtCenter(double sizeX, double sizeY)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(sizeX / 2.0, sizeY / 2.0);
+      convexPolygon.addVertex(-sizeX / 2.0, sizeY / 2.0);
+      convexPolygon.addVertex(-sizeX / 2.0, -sizeY / 2.0);
+      convexPolygon.addVertex(sizeX / 2.0, -sizeY / 2.0);
+      convexPolygon.update();
+      PlanarRegion planarRegion = new PlanarRegion(placementFrame.getTransformToWorldFrame(), convexPolygon);
+      planarRegionsList.addPlanarRegion(planarRegion);
    }
 
    public void addBoxReferencedAtCenter(double sizeX, double sizeY, double sizeZ)
@@ -177,6 +186,14 @@ public class PlanarRegionsListBuilder
    public void popOffset()
    {
       placementFrame.setPoseAndUpdate(placementFrameStack.pop());
+   }
+
+   public void popOffset(int numberOfOffsetsToPop)
+   {
+      for (int i = 0; i < numberOfOffsetsToPop; i++)
+      {
+         placementFrame.setPoseAndUpdate(placementFrameStack.pop());
+      }
    }
 
    public void popAllRemainingOffsets()
