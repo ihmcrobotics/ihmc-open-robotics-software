@@ -402,9 +402,6 @@ float64 shin_length -11.1
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1
 
-# Distance epsilon below snapped footstep that will be added to foothold
-float64 distance_epsilon_to_bridge_regions -11.1
-
 # If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
 # The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
 # so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is

@@ -16,7 +16,7 @@ public class FootstepPlanningTestTools
 {
    private final static double epsilon = 1e-7;
 
-   public static FootstepPlannerParametersReadOnly createRandomParameters(Random random)
+   public static FootstepPlannerParametersBasics createRandomParameters(Random random)
    {
 
       FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();

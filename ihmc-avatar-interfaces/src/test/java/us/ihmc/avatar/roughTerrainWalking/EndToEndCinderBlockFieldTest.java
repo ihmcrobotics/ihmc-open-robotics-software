@@ -65,11 +65,17 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public boolean getUsePerfectSensors()
+   {
+      return false;
+   }
+
    @Test
    @Tag("fast")
    public void testWalkingOverCinderBlockField() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses(), getStepHeightOffset());

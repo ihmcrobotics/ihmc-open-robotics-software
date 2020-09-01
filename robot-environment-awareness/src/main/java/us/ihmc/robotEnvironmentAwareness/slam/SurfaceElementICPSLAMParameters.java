@@ -41,6 +41,9 @@ public class SurfaceElementICPSLAMParameters
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_SURFACE_ELEMENTS = Integer.MAX_VALUE;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_CORRESPONDENCES = Integer.MAX_VALUE;
 
+   private static final double DEFAULT_STATIONARY_VELOCITY = 0.001;
+   private static final double DEFAULT_MAX_VELOCITY = 0.01;
+
    private double surfaceElementResolution;
    private double windowMargin;
    private int minimumNumberOfHit;
@@ -69,6 +72,8 @@ public class SurfaceElementICPSLAMParameters
    private int maximumQueueSize;
    private double maximumTimeBetweenFrames;
    private double longestTimeToLag;
+   private double stationaryVelocity;
+   private double maxVelocity;
 
    private int maxNumberOfSurfaceElements;
    private int maxNumberOfCorrespondences;
@@ -114,6 +119,9 @@ public class SurfaceElementICPSLAMParameters
       maximumTimeBetweenFrames = other.maximumTimeBetweenFrames;
       longestTimeToLag = other.longestTimeToLag;
 
+      stationaryVelocity = other.stationaryVelocity;
+      maxVelocity = other.maxVelocity;
+
       maxNumberOfSurfaceElements = other.maxNumberOfSurfaceElements;
       maxNumberOfCorrespondences = other.maxNumberOfCorrespondences;
    }
@@ -148,6 +156,9 @@ public class SurfaceElementICPSLAMParameters
       maximumQueueSize = DEFAULT_MAXIMUM_QUEUE_SIZE;
       maximumTimeBetweenFrames = DEFAULT_MAXIMUM_TIME_BETWEEN_FRAMES;
       longestTimeToLag = DEFAULT_LONGEST_TIME_TO_LAG;
+
+      stationaryVelocity = DEFAULT_STATIONARY_VELOCITY;
+      maxVelocity = DEFAULT_MAX_VELOCITY;
 
       maxNumberOfSurfaceElements = DEFAULT_MAXIMUM_NUMBER_OF_SURFACE_ELEMENTS;
       maxNumberOfCorrespondences = DEFAULT_MAXIMUM_NUMBER_OF_CORRESPONDENCES;
@@ -268,6 +279,16 @@ public class SurfaceElementICPSLAMParameters
       return maxNumberOfCorrespondences;
    }
 
+   public double getStationaryVelocity()
+   {
+      return stationaryVelocity;
+   }
+
+   public double getMaxVelocity()
+   {
+      return maxVelocity;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -383,6 +404,16 @@ public class SurfaceElementICPSLAMParameters
       this.maxNumberOfCorrespondences = maxNumberOfCorrespondences;
    }
 
+   public void setStationaryVelocity(double stationaryVelocity)
+   {
+      this.stationaryVelocity = stationaryVelocity;
+   }
+
+   public void setMaxVelocity(double maxVelocity)
+   {
+      this.maxVelocity = maxVelocity;
+   }
+
    @Override
    public String toString()
    {
@@ -397,7 +428,8 @@ public class SurfaceElementICPSLAMParameters
              + ", rotationPerturbation: " + getRotationPerturbation() + ", maximumQueueSize: " + getMaximumQueueSize() + ", maximumTimeBetweenFrames: "
              + getMaximumTimeBetweenFrames() + ", longestTimeToLag: " + getLongestTimeToLag() + ", maximumNumberOfSurfaceElements: "
              + getMaxNumberOfSurfaceElements() + ", maxNumberOfCorrespondences: " + getMaxNumberOfCorrespondences()
-             + ", computeFramesInParallel: " + getComputeFramesInParallel();
+             + ", computeFramesInParallel: " + getComputeFramesInParallel() + ", stationaryVelocity: " + getStationaryVelocity()
+            + ", maxVelocity: " + getMaxVelocity();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -429,6 +461,8 @@ public class SurfaceElementICPSLAMParameters
       parameters.setMaxNumberOfSurfaceElements(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfSurfaceElements()));
       parameters.setMaxNumberOfCorrespondences(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfCorrespondences()));
       parameters.setComputeFramesInParallel(ScannerTools.readNextBoolean(scanner, parameters.getComputeFramesInParallel()));
+      parameters.setStationaryVelocity(ScannerTools.readNextDouble(scanner, parameters.getStationaryVelocity()));
+      parameters.setMaxVelocity(ScannerTools.readNextDouble(scanner, parameters.getMaxVelocity()));
       scanner.close();
       return parameters;
    }
