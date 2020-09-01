@@ -27,7 +27,6 @@ import us.ihmc.robotics.optimization.OutputCalculator;
 
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
-   private static final boolean WARM_START = true;
    public static final boolean DEBUG = false;
    private final AtomicReference<SurfaceElementICPSLAMParameters> parameters = new AtomicReference<>(new SurfaceElementICPSLAMParameters());
 
@@ -127,7 +126,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       };
       int problemSize = surfaceElementICPSLAMParameters.getIncludePitchAndRoll() ? 6 : 4;
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(transformConverter, outputCalculator, problemSize, numberOfSurfel);
-      if (frame.getPreviousFrame() != null && WARM_START)
+      if (frame.getPreviousFrame() != null && surfaceElementICPSLAMParameters.getWarmStartDriftTransform())
       {
          Function<RigidBodyTransformReadOnly, DMatrixRMaj> inverseTransformConverter = LevenbergMarquardtParameterOptimizer.createInverseSpatialInputFunction(surfaceElementICPSLAMParameters.getIncludePitchAndRoll());
          optimizer.setInitialOptimalGuess(inverseTransformConverter.apply(frame.getPreviousFrame().getDriftCompensationTransform()));
