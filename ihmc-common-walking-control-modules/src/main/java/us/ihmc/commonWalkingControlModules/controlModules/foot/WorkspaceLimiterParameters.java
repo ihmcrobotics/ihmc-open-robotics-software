@@ -39,10 +39,10 @@ public class WorkspaceLimiterParameters
       timeToCorrectForUnachievedSwingTranslation.set(0.2);
 
       maxPercentOfLegLengthForSingularityAvoidanceInSupport = new YoDouble(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSupport", registry);
-      maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot = new DoubleParameter(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForFoot", registry, 0.98);
+      maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot = new DoubleParameter(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForFoot", registry, 0.97);
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight = new YoDouble(namePrefix + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForHeight", registry);
       minPercentOfLegLengthForSingularityAvoidanceInSwing = new YoDouble(namePrefix + "MinPercOfLegLengthForSingularityAvoidanceInSwing", registry);
-      percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForFoot", registry, 0.02);
+      percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForFoot", registry, 0.1);
       percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForHeight", registry, 0.1);
       percentOfLegLengthMarginToDisableSingularityAvoidance = new YoDouble(namePrefix + "PercMarginToDisableSingularityAvoidance", registry);
       percentOfLegLengthMarginToAbortSingularityAvoidance = new YoDouble(namePrefix + "PercMarginToAbortSingularityAvoidance", registry);
