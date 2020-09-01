@@ -59,6 +59,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private ToggleButton insertMissInOcTree;
    @FXML
    private ToggleButton computeFramesInParallel;
+   @FXML
+   private ToggleButton warmStartDriftTransform;
 
    @FXML
    private ToggleButton includePitchAndRoll;
@@ -134,6 +136,7 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInsertMissInOcTree(insertMissInOcTree.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeFramesInParallel(computeFramesInParallel.selectedProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalWarmStartDriftTransform(warmStartDriftTransform.selectedProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalIncludePitchAndRoll(includePitchAndRoll.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalTranslationPerturbation(translationPerturbation.getValueFactory().valueProperty());
