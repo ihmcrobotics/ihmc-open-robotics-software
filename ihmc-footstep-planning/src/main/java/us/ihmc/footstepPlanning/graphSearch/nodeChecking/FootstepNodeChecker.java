@@ -76,6 +76,7 @@ public class FootstepNodeChecker
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, stanceNode, parameters.getWiggleWhilePlanning());
       candidateNodeSnapData.set(snapData);
       goodPositionChecker.setApproximateStepDimensions(candidateNode, stanceNode);
+      achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
@@ -93,7 +94,6 @@ public class FootstepNodeChecker
       if (parameters.getWiggleWhilePlanning() && parameters.getRejectIfWiggleNotSatisfied())
       {
          double epsilon = 1e-5;
-         this.achievedDeltaInside.set(snapData.getAchievedInsideDelta());
          if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDelta() - epsilon)
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);

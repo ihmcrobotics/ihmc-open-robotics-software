@@ -349,6 +349,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return postProcessHandler.getSplitFractionParameters();
    }
 
+   public SideDependentList<ConvexPolygon2D> getFootPolygons()
+   {
+      return aStarFootstepPlanner.getFootPolygons();
+   }
+
    public FootstepNodeSnapAndWiggler getSnapper()
    {
       return aStarFootstepPlanner.getSnapper();

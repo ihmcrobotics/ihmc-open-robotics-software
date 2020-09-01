@@ -23,6 +23,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
 import javax.swing.*;
@@ -261,6 +262,9 @@ public class FootstepPlannerLogLoader
             }
          }
 
+         log.getFootPolygons().put(RobotSide.LEFT, readPolygon(dataFileReader.readLine()));
+         log.getFootPolygons().put(RobotSide.RIGHT, readPolygon(dataFileReader.readLine()));
+
          // load data file
          dataFileReader.close();
          File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
@@ -292,6 +296,7 @@ public class FootstepPlannerLogLoader
                edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
+               edgeData.getCandidateNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
 
                long[] longCSV = getLongCSV(true, dataFileReader.readLine());
                for (int j = 0; j < longCSV.length; j++)

@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +27,10 @@ public class FootstepPlannerLog
 
    // Logged data
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
-   private final List<VariableDescriptor> variableNames = new ArrayList<>();
+   private final List<VariableDescriptor> variableDescriptors = new ArrayList<>();
    private final Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
+   private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
 
    public FootstepPlannerLog(String logName)
    {
@@ -76,7 +79,7 @@ public class FootstepPlannerLog
 
    public List<VariableDescriptor> getVariableDescriptors()
    {
-      return variableNames;
+      return variableDescriptors;
    }
 
    public Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
@@ -87,6 +90,11 @@ public class FootstepPlannerLog
    public List<FootstepPlannerIterationData> getIterationData()
    {
       return iterationData;
+   }
+
+   public SideDependentList<ConvexPolygon2D> getFootPolygons()
+   {
+      return footPolygons;
    }
 
    /**
