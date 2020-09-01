@@ -171,14 +171,15 @@ public class LookAndStepBehavior implements BehaviorInterface
             helper::publishToUI,
             lookAndStepParameters,
             robotInterface.newSyncedRobot(),
+            helper.createWalkingCompletedNotification(),
             () -> {
                if ((!isBeingReset.get()))
                {
                   bodyPathPlanning.acceptGoal(null);
-                  helper.publishROS2(REACHED_GOAL);
                   behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
                }
             },
+            () -> helper.publishROS2(REACHED_GOAL),
             lastCommandedFootsteps,
             footstepPlanning::acceptLocalizationResult
       );
