@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -34,8 +36,10 @@ public class LookAndStepLocalizationTask
    protected UIPublisher uiPublisher;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected RemoteSyncedRobotModel syncedRobot;
-   protected Runnable reachedGoalOutput;
+   protected Runnable clearAndActivateBodyPathPlanning;
+   protected Runnable broadcastReachedGoal;
    protected Consumer<LookAndStepLocalizationResult> footstepPlanningOutput;
+   protected Notification finishedWalkingNotification;
 
    public static class LookAndStepLocalization extends LookAndStepLocalizationTask
    {
@@ -49,13 +53,17 @@ public class LookAndStepLocalizationTask
                              UIPublisher uiPublisher,
                              LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                              RemoteSyncedRobotModel syncedRobot,
-                             Runnable reachedGoalOutput,
+                             Notification finishedWalkingNotification,
+                             Runnable clearAndActivateBodyPathPlanning,
+                             Runnable broadcastReachedGoal,
                              SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps,
                              Consumer<LookAndStepLocalizationResult> footstepPlanningOutput)
       {
          this.lastCommandedFootsteps = lastCommandedFootsteps;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
-         this.reachedGoalOutput = reachedGoalOutput;
+         this.finishedWalkingNotification = finishedWalkingNotification;
+         this.clearAndActivateBodyPathPlanning = clearAndActivateBodyPathPlanning;
+         this.broadcastReachedGoal = broadcastReachedGoal;
          this.footstepPlanningOutput = footstepPlanningOutput;
          this.statusLogger = statusLogger;
          this.uiPublisher = uiPublisher;
@@ -165,8 +173,9 @@ public class LookAndStepLocalizationTask
                                            lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
       if (reachedGoalZone)
       {
-         statusLogger.warn("Goal reached.");
-         reachedGoalOutput.run();
+         statusLogger.info("Eventual pose reaches goal.");
+         clearAndActivateBodyPathPlanning.run();
+         ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
       else
       {
@@ -176,5 +185,15 @@ public class LookAndStepLocalizationTask
                                                                                   bodyPathPlan, eventualStanceFeet);
          footstepPlanningOutput.accept(result);
       }
+   }
+
+   /** Here we wait until the robot is finished walking to report reached goal */
+   private void reachedGoalPublicationThread()
+   {
+      statusLogger.info("Waiting for walking to complete...");
+      finishedWalkingNotification.poll();
+      finishedWalkingNotification.blockingPoll();
+      statusLogger.info("Walking completed.");
+      broadcastReachedGoal.run();
    }
 }

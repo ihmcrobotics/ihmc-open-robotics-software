@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -23,6 +24,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
@@ -255,6 +257,18 @@ public class BehaviorHelper
    {
       ROS2Topic topic = ROS2Tools.REA.withOutput().withType(PlanarRegionsListMessage.class).withNaming(typeName -> typeName + "_" + specifier);
       return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, topic.getName());
+   }
+
+   public Notification createWalkingCompletedNotification()
+   {
+      Notification notification = new Notification();
+      createROS2ControllerCallback(WalkingStatusMessage.class, walkingStatusMessage -> {
+         if (walkingStatusMessage.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
+         {
+            notification.set();
+         }
+      });
+      return notification;
    }
 
    // Thread and Schedule Methods:
