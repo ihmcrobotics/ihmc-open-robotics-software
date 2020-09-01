@@ -248,9 +248,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -543,10 +540,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -764,9 +757,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getShinHeightOffet());
 
 
-      cdr.write_type_6(data.getDistanceEpsilonToBridgeRegions());
-
-
       cdr.write_type_9(data.getStepOnlyWithRequestedSide());
 
    }
@@ -981,9 +971,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinHeightOffet(cdr.read_type_6());
       	
 
-      data.setDistanceEpsilonToBridgeRegions(cdr.read_type_6());
-      	
-
       data.setStepOnlyWithRequestedSide(cdr.read_type_9());
       	
 
@@ -1131,8 +1118,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
 
-      ser.write_type_6("distance_epsilon_to_bridge_regions", data.getDistanceEpsilonToBridgeRegions());
-
       ser.write_type_9("step_only_with_requested_side", data.getStepOnlyWithRequestedSide());
    }
 
@@ -1277,8 +1262,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinLength(ser.read_type_6("shin_length"));
 
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
-
-      data.setDistanceEpsilonToBridgeRegions(ser.read_type_6("distance_epsilon_to_bridge_regions"));
 
       data.setStepOnlyWithRequestedSide(ser.read_type_9("step_only_with_requested_side"));
    }

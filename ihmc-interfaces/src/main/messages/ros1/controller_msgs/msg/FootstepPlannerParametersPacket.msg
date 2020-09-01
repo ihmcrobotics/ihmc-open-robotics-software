@@ -463,10 +463,6 @@ float64 shin_length
 # Field default value -11.1
 float64 shin_height_offet
 
-# Distance epsilon below snapped footstep that will be added to foothold
-# Field default value -11.1
-float64 distance_epsilon_to_bridge_regions
-
 # If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
 # The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
 # so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is

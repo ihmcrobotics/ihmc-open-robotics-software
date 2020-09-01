@@ -103,7 +103,6 @@ public class FootstepPlannerMessageTools
       packet.setShinHeelClearance(parameters.getShinHeelClearance());
       packet.setShinLength(parameters.getShinLength());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
-      packet.setDistanceEpsilonToBridgeRegions(parameters.getDistanceEpsilonToBridgeRegions());
 
       RobotSide stepOnlyWithRequestedSide = parameters.getStepOnlyWithRequestedSide();
       packet.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide == null ? -1 : stepOnlyWithRequestedSide.toByte());
