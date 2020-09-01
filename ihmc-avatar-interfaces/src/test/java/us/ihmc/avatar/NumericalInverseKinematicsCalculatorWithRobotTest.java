@@ -129,6 +129,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       {
          case PETER_SOLVER :
          {
+            double positionCost = 1.0;
             double orientationDiscount = 0.2;
             int maxIterations = 5000;
             boolean solveOrientation = true;
@@ -136,8 +137,15 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             double acceptTolLoc = 0.005;
             double acceptTolAngle = 0.02;
             double parameterChangePenalty = 1.0e-4; //0.1;
-            inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, orientationDiscount, maxIterations, solveOrientation,
-                    convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
+            inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian,
+                                                                                 positionCost,
+                                                                                 orientationDiscount,
+                                                                                 maxIterations,
+                                                                                 solveOrientation,
+                                                                                 convergeTolerance,
+                                                                                 acceptTolLoc,
+                                                                                 acceptTolAngle,
+                                                                                 parameterChangePenalty);
 
             break;
          }

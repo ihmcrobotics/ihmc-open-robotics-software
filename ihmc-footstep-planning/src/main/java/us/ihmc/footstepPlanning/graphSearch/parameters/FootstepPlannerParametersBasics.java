@@ -353,11 +353,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
    }
 
-   default void setDistanceEpsilonToBridgeRegions(double distanceEpsilonToBridgeRegions)
-   {
-      set(FootstepPlannerParameterKeys.distanceEpsilonToBridgeRegions, distanceEpsilonToBridgeRegions);
-   }
-
    default void setStepOnlyWithRequestedSide(byte side)
    {
       set(stepOnlyWithRequestedSide, side);
@@ -494,8 +489,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinHeelClearance(parametersPacket.getShinHeelClearance());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
-      if (parametersPacket.getDistanceEpsilonToBridgeRegions() != noValue)
-         setDistanceEpsilonToBridgeRegions(parametersPacket.getDistanceEpsilonToBridgeRegions());
       setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

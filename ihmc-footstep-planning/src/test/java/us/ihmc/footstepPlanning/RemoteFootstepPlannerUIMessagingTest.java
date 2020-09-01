@@ -44,6 +44,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -384,8 +385,12 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPlannerParametersReadOnly randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
+         FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
+
+         // step only with requested side is exception, has to be in interval [-1,1]
+         randomParameters.setStepOnlyWithRequestedSide((byte) (random.nextInt(2) - 1));
+
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
@@ -747,7 +752,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Step up weights aren't equal.", parameters.getStepUpWeight(), packet.getStepUpWeight(), epsilon);
       assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
-      assertEquals("Distance epsilon to bridge regions isn't equal.", parameters.getDistanceEpsilonToBridgeRegions(), packet.getDistanceEpsilonToBridgeRegions(), epsilon);
    }
 
 

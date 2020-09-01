@@ -553,11 +553,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double shin_height_offet_ = -11.1;
 
    /**
-            * Distance epsilon below snapped footstep that will be added to foothold
-            */
-   public double distance_epsilon_to_bridge_regions_ = -11.1;
-
-   /**
             * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
             * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
             * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
@@ -567,7 +562,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    public FootstepPlannerParametersPacket()
    {
-
 
 
 
@@ -855,9 +849,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       shin_height_offet_ = other.shin_height_offet_;
-
-
-      distance_epsilon_to_bridge_regions_ = other.distance_epsilon_to_bridge_regions_;
 
 
       step_only_with_requested_side_ = other.step_only_with_requested_side_;
@@ -2300,22 +2291,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-            * Distance epsilon below snapped footstep that will be added to foothold
-            */
-   public void setDistanceEpsilonToBridgeRegions(double distance_epsilon_to_bridge_regions)
-   {
-      distance_epsilon_to_bridge_regions_ = distance_epsilon_to_bridge_regions;
-   }
-   /**
-            * Distance epsilon below snapped footstep that will be added to foothold
-            */
-   public double getDistanceEpsilonToBridgeRegions()
-   {
-      return distance_epsilon_to_bridge_regions_;
-   }
-
-
-   /**
             * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
             * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
             * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
@@ -2562,9 +2537,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_epsilon_to_bridge_regions_, other.distance_epsilon_to_bridge_regions_, epsilon)) return false;
-
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_only_with_requested_side_, other.step_only_with_requested_side_, epsilon)) return false;
 
 
@@ -2788,9 +2760,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
 
 
-      if(this.distance_epsilon_to_bridge_regions_ != otherMyClass.distance_epsilon_to_bridge_regions_) return false;
-
-
       if(this.step_only_with_requested_side_ != otherMyClass.step_only_with_requested_side_) return false;
 
 
@@ -3010,9 +2979,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       builder.append("shin_height_offet=");
       builder.append(this.shin_height_offet_);      builder.append(", ");
-
-      builder.append("distance_epsilon_to_bridge_regions=");
-      builder.append(this.distance_epsilon_to_bridge_regions_);      builder.append(", ");
 
       builder.append("step_only_with_requested_side=");
       builder.append(this.step_only_with_requested_side_);

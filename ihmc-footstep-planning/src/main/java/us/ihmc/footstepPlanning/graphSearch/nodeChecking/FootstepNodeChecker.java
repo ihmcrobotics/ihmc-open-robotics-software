@@ -10,43 +10,48 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 import java.util.function.UnaryOperator;
 
 public class FootstepNodeChecker
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapAndWiggler snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
-   private final FootstepPlannerEdgeData edgeData;
 
    private final PlanarRegionCliffAvoider cliffAvoider;
    private final ObstacleBetweenNodesChecker obstacleBetweenNodesChecker;
    private final FootstepNodeBodyCollisionDetector collisionDetector;
-   private final GoodFootstepPositionChecker goodPositionChecker;
+   private final FootstepPoseChecker goodPositionChecker;
 
    private PlanarRegionsList planarRegionsList = null;
 
-   // Variables to log
    private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
-   private double footAreaPercentage;
-   private int footstepIndex = -1;
+   private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> rejectionReason = new YoEnum<>("rejectionReason", "", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
+   private final YoDouble footAreaPercentage = new YoDouble("footAreaPercentage", registry);
+   private final YoInteger footstepIndex = new YoInteger("footstepIndex", registry);
+   private final YoDouble achievedDeltaInside = new YoDouble("achievedDeltaInside", registry);
 
    public FootstepNodeChecker(FootstepPlannerParametersReadOnly parameters,
-                              SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapAndWiggler snapper, FootstepPlannerEdgeData edgeData)
+                              SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
-      this.edgeData = edgeData;
       this.footPolygons = footPolygons;
       this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenNodesChecker = new ObstacleBetweenNodesChecker(parameters, snapper);
       this.collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
-      this.goodPositionChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      this.goodPositionChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      parentRegistry.addChild(registry);
    }
 
    public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -57,33 +62,32 @@ public class FootstepNodeChecker
       }
 
       clearLoggedVariables();
-      BipedalFootstepPlannerNodeRejectionReason rejectionReason = isNodeValidInternal(candidateNode, stanceNode);
-      logVariables(candidateNode, stanceNode, rejectionReason);
-
-      return rejectionReason == null;
+      doValidityCheck(candidateNode, stanceNode);
+      return rejectionReason.getValue() == null;
    }
 
    public void onIterationStart(FootstepNode footstepNode)
    {
-      footstepIndex = footstepNode.getChildNodes().size() - 1;
+      footstepIndex.set(footstepNode.getChildNodes().size() - 1);
    }
 
-   private BipedalFootstepPlannerNodeRejectionReason isNodeValidInternal(FootstepNode candidateNode, FootstepNode stanceNode)
+   private void doValidityCheck(FootstepNode candidateNode, FootstepNode stanceNode)
    {
-      footstepIndex++;
-
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, stanceNode, parameters.getWiggleWhilePlanning());
       candidateNodeSnapData.set(snapData);
+      goodPositionChecker.setApproximateStepDimensions(candidateNode, stanceNode);
+      achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
-         return null;
+         return;
       }
 
       // Check valid snap
       if (candidateNodeSnapData.getSnapTransform().containsNaN())
       {
-         return BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP;
+         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         return;
       }
 
       // Check wiggle parameters satisfied
@@ -92,7 +96,8 @@ public class FootstepNodeChecker
          double epsilon = 1e-5;
          if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDelta() - epsilon)
          {
-            return BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET;
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);
+            return;
          }
       }
 
@@ -101,37 +106,44 @@ public class FootstepNodeChecker
       double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
-         return BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP;
+         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         return;
       }
 
       // Check snap area
       ConvexPolygon2D footholdAfterSnap = candidateNodeSnapData.getCroppedFoothold();
       double croppedFootArea = footholdAfterSnap.getArea();
       double fullFootArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
-      footAreaPercentage = croppedFootArea / fullFootArea;
+      footAreaPercentage.set(croppedFootArea / fullFootArea);
 
       double epsilonAreaPercentage = 1e-4;
-      if (!footholdAfterSnap.isEmpty() && footAreaPercentage < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
+      if (!footholdAfterSnap.isEmpty() && footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
       {
-         return BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA;
+         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
+         return;
       }
 
       // Check for ankle collision
       cliffAvoider.setPlanarRegionsList(planarRegionsList);
       if(!cliffAvoider.isNodeValid(candidateNode))
       {
-         return BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM;
+         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+         return;
       }
 
       if(stanceNode == null)
       {
-         return null;
+         return;
       }
 
+      footstepIndex.set(stanceNode.getChildNodes().size());
+
       // Check snapped footstep placement
-      if (!goodPositionChecker.isNodeValid(candidateNode, stanceNode))
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = goodPositionChecker.checkStepValidity(candidateNode, stanceNode);
+      if (poseRejectionReason != null)
       {
-         return goodPositionChecker.getRejectionReason();
+         rejectionReason.set(poseRejectionReason);
+         return;
       }
 
       // Check for obstacle collisions (vertically extruded line between steps)
@@ -142,7 +154,8 @@ public class FootstepNodeChecker
          {
             if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
             {
-               return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY;
+               rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
+               return;
             }
          }
          catch(Exception e)
@@ -156,11 +169,10 @@ public class FootstepNodeChecker
       {
          if (boundingBoxCollisionDetected(candidateNode, stanceNode))
          {
-            return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY;
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
+            return;
          }
-     }
-
-      return null;
+      }
    }
 
    private boolean boundingBoxCollisionDetected(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -200,23 +212,13 @@ public class FootstepNodeChecker
       this.goodPositionChecker.setParentNodeSupplier(parentNodeSupplier);
    }
 
-   private void logVariables(FootstepNode candidateNode, FootstepNode stanceNode, BipedalFootstepPlannerNodeRejectionReason rejectionReason)
-   {
-      if (edgeData != null)
-      {
-         edgeData.setStanceNode(stanceNode);
-         edgeData.setCandidateNode(candidateNode);
-         edgeData.setCandidateNodeSnapData(candidateNodeSnapData);
-         edgeData.setFootAreaPercentage(footAreaPercentage);
-         edgeData.setRejectionReason(rejectionReason);
-         edgeData.setStepIndex(footstepIndex);
-         goodPositionChecker.logVariables();
-      }
-   }
-
    private void clearLoggedVariables()
    {
-      footAreaPercentage = Double.NaN;
+      footAreaPercentage.setToNaN();
+      rejectionReason.set(null);
+      footstepIndex.set(-1);
+      achievedDeltaInside.setToNaN();
+
       candidateNodeSnapData.clear();
       goodPositionChecker.clearLoggedVariables();
    }

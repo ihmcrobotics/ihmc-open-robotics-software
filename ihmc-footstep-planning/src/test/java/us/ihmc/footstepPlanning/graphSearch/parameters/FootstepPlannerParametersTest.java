@@ -244,10 +244,6 @@ public class FootstepPlannerParametersTest
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
 
-      double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setDistanceEpsilonToBridgeRegions(distanceEpsilonToBridgeRegions);
-      assertEquals(distanceEpsilonToBridgeRegions, parameters.getDistanceEpsilonToBridgeRegions());
-
       byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
       parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);
       assertEquals(RobotSide.fromByte(stepOnlyWithRequestedSide), parameters.getStepOnlyWithRequestedSide());

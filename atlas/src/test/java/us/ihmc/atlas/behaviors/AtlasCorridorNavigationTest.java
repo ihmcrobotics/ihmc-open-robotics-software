@@ -331,32 +331,6 @@ public class AtlasCorridorNavigationTest
          {
             LogTools.error("Footstep plan not valid for execution! {}", plannerOutput.getFootstepPlanningResult());
 
-            EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionReasonCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
-            Arrays.stream(BipedalFootstepPlannerNodeRejectionReason.values).forEach(reason -> rejectionReasonCount.put(reason, new MutableInt()));
-
-            List<FootstepPlannerIterationData> iterationDataList = planner.getIterationData();
-            HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = planner.getEdgeDataMap();
-            iterationDataList.stream().forEach(iterationData ->
-                                               {
-                                                  List<FootstepNode> childNodes = iterationData.getChildNodes();
-                                                  for (int i = 0; i < childNodes.size(); i++)
-                                                  {
-                                                     GraphEdge<FootstepNode> edge = new GraphEdge<>(iterationData.getStanceNode(), childNodes.get(i));
-                                                     if (!edgeDataMap.containsKey(edge))
-                                                        continue;
-                                                     BipedalFootstepPlannerNodeRejectionReason rejectionReason = edgeDataMap.get(edge).getRejectionReason();
-                                                     if (rejectionReason != null)
-                                                        rejectionReasonCount.get(rejectionReason).incrementAndGet();
-                                                  }
-                                               });
-
-            for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
-            {
-               System.out.println("Reason: " + rejectionReason + "  " + rejectionReasonCount.get(rejectionReason));
-            }
-
-            ThreadTools.sleep(1000);
-            continue;
          }
 
          FootstepPlan footstepPlan = plannerOutput.getFootstepPlan();
