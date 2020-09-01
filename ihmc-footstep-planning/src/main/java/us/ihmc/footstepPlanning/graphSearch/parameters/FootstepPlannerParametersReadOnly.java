@@ -849,14 +849,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Distance epsilon below snapped footstep that will be added to foothold
-    */
-   default double getDistanceEpsilonToBridgeRegions()
-   {
-      return get(distanceEpsilonToBridgeRegions);
-   }
-
-   /**
     * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
     */
    default RobotSide getStepOnlyWithRequestedSide()

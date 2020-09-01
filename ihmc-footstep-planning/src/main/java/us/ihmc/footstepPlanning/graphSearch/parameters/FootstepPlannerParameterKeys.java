@@ -66,7 +66,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  shinToeClearance                             = keys.addDoubleKey("Shin toe clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeelClearance                            = keys.addDoubleKey("Shin heel clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
-   public static final DoubleStoredPropertyKey  distanceEpsilonToBridgeRegions               = keys.addDoubleKey("Distance epsilon to bridge regions", 0.0);
    public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);
 
    // cost parameters
