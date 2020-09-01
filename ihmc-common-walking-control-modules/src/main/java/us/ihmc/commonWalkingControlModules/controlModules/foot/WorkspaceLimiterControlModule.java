@@ -545,11 +545,6 @@ public class WorkspaceLimiterControlModule
       double desiredLinearAccelerationZ = InterpolationTools.linearInterpolate(desiredFootLinearAcceleration.getZ(),
                                                                                0.0,
                                                                                alphaSwingSingularityAvoidanceForFoot.getDoubleValue());
-      if (alphaSwingSingularityAvoidanceForFoot.getDoubleValue() >= 1.0)
-      {
-         desiredLinearVelocityZ = pelvisLinearVelocity.getZ();
-         desiredLinearAccelerationZ = 0.0;
-      }
 
       desiredFootPosition.setZ(desiredFootPositionInAxisFrame);
 
