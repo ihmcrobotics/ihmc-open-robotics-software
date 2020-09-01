@@ -94,6 +94,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    public abstract boolean doPelvisWarmup();
 
+   public boolean getUsePerfectSensors()
+   {
+      return false;
+   }
+
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -108,6 +113,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.getSCSInitialSetup().setUsePerfectSensors(getUsePerfectSensors());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.setAddFootstepMessageGenerator(true);
       drcSimulationTestHelper.setUseHeadingAndVelocityScript(useVelocityAndHeadingScript);
