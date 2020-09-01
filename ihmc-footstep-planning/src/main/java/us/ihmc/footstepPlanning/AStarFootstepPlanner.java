@@ -419,6 +419,11 @@ public class AStarFootstepPlanner
       return registry;
    }
 
+   public SideDependentList<ConvexPolygon2D> getFootPolygons()
+   {
+      return footPolygons;
+   }
+
    public FootstepNodeSnapAndWiggler getSnapper()
    {
       return snapper;

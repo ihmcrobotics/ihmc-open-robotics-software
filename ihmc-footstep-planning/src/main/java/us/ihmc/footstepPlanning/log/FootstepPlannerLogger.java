@@ -24,6 +24,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -296,6 +298,12 @@ public class FootstepPlannerLogger
             fileWriter.write(newLine);
          }
 
+         SideDependentList<ConvexPolygon2D> footPolygons = planner.getFootPolygons();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            writeFootPolygon(0, robotSide.getLowerCaseName() + "FootPolygon:", footPolygons.get(robotSide));
+         }
+
          fileWriter.flush();
       }
       catch (Exception e)
@@ -320,7 +328,7 @@ public class FootstepPlannerLogger
          for (int i = 0; i < iterationDataList.size(); i++)
          {
             FootstepPlannerIterationData iterationData = iterationDataList.get(i);
-            fileWriter.write("Iteration " + i + "\n");
+            fileWriter.write("Iteration " + i + newLine);
             writeNode(1, "stanceNode", iterationData.getStanceNode());
             writeNode(1, "idealStep", iterationData.getIdealStep());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
@@ -420,7 +428,7 @@ public class FootstepPlannerLogger
                                                      translation.getZ()));
    }
 
-   private void writeFootPolygon(int numTabs, String name, ConvexPolygon2D croppedFoothold) throws IOException
+   private void writeFootPolygon(int numTabs, String name, ConvexPolygon2D footPolygon) throws IOException
    {
       for (int i = 0; i < numTabs; i++)
       {
@@ -429,13 +437,11 @@ public class FootstepPlannerLogger
 
       fileWriter.write(name);
 
-      for (int vertexIndex = 0; vertexIndex < croppedFoothold.getNumberOfVertices(); vertexIndex++)
+      for (int vertexIndex = 0; vertexIndex < footPolygon.getNumberOfVertices(); vertexIndex++)
       {
-         Point2DReadOnly vertex = croppedFoothold.getVertex(vertexIndex);
-         fileWriter.write(vertex.getX() + ", " + vertex.getY() + (vertexIndex == croppedFoothold.getNumberOfVertices() - 1 ? "" : ","));
+         Point2DReadOnly vertex = footPolygon.getVertex(vertexIndex);
+         fileWriter.write(vertex.getX() + "," + vertex.getY() + (vertexIndex == footPolygon.getNumberOfVertices() - 1 ? newLine : ","));
       }
-
-      fileWriter.write("\n");
    }
 
    private void writePoint2D(int numTabs, Tuple2DReadOnly tuple) throws IOException
