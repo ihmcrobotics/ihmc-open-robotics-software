@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class PlanarRegionsFromCodeViewer extends Application
 {
    public static final Supplier<PlanarRegionsList> PLANNER_ENVIRONMENT = PlannerTestEnvironments::getMazeCorridor;
-   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::generateRealisticEasierStartingBlockRegions;
+   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown;
 
    public static final Supplier<PlanarRegionsList> PLANAR_REGIONS_TO_VIEW = BEHAVIOR_ENVIRONMENT;
 
