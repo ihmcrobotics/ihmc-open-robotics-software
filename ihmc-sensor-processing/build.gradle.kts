@@ -38,7 +38,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:simulation-construction-set-test:0.20.4")
+   api("us.ihmc:simulation-construction-set-test:0.20.5")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
