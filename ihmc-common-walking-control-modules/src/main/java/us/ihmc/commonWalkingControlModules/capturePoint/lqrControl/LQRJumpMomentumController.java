@@ -313,7 +313,7 @@ public class LQRJumpMomentumController
             CommonOps_DDRM.addEquals(tempMatrix, duration, Ad1);
 
             FlightS1Function s1Function = new FlightS1Function();
-            s1Function.set(Ad1, tempMatrix, nextInitialS1);
+            s1Function.set(nextInitialS1);
 
             s1Flight.put(thisVRPTrajectory, s1Function);
          }

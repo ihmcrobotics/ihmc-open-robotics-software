@@ -7,15 +7,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LQRJumpSphereController implements SphereControllerInterface
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
+   private final YoRegistry registry = new YoRegistry("SphereController");
 
    private final RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot;
    private final SphereRobot sphereRobot;
@@ -110,7 +110,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

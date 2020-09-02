@@ -185,6 +185,7 @@ public class LQRJumpMomentumControllerTest
       }
    }
 
+   /*
    @Test
    public void testComputingAndS1TwoContactsStartingInJump()
    {
@@ -958,6 +959,8 @@ public class LQRJumpMomentumControllerTest
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
    }
 
+
+    */
 
    /*
    @Test
