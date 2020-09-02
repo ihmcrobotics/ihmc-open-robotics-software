@@ -109,7 +109,7 @@ public class LQRMomentumControllerSimulation
 
          SimpleCoMTrajectoryPlanner dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot3.getOmega0Provider());
          dcmPlan.setNominalCoMHeight(sphereRobot3.getDesiredHeight());
-         dcmPlan.setCornerPointViewer(new CornerPointViewer(sphereRobot3.getScsRobot().getRobotsYoVariableRegistry(),
+         dcmPlan.setCornerPointViewer(new CornerPointViewer(sphereRobot3.getScsRobot().getRobotsYoRegistry(),
                                                             yoGraphicsListRegistry3));
 
          controller3 = new LQRSphereController(sphereRobot3, dcmPlan, yoGraphicsListRegistry3);
