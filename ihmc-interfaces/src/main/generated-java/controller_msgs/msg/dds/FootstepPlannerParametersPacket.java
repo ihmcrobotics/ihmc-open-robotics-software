@@ -80,17 +80,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double ideal_back_step_length_ = -11.1;
 
    /**
-            * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-            * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-            * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-            * to allowing footsteps that partially intersect planar regions.
-            * 
-            * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-            * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-            * The smallest acceptable distance to the edge of a cliff
-            * The maximum error between desired and actual foot placement
+            * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+            * to the edge. A negative value means the footstep can overhang a region.
             */
-   public double wiggle_inside_delta_;
+   public double wiggle_inside_delta_target_ = -11.1;
+
+   /**
+            * This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+            * it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+            */
+   public double wiggle_inside_delta_minimum_ = -11.1;
 
    /**
             * Maximum xy-distance the planner will consider for candidate steps.
@@ -633,6 +632,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
 
+
    }
 
    public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket other)
@@ -665,7 +665,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       ideal_back_step_length_ = other.ideal_back_step_length_;
 
 
-      wiggle_inside_delta_ = other.wiggle_inside_delta_;
+      wiggle_inside_delta_target_ = other.wiggle_inside_delta_target_;
+
+
+      wiggle_inside_delta_minimum_ = other.wiggle_inside_delta_minimum_;
 
 
       maximum_step_reach_ = other.maximum_step_reach_;
@@ -973,34 +976,38 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-            * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-            * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-            * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-            * to allowing footsteps that partially intersect planar regions.
-            * 
-            * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-            * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-            * The smallest acceptable distance to the edge of a cliff
-            * The maximum error between desired and actual foot placement
+            * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+            * to the edge. A negative value means the footstep can overhang a region.
             */
-   public void setWiggleInsideDelta(double wiggle_inside_delta)
+   public void setWiggleInsideDeltaTarget(double wiggle_inside_delta_target)
    {
-      wiggle_inside_delta_ = wiggle_inside_delta;
+      wiggle_inside_delta_target_ = wiggle_inside_delta_target;
    }
    /**
-            * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-            * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-            * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-            * to allowing footsteps that partially intersect planar regions.
-            * 
-            * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-            * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-            * The smallest acceptable distance to the edge of a cliff
-            * The maximum error between desired and actual foot placement
+            * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+            * to the edge. A negative value means the footstep can overhang a region.
             */
-   public double getWiggleInsideDelta()
+   public double getWiggleInsideDeltaTarget()
    {
-      return wiggle_inside_delta_;
+      return wiggle_inside_delta_target_;
+   }
+
+
+   /**
+            * This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+            * it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+            */
+   public void setWiggleInsideDeltaMinimum(double wiggle_inside_delta_minimum)
+   {
+      wiggle_inside_delta_minimum_ = wiggle_inside_delta_minimum;
+   }
+   /**
+            * This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+            * it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+            */
+   public double getWiggleInsideDeltaMinimum()
+   {
+      return wiggle_inside_delta_minimum_;
    }
 
 
@@ -2351,7 +2358,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_back_step_length_, other.ideal_back_step_length_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_, other.wiggle_inside_delta_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_target_, other.wiggle_inside_delta_target_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_minimum_, other.wiggle_inside_delta_minimum_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_reach_, other.maximum_step_reach_, epsilon)) return false;
@@ -2574,7 +2584,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.ideal_back_step_length_ != otherMyClass.ideal_back_step_length_) return false;
 
 
-      if(this.wiggle_inside_delta_ != otherMyClass.wiggle_inside_delta_) return false;
+      if(this.wiggle_inside_delta_target_ != otherMyClass.wiggle_inside_delta_target_) return false;
+
+
+      if(this.wiggle_inside_delta_minimum_ != otherMyClass.wiggle_inside_delta_minimum_) return false;
 
 
       if(this.maximum_step_reach_ != otherMyClass.maximum_step_reach_) return false;
@@ -2794,8 +2807,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("ideal_back_step_length=");
       builder.append(this.ideal_back_step_length_);      builder.append(", ");
 
-      builder.append("wiggle_inside_delta=");
-      builder.append(this.wiggle_inside_delta_);      builder.append(", ");
+      builder.append("wiggle_inside_delta_target=");
+      builder.append(this.wiggle_inside_delta_target_);      builder.append(", ");
+
+      builder.append("wiggle_inside_delta_minimum=");
+      builder.append(this.wiggle_inside_delta_minimum_);      builder.append(", ");
 
       builder.append("maximum_step_reach=");
       builder.append(this.maximum_step_reach_);      builder.append(", ");

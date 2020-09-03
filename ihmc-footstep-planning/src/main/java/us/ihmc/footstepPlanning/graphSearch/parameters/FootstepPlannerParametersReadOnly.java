@@ -61,23 +61,21 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
-    * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-    * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-    * to allowing footsteps that partially intersect planar regions.
-    *
-    * <p>
-    * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-    * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-    * <ul>
-    *    <li>The smallest acceptable distance to the edge of a cliff</li>
-    *    <li>The maximum error between desired and actual foot placement</li>
-    * </ul>
-    * </p>
+    * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+    * to the edge. A negative value means the footstep can overhang a region.
     */
-   default double getWiggleInsideDelta()
+   default double getWiggleInsideDeltaTarget()
    {
-      return get(wiggleInsideDelta);
+      return get(wiggleInsideDeltaTarget);
+   }
+
+   /**
+    * This parameter only is used if {@link #getWiggleWhilePlanning} is true. If a step cannot be wiggled inside by this amount or more,
+    * it will be rejected. Note that if {@link #getWiggleWhilePlanning} if false, it's always best effort on the final plan.
+    */
+   default double getWiggleInsideDeltaMinimum()
+   {
+      return get(wiggleInsideDeltaMinimum);
    }
 
    /**

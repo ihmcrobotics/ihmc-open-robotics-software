@@ -1,14 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -19,7 +17,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.ToDoubleFunction;
 
@@ -223,7 +220,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       else
       {
          double initialDeltaInside = computeAchievedDeltaInside(footPolygonInRegionFrame, planarRegionToPack, false);
-         if (initialDeltaInside > parameters.getWiggleInsideDelta())
+         if (initialDeltaInside > parameters.getWiggleInsideDeltaTarget())
          {
             snapData.setAchievedInsideDelta(initialDeltaInside);
             snapData.getWiggleTransformInWorld().setIdentity();
@@ -326,7 +323,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 
    private static void updateWiggleParameters(WiggleParameters wiggleParameters, FootstepPlannerParametersReadOnly parameters)
    {
-      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDeltaTarget();
       wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
       wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
       wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();

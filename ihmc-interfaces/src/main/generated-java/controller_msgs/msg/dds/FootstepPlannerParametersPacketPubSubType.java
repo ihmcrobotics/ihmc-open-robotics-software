@@ -122,6 +122,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -273,6 +276,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -571,7 +578,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getIdealBackStepLength());
 
 
-      cdr.write_type_6(data.getWiggleInsideDelta());
+      cdr.write_type_6(data.getWiggleInsideDeltaTarget());
+
+
+      cdr.write_type_6(data.getWiggleInsideDeltaMinimum());
 
 
       cdr.write_type_6(data.getMaximumStepReach());
@@ -785,7 +795,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setIdealBackStepLength(cdr.read_type_6());
       	
 
-      data.setWiggleInsideDelta(cdr.read_type_6());
+      data.setWiggleInsideDeltaTarget(cdr.read_type_6());
+      	
+
+      data.setWiggleInsideDeltaMinimum(cdr.read_type_6());
       	
 
       data.setMaximumStepReach(cdr.read_type_6());
@@ -994,7 +1007,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("ideal_back_step_length", data.getIdealBackStepLength());
 
-      ser.write_type_6("wiggle_inside_delta", data.getWiggleInsideDelta());
+      ser.write_type_6("wiggle_inside_delta_target", data.getWiggleInsideDeltaTarget());
+
+      ser.write_type_6("wiggle_inside_delta_minimum", data.getWiggleInsideDeltaMinimum());
 
       ser.write_type_6("maximum_step_reach", data.getMaximumStepReach());
 
@@ -1139,7 +1154,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setIdealBackStepLength(ser.read_type_6("ideal_back_step_length"));
 
-      data.setWiggleInsideDelta(ser.read_type_6("wiggle_inside_delta"));
+      data.setWiggleInsideDeltaTarget(ser.read_type_6("wiggle_inside_delta_target"));
+
+      data.setWiggleInsideDeltaMinimum(ser.read_type_6("wiggle_inside_delta_minimum"));
 
       data.setMaximumStepReach(ser.read_type_6("maximum_step_reach"));
 
