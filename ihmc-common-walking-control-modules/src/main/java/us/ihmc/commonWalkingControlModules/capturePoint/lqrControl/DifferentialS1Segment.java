@@ -9,7 +9,6 @@ import us.ihmc.matrixlib.NativeCommonOps;
 public class DifferentialS1Segment implements S1Function
 {
    private final double dt;
-   private final DMatrixRMaj R1Inverse = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj NB = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj S1Dot = new DMatrixRMaj(6, 6);
 
@@ -20,10 +19,19 @@ public class DifferentialS1Segment implements S1Function
       this.dt = dt;
    }
 
-   public void set(DMatrixRMaj Q1, DMatrixRMaj R1, DMatrixRMaj NTranspose, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj S1AtEnd, double duration)
+   public void set(LQRCommonValues lqrCommonValues, DMatrixRMaj S1AtEnd, double duration)
    {
-      NativeCommonOps.invert(R1, R1Inverse);
+      set(lqrCommonValues.getQ1(),
+          lqrCommonValues.getR1Inverse(),
+          lqrCommonValues.getNTranspose(),
+          lqrCommonValues.getA(),
+          lqrCommonValues.getB(),
+          S1AtEnd,
+          duration);
+   }
 
+   public void set(DMatrixRMaj Q1, DMatrixRMaj R1Inverse, DMatrixRMaj NTranspose, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj S1AtEnd, double duration)
+   {
       S1Trajectory.clear();
       S1Trajectory.add().set(S1AtEnd);
 

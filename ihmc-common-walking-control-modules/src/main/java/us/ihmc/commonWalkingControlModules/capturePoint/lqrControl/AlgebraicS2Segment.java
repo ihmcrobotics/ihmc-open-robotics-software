@@ -10,7 +10,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
-public class AlgebraicS2Segment
+public class AlgebraicS2Segment implements S2Segment
 {
    private final DMatrixRMaj A2 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj timeScaledA2 = new DMatrixRMaj(6, 6);
@@ -24,7 +24,10 @@ public class AlgebraicS2Segment
    private final DMatrixRMaj alpha = new DMatrixRMaj(6, 1);
    private final RecyclingArrayList<DMatrixRMaj> betas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
 
-
+   public void set(DMatrixRMaj endValue, Trajectory3D vrpTrajectory, LQRCommonValues lqrCommonValues)
+   {
+      set(endValue, vrpTrajectory, lqrCommonValues.getA2(), lqrCommonValues.getA2Inverse(), lqrCommonValues.getA2InverseB2());
+   }
 
    public void set(DMatrixRMaj endValue, Trajectory3D vrpTrajectory, DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
    {
