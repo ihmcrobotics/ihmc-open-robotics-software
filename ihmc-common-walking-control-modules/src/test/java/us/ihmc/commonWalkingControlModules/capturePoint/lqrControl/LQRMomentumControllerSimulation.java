@@ -112,7 +112,7 @@ public class LQRMomentumControllerSimulation
          dcmPlan.setCornerPointViewer(new CornerPointViewer(sphereRobot3.getScsRobot().getRobotsYoRegistry(),
                                                             yoGraphicsListRegistry3));
 
-         controller3 = new LQRSphereController(sphereRobot3, dcmPlan, yoGraphicsListRegistry3);
+         controller3 = new LQRJumpSphereController(sphereRobot3, dcmPlan, yoGraphicsListRegistry3);
 
          pushController3 = createPusher(sphereRobot3, yoGraphicsListRegistry3);
          setupGroundContactModel(sphereRobot3.getScsRobot());
