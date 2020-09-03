@@ -33,6 +33,7 @@ import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -171,7 +172,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       this.target = target;
 
-      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
+      InputStream stream = selectedVersion.getSdfFileAsStream();
+      if (stream == null)
+      {
+         LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
+      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), stream, this);
 
       sensorInformation = new AtlasSensorInformation(atlasVersion, target);
 
