@@ -136,7 +136,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
-   public static final Topic<FootstepPlanHeading> RequestedFootstepPlanHeading = topic("FootstepPlanHeading");
+   public static final Topic<Double> RequestedFootstepPlanHeading = topic("FootstepPlanHeading");
 
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
    public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
