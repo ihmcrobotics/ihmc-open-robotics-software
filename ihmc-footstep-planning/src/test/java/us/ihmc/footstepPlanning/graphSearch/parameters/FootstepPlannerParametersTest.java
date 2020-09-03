@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import org.junit.jupiter.api.Test;
-import org.ojalgo.random.RandomNumber;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -80,9 +79,13 @@ public class FootstepPlannerParametersTest
       parameters.setMaximumStepZWhenForwardAndDown(maxStepZWhenForwardAndDown);
       assertEquals(maxStepZWhenForwardAndDown, parameters.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      double wiggleInsideDelta = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setWiggleInsideDelta(wiggleInsideDelta);
-      assertEquals(wiggleInsideDelta, parameters.getWiggleInsideDelta(), epsilon);
+      double wiggleInsideDeltaTarget = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setWiggleInsideDeltaTarget(wiggleInsideDeltaTarget);
+      assertEquals(wiggleInsideDeltaTarget, parameters.getWiggleInsideDeltaTarget(), epsilon);
+
+      double wiggleInsideDeltaMinimum = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setWiggleInsideDeltaMinimum(wiggleInsideDeltaMinimum);
+      assertEquals(wiggleInsideDeltaMinimum, parameters.getWiggleInsideDeltaMinimum(), epsilon);
 
       double maximumStepReachWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
       parameters.setMaximumStepReachWhenSteppingUp(maximumStepReachWhenSteppingUp);
@@ -103,10 +106,6 @@ public class FootstepPlannerParametersTest
       boolean wiggleWhilePlanning = random.nextBoolean();
       parameters.setWiggleWhilePlanning(wiggleWhilePlanning);
       assertEquals(wiggleWhilePlanning, parameters.getWiggleWhilePlanning());
-
-      boolean rejectIfWiggleNotSatisfied = random.nextBoolean();
-      parameters.setRejectIfWiggleNotSatisfied(rejectIfWiggleNotSatisfied);
-      assertEquals(rejectIfWiggleNotSatisfied, parameters.getRejectIfWiggleNotSatisfied());
 
       boolean enableConcaveHullWiggler = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setEnableConcaveHullWiggler(enableConcaveHullWiggler);

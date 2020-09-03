@@ -128,9 +128,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minClearanceFromStance, clearance);
    }
 
-   default void setWiggleInsideDelta(double wiggleInsideDelta)
+   default void setWiggleInsideDeltaTarget(double wiggleInsideDeltaTarget)
    {
-      set(FootstepPlannerParameterKeys.wiggleInsideDelta, wiggleInsideDelta);
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaTarget, wiggleInsideDeltaTarget);
+   }
+
+   default void setWiggleInsideDeltaMinimum(double wiggleInsideDeltaMinimum)
+   {
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaMinimum, wiggleInsideDeltaMinimum);
    }
 
    default void setMaximumStepZWhenSteppingUp(double maxStepZ)
@@ -191,11 +196,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setWiggleWhilePlanning(boolean wiggleWhilePlanning)
    {
       set(FootstepPlannerParameterKeys.wiggleWhilePlanning, wiggleWhilePlanning);
-   }
-
-   default void setRejectIfWiggleNotSatisfied(boolean rejectIfWiggleNotSatisfied)
-   {
-      set(FootstepPlannerParameterKeys.rejectIfWiggleNotSatisfied, rejectIfWiggleNotSatisfied);
    }
 
    default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
@@ -372,8 +372,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
       if (parametersPacket.getIdealBackStepLength() != noValue)
          setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
-      if (parametersPacket.getWiggleInsideDelta() != noValue)
-         setWiggleInsideDelta(parametersPacket.getWiggleInsideDelta());
+      if (parametersPacket.getWiggleInsideDeltaTarget() != noValue)
+         setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
+      if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
+         setWiggleInsideDeltaMinimum(parametersPacket.getWiggleInsideDeltaMinimum());
       if (parametersPacket.getMaximumStepReach() != noValue)
          setMaximumStepReach(parametersPacket.getMaximumStepReach());
       if (parametersPacket.getMaximumStepYaw() != noValue)
@@ -413,7 +415,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
       setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
-      setRejectIfWiggleNotSatisfied(parametersPacket.getRejectIfWiggleNotSatisfied());
       setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());

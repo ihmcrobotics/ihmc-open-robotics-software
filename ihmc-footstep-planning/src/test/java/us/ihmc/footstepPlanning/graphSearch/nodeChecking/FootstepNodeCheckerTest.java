@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlanningTestTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -565,6 +566,80 @@ public class FootstepNodeCheckerTest
 //            assertEquals(null, registry.getRejectionReason());
          }
       }
+   }
+
+   @Test
+   public void testWiggleMinimumThreshold()
+   {
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.setWiggleWhilePlanning(true);
+
+      double wiggleMinimum = 0.02;
+      footstepPlannerParameters.setWiggleInsideDeltaMinimum(wiggleMinimum);
+
+      double wiggleTarget = 0.07;
+      footstepPlannerParameters.setWiggleInsideDeltaTarget(wiggleTarget);
+
+      double maxXYWiggle = 0.1;
+      footstepPlannerParameters.setMaximumXYWiggleDistance(maxXYWiggle);
+
+      double maxYawWiggle = 0.7;
+      footstepPlannerParameters.setMaximumYawWiggle(maxYawWiggle);
+
+      double footLength = 0.2;
+      double footWidth = 0.1;
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
+
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      FootstepNodeChecker checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, new YoRegistry("testRegistry"));
+      FootstepNode node = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      double regionEpsilon = 1e-5;
+
+      // test just enough area
+      double regionX = footLength + 2.0 * wiggleMinimum + regionEpsilon;
+      double regionY = footWidth + 2.0 * wiggleMinimum + regionEpsilon;
+      planarRegionsListGenerator.reset();
+
+      planarRegionsListGenerator.translate(0.5 * maxXYWiggle, 0.5 * maxXYWiggle, 0.1);
+      planarRegionsListGenerator.addRectangle(regionX, regionY);
+      PlanarRegionsList regions = planarRegionsListGenerator.getPlanarRegionsList();
+      snapper.setPlanarRegions(regions);
+      checker.setPlanarRegions(regions);
+      snapper.initialize();
+      boolean valid = checker.isNodeValid(node, null);
+      System.out.println(valid);
+
+      // test just too little area along x
+      snapper.reset();
+      regionX = footLength + 2.0 * wiggleMinimum - regionEpsilon;
+      regionY = footWidth + 2.0 * wiggleMinimum + regionEpsilon;
+      planarRegionsListGenerator.reset();
+
+      planarRegionsListGenerator.translate(0.5 * maxXYWiggle, 0.5 * maxXYWiggle, 0.1);
+      planarRegionsListGenerator.addRectangle(regionX, regionY);
+      regions = planarRegionsListGenerator.getPlanarRegionsList();
+      snapper.setPlanarRegions(regions);
+      checker.setPlanarRegions(regions);
+      snapper.initialize();
+      valid = checker.isNodeValid(node, null);
+      System.out.println(valid);
+
+      // test just too little area along y
+      snapper.reset();
+      regionX = footLength + 2.0 * wiggleMinimum + regionEpsilon;
+      regionY = footWidth + 2.0 * wiggleMinimum - regionEpsilon;
+      planarRegionsListGenerator.reset();
+
+      planarRegionsListGenerator.translate(0.5 * maxXYWiggle, 0.5 * maxXYWiggle, 0.1);
+      planarRegionsListGenerator.addRectangle(regionX, regionY);
+      regions = planarRegionsListGenerator.getPlanarRegionsList();
+      snapper.setPlanarRegions(regions);
+      checker.setPlanarRegions(regions);
+      snapper.initialize();
+      valid = checker.isNodeValid(node, null);
+      System.out.println(valid);
    }
 
    private class TestSnapper extends FootstepNodeSnapAndWiggler

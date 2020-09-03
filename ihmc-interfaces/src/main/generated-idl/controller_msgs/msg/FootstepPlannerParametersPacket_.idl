@@ -82,17 +82,17 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double ideal_back_step_length;
         /**
-         * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-         * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-         * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-         * to allowing footsteps that partially intersect planar regions.
-         * 
-         * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-         * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-         * The smallest acceptable distance to the edge of a cliff
-         * The maximum error between desired and actual foot placement
+         * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+         * to the edge. A negative value means the footstep can overhang a region.
          */
-        double wiggle_inside_delta;
+        @defaultValue(value=-11.1)
+        double wiggle_inside_delta_target;
+        /**
+         * This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+         * it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+         */
+        @defaultValue(value=-11.1)
+        double wiggle_inside_delta_minimum;
         /**
          * Maximum xy-distance the planner will consider for candidate steps.
          * Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
