@@ -59,6 +59,7 @@ public class LQRJumpMomentumController
 
    private final DMatrixRMaj S1 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj s2 = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj otherS2 = new DMatrixRMaj(6, 1);
 
    private final DMatrixRMaj K1 = new DMatrixRMaj(3, 6);
    private final DMatrixRMaj k2 = new DMatrixRMaj(3, 1);
@@ -82,6 +83,7 @@ public class LQRJumpMomentumController
    private final List<S1Function> s1FunctionList = new ArrayList<>();
    private final List<S2Segment> reversedS2FunctionList = new ArrayList<>();
    private final List<S2Segment> s2FunctionList = new ArrayList<>();
+   private final AlgebraicS2Function fullS2Function = new AlgebraicS2Function();
 
    public LQRJumpMomentumController(DoubleProvider omega)
    {
@@ -169,7 +171,6 @@ public class LQRJumpMomentumController
          s1Functions.put(nextVRPTrajectory, finalS1Function);
          reversedS1FunctionList.add(finalS1Function);
 
-
          boolean hasHadSwitch = false;
 
          for (int j = numberOfSegments - 1; j >= 0; j--)
@@ -216,6 +217,7 @@ public class LQRJumpMomentumController
       reversedS2FunctionList.clear();
       s2FunctionList.clear();
 
+
       int numberOfSegments = relativeVRPTrajectories.size();
       int numberOfEndingContactSegments = 0;
       int j = numberOfSegments - 1;
@@ -230,6 +232,8 @@ public class LQRJumpMomentumController
          endingContactVRPs.add(relativeVRPTrajectories.get(j));
 
       s2.zero();
+      fullS2Function.set(s2, relativeVRPTrajectories, lqrCommonValues);
+
       AlgebraicS2Function endingS2Function = new AlgebraicS2Function();
       finalS1Function.compute(0.0, S1);
       lqrCommonValues.computeS2ConstantStateMatrices(S1);
@@ -255,6 +259,7 @@ public class LQRJumpMomentumController
          }
          else
          {
+            s1Functions.get(trajectorySegment).compute(trajectorySegment.getDuration(), S1);
             FlightS2Function s2Function = new FlightS2Function(gravityZ);
             s2Function.set(S1, s2, trajectorySegment.getDuration());
 
@@ -293,6 +298,7 @@ public class LQRJumpMomentumController
       referenceVRPPosition.add(finalVRPPosition);
 
       s2FunctionList.get(j).compute(timeInSegment, s2);
+      fullS2Function.compute(j, timeInSegment, otherS2);
 
       CommonOps_DDRM.mult(lqrCommonValues.getR1Inverse(), lqrCommonValues.getDQ(), R1InverseDQ);
       CommonOps_DDRM.multTransB(-0.5, lqrCommonValues.getR1Inverse(), lqrCommonValues.getB(), R1InverseBTranspose);
@@ -409,6 +415,11 @@ public class LQRJumpMomentumController
    DMatrixRMaj getK2()
    {
       return k2;
+   }
+
+   S1Function getS1Segment(int segment)
+   {
+      return s1FunctionList.get(segment);
    }
 
    S2Segment getS2Segment(int segment)
