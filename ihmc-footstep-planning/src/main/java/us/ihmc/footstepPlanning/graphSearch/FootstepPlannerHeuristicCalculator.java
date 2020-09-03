@@ -24,7 +24,7 @@ public class FootstepPlannerHeuristicCalculator
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private FootstepPlanHeading desiredHeading = FootstepPlanHeading.FORWARD;
+   private double desiredHeading;
 
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final FramePose3D midFootPose = new FramePose3D();
@@ -45,7 +45,7 @@ public class FootstepPlannerHeuristicCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(FramePose3DReadOnly goalPose, FootstepPlanHeading desiredHeading)
+   public void initialize(FramePose3DReadOnly goalPose, double desiredHeading)
    {
       this.goalPose.set(goalPose);
       this.desiredHeading = desiredHeading;
@@ -79,7 +79,7 @@ public class FootstepPlannerHeuristicCalculator
          midFootPoint.set(midFootPose.getPosition());
          double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
          int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
-         double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading.getYawOffset());
+         double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
 
          initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;

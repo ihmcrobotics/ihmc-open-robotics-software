@@ -46,10 +46,10 @@ public class IdealStepCalculator
       this.bodyPathPlanHolder = bodyPathPlanHolder;
    }
 
-   public void initialize(SideDependentList<FootstepNode> goalNodes, FootstepPlanHeading desiredHeading)
+   public void initialize(SideDependentList<FootstepNode> goalNodes, double desiredHeading)
    {
       this.goalNodes = goalNodes;
-      this.desiredHeading = desiredHeading;
+//      this.desiredHeading = desiredHeading;
 
       idealStepMap.clear();
       pathLength = bodyPathPlanHolder.computePathLength(0.0);
