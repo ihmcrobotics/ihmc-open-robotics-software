@@ -26,7 +26,7 @@ public class AlgebraicS2Function implements S2Function
 
          s2Segment.set(endValueLocal, vrpTrajectories.get(j), A2, B2);
 
-         if (j != numberOfSegments)
+//         if (j != numberOfSegments)
             CommonOps_DDRM.add(s2Segment.getAlpha(), s2Segment.getBeta(0), endValueLocal);
       }
    }
@@ -37,8 +37,8 @@ public class AlgebraicS2Function implements S2Function
    }
 
    @Override
-   public void compute(double timeInState, DMatrixRMaj s2ToPack)
+   public void compute(int segmentNumber, double timeInSegment, DMatrixRMaj s2ToPack)
    {
-      s2Segments.get(0).compute(timeInState, s2ToPack);
+      s2Segments.get(segmentNumber).compute(timeInSegment, s2ToPack);
    }
 }

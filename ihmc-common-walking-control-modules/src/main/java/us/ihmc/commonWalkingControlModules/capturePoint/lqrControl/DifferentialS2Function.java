@@ -49,8 +49,8 @@ public class DifferentialS2Function implements S2Function
    }
 
    @Override
-   public void compute(double timeInState, DMatrixRMaj s2ToPack)
+   public void compute(int segmentNumber, double timeInSegment, DMatrixRMaj s2ToPack)
    {
-      s2Segments.get(0).compute(timeInState, s2ToPack);
+      s2Segments.get(segmentNumber).compute(timeInSegment, s2ToPack);
    }
 }
