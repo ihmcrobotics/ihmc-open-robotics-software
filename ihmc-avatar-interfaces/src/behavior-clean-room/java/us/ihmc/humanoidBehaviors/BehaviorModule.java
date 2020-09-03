@@ -19,7 +19,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.lists.PairList;
 
 import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
@@ -29,7 +29,7 @@ public class BehaviorModule
    private final MessagerAPI messagerAPI;
    private final Messager messager;
    private final PairList<BehaviorDefinition, BehaviorInterface> constructedBehaviors = new PairList<>();
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -72,7 +72,7 @@ public class BehaviorModule
 
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
 
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {

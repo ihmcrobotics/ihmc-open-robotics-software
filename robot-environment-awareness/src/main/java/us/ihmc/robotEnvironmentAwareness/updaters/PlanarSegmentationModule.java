@@ -11,11 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import org.apache.commons.lang3.tuple.Pair;
-import org.bytedeco.librealsense.timestamp_data;
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -24,7 +19,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxWithCenterAndYaw;
-import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -32,7 +26,6 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
@@ -46,8 +39,8 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 
 public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModule
 {
@@ -62,7 +55,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private final ROS2Topic<?> outputTopic;
    private boolean manageRosNode;
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
@@ -85,7 +78,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
 
    private PlanarSegmentationModule(Messager reaMessager, Path configurationFilePath) throws Exception
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            REACommunicationProperties.inputTopic,
            REACommunicationProperties.subscriberCustomRegionsTopicName,
            ROS2Tools.REALSENSE_SLAM_MAP,
@@ -95,7 +88,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
            false);
    }
 
-   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, Path configurationFilePath) throws Exception
+   private PlanarSegmentationModule(ROS2Node ros2Node, Messager reaMessager, Path configurationFilePath) throws Exception
    {
       this(ros2Node,
            REACommunicationProperties.inputTopic,
@@ -107,7 +100,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
            false);
    }
 
-   private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, Path configurationFilePath, boolean runAsynchronously) throws Exception
+   private PlanarSegmentationModule(ROS2Node ros2Node, Messager reaMessager, Path configurationFilePath, boolean runAsynchronously) throws Exception
    {
       this(ros2Node,
            REACommunicationProperties.inputTopic,
@@ -126,7 +119,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                     Messager reaMessager,
                                     Path configurationFilePath) throws Exception
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            inputTopic,
            customRegionTopic,
            outputTopic,
@@ -136,7 +129,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
            false);
    }
 
-   private PlanarSegmentationModule(Ros2Node ros2Node,
+   private PlanarSegmentationModule(ROS2Node ros2Node,
                                     ROS2Topic<?> inputTopic,
                                     ROS2Topic<?> customRegionTopic,
                                     ROS2Topic<?> outputTopic,
@@ -147,7 +140,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       this(ros2Node, inputTopic, customRegionTopic, outputTopic, reaMessager, configurationFilePath, manageRosNode, false);
    }
 
-   private PlanarSegmentationModule(Ros2Node ros2Node,
+   private PlanarSegmentationModule(ROS2Node ros2Node,
                                     ROS2Topic<?> inputTopic,
                                     ROS2Topic<?> customRegionTopic,
                                     ROS2Topic<?> outputTopic,
@@ -435,13 +428,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       return new PlanarSegmentationModule(messager, configurationFilePath);
    }
 
-   public static PlanarSegmentationModule createIntraprocessModule(Path configurationFilePath, Ros2Node ros2Node, Messager messager) throws Exception
+   public static PlanarSegmentationModule createIntraprocessModule(Path configurationFilePath, ROS2Node ros2Node, Messager messager) throws Exception
    {
       return new PlanarSegmentationModule(ros2Node, messager, configurationFilePath);
    }
 
-
-   public static PlanarSegmentationModule createIntraprocessModule(Path configurationFilePath, Ros2Node ros2Node, Messager messager, boolean runAsynchronously) throws Exception
+   public static PlanarSegmentationModule createIntraprocessModule(Path configurationFilePath, ROS2Node ros2Node, Messager messager, boolean runAsynchronously) throws Exception
    {
       return new PlanarSegmentationModule(ros2Node, messager, configurationFilePath, runAsynchronously);
 

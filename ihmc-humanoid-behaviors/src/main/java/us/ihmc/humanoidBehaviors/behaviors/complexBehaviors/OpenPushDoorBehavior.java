@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -61,8 +61,8 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
    private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
 
-   public OpenPushDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
-                           DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OpenPushDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
+                               DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;

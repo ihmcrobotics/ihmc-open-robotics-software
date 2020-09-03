@@ -11,13 +11,13 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class PartialFootholdBehavior extends AbstractBehavior
 {
    private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
 
-   public PartialFootholdBehavior(String robotName, Ros2Node ros2Node)
+   public PartialFootholdBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
       publisher = createPublisherForController(FootstepDataListMessage.class);

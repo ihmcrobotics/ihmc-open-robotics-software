@@ -13,7 +13,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxControll
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
 import java.util.ArrayList;
@@ -42,30 +42,30 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node)
    {
       // status messages from the controller
       ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic,
                                            s -> processTimestamp(s.takeNextData().getMonotonicTime()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> setPaused(true));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> setPaused(true));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, controllerOutputTopic,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopic,
                                            s -> processSteppingStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedGroundPlaneMessage.class, controllerOutputTopic,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getInputTopic(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedBodyPathPlanMessage.class, getInputTopic(),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getInputTopic(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedTeleopDesiredVelocity.class, getInputTopic(),
                                            s -> processTeleopDesiredVelocity(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, getInputTopic(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, getInputTopic(),
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 

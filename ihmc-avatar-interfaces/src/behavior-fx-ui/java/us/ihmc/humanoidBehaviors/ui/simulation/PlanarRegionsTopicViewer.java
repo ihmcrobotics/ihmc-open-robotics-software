@@ -7,14 +7,14 @@ import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class PlanarRegionsTopicViewer extends Application
 {
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "planar_region_topic_viewer");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "planar_region_topic_viewer");
       
       View3DFactory view3dFactory = new View3DFactory(1200, 800);
       FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);

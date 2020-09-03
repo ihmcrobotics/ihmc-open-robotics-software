@@ -14,7 +14,7 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 
@@ -32,7 +32,7 @@ public class LookAndStepRemoteVisualizer
 
    private Stage primaryStage;
 
-   public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, Ros2Node ros2Node, Messager behaviorMessager)
+   public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, ROS2Node ros2Node, Messager behaviorMessager)
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 

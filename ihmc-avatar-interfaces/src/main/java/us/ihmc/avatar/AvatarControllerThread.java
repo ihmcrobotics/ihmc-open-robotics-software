@@ -29,7 +29,7 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -82,7 +82,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    public AvatarControllerThread(String robotName, DRCRobotModel robotModel, HumanoidRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
-                                 DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, double gravity, double estimatorDT)
+                                 DRCOutputProcessor outputProcessor, RealtimeROS2Node realtimeROS2Node, double gravity, double estimatorDT)
    {
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
 
@@ -99,7 +99,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, ControllerCrashNotificationPacket.class,
                                                                       ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)

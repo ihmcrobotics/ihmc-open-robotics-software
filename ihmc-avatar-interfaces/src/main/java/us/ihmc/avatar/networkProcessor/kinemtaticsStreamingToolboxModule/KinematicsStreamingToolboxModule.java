@@ -23,7 +23,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
@@ -78,16 +78,16 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
       ROS2Topic controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
+      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (controller != null)
          {
@@ -98,7 +98,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (controller != null)
          {

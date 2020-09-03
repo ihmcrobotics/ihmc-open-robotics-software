@@ -9,7 +9,7 @@ import us.ihmc.communication.video.VideoCallback;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public abstract class VideoPacketListenerBehavior extends AbstractBehavior implements VideoCallback
 {
@@ -17,7 +17,7 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
    private final CompressedVideoDataClient videoDataClient;
 
-   public VideoPacketListenerBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
+   public VideoPacketListenerBehavior(String robotName, String namePrefix, ROS2Node ros2Node)
    {
       super(robotName, namePrefix, ros2Node);
 

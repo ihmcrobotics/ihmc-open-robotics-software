@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
@@ -22,7 +22,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
 
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
 
-   public JavaFXRemoteRobotVisualizer(DRCRobotModel robotModel, Ros2Node ros2Node)
+   public JavaFXRemoteRobotVisualizer(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 

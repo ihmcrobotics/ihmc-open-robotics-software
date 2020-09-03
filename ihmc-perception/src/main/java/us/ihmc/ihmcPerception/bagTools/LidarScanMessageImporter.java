@@ -9,7 +9,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import javax.swing.*;
 import java.io.File;
@@ -48,7 +48,7 @@ public class LidarScanMessageImporter
 
       System.out.println("Loaded " + numberOfMessages + " messages");
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
       IHMCROS2Publisher<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
 
       for (int i = 0; i < PUBLISH_N_TIMES; i++)

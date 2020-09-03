@@ -13,7 +13,7 @@ import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class PlanarRegionSLAMUI extends Application
 {
@@ -23,7 +23,7 @@ public class PlanarRegionSLAMUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "behavior_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "behavior_ui");
 
       LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
       LabelGraphic.initializeYoVariables(parameterServer.getRegistry());

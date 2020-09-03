@@ -24,7 +24,7 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHan
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class FusionSensorMeshViewer
 {
@@ -47,7 +47,7 @@ public class FusionSensorMeshViewer
    private final List<ScheduledFuture<?>> meshBuilderScheduledFutures = new ArrayList<>();
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
 
-   public FusionSensorMeshViewer(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager) throws Exception
+   public FusionSensorMeshViewer(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager) throws Exception
    {
       this.reaMessager = reaMessager;
       lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, reaMessager, REAModuleAPI.UILidarScanShow, REAModuleAPI.UILidarScanClear);

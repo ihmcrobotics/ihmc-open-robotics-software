@@ -7,14 +7,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class ConstantGoalDetectorBehaviorService extends GoalDetectorBehaviorService
 {
    private final HumanoidReferenceFrames referenceFrames;
    private final Point3D constantGoalLocationInMidFeetZUpFrame = new Point3D();
 
-   public ConstantGoalDetectorBehaviorService(String robotName, HumanoidReferenceFrames referenceFrames, Point3D constantGoalLocationInMidFeetZUpFrame, Ros2Node ros2Node)
+   public ConstantGoalDetectorBehaviorService(String robotName, HumanoidReferenceFrames referenceFrames, Point3D constantGoalLocationInMidFeetZUpFrame, ROS2Node ros2Node)
    {
       super(robotName, ConstantGoalDetectorBehaviorService.class.getSimpleName(), ros2Node);
       this.referenceFrames = referenceFrames;

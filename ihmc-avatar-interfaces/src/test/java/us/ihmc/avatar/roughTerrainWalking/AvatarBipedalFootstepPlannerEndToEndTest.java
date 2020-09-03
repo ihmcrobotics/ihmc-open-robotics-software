@@ -45,7 +45,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
@@ -72,7 +72,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
 
    protected final TwoBollardEnvironment bollardEnvironment = new TwoBollardEnvironment(BOLLARD_DISTANCE);
    private PlanarRegionsList cinderBlockField;
@@ -115,7 +115,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       networkModuleParameters = new HumanoidNetworkProcessorParameters();
       networkModuleParameters.setUseFootstepPlanningToolboxModule(true);
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), PubSubImplementation.INTRAPROCESS);
 
       footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,

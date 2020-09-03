@@ -4,7 +4,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.HashMap;
 
@@ -13,11 +13,11 @@ import java.util.HashMap;
  */
 public class ROS2PublisherMap
 {
-   private final Ros2NodeInterface ros2Node;
+   private final ROS2NodeInterface ros2Node;
 
    private HashMap<Class, IHMCROS2Publisher> map = new HashMap<>();
 
-   public ROS2PublisherMap(Ros2NodeInterface ros2Node)
+   public ROS2PublisherMap(ROS2NodeInterface ros2Node)
    {
       this.ros2Node = ros2Node;
    }

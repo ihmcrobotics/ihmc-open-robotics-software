@@ -8,19 +8,19 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class BehaviorService
 {
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final Map<ROS2Topic, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoRegistry registry;
    protected final String robotName;
    private final ROS2Topic controllerInputTopic, controllerOutputTopic;
 
-   public BehaviorService(String robotName, String name, Ros2Node ros2Node)
+   public BehaviorService(String robotName, String name, ROS2Node ros2Node)
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;
@@ -81,7 +81,7 @@ public abstract class BehaviorService
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
-   protected Ros2Node getRos2Node()
+   protected ROS2Node getROS2Node()
    {
       return ros2Node;
    }

@@ -24,7 +24,7 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -57,7 +57,7 @@ public class SimpleLidarRobotController implements RobotController
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
-   public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, Ros2Node ros2Node, Graphics3DAdapter graphics3dAdapter,
+   public SimpleLidarRobotController(SimpleLidarRobot lidarRobot, double dt, ROS2Node ros2Node, Graphics3DAdapter graphics3dAdapter,
                                      YoGraphicsListRegistry yoGraphicsListRegistry) throws IOException
    {
       this.dt = dt;
