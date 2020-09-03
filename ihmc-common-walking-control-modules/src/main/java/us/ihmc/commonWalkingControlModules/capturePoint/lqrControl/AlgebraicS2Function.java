@@ -26,8 +26,7 @@ public class AlgebraicS2Function implements S2Function
 
          s2Segment.set(endValueLocal, vrpTrajectories.get(j), A2, B2);
 
-//         if (j != numberOfSegments)
-            CommonOps_DDRM.add(s2Segment.getAlpha(), s2Segment.getBeta(0), endValueLocal);
+         CommonOps_DDRM.add(s2Segment.getAlpha(), s2Segment.getBeta(0), endValueLocal);
       }
    }
 
