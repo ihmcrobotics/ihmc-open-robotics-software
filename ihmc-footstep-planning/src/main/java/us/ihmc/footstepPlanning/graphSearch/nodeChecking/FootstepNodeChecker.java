@@ -4,8 +4,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -93,8 +93,8 @@ public class FootstepNodeChecker
       // Check wiggle parameters satisfied
       if (parameters.getWiggleWhilePlanning() && parameters.getRejectIfWiggleNotSatisfied())
       {
-         double epsilon = 1e-5;
-         if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDeltaTarget() - epsilon)
+         checkWiggleParameters(parameters);
+         if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDeltaMinimum())
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);
             return;
@@ -221,5 +221,16 @@ public class FootstepNodeChecker
 
       candidateNodeSnapData.clear();
       goodPositionChecker.clearLoggedVariables();
+   }
+
+   private static void checkWiggleParameters(FootstepPlannerParametersReadOnly parameters)
+   {
+      double epsilon = 1e-7;
+      if (parameters.getWiggleInsideDeltaMinimum() > parameters.getWiggleInsideDeltaTarget() + epsilon)
+      {
+         throw new RuntimeException(
+               "Illegal wiggle parameters, target should be greater or equal to minimum. Target: " + parameters.getWiggleInsideDeltaTarget() + ", Minimum: "
+               + parameters.getWiggleInsideDeltaMinimum());
+      }
    }
 }
