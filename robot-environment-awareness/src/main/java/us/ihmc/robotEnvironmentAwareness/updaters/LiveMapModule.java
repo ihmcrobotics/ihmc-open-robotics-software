@@ -63,7 +63,7 @@ public class LiveMapModule implements PerceptionModule
       this(ros2Node, messager, null);
    }
 
-   private LiveMapModule(Ros2Node ros2Node, Messager messager, String configurationFileProject)
+   private LiveMapModule(ROS2Node ros2Node, Messager messager, String configurationFileProject)
    {
       this.ros2Node = ros2Node;
       this.messager = messager;
@@ -254,7 +254,7 @@ public class LiveMapModule implements PerceptionModule
       return createIntraprocess(ros2Node, messager, null);
    }
 
-   public static LiveMapModule createIntraprocess(Ros2Node ros2Node, Messager messager, String configurationFileProject)
+   public static LiveMapModule createIntraprocess(ROS2Node ros2Node, Messager messager, String configurationFileProject)
    {
       return new LiveMapModule(ros2Node, messager, configurationFileProject);
    }
