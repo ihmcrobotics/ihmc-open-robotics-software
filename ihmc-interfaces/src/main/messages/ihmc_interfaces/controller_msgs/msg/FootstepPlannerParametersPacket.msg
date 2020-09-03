@@ -27,16 +27,14 @@ float64 ideal_side_step_width -11.1
 # Returns the ideal length when walking backwards. This value is negative.
 float64 ideal_back_step_length -11.1
 
-# If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-# regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-# edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-# to allowing footsteps that partially intersect planar regions.
-#
-# If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-# choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-#    The smallest acceptable distance to the edge of a cliff
-#    The maximum error between desired and actual foot placement
-float64 wiggle_inside_delta 0.0
+# The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+# to the edge. A negative value means the footstep can overhang a region.
+float64 wiggle_inside_delta_target -11.1
+
+# This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+# it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+float64 wiggle_inside_delta_minimum -11.1
+
 # Maximum xy-distance the planner will consider for candidate steps.
 # Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
 # where the parent is the last footstep taken on the other foot.
