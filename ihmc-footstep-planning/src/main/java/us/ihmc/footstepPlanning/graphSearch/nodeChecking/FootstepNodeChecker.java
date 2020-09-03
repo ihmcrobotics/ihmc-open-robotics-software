@@ -94,7 +94,7 @@ public class FootstepNodeChecker
       if (parameters.getWiggleWhilePlanning() && parameters.getRejectIfWiggleNotSatisfied())
       {
          double epsilon = 1e-5;
-         if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDelta() - epsilon)
+         if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDeltaTarget() - epsilon)
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);
             return;

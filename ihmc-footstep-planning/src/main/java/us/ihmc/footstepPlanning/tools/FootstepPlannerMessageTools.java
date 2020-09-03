@@ -56,7 +56,8 @@ public class FootstepPlannerMessageTools
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setIdealSideStepWidth(parameters.getIdealSideStepWidth());
       packet.setIdealBackStepLength(parameters.getIdealBackStepLength());
-      packet.setWiggleInsideDelta(parameters.getWiggleInsideDelta());
+      packet.setWiggleInsideDeltaTarget(parameters.getWiggleInsideDeltaTarget());
+      packet.setWiggleInsideDeltaMinimum(parameters.getWiggleInsideDeltaMinimum());
       packet.setMaximumStepReach(parameters.getMaximumStepReach());
       packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
       packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
