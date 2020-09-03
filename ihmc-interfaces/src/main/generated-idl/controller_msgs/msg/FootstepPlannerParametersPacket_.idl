@@ -77,7 +77,7 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double ideal_side_step_width;
         /**
-         * Returns the ideal length when walking backwards. This value is negative.
+         * Returns the ideal length when walking backwards. This value is positive.
          */
         @defaultValue(value=-11.1)
         double ideal_back_step_length;

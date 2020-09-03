@@ -65,7 +65,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double ideal_side_step_width_ = -11.1;
    /**
-            * Returns the ideal length when walking backwards. This value is negative.
+            * Returns the ideal length when walking backwards. This value is positive.
             */
    public double ideal_back_step_length_ = -11.1;
    /**
@@ -736,14 +736,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Returns the ideal length when walking backwards. This value is negative.
+            * Returns the ideal length when walking backwards. This value is positive.
             */
    public void setIdealBackStepLength(double ideal_back_step_length)
    {
       ideal_back_step_length_ = ideal_back_step_length;
    }
    /**
-            * Returns the ideal length when walking backwards. This value is negative.
+            * Returns the ideal length when walking backwards. This value is positive.
             */
    public double getIdealBackStepLength()
    {
