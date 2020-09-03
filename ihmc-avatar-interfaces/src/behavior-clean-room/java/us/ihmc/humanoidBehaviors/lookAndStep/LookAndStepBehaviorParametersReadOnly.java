@@ -36,9 +36,24 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(direction);
    }
 
-   default double getWiggleInsideDeltaOverride()
+   default double getWiggleInsideDeltaMinimumOverride()
    {
-      return get(wiggleInsideDeltaOverride);
+      return get(wiggleInsideDeltaMinimumOverride);
+   }
+
+   default double getWiggleInsideDeltaTargetOverride()
+   {
+      return get(wiggleInsideDeltaTargetOverride);
+   }
+
+   default boolean getWiggleWhilePlanningOverride()
+   {
+      return get(wiggleWhilePlanningOverride);
+   }
+
+   default boolean getEnableExpansionMaskOverride()
+   {
+      return get(enableExpansionMaskOverride);
    }
 
    default double getPlanHorizon()
@@ -124,10 +139,5 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    default int getSwingPlannerType()
    {
       return get(swingPlannerType);
-   }
-
-   default boolean getRejectIfWiggleNotSatisfiedOverride()
-   {
-      return get(rejectIfWiggleNotSatisfiedOverride);
    }
 }
