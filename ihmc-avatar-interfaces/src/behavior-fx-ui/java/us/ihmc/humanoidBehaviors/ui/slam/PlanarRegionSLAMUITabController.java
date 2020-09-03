@@ -26,7 +26,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Path;
@@ -82,7 +82,7 @@ public class PlanarRegionSLAMUITabController extends Group
 
    private PlanarRegionSLAMGraphic visualizer;
 
-   public void init(Window window, Ros2Node ros2Node)
+   public void init(Window window, ROS2Node ros2Node)
    {
       this.window = window;
 

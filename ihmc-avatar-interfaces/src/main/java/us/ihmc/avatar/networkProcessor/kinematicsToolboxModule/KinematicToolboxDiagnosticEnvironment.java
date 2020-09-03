@@ -15,7 +15,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
@@ -29,7 +29,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 public class KinematicToolboxDiagnosticEnvironment
 {
    private final String threadName = "NonRealtimeScheduler";
-   private final RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_fake_controller");
+   private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_fake_controller");
 
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {
@@ -48,7 +48,7 @@ public class KinematicToolboxDiagnosticEnvironment
       RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
       factory.setDefinitionsToPublish(humanoidFullRobotModel);
       factory.setSensorSource(humanoidFullRobotModel, new ForceSensorDataHolder(forceSensorDefinitionList), sensorOutputMapReadOnly);
-      factory.setROS2Info(realtimeRos2Node, ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
+      factory.setROS2Info(realtimeROS2Node, ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
       RobotConfigurationDataPublisher robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
 
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);

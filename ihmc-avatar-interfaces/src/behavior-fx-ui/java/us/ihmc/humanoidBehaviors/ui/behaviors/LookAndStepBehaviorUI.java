@@ -36,7 +36,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
 
@@ -71,7 +71,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TableView footstepPlannerParameterTable;
 
    @Override
-   public void init(SubScene sceneNode, Pane visualizationPane, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
       ros2Publisher = new ROS2PublisherMap(ros2Node);

@@ -60,7 +60,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    @Test
    public void testConstructorAndSetInput()
    {
-      ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node());
+      ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node());
       behavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.LEFT, 0.0));
       assertTrue(behavior.hasInputBeenSet());
    }
@@ -72,7 +72,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node());
+      ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node());
       YoDouble rightMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().findVariable("rightTool", "rightToolObjectMass");
       YoDouble leftMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().findVariable("leftTool", "leftToolObjectMass");
 

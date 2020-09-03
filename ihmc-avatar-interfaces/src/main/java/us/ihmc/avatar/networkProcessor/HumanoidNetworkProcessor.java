@@ -35,7 +35,7 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -60,7 +60,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    private final DRCRobotModel robotModel;
    private final PubSubImplementation pubSubImplementation;
 
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
    private URI rosURI;
    private ObjectCommunicator simulatedSensorCommunicator;
 
@@ -151,11 +151,11 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
    }
 
-   public Ros2Node getOrCreateRos2Node()
+   public ROS2Node getOrCreateROS2Node()
    {
       if (ros2Node == null)
       {
-         ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
+         ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
          modulesToClose.add(ros2Node::destroy);
       }
       return ros2Node;
@@ -315,7 +315,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateRos2Node(),
+         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateROS2Node(),
                                                        PlanarRegionsListMessage.class,
                                                        REACommunicationProperties.outputTopic,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));

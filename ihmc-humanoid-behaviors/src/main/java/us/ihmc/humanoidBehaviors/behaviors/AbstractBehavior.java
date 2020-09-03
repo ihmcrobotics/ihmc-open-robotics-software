@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -42,7 +42,7 @@ public abstract class AbstractBehavior implements RobotController
 
    KryoMessager messager;
 
-   protected final Ros2Node ros2Node;
+   protected final ROS2Node ros2Node;
    private final Map<ROS2Topic<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
@@ -76,12 +76,12 @@ public abstract class AbstractBehavior implements RobotController
 
    private static int behaviorUniqID = 0;
    
-   public AbstractBehavior(String robotName, Ros2Node ros2Node)
+   public AbstractBehavior(String robotName, ROS2Node ros2Node)
    {
       this(robotName, null, ros2Node);
    }
 
-   public AbstractBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
+   public AbstractBehavior(String robotName, String namePrefix, ROS2Node ros2Node)
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;

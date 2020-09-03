@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorStates>
@@ -35,7 +35,7 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
       WALKING,
     }
 
-   public WalkTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, boolean userControlled)
+   public WalkTimingBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node, boolean userControlled)
    {
       super(robotName, "WalkTimingBehaviorStates", WalkTimingBehaviorStates.class, yoTime, ros2Node);
       this.operatorInControl = userControlled;

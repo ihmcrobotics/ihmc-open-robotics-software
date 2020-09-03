@@ -78,7 +78,7 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
       stepTeleopManager.setEndPhaseShift(180);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), PawStepPlanningToolboxOutputStatus.class,
                                                     ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
                                                               .withOutput(),
                                            s -> {
@@ -86,7 +86,7 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
          stepMessage.setAreStepsAdjustable(true);
          stepTeleopManager.publishTimedStepListToController(stepMessage);
                                            });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), QuadrupedBodyOrientationMessage.class,
                                                     ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
                                                               .withOutput(),
                                            s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));

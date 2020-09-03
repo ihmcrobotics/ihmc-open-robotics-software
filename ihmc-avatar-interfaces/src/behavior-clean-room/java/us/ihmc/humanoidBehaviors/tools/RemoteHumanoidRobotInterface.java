@@ -34,14 +34,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
 {
-   private final Ros2NodeInterface ros2Node;
+   private final ROS2NodeInterface ros2Node;
    private final DRCRobotModel robotModel;
    private final String robotName;
    private final DRCRobotJointMap jointMap;
@@ -57,7 +57,7 @@ public class RemoteHumanoidRobotInterface
 
    private final ROS2Topic<?> topicName;
 
-   public RemoteHumanoidRobotInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel)
+   public RemoteHumanoidRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;

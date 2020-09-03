@@ -22,7 +22,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -31,7 +30,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +50,7 @@ public class RemoteUIMessageConverter
 {
    private static final boolean verbose = false;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final Messager messager;
 
@@ -123,11 +122,11 @@ public class RemoteUIMessageConverter
 
    public static RemoteUIMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemoteUIMessageConverter(ros2Node, messager, robotName);
    }
 
-   public RemoteUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
+   public RemoteUIMessageConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
@@ -178,7 +177,7 @@ public class RemoteUIMessageConverter
       ros2Node.destroy();
    }
 
-   private void registerPubSubs(RealtimeRos2Node ros2Node)
+   private void registerPubSubs(RealtimeROS2Node ros2Node)
    {
       /* subscribers */
       // we want to listen to the incoming request to the planning toolbox

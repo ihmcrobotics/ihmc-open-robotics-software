@@ -17,8 +17,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2Subscription;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Subscription;
 
 public class LidarScanLogWriter
 {
@@ -35,10 +35,10 @@ public class LidarScanLogWriter
 
    private final AtomicBoolean loggingEnabled = new AtomicBoolean(false);
 
-   private final Ros2Node ros2Node;
-   private Ros2Subscription<LidarScanMessage> subscription;
+   private final ROS2Node ros2Node;
+   private ROS2Subscription<LidarScanMessage> subscription;
 
-   public LidarScanLogWriter(Ros2Node ros2Node)
+   public LidarScanLogWriter(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
    }

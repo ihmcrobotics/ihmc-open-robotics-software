@@ -29,9 +29,9 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -78,14 +78,14 @@ public class StereoVisionPointCloudPublisher
    private long publisherPeriodInMillisecond = 200L;
    private double minimumResolution = 0.005;
 
-   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2Node ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, topic);
    }
 
    public StereoVisionPointCloudPublisher(String robotName,
                                           FullRobotModel fullRobotModel,
-                                          Ros2Node ros2Node,
+                                          ROS2Node ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this.robotName = robotName;
@@ -99,16 +99,16 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(String robotName,
                                           FullRobotModel fullRobotModel,
-                                          RealtimeRos2Node realtimeRos2Node,
+                                          RealtimeROS2Node realtimeROS2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      pointcloudPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ROS2Tools.D435_POINT_CLOUD)::publish;
+      pointcloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.D435_POINT_CLOUD)::publish;
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)

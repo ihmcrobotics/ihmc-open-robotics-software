@@ -9,7 +9,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +38,7 @@ public class ExternalForceEstimationMessageLogger
    static final String robotDesiredConfigurationDataName = RobotDesiredConfigurationData.class.getSimpleName();
    static final String externalForceEstimationConfigName = ExternalForceEstimationConfigurationMessage.class.getSimpleName();
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
    private final AtomicBoolean firstMessage = new AtomicBoolean();
    private final AtomicBoolean stopRequested = new AtomicBoolean();
 
@@ -61,7 +61,7 @@ public class ExternalForceEstimationMessageLogger
    public ExternalForceEstimationMessageLogger(String robotName)
    {
       this.robotName = robotName;
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);

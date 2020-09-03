@@ -38,7 +38,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -430,7 +430,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
       if (!robotVersion.hasFingers())
          return null;
@@ -445,7 +445,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (hasFingers)
       {
          return new SimulatedValkyrieFingerController(simulatedRobot,
-                                                      realtimeRos2Node,
+                                                      realtimeROS2Node,
                                                       this, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
       }

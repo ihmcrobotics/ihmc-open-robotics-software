@@ -10,7 +10,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
 {
@@ -19,7 +19,7 @@ public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
    private final IHMCRealtimeROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
    private final IHMCRealtimeROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public AtlasLowLevelMessenger(RealtimeRos2Node ros2Node, String robotName)
+   public AtlasLowLevelMessenger(RealtimeROS2Node ros2Node, String robotName)
    {
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       lowLevelModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AtlasLowLevelControlModeMessage.class, inputTopic);

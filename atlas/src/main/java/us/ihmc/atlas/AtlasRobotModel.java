@@ -62,7 +62,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -443,14 +443,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
       switch (selectedVersion.getHandModel())
       {
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeRos2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       realtimeROS2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                        ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
