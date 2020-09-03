@@ -65,7 +65,7 @@ public class DifferentialS1Segment implements S1Function
 
    private double getAlphaBetweenSegments(double timeInState)
    {
-      return (timeInState % dt) / timeInState;
+      return (timeInState % dt) / dt;
    }
 
    private static void interpolate(DMatrixRMaj start, DMatrixRMaj end, double alpha, DMatrixRMaj ret)

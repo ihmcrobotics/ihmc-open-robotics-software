@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class LQRJumpMomentumController
 {
-   private static final double discreteDt = 1e-5;
+   private static final double discreteDt = 1e-4;
    private static final double gravityZ = -9.81;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
