@@ -381,4 +381,9 @@ public class LQRJumpMomentumController
    {
       return k2;
    }
+
+   S2Segment getS2Segment(int segment)
+   {
+      return s2Functions.get(relativeVRPTrajectories.get(segment));
+   }
 }
