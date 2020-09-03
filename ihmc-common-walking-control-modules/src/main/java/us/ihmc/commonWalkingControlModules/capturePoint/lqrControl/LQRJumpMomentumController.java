@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableC
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.tools.ArrayTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -77,7 +78,10 @@ public class LQRJumpMomentumController
    private boolean shouldUpdateP = true;
 
    private final HashMap<Trajectory3D, S1Function> s1Functions = new HashMap<>();
-   private final HashMap<Trajectory3D, S2Segment> s2Functions = new HashMap<>();
+   private final List<S1Function> reversedS1FunctionList = new ArrayList<>();
+   private final List<S1Function> s1FunctionList = new ArrayList<>();
+   private final List<S2Segment> reversedS2FunctionList = new ArrayList<>();
+   private final List<S2Segment> s2FunctionList = new ArrayList<>();
 
    public LQRJumpMomentumController(DoubleProvider omega)
    {
@@ -149,51 +153,70 @@ public class LQRJumpMomentumController
    void computeS1Segments()
    {
       s1Functions.clear();
+      reversedS1FunctionList.clear();
+      s1FunctionList.clear();
 
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
 
-      Trajectory3D nextVRPTrajectory = relativeVRPTrajectories.get(numberOfSegments);
-      finalS1Function.compute(0.0, S1);
-      s1Functions.put(nextVRPTrajectory, finalS1Function);
-
-      boolean hasHadSwitch = false;
-
-      for (int j = numberOfSegments - 1; j >= 0; j--)
+      if (numberOfSegments < 0)
       {
-         Trajectory3D thisVRPTrajectory = relativeVRPTrajectories.get(j);
+         reversedS1FunctionList.add(finalS1Function);
+      }
+      else
+      {
+         Trajectory3D nextVRPTrajectory = relativeVRPTrajectories.get(numberOfSegments);
+         finalS1Function.compute(0.0, S1);
+         s1Functions.put(nextVRPTrajectory, finalS1Function);
+         reversedS1FunctionList.add(finalS1Function);
 
-         if (contactStateProviders.get(j).getContactState().isLoadBearing())
+
+         boolean hasHadSwitch = false;
+
+         for (int j = numberOfSegments - 1; j >= 0; j--)
          {
-            S1Function thisS1Trajectory;
-            if (hasHadSwitch)
+            Trajectory3D thisVRPTrajectory = relativeVRPTrajectories.get(j);
+
+            if (contactStateProviders.get(j).getContactState().isLoadBearing())
             {
-               DifferentialS1Segment s1Segment = new DifferentialS1Segment(discreteDt);
-               s1Segment.set(lqrCommonValues, S1, thisVRPTrajectory.getDuration());
-               thisS1Trajectory = s1Segment;
+               S1Function thisS1Trajectory;
+               if (hasHadSwitch)
+               {
+                  DifferentialS1Segment s1Segment = new DifferentialS1Segment(discreteDt);
+                  s1Segment.set(lqrCommonValues, S1, thisVRPTrajectory.getDuration());
+                  thisS1Trajectory = s1Segment;
+               }
+               else
+               {
+                  thisS1Trajectory = finalS1Function;
+               }
+
+               thisS1Trajectory.compute(0.0, S1);
+               s1Functions.put(thisVRPTrajectory, thisS1Trajectory);
+               reversedS1FunctionList.add(thisS1Trajectory);
             }
             else
             {
-               thisS1Trajectory = finalS1Function;
+               hasHadSwitch = true;
+               FlightS1Function s1Function = new FlightS1Function();
+               s1Function.set(S1, thisVRPTrajectory.getDuration());
+               s1Function.compute(0.0, S1);
+
+               s1Functions.put(thisVRPTrajectory, s1Function);
+               reversedS1FunctionList.add(s1Function);
             }
-
-            thisS1Trajectory.compute(0.0, S1);
-            s1Functions.put(thisVRPTrajectory, thisS1Trajectory);
-         }
-         else
-         {
-            hasHadSwitch = true;
-            FlightS1Function s1Function = new FlightS1Function();
-            s1Function.set(S1, thisVRPTrajectory.getDuration());
-            s1Function.compute(0.0, S1);
-
-            s1Functions.put(thisVRPTrajectory, s1Function);
          }
       }
+
+      for (int i = reversedS1FunctionList.size() - 1; i >= 0; i--)
+         s1FunctionList.add(reversedS1FunctionList.get(i));
    }
 
    void computeS2Segments()
    {
-      int numberOfSegments = relativeVRPTrajectories.size() ;
+      reversedS2FunctionList.clear();
+      s2FunctionList.clear();
+
+      int numberOfSegments = relativeVRPTrajectories.size();
       int numberOfEndingContactSegments = 0;
       int j = numberOfSegments - 1;
       while (j >= 0 && contactStateProviders.get(j).getContactState().isLoadBearing())
@@ -208,11 +231,15 @@ public class LQRJumpMomentumController
 
       s2.zero();
       AlgebraicS2Function endingS2Function = new AlgebraicS2Function();
+      finalS1Function.compute(0.0, S1);
+      lqrCommonValues.computeS2ConstantStateMatrices(S1);
       endingS2Function.set(s2, endingContactVRPs, lqrCommonValues);
       endingS2Function.compute(0, 0.0, s2);
 
-      for (j = 0; j < numberOfEndingContactSegments; j++)
-         s2Functions.put(endingContactVRPs.get(j), endingS2Function.getSegment(j));
+      for (j = numberOfEndingContactSegments - 1; j >= 0; j--)
+      {
+         reversedS2FunctionList.add(endingS2Function.getSegment(j));
+      }
 
       for (j = numberOfSegments - numberOfEndingContactSegments - 1; j >= 0; j--)
       {
@@ -224,7 +251,7 @@ public class LQRJumpMomentumController
             s2Segment.set(s1Functions.get(trajectorySegment), trajectorySegment, lqrCommonValues, s2);
             s2Segment.compute(0.0, s2);
 
-            s2Functions.put(trajectorySegment, s2Segment);
+            reversedS2FunctionList.add(s2Segment);
          }
          else
          {
@@ -232,9 +259,12 @@ public class LQRJumpMomentumController
             s2Function.set(S1, s2, trajectorySegment.getDuration());
 
             s2Function.compute(0.0, s2);
-            s2Functions.put(trajectorySegment, s2Function);
+            reversedS2FunctionList.add(s2Function);
          }
       }
+
+      for (int i = reversedS2FunctionList.size() - 1; i >= 0; i--)
+         s2FunctionList.add(reversedS2FunctionList.get(i));
    }
 
    void computeS1AndK1(double time)
@@ -242,8 +272,7 @@ public class LQRJumpMomentumController
       int segmentNumber = getSegmentNumber(time);
       double timeInState = computeTimeInSegment(time, segmentNumber);
 
-      Trajectory3D relativeVRPTrajectory = relativeVRPTrajectories.get(segmentNumber);
-      s1Functions.get(relativeVRPTrajectory).compute(timeInState, S1);
+      s1FunctionList.get(segmentNumber).compute(timeInState, S1);
 
       // Nb = N' + B' S1
       Nb.set(lqrCommonValues.getNTranspose());
@@ -263,7 +292,7 @@ public class LQRJumpMomentumController
       referenceVRPPosition.get(relativeDesiredVRP);
       referenceVRPPosition.add(finalVRPPosition);
 
-      s2Functions.get(relativeVRPTrajectories.get(j)).compute(timeInSegment, s2);
+      s2FunctionList.get(j).compute(timeInSegment, s2);
 
       CommonOps_DDRM.mult(lqrCommonValues.getR1Inverse(), lqrCommonValues.getDQ(), R1InverseDQ);
       CommonOps_DDRM.multTransB(-0.5, lqrCommonValues.getR1Inverse(), lqrCommonValues.getB(), R1InverseBTranspose);
@@ -384,6 +413,6 @@ public class LQRJumpMomentumController
 
    S2Segment getS2Segment(int segment)
    {
-      return s2Functions.get(relativeVRPTrajectories.get(segment));
+      return s2FunctionList.get(segment);
    }
 }
