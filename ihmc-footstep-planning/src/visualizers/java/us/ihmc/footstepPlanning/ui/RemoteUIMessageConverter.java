@@ -528,7 +528,7 @@ public class RemoteUIMessageConverter
       packet.setGoalDistanceProximity(goalDistanceProximity.get());
       packet.setGoalYawProximity(goalYawProximity.get());
       if (pathHeadingReference.get() != null)
-         packet.setRequestedPathHeading(pathHeadingReference.get().toByte());
+         packet.setRequestedPathHeading(pathHeadingReference.get().getYawOffset());
       packet.setSnapGoalSteps(snapGoalSteps.get());
       packet.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
       packet.setMaxIterations(maxIterations.get());
