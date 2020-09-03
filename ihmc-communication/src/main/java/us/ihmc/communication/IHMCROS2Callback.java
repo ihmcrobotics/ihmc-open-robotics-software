@@ -9,8 +9,8 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.ros2.Ros2Subscription;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,20 +26,20 @@ import java.util.function.Supplier;
 public class IHMCROS2Callback<T>
 {
    private final Consumer<T> messageCallback;
-   private Ros2Subscription<T> subscription;
+   private ROS2Subscription<T> subscription;
    private volatile boolean enabled = true;
 
-   public IHMCROS2Callback(Ros2NodeInterface ros2Node, ROS2Topic<T> topicName, Consumer<T> messageCallback)
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName, Consumer<T> messageCallback)
    {
       this(ros2Node, topicName.getType(), topicName, messageCallback);
    }
 
-   public IHMCROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, Consumer<T> messageCallback)
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, Consumer<T> messageCallback)
    {
       this(ros2Node, messageType, topicName.withType(messageType).toString(), messageCallback);
    }
 
-   public IHMCROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)
    {
       this.messageCallback = messageCallback;
       ExceptionTools.handle(() ->

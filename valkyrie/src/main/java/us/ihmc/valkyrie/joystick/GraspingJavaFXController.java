@@ -49,7 +49,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 /**
  * What to do this controller.
@@ -111,7 +111,7 @@ public class GraspingJavaFXController
 
    FullHumanoidRobotModelFactory fullRobotModelFactory;
 
-   public GraspingJavaFXController(String robotName, JavaFXMessager messager, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public GraspingJavaFXController(String robotName, JavaFXMessager messager, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                    JavaFXRobotVisualizer javaFXRobotVisualizer, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
    {
       this.fullRobotModelFactory = fullRobotModelFactory;

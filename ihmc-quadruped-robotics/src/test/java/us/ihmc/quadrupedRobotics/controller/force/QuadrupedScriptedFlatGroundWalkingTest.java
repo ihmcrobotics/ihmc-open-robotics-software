@@ -259,7 +259,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       int initialSize = steps.size();
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(stepTeleopManager.getRobotName());
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getRos2Node(), QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
                                            s ->
                                            {
                                               if (s.takeNextData().getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)

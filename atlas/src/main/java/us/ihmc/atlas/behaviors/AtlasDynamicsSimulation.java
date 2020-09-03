@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -27,7 +27,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 public class AtlasDynamicsSimulation
 {
-   private final RealtimeRos2Node realtimeRos2Node;
+   private final RealtimeROS2Node realtimeROS2Node;
    private final SimulationConstructionSet simulationConstructionSet;
    private final AvatarSimulation avatarSimulation;
 
@@ -72,7 +72,7 @@ public class AtlasDynamicsSimulation
                                                             contactPointParameters.getAdditionalContactTransforms().get(i));
       }
 
-      RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "humanoid_simulation_controller");
+      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "humanoid_simulation_controller");
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     robotModel.getSensorInformation().getFeetForceSensorNames(),
@@ -90,7 +90,7 @@ public class AtlasDynamicsSimulation
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, DO_NOTHING_BEHAVIOR);
       controllerFactory.addControllerFailureTransition(WALKING, DO_NOTHING_BEHAVIOR);
       controllerFactory.setInitialState(HighLevelControllerName.WALKING);
-      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
+      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
@@ -100,7 +100,7 @@ public class AtlasDynamicsSimulation
       avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(0.0, 0.0));
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
-      avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
+      avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(false);
       avatarSimulationFactory.setLogToFile(logToFile);
 
@@ -110,19 +110,19 @@ public class AtlasDynamicsSimulation
          scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
 
       avatarSimulation.start();
-      realtimeRos2Node.spin();  // TODO Should probably happen in start()
+      realtimeROS2Node.spin();  // TODO Should probably happen in start()
 
       // TODO set up some useful graphs
 
       scs.setupGraph("root.atlas.t");
       scs.setupGraph("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
 
-      return new AtlasDynamicsSimulation(realtimeRos2Node, avatarSimulation);
+      return new AtlasDynamicsSimulation(realtimeROS2Node, avatarSimulation);
    }
 
-   private AtlasDynamicsSimulation(RealtimeRos2Node realtimeRos2Node, AvatarSimulation avatarSimulation)
+   private AtlasDynamicsSimulation(RealtimeROS2Node realtimeROS2Node, AvatarSimulation avatarSimulation)
    {
-      this.realtimeRos2Node = realtimeRos2Node;
+      this.realtimeROS2Node = realtimeROS2Node;
       this.avatarSimulation = avatarSimulation;
       this.simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
    }
@@ -131,12 +131,12 @@ public class AtlasDynamicsSimulation
    {
       LogTools.info("Shutting down");
       avatarSimulation.destroy();
-      realtimeRos2Node.destroy();
+      realtimeROS2Node.destroy();
    }
 
-   public RealtimeRos2Node getRealtimeRos2Node()
+   public RealtimeROS2Node getRealtimeROS2Node()
    {
-      return realtimeRos2Node;
+      return realtimeROS2Node;
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

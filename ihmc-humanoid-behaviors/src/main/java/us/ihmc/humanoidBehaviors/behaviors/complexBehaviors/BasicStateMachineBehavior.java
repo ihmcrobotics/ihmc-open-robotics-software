@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
@@ -25,7 +25,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
       ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM
    }
 
-   public BasicStateMachineBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public BasicStateMachineBehavior(String robotName, String name, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, name, BasicStates.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;

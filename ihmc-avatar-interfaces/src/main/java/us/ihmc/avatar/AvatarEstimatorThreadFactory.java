@@ -39,7 +39,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -90,7 +90,7 @@ public class AvatarEstimatorThreadFactory
 
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
-   private final OptionalFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new OptionalFactoryField<>("realtimeRos2Node");
+   private final OptionalFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new OptionalFactoryField<>("realtimeROS2Node");
    private final OptionalFactoryField<ROS2Topic> outputTopicField = new OptionalFactoryField<>("outputTopic");
    private final OptionalFactoryField<ROS2Topic> inputTopicField = new OptionalFactoryField<>("inputTopic");
 
@@ -125,7 +125,7 @@ public class AvatarEstimatorThreadFactory
     *
     * <pre>
     * AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-    * avatarEstimatorThreadFactory.setROS2Info(realtimeRos2Node, robotName);
+    * avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node, robotName);
     * avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
     * avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
     * avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
@@ -201,7 +201,7 @@ public class AvatarEstimatorThreadFactory
     *                  {@link ControllerAPIDefinition#getOutputTopic(String)} and
     *                  {@link ControllerAPIDefinition#getInputTopic(String)}.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, String robotName)
+   public void setROS2Info(RealtimeROS2Node ros2Node, String robotName)
    {
       setROS2Info(ros2Node, ROS2Tools.getControllerOutputTopic(robotName), ROS2Tools.getControllerInputTopic(robotName));
    }
@@ -215,10 +215,10 @@ public class AvatarEstimatorThreadFactory
     * @param inputTopic the generator to use for creating the topic name for
     *                                     subscribers.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic outputTopic,
+   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic outputTopic,
                            ROS2Topic inputTopic)
    {
-      realtimeRos2NodeField.set(ros2Node);
+      realtimeROS2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);
       inputTopicField.set(inputTopic);
    }
@@ -474,10 +474,10 @@ public class AvatarEstimatorThreadFactory
       return ekfStateEstimator;
    }
 
-   public RealtimeRos2Node getRealtimeRos2Node()
+   public RealtimeROS2Node getRealtimeROS2Node()
    {
-      if (realtimeRos2NodeField.hasValue())
-         return realtimeRos2NodeField.get();
+      if (realtimeROS2NodeField.hasValue())
+         return realtimeROS2NodeField.get();
       else
          return null;
    }
@@ -514,10 +514,10 @@ public class AvatarEstimatorThreadFactory
                                                                       getYoGraphicsListRegistry(),
                                                                       getEstimatorRegistry()));
 
-         if (realtimeRos2NodeField.hasValue())
+         if (realtimeROS2NodeField.hasValue())
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2NodeField.get(),
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2NodeField.get(),
                                                           RequestWristForceSensorCalibrationPacket.class,
                                                           inputTopicField.get(),
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
@@ -529,8 +529,8 @@ public class AvatarEstimatorThreadFactory
 
    private IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
-      if (realtimeRos2NodeField.hasValue())
-         return ROS2Tools.createPublisherTypeNamed(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, outputTopicField.get());
+      if (realtimeROS2NodeField.hasValue())
+         return ROS2Tools.createPublisherTypeNamed(realtimeROS2NodeField.get(), ControllerCrashNotificationPacket.class, outputTopicField.get());
       else
          return null;
    }
@@ -750,7 +750,7 @@ public class AvatarEstimatorThreadFactory
 
    public RobotConfigurationDataPublisher getRobotConfigurationDataPublisher()
    {
-      if (!realtimeRos2NodeField.hasValue())
+      if (!realtimeROS2NodeField.hasValue())
          return null;
 
       if (!robotConfigurationDataPublisherField.hasValue())
@@ -763,7 +763,7 @@ public class AvatarEstimatorThreadFactory
          factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
-         factory.setROS2Info(realtimeRos2NodeField.get(), outputTopicField.get());
+         factory.setROS2Info(realtimeROS2NodeField.get(), outputTopicField.get());
          factory.setPublishPeriod(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }

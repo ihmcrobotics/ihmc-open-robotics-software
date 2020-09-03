@@ -13,7 +13,7 @@ import us.ihmc.humanoidBehaviors.ui.tools.DirectRobotUI;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class AtlasDirectControlUI
 {
@@ -26,7 +26,7 @@ public class AtlasDirectControlUI
    private void buildApp()
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "direct_robot_ui");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "direct_robot_ui");
 
       Stage stage = new Stage();
       stage.setTitle(getClass().getSimpleName());

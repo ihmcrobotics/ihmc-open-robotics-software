@@ -6,7 +6,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.function.Supplier;
@@ -17,7 +17,7 @@ public class PeriodicPlanarRegionPublisher
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
    private final PausablePeriodicThread thread;
 
-   public PeriodicPlanarRegionPublisher(Ros2NodeInterface ros2Node,
+   public PeriodicPlanarRegionPublisher(ROS2NodeInterface ros2Node,
                                         ROS2Topic<PlanarRegionsListMessage> topic,
                                         double period,
                                         Supplier<PlanarRegionsList> planarRegionsListSupplier)

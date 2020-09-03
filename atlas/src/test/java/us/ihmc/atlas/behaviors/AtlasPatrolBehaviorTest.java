@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -35,7 +35,7 @@ public class AtlasPatrolBehaviorTest
    private AtlasRobotModel robotModel;
    private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
 
    @Disabled
    @Test

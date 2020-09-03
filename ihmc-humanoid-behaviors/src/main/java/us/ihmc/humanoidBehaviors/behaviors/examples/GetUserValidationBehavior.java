@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class GetUserValidationBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
 {
@@ -14,7 +14,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    CommunicationBridge coactiveBehaviorsNetworkManager;
    private boolean recievedMessage = false;
 
-   public GetUserValidationBehavior(String robotName, Ros2Node ros2Node)
+   public GetUserValidationBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
       //      coactiveBehaviorsNetworkManager = ros2Node; // FIXME I broke it when switching to pub-sub (Sylvain)

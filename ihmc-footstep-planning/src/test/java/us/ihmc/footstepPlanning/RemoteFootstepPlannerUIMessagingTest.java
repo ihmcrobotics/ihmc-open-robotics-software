@@ -59,7 +59,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -69,7 +69,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static final boolean VISUALIZE = false;
    private static final String robotName = "testBot";
 
-   private RealtimeRos2Node localNode = null;
+   private RealtimeROS2Node localNode = null;
    private RemoteUIMessageConverter messageConverter = null;
    private SharedMemoryMessager messager = null;
    private DomainFactory.PubSubImplementation pubSubImplementation = null;
@@ -104,7 +104,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    public void setup()
    {
-      localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      localNode = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else

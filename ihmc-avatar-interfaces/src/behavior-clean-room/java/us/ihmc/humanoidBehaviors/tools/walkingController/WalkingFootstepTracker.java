@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
@@ -28,7 +28,7 @@ public class WalkingFootstepTracker
 
    private SideDependentList<FootstepDataMessage> lastCommandedFootsteps = new SideDependentList<>();
 
-   public WalkingFootstepTracker(Ros2NodeInterface ros2Node, String robotName)
+   public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
       new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);

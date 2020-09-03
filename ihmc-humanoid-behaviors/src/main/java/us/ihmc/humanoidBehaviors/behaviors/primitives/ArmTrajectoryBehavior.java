@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -13,7 +12,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -40,12 +39,12 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<JointspaceTrajectoryStatusMessage> jointSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
 
-   public ArmTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public ArmTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, null, ros2Node, yoTime);
    }
 
-   public ArmTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public ArmTrajectoryBehavior(String robotName, String namePrefix, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, namePrefix, ros2Node);
 

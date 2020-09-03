@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
@@ -36,7 +36,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame midZupFrame;
 
-   public WalkToInteractableObjectBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public WalkToInteractableObjectBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "WalkState", WalkToObjectState.class, yoTime, ros2Node);
       midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();

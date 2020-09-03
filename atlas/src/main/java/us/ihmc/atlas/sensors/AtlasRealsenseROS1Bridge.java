@@ -10,15 +10,13 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -60,7 +58,7 @@ public class AtlasRealsenseROS1Bridge
          ThreadTools.sleep(2000);
       }
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_ros1_bridge");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_ros1_bridge");
 
       pointCloud2ROS2Publisher = new IHMCROS2Publisher<>(ros2Node, PointCloud2.class);
 

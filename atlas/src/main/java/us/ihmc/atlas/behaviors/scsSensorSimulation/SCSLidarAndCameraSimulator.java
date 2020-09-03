@@ -33,7 +33,7 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -55,7 +55,7 @@ import java.io.IOException;
  */
 public class SCSLidarAndCameraSimulator
 {
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
    private final RemoteSyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
@@ -69,7 +69,7 @@ public class SCSLidarAndCameraSimulator
 
    public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
    {
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "lidar_and_camera");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
 
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,

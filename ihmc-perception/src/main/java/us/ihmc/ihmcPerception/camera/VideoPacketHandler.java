@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
@@ -22,7 +22,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    private volatile boolean enable = true;
 
-   public VideoPacketHandler(Ros2Node ros2Node)
+   public VideoPacketHandler(ROS2Node ros2Node)
    {
       this(ros2Node, ROS2Tools.VIDEO);
    }
