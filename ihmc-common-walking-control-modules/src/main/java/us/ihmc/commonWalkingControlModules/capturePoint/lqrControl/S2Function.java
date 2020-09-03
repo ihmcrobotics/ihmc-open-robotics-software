@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 
-public interface S2Function
+public interface S2Function extends S2Segment
 {
    default void compute(double timeInSegment, DMatrixRMaj s2ToPack)
    {

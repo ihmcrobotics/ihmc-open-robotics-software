@@ -1,24 +1,18 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import com.google.common.collect.Lists;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 import java.util.List;
 
 public class DifferentialS2Function implements S2Function
 {
-   private final double dt;
-
    private final DMatrixRMaj endValueLocal = new DMatrixRMaj(6, 1);
    private final RecyclingArrayList<DifferentialS2Segment> s2Segments;
 
    public DifferentialS2Function(double dt)
    {
-      this.dt = dt;
       s2Segments = new RecyclingArrayList<>(() -> new DifferentialS2Segment(dt));
    }
 

@@ -18,8 +18,7 @@ public class FlightS1Function implements S1Function
       MatrixTools.setMatrixBlock(Afl, 3, 3, identity, 0, 0, 3, 3, 1.0);
    }
 
-
-   public void set( DMatrixRMaj finalS1)
+   public void set(DMatrixRMaj finalS1)
    {
       this.finalS1.set(finalS1);
    }

@@ -26,6 +26,7 @@ public class AlgebraicS1Function implements S1Function
           lqrCommonValues.getA(),
           lqrCommonValues.getB());
    }
+
    public void set(DMatrixRMaj Q1, DMatrixRMaj R1, DMatrixRMaj R1Inverse, DMatrixRMaj NTranspose, DMatrixRMaj A, DMatrixRMaj B)
    {
       NativeCommonOps.multQuad(NTranspose, R1Inverse, QRiccati);

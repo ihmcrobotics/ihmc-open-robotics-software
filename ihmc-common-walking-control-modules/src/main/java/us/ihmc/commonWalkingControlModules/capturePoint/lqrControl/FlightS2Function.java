@@ -5,7 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
-public class FlightS2Function implements S1Function
+public class FlightS2Function implements S2Segment
 {
    private final DMatrixRMaj Afl = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj Bfl = new DMatrixRMaj(6, 3);
@@ -25,7 +25,6 @@ public class FlightS2Function implements S1Function
 
       g.set(2, 0, -Math.abs(gravityZ));
    }
-
 
    public void set(DMatrixRMaj finalS1, DMatrixRMaj finalS2)
    {
