@@ -573,7 +573,6 @@ public class FootstepNodeCheckerTest
    {
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setWiggleWhilePlanning(true);
-      footstepPlannerParameters.setRejectIfWiggleNotSatisfied(true);
 
       double wiggleMinimum = 0.02;
       footstepPlannerParameters.setWiggleInsideDeltaMinimum(wiggleMinimum);
