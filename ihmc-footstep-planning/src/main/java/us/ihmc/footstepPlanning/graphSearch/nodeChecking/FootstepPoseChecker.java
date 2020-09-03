@@ -187,6 +187,11 @@ public class FootstepPoseChecker
 
    void setApproximateStepDimensions(FootstepNode candidateNode, FootstepNode stanceNode)
    {
+      if (stanceNode == null)
+      {
+         return;
+      }
+
       double dx = candidateNode.getX() - stanceNode.getX();
       double dy = candidateNode.getY() - stanceNode.getY();
 
