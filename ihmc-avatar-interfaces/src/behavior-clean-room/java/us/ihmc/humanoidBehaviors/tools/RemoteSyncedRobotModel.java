@@ -14,7 +14,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 import java.util.function.Function;
@@ -31,7 +31,7 @@ public class RemoteSyncedRobotModel
 
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
-   public RemoteSyncedRobotModel(DRCRobotModel robotModel, Ros2NodeInterface ros2Node)
+   public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData();

@@ -22,7 +22,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisposable
@@ -41,7 +41,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
    static final String kinematicsStreamingToolboxInputMessageName = KinematicsStreamingToolboxInputMessage.class.getSimpleName();
    static final String kinematicsToolboxOutputStatusName = KinematicsToolboxOutputStatus.class.getSimpleName();
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
@@ -68,7 +68,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
    public KinematicsStreamingToolboxMessageLogger(String robotName, PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);

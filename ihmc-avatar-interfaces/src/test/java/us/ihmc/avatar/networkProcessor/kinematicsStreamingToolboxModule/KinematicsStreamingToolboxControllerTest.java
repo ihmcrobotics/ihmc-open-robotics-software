@@ -65,8 +65,8 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -106,7 +106,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected SimulationConstructionSet scs;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
    protected HumanoidFloatingRootJointRobot robot, ghost;
-   protected Ros2Node ros2Node;
+   protected ROS2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
    protected ROS2Topic controllerInputTopic;
@@ -135,15 +135,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
       createToolboxController(ghostRobotModel);
       setupCollisions(ghostRobotModel.getHumanoidRobotKinematicsCollisionModel(), ghost);
 
-      ros2Node = drcSimulationTestHelper.getRos2Node();
+      ros2Node = drcSimulationTestHelper.getROS2Node();
 
       controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-      RealtimeRos2Node toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
-      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxRos2Node);
+      RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
       IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                          WholeBodyTrajectoryMessage.class,
                                                                                                          controllerInputTopic);
@@ -196,7 +196,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             ghost.setController(ghostController, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
       }
 
-      toolboxRos2Node.spin();
+      toolboxROS2Node.spin();
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       scs = drcSimulationTestHelper.getSimulationConstructionSet();
    }

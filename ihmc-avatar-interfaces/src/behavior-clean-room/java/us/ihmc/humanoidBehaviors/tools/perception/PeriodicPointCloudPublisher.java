@@ -7,8 +7,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class PeriodicPointCloudPublisher
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
    private final PausablePeriodicThread thread;
 
-   public PeriodicPointCloudPublisher(Ros2Node ros2Node,
+   public PeriodicPointCloudPublisher(ROS2Node ros2Node,
                                       ROS2Topic<StereoVisionPointCloudMessage> topic,
                                       double period,
                                       Supplier<List<Point3DReadOnly>> pointCloudSupplier,

@@ -27,7 +27,7 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -114,7 +114,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, HumanoidRobotSensorInformation sensorInformation,
                               HighLevelHumanoidControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-                              DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, RobotVisualizer robotVisualizer, double gravity,
+                              DRCOutputProcessor outputProcessor, RealtimeROS2Node realtimeROS2Node, RobotVisualizer robotVisualizer, double gravity,
                               double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
@@ -128,7 +128,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, ControllerCrashNotificationPacket.class,
                                                                       ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)

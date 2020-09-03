@@ -33,7 +33,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -173,7 +173,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       YoRegistry teleopRegistry = new YoRegistry("TeleopRegistry");
       sdfRobot.getRobotsYoRegistry().addChild(teleopRegistry);
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
       QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
 

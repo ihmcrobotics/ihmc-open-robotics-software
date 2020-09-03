@@ -6,18 +6,14 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REACurrentStateProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
@@ -30,7 +26,7 @@ public class LidarREANetworkProvider implements REANetworkProvider
    private REACurrentStateProvider currentStateProvider = null;
 
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final ROS2Topic<PlanarRegionsListMessage> outputTopic;
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
@@ -38,12 +34,12 @@ public class LidarREANetworkProvider implements REANetworkProvider
    public LidarREANetworkProvider(ROS2Topic outputTopic,
                                   ROS2Topic lidarOutputTopic)
    {
-      this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            outputTopic,
            lidarOutputTopic);
    }
 
-   public LidarREANetworkProvider(Ros2Node ros2Node,
+   public LidarREANetworkProvider(ROS2Node ros2Node,
                                   ROS2Topic outputTopic,
                                   ROS2Topic lidarOutputTopic)
    {

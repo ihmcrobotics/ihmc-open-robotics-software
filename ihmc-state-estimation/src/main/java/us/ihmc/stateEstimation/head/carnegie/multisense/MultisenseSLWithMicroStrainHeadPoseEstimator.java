@@ -18,7 +18,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
@@ -88,9 +88,9 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       this.getRobotConfigurationDataFromNetwork = getRobotConfigurationDataFromNetwork;
       if (this.getRobotConfigurationDataFromNetwork)
       {
-         RealtimeRos2Node realtimeRos2Node = ROS2Tools
-               .createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "multisense_microstrain_head_pose_estimator");
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, ROS2Tools.IHMC_ROOT, this::onNewDataMessage);
+         RealtimeROS2Node realtimeROS2Node = ROS2Tools
+               .createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "multisense_microstrain_head_pose_estimator");
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, ROS2Tools.IHMC_ROOT, this::onNewDataMessage);
       }
 
       headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());

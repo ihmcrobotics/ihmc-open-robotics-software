@@ -3,21 +3,13 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
-import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
-import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
-import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 public class REACurrentStateProvider
 {
@@ -27,7 +19,7 @@ public class REACurrentStateProvider
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
    private final REAStatusMessage currentState = new REAStatusMessage();
 
-   public REACurrentStateProvider(Ros2Node ros2Node,
+   public REACurrentStateProvider(ROS2Node ros2Node,
                                   ROS2Topic outputTopic,
                                   Messager messager)
    {

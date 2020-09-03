@@ -51,7 +51,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -112,7 +112,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    private final boolean DEBUG = false;
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
    private YoDouble yoTime;
 
    private HumanoidFloatingRootJointRobot robot;
@@ -132,7 +132,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       registry = new YoRegistry(getClass().getSimpleName());
       this.yoTime = new YoDouble("yoTime", registry);
 
-      this.ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_humanoid_behavior_dispatcher_test");
+      this.ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_humanoid_behavior_dispatcher_test");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getSimpleRobotName());
@@ -155,7 +155,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                                                                                                         fullRobotModel, sensorInfo,
                                                                                                         robotDataReceiver.getForceSensorDataHolder(),
                                                                                                         IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT,
-                                                                                                        drcSimulationTestHelper.getRos2Node(), registry);
+                                                                                                        drcSimulationTestHelper.getROS2Node(), registry);
          behaviorDispatcher.addUpdatable(wristSensorUpdatable);
       }
 
@@ -173,7 +173,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(String robotName, FullHumanoidRobotModel fullRobotModel, Ros2Node ros2Node,
+   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(String robotName, FullHumanoidRobotModel fullRobotModel, ROS2Node ros2Node,
                                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));

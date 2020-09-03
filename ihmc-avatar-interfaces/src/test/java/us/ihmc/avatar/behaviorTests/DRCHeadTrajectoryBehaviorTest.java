@@ -167,7 +167,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
 
       final HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(drcBehaviorTestHelper.getRobotName(),
-                                                                                       drcBehaviorTestHelper.getRos2Node(), drcBehaviorTestHelper.getYoTime());
+                                                                                       drcBehaviorTestHelper.getROS2Node(), drcBehaviorTestHelper.getYoTime());
 
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(headTrajectoryMessage);

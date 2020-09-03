@@ -41,7 +41,7 @@ public class RobotTimeBasedExecutorService
     * @param timeUnit of the period.
     * @param runnable will be called at the specified period.
     */
-   public static void schedulePackageBased(RealtimeRos2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
+   public static void schedulePackageBased(RealtimeROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
@@ -58,7 +58,7 @@ public class RobotTimeBasedExecutorService
     * @param timeUnit of the period.
     * @param runnable will be called at the specified period.
     */
-   public static void schedulePackageBased(Ros2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
+   public static void schedulePackageBased(ROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
@@ -153,7 +153,7 @@ public class RobotTimeBasedExecutorService
     * @param timeUnit of the period.
     * @param runnable will be called at the specified period.
     */
-   public static void schedulePackageBasedWithDelayCompensation(RealtimeRos2Node ros2Node, String robotName, long expectedPackagePeriod,
+   public static void schedulePackageBasedWithDelayCompensation(RealtimeROS2Node ros2Node, String robotName, long expectedPackagePeriod,
                                                                 TimeUnit packagePeriodTimeUnit, long period, TimeUnit timeUnit, Runnable runnable)
    {
       long periodInNanos = timeUnit.toNanos(period);

@@ -19,7 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Path;
@@ -41,7 +41,7 @@ public class PerceptionSuite
    private final PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
    private final PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
 
-   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   protected final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private static final Path defaultRootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
    private static final String defaultDirectory = "/robot-environment-awareness/src/main/resources/";

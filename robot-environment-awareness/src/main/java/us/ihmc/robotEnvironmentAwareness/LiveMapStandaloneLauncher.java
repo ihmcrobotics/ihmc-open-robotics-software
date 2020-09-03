@@ -8,11 +8,9 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.LiveMapModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.ui.LiveMapUI;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class LiveMapStandaloneLauncher extends Application
 {
@@ -21,7 +19,7 @@ public class LiveMapStandaloneLauncher extends Application
    private Messager messager;
    private LiveMapUI ui;
    private LiveMapModule module;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -29,7 +27,7 @@ public class LiveMapStandaloneLauncher extends Application
       messager = new SharedMemoryJavaFXMessager(LiveMapModuleAPI.API);
       messager.startMessager();
 
-      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
       ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);
       module = LiveMapModule.createIntraprocess(ros2Node, messager);
 

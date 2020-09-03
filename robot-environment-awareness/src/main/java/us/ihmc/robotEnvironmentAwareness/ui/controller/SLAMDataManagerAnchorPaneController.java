@@ -25,7 +25,7 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHan
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 {
@@ -134,7 +134,7 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    }
 
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                              StereoVisionPointCloudMessage.class,
                                                                                                                              ROS2Tools.IHMC_ROOT);

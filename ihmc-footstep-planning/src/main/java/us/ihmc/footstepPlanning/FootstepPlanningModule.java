@@ -38,7 +38,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -57,7 +57,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 {
    private final String name;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -296,7 +296,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearCustomTerminationConditions();
    }
 
-   public boolean registerRosNode(Ros2Node ros2Node)
+   public boolean registerRosNode(ROS2Node ros2Node)
    {
       if (this.ros2Node != null)
          return false;
