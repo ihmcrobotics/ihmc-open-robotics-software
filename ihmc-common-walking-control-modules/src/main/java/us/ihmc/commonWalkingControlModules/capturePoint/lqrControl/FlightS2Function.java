@@ -17,6 +17,7 @@ public class FlightS2Function implements S2Segment
    private static final DMatrixRMaj identity = CommonOps_DDRM.identity(3);
 
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(6, 1);
+   private double duration;
 
    public FlightS2Function(double gravityZ)
    {
@@ -26,18 +27,20 @@ public class FlightS2Function implements S2Segment
       g.set(2, 0, -Math.abs(gravityZ));
    }
 
-   public void set(DMatrixRMaj finalS1, DMatrixRMaj finalS2)
+   public void set(DMatrixRMaj finalS1, DMatrixRMaj finalS2, double duration)
    {
       this.finalS1.set(finalS1);
       this.finalS2.set(finalS2);
+      this.duration = duration;
    }
 
    public void compute(double timeInState, DMatrixRMaj s2ToPack)
    {
-      MatrixTools.setMatrixBlock(Afl, 3, 3, identity, 0, 0, 3, 3, timeInState);
+      double timeRemaining = duration - timeInState;
+      MatrixTools.setMatrixBlock(Afl, 3, 3, identity, 0, 0, 3, 3, timeRemaining);
 
-      MatrixTools.setMatrixBlock(Bfl, 0, 0, identity, 0, 0, 3, 3, 0.5 * timeInState * timeInState);
-      MatrixTools.setMatrixBlock(Bfl, 3, 0, identity, 0, 0, 3, 3, timeInState);
+      MatrixTools.setMatrixBlock(Bfl, 0, 0, identity, 0, 0, 3, 3, 0.5 * timeRemaining * timeRemaining);
+      MatrixTools.setMatrixBlock(Bfl, 3, 0, identity, 0, 0, 3, 3, timeRemaining);
 
       CommonOps_DDRM.multTransA(Bfl, g, Bflg);
 

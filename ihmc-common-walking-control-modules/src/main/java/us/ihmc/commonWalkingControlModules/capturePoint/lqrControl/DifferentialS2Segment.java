@@ -7,12 +7,12 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
-public class DifferentialS2Segment
+public class DifferentialS2Segment implements S2Segment
 {
    private final double dt;
-   private final DMatrixRMaj R1Inverse = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj NB = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj s2Dot = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj q2 = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj r2 = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj rs = new DMatrixRMaj(6, 1);
 
@@ -26,18 +26,34 @@ public class DifferentialS2Segment
       this.dt = dt;
    }
 
-   public void set(DifferentialS1Segment s1Segment,
+   public void set(S1Function s1Segment,
+                   Trajectory3D vrpTrajectory,
+                   LQRCommonValues lqrCommonValues,
+                   DMatrixRMaj s2AtEnd)
+   {
+      set(s1Segment,
+          vrpTrajectory,
+          lqrCommonValues.getQ(),
+          lqrCommonValues.getR1Inverse(),
+          lqrCommonValues.getNTranspose(),
+          lqrCommonValues.getA(),
+          lqrCommonValues.getB(),
+          lqrCommonValues.getC(),
+          lqrCommonValues.getD(),
+          s2AtEnd);
+   }
+
+   public void set(S1Function s1Segment,
                    Trajectory3D vrpTrajectory,
                    DMatrixRMaj Q,
-                   DMatrixRMaj q2,
-                   DMatrixRMaj R1,
+                   DMatrixRMaj R1Inverse,
                    DMatrixRMaj NTranspose,
                    DMatrixRMaj A,
                    DMatrixRMaj B,
+                   DMatrixRMaj C,
                    DMatrixRMaj D,
                    DMatrixRMaj s2AtEnd)
    {
-      NativeCommonOps.invert(R1, R1Inverse);
 
       s2Trajectory.clear();
       s2Trajectory.add().set(s2AtEnd);
@@ -55,6 +71,7 @@ public class DifferentialS2Segment
          vrpTrajectory.getPosition().get(referenceVRP);
 
          computeNB(B, NTranspose, S1);
+         computeQ2(C, Q, referenceVRP);
          computeR2(D, Q, referenceVRP);
          computeRs(B, previousS2);
 
@@ -94,6 +111,14 @@ public class DifferentialS2Segment
    {
       CommonOps_DDRM.multTransA(B, S1, NB);
       CommonOps_DDRM.addEquals(NB, NTranspose);
+   }
+
+   private final DMatrixRMaj CTransposeQ = new DMatrixRMaj(3, 6);
+
+   private void computeQ2(DMatrixRMaj C, DMatrixRMaj Q, DMatrixRMaj referenceVRP)
+   {
+      CommonOps_DDRM.multTransA(-2.0, C, Q, CTransposeQ);
+      CommonOps_DDRM.mult(CTransposeQ, referenceVRP, q2);
    }
 
    private final DMatrixRMaj DTransposeQ = new DMatrixRMaj(3, 6);

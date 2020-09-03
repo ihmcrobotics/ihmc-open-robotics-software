@@ -141,33 +141,14 @@ public class LQRJumpMomentumController
    {
       lqrCommonValues.computeEquivalentCostValues(momentumRateWeight, vrpTrackingWeight);
 
-
-      /*
-        A' S1 + S1 A - Nb' R1inv Nb + Q1 = S1dot = 0
-        or
-        A1 S1 + S1 A - S1' B R1inv B' S1 - N R1inv N' + Q1
-        If the standard CARE is formed as
-        A' P + P A - P B R^-1 B' P + Q = 0
-        then we can rewrite this as
-                     S1 = P
-         A - B R1inv N' = A
-                      B = B
-        Q1 - N R1inv N' = Q
-      */
-
       finalS1Function.set(lqrCommonValues);
 
       shouldUpdateP = false;
    }
 
-   private void resetS1Parameters()
+   void computeS1Segments()
    {
       s1Functions.clear();
-   }
-
-   void computeS1Parameters()
-   {
-      resetS1Parameters();
 
       int numberOfSegments = relativeVRPTrajectories.size() - 1;
 
@@ -202,8 +183,7 @@ public class LQRJumpMomentumController
          {
             hasHadSwitch = true;
             FlightS1Function s1Function = new FlightS1Function();
-            s1Function.set(S1);
-
+            s1Function.set(S1, thisVRPTrajectory.getDuration());
             s1Function.compute(0.0, S1);
 
             s1Functions.put(thisVRPTrajectory, s1Function);
@@ -211,22 +191,7 @@ public class LQRJumpMomentumController
       }
    }
 
-   void computeS1AndK1(double time)
-   {
-      int segmentNumber = getSegmentNumber(time);
-      double timeInState = computeTimeInSegment(time, segmentNumber);
-      Trajectory3D relativeVRPTrajectory = relativeVRPTrajectories.get(segmentNumber);
-      s1Functions.get(relativeVRPTrajectory).compute(timeInState, S1);
-
-      // Nb = N' + B' S1
-      Nb.set(lqrCommonValues.getNTranspose());
-      CommonOps_DDRM.multAddTransA(lqrCommonValues.getB(), S1, Nb);
-
-      // K1 = -R1inv NB
-      CommonOps_DDRM.mult(-1.0, lqrCommonValues.getR1Inverse(), Nb, K1);
-   }
-
-   void computeS2Parameters()
+   void computeS2Segments()
    {
       int numberOfSegments = relativeVRPTrajectories.size() ;
       int numberOfEndingContactSegments = 0;
@@ -238,7 +203,6 @@ public class LQRJumpMomentumController
       }
 
       List<Trajectory3D> endingContactVRPs = new ArrayList<>();
-      // TODO double check the indexing
       for (j = numberOfSegments - numberOfEndingContactSegments; j < numberOfSegments; j++)
          endingContactVRPs.add(relativeVRPTrajectories.get(j));
 
@@ -254,25 +218,39 @@ public class LQRJumpMomentumController
       {
          Trajectory3D trajectorySegment = relativeVRPTrajectories.get(j);
 
-
          if (contactStateProviders.get(j).getContactState().isLoadBearing())
          {
-            AlgebraicS2Segment s2Segment = new AlgebraicS2Segment();
-            s2Segment.set(s2, trajectorySegment, lqrCommonValues);
+            DifferentialS2Segment s2Segment = new DifferentialS2Segment(discreteDt);
+            s2Segment.set(s1Functions.get(trajectorySegment), trajectorySegment, lqrCommonValues, s2);
             s2Segment.compute(0.0, s2);
 
             s2Functions.put(trajectorySegment, s2Segment);
          }
          else
          {
-            // TODO remove gravity fixed value
             FlightS2Function s2Function = new FlightS2Function(gravityZ);
-            s2Function.set(S1, s2);
+            s2Function.set(S1, s2, trajectorySegment.getDuration());
 
             s2Function.compute(0.0, s2);
             s2Functions.put(trajectorySegment, s2Function);
          }
       }
+   }
+
+   void computeS1AndK1(double time)
+   {
+      int segmentNumber = getSegmentNumber(time);
+      double timeInState = computeTimeInSegment(time, segmentNumber);
+
+      Trajectory3D relativeVRPTrajectory = relativeVRPTrajectories.get(segmentNumber);
+      s1Functions.get(relativeVRPTrajectory).compute(timeInState, S1);
+
+      // Nb = N' + B' S1
+      Nb.set(lqrCommonValues.getNTranspose());
+      CommonOps_DDRM.multAddTransA(lqrCommonValues.getB(), S1, Nb);
+
+      // K1 = -R1inv NB
+      CommonOps_DDRM.mult(-1.0, lqrCommonValues.getR1Inverse(), Nb, K1);
    }
 
    void computeS2AndK2(double time)
@@ -287,7 +265,9 @@ public class LQRJumpMomentumController
 
       s2Functions.get(relativeVRPTrajectories.get(j)).compute(timeInSegment, s2);
 
-      // defined this way, because the R1Inverse BT already has a -0.5 appended.
+      CommonOps_DDRM.mult(lqrCommonValues.getR1Inverse(), lqrCommonValues.getDQ(), R1InverseDQ);
+      CommonOps_DDRM.multTransB(-0.5, lqrCommonValues.getR1Inverse(), lqrCommonValues.getB(), R1InverseBTranspose);
+
       CommonOps_DDRM.mult(R1InverseDQ, relativeDesiredVRP, k2);
       CommonOps_DDRM.multAdd(R1InverseBTranspose, s2, k2);
 
@@ -299,10 +279,10 @@ public class LQRJumpMomentumController
       if (shouldUpdateP)
          computeP();
 
-      computeS1Parameters();
-      computeS1AndK1(time);
+      computeS1Segments();
+      computeS2Segments();
 
-      computeS2Parameters();
+      computeS1AndK1(time);
       computeS2AndK2(time);
 
       relativeState.set(currentState);
@@ -360,5 +340,45 @@ public class LQRJumpMomentumController
       for (int i = 0; i < segment; i++)
          timeOffset += relativeVRPTrajectories.get(i).getDuration();
       return time - timeOffset;
+   }
+
+   DMatrixRMaj getA()
+   {
+      return lqrCommonValues.getA();
+   }
+
+   DMatrixRMaj getB()
+   {
+      return lqrCommonValues.getB();
+   }
+
+   DMatrixRMaj getC()
+   {
+      return lqrCommonValues.getC();
+   }
+
+   DMatrixRMaj getD()
+   {
+      return lqrCommonValues.getD();
+   }
+
+   DMatrixRMaj getQ()
+   {
+      return lqrCommonValues.getQ();
+   }
+
+   DMatrixRMaj getR()
+   {
+      return lqrCommonValues.getR();
+   }
+
+   DMatrixRMaj getK1()
+   {
+      return K1;
+   }
+
+   DMatrixRMaj getK2()
+   {
+      return k2;
    }
 }
