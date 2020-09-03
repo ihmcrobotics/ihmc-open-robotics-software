@@ -37,12 +37,12 @@ public class FlightS2Function implements S2Segment
    public void compute(double timeInState, DMatrixRMaj s2ToPack)
    {
       double timeRemaining = duration - timeInState;
-      MatrixTools.setMatrixBlock(Afl, 3, 3, identity, 0, 0, 3, 3, timeRemaining);
+      MatrixTools.setMatrixBlock(Afl, 0, 3, identity, 0, 0, 3, 3, timeRemaining);
 
       MatrixTools.setMatrixBlock(Bfl, 0, 0, identity, 0, 0, 3, 3, 0.5 * timeRemaining * timeRemaining);
       MatrixTools.setMatrixBlock(Bfl, 3, 0, identity, 0, 0, 3, 3, timeRemaining);
 
-      CommonOps_DDRM.multTransA(Bfl, g, Bflg);
+      CommonOps_DDRM.mult(Bfl, g, Bflg);
 
       CommonOps_DDRM.mult(2.0, finalS1, Bflg, tempMatrix);
       CommonOps_DDRM.addEquals(tempMatrix, finalS2);
