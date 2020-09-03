@@ -10,7 +10,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -33,10 +32,10 @@ public class FootstepNodeSnapAndWigglerTest
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumXYWiggleDistance(0.1);
       footstepPlannerParameters.setMaximumYawWiggle(0.1);
-      footstepPlannerParameters.setWiggleInsideDelta(0.05);
+      footstepPlannerParameters.setWiggleInsideDeltaTarget(0.05);
 
       double epsilon = 1e-5;
-      double wiggleInsideDelta = footstepPlannerParameters.getWiggleInsideDelta();
+      double wiggleInsideDelta = footstepPlannerParameters.getWiggleInsideDeltaTarget();
       double pX = 0.5 * PlannerTools.footLength;
       double pY = 0.5 * PlannerTools.footWidth;
 

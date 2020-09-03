@@ -64,7 +64,7 @@ public class PlannerParametersUIController
       minStepYaw          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumStepYaw()                  , 0.05   ));
       minSurfaceIncline   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumSurfaceInclineRadians()    , 0.05   ));
       minClearance        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinClearanceFromStance()          , 0.05   ));
-      wiggleInsideDelta   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getWiggleInsideDelta()               , 0.05   ));
+      wiggleInsideDelta   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   , 10.0   , footstepPlannerParameters.getWiggleInsideDeltaTarget()               , 0.05   ));
       stepUpHeight        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZWhenSteppingUp()      , 0.05   ));
       stepDownHeight      .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZWhenForwardAndDown()  , 0.05   ));
       maxStepUpX          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReachWhenSteppingUp()  , 0.05   ));

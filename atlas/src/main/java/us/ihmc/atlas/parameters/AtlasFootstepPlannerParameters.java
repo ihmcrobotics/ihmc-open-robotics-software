@@ -31,7 +31,7 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
       setMinimumFootholdPercent(0.99);
       setMinimumSurfaceInclineRadians(0.78539);
       setMinClearanceFromStance(0.05);
-      setWiggleInsideDelta(0.02);
+      setWiggleInsideDeltaTarget(0.02);
       setMaximumStepZWhenSteppingUp(1.5);
       setMaximumStepReachWhenSteppingUp(0.5);
       setMaximumStepZWhenForwardAndDown(1.0);
