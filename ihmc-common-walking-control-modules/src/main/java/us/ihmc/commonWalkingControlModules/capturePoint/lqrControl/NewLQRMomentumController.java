@@ -58,40 +58,15 @@ public class NewLQRMomentumController
    private final AlgebraicS1Function s1Function = new AlgebraicS1Function();
    private final AlgebraicS2Function s2Function = new AlgebraicS2Function();
 
-   private final DMatrixRMaj Q = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj R = new DMatrixRMaj(3, 3);
-
-   private final DMatrixRMaj A = new DMatrixRMaj(6, 6);
-   private final DMatrixRMaj B = new DMatrixRMaj(6, 3);
-   private final DMatrixRMaj BTranspose = new DMatrixRMaj(3, 6);
-   private final DMatrixRMaj C = new DMatrixRMaj(3, 6);
-   private final DMatrixRMaj D = new DMatrixRMaj(3, 3);
-
-   private final DMatrixRMaj A2 = new DMatrixRMaj(6, 6);
-   private final DMatrixRMaj A2Inverse = new DMatrixRMaj(6, 6);
-   private final DMatrixRMaj B2 = new DMatrixRMaj(6, 3);
-
-   private final DMatrixRMaj Q1 = new DMatrixRMaj(3, 3);
-
-   private final DMatrixRMaj R1 = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj R1Inverse = new DMatrixRMaj(3, 3);
-
-   private final DMatrixRMaj N = new DMatrixRMaj(6, 3);
-   private final DMatrixRMaj NTranspose = new DMatrixRMaj(3, 6);
-
-   private final DMatrixRMaj NB = new DMatrixRMaj(3, 6);
+   private final LQRCommonValues lqrCommonValues = new LQRCommonValues();
 
    private final DMatrixRMaj S1 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj s2 = new DMatrixRMaj(6, 1);
-
-   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj K1 = new DMatrixRMaj(3, 6);
    private final DMatrixRMaj k2 = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj u = new DMatrixRMaj(3, 1);
 
-   private final DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
-   private final DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj R1InverseDQ = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj R1InverseBTranspose = new DMatrixRMaj(3, 6);
    private final DMatrixRMaj finalVRPState = new DMatrixRMaj(6, 1);
@@ -145,12 +120,7 @@ public class NewLQRMomentumController
 
    public void computeDynamicsMatrix(double omega)
    {
-      MatrixTools.setMatrixBlock(A, 0, 3, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(B, 3, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(C, 0, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, -1.0 / MathTools.square(omega));
-
-      CommonOps_DDRM.transpose(B, BTranspose);
+      lqrCommonValues.computeDynamicsMatrix(omega);
 
       shouldUpdateS1 = true;
    }
@@ -179,21 +149,8 @@ public class NewLQRMomentumController
 
    void computeS1()
    {
-      MatrixTools.setDiagonal(Q, vrpTrackingWeight);
-      MatrixTools.setDiagonal(R, momentumRateWeight);
+      lqrCommonValues.computeEquivalentCostValues(momentumRateWeight, vrpTrackingWeight);
 
-      NativeCommonOps.multQuad(C, Q, Q1);
-      NativeCommonOps.multQuad(D, Q, R1);
-      CommonOps_DDRM.addEquals(R1, R);
-
-      NativeCommonOps.invert(R1, R1Inverse);
-
-      CommonOps_DDRM.mult(D, Q, DQ);
-
-      tempMatrix.reshape(3, 3);
-      CommonOps_DDRM.mult(Q, D, tempMatrix);
-      CommonOps_DDRM.multTransA(C, tempMatrix, N);
-      CommonOps_DDRM.transpose(N, NTranspose);
 
       /*
         A' S1 + S1 A - Nb' R1inv Nb + Q1 = S1dot = 0
@@ -208,34 +165,19 @@ public class NewLQRMomentumController
         Q1 - N R1inv N' = Q
       */
 
-
-
-      s1Function.set(Q1, R1, NTranspose, A, B);
+      s1Function.set(lqrCommonValues);
       s1Function.compute(0.0, S1);
 
       // all the below stuff is constant
-      // Nb = N' + B' S1
-      CommonOps_DDRM.transpose(N, NB);
-      CommonOps_DDRM.multAddTransA(B, S1, NB);
+
+      lqrCommonValues.computeS2ConstantStateMatrices(S1);
+
 
       // K1 = -R1inv NB
-      CommonOps_DDRM.mult(-1.0, R1Inverse, NB, K1);
+      CommonOps_DDRM.mult(-1.0, lqrCommonValues.getR1Inverse(), lqrCommonValues.getNb(), K1);
 
-      // A2 = Nb' R1inv B' - A'
-      tempMatrix.reshape(3, 6);
-      MatrixTools.scaleTranspose(-1.0, A, A2);
-      CommonOps_DDRM.multTransB(R1Inverse, B, tempMatrix);
-      CommonOps_DDRM.multAddTransA(NB, tempMatrix, A2);
-
-      // B2 = 2 (C' - Nb' R1inv D) Q
-      CommonOps_DDRM.mult(R1Inverse, DQ, R1InverseDQ);
-      CommonOps_DDRM.multTransA(-2.0, NB, R1InverseDQ, B2);
-      CommonOps_DDRM.multAddTransA(2.0, C, Q, B2);
-
-      NativeCommonOps.invert(A2, A2Inverse);
-      CommonOps_DDRM.mult(-1.0, A2Inverse, B2, A2InverseB2);
-
-      CommonOps_DDRM.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
+      CommonOps_DDRM.mult(lqrCommonValues.getR1Inverse(), lqrCommonValues.getDQ(), R1InverseDQ);
+      CommonOps_DDRM.multTransB(-0.5, lqrCommonValues.getR1Inverse(), lqrCommonValues.getB(), R1InverseBTranspose);
 
       shouldUpdateS1 = false;
    }
@@ -243,7 +185,7 @@ public class NewLQRMomentumController
    private final DMatrixRMaj zeroVector = new DMatrixRMaj(6, 1);
    void computeS2Parameters()
    {
-      s2Function.set(zeroVector, relativeVRPTrajectories, A2, B2);
+      s2Function.set(zeroVector, relativeVRPTrajectories, lqrCommonValues);
    }
 
    void computeS2(double time)
@@ -295,8 +237,8 @@ public class NewLQRMomentumController
 
       CommonOps_DDRM.addEquals(u, k2);
 
-      CommonOps_DDRM.mult(C, relativeState, relativeDesiredVRP);
-      CommonOps_DDRM.multAdd(D, u, relativeDesiredVRP);
+      CommonOps_DDRM.mult(lqrCommonValues.getC(), relativeState, relativeDesiredVRP);
+      CommonOps_DDRM.multAdd(lqrCommonValues.getD(), u, relativeDesiredVRP);
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
@@ -365,32 +307,32 @@ public class NewLQRMomentumController
 
    DMatrixRMaj getA()
    {
-      return A;
+      return lqrCommonValues.getA();
    }
 
    DMatrixRMaj getB()
    {
-      return B;
+      return lqrCommonValues.getB();
    }
 
    DMatrixRMaj getC()
    {
-      return C;
+      return lqrCommonValues.getC();
    }
 
    DMatrixRMaj getD()
    {
-      return D;
+      return lqrCommonValues.getD();
    }
 
    DMatrixRMaj getQ()
    {
-      return Q;
+      return lqrCommonValues.getQ();
    }
 
    DMatrixRMaj getR()
    {
-      return R;
+      return lqrCommonValues.getR();
    }
 
    DMatrixRMaj getK1()

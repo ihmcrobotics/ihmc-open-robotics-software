@@ -15,8 +15,6 @@ public class AlgebraicS2Segment
    private final DMatrixRMaj A2 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj timeScaledA2 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj A2Exponential = new DMatrixRMaj(6, 6);
-   private final DMatrixRMaj A2Inverse = new DMatrixRMaj(6, 6);
-   private final DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
    private final DMatrixRMaj summedBetas = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
@@ -26,11 +24,11 @@ public class AlgebraicS2Segment
    private final DMatrixRMaj alpha = new DMatrixRMaj(6, 1);
    private final RecyclingArrayList<DMatrixRMaj> betas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
 
-   public void set(DMatrixRMaj endValue, Trajectory3D vrpTrajectory, DMatrixRMaj A2, DMatrixRMaj B2)
+
+
+   public void set(DMatrixRMaj endValue, Trajectory3D vrpTrajectory, DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
    {
       this.A2.set(A2);
-      NativeCommonOps.invert(A2, A2Inverse);
-      CommonOps_DDRM.mult(A2Inverse, B2, A2InverseB2);
 
       int k = vrpTrajectory.getNumberOfCoefficients() - 1;
       for (int i = 0; i <= k; i++)
