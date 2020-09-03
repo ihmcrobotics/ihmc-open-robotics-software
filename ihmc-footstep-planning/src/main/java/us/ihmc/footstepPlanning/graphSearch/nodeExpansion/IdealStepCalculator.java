@@ -114,6 +114,10 @@ public class IdealStepCalculator
          }
       }
 
+      double thetaFromPrimary = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredHeading, primaryDirection.getYawOffset()));
+      double percentageSecondary = thetaFromPrimary / (0.5 * Math.PI);
+      double percentagePrimary = 1.0 - percentageSecondary;
+
       for (RobotSide stanceSide : RobotSide.values)
       {
          double stepLength0 = getIdealStepLength(parameters, primaryDirection);
@@ -121,12 +125,8 @@ public class IdealStepCalculator
          double stepLength1 = getIdealStepLength(parameters, secondaryDirection);
          double stepWidth1 = getIdealStepWidth(parameters, secondaryDirection, stanceSide);
 
-         double thetaFromPrimary = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredHeading, primaryDirection.getYawOffset()));
-         double alpha0 = Math.cos(thetaFromPrimary);
-         double alpha1 = Math.sin(thetaFromPrimary);
-
-         idealStepLengths.get(stanceSide).set(alpha0 * stepLength0 + alpha1 * stepLength1);
-         idealStepWidths.get(stanceSide).set(alpha0 * stepWidth0 + alpha1 * stepWidth1);
+         idealStepLengths.get(stanceSide).set(percentagePrimary * stepLength0 + percentageSecondary * stepLength1);
+         idealStepWidths.get(stanceSide).set(percentagePrimary * stepWidth0 + percentageSecondary * stepWidth1);
       }
    }
 
