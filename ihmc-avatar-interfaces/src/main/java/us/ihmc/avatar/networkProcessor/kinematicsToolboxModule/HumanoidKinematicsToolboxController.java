@@ -81,6 +81,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
 
+   private final YoBoolean enableAutoSupportPolygon = new YoBoolean("enableAutoSupportPolygon", registry);
    /**
     * Updated during the initialization phase with {@link CapturabilityBasedStatus}, this set of two
     * {@link YoBoolean}s is used to know which foot is currently used for support in the walking
@@ -386,6 +387,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
       holdSupportRigidBodies.set(true);
+      enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
@@ -567,6 +569,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private void addLinearMomentumConvexConstraint2DCommand(InverseKinematicsCommandBuffer bufferToPack)
    {
+      if (!enableAutoSupportPolygon.getValue())
+         return;
       if (!enableSupportPolygonConstraint.getValue())
          return;
       if (isUserProvidingSupportPolygon())
