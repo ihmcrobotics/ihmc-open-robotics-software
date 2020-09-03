@@ -239,7 +239,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void updateOverrideParameters()
    {
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.getIdealFootstepLengthOverride());
-      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.getWiggleInsideDeltaOverride());
+      footstepPlannerParameters.setWiggleInsideDeltaTarget(lookAndStepParameters.getWiggleInsideDeltaOverride());
       footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
       footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
       footstepPlannerParameters.setRejectIfWiggleNotSatisfied(lookAndStepParameters.getRejectIfWiggleNotSatisfiedOverride());

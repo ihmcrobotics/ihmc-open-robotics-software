@@ -137,7 +137,7 @@ public class GradientDescentStepConstraintSolverVisualizer
    private static WiggleParameters getWiggleParameters(FootstepPlannerParametersPacket parameters)
    {
       WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDeltaTarget();
       wiggleParameters.maxX = parameters.getMaximumXyWiggleDistance();
       wiggleParameters.minX = -parameters.getMaximumXyWiggleDistance();
       wiggleParameters.maxY = parameters.getMaximumXyWiggleDistance();
