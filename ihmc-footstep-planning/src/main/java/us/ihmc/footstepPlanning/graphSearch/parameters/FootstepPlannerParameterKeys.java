@@ -15,7 +15,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  idealFootstepWidth                           = keys.addDoubleKey ("Ideal footstep width", 0.22);
    public static final DoubleStoredPropertyKey  idealFootstepLength                          = keys.addDoubleKey ("Ideal footstep length", 0.3);
    public static final DoubleStoredPropertyKey  idealSideStepWidth                           = keys.addDoubleKey ("Ideal side step width", 0.35);
-   public static final DoubleStoredPropertyKey  idealBackStepLength                          = keys.addDoubleKey ("Ideal back step length", -0.2);
+   public static final DoubleStoredPropertyKey  idealBackStepLength                          = keys.addDoubleKey ("Ideal back step length", 0.2);
    public static final DoubleStoredPropertyKey  maxStepReach                                 = keys.addDoubleKey ("Max step reach", 0.45);
    public static final DoubleStoredPropertyKey  minStepLength                                = keys.addDoubleKey ("Min step length", -0.25);
    public static final DoubleStoredPropertyKey  minStepYaw                                   = keys.addDoubleKey ("Min step yaw", -0.3);

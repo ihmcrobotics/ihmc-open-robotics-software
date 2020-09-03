@@ -24,7 +24,7 @@ float64 ideal_footstep_length -11.1
 # Returns the ideal step side step width when "shuffling" sideways.
 float64 ideal_side_step_width -11.1
 
-# Returns the ideal length when walking backwards. This value is negative.
+# Returns the ideal length when walking backwards. This value is positive.
 float64 ideal_back_step_length -11.1
 
 # The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
