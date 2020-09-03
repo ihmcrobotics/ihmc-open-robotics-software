@@ -21,7 +21,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.LinearSpatialVectorTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.LinearSpatialVectorTrajectoryGenerator.SpatialWaypoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -50,7 +50,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    private final PoseReferenceFrame activeControlFrame;
 
    public RigidBodyExternalWrenchManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, ReferenceFrame controlFrame, YoDouble yoTime,
-                                         YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                         YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       super(null, bodyToControl.getName() + "Wrench", yoTime, parentRegistry);
 

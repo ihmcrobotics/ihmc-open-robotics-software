@@ -9,6 +9,7 @@ import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPointCloudPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 
@@ -22,7 +23,11 @@ public class AtlasPerceptionSimulation
    private AtlasSLAMBasedREAStandaloneLauncher realsenseSLAMFramework;
    private PeriodicPointCloudPublisher realsensePointCloudPublisher;
 
-   public AtlasPerceptionSimulation(CommunicationMode communicationMode, PlanarRegionsList map, boolean runRealsenseSLAM, DRCRobotModel robotModel)
+   public AtlasPerceptionSimulation(CommunicationMode communicationMode,
+                                    PlanarRegionsList map,
+                                    boolean runRealsenseSLAM,
+                                    boolean spawnUIs,
+                                    DRCRobotModel robotModel)
    {
       this.runRealsenseSLAM = runRealsenseSLAM;
       ROS2Node ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception");
@@ -38,7 +43,7 @@ public class AtlasPerceptionSimulation
       {
          realsensePointCloudPublisher = new PeriodicPointCloudPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD, period, realsense::getPointCloud, realsense::getSensorPose);
          realsensePointCloudPublisher.start();
-         realsenseSLAMFramework = new AtlasSLAMBasedREAStandaloneLauncher(false, communicationMode.getPubSubImplementation());
+         realsenseSLAMFramework = new AtlasSLAMBasedREAStandaloneLauncher(spawnUIs, communicationMode.getPubSubImplementation());
       }
       else
       {
@@ -50,6 +55,7 @@ public class AtlasPerceptionSimulation
 
    public void destroy()
    {
+      LogTools.info("Shutting down...");
       multisenseRegionsPublisher.stop();
       if (runRealsenseSLAM)
       {

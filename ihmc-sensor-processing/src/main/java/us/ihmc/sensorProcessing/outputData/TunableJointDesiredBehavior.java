@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.outputData;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Tunable implementation of the {@link JointDesiredBehaviorReadOnly} interface. This
@@ -31,7 +31,7 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
    private final DoubleParameter maxPositionError;
    private final DoubleParameter maxVelocityError;
 
-   public TunableJointDesiredBehavior(String namePrefix, YoVariableRegistry registry)
+   public TunableJointDesiredBehavior(String namePrefix, YoRegistry registry)
    {
       controlMode = new EnumParameter<>(namePrefix + CONTROL_MODE_NAME, registry, JointDesiredControlMode.class, false);
       stiffness = new DoubleParameter(namePrefix + STIFFNESS_NAME, registry, 0.0, 10.0);
@@ -42,7 +42,7 @@ public class TunableJointDesiredBehavior implements JointDesiredBehaviorReadOnly
       maxVelocityError = new DoubleParameter(namePrefix + VELOCITY_FEEDBACK_MAX_ERROR_NAME, registry, SUGGESTED_MAXIMUM_VELOCITY, 0.0, Double.POSITIVE_INFINITY);
    }
 
-   public TunableJointDesiredBehavior(String namePrefix, JointDesiredBehaviorReadOnly other, YoVariableRegistry registry)
+   public TunableJointDesiredBehavior(String namePrefix, JointDesiredBehaviorReadOnly other, YoRegistry registry)
    {
       controlMode = new EnumParameter<>(namePrefix + CONTROL_MODE_NAME, registry, JointDesiredControlMode.class, false, other.getControlMode());
       stiffness = new DoubleParameter(namePrefix + STIFFNESS_NAME, registry, other.getStiffness(), 0.0, 10.0);

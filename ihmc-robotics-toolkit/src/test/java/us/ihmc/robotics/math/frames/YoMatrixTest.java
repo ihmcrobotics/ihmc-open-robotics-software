@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoMatrixTest
@@ -21,7 +21,7 @@ public class YoMatrixTest
    {
       int maxNumberOfRows = 4;
       int maxNumberOfColumns = 8;
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoMatrix yoMatrix = new YoMatrix("testMatrix", maxNumberOfRows, maxNumberOfColumns, registry);
       assertEquals(maxNumberOfRows, yoMatrix.getNumberOfRows());
       assertEquals(maxNumberOfColumns, yoMatrix.getNumberOfColumns());
@@ -41,7 +41,7 @@ public class YoMatrixTest
 
       MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
-      assertEquals(registry.getVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
+      assertEquals(registry.findVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
 
    @Test
@@ -51,7 +51,7 @@ public class YoMatrixTest
       int maxNumberOfColumns = 8;
       String name = "testMatrix";
       
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoMatrix yoMatrix = new YoMatrix(name, maxNumberOfRows, maxNumberOfColumns, registry);
 
       int smallerRows = maxNumberOfRows - 2;
@@ -109,7 +109,7 @@ public class YoMatrixTest
       int maxNumberOfColumns = 8;
       String name = "testMatrixForZero";
       
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoMatrix yoMatrix = new YoMatrix(name, maxNumberOfRows, maxNumberOfColumns, registry);
       
       Random random = new Random(1984L);
@@ -131,7 +131,7 @@ public class YoMatrixTest
       int maxNumberOfRows = 4;
       int maxNumberOfColumns = 8;
       String name = "testMatrix";
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoMatrix yoMatrix = new YoMatrix(name, maxNumberOfRows, maxNumberOfColumns, registry);
 
       DMatrixRMaj tooBigMatrix = new DMatrixRMaj(maxNumberOfRows + 1, maxNumberOfColumns);
@@ -182,7 +182,7 @@ public class YoMatrixTest
    }
 
 
-   private void checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, DMatrixRMaj checkMatrix, YoVariableRegistry registry)
+   private void checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, DMatrixRMaj checkMatrix, YoRegistry registry)
    {
       int smallerRows = checkMatrix.getNumRows();
       int smallerColumns = checkMatrix.getNumCols();
@@ -192,7 +192,7 @@ public class YoMatrixTest
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            YoDouble variable = (YoDouble) registry.getVariable(name + "_" + row + "_" + column);
+            YoDouble variable = (YoDouble) registry.findVariable(name + "_" + row + "_" + column);
 
             if ((row < smallerRows) && (column < smallerColumns))
             {
@@ -207,13 +207,13 @@ public class YoMatrixTest
       }
    }
    
-   private void assertMatrixYoVariablesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, YoVariableRegistry registry)
+   private void assertMatrixYoVariablesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
    {
       for (int row = 0; row < maxNumberOfRows; row++)
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            YoDouble variable = (YoDouble) registry.getVariable(name + "_" + row + "_" + column);
+            YoDouble variable = (YoDouble) registry.findVariable(name + "_" + row + "_" + column);
             assertTrue(Double.isNaN(variable.getDoubleValue()));
          }
       }

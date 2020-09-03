@@ -73,59 +73,59 @@ public class QuadrupedTestYoVariables
    @SuppressWarnings("unchecked")
    public QuadrupedTestYoVariables(SimulationConstructionSet scs)
    {
-      yoTime = (YoDouble) scs.getVariable("t");
+      yoTime = (YoDouble) scs.findVariable("t");
 
-      robotBodyX = (YoDouble) scs.getVariable("q_x");
-      robotBodyY = (YoDouble) scs.getVariable("q_y");
-      robotBodyZ = (YoDouble) scs.getVariable("q_z");
-      robotBodyYaw = (YoDouble) scs.getVariable("q_yaw");
+      robotBodyX = (YoDouble) scs.findVariable("q_x");
+      robotBodyY = (YoDouble) scs.findVariable("q_y");
+      robotBodyZ = (YoDouble) scs.findVariable("q_z");
+      robotBodyYaw = (YoDouble) scs.findVariable("q_yaw");
 
-      isFallDetected = (YoBoolean) scs.getVariable("isFallDetected");
-      fallDetectionType = (YoEnum<FallDetectionType>) scs.getVariable("fallDetectionReason");
+      isFallDetected = (YoBoolean) scs.findVariable("isFallDetected");
+      fallDetectionType = (YoEnum<FallDetectionType>) scs.findVariable("fallDetectionReason");
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         controllerFootSwitches.set(robotQuadrant, (YoBoolean) scs.getVariable(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
-         footSwitches.set(robotQuadrant, (YoBoolean) scs.getVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected"));
-         solePositionXs.set(robotQuadrant, (YoDouble) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionX"));
-         solePositionYs.set(robotQuadrant, (YoDouble) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionY"));
-         solePositionZs.set(robotQuadrant, (YoDouble) scs.getVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
+         controllerFootSwitches.set(robotQuadrant, (YoBoolean) scs.findVariable(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
+         footSwitches.set(robotQuadrant, (YoBoolean) scs.findVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected"));
+         solePositionXs.set(robotQuadrant, (YoDouble) scs.findVariable(robotQuadrant.getCamelCaseName() + "SolePositionX"));
+         solePositionYs.set(robotQuadrant, (YoDouble) scs.findVariable(robotQuadrant.getCamelCaseName() + "SolePositionY"));
+         solePositionZs.set(robotQuadrant, (YoDouble) scs.findVariable(robotQuadrant.getCamelCaseName() + "SolePositionZ"));
       }
 
-      limitJointTorques = (YoBoolean) scs.getVariable("limitJointTorques");
+      limitJointTorques = (YoBoolean) scs.findVariable("limitJointTorques");
       
-      userTrigger = (YoEnum<HighLevelControllerName>) scs.getVariable("requestedControllerState");
-      stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
-      controllerState = (YoEnum<HighLevelControllerName>) scs.getVariable("controllerCurrentState");
-      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
+      userTrigger = (YoEnum<HighLevelControllerName>) scs.findVariable("requestedControllerState");
+      stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.findVariable("stepTrigger");
+      controllerState = (YoEnum<HighLevelControllerName>) scs.findVariable("controllerCurrentState");
+      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.findVariable("steppingCurrentState");
 
-      stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
-      groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
+      stanceHeight = (YoDouble) scs.findVariable("stanceHeight");
+      groundPlanePointZ = (YoDouble) scs.findVariable("groundPlanePointZ");
       
-      comPositionEstimateX = (YoDouble) scs.getVariable("comPositionEstimateX");
-      comPositionEstimateY = (YoDouble) scs.getVariable("comPositionEstimateY");
-      currentHeightInWorld = (YoDouble) scs.getVariable("currentHeightInWorld");
+      comPositionEstimateX = (YoDouble) scs.findVariable("comPositionEstimateX");
+      comPositionEstimateY = (YoDouble) scs.findVariable("comPositionEstimateY");
+      currentHeightInWorld = (YoDouble) scs.findVariable("currentHeightInWorld");
       
-      timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.getVariable("timedStepQuadrant");
-      timedStepDuration = (YoDouble) scs.getVariable("timedStepDuration");
-      timedStepGroundClearance = (YoDouble) scs.getVariable("timedStepGroundClearance");
-      timedStepGoalPositionX = (YoDouble) scs.getVariable("timedStepGoalPositionX");
-      timedStepGoalPositionY = (YoDouble) scs.getVariable("timedStepGoalPositionY");
-      timedStepGoalPositionZ = (YoDouble) scs.getVariable("timedStepGoalPositionZ");
+      timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.findVariable("timedStepQuadrant");
+      timedStepDuration = (YoDouble) scs.findVariable("timedStepDuration");
+      timedStepGroundClearance = (YoDouble) scs.findVariable("timedStepGroundClearance");
+      timedStepGoalPositionX = (YoDouble) scs.findVariable("timedStepGoalPositionX");
+      timedStepGoalPositionY = (YoDouble) scs.findVariable("timedStepGoalPositionY");
+      timedStepGoalPositionZ = (YoDouble) scs.findVariable("timedStepGoalPositionZ");
 
-      bodyCurrentOrientationQx = (YoDouble) scs.getVariable("bodyCurrentOrientationQx");
-      bodyCurrentOrientationQy = (YoDouble) scs.getVariable("bodyCurrentOrientationQy");
-      bodyCurrentOrientationQz = (YoDouble) scs.getVariable("bodyCurrentOrientationQz");
-      bodyCurrentOrientationQs = (YoDouble) scs.getVariable("bodyCurrentOrientationQs");
+      bodyCurrentOrientationQx = (YoDouble) scs.findVariable("bodyCurrentOrientationQx");
+      bodyCurrentOrientationQy = (YoDouble) scs.findVariable("bodyCurrentOrientationQy");
+      bodyCurrentOrientationQz = (YoDouble) scs.findVariable("bodyCurrentOrientationQz");
+      bodyCurrentOrientationQs = (YoDouble) scs.findVariable("bodyCurrentOrientationQs");
 
-      comPositionSetpointX = (YoDouble) scs.getVariable("comPositionSetpointX");
-      comPositionSetpointY = (YoDouble) scs.getVariable("comPositionSetpointY");
-      desiredHeightInWorld = (YoDouble) scs.getVariable("desiredHeightInWorld");
+      comPositionSetpointX = (YoDouble) scs.findVariable("comPositionSetpointX");
+      comPositionSetpointY = (YoDouble) scs.findVariable("comPositionSetpointY");
+      desiredHeightInWorld = (YoDouble) scs.findVariable("desiredHeightInWorld");
 
-      timeToPrepareForStanding = (YoDouble) scs.getVariable("timeToPrepareForStanding");
-      minimumTimeDoneWithStandPrep = (YoDouble) scs.getVariable("minimumTimeDoneWithStandPrep");
-      toWalkingTransitionDuration = (YoDouble) scs.getVariable("toWalkingTransitionDuration");
-      timeToMoveSittingDown = (YoDouble) scs.getVariable("timeToMoveSittingDown");
+      timeToPrepareForStanding = (YoDouble) scs.findVariable("timeToPrepareForStanding");
+      minimumTimeDoneWithStandPrep = (YoDouble) scs.findVariable("minimumTimeDoneWithStandPrep");
+      toWalkingTransitionDuration = (YoDouble) scs.findVariable("toWalkingTransitionDuration");
+      timeToMoveSittingDown = (YoDouble) scs.findVariable("timeToMoveSittingDown");
    }
 
    public YoDouble getRobotBodyX()

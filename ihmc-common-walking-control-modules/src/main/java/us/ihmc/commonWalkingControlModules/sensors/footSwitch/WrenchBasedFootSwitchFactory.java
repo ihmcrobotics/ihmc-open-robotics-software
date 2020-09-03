@@ -9,7 +9,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
 {
@@ -64,7 +64,7 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    @Override
    public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
                                             ForceSensorDataReadOnly footForceSensor, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                            YoVariableRegistry registry)
+                                            YoRegistry registry)
    {
       if (contactThresholdForceParameter == null)
       {

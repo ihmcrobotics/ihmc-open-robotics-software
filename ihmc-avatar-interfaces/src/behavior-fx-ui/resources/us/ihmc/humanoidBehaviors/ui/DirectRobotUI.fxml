@@ -37,8 +37,7 @@
                      </font></Label>
       				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
       				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-      				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-      				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                   <BorderPane GridPane.rowIndex="5">
                      <left>
                         <Label text="PSI" BorderPane.alignment="CENTER" />
@@ -69,6 +68,16 @@
                   <CheckBox fx:id="showLidarRegions" mnemonicParsing="false" onAction="#showLidarRegions" text="Lidar regions" GridPane.columnIndex="1" GridPane.rowIndex="4">
                      <font>
                         <Font size="11.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showMultisenseVideo" mnemonicParsing="false" onAction="#showMultisenseVideo" text="Multisense video" GridPane.columnIndex="2" GridPane.rowIndex="4">
+                     <font>
+                        <Font size="9.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="showRealsenseVideo" mnemonicParsing="false" onAction="#showRealsenseVideo" text="Realsense video" GridPane.columnIndex="2" GridPane.rowIndex="5">
+                     <font>
+                        <Font size="9.0" />
                      </font>
                   </CheckBox>
       			</children>

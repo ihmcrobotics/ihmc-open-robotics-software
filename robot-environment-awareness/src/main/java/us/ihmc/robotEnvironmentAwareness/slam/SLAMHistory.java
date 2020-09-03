@@ -80,6 +80,7 @@ public class SLAMHistory
          builder.append("computationTime (sec)" + ",");
          builder.append("icpIterations" + ",");
          builder.append("numberOfSurfels" + ",");
+         builder.append("numberOfCorrespondances" + ",");
          builder.append("initialDistance" + ",");
          builder.append("finalDistance" + "\n");
          for (int i = 0; i < timeStamps.size(); i++)
@@ -91,6 +92,7 @@ public class SLAMHistory
             builder.append(driftCorrectionResult.getIcpIterations() + ",");
 
             builder.append(driftCorrectionResult.getNumberOfSurfels() + ",");
+            builder.append(driftCorrectionResult.getNumberOfCorrespondances() + ",");
             builder.append(driftCorrectionResult.getInitialDistance() + ",");
             builder.append(driftCorrectionResult.getFinalDistance() + "\n");
 

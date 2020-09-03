@@ -6,22 +6,21 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.simpleWholeBodyWalking.SimpleBipedCoMTrajectoryPlanner;
 
 public class SimpleLQRSphereController implements SimpleSphereControllerInterface
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("SphereLQRController");
+   private final YoRegistry registry = new YoRegistry("SphereLQRController");
 
    private final RobotTools.SCSRobotFromInverseDynamicsRobotModel scsRobot;
    private final SimpleSphereRobot sphereRobot;
@@ -195,7 +194,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
   }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

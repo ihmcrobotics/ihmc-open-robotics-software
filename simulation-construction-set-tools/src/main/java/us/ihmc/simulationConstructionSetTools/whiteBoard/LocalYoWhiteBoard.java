@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LocalYoWhiteBoard extends YoWhiteBoard
@@ -11,7 +11,7 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
    private static final boolean VERBOSE = false;
    private YoWhiteBoard myBrotherWhiteBoard;
 
-   public LocalYoWhiteBoard(String name, YoVariableRegistry registry)
+   public LocalYoWhiteBoard(String name, YoRegistry registry)
    {
       super(name, registry);
    }
@@ -32,19 +32,19 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
    @Override
    public void whiteBoardSpecificConnect()
    {
-      ArrayList<YoVariable<?>> allVariablesToRead = new ArrayList<YoVariable<?>>();
+      ArrayList<YoVariable> allVariablesToRead = new ArrayList<YoVariable>();
       getAllVariablesToRead(allVariablesToRead);
 
-      ArrayList<YoVariable<?>> brothersVariablesToWrite = new ArrayList<YoVariable<?>>();
+      ArrayList<YoVariable> brothersVariablesToWrite = new ArrayList<YoVariable>();
       myBrotherWhiteBoard.getAllVariablesToWrite(brothersVariablesToWrite);
 
       verifyYoVariablesHaveSameNamesAndTypes(allVariablesToRead, brothersVariablesToWrite);
 
 
-      ArrayList<YoVariable<?>> allVariablesToWrite = new ArrayList<YoVariable<?>>();
+      ArrayList<YoVariable> allVariablesToWrite = new ArrayList<YoVariable>();
       getAllVariablesToWrite(allVariablesToWrite);
 
-      ArrayList<YoVariable<?>> brothersVariablesToRead = new ArrayList<YoVariable<?>>();
+      ArrayList<YoVariable> brothersVariablesToRead = new ArrayList<YoVariable>();
       myBrotherWhiteBoard.getAllVariablesToRead(brothersVariablesToRead);
 
       verifyYoVariablesHaveSameNamesAndTypes(allVariablesToWrite, brothersVariablesToRead);
@@ -71,7 +71,7 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
       setConnected(false);       
    }
 
-   private void verifyYoVariablesHaveSameNamesAndTypes(ArrayList<YoVariable<?>> variablesOne, ArrayList<YoVariable<?>> variablesTwo)
+   private void verifyYoVariablesHaveSameNamesAndTypes(ArrayList<YoVariable> variablesOne, ArrayList<YoVariable> variablesTwo)
    {
       if (variablesOne.size() != variablesTwo.size())
       {
@@ -80,16 +80,16 @@ public class LocalYoWhiteBoard extends YoWhiteBoard
    
       for (int i = 0; i < variablesOne.size(); i++)
       {
-         YoVariable<?> variableOne = variablesOne.get(i);
-         YoVariable<?> variableTwo = variablesTwo.get(i);
+         YoVariable variableOne = variablesOne.get(i);
+         YoVariable variableTwo = variablesTwo.get(i);
          verifyTypesAreEqual(variableOne, variableTwo);
-         verifyNamesAreConsistent(variableOne.getFullNameWithNameSpace(), variableTwo.getFullNameWithNameSpace());
+         verifyNamesAreConsistent(variableOne.getFullNameString(), variableTwo.getFullNameString());
       }
    }
 
-   private void verifyTypesAreEqual(YoVariable<?> variableOne, YoVariable<?> variableTwo)
+   private void verifyTypesAreEqual(YoVariable variableOne, YoVariable variableTwo)
    {
-      if (variableOne.getYoVariableType() != variableTwo.getYoVariableType())
+      if (variableOne.getType() != variableTwo.getType())
          throw new RuntimeException("variableOne.getYoVariableType() != variableTwo.getYoVariableType()");
    }
 }

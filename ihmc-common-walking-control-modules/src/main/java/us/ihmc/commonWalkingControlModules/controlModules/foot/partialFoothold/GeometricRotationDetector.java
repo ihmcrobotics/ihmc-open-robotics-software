@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * This class is designed to detect whether or not the foot is rotating. It does this by looking at the orientation of the foot with respect
@@ -28,12 +27,12 @@ public class GeometricRotationDetector implements FootRotationDetector
 
    private final ReferenceFrame soleFrame;
 
-   public GeometricRotationDetector(RobotSide side, ReferenceFrame soleFrame, FootholdRotationParameters explorationParameters, YoVariableRegistry parentRegistry)
+   public GeometricRotationDetector(RobotSide side, ReferenceFrame soleFrame, FootholdRotationParameters explorationParameters, YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
       String namePrefix = side.getLowerCaseName() + "Geometric";
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
       groundPlaneNormal.setZ(1.0);

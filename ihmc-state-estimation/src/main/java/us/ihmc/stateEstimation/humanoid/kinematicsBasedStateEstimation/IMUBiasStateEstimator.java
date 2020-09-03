@@ -1,10 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -19,21 +15,21 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class IMUBiasStateEstimator implements IMUBiasProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<YoFrameQuaternion> rawOrientationBiases = new ArrayList<>();
    private final List<AlphaFilteredYoFrameQuaternion> orientationBiases = new ArrayList<>();
@@ -67,14 +63,14 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
 
    public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBodyBasics> feet, double gravitationalAcceleration,
-                                BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, YoVariableRegistry parentRegistry)
+                                BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, YoRegistry parentRegistry)
    {
       this(imuProcessedOutputs, feet, gravitationalAcceleration, cancelGravityFromAccelerationMeasurement, updateDT, null, parentRegistry);
    }
    
    public IMUBiasStateEstimator(List<? extends IMUSensorReadOnly> imuProcessedOutputs, Collection<RigidBodyBasics> feet, double gravitationalAcceleration,
                                 BooleanProvider cancelGravityFromAccelerationMeasurement, double updateDT, StateEstimatorParameters stateEstimatorParameters,
-                                YoVariableRegistry parentRegistry)
+                                YoRegistry parentRegistry)
    {
       this.imuProcessedOutputs = imuProcessedOutputs;
       this.feet = new ArrayList<>(feet);

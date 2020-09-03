@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -61,12 +63,18 @@ public class SLAMModule implements PerceptionModule
    
    protected final SurfaceElementICPSLAM slam;
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
-   private static final int THREAD_PERIOD_MILLISECONDS = 1;
+   private static final int SLAM_PERIOD_MILLISECONDS = 250;
+   private static final int QUEUE_PERIOD_MILLISECONDS = 5;
+   private static final int MAIN_PERIOD_MILLISECONDS = 200;
+
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> scheduledQueue;
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
-   private Stopwatch stopwatch = new Stopwatch();
+   private final Mean average = new Mean();
+   private final Stopwatch totalStopWatch = new Stopwatch();
+   private final Stopwatch updateStopwatch = new Stopwatch();
 
    private final boolean manageRosNode;
    protected final ROS2Node ros2Node;
@@ -137,11 +145,12 @@ public class SLAMModule implements PerceptionModule
       reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
 
       NormalEstimationParameters normalEstimationParametersLocal = new NormalEstimationParameters();
-      normalEstimationParametersLocal.setNumberOfIterations(10);
+      normalEstimationParametersLocal.setNumberOfIterations(1);
       normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParametersLocal);
 
       NormalEstimationParameters frameNormalEstimationParametersLocal = new NormalEstimationParameters();
       frameNormalEstimationParametersLocal.setNumberOfIterations(10);
+
       frameNormalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.FrameNormalEstimationParameters, frameNormalEstimationParametersLocal);
 
 
@@ -191,15 +200,15 @@ public class SLAMModule implements PerceptionModule
    public void start()
    {
       LogTools.info("Starting SLAM Module");
+      totalStopWatch.start();
+      updateStopwatch.start();
+      average.clear();
       if (scheduledMain == null)
-      {
-         scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-      }
-
+         scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, MAIN_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      if (scheduledQueue == null)
+         scheduledQueue = executorService.scheduleAtFixedRate(this::updateQueue, 0, QUEUE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       if (scheduledSLAM == null)
-      {
-         scheduledSLAM = executorService.scheduleAtFixedRate(this::updateSLAM, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
-      }
+         scheduledSLAM = executorService.scheduleAtFixedRate(this::updateSLAM, 0, SLAM_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    @Override
@@ -214,6 +223,12 @@ public class SLAMModule implements PerceptionModule
       catch (Exception e)
       {
          e.printStackTrace();
+      }
+
+      if (scheduledQueue != null)
+      {
+         scheduledQueue.cancel(true);
+         scheduledQueue = null;
       }
 
       if (scheduledMain != null)
@@ -243,6 +258,11 @@ public class SLAMModule implements PerceptionModule
       return Thread.interrupted() || scheduledMain == null || scheduledMain.isCancelled();
    }
 
+   private boolean isQueueThreadInterrupted()
+   {
+      return Thread.interrupted() || scheduledQueue == null || scheduledQueue.isCancelled();
+   }
+
    private boolean isSLAMThreadInterrupted()
    {
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
@@ -261,9 +281,22 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.OcTreeBoundingBoxParameters, atomicBoundingBoxParameters.get());
    }
 
-   public void updateSLAM()
+   public void updateMain()
    {
-      stopwatch.start();
+      if (isMainThreadInterrupted())
+         return;
+
+      slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      if (clearNormals.getAndSet(false))
+         slam.clearNormals();
+      if (enableNormalEstimation.get())
+         slam.updateSurfaceNormals();
+   }
+
+   private void updateSLAM()
+   {
+      totalStopWatch.lap();
+      updateStopwatch.lap();
       if (updateSLAMInternal())
       {
          publishResults();
@@ -287,7 +320,10 @@ public class SLAMModule implements PerceptionModule
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
       lastTimestampProcessed.set(pointCloudToCompute.getTimestamp());
 
+      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
+
       boolean success;
+      slam.setComputeInParallel(slamParameters.get().getComputeFramesInParallel());
       if (slam.isEmpty())
       {
          LogTools.debug("addKeyFrame queueSize: {} pointCloudSize: {} timestamp: {}",
@@ -307,12 +343,10 @@ public class SLAMModule implements PerceptionModule
          LogTools.debug("success: {} getComputationTimeForLatestFrame: {}", success, slam.getComputationTimeForLatestFrame());
       }
 
-      slam.setNormalEstimationParameters(normalEstimationParameters.get());
-      slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
-      if (clearNormals.getAndSet(false))
-         slam.clearNormals();
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters(this.normalEstimationParameters.get());
+      normalEstimationParameters.setNumberOfIterations(2 * this.normalEstimationParameters.get().getNumberOfIterations());
       if (enableNormalEstimation.get())
-         slam.updateSurfaceNormals();
+         slam.updateSurfaceNormalsInBoundingBox(normalEstimationParameters);
          
       dequeue();
 
@@ -368,26 +402,38 @@ public class SLAMModule implements PerceptionModule
       pointCloudQueue.removeFirst();
    }
 
+   private final DecimalFormat df = new DecimalFormat("#.##");
+
    protected void publishResults()
    {
-      String stringToReport = "";
       reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
-      stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
+
+      String stringToReport = slam.getComputationTimeForLatestFrame() + " (sec) ";
+      reaMessager.submitMessage(SLAMModuleAPI.FrameComputationTime, stringToReport);
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMComputationTime, df.format(updateStopwatch.lapElapsed()) + "(sec)");
+      average.increment(updateStopwatch.lapElapsed());
+      reaMessager.submitMessage(SLAMModuleAPI.AverageComputationTime, df.format(average.getResult()) + " (sec)");
+
 
       NormalOcTree octreeMap = slam.getMapOcTree();
       SLAMFrame latestFrame = slam.getLatestFrame();
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getMapOcTree()));
 
-      LogTools.debug("Took: {} ocTree size: {}", stopwatch.totalElapsed(), octreeMap.size());
+
+      long startTime = System.nanoTime();
       Pose3D pose = new Pose3D(slam.getLatestFrame().getCorrectedSensorPoseInWorld());
+
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
          ocTreeConsumer.reportOcTree(octreeMap, pose);
       }
+      long endTime = System.nanoTime();
+      stringToReport = df.format(Conversions.nanosecondsToSeconds(endTime - startTime)) + " (sec)";
+      reaMessager.submitMessage(SLAMModuleAPI.ListenerComputationTime, stringToReport);
+
       Point3DReadOnly[] originalPointCloud = latestFrame.getUncorrectedPointCloudInWorld();
-      Point3DReadOnly[] correctedPointCloud = latestFrame.getCorrectedPointCloudInWorld();
+      List<? extends Point3DReadOnly> correctedPointCloud = latestFrame.getCorrectedPointCloudInWorld();
       Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePoints();
       if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
          return;
@@ -402,12 +448,19 @@ public class SLAMModule implements PerceptionModule
       reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
       history.addLatestFrameHistory(latestFrame);
       history.addDriftCorrectionHistory(slam.getDriftCorrectionResult());
+
+
+
+      LogTools.debug("Took: {} ocTree size: {}", totalStopWatch.lapElapsed(), octreeMap.size());
+
+      stringToReport = df.format(totalStopWatch.lapElapsed()) + " (sec)";
+      reaMessager.submitMessage(SLAMModuleAPI.TotalComputationTime, stringToReport);
    }
 
 
-   public void updateMain()
+   public void updateQueue()
    {
-      if (isMainThreadInterrupted())
+      if (isQueueThreadInterrupted())
          return;
 
       if (enable.get())

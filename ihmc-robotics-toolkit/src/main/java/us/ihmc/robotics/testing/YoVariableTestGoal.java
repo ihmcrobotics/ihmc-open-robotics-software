@@ -1,7 +1,7 @@
 package us.ihmc.robotics.testing;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -20,18 +20,18 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
       String getString();
    }
 
-   protected YoVariableTestGoal(YoVariable<?>... yoVariables)
+   protected YoVariableTestGoal(YoVariable... yoVariables)
    {
       this("", yoVariables);
    }
 
-   protected YoVariableTestGoal(String failurePrefix, YoVariable<?>... yoVariables)
+   protected YoVariableTestGoal(String failurePrefix, YoVariable... yoVariables)
    {
       this(failurePrefix);
 
-      for (YoVariable<?> yoVariable : yoVariables)
+      for (YoVariable yoVariable : yoVariables)
       {
-         yoVariable.addVariableChangedListener(this::notifyOfVariableChange);
+         yoVariable.addListener(this::notifyOfVariableChange);
       }
    }
 
@@ -50,7 +50,7 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
       this.stringProvider = stringProvider;
    }
 
-   public void notifyOfVariableChange(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable v)
    {
       update();
    }

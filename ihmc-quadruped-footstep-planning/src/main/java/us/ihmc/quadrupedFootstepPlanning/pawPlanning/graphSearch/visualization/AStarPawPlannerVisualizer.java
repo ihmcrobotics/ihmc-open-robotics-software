@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.visualization;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -15,13 +19,9 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class AStarPawPlannerVisualizer implements PawStepPlannerListener
 {
@@ -30,7 +30,7 @@ public class AStarPawPlannerVisualizer implements PawStepPlannerListener
    private static final double nodeSize = 0.007;
 
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
    private final YoDouble time = new YoDouble("time", registry);
@@ -83,10 +83,9 @@ public class AStarPawPlannerVisualizer implements PawStepPlannerListener
          Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, regions);
       scs.addStaticLinkGraphics(graphics3DObject);
 
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setPlaybackRealTimeRate(playbackRate);
-      scs.setMaxBufferSize(64000);
       scs.setCameraFix(0.0, 0.0, 0.0);
       scs.setCameraPosition(-0.001, 0.0, 15.0);
       scs.setGroundVisible(false);

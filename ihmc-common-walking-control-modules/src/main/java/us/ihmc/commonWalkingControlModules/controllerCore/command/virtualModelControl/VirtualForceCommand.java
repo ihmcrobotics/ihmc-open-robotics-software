@@ -40,6 +40,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
  */
 public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -82,6 +83,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    @Override
    public void set(VirtualForceCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearForce.set(other.desiredLinearForce);
       selectionMatrix.set(other.selectionMatrix);
@@ -97,6 +99,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       command.getLinearSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
@@ -429,6 +432,18 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -439,6 +454,8 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       {
          VirtualForceCommand other = (VirtualForceCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredLinearForce.equals(other.desiredLinearForce))

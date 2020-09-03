@@ -67,7 +67,7 @@ public class JSliderControl extends JSlider implements CloseableAndDisposable
 
                changeLock = false;
             }
-         });
+         }, "JSliderControl");
          timer.start();
       }
    }

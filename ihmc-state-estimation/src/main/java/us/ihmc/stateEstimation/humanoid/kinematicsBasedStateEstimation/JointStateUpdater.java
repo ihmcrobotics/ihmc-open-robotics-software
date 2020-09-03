@@ -12,7 +12,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class JointStateUpdater
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final RigidBodyBasics rootBody;
 
@@ -32,7 +32,7 @@ public class JointStateUpdater
    private final BooleanProvider enableIMUBasedJointVelocityEstimator;
 
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+         StateEstimatorParameters stateEstimatorParameters, YoRegistry parentRegistry)
    {
       rootBody = inverseDynamicsStructure.getElevator();
 
@@ -61,7 +61,7 @@ public class JointStateUpdater
    }
 
    public IMUBasedJointStateEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
-                                                                           StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+                                                                           StateEstimatorParameters stateEstimatorParameters, YoRegistry parentRegistry)
    {
       if (stateEstimatorParameters == null || stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation() == null)
          return null;

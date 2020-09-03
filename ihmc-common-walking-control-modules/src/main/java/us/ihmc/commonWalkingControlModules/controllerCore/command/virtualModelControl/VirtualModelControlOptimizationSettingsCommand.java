@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
 public class VirtualModelControlOptimizationSettingsCommand implements VirtualModelControlCommand<VirtualModelControlOptimizationSettingsCommand>
 {
+   private int commandId;
    private double rhoMin = Double.NaN;
    private double rhoWeight = Double.NaN;
    private double rhoRateWeight = Double.NaN;
@@ -84,7 +85,7 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
     * </p>
     *
     * @param rhoRateWeight the weight to use for the regularization of the rate of change of contact
-    *           forces.
+    *                      forces.
     */
    public void setRhoRateWeight(double rhoRateWeight)
    {
@@ -101,7 +102,7 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
     * </p>
     *
     * @param centerOfPressureWeight the regularization weight to use on the center of pressure
-    *           location.
+    *                               location.
     */
    public void setCenterOfPressureWeight(Tuple2DReadOnly centerOfPressureWeight)
    {
@@ -118,7 +119,7 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
     * </p>
     *
     * @param centerOfPressureRateWeight the regularization weight to use for center of pressure
-    *           variations.
+    *                                   variations.
     */
    public void setCenterOfPressureRateWeight(Tuple2DReadOnly centerOfPressureRateWeight)
    {
@@ -149,7 +150,7 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
     * </p>
     * 
     * @param momentumAccelerationWeight the weight to use for rate of change of momentum
-    *           regularization.
+    *                                   regularization.
     */
    public void setMomentumAccelerationWeight(double momentumAccelerationWeight)
    {
@@ -334,6 +335,7 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
    @Override
    public void set(VirtualModelControlOptimizationSettingsCommand other)
    {
+      commandId = other.commandId;
       rhoMin = other.rhoMin;
       rhoWeight = other.rhoWeight;
       rhoRateWeight = other.rhoRateWeight;
@@ -350,6 +352,18 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -359,6 +373,8 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
       else if (object instanceof VirtualModelControlOptimizationSettingsCommand)
       {
          VirtualModelControlOptimizationSettingsCommand other = (VirtualModelControlOptimizationSettingsCommand) object;
+         if (commandId != other.commandId)
+            return false;
          if (Double.compare(rhoMin, other.rhoMin) != 0)
             return false;
          if (Double.compare(rhoWeight, other.rhoWeight) != 0)

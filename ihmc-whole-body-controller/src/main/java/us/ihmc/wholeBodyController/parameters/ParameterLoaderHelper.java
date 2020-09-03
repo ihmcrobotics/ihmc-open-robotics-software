@@ -13,13 +13,13 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.parameters.AbstractParameterReader;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterLoaderHelper
 {
    private static final boolean debugLoading = false;
 
-   public static void loadParameters(Object caller, WholeBodyControllerParameters<?> controllerParameters, YoVariableRegistry registry)
+   public static void loadParameters(Object caller, WholeBodyControllerParameters<?> controllerParameters, YoRegistry registry)
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();
       InputStream overwriteFile = controllerParameters.getParameterOverwrites();
@@ -34,17 +34,17 @@ public class ParameterLoaderHelper
       }
    }
 
-   public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry)
+   public static void loadParameters(Object caller, InputStream parameterFile, YoRegistry registry)
    {
       loadParameters(caller, parameterFile, null, registry, true);
    }
 
-   public static void loadParameters(Object caller, InputStream parameterFile, YoVariableRegistry registry, boolean printWarnings)
+   public static void loadParameters(Object caller, InputStream parameterFile, YoRegistry registry, boolean printWarnings)
    {
       loadParameters(caller, parameterFile, null, registry, printWarnings);
    }
 
-   public static void loadParameters(Object caller, InputStream parameterFile, InputStream overwriteFile, YoVariableRegistry registry, boolean printWarnings)
+   public static void loadParameters(Object caller, InputStream parameterFile, InputStream overwriteFile, YoRegistry registry, boolean printWarnings)
    {
       if (parameterFile == null)
       {
@@ -77,7 +77,7 @@ public class ParameterLoaderHelper
     * {@link ParameterLoaderHelper#debugLoading} to see what parameters were not specified in the XML
     * file.
     */
-   private static void loadAndCheckStatistics(YoVariableRegistry registry, AbstractParameterReader reader, boolean printWarnings)
+   private static void loadAndCheckStatistics(YoRegistry registry, AbstractParameterReader reader, boolean printWarnings)
    {
       HashSet<String> defaultParameters = new HashSet<>();
       HashSet<String> unmatchedParameters = new HashSet<>();
@@ -85,7 +85,7 @@ public class ParameterLoaderHelper
 
       if (debugLoading)
       {
-         LogTools.info("When loading " + registry.getName() + " with " + registry.getAllParameters().size() + " parameters:");
+         LogTools.info("When loading " + registry.getName() + " with " + registry.collectSubtreeParameters().size() + " parameters:");
          List<String> sortedUnmatchedParameters = new ArrayList<>(unmatchedParameters);
          List<String> sortedDefaultParameters = new ArrayList<>(defaultParameters);
          Collections.sort(sortedUnmatchedParameters);
@@ -98,7 +98,7 @@ public class ParameterLoaderHelper
       else if (printWarnings && !unmatchedParameters.isEmpty())
       {
          String message = "I think something is off in your parameter file.";
-         String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" + "Parameters using their default value: "
+         String additionalInfo = "Parameters in registry: " + registry.collectSubtreeParameters().size() + "\n" + "Parameters using their default value: "
                + defaultParameters.size() + "\n" + "Parameters in XML with no match: " + unmatchedParameters.size();
          Skully.say(message, additionalInfo);
       }

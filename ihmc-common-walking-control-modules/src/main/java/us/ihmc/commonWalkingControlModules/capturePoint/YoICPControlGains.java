@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoICPControlGains implements ICPControlGainsProvider
@@ -14,7 +14,7 @@ public class YoICPControlGains implements ICPControlGainsProvider
    private final YoDouble feedbackPartMaxValueParallelToMotion;
    private final YoDouble feedbackPartMaxValueOrthogonalToMotion;
 
-   public YoICPControlGains(String suffix, YoVariableRegistry registry)
+   public YoICPControlGains(String suffix, YoRegistry registry)
    {
       kpParallelToMotion = new YoDouble("captureKpParallel" + suffix, registry);
       kpOrthogonalToMotion = new YoDouble("captureKpOrthogonal" + suffix, registry);

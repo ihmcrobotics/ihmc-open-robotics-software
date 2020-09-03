@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoPDGainsTest
 {
    @Test
    public void testParameters()
    {
-      YoPDGains gains = new YoPDGains("pdGains", new YoVariableRegistry("testRegistry"));
+      YoPDGains gains = new YoPDGains("pdGains", new YoRegistry("testRegistry"));
 
       Random rand = new Random();
       for (int i = 0; i < 1000; i++)
@@ -54,7 +54,7 @@ public class YoPDGainsTest
    @Test
    public void testParameters_2()
    {
-      YoPDGains gains = new YoPDGains("pdGains", new YoVariableRegistry("testRegistry"));
+      YoPDGains gains = new YoPDGains("pdGains", new YoRegistry("testRegistry"));
 
       Random rand = new Random();
       for (int i = 0; i < 1000; i++)

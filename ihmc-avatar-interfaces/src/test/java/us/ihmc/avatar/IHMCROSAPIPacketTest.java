@@ -64,7 +64,7 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
@@ -319,7 +319,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                             HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter,
                                                             FloatingRootJointRobot sdfRobot)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
 
       HighLevelHumanoidControllerFactory controllerFactory = createHighLevelHumanoidControllerFactory(robotModel, packetCommunicator);

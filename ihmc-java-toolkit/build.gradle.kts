@@ -21,12 +21,12 @@ mainDependencies {
    api("us.ihmc.thirdparty.jinput:jinput:200128")
    api("com.google.guava:guava:18.0")
 
-   api("us.ihmc:ihmc-commons:0.30.2")
-   api("us.ihmc:euclid:0.15.0")
-   api("us.ihmc:euclid-frame:0.15.0")
-   api("us.ihmc:euclid-shape:0.15.0")
-   api("us.ihmc:euclid-geometry:0.15.0")
-   api("us.ihmc:ihmc-graphics-description:0.18.0")
+   api("us.ihmc:ihmc-commons:0.30.3")
+   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:euclid-frame:0.15.1")
+   api("us.ihmc:euclid-shape:0.15.1")
+   api("us.ihmc:euclid-geometry:0.15.1")
+   api("us.ihmc:ihmc-graphics-description:0.19.1")
 }
 
 testDependencies {

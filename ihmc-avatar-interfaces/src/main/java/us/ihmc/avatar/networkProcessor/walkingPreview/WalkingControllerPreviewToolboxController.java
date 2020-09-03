@@ -18,10 +18,10 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -64,7 +64,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -108,7 +108,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
    public WalkingControllerPreviewToolboxController(DRCRobotModel robotModel, double integrationDT, CommandInputManager toolboxInputManager,
                                                     StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                    YoVariableRegistry parentRegistry)
+                                                    YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -127,11 +127,11 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       // Create registries to match controller so the XML gets loaded properly.
-      YoVariableRegistry drcControllerThread = new YoVariableRegistry("DRCControllerThread");
-      YoVariableRegistry drcMomentumBasedController = new YoVariableRegistry("DRCMomentumBasedController");
-      YoVariableRegistry humanoidHighLevelControllerManager = new YoVariableRegistry("HumanoidHighLevelControllerManager");
-      YoVariableRegistry managerParentRegistry = new YoVariableRegistry("HighLevelHumanoidControllerFactory");
-      YoVariableRegistry walkingParentRegistry = new YoVariableRegistry("WalkingControllerState");
+      YoRegistry drcControllerThread = new YoRegistry("DRCControllerThread");
+      YoRegistry drcMomentumBasedController = new YoRegistry("DRCMomentumBasedController");
+      YoRegistry humanoidHighLevelControllerManager = new YoRegistry("HumanoidHighLevelControllerManager");
+      YoRegistry managerParentRegistry = new YoRegistry("HighLevelHumanoidControllerFactory");
+      YoRegistry walkingParentRegistry = new YoRegistry("WalkingControllerState");
       registry.addChild(drcControllerThread);
       drcControllerThread.addChild(drcMomentumBasedController);
       drcMomentumBasedController.addChild(humanoidHighLevelControllerManager);
@@ -163,7 +163,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       WholeBodyControlCoreToolbox controlCoreToolbox = createControllerCoretoolbox(walkingControllerParameters, yoGraphicsListRegistry);
 
-      FeedbackControlCommandList feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
+      FeedbackControllerTemplate feedbackControlTemplate = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints());
 
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, walkingParentRegistry);
@@ -187,7 +187,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThread);
 
-      YoVariable<?> defaultHeight = registry.getVariable(PelvisHeightControlState.class.getSimpleName(),
+      YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
                                                          PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
       if (Double.isNaN(defaultHeight.getValueAsDouble()))
       {

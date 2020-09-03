@@ -1,5 +1,8 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
+import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,16 +16,13 @@ import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.Random;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class SensorOnlyController implements RobotController
 {
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final SensorOnlyRobot robot;
    private final SimulationConstructionSet scs;
    private final LidarScanParameters lidarScanParameters;
@@ -57,11 +57,11 @@ public class SensorOnlyController implements RobotController
 
       bagOfBalls = new BagOfBalls(lidarScanParameters.getPointsPerSweep(), 0.005, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 
-      tauLidarZ = (YoDouble) robot.getVariable("tau_gimbalZ");
-      tauLidarX = (YoDouble) robot.getVariable("tau_gimbalX");
+      tauLidarZ = (YoDouble) robot.findVariable("tau_gimbalZ");
+      tauLidarX = (YoDouble) robot.findVariable("tau_gimbalX");
 
-      qLidarZ = (YoDouble) robot.getVariable("q_gimbalZ");
-      qLidarX = (YoDouble) robot.getVariable("q_gimbalX");
+      qLidarZ = (YoDouble) robot.findVariable("q_gimbalZ");
+      qLidarX = (YoDouble) robot.findVariable("q_gimbalX");
 
       proportionalGain = new YoDouble("lidarPGain", registry);
       derivativeGain = new YoDouble("lidarDGain", registry);
@@ -91,7 +91,7 @@ public class SensorOnlyController implements RobotController
                                                                                   new RigidBodyTransform(currentTransform), scan)));
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -12,13 +12,13 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class M2ProcessedSensorsControllerWithStateTransitions implements SimulationDoneCriterion, RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("M2ClawarController");
+   private final YoRegistry registry = new YoRegistry("M2ClawarController");
 
    // These are the control variables which need to be created now:
 
@@ -476,7 +476,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -64,12 +64,12 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class AvatarEstimatorThreadFactory
 {
-   private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
+   private final YoRegistry estimatorRegistry = new YoRegistry("DRCEstimatorThread");
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    // Required fields -----------------------------------------------
@@ -267,7 +267,7 @@ public class AvatarEstimatorThreadFactory
 
    /**
     * Sets the parameters required to load Yo parameters, see
-    * {@link ParameterLoaderHelper#loadParameters(Object, WholeBodyControllerParameters, YoVariableRegistry)}.
+    * {@link ParameterLoaderHelper#loadParameters(Object, WholeBodyControllerParameters, YoRegistry)}.
     *
     * @param controllerParameters the controller parameters.
     */
@@ -470,7 +470,7 @@ public class AvatarEstimatorThreadFactory
       {
          throw new RuntimeException("Did not find parameter file for EKF.");
       }
-      ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+      ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoRegistry());
       return ekfStateEstimator;
    }
 
@@ -775,7 +775,7 @@ public class AvatarEstimatorThreadFactory
       return yoGraphicsListRegistry;
    }
 
-   public YoVariableRegistry getEstimatorRegistry()
+   public YoRegistry getEstimatorRegistry()
    {
       return estimatorRegistry;
    }

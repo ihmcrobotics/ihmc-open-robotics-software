@@ -2,17 +2,17 @@ package us.ihmc.robotics.math.trajectories;
 
 import java.util.EnumMap;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 
 public class YoSpline3D
@@ -22,14 +22,14 @@ public class YoSpline3D
    private final int numberOfCoefficientsPerPolynomial;
    private final ReferenceFrame referenceFrame;
    private final YoDouble[] arcLengths;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble t0;
    private final YoDouble tf;
    private final YoFramePoint3D position;
    private final YoFrameVector3D velocity;
    private final YoFrameVector3D acceleration;
 
-   public YoSpline3D(int numberOfCoefficientsPerPolynomial, int arcLengthCalculatorDivisions, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
+   public YoSpline3D(int numberOfCoefficientsPerPolynomial, int arcLengthCalculatorDivisions, ReferenceFrame referenceFrame, YoRegistry parentRegistry,
                      String namePrefix)
    {
       if (arcLengthCalculatorDivisions < 2)
@@ -37,7 +37,7 @@ public class YoSpline3D
          throw new RuntimeException("arcLengthCalculatorDivisions must be at least 2");
       }
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       polynomials = new EnumMap<Axis3D, YoPolynomial>(Axis3D.class);
       this.numberOfCoefficientsPerPolynomial = numberOfCoefficientsPerPolynomial;

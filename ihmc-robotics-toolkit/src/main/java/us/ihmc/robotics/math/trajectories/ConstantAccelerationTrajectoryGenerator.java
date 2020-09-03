@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ConstantAccelerationTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final DoubleProvider initialPositionProvider;
    private final DoubleProvider finalPositionProvider;
    private final DoubleProvider initialVelocityProvider;
@@ -17,9 +17,9 @@ public class ConstantAccelerationTrajectoryGenerator implements DoubleTrajectory
    private final int numberOfCoefficients = 3;
 
    public ConstantAccelerationTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider finalPositionProvider,
-         DoubleProvider initialVelocityProvider, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+         DoubleProvider initialVelocityProvider, DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.initialPositionProvider = initialPositionProvider;
       this.finalPositionProvider = finalPositionProvider;
       this.initialVelocityProvider = initialVelocityProvider;

@@ -4,12 +4,12 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class UnicycleController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("UnicycleController");
+   private final YoRegistry registry = new YoRegistry("UnicycleController");
    private final String name;
 
    // used for control
@@ -36,19 +36,19 @@ public class UnicycleController implements RobotController
       this.name = name;
       this.radius = robot.getWheelRadius();
 
-      back_tau = (YoDouble) robot.getVariable("tau_backJoint");
-      wheel_tau = (YoDouble) robot.getVariable("tau_wheelJoint");
+      back_tau = (YoDouble) robot.findVariable("tau_backJoint");
+      wheel_tau = (YoDouble) robot.findVariable("tau_wheelJoint");
 
-      pitch = (YoDouble) robot.getVariable("q_pitch");
-      pitch_rate = (YoDouble) robot.getVariable("qd_pitch");
+      pitch = (YoDouble) robot.findVariable("q_pitch");
+      pitch_rate = (YoDouble) robot.findVariable("qd_pitch");
 
-      q_back = (YoDouble) robot.getVariable("q_backJoint");
-      qd_back = (YoDouble) robot.getVariable("qd_backJoint");
+      q_back = (YoDouble) robot.findVariable("q_backJoint");
+      qd_back = (YoDouble) robot.findVariable("qd_backJoint");
 
-      q_wheel = (YoDouble) robot.getVariable("q_wheelJoint");
-      qd_wheel = (YoDouble) robot.getVariable("qd_wheelJoint");
+      q_wheel = (YoDouble) robot.findVariable("q_wheelJoint");
+      qd_wheel = (YoDouble) robot.findVariable("qd_wheelJoint");
 
-      body_x = (YoDouble) robot.getVariable("q_x");
+      body_x = (YoDouble) robot.findVariable("q_x");
    }
 
    @Override
@@ -86,7 +86,7 @@ public class UnicycleController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

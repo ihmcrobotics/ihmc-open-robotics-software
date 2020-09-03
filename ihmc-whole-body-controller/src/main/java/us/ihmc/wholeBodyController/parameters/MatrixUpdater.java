@@ -1,10 +1,10 @@
 package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public final class MatrixUpdater implements VariableChangedListener
+public final class MatrixUpdater implements YoVariableChangedListener
 {
    private final int i;
    private final int j;
@@ -17,7 +17,7 @@ public final class MatrixUpdater implements VariableChangedListener
       this.matrix = matrix;
    }
 
-   public void notifyOfVariableChange(YoVariable<?> v)
+   public void changed(YoVariable v)
    {
       matrix.setElement(i, j, v.getValueAsDouble());
    }

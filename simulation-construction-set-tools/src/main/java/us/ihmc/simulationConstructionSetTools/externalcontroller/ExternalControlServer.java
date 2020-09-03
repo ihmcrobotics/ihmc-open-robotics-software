@@ -2,22 +2,22 @@ package us.ihmc.simulationConstructionSetTools.externalcontroller;
 
 import java.util.StringTokenizer;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ExternalControlServer implements RobotController
 {
    ExternalControllerTCPConnection tcpConnection;
    private Robot terminator;
    public PinJointRobotSensor sensors;
-   YoVariableRegistry registry = new YoVariableRegistry("ExternalControl");
+   YoRegistry registry = new YoRegistry("ExternalControl");
 
    // ArrayList<SensorInterface> sensorData = new ArrayList<SensorInterface>();
    boolean debug = false;
-   YoVariable<?>[] allVariables;
-   YoVariable<?>[] torques;
+   YoVariable[] allVariables;
+   YoVariable[] torques;
    private String name;
 
    public ExternalControlServer(Robot terminator, String name)
@@ -63,22 +63,22 @@ public class ExternalControlServer implements RobotController
       for (int i = 0; i < allVariables.length; i++)
       {
          double initialValue = initialSetup[i];
-         YoVariable<?> variable = allVariables[i];
+         YoVariable variable = allVariables[i];
          System.out.println(variable.getName() + ": " + initialValue);
          variable.setValueFromDouble(initialValue);
       }
    }
 
-   private YoVariable<?>[] setUpVariableList(String variableOrderedList)
+   private YoVariable[] setUpVariableList(String variableOrderedList)
    {
       StringTokenizer tokenizer = new StringTokenizer(variableOrderedList, ",");
-      YoVariable<?>[] vars = new YoVariable[tokenizer.countTokens()];
+      YoVariable[] vars = new YoVariable[tokenizer.countTokens()];
 
       int index = 0;
       while (tokenizer.hasMoreTokens())
       {
          String varName = tokenizer.nextToken();
-         vars[index] = terminator.getVariable(varName);
+         vars[index] = terminator.findVariable(varName);
 
          index++;
       }
@@ -111,7 +111,7 @@ public class ExternalControlServer implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

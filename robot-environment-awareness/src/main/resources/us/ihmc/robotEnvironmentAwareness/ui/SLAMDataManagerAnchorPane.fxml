@@ -49,12 +49,6 @@
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browsePlanarRegionsInputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   <TextField fx:id="currentRawDataInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
                   <TextField fx:id="currentPlanarRegionsInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" GridPane.rowIndex="1">
-                     <children>
-                        <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importPlanarRegions" prefHeight="25.0" prefWidth="150.0" text="Import Planar Regions" />
-                        <Button maxWidth="1.7976931348623157E308" minWidth="50.0" mnemonicParsing="false" onAction="#hideImportedPlanarRegions" prefWidth="50.0" text="hide" />
-                     </children>
-                  </HBox>
                </children>
             </GridPane>
          </children>

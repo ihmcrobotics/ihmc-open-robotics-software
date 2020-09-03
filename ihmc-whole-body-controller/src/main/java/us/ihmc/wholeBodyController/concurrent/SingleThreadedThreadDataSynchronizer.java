@@ -16,7 +16,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchronizerInterface
@@ -49,7 +49,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
     * @param wholeBodyControlParameters
     * @param registry
     */
-   public SingleThreadedThreadDataSynchronizer(SimulationConstructionSet scs, FullHumanoidRobotModelFactory robotModelFactory, YoVariableRegistry registry)
+   public SingleThreadedThreadDataSynchronizer(SimulationConstructionSet scs, FullHumanoidRobotModelFactory robotModelFactory, YoRegistry registry)
    {
       timestamp = new YoLong(getClass().getSimpleName() + "Timestamp", registry);
       estimatorClockStartTime = new YoLong(getClass().getSimpleName() + "EstimatorClockStartTime", registry);

@@ -33,7 +33,7 @@ import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -50,7 +50,7 @@ public class SupportState extends AbstractFootControlState
    private static final double defaultFootLoadThreshold = 0.2;
    private static final int dofs = Twist.SIZE;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final FrameConvexPolygon2D footPolygon = new FrameConvexPolygon2D();
 
@@ -124,14 +124,14 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble pitchTrajectoryEndTime;
    private final YoDouble desiredPitch;
 
-   public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
+   public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoRegistry parentRegistry)
    {
       super(footControlHelper);
 
       this.gains = holdPositionGains;
 
       String prefix = footControlHelper.getRobotSide().getLowerCaseName() + "Foot";
-      registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      registry = new YoRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       footSwitch = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootSwitches().get(robotSide);

@@ -9,7 +9,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerTargetType;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -18,7 +18,7 @@ public class VisibilityGraphPawPathPlannerTest
    @Test
    public void testStartingOffPlanarRegion()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testRegistry");
+      YoRegistry testRegistry = new YoRegistry("testRegistry");
       VisibilityGraphPawPathPlanner planner = new VisibilityGraphPawPathPlanner(new DefaultVisibilityGraphParameters(), testRegistry);
 
       ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();

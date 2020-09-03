@@ -1,16 +1,15 @@
 package us.ihmc.robotics.math.trajectories;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.PointCloud3DMeshGenerator;
@@ -23,17 +22,13 @@ import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicJob;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
-
-import static java.util.Collections.singletonList;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
@@ -97,7 +92,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
                                 double radius,
                                 int resolution,
                                 int radialResolution,
-                                YoVariableRegistry registry)
+                                YoRegistry registry)
    {
       this(name, null, trajectoryGenerator, trajectoryDuration, radius, resolution, radialResolution, registry);
    }
@@ -109,7 +104,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
                                 double radius,
                                 int resolution,
                                 int radialResolution,
-                                YoVariableRegistry registry)
+                                YoRegistry registry)
    {
       super(name);
 
@@ -153,7 +148,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
 
    private void setupDirtyGraphicListener()
    {
-      getVariablesDefiningGraphic().forEach(variable -> variable.addVariableChangedListener(v -> dirtyGraphic.set(true)));
+      getVariablesDefiningGraphic().forEach(variable -> variable.addListener(v -> dirtyGraphic.set(true)));
    }
 
    /**
@@ -349,9 +344,9 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
     * @return The YoVariables needed to create a remote version of this YoGraphic.
     */
    @Override
-   public YoVariable<?>[] getVariables()
+   public YoVariable[] getVariables()
    {
-      List<YoVariable<?>> allVariables = new ArrayList<>();
+      List<YoVariable> allVariables = new ArrayList<>();
       allVariables.addAll(getVariablesDefiningGraphic());
       allVariables.add(readerExists);
 
@@ -361,9 +356,9 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    /**
     * @return The subset of {@link YoVariable}s on which the graphics depend.
     */
-   private List<YoVariable<?>> getVariablesDefiningGraphic()
+   private List<YoVariable> getVariablesDefiningGraphic()
    {
-      List<YoVariable<?>> graphicVariables = new ArrayList<>();
+      List<YoVariable> graphicVariables = new ArrayList<>();
 
       if (poseToWorldFrame != null)
       {
@@ -439,7 +434,7 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
    }
 
    @Override
-   public YoGraphicTrajectory3D duplicate(YoVariableRegistry newRegistry)
+   public YoGraphicTrajectory3D duplicate(YoRegistry newRegistry)
    {
       return null;
    }

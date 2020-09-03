@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
@@ -42,6 +43,13 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private Spinner<Double> initialQualityThreshold;
    @FXML
    private Spinner<Integer> maxQueueSize;
+   @FXML
+   private Spinner<Double> longestTimeToLag;
+   @FXML
+   private Spinner<Double> stationaryVelocity;
+   @FXML
+   private Spinner<Double> maxVelocity;
+
 
    @FXML
    private Spinner<Integer> maxOptimizationIterations;
@@ -49,6 +57,8 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private ToggleButton computeSurfaceNormalsInFrame;
    @FXML
    private ToggleButton insertMissInOcTree;
+   @FXML
+   private ToggleButton computeFramesInParallel;
 
    @FXML
    private ToggleButton includePitchAndRoll;
@@ -56,6 +66,14 @@ public class SurfaceElementICPPaneController extends REABasicUIController
    private Spinner<Double> translationPerturbation;
    @FXML
    private Spinner<Double> rotationPerturbation;
+
+   @FXML
+   private Spinner<Double> minCorrespondingDistance;
+
+   @FXML
+   private Slider maxNumberOfSurfels;
+   @FXML
+   private Slider maxNumberOfCorrespondences;
    
    private final SurfaceElementICPSLAMParametersProperty surfaceElementICPSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "surfaceElementICPSLAMParametersProperty");
    
@@ -73,11 +91,22 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       
       initialQualityThreshold.setValueFactory(createDoubleValueFactory(0.05, 0.3, 0.1, 0.05));
 
+      longestTimeToLag.setValueFactory(createDoubleValueFactory(0.0, 1000.0, 1000.0, 0.1));
       maxOptimizationIterations.setValueFactory(createIntegerValueFactory(1, 100, 40, 1));
       translationPerturbation.setValueFactory(createDoubleValueFactory(0.0001, 0.01, 0.002, 0.0005));
       rotationPerturbation.setValueFactory(createDoubleValueFactory(0.00001, 0.0001, 0.00001, 0.00001));
 
       maxQueueSize.setValueFactory(createIntegerValueFactory(1, Integer.MAX_VALUE, 100, 5));
+      stationaryVelocity.setValueFactory(createDoubleValueFactory(0.00, 0.15, 0.002, 0.0005));
+      maxVelocity.setValueFactory(createDoubleValueFactory(0.0, 0.5, 0.00001, 0.05));
+
+      minCorrespondingDistance.setValueFactory(createDoubleValueFactory(0.0, 0.1, 0.06, 0.005));
+
+      maxNumberOfSurfels.setMax(1000);
+      maxNumberOfSurfels.setMin(50);
+
+      maxNumberOfCorrespondences.setMax(1000);
+      maxNumberOfCorrespondences.setMin(50);
    }
    
    @Override
@@ -97,15 +126,24 @@ public class SurfaceElementICPPaneController extends REABasicUIController
       surfaceElementICPSLAMParametersProperty.bindBidirectionalEnableInitialQualityFilter(enableInitialQualityFilter.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInitialQualityThreshold(initialQualityThreshold.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxQueueSize(maxQueueSize.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalLongestTimeToLag(longestTimeToLag.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalStationaryVelocity(stationaryVelocity.getValueFactory().valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxVelocity(maxVelocity.getValueFactory().valueProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxOptimizationIterations(maxOptimizationIterations.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeSurfaceNormalsInFrame(computeSurfaceNormalsInFrame.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalInsertMissInOcTree(insertMissInOcTree.selectedProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalComputeFramesInParallel(computeFramesInParallel.selectedProperty());
 
       surfaceElementICPSLAMParametersProperty.bindBidirectionalIncludePitchAndRoll(includePitchAndRoll.selectedProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalTranslationPerturbation(translationPerturbation.getValueFactory().valueProperty());
       surfaceElementICPSLAMParametersProperty.bindBidirectionalRotationPerturbation(rotationPerturbation.getValueFactory().valueProperty());
-      
+
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMinimumCorrespondingDistance(minCorrespondingDistance.getValueFactory().valueProperty());
+
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxNumberOfSurfels(maxNumberOfSurfels.valueProperty());
+      surfaceElementICPSLAMParametersProperty.bindBidirectionalMaxNumberOfCorrespondences(maxNumberOfCorrespondences.valueProperty());
+
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, surfaceElementICPSLAMParametersProperty);
    }
 

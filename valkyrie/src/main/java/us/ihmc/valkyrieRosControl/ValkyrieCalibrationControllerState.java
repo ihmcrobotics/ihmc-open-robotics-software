@@ -67,7 +67,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
 
       boolean useArms = ValkyrieRosControlController.VERSION.hasArms();
       jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter, useArms);
-      registry.addChild(jointTorqueOffsetEstimatorController.getYoVariableRegistry());
+      registry.addChild(jointTorqueOffsetEstimatorController.getYoRegistry());
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 

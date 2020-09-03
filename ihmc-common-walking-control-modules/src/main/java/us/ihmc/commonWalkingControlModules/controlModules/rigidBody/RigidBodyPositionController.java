@@ -14,7 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -34,7 +34,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
 
    public RigidBodyPositionController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
-                                      ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+                                      ReferenceFrame baseFrame, YoDouble yoTime, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
 

@@ -47,9 +47,9 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
 public class JFreeGraph extends JPanel
 {
@@ -303,17 +303,17 @@ public class JFreeGraph extends JPanel
       }
    }
 
-   public static JFreeGraph createDataVsTimeGraph(DataBufferEntry timeEntry, DataBufferEntry dataEntry)
+   public static JFreeGraph createDataVsTimeGraph(YoBufferVariableEntry timeEntry, YoBufferVariableEntry dataEntry)
    {
       return createDataVsTimeGraph(timeEntry, dataEntry, Color.BLACK);
    }
 
-   public static JFreeGraph createDataVsTimeGraph(DataBufferEntry timeEntry, DataBufferEntry dataEntry, Color plotColor)
+   public static JFreeGraph createDataVsTimeGraph(YoBufferVariableEntry timeEntry, YoBufferVariableEntry dataEntry, Color plotColor)
    {
       return createDataVsTimeGraph(timeEntry, dataEntry, dataEntry.getVariableName(), "time", dataEntry.getVariableName(), plotColor);
    }
 
-   public static JFreeGraph createDataVsTimeGraph(DataBufferEntry timeEntry, DataBufferEntry dataEntry, String title, String xLabel, String yLabel, Color plotColor)
+   public static JFreeGraph createDataVsTimeGraph(YoBufferVariableEntry timeEntry, YoBufferVariableEntry dataEntry, String title, String xLabel, String yLabel, Color plotColor)
    {
       String variableName = dataEntry.getVariable().getName();
       JFreePlot plot = new JFreePlot("time vs " + variableName, timeEntry, dataEntry);
@@ -326,12 +326,12 @@ public class JFreeGraph extends JPanel
       return graph;
    }
 
-   public static JFreeGraph createDataOneVsDataTwoGraph(DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry)
+   public static JFreeGraph createDataOneVsDataTwoGraph(YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry)
    {
       return createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, Color.BLACK);
    }
 
-   public static JFreeGraph createDataOneVsDataTwoGraph(DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry, Color plotColor)
+   public static JFreeGraph createDataOneVsDataTwoGraph(YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, Color plotColor)
    {
       String dataOneVariableName = dataOneEntry.getVariable().getName();
       String dataTwoVariableName = dataTwoEntry.getVariable().getName();
@@ -339,7 +339,7 @@ public class JFreeGraph extends JPanel
       return createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, title, dataOneEntry.getVariableName(), dataTwoEntry.getVariableName(), plotColor);
    }
 
-   public static JFreeGraph createDataOneVsDataTwoGraph(DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry, String title, String xLabel, String yLabel, Color plotColor)
+   public static JFreeGraph createDataOneVsDataTwoGraph(YoBufferVariableEntry dataOneEntry, YoBufferVariableEntry dataTwoEntry, String title, String xLabel, String yLabel, Color plotColor)
    {
       JFreePlot plot = new JFreePlot(title, dataOneEntry, dataTwoEntry, false, true);
       plot.setIsScatterPlot(true);
@@ -489,19 +489,19 @@ public class JFreeGraph extends JPanel
    {      
       int numberOfPoints = 1000;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Registry");
+      YoRegistry registry = new YoRegistry("Registry");
       YoDouble variableOne = new YoDouble("variableOne", registry);
       YoDouble variableTwo = new YoDouble("variableTwo", registry);
       
-      DataBufferEntry dataOneEntry = new DataBufferEntry(variableOne, numberOfPoints);
-      DataBufferEntry dataTwoEntry = new DataBufferEntry(variableTwo, numberOfPoints);
+      YoBufferVariableEntry dataOneEntry = new YoBufferVariableEntry(variableOne, numberOfPoints);
+      YoBufferVariableEntry dataTwoEntry = new YoBufferVariableEntry(variableTwo, numberOfPoints);
       
       for (int i=0; i<numberOfPoints; i++)
       {
          variableOne.set(Math.random());
          variableTwo.set(Math.random());
-         dataOneEntry.setDataAtIndexToYoVariableValue(i);
-         dataTwoEntry.setDataAtIndexToYoVariableValue(i);
+         dataOneEntry.writeIntoBufferAt(i);
+         dataTwoEntry.writeIntoBufferAt(i);
       }
       
       JFreeGraph jFreeGraphOne = JFreeGraph.createDataVsTimeGraph(dataOneEntry, dataTwoEntry, Color.orange);

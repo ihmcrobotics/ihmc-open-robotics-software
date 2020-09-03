@@ -1,11 +1,11 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FunctionalRobotController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private String name = getClass().getSimpleName();
    private String description = "Robot controller for " + getName() + ".";
@@ -26,7 +26,7 @@ public class FunctionalRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

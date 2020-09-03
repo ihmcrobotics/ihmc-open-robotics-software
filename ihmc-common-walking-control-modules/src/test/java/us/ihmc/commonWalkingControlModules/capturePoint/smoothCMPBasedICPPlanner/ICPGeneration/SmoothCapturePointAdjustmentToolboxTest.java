@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SmoothCapturePointAdjustmentToolboxTest
 {
@@ -29,7 +29,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final Random random = new Random(4910204121L);
 
-   YoVariableRegistry registry = new YoVariableRegistry("");
+   YoRegistry registry = new YoRegistry("Dummy");
    String namePrefix = "SmoothCapturePointAdjustmentToolboxTest";
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();

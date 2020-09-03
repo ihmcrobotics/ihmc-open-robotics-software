@@ -17,7 +17,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MultipleWaypointsPositionTrajectoryGeneratorTest
 {
@@ -34,7 +34,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
    @Test
    public void test()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("traj");
+      YoRegistry registry = new YoRegistry("traj");
 
       double trajectoryTime = 1.0;
       double dt = 0.001;

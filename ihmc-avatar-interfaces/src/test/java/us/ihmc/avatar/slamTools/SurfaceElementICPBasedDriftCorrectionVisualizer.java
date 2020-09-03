@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -25,17 +26,18 @@ import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SurfaceElementICPBasedDriftCorrectionVisualizer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double trajectoryTime = 100.0;
    private final double dt = 1.0;
@@ -123,7 +125,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       Robot robot = new Robot("dummy");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setDT(dt, recordFrequency);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -138,12 +140,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame2.getUncorrectedLocalPoseInWorld());
       correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frame2.getPointCloudInLocalFrame().length];
-      for (int i = 0; i < correctedData.length; i++)
-      {
-         correctedData[i] = new Point3D(frame2.getPointCloudInLocalFrame()[i]);
-         driftCorrectionTransform.transform(correctedData[i]);
-      }
+      List<Point3D> correctedData = frame2.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+      correctedData.forEach(driftCorrectionTransform::transform);
 
       frame1GraphicsManager.updateGraphics();
       frame2GraphicsManager.updateGraphics();
@@ -162,11 +160,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          driftCorrectionTransform.set(inputFunction.apply(optimalParameter));
          correctedLocalPoseInWorld.set(frame2.getUncorrectedLocalPoseInWorld());
          correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
-         for (int i = 0; i < correctedData.length; i++)
-         {
-            correctedData[i].set(frame2.getPointCloudInLocalFrame()[i]);
-            driftCorrectionTransform.transform(correctedData[i]);
-         }
+         correctedData = frame2.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+         correctedData.forEach(driftCorrectionTransform::transform);
 
          frame2.updateOptimizedCorrection(driftCorrectionTransform);
          double quality = optimizer.getQuality();
@@ -253,7 +248,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, SLAMFrame frame)
    {
       int numberOfSurfel = frame.getNumberOfSurfaceElements();
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)

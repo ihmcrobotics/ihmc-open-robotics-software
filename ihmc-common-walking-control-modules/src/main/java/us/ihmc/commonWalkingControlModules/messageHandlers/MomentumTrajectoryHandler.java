@@ -9,12 +9,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
 {
-   public MomentumTrajectoryHandler(YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public MomentumTrajectoryHandler(YoDouble yoTime, YoRegistry parentRegistry)
    {
       super("AngularMomentum", yoTime, parentRegistry);
    }

@@ -284,18 +284,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean wiggle_while_planning_;
 
    /**
+            * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+            */
+   public boolean reject_if_wiggle_not_satisfied_;
+
+   /**
             * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
             * this toggles between them.
             */
    public boolean enable_concave_hull_wiggler_;
-
-   /**
-            * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-            * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-            * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-            * candidate footstep will be rejected if this method returns {@code true}.
-            */
-   public boolean reject_if_cannot_fully_wiggle_inside_;
 
    /**
             * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
@@ -556,11 +553,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double shin_height_offet_ = -11.1;
 
    /**
-            * Distance epsilon below snapped footstep that will be added to foothold
-            */
-   public double distance_epsilon_to_bridge_regions_ = -11.1;
-
-   /**
             * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
             * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
             * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
@@ -570,7 +562,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    public FootstepPlannerParametersPacket()
    {
-
 
 
 
@@ -737,10 +728,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       wiggle_while_planning_ = other.wiggle_while_planning_;
 
 
+      reject_if_wiggle_not_satisfied_ = other.reject_if_wiggle_not_satisfied_;
+
+
       enable_concave_hull_wiggler_ = other.enable_concave_hull_wiggler_;
-
-
-      reject_if_cannot_fully_wiggle_inside_ = other.reject_if_cannot_fully_wiggle_inside_;
 
 
       maximum_xy_wiggle_distance_ = other.maximum_xy_wiggle_distance_;
@@ -858,9 +849,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       shin_height_offet_ = other.shin_height_offet_;
-
-
-      distance_epsilon_to_bridge_regions_ = other.distance_epsilon_to_bridge_regions_;
 
 
       step_only_with_requested_side_ = other.step_only_with_requested_side_;
@@ -1519,6 +1507,22 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
+            * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+            */
+   public void setRejectIfWiggleNotSatisfied(boolean reject_if_wiggle_not_satisfied)
+   {
+      reject_if_wiggle_not_satisfied_ = reject_if_wiggle_not_satisfied;
+   }
+   /**
+            * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+            */
+   public boolean getRejectIfWiggleNotSatisfied()
+   {
+      return reject_if_wiggle_not_satisfied_;
+   }
+
+
+   /**
             * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
             * this toggles between them.
             */
@@ -1533,28 +1537,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean getEnableConcaveHullWiggler()
    {
       return enable_concave_hull_wiggler_;
-   }
-
-
-   /**
-            * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-            * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-            * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-            * candidate footstep will be rejected if this method returns {@code true}.
-            */
-   public void setRejectIfCannotFullyWiggleInside(boolean reject_if_cannot_fully_wiggle_inside)
-   {
-      reject_if_cannot_fully_wiggle_inside_ = reject_if_cannot_fully_wiggle_inside;
-   }
-   /**
-            * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-            * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-            * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-            * candidate footstep will be rejected if this method returns {@code true}.
-            */
-   public boolean getRejectIfCannotFullyWiggleInside()
-   {
-      return reject_if_cannot_fully_wiggle_inside_;
    }
 
 
@@ -2309,22 +2291,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-            * Distance epsilon below snapped footstep that will be added to foothold
-            */
-   public void setDistanceEpsilonToBridgeRegions(double distance_epsilon_to_bridge_regions)
-   {
-      distance_epsilon_to_bridge_regions_ = distance_epsilon_to_bridge_regions;
-   }
-   /**
-            * Distance epsilon below snapped footstep that will be added to foothold
-            */
-   public double getDistanceEpsilonToBridgeRegions()
-   {
-      return distance_epsilon_to_bridge_regions_;
-   }
-
-
-   /**
             * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
             * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
             * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
@@ -2448,10 +2414,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.wiggle_while_planning_, other.wiggle_while_planning_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reject_if_wiggle_not_satisfied_, other.reject_if_wiggle_not_satisfied_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_concave_hull_wiggler_, other.enable_concave_hull_wiggler_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reject_if_cannot_fully_wiggle_inside_, other.reject_if_cannot_fully_wiggle_inside_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_xy_wiggle_distance_, other.maximum_xy_wiggle_distance_, epsilon)) return false;
@@ -2571,9 +2537,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_epsilon_to_bridge_regions_, other.distance_epsilon_to_bridge_regions_, epsilon)) return false;
-
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_only_with_requested_side_, other.step_only_with_requested_side_, epsilon)) return false;
 
 
@@ -2674,10 +2637,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.wiggle_while_planning_ != otherMyClass.wiggle_while_planning_) return false;
 
 
+      if(this.reject_if_wiggle_not_satisfied_ != otherMyClass.reject_if_wiggle_not_satisfied_) return false;
+
+
       if(this.enable_concave_hull_wiggler_ != otherMyClass.enable_concave_hull_wiggler_) return false;
-
-
-      if(this.reject_if_cannot_fully_wiggle_inside_ != otherMyClass.reject_if_cannot_fully_wiggle_inside_) return false;
 
 
       if(this.maximum_xy_wiggle_distance_ != otherMyClass.maximum_xy_wiggle_distance_) return false;
@@ -2797,9 +2760,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
 
 
-      if(this.distance_epsilon_to_bridge_regions_ != otherMyClass.distance_epsilon_to_bridge_regions_) return false;
-
-
       if(this.step_only_with_requested_side_ != otherMyClass.step_only_with_requested_side_) return false;
 
 
@@ -2897,11 +2857,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("wiggle_while_planning=");
       builder.append(this.wiggle_while_planning_);      builder.append(", ");
 
+      builder.append("reject_if_wiggle_not_satisfied=");
+      builder.append(this.reject_if_wiggle_not_satisfied_);      builder.append(", ");
+
       builder.append("enable_concave_hull_wiggler=");
       builder.append(this.enable_concave_hull_wiggler_);      builder.append(", ");
-
-      builder.append("reject_if_cannot_fully_wiggle_inside=");
-      builder.append(this.reject_if_cannot_fully_wiggle_inside_);      builder.append(", ");
 
       builder.append("maximum_xy_wiggle_distance=");
       builder.append(this.maximum_xy_wiggle_distance_);      builder.append(", ");
@@ -3019,9 +2979,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       builder.append("shin_height_offet=");
       builder.append(this.shin_height_offet_);      builder.append(", ");
-
-      builder.append("distance_epsilon_to_bridge_regions=");
-      builder.append(this.distance_epsilon_to_bridge_regions_);      builder.append(", ");
 
       builder.append("step_only_with_requested_side=");
       builder.append(this.step_only_with_requested_side_);

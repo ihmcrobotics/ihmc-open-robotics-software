@@ -17,11 +17,11 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInverseKinematicsCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ReferenceFrame rootJointFrame, bodyFrame;
    protected final OneDoFJointBasics[] oneDoFJoints;
    private final QuadrantDependentList<QuadrantHolder> quadrantHolders = new QuadrantDependentList<QuadrantHolder>();
@@ -31,7 +31,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    protected final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedInverseKinematicsCalculators(FullQuadrupedRobotModelFactory modelFactory, JointDesiredOutputList jointDesiredOutputList, QuadrupedPhysicalProperties physicalProperties,
-                                                FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+                                                FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoRegistry parentRegistry,
                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.jointDesiredOutputList = jointDesiredOutputList;

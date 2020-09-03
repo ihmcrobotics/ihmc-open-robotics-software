@@ -9,17 +9,17 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 
 public class PolynomialSplineTest
 {
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    @BeforeEach
    public void setUp()
    {
-      registry = new YoVariableRegistry("test");
+      registry = new YoRegistry("test");
    }
 
 	@Test

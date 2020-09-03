@@ -11,7 +11,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStateTransitionFactory<HighLevelControllerName>
@@ -36,7 +36,7 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
    @Override
    public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends State> controllerStateMap,
                                                                               HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                                              YoVariableRegistry parentRegistry)
+                                                                              YoRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;

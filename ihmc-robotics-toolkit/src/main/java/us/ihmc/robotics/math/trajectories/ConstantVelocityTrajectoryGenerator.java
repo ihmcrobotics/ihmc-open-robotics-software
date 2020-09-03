@@ -2,12 +2,12 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ConstantVelocityTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final DoubleProvider initialPositionProvider;
    private final DoubleProvider velocityProvider;
    private final YoPolynomial polynomial;
@@ -17,9 +17,9 @@ public class ConstantVelocityTrajectoryGenerator implements DoubleTrajectoryGene
    private final int numberOfCoefficients = 2;
 
    public ConstantVelocityTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider,
-           DoubleProvider velocityProvider, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+           DoubleProvider velocityProvider, DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.initialPositionProvider = initialPositionProvider;
       this.velocityProvider = velocityProvider;
       this.polynomial = new YoPolynomial(namePrefix + "Polynomial", numberOfCoefficients, registry);

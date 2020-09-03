@@ -39,6 +39,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minSurfaceIncline                            = keys.addDoubleKey ("Min surface incline", Math.toRadians(45.0));
    public static final BooleanStoredPropertyKey enableConcaveHullWiggler                     = keys.addBooleanKey("Enable concave hull wiggler", false);
    public static final BooleanStoredPropertyKey wiggleWhilePlanning                          = keys.addBooleanKey("Wiggle while planning", false);
+   public static final BooleanStoredPropertyKey rejectIfWiggleNotSatisfied                   = keys.addBooleanKey("Reject if wiggle not satisfied", false);
    public static final DoubleStoredPropertyKey  maximumXYWiggleDistance                      = keys.addDoubleKey ("Max XY wiggle distance", LatticeNode.gridSizeXY / 2.0);
    public static final DoubleStoredPropertyKey  maximumYawWiggle                             = keys.addDoubleKey ("Max yaw wiggle", LatticeNode.gridSizeYaw / 2.0);
    public static final DoubleStoredPropertyKey  maximumZPenetrationOnValleyRegions           = keys.addDoubleKey ("Max Z penetration on valley regions", Double.POSITIVE_INFINITY);
@@ -65,7 +66,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  shinToeClearance                             = keys.addDoubleKey("Shin toe clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeelClearance                            = keys.addDoubleKey("Shin heel clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
-   public static final DoubleStoredPropertyKey  distanceEpsilonToBridgeRegions               = keys.addDoubleKey("Distance epsilon to bridge regions", 0.0);
    public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);
 
    // cost parameters

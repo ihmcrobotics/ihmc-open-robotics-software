@@ -118,11 +118,11 @@ public class SpringFlamingoSimulation
 
          if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
          {
-            springFlamingo.setGroundContactModel(new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoVariableRegistry()));
+            springFlamingo.setGroundContactModel(new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoRegistry()));
          }
          else if (controllerToUse == FAST_WALKING_CONTROLLER)
          {
-            springFlamingo.setGroundContactModel(new LinearGroundContactModel(springFlamingo, 50000.0, 2500.0, 100.0, 500.0, springFlamingo.getRobotsYoVariableRegistry()));
+            springFlamingo.setGroundContactModel(new LinearGroundContactModel(springFlamingo, 50000.0, 2500.0, 100.0, 500.0, springFlamingo.getRobotsYoRegistry()));
 
             // springFlamingo.setGroundContactModel(new CollisionGroundContactModel(this, 0.1, 0.7));
          }

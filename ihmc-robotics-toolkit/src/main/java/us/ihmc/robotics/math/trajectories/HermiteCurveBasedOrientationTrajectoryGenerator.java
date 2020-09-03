@@ -23,11 +23,11 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameQuaternion;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 /**
  * This trajectory generator aims at interpolating between two orientations qa and qb for given
@@ -54,7 +54,7 @@ import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
  */
 public class HermiteCurveBasedOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
    private final YoInteger numberOfRevolutions;
@@ -76,9 +76,9 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
    private final ReferenceFrame trajectoryFrame;
 
-   public HermiteCurveBasedOrientationTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public HermiteCurveBasedOrientationTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       trajectoryTime = new YoDouble(name + "TrajectoryTime", registry);
       numberOfRevolutions = new YoInteger(name + "NumberOfRevolutions", registry);
       currentTime = new YoDouble(name + "Time", registry);

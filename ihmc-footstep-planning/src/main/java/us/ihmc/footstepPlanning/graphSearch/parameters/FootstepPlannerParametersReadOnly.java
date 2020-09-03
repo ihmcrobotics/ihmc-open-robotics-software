@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepPoseChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -129,7 +129,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
+    *    The {@link FootstepPoseChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
    default double getMinimumStepWidth()
@@ -446,6 +446,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * If {@link #getWiggleWhilePlanning} is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+    */
+   default boolean getRejectIfWiggleNotSatisfied()
+   {
+      return get(rejectIfWiggleNotSatisfied);
+   }
+
+   /**
     * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
     * distance the planner will use
     */
@@ -487,7 +495,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
+    *   The {@link FootstepPoseChecker} will reject a node if it is too wide using this parameter.
     * </p>
     */
    default double getMaximumStepWidth()
@@ -838,14 +846,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getShinHeightOffset()
    {
       return get(shinHeightOffet);
-   }
-
-   /**
-    * Distance epsilon below snapped footstep that will be added to foothold
-    */
-   default double getDistanceEpsilonToBridgeRegions()
-   {
-      return get(distanceEpsilonToBridgeRegions);
    }
 
    /**

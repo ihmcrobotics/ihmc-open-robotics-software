@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.inverseKinematics;
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -29,14 +30,14 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedInverseKinematicsController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final WholeBodyControllerCore controllerCore;
@@ -177,7 +178,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -194,13 +195,13 @@ public class QuadrupedInverseKinematicsController implements RobotController
       return getName();
    }
 
-   private FeedbackControlCommandList getFeedbackCommandTemplate()
+   private FeedbackControllerTemplate getFeedbackCommandTemplate()
    {
       FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
       for (RobotQuadrant robotQuadrant : quadrants)
       {
          feedbackControlCommandList.addCommand(feedbackControlCommands.get(robotQuadrant));
       }
-      return feedbackControlCommandList;
+      return new FeedbackControllerTemplate(feedbackControlCommandList);
    }
 }

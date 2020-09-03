@@ -9,7 +9,7 @@ import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -39,7 +39,7 @@ public class SimpleWalkerHeightStopMPC
     * debugging
     */
 
-   YoVariableRegistry registry = new YoVariableRegistry("childRegistry");
+   YoRegistry registry = new YoRegistry("childRegistry");
 
    YoLong AlgTimems = new YoLong("AlgTimems", registry);
    YoInteger AlgIters = new YoInteger("AlgIters", registry);
@@ -65,7 +65,7 @@ public class SimpleWalkerHeightStopMPC
    DMatrixRMaj b = new DMatrixRMaj(4,1);
    DMatrixRMaj c = new DMatrixRMaj(4,1);
 
-   public SimpleWalkerHeightStopMPC(double zmax, double zf,double umax, YoVariableRegistry registry)
+   public SimpleWalkerHeightStopMPC(double zmax, double zf,double umax, YoRegistry registry)
    {
       this.zmax = zmax;
       this.zf=zf;

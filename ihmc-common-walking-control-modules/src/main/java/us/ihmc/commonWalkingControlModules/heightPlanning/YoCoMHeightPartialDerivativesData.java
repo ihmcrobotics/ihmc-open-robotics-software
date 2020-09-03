@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoCoMHeightPartialDerivativesData implements CoMHeightPartialDerivativesDataBasics
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private ReferenceFrame frameOfCoMHeight;
    private final YoDouble comHeight = new YoDouble("partialZ", registry);
@@ -20,7 +20,7 @@ public class YoCoMHeightPartialDerivativesData implements CoMHeightPartialDeriva
    private final YoDouble partialD3zDx2Dy = new YoDouble("partialD3zDx2Dy", registry);
    private final YoDouble partialD3zDxDy2 = new YoDouble("partialD3zDxDy2", registry);
 
-   public YoCoMHeightPartialDerivativesData(YoVariableRegistry parentRegistry)
+   public YoCoMHeightPartialDerivativesData(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

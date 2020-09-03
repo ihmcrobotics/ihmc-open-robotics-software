@@ -24,12 +24,12 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class AvatarEstimatorThread extends ModularRobotController
 {
-   private final YoVariableRegistry estimatorRegistry;
+   private final YoRegistry estimatorRegistry;
    private final YoBoolean firstTick;
 
    private final SensorReader sensorReader;
@@ -48,7 +48,7 @@ public class AvatarEstimatorThread extends ModularRobotController
    public AvatarEstimatorThread(SensorReader sensorReader, FullHumanoidRobotModel estimatorFullRobotModel, HumanoidRobotContextData humanoidRobotContextData,
                                    StateEstimatorController mainStateEstimator, PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
                                    ForceSensorStateUpdater forceSensorStateUpdater,
-                                   IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher, YoVariableRegistry estimatorRegistry,
+                                   IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher, YoRegistry estimatorRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super("EstimatorController");
@@ -64,7 +64,7 @@ public class AvatarEstimatorThread extends ModularRobotController
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       // This is to preserve the registry hierarchy for the parameters to work
-      estimatorRegistry.addChild(super.getYoVariableRegistry());
+      estimatorRegistry.addChild(super.getYoRegistry());
 
       if (mainStateEstimator != null)
          addRobotController(mainStateEstimator);
@@ -162,7 +162,7 @@ public class AvatarEstimatorThread extends ModularRobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return estimatorRegistry;
    }

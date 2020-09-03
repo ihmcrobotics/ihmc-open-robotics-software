@@ -47,7 +47,8 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    private int numberOfIterations;
    private final boolean solveOrientation;
 
-   private final double orientationDiscount;
+   private final double positionCost;
+   private final double orientationCost;
 
    // convergence tolerance
    private final double convergeTolerance;
@@ -67,14 +68,14 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
    /**
     * @param jacobian
-    * @param orientationDiscount How much it discounts orientation by. 0 to 1.0. Try 0.2
+    * @param orientationCost How much it discounts orientation by. 0 to 1.0. Try 0.2
     * @param maxIterations
     * @param solveOrientation
     * @param convergeTolerance   Convergence tolerance. Try 1e-12
     * @param acceptTolLoc        Tolerance for location error. Try 0.005
     * @param acceptTolAngle      Tolerance for angle error in radians. Try 0.02
     */
-   public DdoglegInverseKinematicsCalculator(GeometricJacobian jacobian, double orientationDiscount, int maxIterations, boolean solveOrientation,
+   public DdoglegInverseKinematicsCalculator(GeometricJacobian jacobian, double positionCost, double orientationCost, int maxIterations, boolean solveOrientation,
                                              double convergeTolerance, double acceptTolLoc, double acceptTolAngle, double parameterChangePenalty)
    {
       if (jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame())
@@ -83,7 +84,8 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       baseFrame = jacobian.getBaseFrame();
       endEffectorFrame = jacobian.getEndEffectorFrame();
 
-      this.orientationDiscount = orientationDiscount;
+      this.positionCost = positionCost;
+      this.orientationCost = orientationCost;
       this.solveOrientation = solveOrientation;
 
       this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
@@ -275,15 +277,15 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
          extractTandR(actualTransform, actualT, actualR);
 
-         functions[index + 0] = actualT.getX() - desiredT.getX();
-         functions[index + 1] = actualT.getY() - desiredT.getY();
-         functions[index + 2] = actualT.getZ() - desiredT.getZ();
+         functions[index + 0] = positionCost * (actualT.getX() - desiredT.getX());
+         functions[index + 1] = positionCost * (actualT.getY() - desiredT.getY());
+         functions[index + 2] = positionCost * (actualT.getZ() - desiredT.getZ());
 
          if (solveOrientation)
          {
-            functions[index + 3] = orientationDiscount * UtilAngle.minus(actualR.getX(), desiredR.getX());
-            functions[index + 4] = orientationDiscount * UtilAngle.minus(actualR.getY(), desiredR.getY());
-            functions[index + 5] = orientationDiscount * UtilAngle.minus(actualR.getZ(), desiredR.getZ());
+            functions[index + 3] = orientationCost * UtilAngle.minus(actualR.getX(), desiredR.getX());
+            functions[index + 4] = orientationCost * UtilAngle.minus(actualR.getY(), desiredR.getY());
+            functions[index + 5] = orientationCost * UtilAngle.minus(actualR.getZ(), desiredR.getZ());
          }
       }
    }

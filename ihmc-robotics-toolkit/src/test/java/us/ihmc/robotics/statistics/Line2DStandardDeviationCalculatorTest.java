@@ -12,8 +12,8 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class Line2DStandardDeviationCalculatorTest
 {
@@ -22,7 +22,7 @@ public class Line2DStandardDeviationCalculatorTest
    @Test
    public void testNoVariance()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoFrameLine2D valueProvider = new YoFrameLine2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
       Line2DStatisticsCalculator calculator = new Line2DStatisticsCalculator("value", valueProvider, testRegistry);
 
@@ -48,7 +48,7 @@ public class Line2DStandardDeviationCalculatorTest
    @Test
    public void testNoVarianceWithOppositeDirections()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoFrameLine2D valueProvider = new YoFrameLine2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
       Line2DStatisticsCalculator calculator = new Line2DStatisticsCalculator("value", valueProvider, testRegistry);
 
@@ -76,7 +76,7 @@ public class Line2DStandardDeviationCalculatorTest
    @Test
    public void testNoVarianceAlongLine()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoFrameLine2D valueProvider = new YoFrameLine2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
       Line2DStatisticsCalculator calculator = new Line2DStatisticsCalculator("value", valueProvider, testRegistry);
 

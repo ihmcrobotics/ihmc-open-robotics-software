@@ -17,12 +17,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class JointSettingsHelper
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final String[] jointNames;
    private final boolean[] jointsLoaded;
@@ -41,22 +41,22 @@ public class JointSettingsHelper
 
 
    public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJointBasics[] joints, JointLoadStatusProvider jointLoadStatusProvider,
-                              HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
+                              HighLevelControllerName stateEnum, YoRegistry parentRegistry)
    {
       this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
            CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stateEnum.toString()), parentRegistry);
    }
 
    public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJointBasics> joints, JointLoadStatusProvider jointLoadStatusProvider,
-                              String stateName, YoVariableRegistry parentRegistry)
+                              String stateName, YoRegistry parentRegistry)
    {
       this(configuration, joints.toArray(new OneDoFJointBasics[joints.size()]), jointLoadStatusProvider, stateName, parentRegistry);
    }
 
    public JointSettingsHelper(JointSettingConfiguration configuration, OneDoFJointBasics[] joints, JointLoadStatusProvider jointLoadStatusProvider, String stateName,
-                              YoVariableRegistry parentRegistry)
+                              YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(stateName + "JointSettings");
+      registry = new YoRegistry(stateName + "JointSettings");
       parentRegistry.addChild(registry);
 
       jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();

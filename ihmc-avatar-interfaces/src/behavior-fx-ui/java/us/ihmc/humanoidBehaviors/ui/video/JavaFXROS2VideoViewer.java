@@ -27,7 +27,7 @@ public class JavaFXROS2VideoViewer
    {
       Stage primaryStage = new Stage();
 
-      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(width, height, false, false);
+      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, width, height, false, false);
 
       StackPane stackPaneNode = new StackPane(ros2VideoView);
       stackPaneNode.setPrefSize(width, height);
@@ -43,7 +43,7 @@ public class JavaFXROS2VideoViewer
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.show();
 
-      ros2VideoView.start(ros2Node);
+      ros2VideoView.start();
    }
 
    public static void main(String[] args)

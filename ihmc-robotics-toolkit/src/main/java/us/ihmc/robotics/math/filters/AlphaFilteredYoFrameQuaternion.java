@@ -5,11 +5,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements ProcessingYoVariable
 {
@@ -20,7 +20,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
    private final Quaternion qPreviousFiltered = new Quaternion();
    private final Quaternion qNewFiltered = new Quaternion();
 
-   private static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createAlphaYoDouble(String namePrefix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "AlphaVariable", registry);
       maxRate.set(initialValue);
@@ -28,25 +28,25 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
    }
 
    public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, double alpha,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       this(namePrefix, nameSuffix, unfilteredQuaternion, createAlphaYoDouble(namePrefix, alpha, registry), registry);
    }
 
    public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, DoubleProvider alpha, ReferenceFrame referenceFrame,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       this(namePrefix, nameSuffix, null, alpha, referenceFrame, registry);
    }
 
    public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, DoubleProvider alpha,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       this(namePrefix, nameSuffix, unfilteredQuaternion, alpha, unfilteredQuaternion.getReferenceFrame(), registry);
    }
 
    private AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, DoubleProvider alpha,
-         ReferenceFrame referenceFrame, YoVariableRegistry registry)
+         ReferenceFrame referenceFrame, YoRegistry registry)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
       this.unfilteredQuaternion = unfilteredQuaternion;

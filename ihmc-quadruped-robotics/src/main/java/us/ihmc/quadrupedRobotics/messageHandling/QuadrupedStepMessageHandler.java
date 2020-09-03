@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -36,7 +36,7 @@ public class QuadrupedStepMessageHandler
    private static final double timeEpsilonForStepSelection = 0.05;
    private static final int STEP_QUEUE_SIZE = 200;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrantDependentList<RecyclingArrayDeque<SoleTrajectoryCommand>> upcomingFootTrajectoryCommandList = new QuadrantDependentList<>();
 
@@ -59,7 +59,7 @@ public class QuadrupedStepMessageHandler
 
    private final double controlDt;
 
-   public QuadrupedStepMessageHandler(YoDouble robotTimestamp, double controlDt, YoVariableRegistry parentRegistry)
+   public QuadrupedStepMessageHandler(YoDouble robotTimestamp, double controlDt, YoRegistry parentRegistry)
    {
       this.robotTimestamp = robotTimestamp;
       this.controlDt = controlDt;

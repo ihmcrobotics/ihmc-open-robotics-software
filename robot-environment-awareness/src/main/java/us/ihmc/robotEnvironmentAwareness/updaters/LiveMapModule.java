@@ -60,6 +60,11 @@ public class LiveMapModule implements PerceptionModule
 
    private LiveMapModule(ROS2Node ros2Node, Messager messager)
    {
+      this(ros2Node, messager, null);
+   }
+
+   private LiveMapModule(Ros2Node ros2Node, Messager messager, String configurationFileProject)
+   {
       this.ros2Node = ros2Node;
       this.messager = messager;
 
@@ -71,7 +76,11 @@ public class LiveMapModule implements PerceptionModule
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
       mostRecentLidarMap = messager.createInput(LiveMapModuleAPI.LidarMap, null);
 
-      slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
+      if (configurationFileProject != null)
+         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap", configurationFileProject);
+      else
+         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
+
       messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
          slamParameters.setAllFromStrings(parameters);
@@ -242,6 +251,11 @@ public class LiveMapModule implements PerceptionModule
 
    public static LiveMapModule createIntraprocess(ROS2Node ros2Node, Messager messager)
    {
-      return new LiveMapModule(ros2Node, messager);
+      return createIntraprocess(ros2Node, messager, null);
+   }
+
+   public static LiveMapModule createIntraprocess(Ros2Node ros2Node, Messager messager, String configurationFileProject)
+   {
+      return new LiveMapModule(ros2Node, messager, configurationFileProject);
    }
 }

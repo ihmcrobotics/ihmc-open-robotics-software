@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.omniWrist;
 
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
@@ -11,7 +11,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class OmniWristController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    
    private final PDController pdControllerA, pdControllerB;
    private final YoDouble q_d_jointOneA = new YoDouble("q_d_jointOneA", registry);
@@ -62,7 +62,7 @@ public class OmniWristController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

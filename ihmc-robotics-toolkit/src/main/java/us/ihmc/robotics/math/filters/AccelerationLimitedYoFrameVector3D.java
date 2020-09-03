@@ -1,16 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class AccelerationLimitedYoFrameVector3D extends YoFrameVector3D
 {
@@ -33,39 +30,39 @@ public class AccelerationLimitedYoFrameVector3D extends YoFrameVector3D
    private final FrameVector3D positionError = new FrameVector3D();
    private final FrameVector3D acceleration = new FrameVector3D();
 
-   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   private static DoubleProvider createMaxAccelerationYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createMaxAccelerationYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "MaxAcceleration" + nameSuffix, registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   public AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate,
+   public AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate,
                                              DoubleProvider maxAcceleration, double dt, FrameTuple3DReadOnly rawPosition)
    {
       this(namePrefix, nameSuffix, registry, maxRate, maxAcceleration, dt, rawPosition, rawPosition.getReferenceFrame());
    }
 
-   public AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate,
+   public AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate,
                                              DoubleProvider maxAcceleration, double dt, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, maxAcceleration, dt, null, referenceFrame);
    }
-   public AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double maxAcceleration,
+   public AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double maxAcceleration,
                                              double dt, ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry),
            createMaxAccelerationYoDouble(namePrefix, nameSuffix, maxAcceleration, registry), dt, null, referenceFrame);
    }
 
-   private AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate,
+   private AccelerationLimitedYoFrameVector3D(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate,
                                               DoubleProvider maxAcceleration, double dt, FrameTuple3DReadOnly rawPosition, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

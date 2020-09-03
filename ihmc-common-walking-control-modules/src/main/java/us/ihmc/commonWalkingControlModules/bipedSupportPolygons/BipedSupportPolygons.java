@@ -16,8 +16,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /*
  * FIXME: not rewindable!
@@ -29,7 +29,7 @@ public class BipedSupportPolygons
    private static boolean VISUALIZE = true;
    private static final int maxNumberOfContactPointsPerFoot = 6;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("BipedSupportPolygons");
+   private final YoRegistry registry = new YoRegistry("BipedSupportPolygons");
 
    // Polygons:
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInWorldFrame = new SideDependentList<>();
@@ -44,13 +44,13 @@ public class BipedSupportPolygons
 
    private final FramePoint3D tempContactPosition = new FramePoint3D();
 
-   public BipedSupportPolygons(CommonHumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BipedSupportPolygons(CommonHumanoidReferenceFrames referenceFrames, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getSoleZUpFrames(), referenceFrames.getSoleFrames(), parentRegistry, yoGraphicsListRegistry);
    }
 
    public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                               SideDependentList<? extends ReferenceFrame> soleFrames, YoVariableRegistry parentRegistry,
+                               SideDependentList<? extends ReferenceFrame> soleFrames, YoRegistry parentRegistry,
                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       supportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);

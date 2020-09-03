@@ -8,7 +8,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -45,7 +45,7 @@ public class YoOptimizedPolynomial
    private double minX = Double.POSITIVE_INFINITY;
    private double maxX = Double.NEGATIVE_INFINITY;
 
-   public YoOptimizedPolynomial(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoOptimizedPolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       this.maximumNumberOfCoefficients = maximumNumberOfCoefficients;
 

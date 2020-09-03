@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ReachabilityConstraintCalculator
@@ -15,7 +15,7 @@ public class ReachabilityConstraintCalculator
    private static final double distanceInsideRegion = 0.04;
    private static final int numberOfVertices = 5;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble lengthLimit;
    private final YoDouble lengthBackLimit;
@@ -26,7 +26,7 @@ public class ReachabilityConstraintCalculator
 
    public ReachabilityConstraintCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                            SteppingParameters steppingParameters,
-                                           YoVariableRegistry parentRegistry)
+                                           YoRegistry parentRegistry)
    {
       this(soleZUpFrames,
            steppingParameters.getFootLength(),
@@ -45,7 +45,7 @@ public class ReachabilityConstraintCalculator
                                            double maxBackwardStepLength,
                                            double minStepWidth,
                                            double maxStepWidth,
-                                           YoVariableRegistry parentRegistry)
+                                           YoRegistry parentRegistry)
    {
       this.soleZUpFrames = soleZUpFrames;
 
