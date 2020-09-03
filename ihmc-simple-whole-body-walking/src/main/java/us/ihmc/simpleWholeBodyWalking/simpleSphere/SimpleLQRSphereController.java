@@ -6,6 +6,7 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
+import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.NewLQRMomentumController;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -26,7 +27,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
    private final SimpleSphereRobot sphereRobot;
    private final ExternalForcePoint externalForcePoint;
 
-   private final LQRMomentumController lqrMomentumController;
+   private final NewLQRMomentumController lqrMomentumController;
 
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
@@ -53,7 +54,7 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
 
       sphereRobot.getScsRobot().setController(this);
 
-      lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
+      lqrMomentumController = new NewLQRMomentumController(sphereRobot.getOmega0Provider(), registry);
       
       vizSphere = new SimpleSphereVisualizer(dcmPlan, yoGraphicsListRegistry, sphereRobot, registry);
       
