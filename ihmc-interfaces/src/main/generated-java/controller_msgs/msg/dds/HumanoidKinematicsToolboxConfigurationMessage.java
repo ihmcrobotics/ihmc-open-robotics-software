@@ -27,6 +27,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    public boolean hold_current_center_of_mass_xy_position_ = true;
 
    /**
+            * When set to true, the solver will process the balance status from an active controller session and build a support polygon.
+            * Note that the auto support polygon feature is overidden by a user specified support polygon when provided.
+            * - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
+            * - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
+            */
+   public boolean enable_auto_support_polygon_ = true;
+
+   /**
             * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
             * - when the walking controller is running, the rigid-bodies in question are the feet.
             * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
@@ -35,6 +43,7 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
+
 
 
 
@@ -54,6 +63,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
 
       hold_current_center_of_mass_xy_position_ = other.hold_current_center_of_mass_xy_position_;
+
+
+      enable_auto_support_polygon_ = other.enable_auto_support_polygon_;
 
 
       hold_support_rigid_bodies_ = other.hold_support_rigid_bodies_;
@@ -94,6 +106,28 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    public boolean getHoldCurrentCenterOfMassXyPosition()
    {
       return hold_current_center_of_mass_xy_position_;
+   }
+
+
+   /**
+            * When set to true, the solver will process the balance status from an active controller session and build a support polygon.
+            * Note that the auto support polygon feature is overidden by a user specified support polygon when provided.
+            * - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
+            * - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
+            */
+   public void setEnableAutoSupportPolygon(boolean enable_auto_support_polygon)
+   {
+      enable_auto_support_polygon_ = enable_auto_support_polygon;
+   }
+   /**
+            * When set to true, the solver will process the balance status from an active controller session and build a support polygon.
+            * Note that the auto support polygon feature is overidden by a user specified support polygon when provided.
+            * - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
+            * - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
+            */
+   public boolean getEnableAutoSupportPolygon()
+   {
+      return enable_auto_support_polygon_;
    }
 
 
@@ -141,6 +175,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_current_center_of_mass_xy_position_, other.hold_current_center_of_mass_xy_position_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_auto_support_polygon_, other.enable_auto_support_polygon_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_rigid_bodies_, other.hold_support_rigid_bodies_, epsilon)) return false;
 
 
@@ -163,6 +200,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       if(this.hold_current_center_of_mass_xy_position_ != otherMyClass.hold_current_center_of_mass_xy_position_) return false;
 
 
+      if(this.enable_auto_support_polygon_ != otherMyClass.enable_auto_support_polygon_) return false;
+
+
       if(this.hold_support_rigid_bodies_ != otherMyClass.hold_support_rigid_bodies_) return false;
 
 
@@ -181,6 +221,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       builder.append("hold_current_center_of_mass_xy_position=");
       builder.append(this.hold_current_center_of_mass_xy_position_);      builder.append(", ");
+
+      builder.append("enable_auto_support_polygon=");
+      builder.append(this.enable_auto_support_polygon_);      builder.append(", ");
 
       builder.append("hold_support_rigid_bodies=");
       builder.append(this.hold_support_rigid_bodies_);

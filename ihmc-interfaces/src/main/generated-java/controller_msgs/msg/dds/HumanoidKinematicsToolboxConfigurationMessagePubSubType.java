@@ -50,6 +50,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -75,6 +78,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -85,6 +92,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
 
       cdr.write_type_7(data.getHoldCurrentCenterOfMassXyPosition());
+
+
+      cdr.write_type_7(data.getEnableAutoSupportPolygon());
 
 
       cdr.write_type_7(data.getHoldSupportRigidBodies());
@@ -100,6 +110,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setHoldCurrentCenterOfMassXyPosition(cdr.read_type_7());
       	
 
+      data.setEnableAutoSupportPolygon(cdr.read_type_7());
+      	
+
       data.setHoldSupportRigidBodies(cdr.read_type_7());
       	
 
@@ -113,6 +126,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
 
+      ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
+
       ser.write_type_7("hold_support_rigid_bodies", data.getHoldSupportRigidBodies());
    }
 
@@ -123,6 +138,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setSequenceId(ser.read_type_4("sequence_id"));
 
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
+
+      data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
 
       data.setHoldSupportRigidBodies(ser.read_type_7("hold_support_rigid_bodies"));
    }
