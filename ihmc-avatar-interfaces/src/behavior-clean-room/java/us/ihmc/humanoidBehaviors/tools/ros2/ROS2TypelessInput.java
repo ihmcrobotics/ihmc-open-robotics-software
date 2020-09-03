@@ -4,7 +4,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class ROS2TypelessInput
    private List<Runnable> userCallbacks = new ArrayList<>();
    private IHMCROS2Callback<Empty> ros2Callback;
 
-   public ROS2TypelessInput(Ros2NodeInterface ros2Node, ROS2Topic<Empty> topic)
+   public ROS2TypelessInput(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic)
    {
       ros2Callback = new IHMCROS2Callback<>(ros2Node, topic, message -> messageReceivedCallback());
    }

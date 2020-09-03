@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 /**
  * A class to keep track of the controller by listening to its ROS 2 status API.
@@ -28,7 +28,7 @@ public class ControllerStatusTracker
    private volatile boolean isWalking = false;
    private final Notification finishedWalkingNotification = new Notification();
 
-   public ControllerStatusTracker(StatusLogger statusLogger, Ros2NodeInterface ros2Node, String robotName)
+   public ControllerStatusTracker(StatusLogger statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
       footstepTracker = new WalkingFootstepTracker(ros2Node, robotName);
 
