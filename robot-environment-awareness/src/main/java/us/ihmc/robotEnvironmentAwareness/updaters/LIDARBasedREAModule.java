@@ -1,7 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -85,14 +83,15 @@ public class LIDARBasedREAModule implements PerceptionModule
 
    private final REANetworkProvider networkProvider;
 
-   private LIDARBasedREAModule(Messager reaMessager, File configurationFile, REANetworkProvider networkProvider)
+   private LIDARBasedREAModule(Messager reaMessager, FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider)
    {
-      this(reaMessager, configurationFile, networkProvider, true);
+      this(reaMessager, filePropertyHelper, networkProvider, true);
    }
 
-   private LIDARBasedREAModule(Messager reaMessager, File configurationFile, REANetworkProvider networkProvider, boolean manageRosNode)
+   private LIDARBasedREAModule(Messager reaMessager, FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider, boolean manageRosNode)
    {
       this.reaMessager = reaMessager;
+      this.filePropertyHelper = filePropertyHelper;
       this.manageRosNode = manageRosNode;
       this.networkProvider = networkProvider;
 
@@ -146,7 +145,6 @@ public class LIDARBasedREAModule implements PerceptionModule
       networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
       networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
 
-      filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
 
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
@@ -438,41 +436,28 @@ public class LIDARBasedREAModule implements PerceptionModule
       }
    }
 
-   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath, REANetworkProvider networkProvider) throws Exception
+   public static LIDARBasedREAModule createRemoteModule(FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider) throws Exception
    {
       KryoMessager server = createKryoMessager(NetworkPorts.REA_MODULE_UI_PORT);
-      return new LIDARBasedREAModule(server, new File(configurationFilePath), networkProvider);
+      return new LIDARBasedREAModule(server, filePropertyHelper, networkProvider);
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, REANetworkProvider networkProvider) throws Exception
+   public static LIDARBasedREAModule createIntraprocessModule(FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider) throws Exception
    {
-      return createIntraprocessModule(configurationFilePath, networkProvider, NetworkPorts.REA_MODULE_UI_PORT);
+      return createIntraprocessModule(filePropertyHelper, networkProvider, NetworkPorts.REA_MODULE_UI_PORT);
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, REANetworkProvider networkProvider, NetworkPorts networkPorts) throws Exception
+   public static LIDARBasedREAModule createIntraprocessModule(FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider, NetworkPorts networkPorts)
+         throws Exception
    {
       KryoMessager messager = createKryoMessager(networkPorts);
 
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      return new LIDARBasedREAModule(messager, configurationFile, networkProvider);
+      return new LIDARBasedREAModule(messager, filePropertyHelper, networkProvider);
    }
 
    private static KryoMessager createKryoMessager(NetworkPorts networkPorts) throws Exception
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API,
-                                                              networkPorts,
-                                                              REACommunicationProperties.getPrivateNetClassList());
+      KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API, networkPorts, REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
       return messager;

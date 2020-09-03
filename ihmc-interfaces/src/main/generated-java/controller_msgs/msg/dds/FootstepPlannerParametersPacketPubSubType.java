@@ -248,9 +248,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -543,10 +540,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -641,10 +634,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_7(data.getWiggleWhilePlanning());
 
 
+      cdr.write_type_7(data.getRejectIfWiggleNotSatisfied());
+
+
       cdr.write_type_7(data.getEnableConcaveHullWiggler());
-
-
-      cdr.write_type_7(data.getRejectIfCannotFullyWiggleInside());
 
 
       cdr.write_type_6(data.getMaximumXyWiggleDistance());
@@ -764,9 +757,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getShinHeightOffet());
 
 
-      cdr.write_type_6(data.getDistanceEpsilonToBridgeRegions());
-
-
       cdr.write_type_9(data.getStepOnlyWithRequestedSide());
 
    }
@@ -858,10 +848,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setWiggleWhilePlanning(cdr.read_type_7());
       	
 
-      data.setEnableConcaveHullWiggler(cdr.read_type_7());
+      data.setRejectIfWiggleNotSatisfied(cdr.read_type_7());
       	
 
-      data.setRejectIfCannotFullyWiggleInside(cdr.read_type_7());
+      data.setEnableConcaveHullWiggler(cdr.read_type_7());
       	
 
       data.setMaximumXyWiggleDistance(cdr.read_type_6());
@@ -981,9 +971,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinHeightOffet(cdr.read_type_6());
       	
 
-      data.setDistanceEpsilonToBridgeRegions(cdr.read_type_6());
-      	
-
       data.setStepOnlyWithRequestedSide(cdr.read_type_9());
       	
 
@@ -1049,9 +1036,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_7("wiggle_while_planning", data.getWiggleWhilePlanning());
 
-      ser.write_type_7("enable_concave_hull_wiggler", data.getEnableConcaveHullWiggler());
+      ser.write_type_7("reject_if_wiggle_not_satisfied", data.getRejectIfWiggleNotSatisfied());
 
-      ser.write_type_7("reject_if_cannot_fully_wiggle_inside", data.getRejectIfCannotFullyWiggleInside());
+      ser.write_type_7("enable_concave_hull_wiggler", data.getEnableConcaveHullWiggler());
 
       ser.write_type_6("maximum_xy_wiggle_distance", data.getMaximumXyWiggleDistance());
 
@@ -1131,8 +1118,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
 
-      ser.write_type_6("distance_epsilon_to_bridge_regions", data.getDistanceEpsilonToBridgeRegions());
-
       ser.write_type_9("step_only_with_requested_side", data.getStepOnlyWithRequestedSide());
    }
 
@@ -1196,9 +1181,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setWiggleWhilePlanning(ser.read_type_7("wiggle_while_planning"));
 
-      data.setEnableConcaveHullWiggler(ser.read_type_7("enable_concave_hull_wiggler"));
+      data.setRejectIfWiggleNotSatisfied(ser.read_type_7("reject_if_wiggle_not_satisfied"));
 
-      data.setRejectIfCannotFullyWiggleInside(ser.read_type_7("reject_if_cannot_fully_wiggle_inside"));
+      data.setEnableConcaveHullWiggler(ser.read_type_7("enable_concave_hull_wiggler"));
 
       data.setMaximumXyWiggleDistance(ser.read_type_6("maximum_xy_wiggle_distance"));
 
@@ -1277,8 +1262,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinLength(ser.read_type_6("shin_length"));
 
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
-
-      data.setDistanceEpsilonToBridgeRegions(ser.read_type_6("distance_epsilon_to_bridge_regions"));
 
       data.setStepOnlyWithRequestedSide(ser.read_type_9("step_only_with_requested_side"));
    }

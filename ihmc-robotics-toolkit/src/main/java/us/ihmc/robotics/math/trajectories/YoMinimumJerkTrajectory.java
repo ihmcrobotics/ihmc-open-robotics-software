@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoMinimumJerkTrajectory
@@ -12,7 +12,7 @@ public class YoMinimumJerkTrajectory
 
    public double pos, vel, acc;
 
-   public YoMinimumJerkTrajectory(String name, YoVariableRegistry registry)
+   public YoMinimumJerkTrajectory(String name, YoRegistry registry)
    {
       X0 = new YoDouble(name + "_x0", registry);
       V0 = new YoDouble(name + "_v0", registry);

@@ -15,9 +15,9 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Helper class that converts a measured foot wrench into a "zero-linear-velocity" sensor for the CoP location.
@@ -37,7 +37,7 @@ public class FootWrenchSensorUpdater
    private final DoubleProvider weightThresholdForTrust;
 
    public FootWrenchSensorUpdater(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry,
-                                  YoVariableRegistry registry)
+                                  YoRegistry registry)
    {
       this.weight = weight;
 

@@ -24,16 +24,16 @@ import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class EstimatedFromTorquesWrenchVisualizer
 {
    private static final double FORCE_VECTOR_SCALE = 0.0015;
    private static final double TORQUE_VECTOR_SCALE = 0.0015;
 
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Map<RigidBodyBasics, YoFrameVector3D> forces = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoFrameVector3D> torques = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<>();
@@ -59,21 +59,21 @@ public class EstimatedFromTorquesWrenchVisualizer
                                                                                                   List<? extends ContactablePlaneBody> contactableBodies,
                                                                                                   double vizScaling,
                                                                                                   YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                                                                  YoVariableRegistry parentRegistry)
+                                                                                                  YoRegistry parentRegistry)
    {
       return new EstimatedFromTorquesWrenchVisualizer(name, null, rootBody, extractRigidBodyList(contactableBodies), vizScaling, yoGraphicsListRegistry,
                                                       parentRegistry);
    }
 
    public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBodyBasics rootBody, List<RigidBodyBasics> rigidBodies,
-                                               double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                               double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this(name, jacobianHolder, rootBody, rigidBodies, vizScaling, yoGraphicsListRegistry, parentRegistry, YoAppearance.AliceBlue(),
            YoAppearance.YellowGreen());
    }
 
    public EstimatedFromTorquesWrenchVisualizer(String name, GeometricJacobianHolder jacobianHolder, RigidBodyBasics rootBody, List<RigidBodyBasics> rigidBodies,
-                                               double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry,
+                                               double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry,
                                                AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
       for (RigidBodyBasics rigidBody : rigidBodies)

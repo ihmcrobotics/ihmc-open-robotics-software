@@ -160,9 +160,9 @@ public class BehaviorBuilderPatternTest
       AllRequiredClass allRequired = new AllRequiredClass();
 
       LogTools.info("Exceptions are supposed to print out here.");
-      executor.execute(() -> allRequired.run());
-      executor.execute(() -> allRequired.run());
-      executor.execute(() -> allRequired.run());
+      executor.queueExecution(() -> allRequired.run());
+      executor.queueExecution(() -> allRequired.run());
+      executor.queueExecution(() -> allRequired.run());
    }
 
    class ExtendingClass extends AllRequiredClass

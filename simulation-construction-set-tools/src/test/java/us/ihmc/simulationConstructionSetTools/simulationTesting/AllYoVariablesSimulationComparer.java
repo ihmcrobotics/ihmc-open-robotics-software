@@ -12,6 +12,6 @@ public class AllYoVariablesSimulationComparer extends YoVariableListComparer imp
    @Override
    public boolean compare(SimulationConstructionSet scs0, SimulationConstructionSet scs1)
    {
-      return compare(scs0.getAllVariables(), scs1.getAllVariables());
+      return compare(scs0.getVariables(), scs1.getVariables());
    }
 }

@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.ui.graphics.live;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -20,7 +19,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 {
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
 
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ExecutorService executorService = ThreadTools.newSingleThreadExecutor(getClass().getSimpleName());
 
    private boolean acceptNewRegions = true;
    private volatile PlanarRegionsList latestPlanarRegionsList = new PlanarRegionsList(); // prevent NPEs

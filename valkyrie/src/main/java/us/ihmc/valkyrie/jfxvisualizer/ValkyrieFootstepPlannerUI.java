@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -53,6 +54,7 @@ public class ValkyrieFootstepPlannerUI extends Application
                                               model.getSplitFractionCalculatorParameters(),
                                               model,
                                               previewModel,
+                                              model.getJointMap(),
                                               model.getContactPointParameters(),
                                               model.getWalkingControllerParameters(),
                                               new ValkyrieUIAuxiliaryData());
@@ -72,13 +74,12 @@ public class ValkyrieFootstepPlannerUI extends Application
       }
    }
 
-
    private void handleMessagerCallbacks(FootstepPlanningModule planningModule, FootstepPlannerOutput status)
    {
       if (status.getFootstepPlanningResult().terminalResult())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
-                                Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));
+                                Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getVariableDescriptors()));
          messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
          messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
          messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());

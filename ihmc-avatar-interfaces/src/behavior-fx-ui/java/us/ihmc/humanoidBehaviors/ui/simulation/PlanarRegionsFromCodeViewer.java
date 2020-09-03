@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -13,7 +14,7 @@ import java.util.function.Supplier;
 public class PlanarRegionsFromCodeViewer extends Application
 {
    public static final Supplier<PlanarRegionsList> PLANNER_ENVIRONMENT = PlannerTestEnvironments::getMazeCorridor;
-   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
+   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop;
 
    public static final Supplier<PlanarRegionsList> PLANAR_REGIONS_TO_VIEW = BEHAVIOR_ENVIRONMENT;
 

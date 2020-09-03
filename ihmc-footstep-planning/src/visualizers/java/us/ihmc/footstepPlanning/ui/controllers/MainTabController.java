@@ -18,6 +18,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -310,7 +312,25 @@ public class MainTabController
    @FXML
    public void loadLog()
    {
-      messager.submitMessage(RequestLoadLog, true);
+      messager.submitMessage(RequestLoadLog, LoadRequestType.FILE_CHOOSER);
+   }
+
+   @FXML
+   public void loadLatestLog()
+   {
+      messager.submitMessage(RequestLoadLog, LoadRequestType.LATEST);
+   }
+
+   @FXML
+   public void loadPreviousLog()
+   {
+      messager.submitMessage(RequestLoadLog, LoadRequestType.PREVIOUS);
+   }
+
+   @FXML
+   public void loadNextLog()
+   {
+      messager.submitMessage(RequestLoadLog, LoadRequestType.NEXT);
    }
 
    private void setStartFromRobot()

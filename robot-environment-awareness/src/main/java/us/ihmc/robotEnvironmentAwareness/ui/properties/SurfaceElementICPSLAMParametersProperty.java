@@ -34,12 +34,21 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    private final IntegerField maxQueueSize = new IntegerField(SurfaceElementICPSLAMParameters::getMaximumQueueSize,
                                                               SurfaceElementICPSLAMParameters::setMaximumQueueSize);
 
+   private final DoubleField longestTimeToLag = new DoubleField(SurfaceElementICPSLAMParameters::getLongestTimeToLag,
+                                                                SurfaceElementICPSLAMParameters::setLongestTimeToLag);
+   private final DoubleField stationaryVelocity = new DoubleField(SurfaceElementICPSLAMParameters::getStationaryVelocity,
+                                                                  SurfaceElementICPSLAMParameters::setStationaryVelocity);
+   private final DoubleField maxVelocity = new DoubleField(SurfaceElementICPSLAMParameters::getMaxVelocity,
+                                                           SurfaceElementICPSLAMParameters::setMaxVelocity);
+
    private final IntegerField maxOptimizationIterations = new IntegerField(SurfaceElementICPSLAMParameters::getMaxOptimizationIterations,
                                                                            SurfaceElementICPSLAMParameters::setMaxOptimizationIterations);
    private final BooleanField computeSurfaceNormalsInFrame = new BooleanField(SurfaceElementICPSLAMParameters::getComputeSurfaceNormalsInFrame,
                                                                               SurfaceElementICPSLAMParameters::setComputeSurfaceNormalsInFrame);
    private final BooleanField insertMissInOcTree = new BooleanField(SurfaceElementICPSLAMParameters::getInsertMissInOcTree,
                                                                     SurfaceElementICPSLAMParameters::setInsertMissInOcTree);
+   private final BooleanField computeFramesInParallel = new BooleanField(SurfaceElementICPSLAMParameters::getComputeFramesInParallel,
+                                                                         SurfaceElementICPSLAMParameters::setComputeFramesInParallel);
 
    private final BooleanField includePitchAndRoll = new BooleanField(SurfaceElementICPSLAMParameters::getIncludePitchAndRoll,
                                                                      SurfaceElementICPSLAMParameters::setIncludePitchAndRoll);
@@ -47,6 +56,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
                                                                        SurfaceElementICPSLAMParameters::setTranslationPerturbation);
    private final DoubleField rotationPerturbation = new DoubleField(SurfaceElementICPSLAMParameters::getRotationPerturbation,
                                                                     SurfaceElementICPSLAMParameters::setRotationPerturbation);
+
+   private final IntegerField maxNumberOfSurfaceElements = new IntegerField(SurfaceElementICPSLAMParameters::getMaxNumberOfSurfaceElements,
+                                                                            SurfaceElementICPSLAMParameters::setMaxNumberOfSurfaceElements);
+   private final IntegerField maxNumberOfCorrespondences = new IntegerField(SurfaceElementICPSLAMParameters::getMaxNumberOfCorrespondences,
+                                                                            SurfaceElementICPSLAMParameters::setMaxNumberOfCorrespondences);
 
    public SurfaceElementICPSLAMParametersProperty(Object bean, String name)
    {
@@ -113,6 +127,21 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
       bindFieldBidirectionalToNumberProperty(property, maxQueueSize);
    }
 
+   public void bindBidirectionalLongestTimeToLag(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, longestTimeToLag);
+   }
+
+   public void bindBidirectionalStationaryVelocity(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stationaryVelocity);
+   }
+
+   public void bindBidirectionalMaxVelocity(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxVelocity);
+   }
+
    public void bindBidirectionalMaxOptimizationIterations(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxOptimizationIterations);
@@ -128,6 +157,11 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
       bindFieldBidirectionalToBooleanProperty(property, insertMissInOcTree);
    }
 
+   public void bindBidirectionalComputeFramesInParallel(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, computeFramesInParallel);
+   }
+
    public void bindBidirectionalIncludePitchAndRoll(Property<Boolean> property)
    {
       bindFieldBidirectionalToBooleanProperty(property, includePitchAndRoll);
@@ -141,6 +175,16 @@ public class SurfaceElementICPSLAMParametersProperty extends ParametersProperty<
    public void bindBidirectionalRotationPerturbation(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, rotationPerturbation);
+   }
+
+   public void bindBidirectionalMaxNumberOfSurfels(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxNumberOfSurfaceElements);
+   }
+
+   public void bindBidirectionalMaxNumberOfCorrespondences(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maxNumberOfCorrespondences);
    }
 
    @Override

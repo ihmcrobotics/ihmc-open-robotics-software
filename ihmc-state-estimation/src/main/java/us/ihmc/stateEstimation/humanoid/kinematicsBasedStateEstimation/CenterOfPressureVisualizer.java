@@ -1,10 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -19,15 +15,15 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 public class CenterOfPressureVisualizer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final Map<RigidBodyBasics, YoFramePoint3D> footRawCoPPositionsInWorld = new HashMap<>();
    private final YoFramePoint3D overallRawCoPPositionInWorld;
@@ -39,7 +35,7 @@ public class CenterOfPressureVisualizer
    private final List<RigidBodyBasics> footList = new ArrayList<>();
 
    public CenterOfPressureVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
       footRigidBodies = footSwitches.keySet();

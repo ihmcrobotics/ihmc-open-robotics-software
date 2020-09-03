@@ -21,11 +21,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -68,7 +68,7 @@ public class PositionOptimizedTrajectoryGenerator
    private final TDoubleArrayList finalVelocityArray = new TDoubleArrayList(dimensions);
    private final TDoubleArrayList waypointVelocity = new TDoubleArrayList(dimensions);
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoBoolean isDone;
    private final YoBoolean optimizeInOneTick;
    private final YoBoolean hasConverged;
@@ -88,25 +88,25 @@ public class PositionOptimizedTrajectoryGenerator
 
    public PositionOptimizedTrajectoryGenerator()
    {
-      this("", new YoVariableRegistry(""));
+      this("", null);
    }
 
    public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints)
    {
-      this("", new YoVariableRegistry(""), null, maxIterations, maxWaypoints);
+      this("", null, null, maxIterations, maxWaypoints);
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
       this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
    }
 
-   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
+   public PositionOptimizedTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                                int maxIterations, int maxWaypoints)
    {
       this.namePrefix = namePrefix;
@@ -127,7 +127,7 @@ public class PositionOptimizedTrajectoryGenerator
                                                       return ret;
                                                    });
 
-      registry = new YoVariableRegistry(namePrefix + "Trajectory");
+      registry = new YoRegistry(namePrefix + "Trajectory");
       optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, registry);
       this.maxIterations = new YoInteger(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
@@ -162,7 +162,8 @@ public class PositionOptimizedTrajectoryGenerator
          extendBySegment(registry);
 
       reset();
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
 
       if (graphicsListRegistry != null)
       {
@@ -180,7 +181,7 @@ public class PositionOptimizedTrajectoryGenerator
       maxSpeedTime = new YoDouble("MaxVelocityTime", registry);
    }
 
-   private void extendBySegment(YoVariableRegistry registry)
+   private void extendBySegment(YoRegistry registry)
    {
       int size = waypointTimes.size() + 1;
       for (Axis3D axis : Axis3D.values)

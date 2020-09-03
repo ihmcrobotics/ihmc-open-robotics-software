@@ -9,13 +9,13 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceQPSolver
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
@@ -47,7 +47,7 @@ public class GroundContactForceQPSolver
 
    private final int rhoSize;
 
-   public GroundContactForceQPSolver(ActiveSetQPSolver qpSolver, int rhoSize, YoVariableRegistry parentRegistry)
+   public GroundContactForceQPSolver(ActiveSetQPSolver qpSolver, int rhoSize, YoRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.rhoSize = rhoSize;

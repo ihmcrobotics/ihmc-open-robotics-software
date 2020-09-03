@@ -1,24 +1,24 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.mutable.MutableDouble;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactPhase;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.*;
-
-import java.util.ArrayList;
+import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class QuadrupedPiecewisePolynomialCopTrajectory
 {
@@ -26,7 +26,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
    {
       TimeInterval timeInterval;
 
-      public YoTimedPolynomial(String name, int maxCoefficients, YoVariableRegistry registry)
+      public YoTimedPolynomial(String name, int maxCoefficients, YoRegistry registry)
       {
          super(name, maxCoefficients, registry);
          timeInterval = new TimeInterval();
@@ -43,7 +43,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       }
    }
 
-   YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean trajectoryInitialized;
    private final TimeInterval trajectoryTimeInterval;
@@ -58,7 +58,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
    private final EndDependentList<ArrayList<YoTimedPolynomial>> pressurePolynomialsPerEnd;
    private final YoDouble copShiftDuration;
 
-   public QuadrupedPiecewisePolynomialCopTrajectory(int maximumNumberOfContactPhases, double copShiftDuration, YoVariableRegistry parentRegistry)
+   public QuadrupedPiecewisePolynomialCopTrajectory(int maximumNumberOfContactPhases, double copShiftDuration, YoRegistry parentRegistry)
    {
       int maximumNumberOfTrajectorySegments = 3 * maximumNumberOfContactPhases;
       trajectoryInitialized = new YoBoolean("copTrajectoryInitialized", registry);

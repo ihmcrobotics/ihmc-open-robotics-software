@@ -4,7 +4,9 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -16,6 +18,7 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInte
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
+import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
@@ -28,7 +31,6 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -110,7 +112,13 @@ public class BehaviorHelper
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      new IHMCROS2Callback<>(managedROS2Node, topic.getType(), topic, callback);
+      new IHMCROS2Callback<>(managedROS2Node, topic, callback);
+   }
+
+   // TODO: Move to remote robot interface?
+   public <T> void createROS2ControllerCallback(Class<T> messageClass, Consumer<T> callback)
+   {
+      new IHMCROS2Callback<>(managedROS2Node, ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
    public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
@@ -130,6 +138,11 @@ public class BehaviorHelper
    public <T> ROS2Input<T> createROS2Input(ROS2Topic<T> topic)
    {
       return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
+   }
+
+   public ROS2TypelessInput createROS2TypelessInput(ROS2Topic<Empty> topic)
+   {
+      return new ROS2TypelessInput(managedROS2Node, topic);
    }
 
    public Notification createROS2Notification(ROS2Topic<Empty> topic)
@@ -183,6 +196,11 @@ public class BehaviorHelper
    public <T> void publishToUI(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
+   }
+
+   public void publishToUI(Topic<Object> topic)
+   {
+      managedMessager.submitMessage(topic, new Object());
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)

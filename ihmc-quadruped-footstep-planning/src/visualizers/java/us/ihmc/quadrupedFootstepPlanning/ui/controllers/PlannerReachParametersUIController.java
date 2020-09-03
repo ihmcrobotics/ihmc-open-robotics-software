@@ -178,7 +178,7 @@ public class PlannerReachParametersUIController
 
       // set JavaFX user input to update stored properties and publish messager message
       javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
-      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
+      javaFXStoredPropertyMap.addAnyJavaFXValueChangedListener(() -> publishParameters());
    }
 
    private void publishParameters()

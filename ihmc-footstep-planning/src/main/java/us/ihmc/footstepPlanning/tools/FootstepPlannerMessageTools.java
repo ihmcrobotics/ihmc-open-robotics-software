@@ -77,6 +77,7 @@ public class FootstepPlannerMessageTools
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
+      packet.setRejectIfWiggleNotSatisfied(parameters.getRejectIfWiggleNotSatisfied());
       packet.setEnableConcaveHullWiggler(parameters.getEnableConcaveHullWiggler());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
@@ -102,7 +103,6 @@ public class FootstepPlannerMessageTools
       packet.setShinHeelClearance(parameters.getShinHeelClearance());
       packet.setShinLength(parameters.getShinLength());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
-      packet.setDistanceEpsilonToBridgeRegions(parameters.getDistanceEpsilonToBridgeRegions());
 
       RobotSide stepOnlyWithRequestedSide = parameters.getStepOnlyWithRequestedSide();
       packet.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide == null ? -1 : stepOnlyWithRequestedSide.toByte());

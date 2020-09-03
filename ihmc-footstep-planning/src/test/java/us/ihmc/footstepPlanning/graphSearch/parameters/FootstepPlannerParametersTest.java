@@ -104,6 +104,10 @@ public class FootstepPlannerParametersTest
       parameters.setWiggleWhilePlanning(wiggleWhilePlanning);
       assertEquals(wiggleWhilePlanning, parameters.getWiggleWhilePlanning());
 
+      boolean rejectIfWiggleNotSatisfied = random.nextBoolean();
+      parameters.setRejectIfWiggleNotSatisfied(rejectIfWiggleNotSatisfied);
+      assertEquals(rejectIfWiggleNotSatisfied, parameters.getRejectIfWiggleNotSatisfied());
+
       boolean enableConcaveHullWiggler = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setEnableConcaveHullWiggler(enableConcaveHullWiggler);
       assertEquals(enableConcaveHullWiggler, parameters.getEnableConcaveHullWiggler());
@@ -239,10 +243,6 @@ public class FootstepPlannerParametersTest
       double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
-
-      double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setDistanceEpsilonToBridgeRegions(distanceEpsilonToBridgeRegions);
-      assertEquals(distanceEpsilonToBridgeRegions, parameters.getDistanceEpsilonToBridgeRegions());
 
       byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
       parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);

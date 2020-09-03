@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
@@ -48,12 +48,13 @@ public class LookAndStepBehaviorAPI
 
    // Visualization only topics
    public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
-   public static final MessagerAPIFactory.Topic<ArrayList<FootstepForUI>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
-   public static final MessagerAPIFactory.Topic<ArrayList<FootstepForUI>> FootstepPlanForUI = topic("FootstepPlanForUI");
+   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
+   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> FootstepPlanForUI = topic("FootstepPlanForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
-   public static final MessagerAPIFactory.Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
+   public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
+   public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

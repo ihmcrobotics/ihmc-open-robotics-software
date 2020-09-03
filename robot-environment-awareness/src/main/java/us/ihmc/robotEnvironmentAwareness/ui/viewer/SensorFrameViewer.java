@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -8,6 +9,7 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -43,6 +45,8 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    private static final int DEFAULT_NUMBER_OF_FRAMES = 1;
    private final LinkedList<SensorFrame> sensorOriginHistory = new LinkedList<SensorFrame>();
    private final AtomicReference<Integer> numberOfFramesToShow;
+   private final AtomicBoolean clearRequest = new AtomicBoolean(false);
+   private boolean isRunning = false;
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
 
@@ -83,8 +87,27 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    }
 
    @Override
+   public void start()
+   {
+      super.start();
+      isRunning = true;
+   }
+
+   @Override
+   public void stop()
+   {
+      super.stop();
+      isRunning = false;
+   }
+
+   @Override
    public void handle(long now)
    {
+      if (clearRequest.getAndSet(false))
+      {
+         clearNow();
+      }
+
       if (latestMessage.get() == null)
          return;
 
@@ -140,7 +163,15 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       }
    }
 
-   private void clear()
+   public void clear()
+   {
+      if (isRunning)
+         clearRequest.set(true);
+      else
+         Platform.runLater(this::clearNow);
+   }
+
+   private void clearNow()
    {
       sensorOriginHistory.clear();
       historyRoot.getChildren().clear();

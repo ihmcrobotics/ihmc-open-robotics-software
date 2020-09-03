@@ -2,7 +2,7 @@ package us.ihmc.robotics.lists;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.jupiter.api.Test;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -19,7 +19,7 @@ public class YoPreallocatedListTest
    @Test
    public void testConstructor()
    {
-      YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 10, new YoVariableRegistry("Test"));
+      YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 10, new YoRegistry("Test"));
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
       assertTrue(list.getLast() == null);
@@ -28,7 +28,7 @@ public class YoPreallocatedListTest
    @Test
    public void testAddAndGet()
    {
-      YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 20, new YoVariableRegistry("Test"));
+      YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 20, new YoRegistry("Test"));
       ArrayList<YoDouble> expectedList = new ArrayList<>();
 
       int finalSize = 10;
@@ -101,7 +101,7 @@ public class YoPreallocatedListTest
    @Test
    public void testRemove()
    {
-      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoVariableRegistry("Test"));
+      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoRegistry("Test"));
       int currentSize = 10;
       while (list.size() < currentSize)
          list.add().set(10 + list.size());
@@ -147,7 +147,7 @@ public class YoPreallocatedListTest
    public void testSwap()
    {
       Random rand = new Random(541964L);
-      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoVariableRegistry("Test"));
+      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoRegistry("Test"));
       int currentSize = 10;
       while (list.size() < currentSize)
          list.add().set(10 + list.size());
@@ -194,7 +194,7 @@ public class YoPreallocatedListTest
    @Test
    public void testSort()
    {
-      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoVariableRegistry("Test"));
+      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", 10, new YoRegistry("Test"));
       list.add().set(-3);
       list.add().set(20);
       list.add().set(-10);
@@ -212,7 +212,7 @@ public class YoPreallocatedListTest
    public void testRemoveIndex()
    {
       int size = 10;
-      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", size, new YoVariableRegistry("Test"));
+      YoPreallocatedList<YoInteger> list = new YoPreallocatedList<>(YoInteger.class, "Test", size, new YoRegistry("Test"));
       for (int i = 0; i < size; i++)
       {
          list.add().set(i);
@@ -232,7 +232,7 @@ public class YoPreallocatedListTest
    public void testUnsupportedOperations()
    {
       int size = 5;
-      YoVariableRegistry testRegistry = new YoVariableRegistry("Test");
+      YoRegistry testRegistry = new YoRegistry("Test");
       YoDouble testDouble = new YoDouble("Test", testRegistry);
 
       YoPreallocatedList<YoDouble> list = new YoPreallocatedList<>(YoDouble.class, "Test", 10, testRegistry);

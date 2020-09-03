@@ -21,13 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
@@ -83,11 +77,11 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
@@ -104,7 +98,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
-   protected YoVariableRegistry toolboxRegistry;
+   protected YoRegistry toolboxRegistry;
    protected YoGraphicsListRegistry yoGraphicsListRegistry;
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
@@ -190,7 +184,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return toolboxRegistry;
          }
@@ -231,7 +225,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       {
          Robot[] robots = ghost != null ? new Robot[] {robot, ghost} : new Robot[] {robot};
          scs = new SimulationConstructionSet(robots, simulationTestingParameters);
-         scs.addYoVariableRegistry(toolboxRegistry);
+         scs.addYoRegistry(toolboxRegistry);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
          scs.setCameraFix(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
@@ -266,7 +260,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    private void createToolboxController(DRCRobotModel robotModel)
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
-      toolboxRegistry = new YoVariableRegistry("toolboxMain");
+      toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
@@ -422,7 +416,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    @Test
    public void testStreamingToController() throws SimulationExceededMaximumTimeException
    {
-      YoVariableRegistry spyRegistry = new YoVariableRegistry("spy");
+      YoRegistry spyRegistry = new YoRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
    
@@ -452,12 +446,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
             if (!needsToInitialize)
                return;
    
-            time = (YoDouble) toolboxRegistry.getVariable("time");
-            isStreaming = (YoBoolean) toolboxRegistry.getVariable("isStreaming");
-            streamingStartTime = (YoDouble) toolboxRegistry.getVariable("streamingStartTime");
-            streamingBlendingDuration = (YoDouble) toolboxRegistry.getVariable("streamingBlendingDuration");
-            mainStateMachineSwitchTime = (YoDouble) toolboxRegistry.getVariable("mainStateMachineSwitchTime");
-            mainStateMachineCurrentState = (YoEnum<KSTState>) toolboxRegistry.getVariable("mainStateMachineCurrentState");
+            time = (YoDouble) toolboxRegistry.findVariable("time");
+            isStreaming = (YoBoolean) toolboxRegistry.findVariable("isStreaming");
+            streamingStartTime = (YoDouble) toolboxRegistry.findVariable("streamingStartTime");
+            streamingBlendingDuration = (YoDouble) toolboxRegistry.findVariable("streamingBlendingDuration");
+            mainStateMachineSwitchTime = (YoDouble) toolboxRegistry.findVariable("mainStateMachineSwitchTime");
+            mainStateMachineCurrentState = (YoEnum<KSTState>) toolboxRegistry.findVariable("mainStateMachineCurrentState");
    
             needsToInitialize = false;
          }
@@ -506,7 +500,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
    
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return spyRegistry;
          }

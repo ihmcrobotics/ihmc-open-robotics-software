@@ -1,23 +1,23 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameTuple3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameTuple3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class BacklashProcessingYoFrameVector extends YoFrameVector3D implements ProcessingYoVariable
 {
    private final BacklashProcessingYoVariable xDot, yDot, zDot;
 
    public static BacklashProcessingYoFrameVector createBacklashProcessingYoFrameVector(String namePrefix, String nameSuffix, double dt, DoubleProvider slopTime,
-           YoVariableRegistry registry, YoFrameTuple3D yoFrameTupleToProcess)
+           YoRegistry registry, YoFrameTuple3D yoFrameTupleToProcess)
    {
-      String xName = YoFrameVariableNameTools.createXName(namePrefix, nameSuffix);
-      String yName = YoFrameVariableNameTools.createYName(namePrefix, nameSuffix);
-      String zName = YoFrameVariableNameTools.createZName(namePrefix, nameSuffix);
+      String xName = YoGeometryNameTools.createXName(namePrefix, nameSuffix);
+      String yName = YoGeometryNameTools.createYName(namePrefix, nameSuffix);
+      String zName = YoGeometryNameTools.createZName(namePrefix, nameSuffix);
 
       YoDouble xRaw = yoFrameTupleToProcess.getYoX();
       YoDouble yRaw = yoFrameTupleToProcess.getYoY();
@@ -33,7 +33,7 @@ public class BacklashProcessingYoFrameVector extends YoFrameVector3D implements 
    }
 
    private BacklashProcessingYoFrameVector(BacklashProcessingYoVariable xDot, BacklashProcessingYoVariable yDot, BacklashProcessingYoVariable zDot,
-           YoVariableRegistry registry, ReferenceFrame referenceFrame)
+           YoRegistry registry, ReferenceFrame referenceFrame)
    {
       super(xDot, yDot, zDot, referenceFrame);
 

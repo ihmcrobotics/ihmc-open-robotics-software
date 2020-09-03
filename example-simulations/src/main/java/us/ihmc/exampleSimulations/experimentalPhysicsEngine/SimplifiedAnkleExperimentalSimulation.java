@@ -18,18 +18,9 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
-import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.ContactParameters;
-import us.ihmc.robotics.physics.MultiBodySystemStateReader;
-import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
+import us.ihmc.robotics.physics.*;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter.MapBasedJointStateWriter;
-import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.KinematicPointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
-import us.ihmc.robotics.robotDescription.PinJointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
@@ -37,11 +28,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SimplifiedAnkleExperimentalSimulation
 {
@@ -63,7 +54,7 @@ public class SimplifiedAnkleExperimentalSimulation
    private final double legLength = 1.0;
    private final double comBallMass = 120.0;
 
-   private final YoVariableRegistry controllerRegitry = new YoVariableRegistry("controllerRegistry");
+   private final YoRegistry controllerRegitry = new YoRegistry("controllerRegistry");
    private final YoPDGains ankleGains = new YoPDGains("Ankle", controllerRegitry);
 
    private final YoDouble desiredPositionAnklePitch = new YoDouble("desiredPositionAnklePitch", controllerRegitry);

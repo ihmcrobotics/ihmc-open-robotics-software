@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoPHistoryRotationEdgeCalculatorTest extends RotationEdgeCalculatorTest
 {
@@ -48,7 +48,7 @@ public class CoPHistoryRotationEdgeCalculatorTest extends RotationEdgeCalculator
    public void testCoPHistory()
    {
       double dt = 0.001;
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       double stableAngleThreshold = 3.0;
       double stablePositionThreshold = 0.5;
       int stableWindowSize = 5;

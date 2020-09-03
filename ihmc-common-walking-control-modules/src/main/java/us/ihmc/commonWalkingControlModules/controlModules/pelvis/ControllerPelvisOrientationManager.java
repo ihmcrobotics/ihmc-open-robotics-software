@@ -29,14 +29,14 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerPelvisOrientationManager implements PelvisOrientationControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FrameQuaternion desiredPelvisOrientation = new FrameQuaternion();
    private final FrameVector3D desiredPelvisAngularVelocity = new FrameVector3D();
@@ -83,7 +83,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                             YoVariableRegistry parentRegistry)
+                                             YoRegistry parentRegistry)
    {
       yoTime = controllerToolbox.getYoTime();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();

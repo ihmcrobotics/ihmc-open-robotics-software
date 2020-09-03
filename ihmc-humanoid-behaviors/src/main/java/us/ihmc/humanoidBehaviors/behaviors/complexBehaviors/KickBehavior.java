@@ -55,7 +55,7 @@ public class KickBehavior extends AbstractBehavior
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
       footTrajectoryBehavior = new FootTrajectoryBehavior(robotName, ros2Node, yoTime, yoDoubleSupport);
-      registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
+      registry.addChild(footTrajectoryBehavior.getYoRegistry());
    }
 
    @Override

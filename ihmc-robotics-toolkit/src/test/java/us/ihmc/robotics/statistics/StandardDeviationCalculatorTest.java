@@ -4,7 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
@@ -18,7 +18,7 @@ public class StandardDeviationCalculatorTest
    @Test
    public void testNoVariance()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoDouble valueProvider = new YoDouble("valueProvider", testRegistry);
       OnlineStandardDeviationCalculator calculator = new OnlineStandardDeviationCalculator("value", valueProvider, testRegistry);
 
@@ -39,7 +39,7 @@ public class StandardDeviationCalculatorTest
    @Test
    public void testFromList()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoDouble valueProvider = new YoDouble("valueProvider", testRegistry);
       OnlineStandardDeviationCalculator calculator = new OnlineStandardDeviationCalculator("value", valueProvider, testRegistry);
 

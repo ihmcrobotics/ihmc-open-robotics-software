@@ -1,11 +1,17 @@
 package us.ihmc.simpleWholeBodyWalking;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -28,12 +34,8 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class SimpleControlManagerFactory
 {
@@ -43,12 +45,12 @@ public class SimpleControlManagerFactory
    public static final String footGainRegistryName = "FootGains";
    public static final String comHeightGainRegistryName = "ComHeightGains";
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoVariableRegistry momentumRegistry = new YoVariableRegistry(weightRegistryName);
-   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry(jointspaceGainRegistryName);
-   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry(rigidBodyGainRegistryName);
-   private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
-   private final YoVariableRegistry comHeightGainRegistry = new YoVariableRegistry(comHeightGainRegistryName);
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry momentumRegistry = new YoRegistry(weightRegistryName);
+   private final YoRegistry jointGainRegistry = new YoRegistry(jointspaceGainRegistryName);
+   private final YoRegistry bodyGainRegistry = new YoRegistry(rigidBodyGainRegistryName);
+   private final YoRegistry footGainRegistry = new YoRegistry(footGainRegistryName);
+   private final YoRegistry comHeightGainRegistry = new YoRegistry(comHeightGainRegistryName);
 
    private SimpleBalanceManager balanceManager;
    private SimpleCenterOfMassHeightManager centerOfMassHeightManager;
@@ -78,7 +80,7 @@ public class SimpleControlManagerFactory
    private PIDGainsReadOnly walkingControllerComHeightGains;
    private DoubleProvider walkingControllerMaxComHeightVelocity;
 
-   public SimpleControlManagerFactory(YoVariableRegistry parentRegistry)
+   public SimpleControlManagerFactory(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       parentRegistry.addChild(momentumRegistry);

@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.tools.io.DatagramInputStream;
 import us.ihmc.tools.io.DatagramOutputStream;
 import us.ihmc.commons.thread.ThreadTools;
@@ -28,7 +28,7 @@ public class UDPYoWhiteBoard extends DataStreamYoWhiteBoard
       this(name, runThisOneFirst, ipAddress, sendPort, receivePort, throwOutStalePackets, false, null);
    }
    
-   public UDPYoWhiteBoard(String name, boolean runThisOneFirst, String ipAddress, int sendPort, int receivePort, boolean throwOutStalePackets, boolean createYoVariablesOnConnect, YoVariableRegistry rootRegistry)
+   public UDPYoWhiteBoard(String name, boolean runThisOneFirst, String ipAddress, int sendPort, int receivePort, boolean throwOutStalePackets, boolean createYoVariablesOnConnect, YoRegistry rootRegistry)
    {
       super(name, !runThisOneFirst, runThisOneFirst, createYoVariablesOnConnect, rootRegistry);
 

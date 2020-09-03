@@ -5,16 +5,16 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class StraightLinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    private final YoDouble currentTime;
    private final YoFramePoint3D currentPosition;
    private final YoFrameVector3D currentVelocity;
@@ -37,9 +37,9 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    private final DoubleProvider trajectoryTimeProvider;
 
    public StraightLinePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry)
+         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
       this.currentTime = new YoDouble(namePrefix + "CurrentTime", registry);

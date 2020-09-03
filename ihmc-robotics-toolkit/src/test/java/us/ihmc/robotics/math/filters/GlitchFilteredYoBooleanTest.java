@@ -8,20 +8,20 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class GlitchFilteredYoBooleanTest
 {
    public static final int WINDOW_SIZE = 10;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoBoolean yoVariableToFilter;
    private GlitchFilteredYoBoolean filteredVariable;
 
    @BeforeEach
    public void setUp()
    {
-      registry = new YoVariableRegistry("testRegistry");
+      registry = new YoRegistry("testRegistry");
       yoVariableToFilter = new YoBoolean("variableToFilter", registry);
       filteredVariable = new GlitchFilteredYoBoolean("filteredVariable", registry, yoVariableToFilter, WINDOW_SIZE);
    }

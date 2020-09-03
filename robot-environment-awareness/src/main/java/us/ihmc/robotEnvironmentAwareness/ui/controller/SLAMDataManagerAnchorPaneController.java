@@ -100,22 +100,6 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    }
 
    @FXML
-   private void importPlanarRegions()
-   {
-      String planarRegionsFilePath = currentPlanarRegionsInputFolderTextField.getText();
-      File planarRegionsFile = new File(planarRegionsFilePath);
-      PlanarRegionsList planarRegionDataToImport = PlanarRegionFileTools.importPlanarRegionData(planarRegionsFile);
-      if (planarRegionDataToImport == null)
-      {
-         LogTools.warn("Empty file path.");
-         return;
-      }
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionDataToImport);
-      uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsState, planarRegionsListMessage);
-      uiMessager.submitMessageInternal(SLAMModuleAPI.ShowImportedPlanarRegions, true);
-   }
-
-   @FXML
    private void browseRawDataOutputFolder()
    {
       exportRawDataDirectoryChooser.setInitialDirectory(defaultExportRawDataFile);
@@ -149,11 +133,6 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
       Platform.runLater(() -> currentPlanarRegionsInputFolderTextField.setText(newPath));
    }
 
-   @FXML
-   private void hideImportedPlanarRegions()
-   {
-      uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsVizClear, true);
-   }
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,

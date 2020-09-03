@@ -25,7 +25,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BlendedPoseTrajectoryGeneratorTest
 {
@@ -121,7 +121,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   private PoseTrajectoryGenerator createRandomReferenceTrajectory(Random random, int numberOfWaypoints, double duration, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   private PoseTrajectoryGenerator createRandomReferenceTrajectory(Random random, int numberOfWaypoints, double duration, ReferenceFrame referenceFrame, YoRegistry registry)
    {
       MultipleWaypointsPoseTrajectoryGenerator referenceTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("referenceTrajectory", 10, registry);
       for (int i = 0; i < numberOfWaypoints; i++)
@@ -144,7 +144,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -170,7 +170,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -208,7 +208,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -245,7 +245,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -296,7 +296,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -344,7 +344,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -382,7 +382,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame bodyFrame = new PoseReferenceFrame("BodyFrame", worldFrame);
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 10, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", referenceTrajectory, worldFrame, registry);
 
@@ -447,7 +447,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       FrameVector3D angularVelocityFromIntegration = new FrameVector3D();
       Vector3D integratedAngularAcceleration = new Vector3D();
 
-      YoVariableRegistry registry = new YoVariableRegistry("null");
+      YoRegistry registry = new YoRegistry("null");
       PoseTrajectoryGenerator referenceTrajectory = createRandomReferenceTrajectory(random, 2, trajectoryDuration, worldFrame, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blended", referenceTrajectory, worldFrame, registry);
       blendedTrajectory.initialize();
@@ -508,7 +508,7 @@ public class BlendedPoseTrajectoryGeneratorTest
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("Swing", 4 + 2, registry);
 
       swingTrajectory.clear(worldFrame);
@@ -571,7 +571,7 @@ public class BlendedPoseTrajectoryGeneratorTest
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("Swing", 4 + 2, registry);
       BlendedPoseTrajectoryGenerator blendedTrajectory = new BlendedPoseTrajectoryGenerator("blendedTrajectory", swingTrajectory, worldFrame, registry);
 
@@ -623,7 +623,7 @@ public class BlendedPoseTrajectoryGeneratorTest
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry registry = new YoVariableRegistry("trajectory");
+      YoRegistry registry = new YoRegistry("trajectory");
       MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator("Swing", 4 + 2, registry);
 
       swingTrajectory.clear(worldFrame);

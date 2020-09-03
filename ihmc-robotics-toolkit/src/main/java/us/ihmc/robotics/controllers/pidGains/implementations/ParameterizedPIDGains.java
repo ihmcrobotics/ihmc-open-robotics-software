@@ -4,7 +4,7 @@ import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * {@link YoParameter} based implementation of the {@link PIDGainsReadOnly} interface.
@@ -20,12 +20,12 @@ public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGa
    private final DoubleParameter maxIntegralError;
    private final DoubleParameter integralLeakRatio;
 
-   public ParameterizedPIDGains(String suffix, YoVariableRegistry registry)
+   public ParameterizedPIDGains(String suffix, YoRegistry registry)
    {
       this(suffix, null, registry);
    }
 
-   public ParameterizedPIDGains(String suffix, PIDGainsReadOnly defaults, YoVariableRegistry registry)
+   public ParameterizedPIDGains(String suffix, PIDGainsReadOnly defaults, YoRegistry registry)
    {
       super(suffix, defaults, registry);
 
@@ -43,7 +43,7 @@ public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGa
       }
    }
 
-   public ParameterizedPIDGains(String suffix, PDGainsReadOnly defaults, YoVariableRegistry registry)
+   public ParameterizedPIDGains(String suffix, PDGainsReadOnly defaults, YoRegistry registry)
    {
       super(suffix, defaults, registry);
 

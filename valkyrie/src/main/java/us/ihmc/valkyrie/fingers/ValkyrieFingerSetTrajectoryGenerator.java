@@ -13,14 +13,14 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements RobotController
 {
    private final String name;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final RobotSide robotSide;
 
@@ -42,12 +42,12 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    }
 
    public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
-                                               YoVariableRegistry parentRegistry)
+                                               YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
       this.name = robotSide.getLowerCaseName() + enumType.getSimpleName();
 
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
 
       this.desiredQs = new EnumMap<>(enumType);
       this.desiredQds = new EnumMap<>(enumType);
@@ -187,7 +187,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

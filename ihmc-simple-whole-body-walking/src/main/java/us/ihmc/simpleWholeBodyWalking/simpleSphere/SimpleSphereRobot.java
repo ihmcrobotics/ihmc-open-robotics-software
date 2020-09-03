@@ -1,5 +1,6 @@
 package us.ihmc.simpleWholeBodyWalking.simpleSphere;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TranslationMovingReferenceFrame;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -11,38 +12,30 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-
-
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList; 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TranslationMovingReferenceFrame;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-
-import java.util.HashMap;
 
 /*
  * Robot constructed to be a single rigid body 
@@ -52,7 +45,7 @@ import java.util.HashMap;
 public class SimpleSphereRobot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final double mass = 1.0;
    private static final double Ixx1 = 0.1, Iyy1 = 0.1, Izz1 = 0.1;
@@ -110,7 +103,7 @@ public class SimpleSphereRobot
       omega0.set(omega);
 
       scsRobot = new SCSRobotFromInverseDynamicsRobotModel(name, floatingJoint);
-      scsRobot.getRobotsYoVariableRegistry().addChild(registry);
+      scsRobot.getRobotsYoRegistry().addChild(registry);
 
       scsRobot.setGravity(0.0, 0.0, -gravity);
 
@@ -259,20 +252,20 @@ public class SimpleSphereRobot
    {
       scsRobot.getYoTime().set(0.0);
 
-      YoDouble q_x = (YoDouble) scsRobot.getVariable("q_x");
-      YoDouble q_y = (YoDouble) scsRobot.getVariable("q_y");
-      YoDouble q_z = (YoDouble) scsRobot.getVariable("q_z");
-      YoDouble qd_x = (YoDouble) scsRobot.getVariable("qd_x");
-      YoDouble qd_y = (YoDouble) scsRobot.getVariable("qd_y");
-      YoDouble qd_z = (YoDouble) scsRobot.getVariable("qd_z");
+      YoDouble q_x = (YoDouble) scsRobot.findVariable("q_x");
+      YoDouble q_y = (YoDouble) scsRobot.findVariable("q_y");
+      YoDouble q_z = (YoDouble) scsRobot.findVariable("q_z");
+      YoDouble qd_x = (YoDouble) scsRobot.findVariable("qd_x");
+      YoDouble qd_y = (YoDouble) scsRobot.findVariable("qd_y");
+      YoDouble qd_z = (YoDouble) scsRobot.findVariable("qd_z");
 
-      YoDouble q_qs = (YoDouble) scsRobot.getVariable("q_qs");
-      YoDouble q_qx = (YoDouble) scsRobot.getVariable("q_qx");
-      YoDouble q_qy = (YoDouble) scsRobot.getVariable("q_qy");
-      YoDouble q_qz = (YoDouble) scsRobot.getVariable("q_qz");
-      YoDouble qd_wx = (YoDouble) scsRobot.getVariable("qd_wx");
-      YoDouble qd_wy = (YoDouble) scsRobot.getVariable("qd_wy");
-      YoDouble qd_wz = (YoDouble) scsRobot.getVariable("qd_wz");
+      YoDouble q_qs = (YoDouble) scsRobot.findVariable("q_qs");
+      YoDouble q_qx = (YoDouble) scsRobot.findVariable("q_qx");
+      YoDouble q_qy = (YoDouble) scsRobot.findVariable("q_qy");
+      YoDouble q_qz = (YoDouble) scsRobot.findVariable("q_qz");
+      YoDouble qd_wx = (YoDouble) scsRobot.findVariable("qd_wx");
+      YoDouble qd_wy = (YoDouble) scsRobot.findVariable("qd_wy");
+      YoDouble qd_wz = (YoDouble) scsRobot.findVariable("qd_wz");
 
       q_x.set(initialPosition.getX());
       q_y.set(initialPosition.getY());

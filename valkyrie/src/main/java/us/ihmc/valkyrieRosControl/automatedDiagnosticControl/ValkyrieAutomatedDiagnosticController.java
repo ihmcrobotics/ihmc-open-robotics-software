@@ -68,7 +68,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -83,7 +83,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
 
    private YoVariableServer yoVariableServer;
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
@@ -303,7 +303,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                                                      imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
                                                                                      robotMotionStatusHolder, bipedFeetMap, yoGraphicsListRegistry);
 
-      registry.addChild(stateEstimator.getYoVariableRegistry());
+      registry.addChild(stateEstimator.getYoRegistry());
 
       forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
                                                             sensorOutputMapReadOnly,

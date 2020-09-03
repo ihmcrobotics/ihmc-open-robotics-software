@@ -193,6 +193,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.wiggleWhilePlanning, wiggleWhilePlanning);
    }
 
+   default void setRejectIfWiggleNotSatisfied(boolean rejectIfWiggleNotSatisfied)
+   {
+      set(FootstepPlannerParameterKeys.rejectIfWiggleNotSatisfied, rejectIfWiggleNotSatisfied);
+   }
+
    default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
    {
       set(FootstepPlannerParameterKeys.enableConcaveHullWiggler, enableConcaveHullWiggler);
@@ -348,11 +353,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
    }
 
-   default void setDistanceEpsilonToBridgeRegions(double distanceEpsilonToBridgeRegions)
-   {
-      set(FootstepPlannerParameterKeys.distanceEpsilonToBridgeRegions, distanceEpsilonToBridgeRegions);
-   }
-
    default void setStepOnlyWithRequestedSide(byte side)
    {
       set(stepOnlyWithRequestedSide, side);
@@ -413,6 +413,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
       setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
+      setRejectIfWiggleNotSatisfied(parametersPacket.getRejectIfWiggleNotSatisfied());
       setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
@@ -488,8 +489,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinHeelClearance(parametersPacket.getShinHeelClearance());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
-      if (parametersPacket.getDistanceEpsilonToBridgeRegions() != noValue)
-         setDistanceEpsilonToBridgeRegions(parametersPacket.getDistanceEpsilonToBridgeRegions());
       setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

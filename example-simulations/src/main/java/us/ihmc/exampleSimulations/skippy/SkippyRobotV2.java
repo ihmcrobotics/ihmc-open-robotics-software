@@ -152,7 +152,7 @@ public class SkippyRobotV2 extends Robot
       shoulderJoint.addGroundContactPoint(arm2ContactPoint);
 
       // add ground contact model
-      LinearGroundContactModel ground = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
+      LinearGroundContactModel ground = new LinearGroundContactModel(this, this.getRobotsYoRegistry());
       ground.setZStiffness(2000.0);
       ground.setZDamping(1500.0);
       ground.setXYStiffness(50000.0);

@@ -5,13 +5,7 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -24,32 +18,25 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -76,13 +63,14 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -96,6 +84,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class KinematicsToolboxController extends ToolboxController
 {
+   private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
@@ -112,6 +102,7 @@ public class KinematicsToolboxController extends ToolboxController
    protected final RigidBodyBasics rootBody;
    /** Reference to the desired robot's floating joint. */
    protected final FloatingJointBasics rootJoint;
+   private final double totalRobotMass;
    /**
     * Array containing all the one degree-of-freedom joints of the desired robot except for the finger
     * joints that are not handled by this solver.
@@ -158,7 +149,7 @@ public class KinematicsToolboxController extends ToolboxController
     * {@link #feedbackControllerDataHolder} is used here to compute the solution quality every tick
     * from the tracking error for each end-effector being controlled.
     */
-   private final FeedbackControllerDataReadOnly feedbackControllerDataHolder;
+   private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
 
    /**
     * This is the output of the {@code KinematicsToolboxController}. It is filled with the robot
@@ -318,7 +309,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, Collection<? extends RigidBodyBasics> controllableRigidBodies, double updateDT,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.commandInputManager = commandInputManager;
@@ -330,6 +321,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
@@ -342,12 +334,12 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      spatialGains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setPositionProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
-      spatialGains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setOrientationProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
-      jointGains.setKp(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      jointGains.setKp(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       jointGains.setMaximumFeedbackAndMaximumFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
@@ -547,7 +539,7 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate(controllableRigidBodies);
       controllerCoreTemplate.addCommand(new CenterOfMassFeedbackControlCommand());
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
-      return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
+      return new WholeBodyControllerCore(toolbox, new FeedbackControllerTemplate(controllerCoreTemplate), lowLevelControllerOutput, registry);
    }
 
    /**
@@ -719,8 +711,8 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
-      // Calculating the solution quality based on sum of all the commands' tracking error.
-      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
+      // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
+      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
 
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
@@ -998,8 +990,8 @@ public class KinematicsToolboxController extends ToolboxController
       return null;
    }
 
-   private final FramePoint3D rigidBodyPosition = new FramePoint3D();
-   private final FrameQuaternion rigidBodyOrientation = new FrameQuaternion();
+   private final List<FBPoint3D> rigidBodyPositions = new ArrayList<>();
+   private final List<FBQuaternion3D> rigidBodyOrientations = new ArrayList<>();
 
    /**
     * Updates the graphic coordinate systems for the end-effectors that are actively controlled during
@@ -1007,40 +999,38 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private void updateVisualization()
    {
-      boolean hasData;
-
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.DESIRED);
-         if (!hasData)
+         feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.DESIRED);
+         if (rigidBodyPositions.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setPosition(rigidBodyPosition);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setPosition(rigidBodyPositions.get(0));
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.DESIRED);
-         if (!hasData)
+         feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.DESIRED);
+         if (rigidBodyOrientations.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setOrientation(rigidBodyOrientation);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
       }
 
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.CURRENT);
-         if (!hasData)
+         feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.CURRENT);
+         if (rigidBodyPositions.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setPosition(rigidBodyPosition);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setPosition(rigidBodyPositions.get(0));
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.CURRENT);
-         if (!hasData)
+         feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.CURRENT);
+         if (rigidBodyOrientations.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setOrientation(rigidBodyOrientation);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
       }
    }
 
@@ -1134,7 +1124,7 @@ public class KinematicsToolboxController extends ToolboxController
       return inverseKinematicsSolution;
    }
 
-   public FeedbackControllerDataReadOnly getFeedbackControllerDataHolder()
+   public FeedbackControllerDataHolderReadOnly getFeedbackControllerDataHolder()
    {
       return feedbackControllerDataHolder;
    }

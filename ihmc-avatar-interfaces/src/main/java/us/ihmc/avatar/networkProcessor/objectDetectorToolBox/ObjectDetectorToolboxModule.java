@@ -72,23 +72,23 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
    }

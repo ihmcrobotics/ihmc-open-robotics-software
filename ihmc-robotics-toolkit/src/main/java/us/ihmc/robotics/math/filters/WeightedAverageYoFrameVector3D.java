@@ -1,14 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WeightedAverageYoFrameVector3D extends YoFrameVector3D
 {
@@ -16,7 +15,7 @@ public class WeightedAverageYoFrameVector3D extends YoFrameVector3D
    private final List<YoFrameVector3D> frameVectorsToAverage = new ArrayList<>();
 
 
-   public WeightedAverageYoFrameVector3D(String name, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   public WeightedAverageYoFrameVector3D(String name, ReferenceFrame referenceFrame, YoRegistry registry)
    {
       super(name, referenceFrame, registry);
    }

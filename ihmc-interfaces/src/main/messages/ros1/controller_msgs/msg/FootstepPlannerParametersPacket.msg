@@ -238,15 +238,12 @@ float64 minimum_surface_incline_radians
 # If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
 bool wiggle_while_planning
 
+# If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+bool reject_if_wiggle_not_satisfied
+
 # There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
 # this toggles between them.
 bool enable_concave_hull_wiggler
-
-# If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-# This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-# {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-# candidate footstep will be rejected if this method returns {@code true}.
-bool reject_if_cannot_fully_wiggle_inside
 
 # When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
 # distance the planner will use
@@ -465,10 +462,6 @@ float64 shin_length
 # Height offset of shin collidable cylinder
 # Field default value -11.1
 float64 shin_height_offet
-
-# Distance epsilon below snapped footstep that will be added to foothold
-# Field default value -11.1
-float64 distance_epsilon_to_bridge_regions
 
 # If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
 # The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,

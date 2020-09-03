@@ -62,7 +62,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -81,7 +81,7 @@ public final class KinematicsToolboxControllerTest
    }
 
    private CommandInputManager commandInputManager;
-   private YoVariableRegistry mainRegistry;
+   private YoRegistry mainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private KinematicsToolboxController toolboxController;
 
@@ -99,7 +99,7 @@ public final class KinematicsToolboxControllerTest
 
    public void setup(RobotDescription robotDescription, RobotDescription ghostRobotDescription)
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
@@ -160,7 +160,7 @@ public final class KinematicsToolboxControllerTest
 
       if (mainRegistry != null)
       {
-         mainRegistry.closeAndDispose();
+         mainRegistry.clear();
          mainRegistry = null;
       }
 
@@ -531,7 +531,7 @@ public final class KinematicsToolboxControllerTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return mainRegistry;
          }

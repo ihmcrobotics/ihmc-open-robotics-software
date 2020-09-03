@@ -30,7 +30,7 @@ public class SCSPlaybackListener implements PlaybackListener
       }
    }
 
-   public void notifyOfIndexChange(int newIndex)
+   public void indexChanged(int newIndex)
    {
    }
 }

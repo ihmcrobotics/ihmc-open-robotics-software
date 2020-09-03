@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -70,7 +70,7 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends 
     */
    FiniteStateMachine(Map<S, C> states, Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions,
          Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks, S initialState, Class<S> enumType, Class<E> standardEventType,
-         String yoVariableName, YoVariableRegistry registry)
+         String yoVariableName, YoRegistry registry)
    {
       this.states = states;
       this.transitions = transitions;

@@ -6,6 +6,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
@@ -40,14 +41,14 @@ public class AtlasKinematicSimForUI
 
       if (SHOW_ROBOT_VIEWER)
       {
-         new Thread(() ->
+         ThreadTools.startAThread(() ->
          {
             LogTools.info("Creating robot and map viewer");
             new RobotAndMapViewer(createRobotModel(), ros2Node);
-         }).start();
+         }, "RobotAndMapViewer");
       }
 
-      new SCSLidarAndCameraSimulator(ros2Node, environment, createRobotModel());
+      new SCSLidarAndCameraSimulator(PubSubImplementation.FAST_RTPS, environment, createRobotModel());
    }
 
    private AtlasRobotModel createRobotModel()

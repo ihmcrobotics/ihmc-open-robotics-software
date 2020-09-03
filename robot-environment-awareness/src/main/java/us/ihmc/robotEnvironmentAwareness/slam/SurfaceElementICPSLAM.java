@@ -1,15 +1,21 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -17,6 +23,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
@@ -47,7 +54,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       double surfaceElementResolution = surfaceElementICPSLAMParameters.getSurfaceElementResolution();
       double windowMargin = surfaceElementICPSLAMParameters.getWindowMargin();
       int minimumNumberOfHits = surfaceElementICPSLAMParameters.getMinimumNumberOfHit();
-      int maxNumberOfSurfels = Integer.MAX_VALUE;
+      int maxNumberOfSurfels = surfaceElementICPSLAMParameters.getMaxNumberOfSurfaceElements();
       frame.registerSurfaceElements(getMapOcTree(),
                                     windowMargin,
                                     surfaceElementResolution,
@@ -57,23 +64,49 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
       int numberOfSurfel = frame.getNumberOfSurfaceElements();
       correctedCorrespondingPointLocation = new Point3D[numberOfSurfel];
+
       if (DEBUG)
          LogTools.info("numberOfSurfel " + numberOfSurfel);
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
+         private List<Point3DReadOnly> surfaceElementPoints = new ArrayList<>();
+
+         public void setIndicesToCompute(TIntArrayList indicesToCompute)
+         {
+            surfaceElementPoints.clear();
+            for (int i = 0; i < indicesToCompute.size(); i++)
+               surfaceElementPoints.add(frame.getSurfaceElementsInLocalFrame().get(indicesToCompute.get(i)).getPoint());
+         }
+
+         public void resetIndicesToCompute()
+         {
+            Stream<Plane3DReadOnly> planeStream = frame.getSurfaceElementsInLocalFrame().stream();
+            surfaceElementPoints = planeStream.map(Plane3DReadOnly::getPoint).collect(Collectors.toList());
+         }
+
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
-            RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(transformConverter.apply(inputParameter));
-            RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
+            RigidBodyTransformReadOnly driftCorrectionTransform = transformConverter.apply(inputParameter);
+            RigidBodyTransformBasics correctedLocalPoseInWorld = new RigidBodyTransform(frame.getUncorrectedLocalPoseInWorld());
             correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(numberOfSurfel, 1);
+            int size = surfaceElementPoints.size();
+            correctedCorrespondingPointLocation = new Point3D[size];
+            DMatrixRMaj errorSpace = new DMatrixRMaj(size, 1);
 
-            for (int i = 0; i < numberOfSurfel; i++)
+            Stream<Point3DReadOnly> surfelPointStream = surfaceElementPoints.stream();
+            List<Point3D> surfelPointsInWorld = surfelPointStream.map(point ->
+                                                              {
+                                                                 Point3D correctedSurfelInWorld = new Point3D();
+                                                                 correctedLocalPoseInWorld.transform(point, correctedSurfelInWorld);
+                                                                 return correctedSurfelInWorld;
+                                                              }).collect(Collectors.toList());
+
+            for (int i = 0; i < size; i++)
             {
-               Point3D correctedSurfelInWorld = new Point3D();
-               correctedLocalPoseInWorld.transform(frame.getSurfaceElementsInLocalFrame().get(i).getPoint(), correctedSurfelInWorld);
+               Point3D correctedSurfelInWorld = surfelPointsInWorld.get(i);
 
                correctedCorrespondingPointLocation[i] = correctedSurfelInWorld;
 
@@ -114,6 +147,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          //return null;
       }
       optimizer.setCorrespondenceThreshold(surfaceElementICPSLAMParameters.getMinimumCorrespondingDistance()); // Note : (x 1.5) of surfel resolution.
+      optimizer.setMaximumNumberOfCorrespondences(surfaceElementICPSLAMParameters.getMaxNumberOfCorrespondences()); // Note : (x 1.5) of surfel resolution.
       double initialQuality = optimizer.getQuality();
       driftCorrectionResult.setInitialDistance(initialQuality);
       if (DEBUG)
@@ -139,8 +173,6 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       int numberOfSteadyIterations = 0;
       int steadyIterationsThreshold = surfaceElementICPSLAMParameters.getSteadyStateDetectorIterationThreshold();
       // do ICP.
-      double quality = 0.0;
-      double translationalEffort = 0.0;
       RotationMatrix rotationalEffort = new RotationMatrix();
       RigidBodyTransform driftCompensationTransform = new RigidBodyTransform();
       int iterations = -1;
@@ -149,8 +181,8 @@ public class SurfaceElementICPSLAM extends SLAMBasics
          optimizer.iterate();
          optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCompensationTransform);
 
-         quality = optimizer.getQuality();
-         translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
+         double quality = optimizer.getQuality();
+         double translationalEffort = driftCompensationTransform.getTranslation().lengthSquared();
          rotationalEffort.set(driftCompensationTransform.getRotation());
 
          if (qualitySteady.isSteady(quality) && translationalSteady.isSteady(translationalEffort) && rotationalSteady.isSteady(rotationalEffort))
@@ -180,6 +212,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       driftCorrectionResult.setNumberOfSurfels(numberOfSurfel);
       driftCorrectionResult.setDriftCorrectionTransformer(driftCompensationTransform);
       driftCorrectionResult.setIcpIterations(iterations);
+      driftCorrectionResult.setNumberOfCorrespondances(optimizer.getNumberOfCorrespondingPoints());
       if (iterations < 0)
       {
          driftCorrectionResult.setSuccess(false);

@@ -31,6 +31,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 
 @Tag("point-cloud-drift-correction-test")
 public class SurfaceElementICPTest
@@ -200,7 +201,7 @@ public class SurfaceElementICPTest
             return transform;
          }
       };
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
@@ -260,11 +261,11 @@ public class SurfaceElementICPTest
       System.out.println("icpTransformer");
       System.out.println(icpTransformer);
 
-      Point3DReadOnly[] pointCloud = frame2.getCorrectedPointCloudInWorld();
+      List<? extends Point3DReadOnly> pointCloud = frame2.getCorrectedPointCloudInWorld();
       RigidBodyTransformReadOnly sensorPose = frame2.getCorrectedLocalPoseInWorld();
 
       ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = frame2.getCorrectedPointCloudInWorld().length;
+      int numberOfPoints = frame2.getCorrectedPointCloudInWorld().size();
 
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));

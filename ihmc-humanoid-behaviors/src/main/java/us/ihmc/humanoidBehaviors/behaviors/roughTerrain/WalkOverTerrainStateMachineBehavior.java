@@ -320,7 +320,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       private final FramePose3D touchdownPose = new FramePose3D();
       private final FramePose3D startLeftFootPose = new FramePose3D();
       private final FramePose3D startRightFootPose = new FramePose3D();
-      private final YoEnum<RobotSide> swingSide = YoEnum.create("swingSide", RobotSide.class, registry);
+      private final YoEnum<RobotSide> swingSide = new YoEnum<>("swingSide", registry, RobotSide.class);
 
       PlanFromSingleSupportState()
       {

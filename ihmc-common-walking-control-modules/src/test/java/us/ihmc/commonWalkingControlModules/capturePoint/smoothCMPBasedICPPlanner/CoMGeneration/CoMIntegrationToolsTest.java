@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
@@ -10,10 +9,11 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerTrajectoryGene
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.Assert;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class CoMIntegrationToolsTest
 {
@@ -30,7 +30,7 @@ public class CoMIntegrationToolsTest
    @Test
    public void testTransferIntegration()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoDouble omega0 = new YoDouble("Omega0", registry);
       omega0.set(3.0);
 
@@ -98,7 +98,7 @@ public class CoMIntegrationToolsTest
    @Test
    public void testSwingIntegration()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoDouble omega0 = new YoDouble("Omega0", registry);
       omega0.set(3.0);
 
@@ -182,7 +182,7 @@ public class CoMIntegrationToolsTest
    @Test
    public void testSwingIntegrationWithSpline()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoDouble omega0 = new YoDouble("Omega0", registry);
       omega0.set(3.0);
 

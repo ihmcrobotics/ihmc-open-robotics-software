@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
 
 
@@ -19,7 +19,7 @@ public class YoSignalDerivativeTest
    @BeforeEach
    public void setUp() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       yoSignalDerivative = new YoSignalDerivative("test", registry);
    }
 

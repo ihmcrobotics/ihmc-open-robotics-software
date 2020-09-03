@@ -1,6 +1,6 @@
 package us.ihmc.avatar.factory;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class SimulatedHandControlTask extends HumanoidRobotControlTask
 {
@@ -9,5 +9,5 @@ public abstract class SimulatedHandControlTask extends HumanoidRobotControlTask
       super(divisor);
    }
 
-   public abstract YoVariableRegistry getRegistry();
+   public abstract YoRegistry getRegistry();
 }

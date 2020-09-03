@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuinticPolynomialTrajectoryGenerator extends PolynomialTrajectoryGenerator
 {
@@ -12,7 +12,7 @@ public class QuinticPolynomialTrajectoryGenerator extends PolynomialTrajectoryGe
    private final DoubleProvider finalVelocityProvider;
 
    public QuinticPolynomialTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider initialVelocityProvider,
-         DoubleProvider finalPositionProvider, DoubleProvider finalVelocityProvider, DoubleProvider trajectoryTimeProvider, YoVariableRegistry parentRegistry)
+         DoubleProvider finalPositionProvider, DoubleProvider finalVelocityProvider, DoubleProvider trajectoryTimeProvider, YoRegistry parentRegistry)
    {
       super(namePrefix, initialPositionProvider, finalPositionProvider, trajectoryTimeProvider, numberOfCoefficients, parentRegistry);
       this.initialVelocityProvider = initialVelocityProvider;

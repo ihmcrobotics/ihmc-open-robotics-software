@@ -16,12 +16,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OneDoFJointQuinticTrajectoryGeneratorTest
 {
    private String namePrefix = "namePrefix";
-   private YoVariableRegistry parentRegistry = new YoVariableRegistry("parentRegistry");
+   private YoRegistry parentRegistry = new YoRegistry("parentRegistry");
 
    private ReferenceFrame parentFrame = ReferenceFrameTools.constructARootFrame("rootFrame");
 

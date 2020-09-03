@@ -16,12 +16,12 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterTools
 {
    public static void extractJointGainMap(List<GroupParameter<PIDGainsReadOnly>> jointspaceGains, Map<String, PIDGainsReadOnly> jointGainMapToPack,
-                                          YoVariableRegistry registry)
+                                          YoRegistry registry)
    {
       jointGainMapToPack.clear();
       for (GroupParameter<PIDGainsReadOnly> jointGroupParameter : jointspaceGains)
@@ -39,7 +39,7 @@ public class ParameterTools
 
    public static void extractAccelerationIntegrationParameterMap(String prefix, List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> parameterList,
                                                                  Map<String, JointAccelerationIntegrationParametersReadOnly> parameterMapToPack,
-                                                                 YoVariableRegistry registry)
+                                                                 YoRegistry registry)
    {
       parameterMapToPack.clear();
       if (parameterList == null)
@@ -61,7 +61,7 @@ public class ParameterTools
    }
 
    public static void extractJointBehaviorMap(String prefix, List<GroupParameter<JointDesiredBehaviorReadOnly>> parameterList,
-                                              Map<String, JointDesiredBehaviorReadOnly> parameterMapToPack, YoVariableRegistry registry)
+                                              Map<String, JointDesiredBehaviorReadOnly> parameterMapToPack, YoRegistry registry)
    {
       parameterMapToPack.clear();
       if (parameterList == null)
@@ -82,7 +82,7 @@ public class ParameterTools
       }
    }
 
-   public static void extract3DGainMap(String suffix, List<GroupParameter<PID3DConfiguration>> gains, Map<String, PID3DGainsReadOnly> yoGainsToPack, YoVariableRegistry registry)
+   public static void extract3DGainMap(String suffix, List<GroupParameter<PID3DConfiguration>> gains, Map<String, PID3DGainsReadOnly> yoGainsToPack, YoRegistry registry)
    {
       yoGainsToPack.clear();
       for (GroupParameter<PID3DConfiguration> jointGroupGains : gains)
@@ -99,7 +99,7 @@ public class ParameterTools
    }
 
    public static void extractJointWeightMap(String suffix, List<GroupParameter<Double>> jointspaceWeights, Map<String, DoubleProvider> jointWeightMapToPack,
-                                            YoVariableRegistry registry)
+                                            YoRegistry registry)
    {
       jointWeightMapToPack.clear();
       for (GroupParameter<Double> jointGroupParameter : jointspaceWeights)
@@ -124,7 +124,7 @@ public class ParameterTools
    }
 
    public static void extract3DWeightMap(String suffix, List<GroupParameter<Vector3DReadOnly>> weights, Map<String, Vector3DReadOnly> weightsToPack,
-                                         YoVariableRegistry registry)
+                                         YoRegistry registry)
    {
       weightsToPack.clear();
       for (GroupParameter<Vector3DReadOnly> jointGroupWeights : weights)

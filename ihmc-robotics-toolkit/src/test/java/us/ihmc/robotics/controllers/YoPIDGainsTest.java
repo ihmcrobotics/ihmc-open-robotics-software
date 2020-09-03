@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoPIDGainsTest
 {
    @Test
    public void test()
    {
-      YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
+      YoPIDGains pidGains = new YoPIDGains("test", new YoRegistry("PIDGainsRegistry"));
 
       Random random = new Random();
       for (int i = 0; i < 1000; i++)
@@ -57,7 +57,7 @@ public class YoPIDGainsTest
    @Test
    public void testParameters_2()
    {
-      YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
+      YoPIDGains pidGains = new YoPIDGains("test", new YoRegistry("PIDGainsRegistry"));
 
       Random random = new Random();
       for (int i = 0; i < 1000; i++)
@@ -97,7 +97,7 @@ public class YoPIDGainsTest
    @Test
    public void testParameters_3()
    {
-      YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
+      YoPIDGains pidGains = new YoPIDGains("test", new YoRegistry("PIDGainsRegistry"));
 
       Random random = new Random();
       for (int i = 0; i < 1000; i++)
@@ -135,7 +135,7 @@ public class YoPIDGainsTest
    @Test
    public void testClippingLeakRate()
    {
-      YoPIDGains pidGains = new YoPIDGains("test", new YoVariableRegistry("PIDGainsRegistry"));
+      YoPIDGains pidGains = new YoPIDGains("test", new YoRegistry("PIDGainsRegistry"));
 
       Random random = new Random();
       for (int i = 0; i < 1000; i++)

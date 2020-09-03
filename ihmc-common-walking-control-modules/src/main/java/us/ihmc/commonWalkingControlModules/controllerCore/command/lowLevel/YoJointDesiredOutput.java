@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -31,7 +31,7 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    private final YoDouble positionFeedbackMaxError;
    private final YoDouble velocityFeedbackMaxError;
 
-   public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
+   public YoJointDesiredOutput(String namePrefix, YoRegistry registry, String suffixString)
    {
       namePrefix += "LowLevel";
 

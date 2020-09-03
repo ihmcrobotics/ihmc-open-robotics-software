@@ -8,8 +8,8 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -20,7 +20,7 @@ public class YoVariableConnectionBurstTest
       A, B, C, D
    }
    
-   private final YoVariableRegistry registry = new YoVariableRegistry("tester");
+   private final YoRegistry registry = new YoRegistry("tester");
    private final YoLong seq_id = new YoLong("seq_id", registry);
    private final YoLong sleep = new YoLong("sleep", registry);
    private final YoEnum<TestEnum> var3 = new YoEnum<TestEnum>("var3", "", registry, TestEnum.class, true);
@@ -91,15 +91,15 @@ public class YoVariableConnectionBurstTest
       
       //make sure last nCheck seq_ids are consecutive.
       final int nCheck=20;
-      DataBuffer buffer=scsYoVariablesUpdatedListener.getDataBuffer();
-      YoLong seq =  (YoLong)buffer.getVariable("seq_id");
-      buffer.setSafeToChangeIndex(true);
+      YoBuffer buffer=scsYoVariablesUpdatedListener.getDataBuffer();
+      YoLong seq =  (YoLong)buffer.findVariable("seq_id");
+      buffer.setLockIndex(true);
       long lastSeq = seq.getLongValue();
-      int lastIndex = buffer.getIndex();
+      int lastIndex = buffer.getCurrentIndex();
       
       for(int j=0;j<nCheck;j++)
       {
-    	  buffer.setIndex(lastIndex-j);
+    	  buffer.setCurrentIndex(lastIndex-j);
     	  assertEquals(seq.getLongValue() , (lastSeq-j));
       }
       

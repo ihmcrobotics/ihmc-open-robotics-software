@@ -7,12 +7,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.CylindricalCoordinatesCalculator;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
    private final YoPolynomial anglePolynomial;
@@ -33,11 +33,11 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
    private final FrameVector3D acceleration;
 
    public CirclePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-           PositionProvider initialPositionProvider, YoVariableRegistry parentRegistry, DoubleProvider desiredRotationAngleProvider)
+           PositionProvider initialPositionProvider, YoRegistry parentRegistry, DoubleProvider desiredRotationAngleProvider)
    {
       // calculate the initial angle:
 
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       this.currentTime = new YoDouble(namePrefix + "Time", registry);
       this.anglePolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);

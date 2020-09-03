@@ -101,7 +101,14 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
+
    private IHMCRealtimeROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<HandTrajectoryMessage> handTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<ChestTrajectoryMessage> chestTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<SpineTrajectoryMessage> spineTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<HeadTrajectoryMessage> headTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<NeckTrajectoryMessage> neckTrajectoryMessagePublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -230,6 +237,12 @@ public class RemoteUIMessageConverter
       walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);
       walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
       armTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      handTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HandTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      footTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      chestTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ChestTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      spineTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, SpineTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      headTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HeadTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      neckTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, NeckTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
@@ -260,6 +273,14 @@ public class RemoteUIMessageConverter
          armTrajectoryMessagePublisher.publish(armTrajectoryMessage);
 
       });
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ArmTrajectoryMessageTopic, armTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.HandTrajectoryMessageTopic, handTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootTrajectoryMessageTopic, footTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ChestTrajectoryMessageTopic, chestTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SpineTrajectoryMessageTopic, spineTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.HeadTrajectoryMessageTopic, headTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.NeckTrajectoryMessageTopic, neckTrajectoryMessagePublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)

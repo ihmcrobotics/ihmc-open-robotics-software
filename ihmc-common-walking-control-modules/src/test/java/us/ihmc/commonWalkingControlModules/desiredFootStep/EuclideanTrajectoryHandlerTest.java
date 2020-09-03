@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class EuclideanTrajectoryHandlerTest
@@ -17,7 +17,7 @@ public class EuclideanTrajectoryHandlerTest
    @Test
    public void testClearPointsInPast()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble time = new YoDouble("time", registry);
       TestTrajectoryHandler trajectoryHandler = new TestTrajectoryHandler("TestHandler", time, registry);
 
@@ -45,7 +45,7 @@ public class EuclideanTrajectoryHandlerTest
 
    private class TestTrajectoryHandler extends EuclideanTrajectoryHandler
    {
-      public TestTrajectoryHandler(String name, DoubleProvider yoTime, YoVariableRegistry parentRegistry)
+      public TestTrajectoryHandler(String name, DoubleProvider yoTime, YoRegistry parentRegistry)
       {
          super(name, yoTime, parentRegistry);
       }

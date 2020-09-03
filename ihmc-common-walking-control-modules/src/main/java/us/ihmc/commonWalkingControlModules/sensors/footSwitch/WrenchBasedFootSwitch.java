@@ -18,12 +18,12 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff
 public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
@@ -34,7 +34,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final DoubleProvider secondContactThresholdForce;
    private final DoubleProvider footSwitchCoPThresholdFraction;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final ForceSensorDataReadOnly forceSensorData;
 
@@ -87,9 +87,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    public WrenchBasedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
                                 DoubleProvider contactThresholdForce, DoubleProvider secondContactThresholdForce, DoubleProvider footSwitchCoPThresholdFraction,
-                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       this.contactThresholdForce = contactThresholdForce;
       this.secondContactThresholdForce = secondContactThresholdForce;

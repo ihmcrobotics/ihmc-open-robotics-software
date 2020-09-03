@@ -1,5 +1,8 @@
 package us.ihmc.atlas.sensors;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,9 +43,9 @@ public class AtlasSLAMModule extends SLAMModule
    protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
-   public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel)
+   public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel, File configurationFile)
    {
-      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera);
+      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera, configurationFile);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
@@ -161,9 +164,9 @@ public class AtlasSLAMModule extends SLAMModule
          posePacket.getPose().set(estimatedPelvisPose);
          reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
 
-         LogTools.info("latestFrame.getConfidenceFactor: " + latestFrame.getConfidenceFactor() +
+         LogTools.debug("latestFrame.getConfidenceFactor: " + latestFrame.getConfidenceFactor() +
                        " posePacket.getConfidenceFactor: " + posePacket.getConfidenceFactor());
-         LogTools.info("publishing pose to state estimator: " + posePacket.getPose());
+         LogTools.debug("publishing pose to state estimator: " + posePacket.getPose());
          estimatedPelvisPublisher.publish(posePacket);
       }
    }
@@ -176,6 +179,8 @@ public class AtlasSLAMModule extends SLAMModule
       reasonableVelocityFlagQueue.clear();
    }
 
+   private final DecimalFormat df = new DecimalFormat("#.####");
+
    private void handleRobotConfigurationData(Subscriber<RobotConfigurationData> subscriber)
    {
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
@@ -183,23 +188,10 @@ public class AtlasSLAMModule extends SLAMModule
 
       if (reaMessager.isMessagerOpen())
       {
-         if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < PELVIS_VELOCITY_STATIONARY_THRESHOLD)
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, true);
-         }
-         else
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, false);
-         }
-
-         if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < TOLERANCE_PELVIS_VELOCITY)
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, true);
-         }
-         else
-         {
-            reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, false);
-         }
+         double pelvisVelocity = robotConfigurationData.getPelvisLinearVelocity().lengthSquared();
+         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, pelvisVelocity < slamParameters.get().getStationaryVelocity());
+         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, pelvisVelocity < slamParameters.get().getMaxVelocity());
+         reaMessager.submitMessage(SLAMModuleAPI.SensorSpeed, "" + df.format(Math.sqrt(pelvisVelocity)));
       }
    }
 
@@ -229,8 +221,8 @@ public class AtlasSLAMModule extends SLAMModule
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(ROS2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager)
+   public static AtlasSLAMModule createIntraprocessModule(ROS2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager, Path configurationFilePath)
    {
-      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel);
+      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel, configurationFilePath.toFile());
    }
 }

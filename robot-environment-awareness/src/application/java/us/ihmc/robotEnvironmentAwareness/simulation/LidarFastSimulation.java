@@ -22,7 +22,7 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.util.RealtimeTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -84,20 +84,20 @@ public class LidarFastSimulation
       environmentsGraphics.put(GroundType.BLOCKS2, createBlocks2());
       environmentsGraphics.put(GroundType.L_SHAPE, createLShapedGround());
 
-      VariableChangedListener listener = new VariableChangedListener()
+      YoVariableChangedListener listener = new YoVariableChangedListener()
       {
          private Graphics3DNode groundGraphicsNode = null;
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (groundGraphicsNode != null)
                scs.removeGraphics3dNode(groundGraphicsNode);
             groundGraphicsNode = scs.addStaticLinkGraphics(environmentsGraphics.get(groundType.getEnumValue()));
          }
       };
-      groundType.addVariableChangedListener(listener);
-      listener.notifyOfVariableChange(null);
+      groundType.addListener(listener);
+      listener.changed(null);
    }
 
    private Graphics3DObject createLShapedGround()

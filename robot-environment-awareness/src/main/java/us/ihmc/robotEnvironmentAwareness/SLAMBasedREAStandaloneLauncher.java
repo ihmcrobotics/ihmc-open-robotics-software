@@ -11,10 +11,14 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
+import us.ihmc.tools.io.WorkspacePathTools;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMModuleConfiguration.txt";
+   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSLAMSegmentationModuleConfiguration.txt";
 
    private Messager slamMessager;
    private SLAMModule slamModule;
@@ -34,9 +38,12 @@ public class SLAMBasedREAStandaloneLauncher extends Application
       segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
       segmentationMessager.startMessager();
 
+      Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software/atlas");
+      segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+
       Stage secondStage = new Stage();
       planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
-      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, segmentationMessager);
+      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath, segmentationMessager);
 
       slamModule.attachOcTreeConsumer(segmentationModule);
 

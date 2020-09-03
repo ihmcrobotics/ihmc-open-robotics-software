@@ -46,7 +46,7 @@ import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -61,7 +61,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
    private static final boolean ALLOW_MODEL_CORRUPTION = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
+   private final YoRegistry registry = new YoRegistry("DRCControllerThread");
 
    private final YoDouble controllerTime = new YoDouble("ControllerTime", registry);
    private final YoLong timestampOffset = new YoLong("TimestampOffsetController", registry);
@@ -121,7 +121,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
 
       firstTick.set(true);
-      registry.addChild(robotController.getYoVariableRegistry());
+      registry.addChild(robotController.getYoRegistry());
       if (outputProcessor != null)
       {
          outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
@@ -181,7 +181,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
+                                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
@@ -292,7 +292,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

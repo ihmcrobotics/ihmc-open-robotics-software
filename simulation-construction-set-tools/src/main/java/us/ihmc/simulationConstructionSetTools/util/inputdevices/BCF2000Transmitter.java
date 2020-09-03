@@ -30,7 +30,7 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
          if (senderPool[80 + midiControl.mapping] == null)
          {
             senderPool[80 + midiControl.mapping] = new MessageSender();
-            new Thread(senderPool[80 + midiControl.mapping]).start();
+            new Thread(senderPool[80 + midiControl.mapping], "BCF2000Transmitter").start();
          }
 
          return senderPool[80 + midiControl.mapping];

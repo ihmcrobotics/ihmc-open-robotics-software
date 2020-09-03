@@ -6,14 +6,14 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.listener.RewoundListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.simulationconstructionset.RewoundListener;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FullRobotModelRootJointRewinder implements RewoundListener
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FullRobotModel fullRobotModel;
    
    private final YoFrameVector3D yoRootJointTranslation = new YoFrameVector3D("yoRootJointTranslation", ReferenceFrame.getWorldFrame(), registry);
@@ -21,7 +21,7 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    private final YoFrameQuaternion yoRootJointRotation = new YoFrameQuaternion("rootJointRotation", ReferenceFrame.getWorldFrame(), registry);
    private final Quaternion rootJointRotation = new Quaternion();
 
-   public FullRobotModelRootJointRewinder(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public FullRobotModelRootJointRewinder(FullRobotModel fullRobotModel, YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       parentRegistry.addChild(registry);

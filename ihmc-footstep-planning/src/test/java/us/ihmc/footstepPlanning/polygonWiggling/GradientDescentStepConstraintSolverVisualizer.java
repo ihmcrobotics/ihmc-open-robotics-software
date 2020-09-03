@@ -1,12 +1,14 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
+import java.util.List;
+import java.util.Random;
+
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import javafx.scene.paint.Color;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,8 +17,9 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappin
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.*;
+import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -29,10 +32,7 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.List;
-import java.util.Random;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class GradientDescentStepConstraintSolverVisualizer
 {
@@ -52,7 +52,7 @@ public class GradientDescentStepConstraintSolverVisualizer
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("testRobot"));
       scs.setGroundVisible(false);
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
 

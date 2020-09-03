@@ -103,4 +103,19 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(LookAndStepBehaviorParameters.minimumSwingFootClearanceOverride);
    }
+
+   default double getNeckPitchForBodyPath()
+   {
+      return get(LookAndStepBehaviorParameters.neckPitchForBodyPath);
+   }
+
+   default double getNeckPitchTolerance()
+   {
+      return get(LookAndStepBehaviorParameters.neckPitchTolerance);
+   }
+
+   default double getResetDuration()
+   {
+      return get(LookAndStepBehaviorParameters.resetDuration);
+   }
 }

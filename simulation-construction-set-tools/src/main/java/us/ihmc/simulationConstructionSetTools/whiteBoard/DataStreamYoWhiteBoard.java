@@ -7,12 +7,12 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.yoVariables.registry.NameSpace;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.yoVariables.registry.YoNamespace;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoFactories;
+import us.ihmc.yoVariables.variable.*;
 
 
 public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
@@ -30,7 +30,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
 
    private final boolean writeOutConnect, readInConnect;
    private final boolean createYoVariablesOnConnect;
-   private final YoVariableRegistry rootRegistryToAddVariablesTo;
+   private final YoRegistry rootRegistryToAddVariablesTo;
 
    protected abstract void allowThrowOutStalePacketsIfYouWish();
 
@@ -39,7 +39,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       this(name, writeOutConnect, readInConnect, false, null);
    }
 
-   public DataStreamYoWhiteBoard(String name, boolean writeOutConnect, boolean readInConnect, boolean createYoVariablesOnConnect, YoVariableRegistry rootRegistryToAddVariablesTo)
+   public DataStreamYoWhiteBoard(String name, boolean writeOutConnect, boolean readInConnect, boolean createYoVariablesOnConnect, YoRegistry rootRegistryToAddVariablesTo)
    {
       super(name, rootRegistryToAddVariablesTo);
       
@@ -101,12 +101,12 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
             ThreadTools.sleep(100);
          }
          
-         ArrayList<YoVariable<?>> allVariablesToWrite = new ArrayList<YoVariable<?>>();
+         ArrayList<YoVariable> allVariablesToWrite = new ArrayList<YoVariable>();
          this.getAllVariablesToWrite(allVariablesToWrite);
 
          writeVariableNamesToBeVerified(allVariablesToWrite);
 
-         ArrayList<YoVariable<?>> allVariablesToRead = new ArrayList<YoVariable<?>>();
+         ArrayList<YoVariable> allVariablesToRead = new ArrayList<YoVariable>();
          this.getAllVariablesToRead(allVariablesToRead);
 
          writeVariableNamesToBeVerified(allVariablesToRead);
@@ -146,15 +146,15 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
       }
    }
 
-   private void writeVariableNamesToBeVerified(ArrayList<YoVariable<?>> variables) throws IOException
+   private void writeVariableNamesToBeVerified(ArrayList<YoVariable> variables) throws IOException
    {
       dataOutputStream.writeInt(variables.size());
       dataOutputStream.flush();
 
-      for (YoVariable<?> yoVariable : variables)
+      for (YoVariable yoVariable : variables)
       {
-         dataOutputStream.writeUTF(yoVariable.getFullNameWithNameSpace());
-         dataOutputStream.writeInt(yoVariable.getYoVariableType().ordinal());
+         dataOutputStream.writeUTF(yoVariable.getFullNameString());
+         dataOutputStream.writeInt(yoVariable.getType().ordinal());
          dataOutputStream.flush();
          
          try
@@ -204,21 +204,21 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
 
             if (createYoVariablesOnConnect)
             {
-               ArrayList<YoVariable<?>> variablesToRead = this.readAndCreateVariables(rootRegistryToAddVariablesTo);
+               ArrayList<YoVariable> variablesToRead = this.readAndCreateVariables(rootRegistryToAddVariablesTo);
                this.setVariablesToRead(variablesToRead);
 
-               ArrayList<YoVariable<?>> variablesToWrite = this.readAndCreateVariables(rootRegistryToAddVariablesTo);               
+               ArrayList<YoVariable> variablesToWrite = this.readAndCreateVariables(rootRegistryToAddVariablesTo);               
                this.setVariablesToWrite(variablesToWrite);
             }
             
             else
             {
-               ArrayList<YoVariable<?>> allVariablesToRead = new ArrayList<YoVariable<?>>();
+               ArrayList<YoVariable> allVariablesToRead = new ArrayList<YoVariable>();
                this.getAllVariablesToRead(allVariablesToRead);
 
                readAndVerifyVariableNames(allVariablesToRead);
 
-               ArrayList<YoVariable<?>> allVariablesToWrite = new ArrayList<YoVariable<?>>();
+               ArrayList<YoVariable> allVariablesToWrite = new ArrayList<YoVariable>();
                this.getAllVariablesToWrite(allVariablesToWrite);
 
                readAndVerifyVariableNames(allVariablesToWrite);
@@ -307,7 +307,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
    }
 
 
-   private void readAndVerifyVariableNames(ArrayList<YoVariable<?>> variables) throws IOException
+   private void readAndVerifyVariableNames(ArrayList<YoVariable> variables) throws IOException
    {
       int numberOfVariablesFromStream = dataInputStream.readInt();
       int numberOfVariables = variables.size();
@@ -321,44 +321,44 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
          int yoVariableTypeOrdinal = dataInputStream.readInt();
          YoVariableType yoVariableType = YoVariableType.values()[yoVariableTypeOrdinal];
          
-         YoVariable<?> yoVariable = variables.get(i);
-         if (yoVariable.getYoVariableType() != yoVariableType)
+         YoVariable yoVariable = variables.get(i);
+         if (yoVariable.getType() != yoVariableType)
          {
-            throw new RuntimeException("yoVariable.getYoVariableType() = " + yoVariable.getYoVariableType() + " != yoVariableType = " + yoVariableType);
+            throw new RuntimeException("yoVariable.getYoVariableType() = " + yoVariable.getType() + " != yoVariableType = " + yoVariableType);
          }
-         verifyNamesAreConsistent(yoVariable.getFullNameWithNameSpace(), fullName);
+         verifyNamesAreConsistent(yoVariable.getFullNameString(), fullName);
       }
    }
    
    
-   private ArrayList<YoVariable<?>> readAndCreateVariables(YoVariableRegistry rootRegistry) throws IOException
+   private ArrayList<YoVariable> readAndCreateVariables(YoRegistry rootRegistry) throws IOException
    {
-      ArrayList<YoVariable<?>> ret = new ArrayList<YoVariable<?>>();
+      ArrayList<YoVariable> ret = new ArrayList<YoVariable>();
       
       int numberOfVariablesFromStream = dataInputStream.readInt();
 
       for (int i = 0; i < numberOfVariablesFromStream; i++)
       {
-         String fullName = dataInputStream.readUTF();
+         YoNamespace fullName = new YoNamespace(dataInputStream.readUTF());
          int yoVariableTypeOrdinal = dataInputStream.readInt();
          YoVariableType yoVariableType = YoVariableType.values()[yoVariableTypeOrdinal];
+
+         String variableName = fullName.getShortName();
+         YoNamespace fullNamespace = fullName.getParent();
+         YoRegistry registry = YoFactories.findOrCreateRegistry(rootRegistry, fullNamespace);
          
-         String variableName = NameSpace.stripOffNameSpaceToGetVariableName(fullName);
-         NameSpace fullNameSpace = NameSpace.createNameSpaceFromAFullVariableName(fullName);
-         YoVariableRegistry registry = rootRegistry.getOrCreateAndAddRegistry(fullNameSpace);
-         
-         YoVariable<?> yoVariable = createNewYoVariable(variableName, yoVariableType, registry);
+         YoVariable yoVariable = createNewYoVariable(variableName, yoVariableType, registry);
          ret.add(yoVariable);
          
-         verifyNamesAreConsistent(yoVariable.getFullNameWithNameSpace(), fullName);
+         verifyNamesAreConsistent(yoVariable.getFullNameString(), fullName.getName());
       }
       
       return ret;
    }
 
-   private YoVariable<?> createNewYoVariable(String variableName, YoVariableType yoVariableType, YoVariableRegistry registry)
+   private YoVariable createNewYoVariable(String variableName, YoVariableType yoVariableType, YoRegistry registry)
    {
-      YoVariable<?> yoVariable;
+      YoVariable yoVariable;
       
       switch(yoVariableType)
       {

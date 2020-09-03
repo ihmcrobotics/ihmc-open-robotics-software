@@ -1,5 +1,10 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.JButton;
+
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
@@ -28,12 +33,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import javax.swing.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
 {
@@ -80,7 +81,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
    }
 
    @Override
-   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
+   public void starting(SimulationConstructionSet scs, Robot robot, YoRegistry registry)
    {
       // ----- Toolbox Output Display ----- //
       //      Joint scsEndEffector = robot.getRootJoints().get(0);

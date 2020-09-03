@@ -17,9 +17,9 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -69,7 +69,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventState>
 {
    private String namePrefix;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    private final Map<K, S> states;
    private final Map<K, StateTransition<K>> stateTransitions;
@@ -85,7 +85,7 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
     * Creates a new factory ready to be used for configuring and creating a new {@link StateMachine}.
     * <p>
     * Once the factory created, do not forget to setup the name, registry, and clock, via
-    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoVariableRegistry)}, and
+    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoRegistry)}, and
     * {@link #buildYoClock(DoubleProvider)} respectively.
     * </p>
     * 
@@ -120,7 +120,7 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
     * @param registry the registry to add the {@code YoVariable}s.
     * @return this factory for chaining operations.
     */
-   public EventBasedStateMachineFactory<K, S> setRegistry(YoVariableRegistry registry)
+   public EventBasedStateMachineFactory<K, S> setRegistry(YoRegistry registry)
    {
       this.registry = registry;
       return this;
@@ -152,7 +152,7 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
     * @param timeProvider the variable used to obtain the time information.
     * @return this factory for chaining operations.
     * @throws RuntimeException if the registry has not been set. The registry can be added via
-    *            {@link #setRegistry(YoVariableRegistry)}.
+    *            {@link #setRegistry(YoRegistry)}.
     */
    public EventBasedStateMachineFactory<K, S> buildYoClock(DoubleProvider timeProvider)
    {
@@ -272,7 +272,7 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
     * Instantiate the state machine.
     * <p>
     * Before calling this method, make sure you have provided: a name, registry, and clock via
-    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoVariableRegistry)}, and
+    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoRegistry)}, and
     * {@link #buildYoClock(DoubleProvider)} respectively.
     * </p>
     * 
@@ -352,10 +352,10 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
    {
       EventTrigger eventTrigger = buildEventTrigger();
 
-      yoTrigger.addVariableChangedListener(new VariableChangedListener()
+      yoTrigger.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             E newEvent = yoTrigger.getEnumValue();
             if (newEvent != null)

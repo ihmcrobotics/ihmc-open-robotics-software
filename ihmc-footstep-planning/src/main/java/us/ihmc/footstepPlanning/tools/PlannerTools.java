@@ -29,9 +29,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +99,7 @@ public class PlannerTools
                                      });
    }
 
-   public static void addGoalViz(FramePose3D goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public static void addGoalViz(FramePose3D goalPose, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       YoFramePoint3D yoGoal = new YoFramePoint3D("GoalPosition", worldFrame, registry);
       yoGoal.set(goalPose.getPosition());

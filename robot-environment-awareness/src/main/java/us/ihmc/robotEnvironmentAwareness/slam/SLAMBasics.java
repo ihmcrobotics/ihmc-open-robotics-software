@@ -13,12 +13,15 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxWithCenterAndYaw;
+import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,6 +39,8 @@ public class SLAMBasics implements SLAMInterface
 
    private final NormalEstimationParameters frameNormalEstimationParameters = new NormalEstimationParameters();
 
+   private boolean computeInParallel = false;
+
    public SLAMBasics(double octreeResolution)
    {
       this(octreeResolution, new RigidBodyTransform());
@@ -51,7 +56,7 @@ public class SLAMBasics implements SLAMInterface
 
    protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
    {
-      Point3DReadOnly[] pointCloud = frame.getCorrectedPointCloudInWorld();
+      List<? extends Point3DReadOnly> pointCloud = frame.getCorrectedPointCloudInWorld();
       RigidBodyTransformReadOnly sensorPose = frame.getCorrectedSensorPoseInWorld();
 
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
@@ -63,14 +68,24 @@ public class SLAMBasics implements SLAMInterface
 
    public void updateSurfaceNormals()
    {
-      // TODO update the node normals only within the bounding box.
       mapOcTree.updateNormals();
+   }
+
+   public void updateSurfaceNormalsInBoundingBox(NormalEstimationParameters normalEstimationParameters)
+   {
+      List<NormalOcTreeNode> leafNodesToUpdate = OcTreeIteratorFactory.createLeafBoundingBoxIteratable(mapOcTree.getRoot(), mapOcTree.getBoundingBox()).toList();
+      mapOcTree.updateNodesNormals(leafNodesToUpdate, normalEstimationParameters);
+   }
+
+   public void setComputeInParallel(boolean computeInParallel)
+   {
+      this.computeInParallel = computeInParallel;
    }
 
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters);
+      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters, computeInParallel);
       setLatestFrame(frame);
       insertNewPointCloud(frame, insertMiss);
 
@@ -80,7 +95,7 @@ public class SLAMBasics implements SLAMInterface
    @Override
    public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters, computeInParallel);
 
       long startTime = System.nanoTime();
       RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);

@@ -22,7 +22,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -40,7 +40,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class CenterOfMassHeightManager
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
    private final YoEnum<PelvisHeightControlMode> requestedState;
 
@@ -58,7 +58,7 @@ public class CenterOfMassHeightManager
 
    public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                     WalkingControllerParameters walkingControllerParameters,
-                                    YoVariableRegistry parentRegistry)
+                                    YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       useStateMachine = !walkingControllerParameters.usePelvisHeightControllerOnly();

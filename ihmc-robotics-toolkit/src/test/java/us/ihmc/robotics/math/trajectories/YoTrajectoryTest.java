@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoTrajectoryTest
 {
-   YoVariableRegistry registry = new YoVariableRegistry("TrajectoryTestRegistry");
+   YoRegistry registry = new YoRegistry("TrajectoryTestRegistry");
 
    @BeforeEach
    public void setup()

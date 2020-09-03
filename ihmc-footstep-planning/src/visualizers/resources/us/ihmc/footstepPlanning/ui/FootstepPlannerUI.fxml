@@ -1,75 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
 
     <top>
         <fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml" />
     </top>
-
-    <right>
-        <fx:include fx:id="footstepPlannerStatusBar" source="FootstepPlannerStatusBar.fxml"/>
-    </right>
-
-    <left>
-        <fx:include fx:id="footstepPlannerTestDashboard" source="FootstepPlannerTestDashboard.fxml"/>
-    </left>
-
-    <bottom>
-        <TabPane prefHeight="320" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-            <tabs>
-                <Tab text="Main">
-                    <content>
-                        <fx:include fx:id="mainTab" source="MainTab.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Visibility Graph Parameters">
-                    <content>
-                        <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Footstep Parameters">
-                    <content>
-                        <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml"/>
-                    </content>
-                </Tab>
-
-                <Tab text="Swing Parameters">
-                    <content>
-                        <fx:include fx:id="swingPlannerParametersUI" source="SwingPlannerParametersUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="ICP Split Fraction Parameters">
-                    <content>
-                        <fx:include fx:id="splitFractionParametersUI" source="SplitFractionParametersUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Log Table">
-                    <content>
-                        <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml"/>
-                    </content>
-                </Tab>
-
-                <Tab text="Visualization Control">
-                    <content>
-                        <fx:include fx:id="visibilityGraphsUI" source="VisualizationDashboard.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Robot Operation">
-                    <content>
-                        <fx:include fx:id="uiRobot" source="UIRobot.fxml" />
-                    </content>
-                </Tab>
-
-            </tabs>
-        </TabPane>
-    </bottom>
+   <center>
+      <SplitPane dividerPositions="0.6" orientation="VERTICAL" BorderPane.alignment="CENTER">
+         <items>
+            <BorderPane>
+               <right>
+                    <fx:include fx:id="footstepPlannerStatusBar" source="FootstepPlannerStatusBar.fxml" />
+               </right>
+               <left>
+                    <fx:include fx:id="footstepPlannerTestDashboard" source="FootstepPlannerTestDashboard.fxml" />
+               </left>
+            </BorderPane>
+              <TabPane tabClosingPolicy="UNAVAILABLE">
+                  <tabs>
+                      <Tab text="Main">
+                          <content>
+                              <fx:include fx:id="mainTab" source="MainTab.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Visibility Graph Parameters">
+                          <content>
+                              <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Footstep Parameters">
+                          <content>
+                              <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Swing Parameters">
+                          <content>
+                              <fx:include fx:id="swingPlannerParametersUI" source="SwingPlannerParametersUI.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="ICP Split Fraction Parameters">
+                          <content>
+                              <fx:include fx:id="splitFractionParametersUI" source="SplitFractionParametersUI.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Log Table">
+                          <content>
+                              <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Visualization Control">
+                          <content>
+                              <fx:include fx:id="visibilityGraphsUI" source="VisualizationDashboard.fxml" />
+                          </content>
+                      </Tab>
+      
+                      <Tab text="Robot Operation">
+                          <content>
+                              <fx:include fx:id="robotOperationTab" source="RobotOperationTab.fxml" />
+                          </content>
+                      </Tab>
+      
+                  </tabs>
+              </TabPane>
+         </items>
+      </SplitPane>
+   </center>
 </BorderPane>

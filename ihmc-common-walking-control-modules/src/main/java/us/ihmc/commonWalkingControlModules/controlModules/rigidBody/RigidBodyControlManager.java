@@ -30,7 +30,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -40,7 +40,7 @@ public class RigidBodyControlManager
    public static final double INITIAL_GO_HOME_TIME = 2.0;
 
    private final String bodyName;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final StateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
    private final EnumParameter<RigidBodyControlMode> defaultControlMode;
@@ -64,11 +64,11 @@ public class RigidBodyControlManager
                                   TObjectDoubleHashMap<String> homeConfiguration, Pose3D homePose, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
                                   Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains, ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode,
-                                  YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
-      registry = new YoVariableRegistry(namePrefix);
+      registry = new YoRegistry(namePrefix);
 
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
@@ -178,7 +178,7 @@ public class RigidBodyControlManager
       String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
       this.defaultControlMode = new EnumParameter<>(namePrefix
             + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
-      this.defaultControlMode.addParameterChangedListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
+      this.defaultControlMode.addListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
       parentRegistry.addChild(registry);

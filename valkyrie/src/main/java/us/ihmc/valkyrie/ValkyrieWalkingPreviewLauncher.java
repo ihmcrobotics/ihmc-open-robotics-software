@@ -23,7 +23,7 @@ public class ValkyrieWalkingPreviewLauncher
       Robot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(robot, toolboxController.getFullRobotModel());
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.addYoVariableRegistry(toolboxModule.getRegistry());
+      scs.addYoRegistry(toolboxModule.getRegistry());
       scs.addYoGraphicsListRegistry(toolboxModule.getYoGraphicsListRegistry(), true);
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.setShowOnStart(true);

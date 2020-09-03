@@ -1,21 +1,20 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class SimpleWalkingState implements State
 {
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    private final SimpleWalkingStateEnum walkingStateEnum;
    private SimpleWalkingStateEnum previousWalkingStateEnum = null;
 
-   public SimpleWalkingState(SimpleWalkingStateEnum stateEnum, YoVariableRegistry parentRegistry)
+   public SimpleWalkingState(SimpleWalkingStateEnum stateEnum, YoRegistry parentRegistry)
    {
       this.walkingStateEnum = stateEnum;
-      registry = new YoVariableRegistry(FormattingTools.underscoredToCamelCase(stateEnum.toString(), true));
+      registry = new YoRegistry(FormattingTools.underscoredToCamelCase(stateEnum.toString(), true));
       parentRegistry.addChild(registry);
    }
 
@@ -64,7 +63,7 @@ public abstract class SimpleWalkingState implements State
       return previousWalkingStateEnum;
    }
 
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

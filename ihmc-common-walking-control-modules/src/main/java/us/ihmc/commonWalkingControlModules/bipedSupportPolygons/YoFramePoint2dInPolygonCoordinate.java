@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -21,7 +21,7 @@ public class YoFramePoint2dInPolygonCoordinate
    private FramePoint2D framePoint2d;
    private Point2dInConvexPolygon2d point2dInConvexPolygon2d; //this will be using
 
-   public YoFramePoint2dInPolygonCoordinate(String namePrefix, YoVariableRegistry registry)
+   public YoFramePoint2dInPolygonCoordinate(String namePrefix, YoRegistry registry)
    {
       eccentricity = new YoDouble(namePrefix + "Eccentricity", registry);
       angle = new YoDouble(namePrefix + "Angle", registry);

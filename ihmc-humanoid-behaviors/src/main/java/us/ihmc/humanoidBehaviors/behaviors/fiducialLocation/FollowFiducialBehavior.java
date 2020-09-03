@@ -338,7 +338,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       private final FramePose3D touchdownPose = new FramePose3D();
       private final FramePose3D leftFootStartPose = new FramePose3D();
       private final FramePose3D rightFootStartPose = new FramePose3D();
-      private final YoEnum<RobotSide> swingSide = YoEnum.create("swingSide", RobotSide.class, registry);
+      private final YoEnum<RobotSide> swingSide = new YoEnum<>("swingSide", registry, RobotSide.class);
 
       PlanFromSingleSupportState()
       {

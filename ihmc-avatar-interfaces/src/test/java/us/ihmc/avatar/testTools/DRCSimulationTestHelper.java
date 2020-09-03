@@ -1,6 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -69,8 +71,8 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -205,7 +207,7 @@ public class DRCSimulationTestHelper
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
          simulationStarter.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
          simulationStarter.attachControllerFailureListener(direction -> notifyControllerHasFailed());
-         if (scs.getVariable("desiredICPX") != null && scs.getVariable("desiredICPY") != null)
+         if (scs.findVariable("desiredICPX") != null && scs.findVariable("desiredICPY") != null)
             blockingSimulationRunner.createValidDesiredICPListener();
          blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }
@@ -223,14 +225,14 @@ public class DRCSimulationTestHelper
          setupPlanContinuityTesters();
    }
 
-   public YoVariable<?> getYoVariable(String name)
+   public YoVariable getYoVariable(String name)
    {
-      return scs.getVariable(name);
+      return scs.findVariable(name);
    }
 
-   public YoVariable<?> getYoVariable(String nameSpace, String name)
+   public YoVariable getYoVariable(String namespace, String name)
    {
-      return scs.getVariable(nameSpace, name);
+      return scs.findVariable(namespace, name);
    }
 
    public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
@@ -446,12 +448,12 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public void addChildRegistry(YoVariableRegistry childRegistry)
+   public void addChildRegistry(YoRegistry childRegistry)
    {
       scs.getRootRegistry().addChild(childRegistry);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return scs.getRootRegistry();
    }
@@ -734,10 +736,10 @@ public class DRCSimulationTestHelper
       final MutableInt xTicks = new MutableInt(0);
       final MutableInt yTicks = new MutableInt(0);
 
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      desiredICPX.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (scs == null || !scs.isSimulating())
                return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
@@ -754,10 +756,10 @@ public class DRCSimulationTestHelper
          }
       });
 
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      desiredICPY.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (scs == null || !scs.isSimulating())
                return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.

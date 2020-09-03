@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.awt.*;
@@ -22,7 +22,7 @@ public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
                                          MovingReferenceFrame soleFrame,
                                          FootholdRotationParameters rotationParameters,
                                          double dt,
-                                         YoVariableRegistry registry,
+                                         YoRegistry registry,
                                          YoGraphicsListRegistry graphicsRegistry)
    {
       copHistoryEdgeCalculator = new CoPHistoryRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, Color.BLUE, graphicsRegistry);
@@ -72,10 +72,8 @@ public class CombinedRotationEdgeCalculator implements RotationEdgeCalculator
    {
       if (copHistoryEdgeCalculator.isRotationEdgeTrusted())
          return copHistoryEdgeCalculator.getLineOfRotation();
-      if (copAndVelocityEdgeCalculator.isRotationEdgeTrusted())
-         return copAndVelocityEdgeCalculator.getLineOfRotation();
-      else
-         return null;
+
+      return copAndVelocityEdgeCalculator.getLineOfRotation();
    }
 
    @Override

@@ -5,14 +5,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ForceBasedTouchDownDetection implements TouchdownDetector
 {
    private final String name = "ForceTchdwnDetect";
-   private final YoVariableRegistry registry ;
+   private final YoRegistry registry ;
 
    private final YoBoolean isInContact;
    private final YoBoolean isDefinitelyInContact;
@@ -28,14 +28,14 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
 
    public ForceBasedTouchDownDetection(String suffix, WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant,
                                        boolean dontDetectTouchdownIfAtJointLimit, DoubleProvider zForceThreshold, DoubleProvider zForceForSureThreshold,
-                                       YoVariableRegistry parentRegistry)
+                                       YoRegistry parentRegistry)
    {
       this.wrenchCalculator = wrenchCalculator;
       this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
       this.zForceThreshold = zForceThreshold;
       this.zForceForSureThreshold = zForceForSureThreshold;
       String prefix = robotQuadrant.getShortName() + name;
-      registry = new YoVariableRegistry(prefix);
+      registry = new YoRegistry(prefix);
 
       isInContact = new YoBoolean(prefix + "IsInContact" + suffix, registry);
       isDefinitelyInContact = new YoBoolean(prefix + "IsDefinitelyInContact" + suffix, registry);

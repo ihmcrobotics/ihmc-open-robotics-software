@@ -54,7 +54,7 @@ public class HandDrillManipulationEnvironment implements CommonAvatarEnvironment
          drillRobot.getRootJoints().get(0).addGroundContactPoint(groundContactPoint);
       }
 
-      GroundContactModel groundContactModel = new LinearGroundContactModel(drillRobot, groundContactGroupIdentifier,1422.0, 150.6, 50.0, 600.0, drillRobot.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(drillRobot, groundContactGroupIdentifier,1422.0, 150.6, 50.0, 600.0, drillRobot.getRobotsYoRegistry());
       groundContactModel.setGroundProfile3D(combinedTerrainObject);
       drillRobot.setGroundContactModel(groundContactModel);
       

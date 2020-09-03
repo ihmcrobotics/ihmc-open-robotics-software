@@ -21,18 +21,17 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SimpleGraphIndicesHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.log.LogTools;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JavaFXHeatmapVisualizer
 {
    private JavaFXHeatmapGraph heatmapGraph;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private SelectedVariableHolder selectedVariableHolder;
    private GraphIndicesHolder graphIndicesHolder;
-   private DataBuffer dataBuffer;
+   private YoBuffer dataBuffer;
    private YoDouble x;
    private YoDouble y;
 
@@ -40,20 +39,16 @@ public class JavaFXHeatmapVisualizer
    {
       int dataBufferSize = 20000;
 
-      registry = new YoVariableRegistry("root");
+      registry = new YoRegistry("root");
 
       YoDouble yoTime = new YoDouble("t", registry);
       x = new YoDouble("qd_LEFT_KNEE_PITCH", registry);
       y = new YoDouble("tau_LEFT_KNEE_PITCH", registry);
 
-      DataBufferEntry tDataBufferEntry = new DataBufferEntry(yoTime, dataBufferSize);
-      DataBufferEntry xDataBufferEntry = new DataBufferEntry(x, dataBufferSize);
-      DataBufferEntry yDataBufferEntry = new DataBufferEntry(y, dataBufferSize);
-
-      dataBuffer = new DataBuffer(dataBufferSize);
-      dataBuffer.addEntry(tDataBufferEntry);
-      dataBuffer.addEntry(xDataBufferEntry);
-      dataBuffer.addEntry(yDataBufferEntry);
+      dataBuffer = new YoBuffer(dataBufferSize);
+      dataBuffer.addVariable(yoTime);
+      dataBuffer.addVariable(x);
+      dataBuffer.addVariable(y);
 
       selectedVariableHolder = new SelectedVariableHolder();
       graphIndicesHolder = new SimpleGraphIndicesHolder(dataBufferSize);
@@ -76,7 +71,7 @@ public class JavaFXHeatmapVisualizer
             x.set(3 * Math.cos(t));
             y.set(3 * Math.sin(t));
 
-            dataBuffer.tickAndUpdate();
+            dataBuffer.tickAndWriteIntoBuffer();
             graphIndicesHolder.tickLater(1);
 
             heatmapGraph.update();

@@ -12,6 +12,7 @@ public class DriftCorrectionResult
 
    private int icpIterations;
    private int numberOfSurfels;
+   private int numberOfCorrespondances;
 
    private double initialDistance;
    private double finalDistance;
@@ -20,22 +21,30 @@ public class DriftCorrectionResult
    {
       success = other.success;
       driftCorrectionTransformer.set(other.driftCorrectionTransformer);
+
       computationTime = other.computationTime;
+
       icpIterations = other.icpIterations;
       numberOfSurfels = other.numberOfSurfels;
+      numberOfCorrespondances = other.numberOfCorrespondances;
+
       initialDistance = other.initialDistance;
       finalDistance = other.finalDistance;
    }
    
    public void setDefault()
    {
-      setComputationTime(0.0);
-      setDriftCorrectionTransformer(new RigidBodyTransform());
-      setFinalDistance(0.0);
-      setIcpIterations(0);
-      setInitialDistance(0.0);
-      setNumberOfSurfels(0);
       setSuccess(true);
+      setDriftCorrectionTransformer(new RigidBodyTransform());
+
+      setComputationTime(0.0);
+
+      setIcpIterations(0);
+      setNumberOfSurfels(0);
+      setNumberOfCorrespondances(0);
+
+      setInitialDistance(0.0);
+      setFinalDistance(0.0);
    }
 
    public boolean isSuccess()
@@ -86,6 +95,16 @@ public class DriftCorrectionResult
    public void setNumberOfSurfels(int numberOfSurfels)
    {
       this.numberOfSurfels = numberOfSurfels;
+   }
+
+   public int getNumberOfCorrespondances()
+   {
+      return numberOfCorrespondances;
+   }
+
+   public void setNumberOfCorrespondances(int numberOfCorrespondances)
+   {
+      this.numberOfCorrespondances = numberOfCorrespondances;
    }
 
    public double getInitialDistance()

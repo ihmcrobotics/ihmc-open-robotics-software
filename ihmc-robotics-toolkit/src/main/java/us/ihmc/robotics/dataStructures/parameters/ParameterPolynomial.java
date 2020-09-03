@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterPolynomial implements PolynomialReadOnly
 {
@@ -15,7 +15,7 @@ public class ParameterPolynomial implements PolynomialReadOnly
 
    private double value;
 
-   public ParameterPolynomial(String prefix, int numberOfCoefficients, YoVariableRegistry registry)
+   public ParameterPolynomial(String prefix, int numberOfCoefficients, YoRegistry registry)
    {
       List<DoubleProvider> coefficients = new ArrayList<>();
       for (int index = 0; index < numberOfCoefficients; index++)
@@ -25,7 +25,7 @@ public class ParameterPolynomial implements PolynomialReadOnly
       this.coefficients = Collections.unmodifiableList(coefficients);
    }
 
-   public ParameterPolynomial(String prefix, double[] defaultCoefficients, YoVariableRegistry registry)
+   public ParameterPolynomial(String prefix, double[] defaultCoefficients, YoRegistry registry)
    {
       List<DoubleProvider> coefficients = new ArrayList<>();
       for (int index = 0; index < defaultCoefficients.length; index++)
