@@ -43,7 +43,7 @@ public class AlgebraicS2Segment
       DMatrixRMaj betaLocal = betas.get(k);
 
       // betaJK = -A2inv B2 cJK
-      CommonOps_DDRM.mult(A2InverseB2, coefficients, betaLocal);
+      CommonOps_DDRM.mult(-1.0, A2InverseB2, coefficients, betaLocal);
 
       DMatrixRMaj betaLocalPrevious = betaLocal;
 
@@ -54,7 +54,7 @@ public class AlgebraicS2Segment
 
          // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
          CommonOps_DDRM.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
-         CommonOps_DDRM.multAdd(A2InverseB2, coefficients, betaLocal);
+         CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, betaLocal);
 
          betaLocalPrevious = betaLocal;
       }

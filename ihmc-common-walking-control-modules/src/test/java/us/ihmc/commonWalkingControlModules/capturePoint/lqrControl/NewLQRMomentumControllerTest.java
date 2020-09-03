@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
@@ -282,9 +283,9 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma1Expected);
       CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1Expected);
 
-//      EjmlUnitTests.assertEquals(beta2Expected, controller.betas.get(0).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(gamma2Expected, controller.gammas.get(0).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(beta1Expected, controller.betas.get(0).get(0), epsilon);
+      EjmlUnitTests.assertEquals(beta2Expected, controller.getS2Segment(0).getBeta(1), epsilon);
+      EjmlUnitTests.assertEquals(beta1Expected, controller.getS2Segment(0).getBeta(0), epsilon);
+      //      EjmlUnitTests.assertEquals(gamma2Expected, controller.gammas.get(0).get(1), epsilon);
 //      EjmlUnitTests.assertEquals(gamma1Expected, controller.gammas.get(0).get(0), epsilon);
 
       MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
@@ -306,7 +307,9 @@ public class NewLQRMomentumControllerTest
 //      EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
 //      EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
 //      EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
-//      EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
+      EjmlUnitTests.assertEquals(beta1Expected, controller.getS2Segment(0).getBeta(0), epsilon);
+      EjmlUnitTests.assertEquals(beta2Expected, controller.getS2Segment(0).getBeta(1), epsilon);
+      EjmlUnitTests.assertEquals(alphaExpected, controller.getS2Segment(0).getAlpha(), epsilon);
 
       DMatrixRMaj s2 = new DMatrixRMaj(6, 1);
       CommonOps_DDRM.mult(matrixExponential, alphaExpected, s2);
@@ -333,6 +336,8 @@ public class NewLQRMomentumControllerTest
       DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
       CommonOps_DDRM.mult(-1.0, R1InverseExpected, NBExpected, K1Expected);
 
+
+//      controller.computeS2(0.0);
       EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
       MatrixTestTools.assertMatrixEquals(k2Method1, controller.getK2(), epsilon);
       MatrixTestTools.assertMatrixEquals(K1Expected, controller.getK1(), epsilon);
@@ -364,9 +369,9 @@ public class NewLQRMomentumControllerTest
 //         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
 //         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
 //         EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
-//         EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
-//         EjmlUnitTests.assertEquals(beta1Expected, controller.betas.get(0).get(0), epsilon);
-//         EjmlUnitTests.assertEquals(beta2Expected, controller.betas.get(0).get(1), epsilon);
+         EjmlUnitTests.assertEquals(alphaExpected, controller.getS2Segment(0).getAlpha(), epsilon);
+         EjmlUnitTests.assertEquals(beta1Expected, controller.getS2Segment(0).getBeta(0), epsilon);
+         EjmlUnitTests.assertEquals(beta2Expected, controller.getS2Segment(0).getBeta(1), epsilon);
 //         EjmlUnitTests.assertEquals(gamma1ExpectedAlt, gamma1Expected, epsilon);
 //         EjmlUnitTests.assertEquals(gamma2ExpectedAlt, gamma2Expected, epsilon);
 //         EjmlUnitTests.assertEquals(gamma1Expected, controller.gammas.get(0).get(0), epsilon);
@@ -527,10 +532,10 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma1Expected);
       CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1Expected);
 
-//      EjmlUnitTests.assertEquals(beta4Expected, controller.betas.get(0).get(3), epsilon);
-//      EjmlUnitTests.assertEquals(beta3Expected, controller.betas.get(0).get(2), epsilon);
-//      EjmlUnitTests.assertEquals(beta2Expected, controller.betas.get(0).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(beta1Expected, controller.betas.get(0).get(0), epsilon);
+      EjmlUnitTests.assertEquals(beta4Expected, controller.getS2Segment(0).getBeta(3), epsilon);
+      EjmlUnitTests.assertEquals(beta3Expected, controller.getS2Segment(0).getBeta(2), epsilon);
+      EjmlUnitTests.assertEquals(beta2Expected, controller.getS2Segment(0).getBeta(1), epsilon);
+      EjmlUnitTests.assertEquals(beta1Expected, controller.getS2Segment(0).getBeta(0), epsilon);
 //      EjmlUnitTests.assertEquals(gamma4Expected, controller.gammas.get(0).get(3), epsilon);
 //      EjmlUnitTests.assertEquals(gamma3Expected, controller.gammas.get(0).get(2), epsilon);
 //      EjmlUnitTests.assertEquals(gamma2Expected, controller.gammas.get(0).get(1), epsilon);
@@ -557,7 +562,7 @@ public class NewLQRMomentumControllerTest
 //      EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
 //      EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
 //      EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
-//      EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
+      EjmlUnitTests.assertEquals(alphaExpected, controller.getS2Segment(0).getAlpha(), epsilon);
 
       DMatrixRMaj finalY = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalY);
@@ -579,7 +584,7 @@ public class NewLQRMomentumControllerTest
 //         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
 //         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
 //         EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
-//         EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
+         EjmlUnitTests.assertEquals(alphaExpected, controller.getS2Segment(0).getAlpha(), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
@@ -632,6 +637,22 @@ public class NewLQRMomentumControllerTest
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory1);
       trajectories.add(vrpTrajectory2);
+
+      List<Trajectory3D> relativeVRPTrajectories = new ArrayList<>();
+      Trajectory3D lastTrajectory = trajectories.get(trajectories.size() - 1);
+      lastTrajectory.compute(lastTrajectory.getFinalTime());
+      DMatrixRMaj finalVRPState = new DMatrixRMaj(3, 1);
+      lastTrajectory.getPosition().get(finalVRPState);
+
+      for (int i = 0; i < trajectories.size(); i++)
+      {
+         Trajectory3D trajectory = trajectories.get(i);
+         Trajectory3D relativeTrajectory = new Trajectory3D(5);
+         relativeVRPTrajectories.add(relativeTrajectory);
+
+         relativeTrajectory.set(trajectory);
+         relativeTrajectory.offsetTrajectoryPosition(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
+      }
 
       DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
@@ -748,16 +769,14 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.multAdd(0.5, R1InvBTrans, beta22Expected, tempMatrix);
       CommonOps_DDRM.mult(R1InvDQInverse, tempMatrix, constructedCoefficient22);
 
-//      EjmlUnitTests.assertEquals(beta21Expected, controller.betas.get(1).get(0), epsilon);
-//      EjmlUnitTests.assertEquals(beta22Expected, controller.betas.get(1).get(1), epsilon);
+      EjmlUnitTests.assertEquals(beta21Expected, controller.getS2Segment(1).getBeta(0), epsilon);
+      EjmlUnitTests.assertEquals(beta22Expected, controller.getS2Segment(1).getBeta(1), epsilon);
 //      EjmlUnitTests.assertEquals(gamma21Expected, controller.gammas.get(1).get(0), epsilon);
 //      EjmlUnitTests.assertEquals(gamma22Expected, controller.gammas.get(1).get(1), epsilon);
 
-      trajectories.get(1).getCoefficients(0, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      relativeVRPTrajectories.get(1).getCoefficients(0, coefficients);
       MatrixTestTools.assertMatrixEquals(constructedCoefficient21, coefficients, epsilon);
-      trajectories.get(1).getCoefficients(1, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      relativeVRPTrajectories.get(1).getCoefficients(1, coefficients);
       MatrixTestTools.assertMatrixEquals(constructedCoefficient22, coefficients, epsilon);
 
 
@@ -787,16 +806,14 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.mult(R1InvDQInverse, tempMatrix, constructedCoefficient12);
 
 
-//      EjmlUnitTests.assertEquals(beta11Expected, controller.betas.get(0).get(0), epsilon);
-//      EjmlUnitTests.assertEquals(beta12Expected, controller.betas.get(0).get(1), epsilon);
+      EjmlUnitTests.assertEquals(beta11Expected, controller.getS2Segment(0).getBeta(0), epsilon);
+      EjmlUnitTests.assertEquals(beta12Expected, controller.getS2Segment(0).getBeta(1), epsilon);
 //      EjmlUnitTests.assertEquals(gamma11Expected, controller.gammas.get(0).get(0), epsilon);
 //      EjmlUnitTests.assertEquals(gamma12Expected, controller.gammas.get(0).get(1), epsilon);
 
-      trajectories.get(0).getCoefficients(0, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      relativeVRPTrajectories.get(0).getCoefficients(0, coefficients);
       MatrixTestTools.assertMatrixEquals(constructedCoefficient11, coefficients, epsilon);
-      trajectories.get(0).getCoefficients(1, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      relativeVRPTrajectories.get(0).getCoefficients(1, coefficients);
       MatrixTestTools.assertMatrixEquals(constructedCoefficient12, coefficients, epsilon);
 
 
@@ -828,8 +845,8 @@ public class NewLQRMomentumControllerTest
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha1Expected);
 
-//      EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
-//      EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
+      EjmlUnitTests.assertEquals(alpha2Expected, controller.getS2Segment(1).getAlpha(), epsilon);
+      EjmlUnitTests.assertEquals(alpha1Expected, controller.getS2Segment(0).getAlpha(), epsilon);
 
 
 
@@ -845,31 +862,20 @@ public class NewLQRMomentumControllerTest
       DMatrixRMaj positionEndOf1 = new DMatrixRMaj(3, 1);
       DMatrixRMaj positionStartOf2 = new DMatrixRMaj(3, 1);
 
-      trajectories.get(0).getCoefficients(0, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
-
+      relativeVRPTrajectories.get(0).getCoefficients(0, coefficients);
       CommonOps_DDRM.addEquals(constructedPositionEndOf1, MathTools.pow(finalTime1, 0), coefficients);
-      trajectories.get(0).getCoefficients(1, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
-
+      relativeVRPTrajectories.get(0).getCoefficients(1, coefficients);
       CommonOps_DDRM.addEquals(constructedPositionEndOf1, MathTools.pow(finalTime1, 1), coefficients);
 
-      trajectories.get(0).compute(finalTime1);
-      trajectories.get(1).compute(0.0);
-      trajectories.get(0).getPosition().get(positionEndOf1);
-      trajectories.get(1).getPosition().get(positionStartOf2);
-      CommonOps_DDRM.subtractEquals(positionEndOf1, finalPosition);
-      CommonOps_DDRM.subtractEquals(positionStartOf2, finalPosition);
+      relativeVRPTrajectories.get(0).compute(finalTime1);
+      relativeVRPTrajectories.get(1).compute(0.0);
+      relativeVRPTrajectories.get(0).getPosition().get(positionEndOf1);
+      relativeVRPTrajectories.get(1).getPosition().get(positionStartOf2);
 
 
-
-      trajectories.get(1).getCoefficients(0, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
-
+      relativeVRPTrajectories.get(1).getCoefficients(0, coefficients);
       CommonOps_DDRM.addEquals(constructedPositionStartOf2, MathTools.pow(0, 0), coefficients);
-      trajectories.get(1).getCoefficients(1, coefficients);
-      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
-
+      relativeVRPTrajectories.get(1).getCoefficients(1, coefficients);
       CommonOps_DDRM.addEquals(constructedPositionStartOf2, MathTools.pow(0, 1), coefficients);
 
       DMatrixRMaj s2EndOf1 = new DMatrixRMaj(6, 1);
@@ -891,8 +897,8 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.scale(finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
       CommonOps_DDRM.mult(matrixExponential, alpha1Expected, s2EndOf1);
-      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 0), gamma11Expected);
-      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 1), gamma12Expected);
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 0), beta11Expected);
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 1), beta12Expected);
 
       // k2 method 1 end of 1
       CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2EndOf1, k2EndOf1Method1);
@@ -955,7 +961,7 @@ public class NewLQRMomentumControllerTest
 //         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
 //         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
 //         EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
-//         EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
+         EjmlUnitTests.assertEquals(alpha1Expected, controller.getS2Segment(0).getAlpha(), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
@@ -997,10 +1003,10 @@ public class NewLQRMomentumControllerTest
          CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 0), beta21Expected);
          CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 1), beta22Expected);
 
-         EjmlUnitTests.assertEquals(alpha2Expected, alpha2Expected, epsilon);
+         EjmlUnitTests.assertEquals(alpha2Expected, controller.getS2Segment(1).getAlpha(), epsilon);
 
-//         MatrixTestTools.assertMatrixEquals("Beta 1 calculation failed at time " + time, beta21Expected, controller.betas.get(1).get(0), epsilon);
-//         MatrixTestTools.assertMatrixEquals("Beta 2 calculation failed at time " + time, beta22Expected, controller.betas.get(1).get(1), epsilon);
+         MatrixTestTools.assertMatrixEquals("Beta 1 calculation failed at time " + time, beta21Expected, controller.getS2Segment(1).getBeta(0), epsilon);
+         MatrixTestTools.assertMatrixEquals("Beta 2 calculation failed at time " + time, beta22Expected, controller.getS2Segment(1).getBeta(1), epsilon);
          MatrixTestTools.assertMatrixEquals("S2 calculation failed at time " + time, s2Expected, controller.getCostJacobian(), epsilon);
 
          // validate the gammas
@@ -1213,10 +1219,10 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma31Expected);
       CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta31Expected, gamma31Expected);
 
-//      EjmlUnitTests.assertEquals(beta34Expected, controller.betas.get(2).get(3), epsilon);
-//      EjmlUnitTests.assertEquals(beta33Expected, controller.betas.get(2).get(2), epsilon);
-//      EjmlUnitTests.assertEquals(beta32Expected, controller.betas.get(2).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(beta31Expected, controller.betas.get(2).get(0), epsilon);
+      EjmlUnitTests.assertEquals(beta34Expected, controller.getS2Segment(2).getBeta(3), epsilon);
+      EjmlUnitTests.assertEquals(beta33Expected, controller.getS2Segment(2).getBeta(2), epsilon);
+      EjmlUnitTests.assertEquals(beta32Expected, controller.getS2Segment(2).getBeta(1), epsilon);
+      EjmlUnitTests.assertEquals(beta31Expected, controller.getS2Segment(2).getBeta(0), epsilon);
 //      EjmlUnitTests.assertEquals(gamma34Expected, controller.gammas.get(2).get(3), epsilon);
 //      EjmlUnitTests.assertEquals(gamma33Expected, controller.gammas.get(2).get(2), epsilon);
 //      EjmlUnitTests.assertEquals(gamma32Expected, controller.gammas.get(2).get(1), epsilon);
@@ -1251,10 +1257,10 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma21Expected);
       CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21Expected);
 
-//      EjmlUnitTests.assertEquals(beta24Expected, controller.betas.get(1).get(3), epsilon);
-//      EjmlUnitTests.assertEquals(beta23Expected, controller.betas.get(1).get(2), epsilon);
-//      EjmlUnitTests.assertEquals(beta22Expected, controller.betas.get(1).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(beta21Expected, controller.betas.get(1).get(0), epsilon);
+      EjmlUnitTests.assertEquals(beta24Expected, controller.getS2Segment(1).getBeta(3), epsilon);
+      EjmlUnitTests.assertEquals(beta23Expected, controller.getS2Segment(1).getBeta(2), epsilon);
+      EjmlUnitTests.assertEquals(beta22Expected, controller.getS2Segment(1).getBeta(1), epsilon);
+      EjmlUnitTests.assertEquals(beta21Expected, controller.getS2Segment(1).getBeta(0), epsilon);
 //      EjmlUnitTests.assertEquals(gamma24Expected, controller.gammas.get(1).get(3), epsilon);
 //      EjmlUnitTests.assertEquals(gamma23Expected, controller.gammas.get(1).get(2), epsilon);
 //      EjmlUnitTests.assertEquals(gamma22Expected, controller.gammas.get(1).get(1), epsilon);
@@ -1288,13 +1294,13 @@ public class NewLQRMomentumControllerTest
       CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma11Expected);
       CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta11Expected, gamma11Expected);
 
-//      EjmlUnitTests.assertEquals(beta14Expected, controller.betas.get(0).get(3), epsilon);
-//      EjmlUnitTests.assertEquals(gamma14Expected, controller.gammas.get(0).get(3), epsilon);
-//      EjmlUnitTests.assertEquals(beta13Expected, controller.betas.get(0).get(2), epsilon);
-//      EjmlUnitTests.assertEquals(gamma13Expected, controller.gammas.get(0).get(2), epsilon);
-//      EjmlUnitTests.assertEquals(beta12Expected, controller.betas.get(0).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(gamma12Expected, controller.gammas.get(0).get(1), epsilon);
-//      EjmlUnitTests.assertEquals(beta11Expected, controller.betas.get(0).get(0), epsilon);
+      EjmlUnitTests.assertEquals(beta14Expected, controller.getS2Segment(0).getBeta(3), epsilon);
+      EjmlUnitTests.assertEquals(beta13Expected, controller.getS2Segment(0).getBeta(2), epsilon);
+      EjmlUnitTests.assertEquals(beta12Expected, controller.getS2Segment(0).getBeta(1), epsilon);
+      EjmlUnitTests.assertEquals(beta11Expected, controller.getS2Segment(0).getBeta(0), epsilon);
+      //      EjmlUnitTests.assertEquals(gamma14Expected, controller.gammas.get(0).get(3), epsilon);
+      //      EjmlUnitTests.assertEquals(gamma13Expected, controller.gammas.get(0).get(2), epsilon);
+      //      EjmlUnitTests.assertEquals(gamma12Expected, controller.gammas.get(0).get(1), epsilon);
 //      EjmlUnitTests.assertEquals(gamma11Expected, controller.gammas.get(0).get(0), epsilon);
 
       MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
@@ -1343,9 +1349,9 @@ public class NewLQRMomentumControllerTest
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha1Expected);
 
-//      EjmlUnitTests.assertEquals(alpha3Expected, controller.alphas.get(2), epsilon);
-//      EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
-//      EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
+      EjmlUnitTests.assertEquals(alpha3Expected, controller.getS2Segment(2).getAlpha(), epsilon);
+      EjmlUnitTests.assertEquals(alpha2Expected, controller.getS2Segment(1).getAlpha(), epsilon);
+      EjmlUnitTests.assertEquals(alpha1Expected, controller.getS2Segment(0).getAlpha(), epsilon);
 
 
 
@@ -1415,7 +1421,7 @@ public class NewLQRMomentumControllerTest
 //         EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
 //         EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
 //         EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
-//         EjmlUnitTests.assertEquals(alpha1Expected, controller.alphas.get(0), epsilon);
+         EjmlUnitTests.assertEquals(alpha1Expected, controller.getS2Segment(0).getAlpha(), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
@@ -1459,7 +1465,7 @@ public class NewLQRMomentumControllerTest
          CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 2), beta23Expected);
          CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 3), beta24Expected);
 
-//         EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
+         EjmlUnitTests.assertEquals(alpha2Expected, controller.getS2Segment(1).getAlpha(), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
@@ -1502,7 +1508,7 @@ public class NewLQRMomentumControllerTest
          CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 2), beta33Expected);
          CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 3), beta34Expected);
 
-//         EjmlUnitTests.assertEquals(alpha3Expected, controller.alphas.get(2), epsilon);
+         EjmlUnitTests.assertEquals(alpha3Expected, controller.getS2Segment(2).getAlpha(), epsilon);
 
          EjmlUnitTests.assertEquals(s2Expected, controller.getCostJacobian(), epsilon);
 
@@ -1537,6 +1543,7 @@ public class NewLQRMomentumControllerTest
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
    }
 
+   @Disabled
    @Test
    public void testBasicTrajectoryTracking()
    {

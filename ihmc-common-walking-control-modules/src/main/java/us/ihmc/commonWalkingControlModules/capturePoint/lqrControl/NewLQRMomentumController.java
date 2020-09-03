@@ -257,12 +257,17 @@ public class NewLQRMomentumController
       referenceVRPPosition.add(finalVRPPosition);
 
       // Fix this to account for the change in segment
-      s2Function.compute(timeInSegment, s2);
+      s2Function.compute(j, timeInSegment, s2);
 
       CommonOps_DDRM.mult(R1InverseDQ, relativeDesiredVRP, k2);
       CommonOps_DDRM.multAdd(R1InverseBTranspose, s2, k2);
 
       yoK2.set(k2);
+   }
+
+   public AlgebraicS2Segment getS2Segment(int segmentNumber)
+   {
+      return s2Function.getSegment(segmentNumber);
    }
 
    /**

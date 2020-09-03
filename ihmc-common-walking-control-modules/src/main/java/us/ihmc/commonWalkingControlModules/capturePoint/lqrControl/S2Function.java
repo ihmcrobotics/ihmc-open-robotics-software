@@ -4,5 +4,10 @@ import org.ejml.data.DMatrixRMaj;
 
 public interface S2Function
 {
-   void compute(double timeInState, DMatrixRMaj s2ToPack);
+   default void compute(double timeInSegment, DMatrixRMaj s2ToPack)
+   {
+      compute(0, timeInSegment, s2ToPack);
+   }
+
+   void compute(int segmentNumber, double timeInSegment, DMatrixRMaj s2ToPack);
 }
