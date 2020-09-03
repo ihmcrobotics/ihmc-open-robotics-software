@@ -12,7 +12,12 @@ public class AlgebraicS2Function implements S2Function
    private final DMatrixRMaj endValueLocal = new DMatrixRMaj(6, 1);
    private final RecyclingArrayList<AlgebraicS2Segment> s2Segments = new RecyclingArrayList<>(AlgebraicS2Segment::new);
 
-   public void set(DMatrixRMaj endValue, List<Trajectory3D> vrpTrajectories, DMatrixRMaj A2, DMatrixRMaj B2)
+   public void set(DMatrixRMaj endValue, List<Trajectory3D> vrpTrajectories, LQRCommonValues lqrCommonValues)
+   {
+      set(endValue, vrpTrajectories, lqrCommonValues.getA2(), lqrCommonValues.getA2Inverse(), lqrCommonValues.getA2InverseB2());
+   }
+
+   public void set(DMatrixRMaj endValue, List<Trajectory3D> vrpTrajectories,  DMatrixRMaj A2, DMatrixRMaj A2Inverse, DMatrixRMaj A2InverseB2)
    {
       s2Segments.clear();
       for (int j = 0; j < vrpTrajectories.size(); j++)
@@ -24,7 +29,7 @@ public class AlgebraicS2Function implements S2Function
       {
          AlgebraicS2Segment s2Segment = s2Segments.get(j);
 
-         s2Segment.set(endValueLocal, vrpTrajectories.get(j), A2, B2);
+         s2Segment.set(endValueLocal, vrpTrajectories.get(j), A2, A2Inverse, A2InverseB2);
 
          CommonOps_DDRM.add(s2Segment.getAlpha(), s2Segment.getBeta(0), endValueLocal);
       }
