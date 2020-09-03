@@ -27,7 +27,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
       this(ros2Node, ROS2Tools.VIDEO);
    }
    
-   public VideoPacketHandler(Ros2Node ros2Node, ROS2Topic<VideoPacket> topic)
+   public VideoPacketHandler(ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
    {
       publisher = ROS2Tools.createPublisher(ros2Node, topic);
    }
