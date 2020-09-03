@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -38,7 +37,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
@@ -219,12 +217,13 @@ public class KinematicsToolboxController extends ToolboxController
     * configuration.
     */
    protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
+   private boolean submitPrivilegedConfigurationCommand = true;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
     * usually updated once right after the initialization phase.
     */
-   private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<>(null);
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    /**
     * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user input,
     * this manager automatically copies the data in the corresponding command that can then be used
@@ -710,9 +709,11 @@ public class KinematicsToolboxController extends ToolboxController
       getAdditionalFeedbackControlCommands(feedbackControlCommandBuffer);
 
       inverseKinematicsCommandBuffer.addInverseKinematicsOptimizationSettingsCommand().set(activeOptimizationSettings);
-      PrivilegedConfigurationCommand privilegedConfigurationCommand = privilegedConfigurationCommandReference.getAndSet(null);
-      if (privilegedConfigurationCommand != null)
+      if (submitPrivilegedConfigurationCommand)
+      {
          inverseKinematicsCommandBuffer.addPrivilegedConfigurationCommand().set(privilegedConfigurationCommand);
+         submitPrivilegedConfigurationCommand = false;
+      }
       getAdditionalInverseKinematicsCommands(inverseKinematicsCommandBuffer);
       computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
 
@@ -831,18 +832,34 @@ public class KinematicsToolboxController extends ToolboxController
           * privileged configuration and the initial center of mass position and foot poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint);
+
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
             robotConfigurationReinitialized();
+
+         if (command.getPrivilegedWeight() < 0.0)
+         {
+            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+         }
+         else
+         {
+            privilegedWeight.set(command.getPrivilegedWeight());
+            privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getValue());
+            submitPrivilegedConfigurationCommand = true;
+         }
+
+         if (command.getPrivilegedGain() < 0.0)
+         {
+            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         }
+         else
+         {
+            privilegedConfigurationGain.set(command.getPrivilegedGain());
+            privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getValue());
+            submitPrivilegedConfigurationCommand = true;
+         }
+
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();
-         if (command.getPrivilegedWeight() < 0.0)
-            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-         else
-            privilegedWeight.set(command.getPrivilegedWeight());
-         if (command.getPrivilegedGain() < 0.0)
-            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-         else
-            privilegedConfigurationGain.set(command.getPrivilegedGain());
       }
    }
 
@@ -1274,12 +1291,15 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private void snapPrivilegedConfigurationToCurrent()
    {
-      PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
+      privilegedConfigurationCommand.clear();
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         privilegedConfigurationCommand.addJoint(oneDoFJoints[i], oneDoFJoints[i].getQ());
+      }
       privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
       privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
       privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
-      privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
+      submitPrivilegedConfigurationCommand = true;
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
