@@ -484,6 +484,8 @@ public class LQRJumpMomentumControllerNoFlightTest
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
 
+      controller.computeS1AndK1(0.0);
+
 
       DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
       CommonOps_DDRM.mult(-1.0, R1InverseExpected, NBExpected, K1Expected);
