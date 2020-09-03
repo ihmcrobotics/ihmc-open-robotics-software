@@ -78,7 +78,6 @@ public class FootstepPlannerMessageTools
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
       packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
-      packet.setRejectIfWiggleNotSatisfied(parameters.getRejectIfWiggleNotSatisfied());
       packet.setEnableConcaveHullWiggler(parameters.getEnableConcaveHullWiggler());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());

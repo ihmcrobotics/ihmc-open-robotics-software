@@ -91,7 +91,7 @@ public class FootstepNodeChecker
       }
 
       // Check wiggle parameters satisfied
-      if (parameters.getWiggleWhilePlanning() && parameters.getRejectIfWiggleNotSatisfied())
+      if (parameters.getWiggleWhilePlanning())
       {
          checkWiggleParameters(parameters);
          if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDeltaMinimum())

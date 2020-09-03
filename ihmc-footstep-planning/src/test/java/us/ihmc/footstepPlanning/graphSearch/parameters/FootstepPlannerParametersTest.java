@@ -107,10 +107,6 @@ public class FootstepPlannerParametersTest
       parameters.setWiggleWhilePlanning(wiggleWhilePlanning);
       assertEquals(wiggleWhilePlanning, parameters.getWiggleWhilePlanning());
 
-      boolean rejectIfWiggleNotSatisfied = random.nextBoolean();
-      parameters.setRejectIfWiggleNotSatisfied(rejectIfWiggleNotSatisfied);
-      assertEquals(rejectIfWiggleNotSatisfied, parameters.getRejectIfWiggleNotSatisfied());
-
       boolean enableConcaveHullWiggler = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setEnableConcaveHullWiggler(enableConcaveHullWiggler);
       assertEquals(enableConcaveHullWiggler, parameters.getEnableConcaveHullWiggler());
