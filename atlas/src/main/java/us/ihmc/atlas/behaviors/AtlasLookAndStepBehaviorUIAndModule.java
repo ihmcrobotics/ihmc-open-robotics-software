@@ -27,8 +27,8 @@ public class AtlasLookAndStepBehaviorUIAndModule
    {
       JavaProcessManager manager = new JavaProcessManager();
       manager.runOrRegister("AtlasBehaviorUIAndModule", () -> new AtlasBehaviorUIAndModule(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION)));
-      manager.runOrRegister("RealsenseSLAM", () -> new AtlasSLAMBasedREAStandaloneLauncher(SHOW_REALSENSE_SLAM_UIS, PubSubImplementation.FAST_RTPS));
-      manager.runOrRegister("RealsenseREA", () -> new AtlasRealsenseBasedREAStandaloneLauncher(false));
+//      manager.runOrRegister("RealsenseSLAM", () -> new AtlasSLAMBasedREAStandaloneLauncher(SHOW_REALSENSE_SLAM_UIS, PubSubImplementation.FAST_RTPS));
+//      manager.runOrRegister("RealsenseREA", () -> new AtlasRealsenseBasedREAStandaloneLauncher(false));
 //      manager.runOrRegister("LiveMap", () -> new LiveMapStandaloneLauncher(false, PubSubImplementation.FAST_RTPS));
 //      manager.runOrRegister("LidarREA", () -> new LidarBasedREAStandaloneLauncher());
 //      manager.runOrRegister("LidarREA", () -> new RemoteLidarBasedREAModuleLauncher());
