@@ -208,7 +208,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             },
             approvalNotification
       );
-      helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanning::acceptPlanarRegions);
+      helper.createROS2Callback(ROS2Tools.MAP_REGIONS, footstepPlanning::acceptPlanarRegions);
       helper.createROS2ControllerCallback(FootstepStatusMessage.class, status ->
       {
          if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
