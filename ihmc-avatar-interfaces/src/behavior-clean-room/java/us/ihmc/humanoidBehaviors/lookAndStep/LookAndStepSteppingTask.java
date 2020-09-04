@@ -106,16 +106,17 @@ public class LookAndStepSteppingTask
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
       PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
       shortenedFootstepPlan.addFootstep(footstepToTake);
-      lastCommandedFoosteps.put(footstepToTake.getRobotSide(), footstepToTake);
-      uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.reduceFootstepsForUIMessager(lastCommandedFoosteps));
 
       footstepPlanPostProcessor.performPostProcessing(footstepPlanEtc.getPlanarRegions(),
-                                                      footstepPlanEtc,
+                                                      shortenedFootstepPlan,
                                                       footstepPlanEtc.getStartFootPoses(),
                                                       footstepPlanEtc.getStartFootholds(),
                                                       footstepPlanEtc.getSwingPlannerType(),
                                                       true,
                                                       true);
+
+      lastCommandedFoosteps.put(footstepToTake.getRobotSide(), footstepToTake);
+      uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.reduceFootstepsForUIMessager(lastCommandedFoosteps));
 
       statusLogger.warn("Requesting walk");
       double swingTime = lookAndStepBehaviorParameters.getSwingTime();
