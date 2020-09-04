@@ -226,5 +226,31 @@ public class LQRJumpMomentumControllerTest
       coMTrajectoryPlanner.solveForTrajectory(contactStates);
 
       controller.setVRPTrajectory(coMTrajectoryPlanner.getVRPTrajectories(), contactStates);
+      controller.computeS1Segments();
+      controller.computeS2Segments();
+
+      DMatrixRMaj endOfS11 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj startOfS12 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj endOfS12 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj startOfS13 = new DMatrixRMaj(6, 6);
+      controller.getS1Segment(0).compute(1.0, endOfS11);
+      controller.getS1Segment(1).compute(0.0, startOfS12);
+      controller.getS1Segment(1).compute(0.3, endOfS12);
+      controller.getS1Segment(2).compute(0.0, startOfS13);
+
+//      MatrixTestTools.assertMatrixEquals(startOfS13, endOfS12, 1e-7);
+//      MatrixTestTools.assertMatrixEquals(startOfS12, endOfS11, 1e-7);
+
+      DMatrixRMaj endOfS21 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj startOfS22 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj endOfS22 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj startOfS23 = new DMatrixRMaj(6, 1);
+      controller.getS2Segment(0).compute(1.0, endOfS21);
+      controller.getS2Segment(1).compute(0.0, startOfS22);
+      controller.getS2Segment(1).compute(0.3, endOfS22);
+      controller.getS2Segment(2).compute(0.0, startOfS23);
+
+      MatrixTestTools.assertMatrixEquals(startOfS23, endOfS22, 1e-7);
+      MatrixTestTools.assertMatrixEquals(startOfS22, endOfS21, 1e-7);
    }
 }
