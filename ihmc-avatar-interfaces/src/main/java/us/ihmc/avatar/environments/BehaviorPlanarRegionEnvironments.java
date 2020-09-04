@@ -214,12 +214,17 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
    public static PlanarRegionsList generateRealisticEasierStartingBlockRegions()
    {
-      return generateRealisticEasierStartingBlockRegions(new Pose3D());
+      Pose3D pose = new Pose3D();
+      pose.setX(-0.5);
+      pose.setY(-0.5);
+      return generateRealisticEasierStartingBlockRegions(pose);
    }
 
    public static PlanarRegionsList generateRealisticEasierStartingBlockRegions(Pose3DReadOnly poseInWorld)
    {
-      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder();
+      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder(true);
+
+      builder.pushOffset(poseInWorld.getPosition(), poseInWorld.getOrientation());
 
       builder.addGround(20.0);
       builder.addPalletStackReferencedAtNegativeXY(2);
@@ -255,7 +260,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
    public static PlanarRegionsList generateTriplePalletCinderBlockStepsUpAndDown()
    {
-      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder();
+      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder(true);
 
       builder.addGround(20.0);
 
@@ -291,7 +296,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
    public static PlanarRegionsList generateTriplePalletCinderBlockAngledStepsUpAndDown()
    {
-      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder();
+      RealisticLabTerrainBuilder builder = new RealisticLabTerrainBuilder(true);
 
       builder.addGround(20.0);
 
