@@ -8,13 +8,6 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
 
    public static final DoubleStoredPropertyKey direction = keys.addDoubleKey("Direction");
    public static final DoubleStoredPropertyKey planHorizon = keys.addDoubleKey("Plan horizon");
-   public static final DoubleStoredPropertyKey idealFootstepLengthOverride = keys.addDoubleKey("Ideal footstep length override");
-   public static final DoubleStoredPropertyKey wiggleInsideDeltaMinimumOverride = keys.addDoubleKey("Wiggle inside delta minimum override");
-   public static final DoubleStoredPropertyKey wiggleInsideDeltaTargetOverride = keys.addDoubleKey("Wiggle inside delta target override");
-   public static final BooleanStoredPropertyKey wiggleWhilePlanningOverride = keys.addBooleanKey("Wiggle while planning override");
-   public static final DoubleStoredPropertyKey cliffBaseHeightToAvoidOverride = keys.addDoubleKey("Cliff base height to avoid override");
-   public static final BooleanStoredPropertyKey enableConcaveHullWigglerOverride = keys.addBooleanKey("Enable concave hull wiggler override");
-   public static final BooleanStoredPropertyKey enableExpansionMaskOverride = keys.addBooleanKey("Enable expansion mask override");
    public static final DoubleStoredPropertyKey footstepPlannerTimeout = keys.addDoubleKey("Footstep planner timeout");
    public static final DoubleStoredPropertyKey planarRegionsExpiration = keys.addDoubleKey("Planar regions expiration");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");

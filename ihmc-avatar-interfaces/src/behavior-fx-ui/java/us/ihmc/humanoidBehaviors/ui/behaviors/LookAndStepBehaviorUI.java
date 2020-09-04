@@ -5,9 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
@@ -127,9 +124,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
 
-      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForLookAndStep");
       JavaFXStoredPropertyTable footstepPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(footstepPlannerParameterTable);
-      footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::footstepPlanningParameters);
+      footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::publishFootstepPlanningParameters);
 
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
 
@@ -204,7 +201,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.submitMessage(LookAndStepParameters, lookAndStepParameters.getAllAsStrings());
    }
 
-   private void footstepPlanningParameters()
+   private void publishFootstepPlanningParameters()
    {
       behaviorMessager.submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
    }
