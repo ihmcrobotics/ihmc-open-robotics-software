@@ -218,7 +218,7 @@ public class LiveMapModule implements PerceptionModule
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
             if (localizedMap != null)
-               localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
+               localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(regionsToFuse, localizedMap, slamParameters, null);
             else
                localizedMap = regionsToFuse;
 
