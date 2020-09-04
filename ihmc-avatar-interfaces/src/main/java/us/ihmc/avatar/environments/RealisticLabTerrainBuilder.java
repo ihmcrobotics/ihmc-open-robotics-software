@@ -27,29 +27,48 @@ public class RealisticLabTerrainBuilder extends PlanarRegionsListBuilder
    public static final double SMALL_CINDER_BLOCK_HEIGHT = 0.08;
    public static final double SMALL_CINDER_BLOCK_ANGLE = Math.toRadians(-13.0);
 
+   private final boolean removeCracks;
+
+   /**
+    * The point based contact algorithm will get it's feet stuck in the cracks,
+    * so use removeCracks to prevent that.
+    * @param removeCracks
+    */
+   public RealisticLabTerrainBuilder(boolean removeCracks)
+   {
+      this.removeCracks = removeCracks;
+   }
+
    public void addGround(double size)
    {
       addXYPlaneSquareReferencedAtCenter(size, size);
    }
 
-   public void addPalletStackReferencedAtNegativeXY(int stackHeight, Runnable placmentOntoPallet)
+   public void addPalletStackReferencedAtNegativeXY(int stackHeight, Runnable placementOntoPallet)
    {
       addPalletStackReferencedAtNegativeXY(stackHeight);
 
       pushOffset(0.0, 0.0, RealisticLabTerrainBuilder.PALLET_HEIGHT);
-      placmentOntoPallet.run();
+      placementOntoPallet.run();
       popOffset();
    }
 
    public void addPalletStackReferencedAtNegativeXY(int stackHeight)
    {
-      for (int i = 0; i < stackHeight; i++)
+      if (removeCracks)
       {
-         addPalletReferencedAtNegativeXY(0.0, 0.0, i);
+         addBoxReferencedAtNegativeXYZCorner(new Box3D(PALLET_LENGTH, PALLET_WIDTH, stackHeight * PALLET_HEIGHT));
+      }
+      else
+      {
+         for (int i = 0; i < stackHeight; i++)
+         {
+            addPalletReferencedAtNegativeXY(i);
+         }
       }
    }
 
-   public void addPalletReferencedAtNegativeXY(double x, double y, int stackIndex)
+   private void addPalletReferencedAtNegativeXY(int stackIndex)
    {
       placeWithOffset(0.0, 0.0, stackIndex * PALLET_HEIGHT, () ->
       {
@@ -59,34 +78,58 @@ public class RealisticLabTerrainBuilder extends PlanarRegionsListBuilder
 
    public void addLargeCinderBlockGroup(int groupSize)
    {
-      for (int i = 0; i < groupSize; i++)
+      if (removeCracks)
       {
-         placeWithOffset(0.0, LARGE_CINDER_BLOCK_WIDTH * i, () ->
+         addBoxReferencedAtNegativeXYZCorner(LARGE_CINDER_BLOCK_LENGTH, groupSize * LARGE_CINDER_BLOCK_WIDTH, LARGE_CINDER_BLOCK_HEIGHT);
+      }
+      else
+      {
+         for (int i = 0; i < groupSize; i++)
          {
-            addBoxReferencedAtNegativeXYZCorner(LARGE_CINDER_BLOCK_LENGTH, LARGE_CINDER_BLOCK_WIDTH, LARGE_CINDER_BLOCK_HEIGHT);
-         });
+            placeWithOffset(0.0, LARGE_CINDER_BLOCK_WIDTH * i, () ->
+            {
+               addBoxReferencedAtNegativeXYZCorner(LARGE_CINDER_BLOCK_LENGTH, LARGE_CINDER_BLOCK_WIDTH, LARGE_CINDER_BLOCK_HEIGHT);
+            });
+         }
       }
    }
 
    public void addMediumCinderBlockGroup(int groupSize)
    {
-      for (int i = 0; i < groupSize; i++)
+      if (removeCracks)
       {
-         placeWithOffset(0.0, MEDIUM_CINDER_BLOCK_WIDTH * i, () ->
+         addBoxReferencedAtNegativeXYZCorner(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH * groupSize, MEDIUM_CINDER_BLOCK_HEIGHT);
+      }
+      else
+      {
+         for (int i = 0; i < groupSize; i++)
          {
-            addBoxReferencedAtNegativeXYZCorner(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
-         });
+            placeWithOffset(0.0, MEDIUM_CINDER_BLOCK_WIDTH * i, () ->
+            {
+               addBoxReferencedAtNegativeXYZCorner(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
+            });
+         }
       }
    }
 
    public void addMediumAngledCinderBlockGroup(int groupSize)
    {
-      for (int i = 0; i < groupSize; i++)
+      if (removeCracks)
       {
-         placeWithOffset(0.0, MEDIUM_CINDER_BLOCK_WIDTH * i, 0.0, Axis3D.Y, MEDIUM_CINDER_BLOCK_ANGLE, () ->
+         placeWithOffset(0.0, 0.0, 0.0, Axis3D.Y, MEDIUM_CINDER_BLOCK_ANGLE, () ->
          {
-            addBoxReferencedAtNegativeXYZCorner(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
+            addBoxReferencedAtNegativeXYZCorner(MEDIUM_CINDER_BLOCK_LENGTH, groupSize * MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
          });
+      }
+      else
+      {
+         for (int i = 0; i < groupSize; i++)
+         {
+            placeWithOffset(0.0, MEDIUM_CINDER_BLOCK_WIDTH * i, 0.0, Axis3D.Y, MEDIUM_CINDER_BLOCK_ANGLE, () ->
+            {
+               addBoxReferencedAtNegativeXYZCorner(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
+            });
+         }
       }
    }
 
@@ -96,13 +139,24 @@ public class RealisticLabTerrainBuilder extends PlanarRegionsListBuilder
       {
          placeWithOffset(0.0, 0.0, 0.0, Axis3D.Z, zRotation, () ->
          {
-            for (int i = 0; i < groupSize; i++)
+            if (removeCracks)
             {
                double centroidZOffset = -(MEDIUM_CINDER_BLOCK_LENGTH / 2.0) * Math.tan(MEDIUM_CINDER_BLOCK_ANGLE);
-               placeWithOffset(0.0, MEDIUM_CINDER_BLOCK_WIDTH * i, centroidZOffset, Axis3D.Y, MEDIUM_CINDER_BLOCK_ANGLE, () ->
+               placeWithOffset(0.0, 0.0, centroidZOffset, Axis3D.Y, MEDIUM_CINDER_BLOCK_ANGLE, () ->
                {
-                  addBoxReferencedAtCenter(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
+                  addBoxReferencedAtCenter(MEDIUM_CINDER_BLOCK_LENGTH, groupSize * MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
                });
+            }
+            else
+            {
+               for (int i = 0; i < groupSize; i++)
+               {
+                  double centroidZOffset = -(MEDIUM_CINDER_BLOCK_LENGTH / 2.0) * Math.tan(MEDIUM_CINDER_BLOCK_ANGLE);
+                  placeWithOffset(0.0, MEDIUM_CINDER_BLOCK_WIDTH * i, centroidZOffset, Axis3D.Y, MEDIUM_CINDER_BLOCK_ANGLE, () ->
+                  {
+                     addBoxReferencedAtCenter(MEDIUM_CINDER_BLOCK_LENGTH, MEDIUM_CINDER_BLOCK_WIDTH, MEDIUM_CINDER_BLOCK_HEIGHT);
+                  });
+               }
             }
          });
       });
@@ -113,13 +167,24 @@ public class RealisticLabTerrainBuilder extends PlanarRegionsListBuilder
       {
          placeWithOffset(0.0, 0.0, 0.0, Axis3D.Z, zRotation, () ->
          {
-            for (int i = 0; i < groupSize; i++)
+            if (removeCracks)
             {
                double centroidZOffset = -(SMALL_CINDER_BLOCK_LENGTH / 2.0) * Math.tan(SMALL_CINDER_BLOCK_ANGLE);
-               placeWithOffset(0.0, SMALL_CINDER_BLOCK_WIDTH * i, centroidZOffset, Axis3D.Y, SMALL_CINDER_BLOCK_ANGLE, () ->
+               placeWithOffset(0.0, 0.0, centroidZOffset, Axis3D.Y, SMALL_CINDER_BLOCK_ANGLE, () ->
                {
-                  addBoxReferencedAtCenter(SMALL_CINDER_BLOCK_LENGTH, SMALL_CINDER_BLOCK_WIDTH, SMALL_CINDER_BLOCK_HEIGHT);
+                  addBoxReferencedAtCenter(SMALL_CINDER_BLOCK_LENGTH, groupSize * SMALL_CINDER_BLOCK_WIDTH, SMALL_CINDER_BLOCK_HEIGHT);
                });
+            }
+            else
+            {
+               for (int i = 0; i < groupSize; i++)
+               {
+                  double centroidZOffset = -(SMALL_CINDER_BLOCK_LENGTH / 2.0) * Math.tan(SMALL_CINDER_BLOCK_ANGLE);
+                  placeWithOffset(0.0, SMALL_CINDER_BLOCK_WIDTH * i, centroidZOffset, Axis3D.Y, SMALL_CINDER_BLOCK_ANGLE, () ->
+                  {
+                     addBoxReferencedAtCenter(SMALL_CINDER_BLOCK_LENGTH, SMALL_CINDER_BLOCK_WIDTH, SMALL_CINDER_BLOCK_HEIGHT);
+                  });
+               }
             }
          });
       });
@@ -127,12 +192,19 @@ public class RealisticLabTerrainBuilder extends PlanarRegionsListBuilder
 
    public void addSmallCinderBlockGroup(int groupSize)
    {
-      for (int i = 0; i < groupSize; i++)
+      if (removeCracks)
       {
-         placeWithOffset(0.0, SMALL_CINDER_BLOCK_WIDTH * i, () ->
+         addBoxReferencedAtNegativeXYZCorner(SMALL_CINDER_BLOCK_LENGTH, SMALL_CINDER_BLOCK_WIDTH * groupSize, SMALL_CINDER_BLOCK_HEIGHT);
+      }
+      else
+      {
+         for (int i = 0; i < groupSize; i++)
          {
-            addBoxReferencedAtNegativeXYZCorner(SMALL_CINDER_BLOCK_LENGTH, SMALL_CINDER_BLOCK_WIDTH, SMALL_CINDER_BLOCK_HEIGHT);
-         });
+            placeWithOffset(0.0, SMALL_CINDER_BLOCK_WIDTH * i, () ->
+            {
+               addBoxReferencedAtNegativeXYZCorner(SMALL_CINDER_BLOCK_LENGTH, SMALL_CINDER_BLOCK_WIDTH, SMALL_CINDER_BLOCK_HEIGHT);
+            });
+         }
       }
    }
 
