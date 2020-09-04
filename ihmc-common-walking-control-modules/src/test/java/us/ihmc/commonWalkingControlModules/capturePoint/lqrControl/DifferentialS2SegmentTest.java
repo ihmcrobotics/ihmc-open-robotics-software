@@ -42,6 +42,7 @@ public class DifferentialS2SegmentTest
       endingS1Function.set(commonValues);
       endingS1Function.compute(0.0, s1AtLanding);
 
+      commonValues.computeS2ConstantStateMatrices(s1AtLanding);
       endingS2Function.set(new DMatrixRMaj(6, 1), vrpTrajectory2, commonValues);
       endingS2Function.compute(0.0, s2AtLanding);
 
