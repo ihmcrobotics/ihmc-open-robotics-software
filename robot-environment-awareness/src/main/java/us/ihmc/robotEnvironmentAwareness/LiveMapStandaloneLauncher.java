@@ -52,22 +52,13 @@ public class LiveMapStandaloneLauncher extends Application
       messager.startMessager();
       
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
-      
-      REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS);
-      LIDARBasedREAModule reaModule = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(Paths.get(System.getProperty("user.home"))
-                                                                                                               .resolve("RealsenseREAConfiguration.txt")
-                                                                                                               .toFile()),
-                                                                                   realSenseREANetworkProvider, NetworkPorts.REA_MODULE2_UI_PORT);
-      reaModule.setParametersForStereo();
-      reaModule.loadConfigurationsFromFile();
-      reaModule.start();
 
       if (launchUI)
          ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);
       else
          ui = null;
 
-      module = LiveMapModule.createIntraprocess(ros2Node, messager);
+      module = LiveMapModule.createIntraprocess(ros2Node, messager, "atlas");
 
       if (launchUI)
          ui.show();
