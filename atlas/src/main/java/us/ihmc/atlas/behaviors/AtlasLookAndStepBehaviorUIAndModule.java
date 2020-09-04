@@ -19,11 +19,13 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 public class AtlasLookAndStepBehaviorUIAndModule
 {
+   public static final boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis", "false"));
+   
    public static void main(String[] args)
    {
       JavaProcessManager manager = new JavaProcessManager();
       manager.runOrRegister("AtlasBehaviorUIAndModule", () -> new AtlasBehaviorUIAndModule(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION)));
-      manager.runOrRegister("RealsenseSLAM", () -> new AtlasSLAMBasedREAStandaloneLauncher(false, PubSubImplementation.FAST_RTPS));
+      manager.runOrRegister("RealsenseSLAM", () -> new AtlasSLAMBasedREAStandaloneLauncher(SHOW_REALSENSE_SLAM_UIS, PubSubImplementation.FAST_RTPS));
 //      manager.runOrRegister("LidarREA", () -> new LidarBasedREAStandaloneLauncher());
 //      manager.runOrRegister("LidarREA", () -> new RemoteLidarBasedREAModuleLauncher());
       manager.runOrRegister("LidarREA", () ->
