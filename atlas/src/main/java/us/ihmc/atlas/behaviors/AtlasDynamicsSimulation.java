@@ -73,6 +73,7 @@ public class AtlasDynamicsSimulation
       scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT() * recordTicksPerControllerTick);
       scsInitialSetup.setUsePerfectSensors(true);
       scsInitialSetup.setSimulationDataBufferSize(dataBufferSize);
+      scsInitialSetup.setUseExperimentalPhysicsEngine(false);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
