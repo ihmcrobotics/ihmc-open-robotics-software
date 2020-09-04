@@ -11,7 +11,6 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -52,7 +51,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
 import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -166,17 +164,11 @@ public class AvatarEstimatorThreadFactory
     * </ul>
     *
     * @param robotModel the robot model used to configure this factory.
-    * @param robotInitialSetup
     */
-   public void configureWithDRCRobotModel(DRCRobotModel robotModel, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
       configureWithWholeBodyControllerParameters(robotModel);
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      if (robotInitialSetup != null)
-      {
-         robotInitialSetup.initializeFullRobotModel(fullRobotModel);
-      }
-      setEstimatorFullRobotModel(fullRobotModel);
+      setEstimatorFullRobotModel(robotModel.createFullRobotModel());
    }
 
    /**
