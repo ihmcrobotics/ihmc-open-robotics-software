@@ -75,8 +75,6 @@ public class JavaProcessManager
                                             timestampOfCreation + "_" + processNames.get(i) + "Log.txt");
                String[] jvmProperties = ArrayUtils.add(parentJVMProperties, "-D" + FORKED_PROCESS_INDEX + "=" + i);
 
-//               new AnsiPrintStream() // TODO: Filter out ANSI codes to file
-
                TeeOutputStream outputTee = new TeeOutputStream(System.out, createJansiFilteredStream(Files.newOutputStream(logFilePath)));
                TeeOutputStream errorTee = new TeeOutputStream(System.err, createJansiFilteredStream(Files.newOutputStream(logFilePath)));
                PrintStream outputStream = new PrintStream(outputTee);
