@@ -108,6 +108,7 @@ public class AvatarSimulationFactory
    private void createHumanoidFloatingRootJointRobot()
    {
       humanoidFloatingRootJointRobot = robotModel.get().createHumanoidFloatingRootJointRobot(createCollisionMeshes.get());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
    }
 
    private void initializeCollisionManager()
@@ -259,7 +260,7 @@ public class AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
       avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
-      avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get());
+      avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get(), robotInitialSetup.get());
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
       avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
@@ -274,6 +275,7 @@ public class AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       controllerThread = new AvatarControllerThread(robotName,
                                                     robotModel.get(),
+                                                    robotInitialSetup.get(),
                                                     robotModel.get().getSensorInformation(),
                                                     highLevelHumanoidControllerFactory.get(),
                                                     contextDataFactory,
@@ -287,6 +289,7 @@ public class AvatarSimulationFactory
    {
       // Create intermediate data buffer for threading.
       masterFullRobotModel = robotModel.get().createFullRobotModel();
+      robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
    }
 

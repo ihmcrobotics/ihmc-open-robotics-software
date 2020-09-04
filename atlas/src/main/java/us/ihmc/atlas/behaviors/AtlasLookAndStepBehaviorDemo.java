@@ -129,6 +129,10 @@ public class AtlasLookAndStepBehaviorDemo
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
       dynamicSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
                                                          createCommonAvatarEnvironment(),
+                                                         environmentInitialSetup.getGroundZ(),
+                                                         environmentInitialSetup.getInitialX(),
+                                                         environmentInitialSetup.getInitialY(),
+                                                         environmentInitialSetup.getInitialYaw(),
                                                          communicationMode.getPubSubImplementation(),
                                                          recordFrequencySpeedup,
                                                          dataBufferSize,
