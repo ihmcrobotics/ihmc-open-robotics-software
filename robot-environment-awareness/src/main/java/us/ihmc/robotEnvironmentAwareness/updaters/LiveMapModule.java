@@ -68,7 +68,7 @@ public class LiveMapModule implements PerceptionModule
       this.ros2Node = ros2Node;
       this.messager = messager;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP, this::dispatchLocalizedMap);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_REGIONS, this::dispatchLocalizedMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic, this::dispatchLidarMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic, this::dispatchRegionsAtFeet);
 
