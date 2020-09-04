@@ -4,13 +4,12 @@ import com.google.common.collect.Lists;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 
 public class DifferentialS2Segment implements S2Segment
 {
    private final double dt;
-   private final DMatrixRMaj NB = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj Nb = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj s2Dot = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj q2 = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj r2 = new DMatrixRMaj(6, 1);
@@ -60,7 +59,7 @@ public class DifferentialS2Segment implements S2Segment
 
       double duration = vrpTrajectory.getDuration();
 
-      for (double t = dt; t <= duration; t += dt)
+      for (double t = duration - dt; t >= 0.0; t -= dt)
       {
          DMatrixRMaj previousS2 = s2Trajectory.getLast();
          DMatrixRMaj newS2 = s2Trajectory.add();
@@ -70,12 +69,12 @@ public class DifferentialS2Segment implements S2Segment
          vrpTrajectory.compute(t);
          vrpTrajectory.getPosition().get(referenceVRP);
 
-         computeNB(B, NTranspose, S1);
+         computeNb(B, NTranspose, S1);
          computeQ2(C, Q, referenceVRP);
          computeR2(D, Q, referenceVRP);
          computeRs(B, previousS2);
 
-         computeS2Dot(q2, NB, R1Inverse, previousS2, A);
+         computeS2Dot(q2, Nb, R1Inverse, previousS2, A);
 
          CommonOps_DDRM.add(previousS2, -dt, s2Dot, newS2);
       }
@@ -86,19 +85,19 @@ public class DifferentialS2Segment implements S2Segment
    public void compute(double timeInState, DMatrixRMaj s2ToPack)
    {
       int startIndex = getStartIndex(timeInState);
-      DMatrixRMaj start = s2Trajectory.get(startIndex);
-      if (startIndex == s2Trajectory.size() - 1)
+      if (startIndex >= s2Trajectory.size() - 1)
       {
          s2ToPack.set(s2Trajectory.getLast());
          return;
       }
+      DMatrixRMaj start = s2Trajectory.get(startIndex);
       DMatrixRMaj end = s2Trajectory.get(startIndex + 1);
       interpolate(start, end, getAlphaBetweenSegments(timeInState), s2ToPack);
    }
 
    private int getStartIndex(double timeInState)
    {
-      return (int) Math.floor(timeInState / dt);
+      return (int) Math.floor(timeInState / dt + dt / 10.0);
    }
 
    private double getAlphaBetweenSegments(double timeInState)
@@ -112,10 +111,10 @@ public class DifferentialS2Segment implements S2Segment
       CommonOps_DDRM.addEquals(ret, alpha, end);
    }
 
-   private void computeNB(DMatrixRMaj B, DMatrixRMaj NTranspose, DMatrixRMaj S1)
+   private void computeNb(DMatrixRMaj B, DMatrixRMaj NTranspose, DMatrixRMaj S1)
    {
-      CommonOps_DDRM.multTransA(B, S1, NB);
-      CommonOps_DDRM.addEquals(NB, NTranspose);
+      CommonOps_DDRM.multTransA(B, S1, Nb);
+      CommonOps_DDRM.addEquals(Nb, NTranspose);
    }
 
    private final DMatrixRMaj CTransposeQ = new DMatrixRMaj(3, 6);
