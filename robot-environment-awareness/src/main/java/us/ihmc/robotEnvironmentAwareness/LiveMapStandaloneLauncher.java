@@ -30,13 +30,28 @@ public class LiveMapStandaloneLauncher extends Application
    private LiveMapModule module;
    private ROS2Node ros2Node;
 
+   private final boolean launchUI;
+   private final PubSubImplementation pubSubImplementation;
+
+   public LiveMapStandaloneLauncher()
+   {
+      this(true, PubSubImplementation.FAST_RTPS);
+   }
+
+   public LiveMapStandaloneLauncher(boolean launchUIs, PubSubImplementation pubSubImplementation)
+   {
+      this.launchUI = launchUIs;
+      this.pubSubImplementation = pubSubImplementation;
+   }
+
+
    @Override
    public void start(Stage primaryStage) throws Exception
    {
       messager = new SharedMemoryJavaFXMessager(LiveMapModuleAPI.API);
       messager.startMessager();
       
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
       
       REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS);
       LIDARBasedREAModule reaModule = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(Paths.get(System.getProperty("user.home"))
@@ -46,18 +61,25 @@ public class LiveMapStandaloneLauncher extends Application
       reaModule.setParametersForStereo();
       reaModule.loadConfigurationsFromFile();
       reaModule.start();
-      
-      ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);
+
+      if (launchUI)
+         ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);
+      else
+         ui = null;
+
       module = LiveMapModule.createIntraprocess(ros2Node, messager);
 
-      ui.show();
+      if (launchUI)
+         ui.show();
+
       module.start();
    }
 
    @Override
    public void stop() throws Exception
    {
-      ui.stop();
+      if (ui != null)
+         ui.stop();
       module.stop();
       ros2Node.destroy();
 
