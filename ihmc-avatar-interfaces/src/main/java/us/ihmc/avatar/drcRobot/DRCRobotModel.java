@@ -122,6 +122,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   {
+      return null;
+   }
+
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;

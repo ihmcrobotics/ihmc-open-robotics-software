@@ -47,6 +47,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepBehaviorParameters lookAndStepParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
+   private final VisibilityGraphsParametersBasics visibilityGraphParameters;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -73,12 +74,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
 
-      VisibilityGraphsParametersBasics visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
+      visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
       visibilityGraphParameters.setIncludePreferredExtrusions(false);
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
       lookAndStepParameters = new LookAndStepBehaviorParameters();
-      footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
+      footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters();
 
       updateOverrideParameters();
@@ -238,13 +239,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void updateOverrideParameters()
    {
-      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.getIdealFootstepLengthOverride());
-      footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
-      footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
-      footstepPlannerParameters.setWiggleInsideDeltaMinimum(lookAndStepParameters.getWiggleInsideDeltaMinimumOverride());
-      footstepPlannerParameters.setWiggleInsideDeltaTarget(lookAndStepParameters.getWiggleInsideDeltaTargetOverride());
-      footstepPlannerParameters.setWiggleWhilePlanning(lookAndStepParameters.getWiggleWhilePlanningOverride());
-      footstepPlannerParameters.setEnableExpansionMask(lookAndStepParameters.getEnableExpansionMaskOverride());
       swingPlannerParameters.setMinimumSwingFootClearance(lookAndStepParameters.getMinimumSwingFootClearanceOverride());
    }
 

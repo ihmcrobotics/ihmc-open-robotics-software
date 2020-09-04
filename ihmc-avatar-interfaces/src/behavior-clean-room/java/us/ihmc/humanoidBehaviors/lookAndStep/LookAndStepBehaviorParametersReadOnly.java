@@ -36,44 +36,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(direction);
    }
 
-   default double getWiggleInsideDeltaMinimumOverride()
-   {
-      return get(wiggleInsideDeltaMinimumOverride);
-   }
-
-   default double getWiggleInsideDeltaTargetOverride()
-   {
-      return get(wiggleInsideDeltaTargetOverride);
-   }
-
-   default boolean getWiggleWhilePlanningOverride()
-   {
-      return get(wiggleWhilePlanningOverride);
-   }
-
-   default boolean getEnableExpansionMaskOverride()
-   {
-      return get(enableExpansionMaskOverride);
-   }
-
    default double getPlanHorizon()
    {
       return get(planHorizon);
-   }
-
-   default double getIdealFootstepLengthOverride()
-   {
-      return get(idealFootstepLengthOverride);
-   }
-
-   default double getCliffBaseHeightToAvoidOverride()
-   {
-      return get(cliffBaseHeightToAvoidOverride);
-   }
-
-   default boolean getEnableConcaveHullWigglerOverride()
-   {
-      return get(enableConcaveHullWigglerOverride);
    }
 
    default double getFootstepPlannerTimeout()
