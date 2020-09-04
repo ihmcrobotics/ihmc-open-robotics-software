@@ -3,7 +3,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import com.google.common.collect.Lists;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import sun.rmi.runtime.Log;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 public class DifferentialS1Segment implements S1Function
@@ -12,7 +15,7 @@ public class DifferentialS1Segment implements S1Function
    private final DMatrixRMaj NB = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj S1Dot = new DMatrixRMaj(6, 6);
 
-   private final RecyclingArrayList<DMatrixRMaj> S1Trajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
+   final RecyclingArrayList<DMatrixRMaj> S1Trajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
 
    public DifferentialS1Segment(double dt)
    {
@@ -35,7 +38,7 @@ public class DifferentialS1Segment implements S1Function
       S1Trajectory.clear();
       S1Trajectory.add().set(S1AtEnd);
 
-      for (double t = dt; t <= duration; t += dt)
+      for (double t = dt; t <= duration + dt / 10.0; t += dt)
       {
          DMatrixRMaj previousS1 = S1Trajectory.getLast();
          DMatrixRMaj newS1 = S1Trajectory.add();
@@ -63,12 +66,12 @@ public class DifferentialS1Segment implements S1Function
       interpolate(start, end, getAlphaBetweenSegments(timeInState), S1ToPack);
    }
 
-   private int getStartIndex(double timeInState)
+   int getStartIndex(double timeInState)
    {
-      return (int) Math.floor(timeInState / dt);
+      return (int) Math.floor(timeInState / dt + dt / 10.0);
    }
 
-   private double getAlphaBetweenSegments(double timeInState)
+   double getAlphaBetweenSegments(double timeInState)
    {
       return (timeInState % dt) / dt;
    }

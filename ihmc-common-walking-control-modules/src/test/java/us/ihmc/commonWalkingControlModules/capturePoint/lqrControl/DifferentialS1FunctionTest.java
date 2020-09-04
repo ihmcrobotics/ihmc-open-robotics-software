@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
+import us.ihmc.matrixlib.MatrixTestTools;
 
 public class DifferentialS1FunctionTest
 {
@@ -18,6 +19,7 @@ public class DifferentialS1FunctionTest
 
       DMatrixRMaj s1End = new DMatrixRMaj(6, 6);
       DMatrixRMaj s1StartOfFlight = new DMatrixRMaj(6, 6);
+      DMatrixRMaj s1StartOfFlightOther = new DMatrixRMaj(6, 6);
       DMatrixRMaj s1Start = new DMatrixRMaj(6, 6);
 
       endingS1Function.set(commonValues);
@@ -27,8 +29,8 @@ public class DifferentialS1FunctionTest
       flightS1Function.compute(0.0, s1StartOfFlight);
 
       firstS1Function.set(commonValues, s1StartOfFlight, 1.0);
-      firstS1Function.compute(0.0, s1Start);
+      firstS1Function.compute(1.0, s1StartOfFlightOther);
 
-      DMatrixRMaj otherS1 = new DMatrixRMaj(s1Start);
+      MatrixTestTools.assertMatrixEquals(s1StartOfFlight, s1StartOfFlightOther, 1e-7);
    }
 }
