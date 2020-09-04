@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import com.google.common.collect.Lists;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import sun.rmi.runtime.Log;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.log.LogTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DifferentialS1Segment implements S1Function
 {
@@ -15,7 +14,8 @@ public class DifferentialS1Segment implements S1Function
    private final DMatrixRMaj NB = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj S1Dot = new DMatrixRMaj(6, 6);
 
-   final RecyclingArrayList<DMatrixRMaj> S1Trajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
+   private final RecyclingArrayList<DMatrixRMaj> S1ReverseTrajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
+   final List<DMatrixRMaj> S1Trajectory = new ArrayList<>();
 
    public DifferentialS1Segment(double dt)
    {
@@ -36,12 +36,13 @@ public class DifferentialS1Segment implements S1Function
    public void set(DMatrixRMaj Q1, DMatrixRMaj R1Inverse, DMatrixRMaj NTranspose, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj S1AtEnd, double duration)
    {
       S1Trajectory.clear();
-      S1Trajectory.add().set(S1AtEnd);
+      S1ReverseTrajectory.clear();
+      S1ReverseTrajectory.add().set(S1AtEnd);
 
       for (double t = dt; t <= duration + dt / 10.0; t += dt)
       {
-         DMatrixRMaj previousS1 = S1Trajectory.getLast();
-         DMatrixRMaj newS1 = S1Trajectory.add();
+         DMatrixRMaj previousS1 = S1ReverseTrajectory.getLast();
+         DMatrixRMaj newS1 = S1ReverseTrajectory.add();
 
          computeNB(B, NTranspose, previousS1);
          computeS1Dot(Q1, NB, R1Inverse, previousS1, A);
@@ -49,7 +50,10 @@ public class DifferentialS1Segment implements S1Function
          CommonOps_DDRM.add(previousS1, -dt, S1Dot, newS1);
       }
 
-      Lists.reverse(S1Trajectory);
+      for (int i = S1ReverseTrajectory.size() - 1; i >= 0; i--)
+      {
+         S1Trajectory.add(S1ReverseTrajectory.get(i));
+      }
    }
 
    @Override
@@ -59,7 +63,7 @@ public class DifferentialS1Segment implements S1Function
       DMatrixRMaj start = S1Trajectory.get(startIndex);
       if (startIndex == S1Trajectory.size() - 1)
       {
-         S1ToPack.set(S1Trajectory.getLast());
+         S1ToPack.set(S1Trajectory.get(S1Trajectory.size() - 1));
          return;
       }
       DMatrixRMaj end = S1Trajectory.get(startIndex + 1);
@@ -84,15 +88,26 @@ public class DifferentialS1Segment implements S1Function
 
    private void computeNB(DMatrixRMaj B, DMatrixRMaj NTranspose, DMatrixRMaj S1)
    {
-      CommonOps_DDRM.multTransA(B, S1, NB);
-      CommonOps_DDRM.addEquals(NB, NTranspose);
+      computeNB(B, NTranspose, S1, NB);
+   }
+
+   static void computeNB(DMatrixRMaj B, DMatrixRMaj NTranspose, DMatrixRMaj S1, DMatrixRMaj NbToPack)
+   {
+      CommonOps_DDRM.multTransA(B, S1, NbToPack);
+      CommonOps_DDRM.addEquals(NbToPack, NTranspose);
    }
 
    private void computeS1Dot(DMatrixRMaj Q1, DMatrixRMaj NB, DMatrixRMaj R1Inverse, DMatrixRMaj S1, DMatrixRMaj A)
    {
-      NativeCommonOps.multQuad(NB, R1Inverse, S1Dot);
-      CommonOps_DDRM.addEquals(S1Dot, -1.0, Q1);
-      CommonOps_DDRM.multAdd(-1.0, S1, A, S1Dot);
-      CommonOps_DDRM.multAddTransA(-1.0, A, S1, S1Dot);
+      computeS1Dot(Q1, NB, R1Inverse, S1, A, S1Dot);
    }
+
+   static void computeS1Dot(DMatrixRMaj Q1, DMatrixRMaj NB, DMatrixRMaj R1Inverse, DMatrixRMaj S1, DMatrixRMaj A, DMatrixRMaj S1DotToPack)
+   {
+      NativeCommonOps.multQuad(NB, R1Inverse, S1DotToPack);
+      CommonOps_DDRM.addEquals(S1DotToPack, -1.0, Q1);
+      CommonOps_DDRM.multAdd(-1.0, S1, A, S1DotToPack);
+      CommonOps_DDRM.multAddTransA(-1.0, A, S1, S1DotToPack);
+   }
+
 }

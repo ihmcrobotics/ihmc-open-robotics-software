@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableC
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.tools.ArrayTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -33,7 +32,7 @@ import java.util.List;
  */
 public class LQRJumpMomentumController
 {
-   private static final double discreteDt = 1e-4;
+   private static final double discreteDt = 5e-3;
    private static final double gravityZ = -9.81;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -59,7 +58,6 @@ public class LQRJumpMomentumController
 
    private final DMatrixRMaj S1 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj s2 = new DMatrixRMaj(6, 1);
-   private final DMatrixRMaj otherS2 = new DMatrixRMaj(6, 1);
 
    private final DMatrixRMaj K1 = new DMatrixRMaj(3, 6);
    private final DMatrixRMaj k2 = new DMatrixRMaj(3, 1);
@@ -83,7 +81,6 @@ public class LQRJumpMomentumController
    private final List<S1Function> s1FunctionList = new ArrayList<>();
    private final List<S2Segment> reversedS2FunctionList = new ArrayList<>();
    private final List<S2Segment> s2FunctionList = new ArrayList<>();
-   private final AlgebraicS2Function fullS2Function = new AlgebraicS2Function();
 
    public LQRJumpMomentumController(DoubleProvider omega)
    {
@@ -232,11 +229,11 @@ public class LQRJumpMomentumController
          endingContactVRPs.add(relativeVRPTrajectories.get(j));
 
       s2.zero();
-      fullS2Function.set(s2, relativeVRPTrajectories, lqrCommonValues);
 
       AlgebraicS2Function endingS2Function = new AlgebraicS2Function();
       finalS1Function.compute(0.0, S1);
       lqrCommonValues.computeS2ConstantStateMatrices(S1);
+//      fullS2Function.set(s2, relativeVRPTrajectories, lqrCommonValues);
       endingS2Function.set(s2, endingContactVRPs, lqrCommonValues);
       endingS2Function.compute(0, 0.0, s2);
 
@@ -298,7 +295,6 @@ public class LQRJumpMomentumController
       referenceVRPPosition.add(finalVRPPosition);
 
       s2FunctionList.get(j).compute(timeInSegment, s2);
-      fullS2Function.compute(j, timeInSegment, otherS2);
 
       CommonOps_DDRM.mult(lqrCommonValues.getR1Inverse(), lqrCommonValues.getDQ(), R1InverseDQ);
       CommonOps_DDRM.multTransB(-0.5, lqrCommonValues.getR1Inverse(), lqrCommonValues.getB(), R1InverseBTranspose);

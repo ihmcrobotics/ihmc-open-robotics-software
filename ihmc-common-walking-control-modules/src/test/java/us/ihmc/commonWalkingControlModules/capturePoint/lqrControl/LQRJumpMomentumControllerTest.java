@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableC
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
@@ -201,21 +202,29 @@ public class LQRJumpMomentumControllerTest
       Point3D vrpStart2 = new Point3D(1.5, 0.2, 1.0);
       Point3D vrpEnd2 = new Point3D(2.0, -0.5, 1.0);
 
+      double contactDuration = 1.0;
+      double flightDuration = 0.3;
+
+      double startTime = 0.0;
 
       SettableContactStateProvider contact1 = new SettableContactStateProvider();
       contact1.setStartCopPosition(new Point2D(vrpStart1));
       contact1.setEndCopPosition(new Point2D(vrpEnd1));
-      contact1.getTimeInterval().setInterval(0.0, 1.0);
+      contact1.getTimeInterval().setInterval(startTime, startTime + contactDuration);
       contact1.setContactState(ContactState.IN_CONTACT);
 
+      startTime += contactDuration;
+
       SettableContactStateProvider contact2 = new SettableContactStateProvider();
-      contact2.getTimeInterval().setInterval(1.0, 1.3);
+      contact2.getTimeInterval().setInterval(startTime, startTime + flightDuration);
       contact2.setContactState(ContactState.FLIGHT);
+
+      startTime += flightDuration;
 
       SettableContactStateProvider contact3 = new SettableContactStateProvider();
       contact3.setStartCopPosition(new Point2D(vrpStart2));
       contact3.setEndCopPosition(new Point2D(vrpEnd2));
-      contact3.getTimeInterval().setInterval(1.3, 2.3);
+      contact3.getTimeInterval().setInterval(startTime, startTime + contactDuration);
       contact3.setContactState(ContactState.IN_CONTACT);
 
       List<SettableContactStateProvider> contactStates = new ArrayList<>();
@@ -229,26 +238,117 @@ public class LQRJumpMomentumControllerTest
       controller.computeS1Segments();
       controller.computeS2Segments();
 
+      LQRCommonValues commonValues = new LQRCommonValues();
+      commonValues.computeDynamicsMatrix(omega);
+      commonValues.computeEquivalentCostValues(controller.defaultMomentumRateWeight, controller.defaultVrpTrackingWeight);
+
+      AlgebraicS1Function finalS1Function = new AlgebraicS1Function();
+      FlightS1Function flightS1Function = new FlightS1Function();
+      DifferentialS1Segment initialS1Function = new DifferentialS1Segment(1e-4);
+
+      AlgebraicS2Segment finalS2Function = new AlgebraicS2Segment();
+      FlightS2Function flightS2Function = new FlightS2Function(-9.81);
+      DifferentialS2Segment initialS2Function = new DifferentialS2Segment(1e-4);
+
+      finalS1Function.set(commonValues);
+
+      DMatrixRMaj expectedStartOfS13 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedStartOfS12 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedStartOfS11 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedStartOfS23 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj expectedStartOfS22 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj expectedStartOfS21 = new DMatrixRMaj(6, 1);
+
+      DMatrixRMaj expectedEndOfS13 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedEndOfS12 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedEndOfS11 = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedEndOfS23 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj expectedEndOfS22 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj expectedEndOfS21 = new DMatrixRMaj(6, 1);
+
+      finalS1Function.compute(0.0, expectedStartOfS13);
+      finalS1Function.compute(contactDuration, expectedEndOfS13);
+
+      Trajectory3D relativeVRPTrajectory = new Trajectory3D(4);
+      Trajectory3D initialVRPTrajectory = new Trajectory3D(4);
+      relativeVRPTrajectory.set(coMTrajectoryPlanner.getVRPTrajectories().get(2));
+      initialVRPTrajectory.set(coMTrajectoryPlanner.getVRPTrajectories().get(0));
+      relativeVRPTrajectory.compute(relativeVRPTrajectory.getFinalTime());
+      Point3DReadOnly finalPosition = relativeVRPTrajectory.getPosition();
+      relativeVRPTrajectory.offsetTrajectoryPosition(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
+      initialVRPTrajectory.offsetTrajectoryPosition(-finalPosition.getX(), -finalPosition.getY(), -finalPosition.getZ());
+
+      commonValues.computeS2ConstantStateMatrices(expectedStartOfS13);
+      finalS2Function.set(new DMatrixRMaj(6, 1), relativeVRPTrajectory, commonValues);
+      finalS2Function.compute(0.0, expectedStartOfS23);
+      finalS2Function.compute(contactDuration, expectedEndOfS23);
+
+      flightS1Function.set(expectedStartOfS13, flightDuration);
+      flightS1Function.compute(0.0, expectedStartOfS12);
+      flightS1Function.compute(flightDuration, expectedEndOfS12);
+
+      flightS2Function.set(expectedStartOfS13, expectedStartOfS23, flightDuration);
+      flightS2Function.compute(0.0, expectedStartOfS22);
+      flightS2Function.compute(flightDuration, expectedEndOfS22);
+
+      initialS1Function.set(commonValues, expectedStartOfS12, contactDuration);
+      initialS1Function.compute(0.0, expectedStartOfS11);
+      initialS1Function.compute(contactDuration, expectedEndOfS11);
+
+      initialS2Function.set(initialS1Function, initialVRPTrajectory, commonValues, expectedStartOfS22);
+      initialS2Function.compute(0.0, expectedStartOfS21);
+      initialS2Function.compute(contactDuration, expectedEndOfS21);
+
+
+      DMatrixRMaj startOfS11 = new DMatrixRMaj(6, 6);
       DMatrixRMaj endOfS11 = new DMatrixRMaj(6, 6);
       DMatrixRMaj startOfS12 = new DMatrixRMaj(6, 6);
       DMatrixRMaj endOfS12 = new DMatrixRMaj(6, 6);
       DMatrixRMaj startOfS13 = new DMatrixRMaj(6, 6);
-      controller.getS1Segment(0).compute(1.0, endOfS11);
+      DMatrixRMaj endOfS13 = new DMatrixRMaj(6, 6);
+      controller.getS1Segment(0).compute(0.0, startOfS11);
+      controller.getS1Segment(0).compute(contactDuration, endOfS11);
       controller.getS1Segment(1).compute(0.0, startOfS12);
-      controller.getS1Segment(1).compute(0.3, endOfS12);
+      controller.getS1Segment(1).compute(flightDuration, endOfS12);
       controller.getS1Segment(2).compute(0.0, startOfS13);
+      controller.getS1Segment(2).compute(contactDuration, endOfS13);
 
-//      MatrixTestTools.assertMatrixEquals(startOfS13, endOfS12, 1e-7);
-//      MatrixTestTools.assertMatrixEquals(startOfS12, endOfS11, 1e-7);
-
+      DMatrixRMaj startOfS21 = new DMatrixRMaj(6, 1);
       DMatrixRMaj endOfS21 = new DMatrixRMaj(6, 1);
       DMatrixRMaj startOfS22 = new DMatrixRMaj(6, 1);
       DMatrixRMaj endOfS22 = new DMatrixRMaj(6, 1);
       DMatrixRMaj startOfS23 = new DMatrixRMaj(6, 1);
-      controller.getS2Segment(0).compute(1.0, endOfS21);
+      DMatrixRMaj endOfS23 = new DMatrixRMaj(6, 1);
+      controller.getS2Segment(0).compute(0.0, startOfS21);
+      controller.getS2Segment(0).compute(contactDuration, endOfS21);
       controller.getS2Segment(1).compute(0.0, startOfS22);
-      controller.getS2Segment(1).compute(0.3, endOfS22);
+      controller.getS2Segment(1).compute(flightDuration, endOfS22);
       controller.getS2Segment(2).compute(0.0, startOfS23);
+      controller.getS2Segment(2).compute(contactDuration, endOfS23);
+
+
+      MatrixTestTools.assertMatrixEquals(finalS2Function.getAlpha(), ((AlgebraicS2Segment) controller.getS2Segment(2)).getAlpha(), 1e-7);
+      MatrixTestTools.assertMatrixEquals(finalS2Function.getBeta(0), ((AlgebraicS2Segment) controller.getS2Segment(2)).getBeta(0), 1e-7);
+      MatrixTestTools.assertMatrixEquals(finalS2Function.getBeta(1), ((AlgebraicS2Segment) controller.getS2Segment(2)).getBeta(1), 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedStartOfS13, startOfS13, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedStartOfS12, startOfS12, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedStartOfS11, startOfS11, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedStartOfS23, startOfS23, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedStartOfS22, startOfS22, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedStartOfS21, startOfS21, 1e-7);
+
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS13, endOfS13, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS12, endOfS12, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS11, endOfS11, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS23, endOfS23, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS22, endOfS22, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS21, endOfS21, 1e-7);
+
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS12, expectedStartOfS13, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS11, expectedStartOfS12, 7e-1);
+
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS22, expectedStartOfS23, 1e-7);
+      MatrixTestTools.assertMatrixEquals(expectedEndOfS21, expectedStartOfS22, 1e-7);
 
       MatrixTestTools.assertMatrixEquals(startOfS23, endOfS22, 1e-7);
       MatrixTestTools.assertMatrixEquals(startOfS22, endOfS21, 1e-7);

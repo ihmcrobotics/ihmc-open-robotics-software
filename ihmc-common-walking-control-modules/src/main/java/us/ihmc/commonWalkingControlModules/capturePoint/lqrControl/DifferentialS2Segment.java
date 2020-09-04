@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import com.google.common.collect.Lists;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DifferentialS2Segment implements S2Segment
 {
@@ -18,7 +20,8 @@ public class DifferentialS2Segment implements S2Segment
    private final DMatrixRMaj S1 = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj referenceVRP = new DMatrixRMaj(3, 1);
 
-   private final RecyclingArrayList<DMatrixRMaj> s2Trajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
+   private final RecyclingArrayList<DMatrixRMaj> s2ReverseTrajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
+   private final List<DMatrixRMaj> s2Trajectory = new ArrayList<>();
 
    public DifferentialS2Segment(double dt)
    {
@@ -54,15 +57,16 @@ public class DifferentialS2Segment implements S2Segment
                    DMatrixRMaj s2AtEnd)
    {
 
+      s2ReverseTrajectory.clear();
       s2Trajectory.clear();
-      s2Trajectory.add().set(s2AtEnd);
+      s2ReverseTrajectory.add().set(s2AtEnd);
 
       double duration = vrpTrajectory.getDuration();
 
       for (double t = duration - dt; t >= 0.0; t -= dt)
       {
-         DMatrixRMaj previousS2 = s2Trajectory.getLast();
-         DMatrixRMaj newS2 = s2Trajectory.add();
+         DMatrixRMaj previousS2 = s2ReverseTrajectory.getLast();
+         DMatrixRMaj newS2 = s2ReverseTrajectory.add();
 
          s1Segment.compute(t, S1);
 
@@ -79,7 +83,8 @@ public class DifferentialS2Segment implements S2Segment
          CommonOps_DDRM.add(previousS2, -dt, s2Dot, newS2);
       }
 
-      Lists.reverse(s2Trajectory);
+      for (int i = s2ReverseTrajectory.size() - 1; i >= 0; i--)
+         s2Trajectory.add(s2ReverseTrajectory.get(i));
    }
 
    public void compute(double timeInState, DMatrixRMaj s2ToPack)
@@ -87,7 +92,7 @@ public class DifferentialS2Segment implements S2Segment
       int startIndex = getStartIndex(timeInState);
       if (startIndex >= s2Trajectory.size() - 1)
       {
-         s2ToPack.set(s2Trajectory.getLast());
+         s2ToPack.set(s2Trajectory.get(s2Trajectory.size() - 1));
          return;
       }
       DMatrixRMaj start = s2Trajectory.get(startIndex);
