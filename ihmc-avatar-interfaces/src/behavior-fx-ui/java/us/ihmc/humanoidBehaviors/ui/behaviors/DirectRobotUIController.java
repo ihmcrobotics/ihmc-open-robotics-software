@@ -110,7 +110,7 @@ public class DirectRobotUIController extends Group
       lidarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
       lidarRegionsGraphic.setEnabled(false);
       getChildren().add(lidarRegionsGraphic);
-      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, false);
+      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_REA, false);
       realsenseRegionsGraphic.setEnabled(false);
       getChildren().add(realsenseRegionsGraphic);
       mapRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
