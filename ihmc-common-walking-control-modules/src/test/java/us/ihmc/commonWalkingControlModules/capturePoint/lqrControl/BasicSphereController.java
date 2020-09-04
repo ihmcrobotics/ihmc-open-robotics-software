@@ -85,7 +85,7 @@ public class BasicSphereController implements SphereControllerInterface
          tempDesiredCMP.subZ(sphereRobot.getDesiredHeight());
          desiredCMP.set(tempDesiredCMP);
 
-         heightController.doControl();
+         heightController.doControl(dcmPlan.getDesiredCoMPosition().getZ(), dcmPlan.getDesiredCoMVelocity().getZ());
 
          double fZ = heightController.getVerticalForce();
          WrenchDistributorTools

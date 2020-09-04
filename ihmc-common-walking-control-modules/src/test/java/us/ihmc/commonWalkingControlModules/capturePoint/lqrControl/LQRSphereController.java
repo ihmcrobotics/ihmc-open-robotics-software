@@ -22,7 +22,7 @@ public class LQRSphereController implements SphereControllerInterface
    private final SphereRobot sphereRobot;
    private final ExternalForcePoint externalForcePoint;
 
-   private final LQRJumpMomentumController lqrMomentumController;
+   private final LQRMomentumController lqrMomentumController;
 
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
@@ -39,7 +39,7 @@ public class LQRSphereController implements SphereControllerInterface
 
       sphereRobot.getScsRobot().setController(this);
 
-      lqrMomentumController = new LQRJumpMomentumController(sphereRobot.getOmega0Provider(), registry);
+      lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
    }
 
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
@@ -60,7 +60,7 @@ public class LQRSphereController implements SphereControllerInterface
 
       if (contactStateProviders.get(segmentNumber).getContactState().isLoadBearing())
       {
-         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories(), contactStateProviders);
+         lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories());
          sphereRobot.getCenterOfMass().get(currentState);
          sphereRobot.getCenterOfMassVelocity().get(3, currentState);
          lqrMomentumController.computeControlInput(currentState, sphereRobot.getScsRobot().getYoTime().getDoubleValue());
