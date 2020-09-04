@@ -54,6 +54,11 @@ public class DifferentialS1Segment implements S1Function
    {
       int startIndex = getStartIndex(timeInState);
       DMatrixRMaj start = S1Trajectory.get(startIndex);
+      if (startIndex == S1Trajectory.size() - 1)
+      {
+         S1ToPack.set(S1Trajectory.getLast());
+         return;
+      }
       DMatrixRMaj end = S1Trajectory.get(startIndex + 1);
       interpolate(start, end, getAlphaBetweenSegments(timeInState), S1ToPack);
    }

@@ -83,12 +83,17 @@ public class DifferentialS2Segment implements S2Segment
       Lists.reverse(s2Trajectory);
    }
 
-   public void compute(double timeInState, DMatrixRMaj S1ToPack)
+   public void compute(double timeInState, DMatrixRMaj s2ToPack)
    {
       int startIndex = getStartIndex(timeInState);
       DMatrixRMaj start = s2Trajectory.get(startIndex);
+      if (startIndex == s2Trajectory.size() - 1)
+      {
+         s2ToPack.set(s2Trajectory.getLast());
+         return;
+      }
       DMatrixRMaj end = s2Trajectory.get(startIndex + 1);
-      interpolate(start, end, getAlphaBetweenSegments(timeInState), S1ToPack);
+      interpolate(start, end, getAlphaBetweenSegments(timeInState), s2ToPack);
    }
 
    private int getStartIndex(double timeInState)
