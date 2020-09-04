@@ -233,7 +233,7 @@ public class LQRJumpMomentumController
       AlgebraicS2Function endingS2Function = new AlgebraicS2Function();
       finalS1Function.compute(0.0, S1);
       lqrCommonValues.computeS2ConstantStateMatrices(S1);
-//      fullS2Function.set(s2, relativeVRPTrajectories, lqrCommonValues);
+      
       endingS2Function.set(s2, endingContactVRPs, lqrCommonValues);
       endingS2Function.compute(0, 0.0, s2);
 

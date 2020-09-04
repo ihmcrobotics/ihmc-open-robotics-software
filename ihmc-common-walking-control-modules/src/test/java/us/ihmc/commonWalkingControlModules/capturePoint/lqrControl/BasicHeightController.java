@@ -49,10 +49,15 @@ public class BasicHeightController
 
    public void doControl()
    {
+      this.doControl(yoDesiredHeight.getDoubleValue(), 0.0);
+   }
+
+   public void doControl(double desiredHeight, double desiredVelocity)
+   {
       double z = centerOfMass.getZ();
 
       weight.set(sphereRobot.getScsRobot().getGravityZ() * sphereRobot.getTotalMass());
-      verticalForce.set(heightController.compute(z, yoDesiredHeight.getDoubleValue(), centerOfMassVelocity.getZ(), 0.0, controlDT));
+      verticalForce.set(heightController.compute(z, desiredHeight, centerOfMassVelocity.getZ(), desiredVelocity, controlDT));
       verticalForce.add(Math.abs(weight.getDoubleValue()));
    }
 
