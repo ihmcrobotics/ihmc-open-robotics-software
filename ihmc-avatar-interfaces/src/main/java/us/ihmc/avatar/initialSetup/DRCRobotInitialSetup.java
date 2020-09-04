@@ -1,11 +1,7 @@
 package us.ihmc.avatar.initialSetup;
 
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -23,21 +19,6 @@ public interface DRCRobotInitialSetup<T extends Robot>
    default Pose3DReadOnly getInitialPelvisPose()
    {
       throw new RuntimeException("Not implemented.");
-   }
-
-   default void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel)
-   {
-      OneDoFJointBasics[] allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      List<Double> initialJointAngles = getInitialJointAngles();
-      for (int i = 0; i < initialJointAngles.size(); i++)
-      {
-         allJointsExcludingHands[i].setQ(initialJointAngles.get(i));
-         allJointsExcludingHands[i].setQd(0.0);
-      }
-
-      fullRobotModel.getRootJoint().getJointPose().set(getInitialPelvisPose());
-      fullRobotModel.getRootJoint().setJointVelocity(0, new DMatrixRMaj(6, 1));
-      fullRobotModel.getRootJoint().getPredecessor().updateFramesRecursively();
    }
 
    void setInitialYaw(double yaw);
