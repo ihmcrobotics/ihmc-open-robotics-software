@@ -68,7 +68,7 @@ public class AtlasLookAndStepBehaviorDemo
       environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
                                                                TRIPLE_PLATFORM_HEIGHT, 0.0, 2.8, 0.0));
       environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateRealisticEasierStartingBlockRegions,
-                                                               RealisticLabTerrainBuilder.PALLET_HEIGHT * 2.0, 0.0, 0.5, 0.5));
+                                                               RealisticLabTerrainBuilder.PALLET_HEIGHT * 2.0, 0.0, 0.0, 0.0));
 
    }
    private final Random random = new Random();
