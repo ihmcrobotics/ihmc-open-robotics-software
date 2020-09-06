@@ -64,6 +64,7 @@ public class OptimizedTrajectoryGenerator
    private final YoDouble desiredPosition;
    private final YoDouble desiredVelocity;
    private final YoDouble desiredAcceleration;
+   private final YoDouble desiredJerk;
 
    private final YoDouble maxSpeed;
    private final YoDouble maxSpeedTime;
@@ -107,6 +108,7 @@ public class OptimizedTrajectoryGenerator
       desiredPosition = new YoDouble(namePrefix + "DesiredPosition", registry);
       desiredVelocity = new YoDouble(namePrefix + "DesiredVelocity", registry);
       desiredAcceleration = new YoDouble(namePrefix + "DesiredAcceleration", registry);
+      desiredJerk = new YoDouble(namePrefix + "DesiredJerk", registry);
 
       for (int i = 0; i < dimensions; i++)
       {
@@ -227,12 +229,11 @@ public class OptimizedTrajectoryGenerator
             throw new RuntimeException("Waypoint times aren't in ascending order.");
       }
 
-      double duration = waypointTimes.get(waypointTimes.size() - 1);
       for (int i = 0; i < waypointTimes.size(); i++)
       {
          double waypointTime = waypointTimes.get(i);
          this.waypointTimes.get(i).set(waypointTime);
-         waypointTimesArray.add(waypointTime / duration);
+         waypointTimesArray.add(waypointTime);
       }
    }
 
@@ -323,6 +324,7 @@ public class OptimizedTrajectoryGenerator
          desiredPosition.set(initialPosition);
          desiredVelocity.set(0.0);
          desiredAcceleration.set(0.0);
+         desiredJerk.set(0.0);
          return;
       }
       if (time > 1.0)
@@ -330,6 +332,7 @@ public class OptimizedTrajectoryGenerator
          desiredPosition.set(finalPosition);
          desiredVelocity.set(0.0);
          desiredAcceleration.set(0.0);
+         desiredJerk.set(0.0);
          return;
       }
 
@@ -351,6 +354,7 @@ public class OptimizedTrajectoryGenerator
       desiredPosition.set(polynomial.getPosition());
       desiredVelocity.set(polynomial.getVelocity());
       desiredAcceleration.set(polynomial.getAcceleration());
+      desiredJerk.set(polynomial.getJerk());
    }
 
    /**
@@ -389,13 +393,23 @@ public class OptimizedTrajectoryGenerator
 
    public double getVelocity()
    {
-      return desiredVelocity.getDoubleValue();
+      double duration = waypointTimes.get(waypointTimes.size() - 1).getDoubleValue();
+      return desiredVelocity.getDoubleValue() / duration;
    }
 
    public double getAcceleration()
    {
-      return desiredAcceleration.getDoubleValue();
+      double squaredDuration = MathTools.square(waypointTimes.get(waypointTimes.size() - 1).getDoubleValue());
+      return desiredAcceleration.getDoubleValue() / squaredDuration;
    }
+
+   public double getJerk()
+   {
+      double duration = waypointTimes.get(waypointTimes.size() - 1).getDoubleValue();
+      double cubedDuration = MathTools.pow(duration, 3);
+      return desiredJerk.getDoubleValue() / cubedDuration;
+   }
+
 
    public void informDone()
    {
