@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolder
 {
    private final int maximumNumberOfCoefficients;
-   private double pos, vel, acc, dPos;
+   private double pos, vel, acc, jerk, dPos;
    private final YoDouble[] a;
    private final YoInteger numberOfCoefficients;
    private final DMatrixRMaj constraintMatrix;
@@ -81,6 +81,11 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    public double getAcceleration()
    {
       return acc;
+   }
+
+   public double getJerk()
+   {
+      return jerk;
    }
 
    public double getCoefficient(int i)
@@ -627,7 +632,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    {
       setXPowers(xPowers, x);
 
-      pos = vel = acc = 0.0;
+      pos = vel = acc = jerk = 0.0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          pos += a[i].getDoubleValue() * xPowers[i];
@@ -641,6 +646,11 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       for (int i = 2; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          acc += (i - 1) * i * a[i].getDoubleValue() * xPowers[i - 2];
+      }
+
+      for (int i = 3; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         jerk += (i - 2) * (i - 1) * i * a[i].getDoubleValue() * xPowers[i - 3];
       }
    }
 
