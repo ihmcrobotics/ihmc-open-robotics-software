@@ -199,13 +199,6 @@ public class OptimizedTrajectoryGenerator
       {
          double waypointPosition = waypointPositions.get(i);
 
-         if (i > 0 && MathTools.epsilonEquals(waypointPosition, waypointPositions.get(i - 1), 1.0e-4))
-         {
-            optimizerIndex--;
-            indexMap.put(i, optimizerIndex);
-            continue;
-         }
-
          indexMap.put(i, optimizerIndex);
          optimizerIndex++;
 
