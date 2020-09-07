@@ -17,7 +17,6 @@ import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 public class RealSenseREANetworkProvider implements REANetworkProvider
@@ -25,17 +24,19 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
 
    private final ROS2Node ros2Node;
+   private final ROS2Topic inputTopic;
 
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
-   public RealSenseREANetworkProvider(ROS2Topic stereoOutputTopic)
+   public RealSenseREANetworkProvider(ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), stereoOutputTopic);
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), inputTopic, stereoOutputTopic);
    }
 
-   public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic stereoOutputTopic)
+   public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
    {
       this.ros2Node = ros2Node;
+      this.inputTopic = inputTopic;
 
       stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
    }
@@ -89,6 +90,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
    {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
    }
 
    @Override

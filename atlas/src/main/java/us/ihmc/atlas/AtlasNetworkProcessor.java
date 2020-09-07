@@ -94,7 +94,8 @@ public class AtlasNetworkProcessor
    {
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
       
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
@@ -111,7 +112,7 @@ public class AtlasNetworkProcessor
    {
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       sensorModule.setEnableDepthPointCloudPublisher(false);

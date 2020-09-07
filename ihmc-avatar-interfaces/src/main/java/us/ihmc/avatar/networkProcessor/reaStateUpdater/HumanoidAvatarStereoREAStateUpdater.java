@@ -1,8 +1,5 @@
 package us.ihmc.avatar.networkProcessor.reaStateUpdater;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -19,7 +16,10 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
-public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposable
 {
    private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
@@ -31,12 +31,12 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
    private final REAStateRequestMessage resumeRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage clearAndResumeRequestMessage = new REAStateRequestMessage();
 
-   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation)
+   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation)
    {
       this(robotModel, implementation, REACommunicationProperties.inputTopic);
    }
 
-   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic inputTopic)
+   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic inputTopic)
    {
       String robotName = robotModel.getSimpleRobotName();
 
@@ -83,23 +83,23 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
       if (executorService.isShutdown())
          return;
 
-      WalkingStatusMessage newMessage = subscriber.takeNextData();
-
-      switch (WalkingStatus.fromByte(newMessage.getWalkingStatus()))
-      {
-      case STARTED:
-      case RESUMED:
-         executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
-         break;
-      case COMPLETED:
-      case PAUSED:
-         executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
-         break;
-      case ABORT_REQUESTED:
-      default:
-         // Do nothing?
-         break;
-      }
+//      WalkingStatusMessage newMessage = subscriber.takeNextData();
+//
+//      switch (WalkingStatus.fromByte(newMessage.getWalkingStatus()))
+//      {
+//      case STARTED:
+//      case RESUMED:
+//         executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
+//         break;
+//      case COMPLETED:
+//      case PAUSED:
+//         executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
+//         break;
+//      case ABORT_REQUESTED:
+//      default:
+//          Do nothing?
+//         break;
+//      }
    }
 
    private void shutdown()
