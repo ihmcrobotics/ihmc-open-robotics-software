@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -186,27 +188,14 @@ public class LookAndStepBodyPathPlanningTask
       uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
 
       // calculate and send body path plan
-      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      YoRegistry parentRegistry = new YoRegistry(getClass().getSimpleName());
-      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
-
-      bodyPathPlanner.setGoal(goal);
-      bodyPathPlanner.setPlanarRegionsList(mapRegions);
-      FramePose3D leftFootPoseTemp = new FramePose3D();
-      leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPoseTemp = new FramePose3D();
-      rightFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
-      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      planningStopwatch.start();
-      BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();// takes about 0.1s
-      statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result, bodyPathPlanner.getWaypoints().size());
+      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result = performTaskWithVisibilityGraphPlanner();// takes about 0.1s
+
+      statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
       //      bodyPathPlan = bodyPathPlanner.getWaypoints();
-      if (bodyPathPlanner.getWaypoints() != null)
+      if (result.getRight() != null)
       {
-         for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
+         for (Pose3DReadOnly poseWaypoint : result.getRight())
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
          }
@@ -229,4 +218,45 @@ public class LookAndStepBodyPathPlanningTask
          planningFailedTimer.reset();
       }
    }
+
+   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithVisibilityGraphPlanner()
+   {
+      // calculate and send body path plan
+      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
+      YoRegistry parentRegistry = new YoRegistry(getClass().getSimpleName());
+      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
+
+      bodyPathPlanner.setGoal(goal);
+      bodyPathPlanner.setPlanarRegionsList(mapRegions);
+      FramePose3D leftFootPoseTemp = new FramePose3D();
+      leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPoseTemp = new FramePose3D();
+      rightFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+      planningStopwatch.start();
+      BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();
+      return new MutablePair<>(result, bodyPathPlanner.getWaypoints());// takes about 0.1s
+   }
+
+   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithFlatGround()
+   {
+      // calculate and send body path plan
+      FramePose3D leftFootPoseTemp = new FramePose3D();
+      leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPoseTemp = new FramePose3D();
+      rightFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      Pose3D start = new Pose3D();
+      start.interpolate(leftFootPoseTemp, rightFootPoseTemp, 0.5);
+
+      List<Pose3DReadOnly> waypoints = new ArrayList<>();
+      waypoints.add(start);
+      waypoints.add(goal);
+
+      return new MutablePair<>(BodyPathPlanningResult.FOUND_SOLUTION, waypoints);
+   }
+
 }
