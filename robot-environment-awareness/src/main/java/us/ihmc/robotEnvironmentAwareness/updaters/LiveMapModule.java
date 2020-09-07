@@ -205,7 +205,7 @@ public class LiveMapModule implements PerceptionModule
 
       shouldUpdateMap |= hasNewLocalizedMap.get() || hasNewRegionsAtFeet.get() || hasNewLidarMap.get() || hasNewParameters.get();
 
-      if (shouldUpdateMap && mostRecentLocalizedMap.get() != null)
+      if (shouldUpdateMap)
       {
          PlanarRegionsList localizedMap = null;
          if (mostRecentLocalizedMap.get() != null)
