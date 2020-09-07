@@ -1,9 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
-
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.messager.Messager;
@@ -24,6 +20,8 @@ import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class PerceptionSuite
 {
@@ -70,7 +68,7 @@ public class PerceptionSuite
 //      slamConfigurationFilePath = Paths.get(rootPath.toString(), directory + SLAM_CONFIGURATION_FILE_NAME);
 
       REANetworkProvider lidarREANetworkProvider = new LidarREANetworkProvider(ros2Node, outputTopic, lidarOutputTopic);
-      REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoOutputTopic);
+      REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoInputTopic, stereoOutputTopic);
       slamModule = new PerceptionSuiteComponent<>("RealSense SLAM",
                                                   () -> new SLAMPerceptionSuiteElement(this::createSLAMModuleInternal,
                                                                                        SLAMBasedEnvironmentAwarenessUI::creatIntraprocessUI),

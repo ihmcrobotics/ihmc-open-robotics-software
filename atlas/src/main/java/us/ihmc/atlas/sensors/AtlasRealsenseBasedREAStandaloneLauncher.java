@@ -48,7 +48,7 @@ public class AtlasRealsenseBasedREAStandaloneLauncher
       Path realsenseREAConfigurationFilePath = Paths.get(rootPath.toString(), directory + REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME);
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
-      REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoOutputTopic);
+      REANetworkProvider realSenseREANetworkProvider = new RealSenseREANetworkProvider(ros2Node, stereoInputTopic, stereoOutputTopic);
 
       if (spawnUI)
          ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage,
