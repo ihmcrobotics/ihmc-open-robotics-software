@@ -168,6 +168,11 @@ public class AvatarEstimatorThreadFactory
     * @param robotModel the robot model used to configure this factory.
     * @param robotInitialSetup
     */
+   public void configureWithDRCRobotModel(DRCRobotModel robotModel)
+   {
+      configureWithDRCRobotModel(robotModel, null);
+   }
+   
    public void configureWithDRCRobotModel(DRCRobotModel robotModel, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       configureWithWholeBodyControllerParameters(robotModel);
