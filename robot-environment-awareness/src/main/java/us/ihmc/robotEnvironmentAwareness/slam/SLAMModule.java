@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
@@ -27,6 +29,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
@@ -60,7 +64,8 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<Boolean> isOcTreeBoundingBoxRequested;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
    private final AtomicReference<Boolean> useBoundingBox;
-   
+   private final AtomicBoolean clearSlam = new AtomicBoolean(false);
+
    protected final SurfaceElementICPSLAM slam;
 
    private static final int SLAM_PERIOD_MILLISECONDS = 250;
@@ -131,6 +136,10 @@ public class SLAMModule implements PerceptionModule
                                            StereoVisionPointCloudMessage.class,
                                            REASourceType.DEPTH_POINT_CLOUD.getTopicName(),
                                            this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           REAStateRequestMessage.class,
+                                           REACommunicationProperties.stereoInputTopic,
+                                           this::handleREAStateRequestMessage);
 
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
@@ -194,6 +203,18 @@ public class SLAMModule implements PerceptionModule
    public void removeOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
    {
       this.ocTreeConsumers.remove(ocTreeConsumer);
+   }
+
+   private void handleREAStateRequestMessage(Subscriber<REAStateRequestMessage> subscriber)
+   {
+      REAStateRequestMessage newMessage = subscriber.takeNextData();
+
+      if (newMessage.getRequestResume())
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, true);
+      else if (newMessage.getRequestPause()) // We guarantee to resume if requested, regardless of the pause request.
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, false);
+      if (newMessage.getRequestClear())
+         clearSlam.set(true);
    }
 
    @Override
@@ -285,6 +306,9 @@ public class SLAMModule implements PerceptionModule
    {
       if (isMainThreadInterrupted())
          return;
+
+      if (clearSlam.getAndSet(false))
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMClear, true);
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
