@@ -1,6 +1,6 @@
 #
-#Thu Aug 27 10:26:43 CDT 2020
-PlanarSegmentationRoot/PlanarSegmentation/CustomRegionsMergingEnable=true
+#Mon Sep 07 14:07:05 CDT 2020
+PlanarSegmentationRoot/PlanarSegmentation/CustomRegionsMergingEnable=false
 PlanarSegmentationRoot/PlanarSegmentation/CustomRegionsMergingParameters=search radius\: 0.22, max distance from plane\: 0.05, maxAngleFromPlane\: 0.17453292519943295
 PlanarSegmentationRoot/PlanarSegmentation/OcTreeBoundingBoxEnable=true
 PlanarSegmentationRoot/PlanarSegmentation/OcTreeBoundingBoxParameters=min\: (-0.5, -1.0, -1.5), max\: (2.0, 1.0, 0.5)
@@ -10,5 +10,5 @@ PlanarSegmentationRoot/PlanarSegmentation/PlanarRegionsIntersectionParameters=ma
 PlanarSegmentationRoot/PlanarSegmentation/PlanarRegionsPolygonizerEnable=true
 PlanarSegmentationRoot/PlanarSegmentation/PlanarRegionsPolygonizerParameters=concaveHullThreshold\: 0.15, minNumberOfNodes\: 10, shallowAngleThreshold\: 0.017453292519943295, peakAngleThreshold\: 2.96705972839036, lengthThreshold\: 0.05, depthThreshold\: 0.1, cutNarrowPassage\: true
 PlanarSegmentationRoot/PlanarSegmentation/PlanarRegionsSegmentationEnable=true
-PlanarSegmentationRoot/PlanarSegmentation/PlanarRegionsSegmentationParameters=search radius\: 0.05, max distance from plane\: 0.0125, maxAngleFromPlane\: 0.12217309999999998, minNormalQuality\: 0.005, min region size\: 50, max standard deviation\: 0.015, min volumic density\: 100000.0
+PlanarSegmentationRoot/PlanarSegmentation/PlanarRegionsSegmentationParameters=search radius\: 0.0625, max distance from plane\: 0.037500000000000006, maxAngleFromPlane\: 0.174533, minNormalQuality\: 0.005, min region size\: 80, max standard deviation\: 0.015, min volumic density\: 100000.0
 PlanarSegmentationRoot/PlanarSegmentation/SurfaceNormalFilterParameters=surfaceNormalUpperBound\: 0.6981317007977318, surfaceNormalLowerBound\: -0.6981317007977318, useSurfaceNormalFilter\: true
