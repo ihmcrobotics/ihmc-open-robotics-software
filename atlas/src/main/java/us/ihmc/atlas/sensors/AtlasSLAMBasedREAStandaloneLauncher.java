@@ -36,7 +36,8 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    private static final String SLAM_CONFIGURATION_FILE_NAME = "atlasSLAMModuleConfiguration.txt";
    private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSegmentationModuleConfiguration.txt";
-   private final boolean spawnUIs;
+   private final boolean spawnSegmentationUI;
+   private final boolean spawnSLAMUI;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
    private ROS2Node ros2Node;
@@ -50,11 +51,18 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnUIs, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this.spawnUIs = spawnUIs;
+      this(spawnUIs, spawnUIs, pubSubImplementation);
+   }
+   
+   public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnSegmentationUI, boolean spawnSLAMUI, DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      this.spawnSegmentationUI = spawnSegmentationUI;
+      this.spawnSLAMUI = spawnSLAMUI;
+
       this.pubSubImplementation = pubSubImplementation;
 
       Runnable setup = () -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE);
-      if (spawnUIs)
+      if (spawnSegmentationUI || spawnSLAMUI)
       {
          JavaFXApplicationCreator.createAJavaFXApplication();
          Platform.runLater(setup);
@@ -68,7 +76,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    public void setup() throws Exception
    {
       Stage primaryStage = null;
-      if (spawnUIs)
+      if (spawnSLAMUI)
       {
          primaryStage = new Stage();
       }
@@ -84,16 +92,16 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
-      slamMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
+      slamMessager = spawnSLAMUI ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
 
       if (launchSegmentation)
       {
-         segmentationMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
+         segmentationMessager = spawnSegmentationUI ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
          segmentationMessager.startMessager();
       }
 
-      if (spawnUIs)
+      if (spawnSLAMUI)
       {
          ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
       }
@@ -104,7 +112,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       Stage secondStage = null;
       if (launchSegmentation)
       {
-         if (spawnUIs)
+         if (spawnSegmentationUI)
          {
             secondStage = new Stage();
             planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
@@ -117,15 +125,16 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          module.attachOcTreeConsumer(segmentationModule);
       }
 
-      if (spawnUIs)
+      if (spawnSLAMUI)
       {
          primaryStage.setOnCloseRequest(event -> stop());
-         if (secondStage != null)
-            secondStage.setOnCloseRequest(event -> stop());
-
          ui.show();
-         if (planarSegmentationUI != null)
-            planarSegmentationUI.show();
+         
+      }
+      if (spawnSegmentationUI && launchSegmentation)
+      {
+         secondStage.setOnCloseRequest(event -> stop());
+         planarSegmentationUI.show();
       }
 
       module.start();
@@ -135,14 +144,14 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public void stop()
    {
-      if (spawnUIs) ui.stop();
+      if (spawnSLAMUI) ui.stop();
       module.stop();
 
       ExceptionTools.handle(() -> slamMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
 
       if (launchSegmentation)
       {
-         if (spawnUIs)
+         if (spawnSegmentationUI)
             planarSegmentationUI.stop();
          segmentationModule.stop();
          ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -153,6 +162,6 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public static void main(String[] args)
    {
-      new AtlasSLAMBasedREAStandaloneLauncher(true, DomainFactory.PubSubImplementation.FAST_RTPS);
+      new AtlasSLAMBasedREAStandaloneLauncher(true, true, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 }
