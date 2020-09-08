@@ -5,6 +5,7 @@ import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.HashSet;
@@ -17,6 +18,7 @@ public class BehaviorRegistry
    static
    {
       DEFAULT_BEHAVIORS.register(LookAndStepBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(TraverseStairsBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(StepInPlaceBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(PatrolBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(FancyPosesBehavior.DEFINITION);
