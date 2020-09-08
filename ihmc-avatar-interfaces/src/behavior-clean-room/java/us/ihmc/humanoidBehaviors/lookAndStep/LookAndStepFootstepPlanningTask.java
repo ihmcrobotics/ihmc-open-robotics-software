@@ -10,9 +10,14 @@ import us.ihmc.communication.util.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.CustomNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
@@ -25,6 +30,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -255,6 +261,9 @@ public class LookAndStepFootstepPlanningTask
       footstepPlanningModule.getPostProcessHandler().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.addCustomTerminationCondition(
             (plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.getMinimumNumberOfPlannedSteps());
+      MinimumStepNodeChecker stepInPlaceChecker = new MinimumStepNodeChecker();
+      stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
+      footstepPlanningModule.getChecker().attachCustomNodeChecker(stepInPlaceChecker);
 
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
@@ -300,6 +309,62 @@ public class LookAndStepFootstepPlanningTask
          {
             autonomousOutput.accept(footstepPlanEtc);
          }
+      }
+   }
+
+   private class MinimumStepNodeChecker implements CustomNodeChecker
+   {
+      private final Pose3D leftFootStancePose = new Pose3D();
+      private final Pose3D rightFootStancePose = new Pose3D();
+
+      private double minimumTranslation = 0.05;
+      private double minimumRotation = Math.toRadians(15.0);
+
+      public void setStanceFeetPoses(SideDependentList<Pose3DReadOnly> stanceFeetPoses)
+      {
+         setStanceFeetPoses(stanceFeetPoses.get(RobotSide.LEFT), stanceFeetPoses.get(RobotSide.RIGHT));
+      }
+
+      public void setStanceFeetPoses(Pose3DReadOnly leftFootStancePose, Pose3DReadOnly rightFootStancePose)
+      {
+         this.leftFootStancePose.set(leftFootStancePose);
+         this.rightFootStancePose.set(rightFootStancePose);
+      }
+
+      public void setMinimumTranslation(double minimumTranslation)
+      {
+         this.minimumTranslation = minimumTranslation;
+      }
+
+      public void setMinimumRotation(double minimumRotation)
+      {
+         this.minimumRotation = minimumRotation;
+      }
+
+      @Override
+      public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
+      {
+         double distanceX, distanceY, angularDistance;
+         if (candidateNode.getRobotSide() == RobotSide.LEFT)
+         {
+            distanceX = leftFootStancePose.getX() - candidateNode.getX();
+            distanceY = leftFootStancePose.getY() - candidateNode.getY();
+            angularDistance = AngleTools.computeAngleDifferenceMinusPiToPi(leftFootStancePose.getYaw(), candidateNode.getYaw());
+         }
+         else
+         {
+            distanceX = rightFootStancePose.getX() - candidateNode.getX();
+            distanceY = rightFootStancePose.getY() - candidateNode.getY();
+            angularDistance = AngleTools.computeAngleDifferenceMinusPiToPi(rightFootStancePose.getYaw(), candidateNode.getYaw());
+         }
+
+         return EuclidCoreTools.norm(distanceX, distanceY) > minimumTranslation || angularDistance > minimumRotation;
+      }
+
+      @Override
+      public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
+      {
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_IN_PLACE;
       }
    }
 }
