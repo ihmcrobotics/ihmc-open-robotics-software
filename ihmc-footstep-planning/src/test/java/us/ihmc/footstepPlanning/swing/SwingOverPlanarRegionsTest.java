@@ -501,7 +501,8 @@ public class SwingOverPlanarRegionsTest
    public SwingPlannerParametersBasics getParameters()
    {
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
-      parameters.setDoInitialFastApproximation(true);
+//      parameters.setDoInitialFastApproximation(true);
+      parameters.setMinimumSwingFootClearance(0.05);
       return parameters;
    }
 
