@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.log;
 
 import us.ihmc.yoVariables.variable.YoVariableType;
 
+import java.util.Objects;
+
 public class VariableDescriptor
 {
    private final String name;
@@ -46,5 +48,38 @@ public class VariableDescriptor
    public String toString()
    {
       return name;
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (!(other instanceof VariableDescriptor))
+      {
+         return false;
+      }
+
+      VariableDescriptor otherDescriptor = (VariableDescriptor) other;
+
+      // for now don't worry about namespace TODO
+      if (!otherDescriptor.name.equals(this.name))
+      {
+         return false;
+      }
+      else if (otherDescriptor.type != this.type)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   @Override
+   public int hashCode()
+   {
+      return Objects.hash(name, type);
    }
 }
