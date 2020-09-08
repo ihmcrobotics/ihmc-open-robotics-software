@@ -311,7 +311,7 @@ public class RemoteHumanoidRobotInterface
 
    public void pauseWalking()
    {
-      LogTools.debug("Sending pause walking to robot");
+      LogTools.info("Sending pause walking to robot");
       PauseWalkingMessage pause = new PauseWalkingMessage();
       pause.setPause(true);
       controllerPublisherMap.publish(pause);
