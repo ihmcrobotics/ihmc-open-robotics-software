@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -13,6 +14,8 @@ import java.util.List;
 
 public class LookAndStepBehaviorAPI
 {
+   public static final ROS2Topic<PlanarRegionsListMessage> REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.REALSENSE_SLAM_REGIONS;
+
    /**
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
     * If look and step is already working on a goal, first send a RESET and then send a new GOAL_INPUT. (Todo: Make this better.)
