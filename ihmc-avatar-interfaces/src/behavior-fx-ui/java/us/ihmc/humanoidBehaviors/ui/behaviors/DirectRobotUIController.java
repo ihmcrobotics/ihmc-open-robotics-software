@@ -16,6 +16,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
@@ -110,7 +111,7 @@ public class DirectRobotUIController extends Group
       lidarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
       lidarRegionsGraphic.setEnabled(false);
       getChildren().add(lidarRegionsGraphic);
-      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_REA, false);
+      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, LookAndStepBehaviorAPI.REGIONS_FOR_FOOTSTEP_PLANNING, false);
       realsenseRegionsGraphic.setEnabled(false);
       getChildren().add(realsenseRegionsGraphic);
       mapRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
