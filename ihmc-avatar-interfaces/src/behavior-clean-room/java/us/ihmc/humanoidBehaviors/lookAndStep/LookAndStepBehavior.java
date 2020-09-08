@@ -82,19 +82,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters();
 
-      updateOverrideParameters();
-
       helper.createUICallback(LookAndStepParameters, parameters ->
       {
          statusLogger.info("Accepting new look and step parameters");
          lookAndStepParameters.setAllFromStrings(parameters);
-         updateOverrideParameters();
       });
       helper.createUICallback(FootstepPlannerParameters, parameters ->
       {
          statusLogger.info("Accepting new footstep planner parameters");
          footstepPlannerParameters.setAllFromStrings(parameters);
-         updateOverrideParameters();
       }); // TODO: This overrides overrides?
 
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
@@ -235,11 +231,6 @@ public class LookAndStepBehavior implements BehaviorInterface
             behaviorStateReference::get,
             lastCommandedFootsteps
       );
-   }
-
-   private void updateOverrideParameters()
-   {
-      swingPlannerParameters.setMinimumSwingFootClearance(lookAndStepParameters.getMinimumSwingFootClearanceOverride());
    }
 
    @Override

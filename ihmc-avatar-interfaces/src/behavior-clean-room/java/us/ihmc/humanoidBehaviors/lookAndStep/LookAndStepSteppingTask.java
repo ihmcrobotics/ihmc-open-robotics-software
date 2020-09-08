@@ -138,7 +138,7 @@ public class LookAndStepSteppingTask
 
    private void sleepForPartOfSwingThread(double swingTime)
    {
-      double percentSwingToWait = lookAndStepBehaviorParameters.get(LookAndStepBehaviorParameters.percentSwingToWait);
+      double percentSwingToWait = lookAndStepBehaviorParameters.getPercentSwingToWait();
       double waitTime = swingTime * percentSwingToWait;
       statusLogger.info("Waiting {} s for {} % of swing...", waitTime, percentSwingToWait);
       ThreadTools.sleepSeconds(waitTime);

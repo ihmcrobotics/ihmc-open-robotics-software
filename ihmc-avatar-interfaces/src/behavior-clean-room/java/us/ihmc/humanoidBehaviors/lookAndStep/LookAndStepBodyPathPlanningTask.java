@@ -189,10 +189,13 @@ public class LookAndStepBodyPathPlanningTask
 
       // calculate and send body path plan
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result = performTaskWithVisibilityGraphPlanner();// takes about 0.1s
+      Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> result =
+            lookAndStepBehaviorParameters.getFlatGroundBodyPathPlan() ?
+                  performTaskWithFlatGround() :
+                  performTaskWithVisibilityGraphPlanner();
 
       statusLogger.info("Body path plan completed with {}, {} waypoint(s)", result.getLeft(), result.getRight().size());
-      //      bodyPathPlan = bodyPathPlanner.getWaypoints();
+
       if (result.getRight() != null)
       {
          for (Pose3DReadOnly poseWaypoint : result.getRight())
