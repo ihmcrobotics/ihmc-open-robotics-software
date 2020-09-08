@@ -75,8 +75,8 @@ public class JavaProcessManager
                                             timestampOfCreation + "_" + processNames.get(i) + "Log.txt");
                String[] jvmProperties = ArrayUtils.add(parentJVMProperties, "-D" + FORKED_PROCESS_INDEX + "=" + i);
 
-               TeeOutputStream outputTee = new TeeOutputStream(System.out, createJansiFilteredStream(Files.newOutputStream(logFilePath)));
-               TeeOutputStream errorTee = new TeeOutputStream(System.err, createJansiFilteredStream(Files.newOutputStream(logFilePath)));
+               TeeOutputStream outputTee = new TeeOutputStream(System.out, ProcessTools.createJansiFilteredStream(logFilePath));
+               TeeOutputStream errorTee = new TeeOutputStream(System.err, ProcessTools.createJansiFilteredStream(logFilePath));
                PrintStream outputStream = new PrintStream(outputTee);
                PrintStream errorStream = new PrintStream(errorTee);
 
@@ -96,18 +96,6 @@ public class JavaProcessManager
       }
 
       return null;
-   }
-
-   private PrintStream createJansiFilteredStream(OutputStream outputStream) throws IOException
-   {
-      if (SystemUtils.IS_OS_WINDOWS)
-      {
-         return new WindowsAnsiPrintStream(new PrintStream(outputStream));
-      }
-      else
-      {
-         return new AnsiPrintStream(new PrintStream(outputStream));
-      }
    }
 
    public boolean isSpawnerProcess()
