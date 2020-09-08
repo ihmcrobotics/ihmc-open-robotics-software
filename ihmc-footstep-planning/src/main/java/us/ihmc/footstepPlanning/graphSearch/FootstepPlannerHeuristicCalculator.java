@@ -89,4 +89,9 @@ public class FootstepPlannerHeuristicCalculator
       heuristicCost.set(parameters.getAStarHeuristicsWeight().getValue() * (initialTurnDistance + walkDistance + finalTurnDistance));
       return heuristicCost.getValue();
    }
+
+   public void resetLoggedVariables()
+   {
+      heuristicCost.set(0.0);
+   }
 }
