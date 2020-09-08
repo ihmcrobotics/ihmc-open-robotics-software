@@ -103,6 +103,8 @@ public class AStarFootstepPlanner
                                                               edgeData.getCandidateNodeSnapData().set(snapper.snapFootstepNode(edge.getEndNode()));
 
                                                               edgeDataMap.put(edge, edgeData.getCopyAndClear());
+                                                              stepCostCalculator.resetLoggedVariables();
+                                                              distanceAndYawHeuristics.resetLoggedVariables();
                                                            });
    }
 
