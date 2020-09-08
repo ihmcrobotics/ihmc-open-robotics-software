@@ -17,6 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -40,6 +41,8 @@ public class FootstepNodeChecker
    private final YoDouble footAreaPercentage = new YoDouble("footAreaPercentage", registry);
    private final YoInteger footstepIndex = new YoInteger("footstepIndex", registry);
    private final YoDouble achievedDeltaInside = new YoDouble("achievedDeltaInside", registry);
+
+   private final List<CustomNodeChecker> customNodeCheckers = new ArrayList<>();
 
    public FootstepNodeChecker(FootstepPlannerParametersReadOnly parameters,
                               SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
@@ -173,6 +176,15 @@ public class FootstepNodeChecker
             return;
          }
       }
+
+      for (CustomNodeChecker customNodeChecker : customNodeCheckers)
+      {
+         if (!customNodeChecker.isNodeValid(candidateNode, stanceNode))
+         {
+            rejectionReason.set(customNodeChecker.getRejectionReason());
+            return;
+         }
+      }
    }
 
    private boolean boundingBoxCollisionDetected(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -232,5 +244,10 @@ public class FootstepNodeChecker
                "Illegal wiggle parameters, target should be greater or equal to minimum. Target: " + parameters.getWiggleInsideDeltaTarget() + ", Minimum: "
                + parameters.getWiggleInsideDeltaMinimum());
       }
+   }
+
+   public void attachCustomNodeChecker(CustomNodeChecker customNodeChecker)
+   {
+      customNodeCheckers.add(customNodeChecker);
    }
 }
