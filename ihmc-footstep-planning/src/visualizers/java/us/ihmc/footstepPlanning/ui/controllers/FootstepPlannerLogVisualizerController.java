@@ -49,6 +49,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.IntToDoubleFunction;
 
 public class FootstepPlannerLogVisualizerController
 {
@@ -436,7 +438,19 @@ public class FootstepPlannerLogVisualizerController
          TableColumn<ChildStepProperty, String> column = new TableColumn<>(variableDescriptor.getName());
          int variableIndex = variableDescriptors.indexOf(variableDescriptor);
 
-         column.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(formatValue(c.getValue().edgeData.getDataBuffer()[variableIndex], variableDescriptor)));
+         Function<long[], String> loggedDataFormatter = data ->
+         {
+            if (variableIndex < 0 || variableIndex >= data.length)
+            {
+               return "-";
+            }
+            else
+            {
+               return formatValue(data[variableIndex], variableDescriptor);
+            }
+         };
+
+         column.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(loggedDataFormatter.apply(c.getValue().edgeData.getDataBuffer())));
          column.setPrefWidth(125);
          childTable.getColumns().add(column);
       }
