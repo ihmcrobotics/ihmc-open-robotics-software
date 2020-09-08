@@ -879,6 +879,21 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       return footHeight;
    }
 
+   public double getToeLength()
+   {
+      return toeLength;
+   }
+
+   public double getHeelLength()
+   {
+      return heelLength;
+   }
+
+   public double getFootWidth()
+   {
+      return footWidth;
+   }
+
    public double getMinimumClearance()
    {
       return minimumClearance.getDoubleValue();
