@@ -196,7 +196,6 @@ public class AtlasLookAndStepBehaviorTest
                              });
 
       LookAndStepBehaviorParameters lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
-      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.minimumSwingFootClearanceOverride, 0.0);
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.LookAndStepParameters, lookAndStepBehaviorParameters.getAllAsStrings());
 
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);

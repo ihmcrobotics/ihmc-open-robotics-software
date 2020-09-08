@@ -6,9 +6,9 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameter
 
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default double getMaxPlanStrayDistance()
+   default boolean getFlatGroundBodyPathPlan()
    {
-      return get(maxPlanStrayDistance);
+      return get(flatGroundBodyPathPlan);
    }
 
    default int getMinimumNumberOfPlannedSteps()
@@ -29,11 +29,6 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    default double getPlanarRegionsExpiration()
    {
       return get(planarRegionsExpiration);
-   }
-
-   default double getDirection()
-   {
-      return get(direction);
    }
 
    default double getPlanHorizon()
@@ -61,11 +56,6 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(waitTimeAfterPlanFailed);
    }
 
-   default boolean getReturnBestEffortPlanOverride()
-   {
-      return get(returnBestEffortPlanOverride);
-   }
-
    default double getPercentSwingToWait()
    {
       return get(percentSwingToWait);
@@ -79,11 +69,6 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    default int getAcceptableIncompleteFootsteps()
    {
       return get(acceptableIncompleteFootsteps);
-   }
-
-   default double getMinimumSwingFootClearanceOverride()
-   {
-      return get(minimumSwingFootClearanceOverride);
    }
 
    default double getNeckPitchForBodyPath()
