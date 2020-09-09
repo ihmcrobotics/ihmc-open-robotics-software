@@ -10,6 +10,7 @@ import org.apache.commons.math3.util.Precision;
 
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -48,7 +49,7 @@ public class CopTrajectory
       {
          for (int i = 0; i < yoWaypoints.size(); i++)
          {
-            YoArtifactPosition artifact = new YoArtifactPosition("CopWaypoint" + i, yoWaypoints.get(i), GraphicType.DIAMOND, Color.CYAN, 0.002);
+            YoArtifactPosition artifact = new YoArtifactPosition("CopWaypoint" + i, yoWaypoints.get(i), GraphicType.DIAMOND, Color.GREEN, 0.002);
             graphicsRegistry.registerArtifact("CopWaypoints", artifact);
          }
       }
@@ -83,14 +84,15 @@ public class CopTrajectory
    {
       clear();
 
+      double startTime = 0.0;
       // First waypoint is a center of initial support.
       Point2DReadOnly centroid = supportPolygons.get(0).getCentroid();
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartCopPosition(centroid);
-      contactStateProvider.getTimeInterval().setStartTime(0.0);
+      contactStateProvider.getTimeInterval().setStartTime(startTime);
 
       for (int i = 1; i < supportPolygons.size(); i++)
-         addPolygon(supportPolygons, supportTimes, i);
+         startTime = addPolygon(supportPolygons, supportTimes, startTime, i);
 
       // Last waypoint is at center of final support.
       contactStateProviders.getLast().setEndCopPosition(supportPolygons.get(supportPolygons.size() - 1).getCentroid());
@@ -101,7 +103,7 @@ public class CopTrajectory
 
    private final Point2D waypoint = new Point2D();
 
-   private void addPolygon(List<? extends ConvexPolygon2DReadOnly> supportPolygons, TDoubleList supportTimes, int i)
+   private double addPolygon(List<? extends ConvexPolygon2DReadOnly> supportPolygons, TDoubleList supportTimes, double startTime, int i)
    {
       ConvexPolygon2DReadOnly previousPolygon = supportPolygons.get(i - 1);
       ConvexPolygon2DReadOnly polygon = supportPolygons.get(i);
@@ -123,8 +125,15 @@ public class CopTrajectory
          previousPolygon.intersectionWith(tempLine, waypoint, waypoint);
       }
 
-      previousContactState.setEndCopPosition(centroid);
-      contactState.setStartCopPosition(centroid);
+      previousContactState.setEndCopPosition(waypoint);
+      contactState.setStartCopPosition(waypoint);
+
+      return startTime;
+   }
+
+   public List<? extends ContactStateProvider> getContactStates()
+   {
+      return contactStateProviders;
    }
 
    private void updateViz()
