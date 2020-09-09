@@ -15,17 +15,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage> implements Settable<JointspaceTrajectoryMessage>, EpsilonComparable<JointspaceTrajectoryMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Trajectory for each joint.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  joint_trajectory_messages_;
-
    /**
             * Properties for queueing trajectories.
             */
@@ -33,10 +30,7 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
    public JointspaceTrajectoryMessage()
    {
-
-
       joint_trajectory_messages_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (100, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
-
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
 
    }
@@ -49,15 +43,11 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
    public void set(JointspaceTrajectoryMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       joint_trajectory_messages_.set(other.joint_trajectory_messages_);
-
       controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -75,7 +65,6 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
    }
 
 
-
    /**
             * Trajectory for each joint.
             */
@@ -83,7 +72,6 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
    {
       return joint_trajectory_messages_;
    }
-
 
 
    /**
@@ -112,9 +100,7 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (this.joint_trajectory_messages_.size() != other.joint_trajectory_messages_.size()) { return false; }
       else
@@ -122,7 +108,6 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
          for (int i = 0; i < this.joint_trajectory_messages_.size(); i++)
          {  if (!this.joint_trajectory_messages_.get(i).epsilonEquals(other.joint_trajectory_messages_.get(i), epsilon)) return false; }
       }
-
 
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
 
@@ -138,12 +123,9 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
       JointspaceTrajectoryMessage otherMyClass = (JointspaceTrajectoryMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.joint_trajectory_messages_.equals(otherMyClass.joint_trajectory_messages_)) return false;
-
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
 
       return true;
@@ -155,13 +137,10 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
       StringBuilder builder = new StringBuilder();
 
       builder.append("JointspaceTrajectoryMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("joint_trajectory_messages=");
       builder.append(this.joint_trajectory_messages_);      builder.append(", ");
-
       builder.append("queueing_properties=");
       builder.append(this.queueing_properties_);
       builder.append("}");

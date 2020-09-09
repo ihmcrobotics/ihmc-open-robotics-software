@@ -11,31 +11,20 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>, EpsilonComparable<IMUPacket>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
-
    public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
-
    public us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
-
    public double time_;
 
    public IMUPacket()
    {
-
-
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-
       angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-
       linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
-
-
    }
 
    public IMUPacket(IMUPacket other)
@@ -46,20 +35,14 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
    public void set(IMUPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
-
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
-
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_acceleration_, linear_acceleration_);
-
       time_ = other.time_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -77,12 +60,10 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
    }
 
 
-
    public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
    {
       return orientation_;
    }
-
 
 
    public us.ihmc.euclid.tuple3D.Vector3D getAngularVelocity()
@@ -91,12 +72,10 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
    }
 
 
-
    public us.ihmc.euclid.tuple3D.Vector3D getLinearAcceleration()
    {
       return linear_acceleration_;
    }
-
 
    public void setTime(double time)
    {
@@ -125,16 +104,11 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
-
       if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon)) return false;
-
       if (!this.linear_acceleration_.epsilonEquals(other.linear_acceleration_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon)) return false;
 
 
@@ -150,16 +124,11 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
       IMUPacket otherMyClass = (IMUPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
-
       if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_)) return false;
-
       if (!this.linear_acceleration_.equals(otherMyClass.linear_acceleration_)) return false;
-
       if(this.time_ != otherMyClass.time_) return false;
 
 
@@ -172,19 +141,14 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       StringBuilder builder = new StringBuilder();
 
       builder.append("IMUPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
-
       builder.append("angular_velocity=");
       builder.append(this.angular_velocity_);      builder.append(", ");
-
       builder.append("linear_acceleration=");
       builder.append(this.linear_acceleration_);      builder.append(", ");
-
       builder.append("time=");
       builder.append(this.time_);
       builder.append("}");

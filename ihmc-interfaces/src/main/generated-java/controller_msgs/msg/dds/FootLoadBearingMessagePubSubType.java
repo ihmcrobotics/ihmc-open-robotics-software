@@ -40,15 +40,11 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -65,17 +61,13 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -87,15 +79,11 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_9(data.getRobotSide());
 
-
       cdr.write_type_9(data.getLoadBearingRequest());
-
 
       cdr.write_type_6(data.getExecutionDelayTime());
 
@@ -103,16 +91,12 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setRobotSide(cdr.read_type_9());
       	
-
       data.setLoadBearingRequest(cdr.read_type_9());
       	
-
       data.setExecutionDelayTime(cdr.read_type_6());
       	
 
@@ -121,26 +105,18 @@ public class FootLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.FootLoadBearingMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_9("robot_side", data.getRobotSide());
-
       ser.write_type_9("load_bearing_request", data.getLoadBearingRequest());
-
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootLoadBearingMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setRobotSide(ser.read_type_9("robot_side"));
-
       data.setLoadBearingRequest(ser.read_type_9("load_bearing_request"));
-
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
    }
 

@@ -40,12 +40,9 @@ public class WrenchTrajectoryPointMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -62,13 +59,10 @@ public class WrenchTrajectoryPointMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getCdrSerializedSize(data.getWrench(), current_alignment);
@@ -79,25 +73,19 @@ public class WrenchTrajectoryPointMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.WrenchTrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
 
-
       cdr.write_type_6(data.getTime());
-
 
       geometry_msgs.msg.dds.WrenchPubSubType.write(data.getWrench(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WrenchTrajectoryPointMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setTime(cdr.read_type_6());
       	
-
       geometry_msgs.msg.dds.WrenchPubSubType.read(data.getWrench(), cdr);	
 
    }
@@ -105,11 +93,8 @@ public class WrenchTrajectoryPointMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.WrenchTrajectoryPointMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_6("time", data.getTime());
-
       ser.write_type_a("wrench", new geometry_msgs.msg.dds.WrenchPubSubType(), data.getWrench());
 
    }
@@ -117,11 +102,8 @@ public class WrenchTrajectoryPointMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WrenchTrajectoryPointMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setTime(ser.read_type_6("time"));
-
       ser.read_type_a("wrench", new geometry_msgs.msg.dds.WrenchPubSubType(), data.getWrench());
 
    }

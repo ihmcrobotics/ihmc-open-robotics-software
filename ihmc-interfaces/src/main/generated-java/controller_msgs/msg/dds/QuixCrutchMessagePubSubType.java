@@ -40,21 +40,15 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += controller_msgs.msg.dds.QuixMotionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,25 +65,19 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += controller_msgs.msg.dds.QuixMotionStateMessagePubSubType.getCdrSerializedSize(data.getRequestedMotionState(), current_alignment);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -100,42 +88,30 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.QuixCrutchMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_7(data.getUserEnable());
 
-
       cdr.write_type_7(data.getRewiggle());
-
 
       cdr.write_type_7(data.getStartBehavior());
 
-
       controller_msgs.msg.dds.QuixMotionStateMessagePubSubType.write(data.getRequestedMotionState(), cdr);
-
       cdr.write_type_7(data.getExecuteBehavior());
 
    }
 
    public static void read(controller_msgs.msg.dds.QuixCrutchMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setUserEnable(cdr.read_type_7());
       	
-
       data.setRewiggle(cdr.read_type_7());
       	
-
       data.setStartBehavior(cdr.read_type_7());
       	
-
       controller_msgs.msg.dds.QuixMotionStateMessagePubSubType.read(data.getRequestedMotionState(), cdr);	
-
       data.setExecuteBehavior(cdr.read_type_7());
       	
 
@@ -144,17 +120,11 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.QuixCrutchMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_7("user_enable", data.getUserEnable());
-
       ser.write_type_7("rewiggle", data.getRewiggle());
-
       ser.write_type_7("start_behavior", data.getStartBehavior());
-
       ser.write_type_a("requested_motion_state", new controller_msgs.msg.dds.QuixMotionStateMessagePubSubType(), data.getRequestedMotionState());
-
 
       ser.write_type_7("execute_behavior", data.getExecuteBehavior());
    }
@@ -162,17 +132,11 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuixCrutchMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setUserEnable(ser.read_type_7("user_enable"));
-
       data.setRewiggle(ser.read_type_7("rewiggle"));
-
       data.setStartBehavior(ser.read_type_7("start_behavior"));
-
       ser.read_type_a("requested_motion_state", new controller_msgs.msg.dds.QuixMotionStateMessagePubSubType(), data.getRequestedMotionState());
-
 
       data.setExecuteBehavior(ser.read_type_7("execute_behavior"));
    }

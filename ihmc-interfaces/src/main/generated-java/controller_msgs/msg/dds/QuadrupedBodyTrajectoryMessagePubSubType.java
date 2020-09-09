@@ -40,12 +40,9 @@ public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -62,13 +59,10 @@ public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
@@ -79,25 +73,19 @@ public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
 
-
       cdr.write_type_7(data.getIsExpressedInAbsoluteTime());
-
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setIsExpressedInAbsoluteTime(cdr.read_type_7());
       	
-
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
 
    }
@@ -105,11 +93,8 @@ public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_7("is_expressed_in_absolute_time", data.getIsExpressedInAbsoluteTime());
-
       ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
@@ -117,11 +102,8 @@ public class QuadrupedBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedBodyTrajectoryMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setIsExpressedInAbsoluteTime(ser.read_type_7("is_expressed_in_absolute_time"));
-
       ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
