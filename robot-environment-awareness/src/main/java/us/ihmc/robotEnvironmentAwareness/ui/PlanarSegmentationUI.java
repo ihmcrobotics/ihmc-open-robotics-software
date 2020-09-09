@@ -226,20 +226,14 @@ public class PlanarSegmentationUI implements PerceptionUI
 
    public void stop()
    {
-      LogTools.info("Stopping");
       try
       {
          uiConnectionHandler.stop();
-      LogTools.info("Stopping");
          uiMessager.closeMessager();
-      LogTools.info("Stopping");
 
          meshViewer.stop();
-      LogTools.info("Stopping");
 
-//         ExceptionTools.handle(() -> ros2Node.destroy(), DefaultExceptionHandler.PRINT_STACKTRACE);
-
-         LogTools.info("Stopped everything");
+         ros2Node.destroy();
       }
       catch (Exception e)
       {
