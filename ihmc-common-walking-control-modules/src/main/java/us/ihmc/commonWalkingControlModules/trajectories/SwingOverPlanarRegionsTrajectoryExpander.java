@@ -609,6 +609,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       RotationMatrix startRotation = new RotationMatrix();
       RotationMatrix endRotation = new RotationMatrix();
 
+      startOfSwingReferenceFrame.getOrientation(startRotation);
+      endOfSwingReferenceFrame.getOrientation(endRotation);
+
       for (double fraction = 0.0; fraction <= 1.0; fraction += stepAmount)
       {
          twoWaypointSwingGenerator.compute(fraction);
@@ -617,9 +620,6 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          trajectoryPosition.set(frameTupleUnsafe);
          solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition);
          pointOnTrajectoryToPack.set(trajectoryPosition);
-
-         startOfSwingReferenceFrame.getOrientation(startRotation);
-         endOfSwingReferenceFrame.getOrientation(endRotation);
 
          collisionBox.getOrientation().interpolate(startRotation, endRotation, fraction);
 
