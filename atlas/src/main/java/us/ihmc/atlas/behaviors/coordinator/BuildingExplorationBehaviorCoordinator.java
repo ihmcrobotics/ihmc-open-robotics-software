@@ -97,6 +97,7 @@ public class BuildingExplorationBehaviorCoordinator
 
       teleopState = new TeleopState();
       lookAndStepState = new LookAndStepState(robotName, ros2Node, messager, bombPose);
+
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
       traverseStairsState = new TraverseStairsState(ros2Node, messager, bombPose);
 
@@ -501,6 +502,8 @@ public class BuildingExplorationBehaviorCoordinator
 
          goalPublisher.publish(new Pose3D(bombPose));
          ThreadTools.sleep(100);
+
+         startPublisher.publish(new Empty());
       }
 
       @Override
