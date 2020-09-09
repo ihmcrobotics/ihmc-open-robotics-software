@@ -13,25 +13,18 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> implements Settable<SoleTrajectoryMessage>, EpsilonComparable<SoleTrajectoryMessage>
 {
-
    public static final byte FRONT_LEFT = (byte) 0;
-
    public static final byte FRONT_RIGHT = (byte) 1;
-
    public static final byte HIND_RIGHT = (byte) 2;
-
    public static final byte HIND_LEFT = (byte) 3;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies which foot will execute the trajectory.
             */
    public byte robot_quadrant_ = (byte) 255;
-
    /**
             * The position trajectory information.
             */
@@ -39,11 +32,7 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
    public SoleTrajectoryMessage()
    {
-
-
-
       position_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
-
    }
 
    public SoleTrajectoryMessage(SoleTrajectoryMessage other)
@@ -54,16 +43,12 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
    public void set(SoleTrajectoryMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       robot_quadrant_ = other.robot_quadrant_;
 
-
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.position_trajectory_, position_trajectory_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -80,7 +65,6 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
       return sequence_id_;
    }
 
-
    /**
             * Specifies which foot will execute the trajectory.
             */
@@ -95,7 +79,6 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
    {
       return robot_quadrant_;
    }
-
 
 
    /**
@@ -124,12 +107,9 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_quadrant_, other.robot_quadrant_, epsilon)) return false;
-
 
       if (!this.position_trajectory_.epsilonEquals(other.position_trajectory_, epsilon)) return false;
 
@@ -145,12 +125,9 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
       SoleTrajectoryMessage otherMyClass = (SoleTrajectoryMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.robot_quadrant_ != otherMyClass.robot_quadrant_) return false;
-
 
       if (!this.position_trajectory_.equals(otherMyClass.position_trajectory_)) return false;
 
@@ -163,13 +140,10 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("SoleTrajectoryMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("robot_quadrant=");
       builder.append(this.robot_quadrant_);      builder.append(", ");
-
       builder.append("position_trajectory=");
       builder.append(this.position_trajectory_);
       builder.append("}");

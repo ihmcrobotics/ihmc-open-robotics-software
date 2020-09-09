@@ -8,38 +8,27 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class FrameInformation extends Packet<FrameInformation> implements Settable<FrameInformation>, EpsilonComparable<FrameInformation>
 {
-
    /**
           * This message is part of the IHMC whole-body controller API.
           * This message carries the frame related information needed for some messages such as taskspace trajectories.
           * Valid codes and their associated frames include:"
           */
    public static final long WORLD_FRAME = 83766130;
-
    public static final long MIDFEET_ZUP_FRAME = -100;
-
    public static final long PELVIS_ZUP_FRAME = -101;
-
    public static final long PELVIS_FRAME = -102;
-
    public static final long CHEST_FRAME = -103;
-
    public static final long CENTER_OF_MASS_FRAME = -104;
-
    public static final long LEFT_SOLE_FRAME = -105;
-
    public static final long RIGHT_SOLE_FRAME = -106;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
             */
    public long trajectory_reference_frame_id_ = 83766130;
-
    /**
             * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
             * trajectory data will be switched to the trajectory frame immediately when the message is received
@@ -62,10 +51,6 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
    public FrameInformation()
    {
-
-
-
-
    }
 
    public FrameInformation(FrameInformation other)
@@ -76,17 +61,13 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
    public void set(FrameInformation other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       trajectory_reference_frame_id_ = other.trajectory_reference_frame_id_;
-
 
       data_reference_frame_id_ = other.data_reference_frame_id_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -103,7 +84,6 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
       return sequence_id_;
    }
 
-
    /**
             * The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
             */
@@ -118,7 +98,6 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    {
       return trajectory_reference_frame_id_;
    }
-
 
    /**
             * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
@@ -183,12 +162,9 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_reference_frame_id_, other.trajectory_reference_frame_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.data_reference_frame_id_, other.data_reference_frame_id_, epsilon)) return false;
 
@@ -205,12 +181,9 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
       FrameInformation otherMyClass = (FrameInformation) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.trajectory_reference_frame_id_ != otherMyClass.trajectory_reference_frame_id_) return false;
-
 
       if(this.data_reference_frame_id_ != otherMyClass.data_reference_frame_id_) return false;
 
@@ -224,13 +197,10 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("FrameInformation {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("trajectory_reference_frame_id=");
       builder.append(this.trajectory_reference_frame_id_);      builder.append(", ");
-
       builder.append("data_reference_frame_id=");
       builder.append(this.data_reference_frame_id_);
       builder.append("}");

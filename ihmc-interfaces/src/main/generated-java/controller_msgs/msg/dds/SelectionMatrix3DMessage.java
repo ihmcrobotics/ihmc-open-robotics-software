@@ -12,12 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> implements Settable<SelectionMatrix3DMessage>, EpsilonComparable<SelectionMatrix3DMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The ID of the reference frame defining the selection frame.
             * When selecting the axes of interest, these axes refer to the selection frame axes.
@@ -25,17 +23,14 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
             * the selection matrix will then be generated regardless to what frame is it used in.
             */
    public long selection_frame_id_;
-
    /**
             * Specifies whether the x-axis of the selection frame is an axis of interest.
             */
    public boolean x_selected_ = true;
-
    /**
             * Specifies whether the y-axis of the selection frame is an axis of interest.
             */
    public boolean y_selected_ = true;
-
    /**
             * Specifies whether the z-axis of the selection frame is an axis of interest.
             */
@@ -43,12 +38,6 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
 
    public SelectionMatrix3DMessage()
    {
-
-
-
-
-
-
    }
 
    public SelectionMatrix3DMessage(SelectionMatrix3DMessage other)
@@ -59,23 +48,17 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
 
    public void set(SelectionMatrix3DMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       selection_frame_id_ = other.selection_frame_id_;
 
-
       x_selected_ = other.x_selected_;
 
-
       y_selected_ = other.y_selected_;
-
 
       z_selected_ = other.z_selected_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -91,7 +74,6 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
    {
       return sequence_id_;
    }
-
 
    /**
             * The ID of the reference frame defining the selection frame.
@@ -114,7 +96,6 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
       return selection_frame_id_;
    }
 
-
    /**
             * Specifies whether the x-axis of the selection frame is an axis of interest.
             */
@@ -130,7 +111,6 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
       return x_selected_;
    }
 
-
    /**
             * Specifies whether the y-axis of the selection frame is an axis of interest.
             */
@@ -145,7 +125,6 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
    {
       return y_selected_;
    }
-
 
    /**
             * Specifies whether the z-axis of the selection frame is an axis of interest.
@@ -180,18 +159,13 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.selection_frame_id_, other.selection_frame_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.x_selected_, other.x_selected_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.y_selected_, other.y_selected_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.z_selected_, other.z_selected_, epsilon)) return false;
 
@@ -208,18 +182,13 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
 
       SelectionMatrix3DMessage otherMyClass = (SelectionMatrix3DMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.selection_frame_id_ != otherMyClass.selection_frame_id_) return false;
 
-
       if(this.x_selected_ != otherMyClass.x_selected_) return false;
 
-
       if(this.y_selected_ != otherMyClass.y_selected_) return false;
-
 
       if(this.z_selected_ != otherMyClass.z_selected_) return false;
 
@@ -233,19 +202,14 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
       StringBuilder builder = new StringBuilder();
 
       builder.append("SelectionMatrix3DMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("selection_frame_id=");
       builder.append(this.selection_frame_id_);      builder.append(", ");
-
       builder.append("x_selected=");
       builder.append(this.x_selected_);      builder.append(", ");
-
       builder.append("y_selected=");
       builder.append(this.y_selected_);      builder.append(", ");
-
       builder.append("z_selected=");
       builder.append(this.z_selected_);
       builder.append("}");

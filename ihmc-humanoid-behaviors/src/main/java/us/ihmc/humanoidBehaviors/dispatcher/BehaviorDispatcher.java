@@ -24,6 +24,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -195,7 +196,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       if (stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey) && currentBehaviorKey != null && !currentBehaviorKey.equals(stopBehaviorKey))
       {
-         behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+         behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING, (currentBehaviorKey instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)currentBehaviorKey:null));
       }
       currentBehaviorKey = stateMachine.getCurrentBehaviorKey();
 
@@ -232,6 +233,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (desiredBehaviorSubscriber.checkForNewBehaviorRequested())
       {
          requestedBehavior.set(desiredBehaviorSubscriber.getRequestedBehavior());
+         behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING,(requestedBehavior.getEnumValue() instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)requestedBehavior.getEnumValue():null));
+
       }
    }
 
@@ -243,18 +246,18 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          {
             case STOP:
                stateMachine.stop();
-               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING,(currentBehaviorKey instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)currentBehaviorKey:null));
                behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
                requestedBehavior.set(stopBehaviorKey);
                break;
             case PAUSE:
                stateMachine.pause();
-               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED,(currentBehaviorKey instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)currentBehaviorKey:null));
                behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
                break;
             case RESUME:
                stateMachine.resume();
-               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING,(currentBehaviorKey instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)currentBehaviorKey:null));
                behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
                break;
             default:

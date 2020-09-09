@@ -40,15 +40,11 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -65,17 +61,13 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getCdrSerializedSize(data.getInitialConfiguration(), current_alignment);
@@ -86,31 +78,23 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
 
    public static void write(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_2(data.getNumberOfInitialGuesses());
 
-
       cdr.write_type_2(data.getMaximumExpansionSize());
-
 
       controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.write(data.getInitialConfiguration(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setNumberOfInitialGuesses(cdr.read_type_2());
       	
-
       data.setMaximumExpansionSize(cdr.read_type_2());
       	
-
       controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.read(data.getInitialConfiguration(), cdr);	
 
    }
@@ -118,13 +102,9 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_2("number_of_initial_guesses", data.getNumberOfInitialGuesses());
-
       ser.write_type_2("maximum_expansion_size", data.getMaximumExpansionSize());
-
       ser.write_type_a("initial_configuration", new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType(), data.getInitialConfiguration());
 
    }
@@ -132,13 +112,9 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setNumberOfInitialGuesses(ser.read_type_2("number_of_initial_guesses"));
-
       data.setMaximumExpansionSize(ser.read_type_2("maximum_expansion_size"));
-
       ser.read_type_a("initial_configuration", new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType(), data.getInitialConfiguration());
 
    }

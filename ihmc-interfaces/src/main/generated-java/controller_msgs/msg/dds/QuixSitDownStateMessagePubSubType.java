@@ -40,9 +40,7 @@ public class QuixSitDownStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -59,9 +57,7 @@ public class QuixSitDownStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -73,9 +69,7 @@ public class QuixSitDownStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(controller_msgs.msg.dds.QuixSitDownStateMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_9(data.getSitDownStateName());
 
@@ -83,10 +77,8 @@ public class QuixSitDownStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(controller_msgs.msg.dds.QuixSitDownStateMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setSitDownStateName(cdr.read_type_9());
       	
 
@@ -95,18 +87,14 @@ public class QuixSitDownStateMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.QuixSitDownStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_9("sit_down_state_name", data.getSitDownStateName());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuixSitDownStateMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setSitDownStateName(ser.read_type_9("sit_down_state_name"));
    }
 

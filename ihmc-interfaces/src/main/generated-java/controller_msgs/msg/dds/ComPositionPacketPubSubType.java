@@ -40,7 +40,6 @@ public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -56,7 +55,6 @@ public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
 
@@ -65,13 +63,10 @@ public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.ComPositionPacket data, us.ihmc.idl.CDR cdr)
    {
-
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
-   }
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);   }
 
    public static void read(controller_msgs.msg.dds.ComPositionPacket data, us.ihmc.idl.CDR cdr)
    {
-
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
 
    }
@@ -79,7 +74,6 @@ public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.ComPositionPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
    }
@@ -87,9 +81,7 @@ public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ComPositionPacket data)
    {
-
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
-
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ComPositionPacket src, controller_msgs.msg.dds.ComPositionPacket dest)

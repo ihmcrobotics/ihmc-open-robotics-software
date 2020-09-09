@@ -11,17 +11,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractionCalculatorParametersPacket> implements Settable<SplitFractionCalculatorParametersPacket>, EpsilonComparable<SplitFractionCalculatorParametersPacket>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Default value for the ICP plan's transfer split fraction.
             */
    public double default_transfer_split_fraction_ = -1.0;
-
    /**
             * Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
             * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
@@ -29,7 +26,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Field default value -1.0
             */
    public double step_height_for_large_step_down_;
-
    /**
             * Sets the step down height for the maximum amount of split fraction and weight distribution adjustment.
             * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
@@ -37,7 +33,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Field default value -1.0
             */
    public double largest_step_down_height_;
-
    /**
             * Sets the desired transfer split fraction if the robot is stepping down by {@link #getLargestStepDownHeight()}.
             * If the step down height is between {@link #getStepHeightForLargeStepDown()} and {@link #getLargestStepDownHeight()}, the
@@ -45,7 +40,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Field default value -1.0
             */
    public double transfer_split_fraction_at_full_depth_;
-
    /**
             * Sets the desired transfer weight distribution if the robot is stepping down by {@link #getLargestStepDownHeight()}.
             * If the step down height is between {@link #getStepHeightForLargeStepDown()} and {@link #getLargestStepDownHeight()}, the
@@ -53,14 +47,12 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Field default value -1.0
             */
    public double transfer_weight_distribution_at_full_depth_;
-
    /**
             * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
             * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
             * Field default value -1.0
             */
    public double fraction_load_if_foot_has_full_support_;
-
    /**
             * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
             * CoP. That is, if the foot has the full area, and we say it should have the entire trajectory (i.e. returns 1), this spends the entire time shifting either
@@ -68,7 +60,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Field default value -1.0
             */
    public double fraction_time_on_foot_if_foot_has_full_support_;
-
    /**
             * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
             * a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
@@ -76,7 +67,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
             * Field default value -1.0
             */
    public double fraction_load_if_other_foot_has_no_width_;
-
    /**
             * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
             * CoP. That is, if there is only a line contact in the X direction on the other foot, and we say it should have the entire trajectory (i.e. returns 1),
@@ -87,17 +77,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
    public SplitFractionCalculatorParametersPacket()
    {
-
-
-
-
-
-
-
-
-
-
-
    }
 
    public SplitFractionCalculatorParametersPacket(SplitFractionCalculatorParametersPacket other)
@@ -108,38 +87,27 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
    public void set(SplitFractionCalculatorParametersPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       default_transfer_split_fraction_ = other.default_transfer_split_fraction_;
 
-
       step_height_for_large_step_down_ = other.step_height_for_large_step_down_;
-
 
       largest_step_down_height_ = other.largest_step_down_height_;
 
-
       transfer_split_fraction_at_full_depth_ = other.transfer_split_fraction_at_full_depth_;
-
 
       transfer_weight_distribution_at_full_depth_ = other.transfer_weight_distribution_at_full_depth_;
 
-
       fraction_load_if_foot_has_full_support_ = other.fraction_load_if_foot_has_full_support_;
-
 
       fraction_time_on_foot_if_foot_has_full_support_ = other.fraction_time_on_foot_if_foot_has_full_support_;
 
-
       fraction_load_if_other_foot_has_no_width_ = other.fraction_load_if_other_foot_has_no_width_;
-
 
       fraction_time_on_foot_if_other_foot_has_no_width_ = other.fraction_time_on_foot_if_other_foot_has_no_width_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -156,7 +124,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       return sequence_id_;
    }
 
-
    /**
             * Default value for the ICP plan's transfer split fraction.
             */
@@ -171,7 +138,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    {
       return default_transfer_split_fraction_;
    }
-
 
    /**
             * Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
@@ -194,7 +160,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       return step_height_for_large_step_down_;
    }
 
-
    /**
             * Sets the step down height for the maximum amount of split fraction and weight distribution adjustment.
             * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
@@ -215,7 +180,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    {
       return largest_step_down_height_;
    }
-
 
    /**
             * Sets the desired transfer split fraction if the robot is stepping down by {@link #getLargestStepDownHeight()}.
@@ -238,7 +202,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       return transfer_split_fraction_at_full_depth_;
    }
 
-
    /**
             * Sets the desired transfer weight distribution if the robot is stepping down by {@link #getLargestStepDownHeight()}.
             * If the step down height is between {@link #getStepHeightForLargeStepDown()} and {@link #getLargestStepDownHeight()}, the
@@ -260,7 +223,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       return transfer_weight_distribution_at_full_depth_;
    }
 
-
    /**
             * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
             * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
@@ -279,7 +241,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    {
       return fraction_load_if_foot_has_full_support_;
    }
-
 
    /**
             * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
@@ -302,7 +263,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       return fraction_time_on_foot_if_foot_has_full_support_;
    }
 
-
    /**
             * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if the trailing foot is
             * a forward line. That is, if there is only a line contact in the X direction on the other foot, and we say this foot should carry the full load,
@@ -323,7 +283,6 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    {
       return fraction_load_if_other_foot_has_no_width_;
    }
-
 
    /**
             * If using the area split fraction post processing module, this determines how much of the transfer duration should be spent shifting towards the midpoint
@@ -364,33 +323,23 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_split_fraction_, other.default_transfer_split_fraction_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_height_for_large_step_down_, other.step_height_for_large_step_down_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.largest_step_down_height_, other.largest_step_down_height_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_split_fraction_at_full_depth_, other.transfer_split_fraction_at_full_depth_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_weight_distribution_at_full_depth_, other.transfer_weight_distribution_at_full_depth_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_load_if_foot_has_full_support_, other.fraction_load_if_foot_has_full_support_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_time_on_foot_if_foot_has_full_support_, other.fraction_time_on_foot_if_foot_has_full_support_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_load_if_other_foot_has_no_width_, other.fraction_load_if_other_foot_has_no_width_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fraction_time_on_foot_if_other_foot_has_no_width_, other.fraction_time_on_foot_if_other_foot_has_no_width_, epsilon)) return false;
 
@@ -407,33 +356,23 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
       SplitFractionCalculatorParametersPacket otherMyClass = (SplitFractionCalculatorParametersPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.default_transfer_split_fraction_ != otherMyClass.default_transfer_split_fraction_) return false;
 
-
       if(this.step_height_for_large_step_down_ != otherMyClass.step_height_for_large_step_down_) return false;
-
 
       if(this.largest_step_down_height_ != otherMyClass.largest_step_down_height_) return false;
 
-
       if(this.transfer_split_fraction_at_full_depth_ != otherMyClass.transfer_split_fraction_at_full_depth_) return false;
-
 
       if(this.transfer_weight_distribution_at_full_depth_ != otherMyClass.transfer_weight_distribution_at_full_depth_) return false;
 
-
       if(this.fraction_load_if_foot_has_full_support_ != otherMyClass.fraction_load_if_foot_has_full_support_) return false;
-
 
       if(this.fraction_time_on_foot_if_foot_has_full_support_ != otherMyClass.fraction_time_on_foot_if_foot_has_full_support_) return false;
 
-
       if(this.fraction_load_if_other_foot_has_no_width_ != otherMyClass.fraction_load_if_other_foot_has_no_width_) return false;
-
 
       if(this.fraction_time_on_foot_if_other_foot_has_no_width_ != otherMyClass.fraction_time_on_foot_if_other_foot_has_no_width_) return false;
 
@@ -447,34 +386,24 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       StringBuilder builder = new StringBuilder();
 
       builder.append("SplitFractionCalculatorParametersPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("default_transfer_split_fraction=");
       builder.append(this.default_transfer_split_fraction_);      builder.append(", ");
-
       builder.append("step_height_for_large_step_down=");
       builder.append(this.step_height_for_large_step_down_);      builder.append(", ");
-
       builder.append("largest_step_down_height=");
       builder.append(this.largest_step_down_height_);      builder.append(", ");
-
       builder.append("transfer_split_fraction_at_full_depth=");
       builder.append(this.transfer_split_fraction_at_full_depth_);      builder.append(", ");
-
       builder.append("transfer_weight_distribution_at_full_depth=");
       builder.append(this.transfer_weight_distribution_at_full_depth_);      builder.append(", ");
-
       builder.append("fraction_load_if_foot_has_full_support=");
       builder.append(this.fraction_load_if_foot_has_full_support_);      builder.append(", ");
-
       builder.append("fraction_time_on_foot_if_foot_has_full_support=");
       builder.append(this.fraction_time_on_foot_if_foot_has_full_support_);      builder.append(", ");
-
       builder.append("fraction_load_if_other_foot_has_no_width=");
       builder.append(this.fraction_load_if_other_foot_has_no_width_);      builder.append(", ");
-
       builder.append("fraction_time_on_foot_if_other_foot_has_no_width=");
       builder.append(this.fraction_time_on_foot_if_other_foot_has_no_width_);
       builder.append("}");
