@@ -109,7 +109,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       resetInput.addCallback(() ->
                              {
                                 isBeingReset.set(true);
-                                LogTools.info("Reset requested");
+                                statusLogger.error("Reset requested");
 
                                 bodyPathPlanning.reset();
                                 localization.reset();
@@ -118,8 +118,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
                                 robotInterface.pauseWalking();
 
-                                LogTools.info("Queuing reset");
-                                LogTools.error("Queuing reset");
+                                statusLogger.error("Queuing reset");
                                 reset.queueReset();
                              });
       reset.initialize(statusLogger,
