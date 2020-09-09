@@ -16,8 +16,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -140,6 +142,7 @@ public class SLAMModule implements PerceptionModule
                                            REAStateRequestMessage.class,
                                            REACommunicationProperties.stereoInputTopic,
                                            this::handleREAStateRequestMessage);
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
 
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
@@ -423,7 +426,8 @@ public class SLAMModule implements PerceptionModule
 
    protected void dequeue()
    {
-      pointCloudQueue.removeFirst();
+      if (!pointCloudQueue.isEmpty())
+         pointCloudQueue.removeFirst();
    }
 
    private final DecimalFormat df = new DecimalFormat("#.##");
@@ -504,6 +508,7 @@ public class SLAMModule implements PerceptionModule
 
    public void clearSLAM()
    {
+      LogTools.info("Clearing");
       newPointCloud.set(null);
       pointCloudQueue.clear();
       slam.clear();
