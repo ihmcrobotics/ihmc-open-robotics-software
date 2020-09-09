@@ -7,10 +7,12 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
@@ -159,6 +161,13 @@ public class BehaviorUI
             ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
             ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
          }
+
+         IHMCROS2Publisher<Empty> shutdownPublisher = ROS2Tools.createPublisher(ros2Node, BehaviorModule.API.SHUTDOWN);
+         onCloseRequestListeners.add(() ->
+         {
+            LogTools.info("Publishing SHUTDOWN on {}", BehaviorModule.API.SHUTDOWN.getName());
+            shutdownPublisher.publish(new Empty());
+         });
 
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();

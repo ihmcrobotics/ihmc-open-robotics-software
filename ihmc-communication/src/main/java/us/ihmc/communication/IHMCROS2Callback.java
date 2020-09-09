@@ -31,12 +31,12 @@ public class IHMCROS2Callback<T>
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName, Consumer<T> messageCallback)
    {
-      this(ros2Node, topicName.getType(), topicName, messageCallback);
+      this(ros2Node, topicName.getType(), topicName.getName(), messageCallback);
    }
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, Consumer<T> messageCallback)
    {
-      this(ros2Node, messageType, topicName.withType(messageType).toString(), messageCallback);
+      this(ros2Node, messageType, topicName.withType(messageType).toString(), messageCallback); // TODO: Bug: withType overrides suffix
    }
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)

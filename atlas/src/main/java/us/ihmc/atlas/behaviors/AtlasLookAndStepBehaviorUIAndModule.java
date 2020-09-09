@@ -1,28 +1,29 @@
 package us.ihmc.atlas.behaviors;
 
-import us.ihmc.atlas.sensors.AtlasRealsenseBasedREAStandaloneLauncher;
-import us.ihmc.atlas.sensors.AtlasSLAMBasedREAStandaloneLauncher;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.LiveMapStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.JavaProcessManager;
 
 import java.io.File;
 import java.nio.file.Paths;
 
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class AtlasLookAndStepBehaviorUIAndModule
 {
    public static final boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis", "false"));
-   
+
    public static void main(String[] args)
    {
       JavaProcessManager manager = new JavaProcessManager();
@@ -44,6 +45,8 @@ public class AtlasLookAndStepBehaviorUIAndModule
             LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(reaConfigurationFile),
                                                                                       networkProvider);
             module.start();
+            ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "lidar_rea");
+            new IHMCROS2Callback<>(ros2Node, BehaviorModule.API.SHUTDOWN, message -> module.stop());
          }, DefaultExceptionHandler.PRINT_STACKTRACE);
       });
       manager.spawnProcesses(AtlasLookAndStepBehaviorUIAndModule.class, args);
