@@ -8,13 +8,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -25,6 +23,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -92,6 +91,19 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
                                                     ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
                                                               .withInput(),
                                            s -> latestParametersMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    WalkingStatusMessage.class,
+                                                    ControllerAPIDefinition.getOutputTopic(robotName),
+                                                    status ->
+                                                    {
+                                                       if (WalkingStatus.fromByte(status.takeNextData().getWalkingStatus())
+                                                       == WalkingStatus.STARTED)
+                                                       {
+                                                          BipedalSupportPlanarRegionParametersMessage parameters = new BipedalSupportPlanarRegionParametersMessage();
+                                                          parameters.setEnable(false);
+                                                          latestParametersMessage.set(parameters);
+                                                       }
+                                                    });
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
       defaultParameters.setEnable(true);
