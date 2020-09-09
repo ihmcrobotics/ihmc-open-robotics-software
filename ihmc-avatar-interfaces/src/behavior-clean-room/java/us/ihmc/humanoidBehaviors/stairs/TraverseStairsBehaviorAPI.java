@@ -15,14 +15,6 @@ public class TraverseStairsBehaviorAPI
     */
    public static final ROS2Topic<Pose3D> GOAL_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class).withNaming(typeName -> typeName + ROS_TOPIC_QUALIFIER + "/goal");
    /**
-    * Begins the behavior, should have received the goal input prior
-    */
-   public static final ROS2Topic<Empty> START = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class).withNaming(typeName -> typeName + ROS_TOPIC_QUALIFIER + "/start");
-   /**
-    * Stops the behavior, if a step is being executed it will finish that step then stand in place. Can be restarted through the start topic, the goal is persistent
-    */
-   public static final ROS2Topic<Empty> STOP = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class).withNaming(typeName -> typeName + ROS_TOPIC_QUALIFIER + "/stop");
-   /**
     * Signals that the robot has reached the goal
     */
    public static final ROS2Topic<Empty> COMPLETED = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class).withNaming(typeName -> typeName + ROS_TOPIC_QUALIFIER + "/completed");

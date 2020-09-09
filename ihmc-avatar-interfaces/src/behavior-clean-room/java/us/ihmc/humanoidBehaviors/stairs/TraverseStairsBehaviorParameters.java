@@ -9,14 +9,14 @@ public class TraverseStairsBehaviorParameters extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final DoubleStoredPropertyKey pauseTime = keys.addDoubleKey("Pause time", 20.0);
-   public static final IntegerStoredPropertyKey numberOfStairsPerExecution = keys.addIntegerKey("Number Of Stairs Per Execution", 3);
+   public static final DoubleStoredPropertyKey pauseTime = keys.addDoubleKey("Pause time", 6.0);
+   public static final IntegerStoredPropertyKey numberOfStairsPerExecution = keys.addIntegerKey("Number Of Stairs Per Execution", 2);
+   public static final DoubleStoredPropertyKey planningTimeout = keys.addDoubleKey("Planning timeout", 10.0);
 
    // TODO look back at logs for these
-   public static final DoubleStoredPropertyKey chestPitchForAscension = keys.addDoubleKey("Chest Pitch For Ascension");
-   public static final DoubleStoredPropertyKey chestPitchForDescension = keys.addDoubleKey("Chest Pitch For Decension");
-   public static final DoubleStoredPropertyKey neckPitchForAscension = keys.addDoubleKey("Neck Pitch For Ascension");
-   public static final DoubleStoredPropertyKey neckPitchForDescension = keys.addDoubleKey("Neck Pitch For Decension");
+   public static final DoubleStoredPropertyKey trajectoryTime = keys.addDoubleKey("Trajectory Time", 4.0);
+   public static final DoubleStoredPropertyKey chestPitch = keys.addDoubleKey("Chest Pitch", Math.toRadians(10.0));
+   public static final DoubleStoredPropertyKey headPitch = keys.addDoubleKey("Neck Pitch", Math.toRadians(48.0));
 
    public static final DoubleStoredPropertyKey xyProximityForCompletion = keys.addDoubleKey("XY Proximity For Completion", 0.8);
 

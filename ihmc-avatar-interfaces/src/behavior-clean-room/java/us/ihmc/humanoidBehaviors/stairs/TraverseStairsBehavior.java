@@ -1,6 +1,9 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
+import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -22,7 +25,7 @@ import static us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI.create;
 public class TraverseStairsBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
-   private static final int UPDATE_RATE_MILLIS = 50;
+   private static final int UPDATE_RATE_MILLIS = 100;
 
    private final BehaviorHelper helper;
    private final StatusLogger statusLogger;
@@ -32,6 +35,10 @@ public class TraverseStairsBehavior implements BehaviorInterface
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
    private ScheduledFuture<?> behaviorTask = null;
    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+
+   private final IHMCROS2Publisher<Empty> completedPublisher;
+   private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
+   private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
 
    private final StateMachine<TraverseStairsStateName, State> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -60,15 +67,14 @@ public class TraverseStairsBehavior implements BehaviorInterface
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
 
+      completedPublisher = ROS2Tools.createPublisher(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
+
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
       planStepsState = new TraverseStairsPlanStepsState(helper, parameters);
       executeStepsState = new TraverseStairsExecuteStepsState(helper, parameters, planStepsState::getOutput);
 
       stateMachine = buildStateMachine();
-
-      helper.createROS2Callback(TraverseStairsBehaviorAPI.START, s -> setEnabled(true));
-      helper.createROS2Callback(TraverseStairsBehaviorAPI.STOP, s -> setEnabled(true));
    }
 
    private StateMachine<TraverseStairsStateName, State> buildStateMachine()
@@ -84,7 +90,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
       factory.addState(TraverseStairsStateName.PLAN_STEPS, planStepsState);
       factory.addState(TraverseStairsStateName.EXECUTE_STEPS, executeStepsState);
 
-      factory.addDoneTransition(TraverseStairsStateName.EXECUTE_STEPS, TraverseStairsStateName.PAUSE);
+      factory.addDoneTransition(TraverseStairsStateName.SQUARE_UP, TraverseStairsStateName.PAUSE);
       factory.addDoneTransition(TraverseStairsStateName.PAUSE, TraverseStairsStateName.PLAN_STEPS);
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.EXECUTE_STEPS, planStepsState::shouldTransitionToExecute);
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.PAUSE, planStepsState::shouldTransitionBackToPause);
@@ -103,8 +109,11 @@ public class TraverseStairsBehavior implements BehaviorInterface
             return;
          }
 
+         hasPublishedCompleted.set(false);
+         behaviorHasCrashed.set(false);
+         helper.setCommunicationCallbacksEnabled(true);
          stateMachine.resetToInitialState();
-         behaviorTask = executorService.scheduleAtFixedRate(stateMachine::doActionAndTransition, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
+         behaviorTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
       }
       else
       {
@@ -119,6 +128,32 @@ public class TraverseStairsBehavior implements BehaviorInterface
             behaviorTask.cancel(true);
             behaviorTask = null;
          }
+
+         helper.setCommunicationCallbacksEnabled(false);
+      }
+   }
+
+   private void update()
+   {
+      if (behaviorHasCrashed.get())
+      {
+         return;
+      }
+
+      try
+      {
+         stateMachine.doActionAndTransition();
+
+         if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
+         {
+            completedPublisher.publish(new Empty());
+            hasPublishedCompleted.set(true);
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         behaviorHasCrashed.set(true);
       }
    }
 }
