@@ -14,6 +14,7 @@ import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,6 +81,11 @@ public class BodyPathPlanGraphic extends Group
          this.mesh = mesh;
          this.material = material;
       }
+   }
+
+   public void clear()
+   {
+      generateMeshes(new ArrayList<>());
    }
 
    private void handle(long now)
