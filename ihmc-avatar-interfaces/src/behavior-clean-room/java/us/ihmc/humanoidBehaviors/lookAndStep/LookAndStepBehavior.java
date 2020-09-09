@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -172,6 +173,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             () -> {
                if ((!isBeingReset.get()))
                {
+                  helper.publishROS2(SLAMModuleAPI.CLEAR);
                   bodyPathPlanning.acceptGoal(null);
                   behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
                }
