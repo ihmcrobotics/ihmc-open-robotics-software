@@ -192,20 +192,6 @@ public class SupportSequence implements ContactSupplier
     */
    public void update(List<Footstep> footsteps, List<FootstepTiming> footstepTimings)
    {
-      update(footsteps, footstepTimings, null, null);
-   }
-
-   /**
-    * Updates the support sequence with the given footstep parameters. This can be called every tick. This method will
-    * retain all contact state since the sequence was started and update all contact switches in the future.
-    *
-    * @param footsteps to be added to the sequence.
-    * @param footstepTimings respective timings.
-    * @param lastFootstep the last executed footstep in case it contained a touchdown.
-    * @param lastFootstepTiming respective timing.
-    */
-   public void update(List<Footstep> footsteps, List<FootstepTiming> footstepTimings, Footstep lastFootstep, FootstepTiming lastFootstepTiming)
-   {
       reset();
 
       // Add initial support states of the feet and set the moving polygons
@@ -221,23 +207,6 @@ public class SupportSequence implements ContactSupplier
          FrameConvexPolygon2D initialFootSupport = footSupportSequences.get(robotSide).add();
          initialFootSupport.setIncludingFrame(stepFrame, movingPolygonsInSole.get(robotSide));
          footSupportInitialTimes.get(robotSide).add(0.0);
-      }
-
-      // In case there is a last footstep we might still be finishing up its touchdown.
-      if (lastFootstep != null && checkForTouchdown(lastFootstep, lastFootstepTiming))
-      {
-         RobotSide stepSide = lastFootstep.getRobotSide();
-         PoseReferenceFrame stepFrame = last(stepFrames.get(stepSide));
-
-         tempPose.setIncludingFrame(footPoses.get(stepSide));
-         tempPose.changeFrame(ReferenceFrame.getWorldFrame());
-         computeAdjustedSole(tempPose, lastFootstep.getFootstepPose(), movingPolygonsInSole.get(stepSide).getCentroid());
-         stepFrame.setPoseAndUpdate(tempPose);
-         extractSupportPolygon(lastFootstep, movingPolygonsInSole.get(stepSide), defaultSupportPolygon);
-
-         FrameConvexPolygon2D fullSupport = footSupportSequences.get(stepSide).add();
-         fullSupport.setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
-         footSupportInitialTimes.get(stepSide).add(lastFootstepTiming.getTouchdownDuration());
       }
 
       // Assemble the individual foot support trajectories for regular walking
@@ -323,123 +292,23 @@ public class SupportSequence implements ContactSupplier
       PoseReferenceFrame stepFrame = stepFrames.get(stepSide).add();
       stepFrame.setPoseAndUpdate(footstep.getFootstepPose());
 
-      // Check if the footstep contains a partial foothold touchdown
-      boolean doPartialFootholdTouchdown = checkForTouchdown(footstep, footstepTiming);
-
       // Compute the touchdown polygon in step sole frame
-      FrameConvexPolygon2D touchdownPolygon = footSupports.add();
-      if (doPartialFootholdTouchdown)
-      {
-         if (computeTouchdownPitch(footstep) > 0.0)
-            computeToePolygon(touchdownPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
-         else
-            computeHeelPolygon(touchdownPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
-      }
-      else
-      {
-         touchdownPolygon.setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
-      }
+      footSupports.add().setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
       footInitialTimes.add(stepStartTime + footstepTiming.getStepTime());
-
-      // In case there was a partial touchdown polygon we need to add the full support after the touchdown is finished.
-      if (doPartialFootholdTouchdown)
-      {
-         FrameConvexPolygon2D fullSupportPolygon = footSupports.add();
-         fullSupportPolygon.setIncludingFrame(stepFrame, movingPolygonsInSole.get(stepSide));
-         footInitialTimes.add(stepStartTime + footstepTiming.getStepTime() + footstepTiming.getTouchdownDuration());
-      }
    }
 
    private void addLiftOffPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
    {
-      boolean doPartialFootholdLiftoff = checkForLiftoff(footstep, footstepTiming);
-
       RobotSide stepSide = footstep.getRobotSide();
       PoseReferenceFrame stepFrame = last(stepFrames.get(stepSide));
 
-      if (doPartialFootholdLiftoff)
-      {
-         double initialTime = stepStartTime + footstepTiming.getTransferTime() - footstepTiming.getLiftoffDuration();
-         FrameConvexPolygon2D liftoffPolygon = insertAt(stepSide, initialTime);
-         if (computeLiftoffPitch(footstep) > 0.0)
-            computeToePolygon(liftoffPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
-         else
-            computeHeelPolygon(liftoffPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
-      }
-      else if (shouldDoToeOff(last(stepFrames.get(stepSide.getOppositeSide())), stepFrame))
+      if (shouldDoToeOff(last(stepFrames.get(stepSide.getOppositeSide())), stepFrame))
       {
          FrameConvexPolygon2D liftoffPolygon = footSupportSequences.get(stepSide).add();
          computeToePolygon(liftoffPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
          // TODO: This timing is a heuristic. Make this tunable.
          footSupportInitialTimes.get(stepSide).add(stepStartTime + footstepTiming.getTransferTime() / 2.0);
       }
-   }
-
-   private FrameConvexPolygon2D insertAt(RobotSide robotSide, double initialTime)
-   {
-      TDoubleArrayList initialTimes = footSupportInitialTimes.get(robotSide);
-      RecyclingArrayList<FrameConvexPolygon2D> polygons = footSupportSequences.get(robotSide);
-
-      if (initialTime > last(initialTimes))
-      {
-         initialTimes.add(initialTime);
-         return polygons.add();
-      }
-      else if (Precision.equals(initialTime, last(initialTimes)))
-      {
-         return last(polygons);
-      }
-      else if (initialTime <= 0.0)
-      {
-         return polygons.get(0);
-      }
-
-      // If we end up here that suggests that step timings for a single side are overlapping.
-      // E.g. a liftoff might be starting before a previous touchdown is finished.
-      System.out.println(initialTimes);
-      throw new RuntimeException("Tried to add " + initialTime);
-   }
-
-   private boolean checkForTouchdown(Footstep footstep, FootstepTiming footstepTiming)
-   {
-      if (footstep.getTrajectoryType() != TrajectoryType.WAYPOINTS)
-         return false;
-      if (footstepTiming.getTouchdownDuration() <= 0.0)
-         return false;
-      if (!Precision.equals(last(footstep.getSwingTrajectory()).getTime(), footstepTiming.getSwingTime()))
-         return false;
-      if (Math.abs(computeTouchdownPitch(footstep)) < Math.toRadians(5.0))
-         return false;
-      return true;
-   }
-
-   private boolean checkForLiftoff(Footstep footstep, FootstepTiming footstepTiming)
-   {
-      if (footstep.getTrajectoryType() != TrajectoryType.WAYPOINTS)
-         return false;
-      if (footstepTiming.getLiftoffDuration() <= 0.0)
-         return false;
-      if (!Precision.equals(footstep.getSwingTrajectory().get(0).getTime(), 0.0))
-         return false;
-      if (Math.abs(computeLiftoffPitch(footstep)) < Math.toRadians(5.0))
-         return false;
-      return true;
-   }
-
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
-
-   private double computeTouchdownPitch(Footstep footstep)
-   {
-      tempOrientation.setIncludingFrame(last(footstep.getSwingTrajectory()).getOrientation());
-      tempOrientation.changeFrame(footstep.getSoleReferenceFrame());
-      return tempOrientation.getPitch();
-   }
-
-   private double computeLiftoffPitch(Footstep footstep)
-   {
-      tempOrientation.setIncludingFrame(footstep.getSwingTrajectory().get(0).getOrientation());
-      tempOrientation.changeFrame(last(stepFrames.get(footstep.getRobotSide())));
-      return tempOrientation.getPitch();
    }
 
    private final FrameConvexPolygon2D framePolygonA = new FrameConvexPolygon2D();
@@ -536,9 +405,10 @@ public class SupportSequence implements ContactSupplier
 
    private boolean shouldDoToeOff(ReferenceFrame stanceFrame, ReferenceFrame swingFootFrame)
    {
-      stepLocation.setToZero(swingFootFrame);
-      stepLocation.changeFrame(stanceFrame);
-      return stepLocation.getX() < -0.05;
+      return false;
+//      stepLocation.setToZero(swingFootFrame);
+//      stepLocation.changeFrame(stanceFrame);
+//      return stepLocation.getX() < -0.05;
    }
 
    private void reset()
@@ -585,11 +455,6 @@ public class SupportSequence implements ContactSupplier
    }
 
    private static <T> T last(List<T> list)
-   {
-      return list.get(list.size() - 1);
-   }
-
-   private static double last(TDoubleList list)
    {
       return list.get(list.size() - 1);
    }
