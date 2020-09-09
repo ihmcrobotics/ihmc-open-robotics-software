@@ -122,7 +122,7 @@ public class FootstepCostCalculator
 
    public void resetLoggedVariables()
    {
-      edgeCost.set(0.0);
-      totalCost.set(0.0);
+      edgeCost.set(Double.NaN);
+      totalCost.set(Double.NaN);
    }
 }
