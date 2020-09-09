@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -152,9 +153,6 @@ public class WalkingSingleSupportState extends SingleSupportState
             walkingMessageHandler.clearFootsteps();
 
             double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-            double swingDuration = footstepTiming.getSwingTime();
-            double transferDuration = footstepTiming.getTransferTime();
-
             double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
             double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
 
@@ -164,7 +162,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
             balanceManager.setICPPlanSupportSide(supportSide);
-            balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
+            balanceManager.initializeICPPlanForSingleSupport();
 
             updateHeightManager();
          }
@@ -259,7 +257,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       updateFootstepParameters();
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
-      balanceManager.setNextFootstep(nextFootstep);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
       balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
@@ -276,30 +273,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport();
 
       updateHeightManager();
-
-      if (balanceManager.wasTimingAdjustedForReachability())
-      {
-         double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
-         double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
-         double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
-
-         swingTime = currentSwingDuration;
-         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
-
-         if (isLastStep)
-         {
-            balanceManager.setFinalTransferTime(nextTransferDuration);
-         }
-         else
-         {
-            double nextSwingTime = footstepTimings[0].getSwingTime();
-            footstepTimings[0].setTimings(nextSwingTime, nextTransferDuration);
-            walkingMessageHandler.adjustTiming(nextSwingTime, nextTransferDuration);
-         }
-      }
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
@@ -419,7 +395,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    /**
     * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}.
     * It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *

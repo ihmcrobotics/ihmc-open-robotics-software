@@ -125,14 +125,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.setICPPlanTransferToSide(transferToSide);
       FootstepTiming firstTiming = footstepTimings[0];
       currentTransferDuration.set(firstTiming.getTransferTime());
-      balanceManager.initializeICPPlanForTransfer(firstTiming.getSwingTime(), firstTiming.getTransferTime(), finalTransferTime);
-
-      if (balanceManager.wasTimingAdjustedForReachability())
-      {
-         double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
-         double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
-         firstTiming.setTimings(currentSwingDuration, currentTransferDuration);
-      }
+      balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.initializeICPPlanForTransfer();
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
       pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());

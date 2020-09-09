@@ -52,7 +52,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_DYN_REACHABILITY = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -60,7 +59,6 @@ public class BalanceManager
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final PrecomputedICPPlanner precomputedICPPlanner;
-   private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
@@ -196,16 +194,6 @@ public class BalanceManager
       }
       blendICPTrajectories.set(true);
 
-      if (ENABLE_DYN_REACHABILITY)
-      {
-         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame,
-                                                                           walkingControllerParameters.getDynamicReachabilityParameters(), registry,
-                                                                           yoGraphicsListRegistry);
-      }
-      else
-      {
-         dynamicReachabilityCalculator = null;
-      }
       editStepTimingForReachability.set(walkingControllerParameters.editStepTimingForReachability());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
@@ -263,35 +251,6 @@ public class BalanceManager
       icpPlanner.addFootstepToPlan(footstep, timing, shiftFractions);
       footsteps.add().set(footstep);
       footstepTimings.add().set(timing);
-   }
-
-   /**
-    * Sets the next footstep that the robot will take. Should be set at the beginning of transfer.
-    * @param upcomingFootstep
-    */
-   public void setUpcomingFootstep(Footstep upcomingFootstep)
-   {
-      if (ENABLE_DYN_REACHABILITY)
-         dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
-   }
-
-   /**
-    * Sets the next footstep that the robot will take. Should be set at the beginning of swing. Modifies the momentum recovery control module, which checks
-    * the stability of the robot.
-    * @param nextFootstep
-    */
-   public void setNextFootstep(Footstep nextFootstep)
-   {
-      if (ENABLE_DYN_REACHABILITY)
-         dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
-   }
-
-   public boolean wasTimingAdjustedForReachability()
-   {
-      if (ENABLE_DYN_REACHABILITY)
-         return dynamicReachabilityCalculator.wasTimingAdjusted();
-      else
-         return false;
    }
 
    public double getCurrentTransferDurationAdjustedForReachability()
@@ -574,26 +533,11 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport(double swingTime, double transferTime, double finalTransferTime)
+   public void initializeICPPlanForSingleSupport()
    {
-      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       initializeForSingleSupport = true;
 
-      if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
-      {
-         dynamicReachabilityCalculator.setInSwing();
-
-         if (editStepTimingForReachability.getBooleanValue())
-         {
-            dynamicReachabilityCalculator.verifyAndEnsureReachability();
-            adjustTimingsUsingReachability();
-         }
-         else
-         {
-            dynamicReachabilityCalculator.checkReachabilityOfStep();
-         }
-      }
 
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
       icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
@@ -601,30 +545,6 @@ public class BalanceManager
       icpPlannerDone.set(false);
    }
 
-   private void adjustTimingsUsingReachability()
-   {
-      if (!dynamicReachabilityCalculator.wasTimingAdjusted())
-      {
-         return;
-      }
-
-      if (footstepTimings.isEmpty())
-      {
-         throw new RuntimeException("Can not adjust empty list of timings. This is probably called at the wrong time.");
-      }
-
-      footstepTimings.get(0).setTimings(dynamicReachabilityCalculator.getSwingDuration(), dynamicReachabilityCalculator.getTransferDuration());
-      if (footstepTimings.size() > 0)
-      {
-         footstepTimings.get(1).setTransferTime(dynamicReachabilityCalculator.getNextTransferDuration());
-      }
-
-      double adjustedFinalTransferDuration = dynamicReachabilityCalculator.getFinalTransferDuration();
-      if (!Double.isNaN(adjustedFinalTransferDuration))
-      {
-         finalTransferDuration = adjustedFinalTransferDuration;
-      }
-   }
 
    public void initializeICPPlanForStanding()
    {
@@ -639,46 +559,29 @@ public class BalanceManager
       icpPlannerDone.set(false);
    }
 
-   public void initializeICPPlanForTransferToStanding(double finalTransferTime)
+   public void initializeICPPlanForTransferToStanding()
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       initializeForStanding = true;
 
       icpPlannerDone.set(false);
    }
 
-   public void initializeICPPlanForTransfer(double swingTime, double transferTime, double finalTransferTime)
+   public void initializeICPPlanForTransfer()
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
       initializeForTransfer = true;
-
-      if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
-      {
-         dynamicReachabilityCalculator.setInTransfer();
-
-         if (editStepTimingForReachability.getBooleanValue())
-         {
-            dynamicReachabilityCalculator.verifyAndEnsureReachability();
-            adjustTimingsUsingReachability();
-         }
-         else
-         {
-            dynamicReachabilityCalculator.checkReachabilityOfStep();
-         }
-      }
 
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
       icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
