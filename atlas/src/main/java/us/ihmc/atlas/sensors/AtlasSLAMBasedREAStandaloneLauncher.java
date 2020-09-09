@@ -16,6 +16,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -107,6 +108,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
       }
       Path slamConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
       slamConfigurationFilePath = Paths.get(slamConfigurationFilePath.toString(), "/atlas/src/main/resources/" + SLAM_CONFIGURATION_FILE_NAME);
+      LogTools.info("Loading configuration file: {}", slamConfigurationFilePath.toAbsolutePath().normalize());
       module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager, slamConfigurationFilePath);
 
       Stage secondStage = null;
