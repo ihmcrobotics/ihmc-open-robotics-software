@@ -63,7 +63,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
       planStepsState = new TraverseStairsPlanStepsState(helper, parameters);
-      executeStepsState = new TraverseStairsExecuteStepsState(helper, parameters);
+      executeStepsState = new TraverseStairsExecuteStepsState(helper, parameters, planStepsState::getOutput);
 
       stateMachine = buildStateMachine();
 
