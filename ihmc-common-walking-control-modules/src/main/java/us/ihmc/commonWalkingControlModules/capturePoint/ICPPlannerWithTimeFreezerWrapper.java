@@ -524,7 +524,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    {
       icpPlanner.compute(time - timeDelay.getDoubleValue());
 
-      if (doTimeFreezing.getBooleanValue())
+      if (icpPlanner.isInDoubleSupport() && doTimeFreezing.getBooleanValue())
       {
          icpPlanner.getDesiredCapturePointPosition(tmpCapturePointPosition);
          icpPlanner.getDesiredCapturePointVelocity(tmpCapturePointVelocity);
