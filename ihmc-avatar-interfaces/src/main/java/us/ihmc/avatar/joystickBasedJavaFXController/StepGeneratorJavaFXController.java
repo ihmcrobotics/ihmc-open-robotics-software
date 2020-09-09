@@ -249,8 +249,8 @@ public class StepGeneratorJavaFXController
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          CapturabilityBasedStatus status = s.takeNextData();
-         isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
-         isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
+         isLeftFootInSupport.set(!status.getLeftFootSupportPolygon3d().isEmpty());
+         isRightFootInSupport.set(!status.getRightFootSupportPolygon3d().isEmpty());
       });
 
       double collisionBoxDepth = 0.65;
