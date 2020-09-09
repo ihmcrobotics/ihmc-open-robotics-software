@@ -24,6 +24,7 @@
                         </Button>
                      </children>
                   </FlowPane>
+                  <CheckBox fx:id="injectSupportRegion" mnemonicParsing="false" onAction="#injectSupportRegion" text="Inject Support Region" />
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />

@@ -42,10 +42,7 @@ import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -81,6 +78,7 @@ public class LookAndStepFootstepPlanningTask
       private SingleThreadSizeOneQueueExecutor executor;
       private ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
+      private Supplier<Boolean> injectSupportRegionsSupplier;
 
       private final TypedInput<LookAndStepLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
@@ -99,6 +97,7 @@ public class LookAndStepFootstepPlanningTask
                              FootstepPlanningModule footstepPlanningModule,
                              SideDependentList<ConvexPolygon2D> defaultFootPolygons,
                              AtomicReference<RobotSide> lastStanceSideReference,
+                             Supplier<Boolean> injectSupportRegionsSupplier,
                              Supplier<Boolean> operatorReviewEnabledSupplier,
                              RemoteSyncedRobotModel syncedRobot,
                              Supplier<LookAndStepBehavior.State> behaviorStateReference,
@@ -114,6 +113,7 @@ public class LookAndStepFootstepPlanningTask
          this.footstepPlanningModule = footstepPlanningModule;
          this.defaultFootPolygons = defaultFootPolygons;
          this.lastStanceSideReference = lastStanceSideReference;
+         this.injectSupportRegionsSupplier = injectSupportRegionsSupplier;
          this.operatorReviewEnabledSupplier = operatorReviewEnabledSupplier;
          this.behaviorStateReference = behaviorStateReference;
          this.controllerStatusTracker = controllerStatusTracker;
@@ -184,6 +184,7 @@ public class LookAndStepFootstepPlanningTask
 
       private void evaluateAndRun()
       {
+         injectSupportRegions = injectSupportRegionsSupplier.get();
          planarRegions = planarRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
@@ -220,11 +221,13 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfIncompleteFootsteps;
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
+   protected boolean injectSupportRegions;
 
    protected void performTask()
    {
       // merge support regions in if < 2 steps taken
-      if (numberOfCompletedFootsteps < 2)
+//      if (numberOfCompletedFootsteps < 2)
+      if (injectSupportRegions)
       {
          IDLSequence.Object<Point3D> leftPolygon = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
          IDLSequence.Object<Point3D> rightPolygon = capturabilityBasedStatus.getRightFootSupportPolygon3d();
@@ -237,6 +240,10 @@ public class LookAndStepFootstepPlanningTask
          {
             // find place using first 3 points
             Plane3D plane = new Plane3D(allPoints.get(0), allPoints.get(1), allPoints.get(2));
+            if (plane.getNormal().getZ() < 0)
+            {
+               plane.getNormal().negate();
+            }
 
             // find transform of plane
             Quaternion fromZUp = new Quaternion();
@@ -254,8 +261,13 @@ public class LookAndStepFootstepPlanningTask
                framePoint3D.changeFrame(planeFrame);
                polygon2D.addVertex(framePoint3D);
             }
+            polygon2D.update();
 
-            PlanarRegion supportRegion = new PlanarRegion(transform, polygon2D);
+            ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+            ConvexPolygon2D grownPolygon = new ConvexPolygon2D();
+            convexPolygonScaler.scaleConvexPolygon(polygon2D, -0.07, grownPolygon);
+
+            PlanarRegion supportRegion = new PlanarRegion(transform, grownPolygon);
             planarRegions.addPlanarRegion(supportRegion);
 
             statusLogger.info("Added region with {} vertices", supportRegion.getConvexPolygon(0).getNumberOfVertices());

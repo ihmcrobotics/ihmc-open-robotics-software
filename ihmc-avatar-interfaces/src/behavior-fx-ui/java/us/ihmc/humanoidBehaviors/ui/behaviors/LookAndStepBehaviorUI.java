@@ -65,6 +65,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FXUIActionMap placeGoalActionMap;
 
    @FXML private Button placeGoalButton;
+   @FXML private CheckBox injectSupportRegion;
    @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
@@ -239,6 +240,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void saveFootstepPlanningParameters()
    {
       footstepPlannerParameters.save();
+   }
+
+   @FXML public void injectSupportRegion()
+   {
+      behaviorMessager.submitMessage(InjectSupportRegion, injectSupportRegion.isSelected());
    }
 
    @FXML public void operatorReviewCheckBox()

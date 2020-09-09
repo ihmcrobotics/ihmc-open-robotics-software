@@ -94,6 +94,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          footstepPlannerParameters.setAllFromStrings(parameters);
       }); // TODO: This overrides overrides?
 
+      AtomicReference<Boolean> injectSupportRegion = helper.createUIInput(InjectSupportRegion, false);
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
 
@@ -193,6 +194,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             helper.getOrCreateFootstepPlanner(),
             FootstepPlanningModuleLauncher.createFootPolygons(helper.getRobotModel()),
             lastStanceSide,
+            injectSupportRegion::get,
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference::get,
@@ -220,6 +222,8 @@ public class LookAndStepBehavior implements BehaviorInterface
             statusLogger,
             robotInterface.newSyncedRobot(),
             lookAndStepParameters,
+            footstepPlannerParameters,
+            swingPlannerParameters,
             helper::publishToUI,
             helper.createFootstepPlanPostProcessor(),
             robotInterface::requestWalk,
