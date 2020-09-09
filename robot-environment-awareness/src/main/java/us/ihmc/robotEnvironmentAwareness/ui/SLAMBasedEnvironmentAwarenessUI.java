@@ -248,35 +248,23 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
    @Override
    public void stop()
    {
-      new Throwable().printStackTrace();
-      LogTools.info("Stopping");
       try
       {
          uiConnectionHandler.stop();
-      LogTools.info("Stopping");
          uiMessager.closeMessager();
-      LogTools.info("Stopping");
 
          ihmcSLAMViewer.stop();
-      LogTools.info("Stopping");
          depthFrameViewer.stop();
-      LogTools.info("Stopping");
          if (pelvisFrameViewer != null)
             pelvisFrameViewer.stop();
-      LogTools.info("Stopping");
          if (footstepViewer != null)
             footstepViewer.stop();
-      LogTools.info("Stopping");
 
-      slamDataManagerAnchorPaneController.destroy();
-      LogTools.info("Stopping");
+         slamDataManagerAnchorPaneController.destroy();
 
          stereoVisionPointCloudDataExporter.shutdown();
-      LogTools.info("Stopping");
 
-//         ExceptionTools.handle(() -> ros2Node.destroy(), DefaultExceptionHandler.PRINT_STACKTRACE);
-
-         LogTools.info("Stopped everything");
+         ros2Node.destroy();
       }
       catch (Exception e)
       {
