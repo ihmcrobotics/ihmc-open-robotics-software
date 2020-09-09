@@ -21,10 +21,4 @@ geometry_msgs/Point[] contact_points_in_body
 # List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
 int32[] support_rigid_body_ids
 
-# First part of the estimation of the local ground plane: the origin in world coordinates of the ground plane.
-geometry_msgs/Point ground_plane_estimate_origin
-
-# Second part of the estimation of the local ground plane: the normal in world coordinates of the ground plane.
-geometry_msgs/Vector3 ground_plane_estimate_normal
-
 
