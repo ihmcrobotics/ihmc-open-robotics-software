@@ -226,8 +226,8 @@ public class LookAndStepFootstepPlanningTask
       // merge support regions in if < 2 steps taken
       if (numberOfCompletedFootsteps < 2)
       {
-         IDLSequence.Object<Point3D> leftPolygon = capturabilityBasedStatus.getLeftFootSupportPolygon2d();
-         IDLSequence.Object<Point3D> rightPolygon = capturabilityBasedStatus.getRightFootSupportPolygon2d();
+         IDLSequence.Object<Point3D> leftPolygon = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+         IDLSequence.Object<Point3D> rightPolygon = capturabilityBasedStatus.getRightFootSupportPolygon3d();
 
          List<Point3D> allPoints = new ArrayList<>();
          allPoints.addAll(leftPolygon);
