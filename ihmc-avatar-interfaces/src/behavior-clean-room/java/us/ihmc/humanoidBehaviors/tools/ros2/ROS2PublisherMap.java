@@ -24,7 +24,7 @@ public class ROS2PublisherMap
 
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
-      IHMCROS2Publisher publisher = map.computeIfAbsent(message.getClass(), key -> new IHMCROS2Publisher<>(ros2Node, message.getClass(), topic));
+      IHMCROS2Publisher publisher = map.computeIfAbsent(message.getClass(), key -> new IHMCROS2Publisher<>(ros2Node, topic));
       publisher.publish(message);
    }
 
@@ -36,6 +36,8 @@ public class ROS2PublisherMap
 
    public void publish(ROS2Topic<Empty> topic)
    {
-      publish(topic, new Empty());
+      Empty message = new Empty();
+      IHMCROS2Publisher publisher = map.computeIfAbsent(message.getClass(), key -> new IHMCROS2Publisher<>(ros2Node, topic));
+      publisher.publish(message);
    }
 }
