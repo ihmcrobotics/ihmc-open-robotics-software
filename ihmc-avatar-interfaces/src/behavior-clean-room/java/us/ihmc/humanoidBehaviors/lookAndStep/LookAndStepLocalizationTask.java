@@ -110,7 +110,7 @@ public class LookAndStepLocalizationTask
                solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
                us.ihmc.idl.IDLSequence.Object<Point3D> rawPolygon = side == RobotSide.LEFT ?
-                     capturabilityBasedStatus.getLeftFootSupportPolygon2d() : capturabilityBasedStatus.getRightFootSupportPolygon2d();
+                     capturabilityBasedStatus.getLeftFootSupportPolygon3d() : capturabilityBasedStatus.getRightFootSupportPolygon3d();
                ConvexPolygon2D foothold = new ConvexPolygon2D();
                for (Point3D vertex : rawPolygon)
                {
