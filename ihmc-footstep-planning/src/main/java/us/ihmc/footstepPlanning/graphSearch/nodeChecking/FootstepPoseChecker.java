@@ -16,7 +16,10 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.function.UnaryOperator;
@@ -36,6 +39,9 @@ public class FootstepPoseChecker
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D candidateFootPose = new FramePose3D();
 
+   private final YoFramePoseUsingYawPitchRoll yoStanceFootPose = new YoFramePoseUsingYawPitchRoll("stance", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoseUsingYawPitchRoll yoCandidateFootPose = new YoFramePoseUsingYawPitchRoll("candidate", stanceFootZUpFrame, registry);
+
    private UnaryOperator<FootstepNode> parentNodeSupplier;
 
    private final YoDouble stepWidth = new YoDouble("stepWidth", registry);
@@ -43,6 +49,12 @@ public class FootstepPoseChecker
    private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
    private final YoDouble stepReachXY = new YoDouble("stepReachXY", registry);
    private final YoDouble stepYaw = new YoDouble("stepYaw", registry);
+
+   private final YoBoolean stepIsPitchedBack = new YoBoolean("stepIsPitchedBack", registry);
+   private final YoBoolean stepTooLow = new YoBoolean("stepTooLow", registry);
+   private final YoBoolean stepTooForward = new YoBoolean("stepTooForward", registry);
+   private final YoDouble minZFromPitchContraint = new YoDouble("minZFromPitchContraint", registry);
+   private final YoDouble maxXFromPitchContraint = new YoDouble("maxXFromPitchContraint", registry);
 
    public FootstepPoseChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
@@ -69,9 +81,11 @@ public class FootstepPoseChecker
 
       candidateFootPose.setToZero(candidateFootFrame);
       candidateFootPose.changeFrame(stanceFootZUpFrame);
+      yoCandidateFootPose.set(candidateFootPose);
 
       stanceFootPose.setToZero(stanceFootFrame);
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      yoStanceFootPose.set(stanceFootPose);
 
       stepLength.set(candidateFootPose.getX());
       stepWidth.set(stepSide.negateIfRightSide(candidateFootPose.getY()));
@@ -97,16 +111,16 @@ public class FootstepPoseChecker
       }
 
       double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
-      double minZFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(maximumStepZ), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alphaPitchedBack);
-      double maxXFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alphaPitchedBack);
-      double stepDownFraction = - stepHeight.getValue() / minZFromPitchContraint;
-      double stepForwardFraction = stepLength.getValue() / maxXFromPitchContraint;
+      minZFromPitchContraint.set(InterpolationTools.linearInterpolate(Math.abs(maximumStepZ), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alphaPitchedBack));
+      maxXFromPitchContraint.set(InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alphaPitchedBack));
+      double stepDownFraction = - stepHeight.getValue() / minZFromPitchContraint.getValue();
+      double stepForwardFraction = stepLength.getValue() / maxXFromPitchContraint.getValue();
 
-      boolean stepIsPitchedBack = alphaPitchedBack > 0.0;
-      boolean stepTooLow = stepLength.getValue() > 0.0 && stepDownFraction > 1.0;
-      boolean stepTooForward = stepHeight.getValue() < 0.0 && stepForwardFraction > 1.0;
+      stepIsPitchedBack.set(alphaPitchedBack > 0.0);
+      stepTooLow.set(stepLength.getValue() > 0.0 && stepDownFraction > 1.0);
+      stepTooForward.set(stepHeight.getValue() < 0.0 && stepForwardFraction > 1.0);
 
-      if (stepIsPitchedBack && (stepTooLow || stepTooForward))
+      if (stepIsPitchedBack.getBooleanValue() && (stepTooLow.getBooleanValue() || stepTooForward.getBooleanValue()))
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
       }
@@ -213,5 +227,13 @@ public class FootstepPoseChecker
       stepLength.setToNaN();
       stepHeight.setToNaN();
       stepReachXY.setToNaN();
+      yoStanceFootPose.setToNaN();
+      yoCandidateFootPose.setToNaN();
+
+      stepIsPitchedBack.set(false);
+      stepTooLow.set(false);
+      stepTooForward.set(false);
+      minZFromPitchContraint.setToNaN();
+      maxXFromPitchContraint.setToNaN();
    }
 }
