@@ -75,10 +75,10 @@ public class SLAMMeshViewer
 
       uiMessager.registerModuleMessagerStateListener(isMessagerOpen ->
       {
-         if (isMessagerOpen)
-            start();
-         else
-            stop();
+//         if (isMessagerOpen)
+//            start();
+//         else
+//            stop();
       });
    }
 

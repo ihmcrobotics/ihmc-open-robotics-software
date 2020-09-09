@@ -143,6 +143,11 @@ public class SLAMModule implements PerceptionModule
                                            REACommunicationProperties.stereoInputTopic,
                                            this::handleREAStateRequestMessage);
       new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+         stop();
+      });
 
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
@@ -275,6 +280,8 @@ public class SLAMModule implements PerceptionModule
          executorService.shutdownNow();
          executorService = null;
       }
+
+      LogTools.info("Shutdown complete");
    }
 
    private boolean isMainThreadInterrupted()

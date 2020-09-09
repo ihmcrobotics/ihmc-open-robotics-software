@@ -1,13 +1,22 @@
 package us.ihmc.robotEnvironmentAwareness.ui;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import std_msgs.msg.dds.Empty;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
@@ -15,9 +24,12 @@ import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
+import us.ihmc.ros2.ROS2Node;
 
 import java.io.File;
 import java.io.IOException;
+
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 public class PlanarSegmentationUI implements PerceptionUI
 {
@@ -26,6 +38,8 @@ public class PlanarSegmentationUI implements PerceptionUI
    private final BorderPane mainPane;
    private final REAUIMessager uiMessager;
    private final SegmentationMeshViewer meshViewer;
+   private boolean shuttingDown = false;
+   private boolean closedExternally = false;
 
    @FXML
    private OcTreeEssentialsAnchorPaneController ocTreeEssentialsAnchorPaneController;
@@ -43,6 +57,7 @@ public class PlanarSegmentationUI implements PerceptionUI
    private final Stage primaryStage;
 
    private final UIConnectionHandler uiConnectionHandler;
+   private final ROS2Node ros2Node;
 
    private PlanarSegmentationUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
@@ -95,7 +110,31 @@ public class PlanarSegmentationUI implements PerceptionUI
                                 });
 
       primaryStage.setScene(mainScene);
-      primaryStage.setOnCloseRequest(event -> stop());
+
+      ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "planar_segmentation_ui");
+      IHMCROS2Publisher<Empty> shutdownPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.SHUTDOWN);
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         if (!shuttingDown)
+         {
+            LogTools.info("Received SHUTDOWN. Shutting down...");
+            closeAndStop();
+         }
+         else
+            LogTools.info("Received SHUTDOWN. Already shutting down...");
+      });
+      primaryStage.setOnCloseRequest(event ->
+      {
+         shuttingDown = true;
+         if (!closedExternally)
+         {
+            ThreadTools.startAThread(() ->
+            {
+               shutdownPublisher.publish(new Empty());
+               stop();
+            }, "PlanarSegmentationShutdown");
+         }
+      });
    }
 
    private void refreshModuleState()
@@ -174,14 +213,33 @@ public class PlanarSegmentationUI implements PerceptionUI
       primaryStage.hide();
    }
 
+   public void closeAndStop()
+   {
+      closedExternally = true;
+      Platform.runLater(() ->
+      {
+         uiConnectionHandler.stop();
+         primaryStage.close();
+      });
+      stop();
+   }
+
    public void stop()
    {
+      LogTools.info("Stopping");
       try
       {
          uiConnectionHandler.stop();
+      LogTools.info("Stopping");
          uiMessager.closeMessager();
+      LogTools.info("Stopping");
 
          meshViewer.stop();
+      LogTools.info("Stopping");
+
+//         ExceptionTools.handle(() -> ros2Node.destroy(), DefaultExceptionHandler.PRINT_STACKTRACE);
+
+         LogTools.info("Stopped everything");
       }
       catch (Exception e)
       {

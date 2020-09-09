@@ -2,16 +2,22 @@ package us.ihmc.atlas.sensors;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.behaviors.AtlasLookAndStepBehaviorUIAndModule;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -28,8 +34,12 @@ import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.rtps.impl.fastRTPS.FastRTPSDomain;
 import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
@@ -129,15 +139,21 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
       if (spawnSLAMUI)
       {
-         primaryStage.setOnCloseRequest(event -> stop());
+//         primaryStage.setOnCloseRequest(event -> stop());
          ui.show();
-         
+
       }
       if (spawnSegmentationUI && launchSegmentation)
       {
-         secondStage.setOnCloseRequest(event -> stop());
+//         secondStage.setOnCloseRequest(event -> stop());
          planarSegmentationUI.show();
       }
+
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+         stop();
+      });
 
       module.start();
       if (segmentationModule != null)
@@ -146,24 +162,65 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public void stop()
    {
-      if (spawnSLAMUI) ui.stop();
-      module.stop();
+      ThreadTools.sleepSeconds(2.0);
+      LogTools.info("Stopping");
+
+      Platform.exit();
+      LogTools.info("Stopping");
+//      if (spawnSLAMUI) ui.stop();
+//      module.stop();
 
       ExceptionTools.handle(() -> slamMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      LogTools.info("Stopping");
 
       if (launchSegmentation)
       {
-         if (spawnSegmentationUI)
-            planarSegmentationUI.stop();
-         segmentationModule.stop();
+//         if (spawnSegmentationUI)
+//            planarSegmentationUI.stop();
+//         segmentationModule.stop();
          ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
       }
+      LogTools.info("Stopping");
 
-      ros2Node.destroy();
+//      ros2Node.destroy();
+
+//      ThreadTools.startAThread(() ->
+//                               {
+//                                  FastRTPSDomain.getInstance().stopAll();
+//                                  LogTools.info("Stopped everything");
+//                               }, "StopAllROS2");
+
+      ThreadTools.sleepSeconds(1.0);
+
+      // Halting in a daemon thread only has to do so if everything else failed.
+//      ThreadTools.startAsDaemon(() ->
+//      {
+//         ThreadTools.sleepSeconds(2.0);
+//         Runtime.getRuntime().halt(1);
+//      }, "EventuallyHalt");
    }
 
    public static void main(String[] args)
    {
-      new AtlasSLAMBasedREAStandaloneLauncher(true, true, DomainFactory.PubSubImplementation.FAST_RTPS);
+      JavaProcessManager manager = new JavaProcessManager();
+      manager.runOrRegister("AtlasSLAMBasedREA", () -> new AtlasSLAMBasedREAStandaloneLauncher(true, true, FAST_RTPS));
+      ArrayList<Process> processes = manager.spawnProcesses(AtlasSLAMBasedREAStandaloneLauncher.class, args);
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "test_node");
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+
+         ThreadTools.startAsDaemon(() ->
+                                   {
+                                      ThreadTools.sleepSeconds(2.0);
+                                      for (Process process : processes)
+                                      {
+                                         LogTools.info("Destoying process  forcibly");
+                                         process.destroyForcibly();
+                                      }
+                                      ros2Node.destroy();
+                                   }, "DestroyThread");
+      });
    }
 }
