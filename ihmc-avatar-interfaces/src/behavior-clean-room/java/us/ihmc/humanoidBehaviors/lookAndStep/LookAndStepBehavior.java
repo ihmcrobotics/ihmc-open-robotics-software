@@ -81,7 +81,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       lookAndStepParameters = new LookAndStepBehaviorParameters();
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
-      swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters();
+      swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
 
       helper.createUICallback(LookAndStepParameters, parameters ->
       {

@@ -191,13 +191,13 @@ public class FootstepPlanPostProcessHandler
             footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
 
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength() / nominalSwingTrajectoryLength);
-            double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * walkingControllerParameters.getDefaultSwingTime();
+            double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
          }
          else
          {
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getInitialTrajectoryLength() / nominalSwingTrajectoryLength);
-            double swingTime = swingScale * walkingControllerParameters.getDefaultSwingTime();
+            double swingTime = swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
          }
       }

@@ -865,6 +865,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
+   {
+      return new AtlasSwingPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
    public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
    {
       return new AtlasSplitFractionCalculatorParameters();
