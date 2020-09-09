@@ -133,10 +133,11 @@ public class TransferToStandingState extends WalkingState
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
       balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
-      balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
+      balanceManager.initializeICPPlanForTransferToStanding();
 
       touchdownErrorCompensator.clear();
 
