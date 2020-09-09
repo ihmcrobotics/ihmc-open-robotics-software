@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -7,13 +8,22 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -29,9 +39,14 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -69,8 +84,10 @@ public class LookAndStepFootstepPlanningTask
 
       private final TypedInput<LookAndStepLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
+      private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
+      private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
       private final Timer planningFailedTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
@@ -121,6 +138,10 @@ public class LookAndStepFootstepPlanningTask
          suppressor.addCondition(() -> "No regions. "
                                        + (planarRegions == null ? null : (" isEmpty: " + planarRegions.isEmpty())),
                                  () -> !(planarRegions != null && !planarRegions.isEmpty()));
+         suppressor.addCondition(() -> "Capturability based status expired. haveReceivedAny: " + capturabilityBasedStatusExpirationTimer.hasBeenSet()
+                                       + " timeSinceLastUpdate: " + capturabilityBasedStatusReceptionTimerSnapshot.getTimePassedSinceReset(),
+                                 () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
+         suppressor.addCondition(() -> "No capturability based status. ", () -> capturabilityBasedStatus == null);
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
@@ -143,6 +164,12 @@ public class LookAndStepFootstepPlanningTask
          planarRegionsExpirationTimer.reset();
       }
 
+      public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+      {
+         capturabilityBasedStatusInput.set(capturabilityBasedStatus);
+         capturabilityBasedStatusExpirationTimer.reset();
+      }
+
       public void acceptLocalizationResult(LookAndStepLocalizationResult localizationResult)
       {
          localizationResultInput.set(localizationResult);
@@ -159,6 +186,9 @@ public class LookAndStepFootstepPlanningTask
       {
          planarRegions = planarRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
+         capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
+         capturabilityBasedStatusReceptionTimerSnapshot
+               = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.getWaitTimeAfterPlanFailed());
          localizationResult = localizationResultInput.getLatest();
          syncedRobot.update();
@@ -167,6 +197,7 @@ public class LookAndStepFootstepPlanningTask
          lastStanceSide = lastStanceSideReference.get();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
+         numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
          swingPlannerType = SwingPlannerType.fromInt(lookAndStepBehaviorParameters.getSwingPlannerType());
 
          if (suppressor.evaulateShouldAccept())
@@ -179,16 +210,62 @@ public class LookAndStepFootstepPlanningTask
    // snapshot data
    protected LookAndStepLocalizationResult localizationResult;
    protected PlanarRegionsList planarRegions;
+   protected CapturabilityBasedStatus capturabilityBasedStatus;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected RobotSide lastStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
+   protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
 
    protected void performTask()
    {
+      // merge support regions in if < 2 steps taken
+      if (numberOfCompletedFootsteps < 2)
+      {
+         IDLSequence.Object<Point3D> leftPolygon = capturabilityBasedStatus.getLeftFootSupportPolygon2d();
+         IDLSequence.Object<Point3D> rightPolygon = capturabilityBasedStatus.getRightFootSupportPolygon2d();
+
+         List<Point3D> allPoints = new ArrayList<>();
+         allPoints.addAll(leftPolygon);
+         allPoints.addAll(rightPolygon);
+
+         if (allPoints.size() >= 3)
+         {
+            // find place using first 3 points
+            Plane3D plane = new Plane3D(allPoints.get(0), allPoints.get(1), allPoints.get(2));
+
+            // find transform of plane
+            Quaternion fromZUp = new Quaternion();
+            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, plane.getNormal(), fromZUp);
+
+            RigidBodyTransform transform = new RigidBodyTransform(fromZUp, plane.getPoint());
+
+            PoseReferenceFrame planeFrame = new PoseReferenceFrame("PlaneFrame", ReferenceFrame.getWorldFrame());
+            planeFrame.setPoseAndUpdate(plane.getPoint(), fromZUp);
+
+            ConvexPolygon2D polygon2D = new ConvexPolygon2D();
+            for (Point3D planarPoint3D : allPoints)
+            {
+               FramePoint3D framePoint3D = new FramePoint3D(ReferenceFrame.getWorldFrame(), planarPoint3D);
+               framePoint3D.changeFrame(planeFrame);
+               polygon2D.addVertex(framePoint3D);
+            }
+
+            PlanarRegion supportRegion = new PlanarRegion(transform, polygon2D);
+            planarRegions.addPlanarRegion(supportRegion);
+
+            statusLogger.info("Added region with {} vertices", supportRegion.getConvexPolygon(0).getNumberOfVertices());
+         }
+         else
+         {
+            statusLogger.error("Not enough points to add support polygon");
+         }
+      }
+
       uiPublisher.publishToUI(PlanarRegionsForUI, planarRegions);
 
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
