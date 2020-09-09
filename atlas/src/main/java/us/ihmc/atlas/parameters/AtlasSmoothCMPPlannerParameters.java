@@ -52,6 +52,18 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    }
 
    @Override
+   public boolean getDoTimeFreezing()
+   {
+      return true;
+   }
+
+   @Override
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return 0.05;
+   }
+
+   @Override
    public boolean planSwingAngularMomentum()
    {
       return true;
