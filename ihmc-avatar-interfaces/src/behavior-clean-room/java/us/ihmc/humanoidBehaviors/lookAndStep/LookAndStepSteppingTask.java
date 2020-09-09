@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -124,6 +125,20 @@ public class LookAndStepSteppingTask
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
                                                                                                                     swingTime,
                                                                                                                     transferTime);
+      for (FootstepDataMessage footstepDataMessage : footstepDataListMessage.getFootstepDataList())
+      {
+         if (footstepDataMessage.getSwingDuration() > 0)
+         {
+            statusLogger.warn("Overriding planned swing duration {} -> {}", footstepDataMessage.getSwingDuration(), swingTime);
+            footstepDataMessage.setSwingDuration(swingTime);
+         }
+         if (footstepDataMessage.getTransferDuration() > 0)
+         {
+            statusLogger.warn("Overriding planned transfer duration {} -> {}", footstepDataMessage.getTransferDuration(), transferTime);
+            footstepDataMessage.setTransferDuration(transferTime);
+         }
+      }
+
       ExecutionMode executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
       long messageId = UUID.randomUUID().getLeastSignificantBits();
