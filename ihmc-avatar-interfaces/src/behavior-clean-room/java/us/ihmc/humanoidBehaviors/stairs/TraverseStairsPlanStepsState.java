@@ -1,29 +1,27 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import javafx.geometry.Side;
+import org.opencv.xfeatures2d.HarrisLaplaceFeatureDetector;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.FootstepPlanningResult.FOUND_SOLUTION;
 
 public class TraverseStairsPlanStepsState implements State
 {
@@ -42,7 +40,11 @@ public class TraverseStairsPlanStepsState implements State
    {
       this.helper = helper;
       this.parameters = parameters;
-      helper.createROS2Callback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalInput::set);
+      helper.createROS2Callback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
+      {
+         LogTools.debug("Received goal input: " + goalPose);
+         goalInput.set(goalPose);
+      });
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
 
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
@@ -53,18 +55,20 @@ public class TraverseStairsPlanStepsState implements State
    @Override
    public void onEntry()
    {
+      LogTools.debug("Entering " + getClass().getSimpleName());
+
       if (goalInput.get() == null)
       {
-         throw new RuntimeException("No goal received in traverse stairs behavior");
+         String message = "No goal received in traverse stairs behavior";
+         LogTools.debug(message);
+         throw new RuntimeException(message);
       }
       else if (planarRegions.get() == null)
       {
-         throw new RuntimeException("No regions received in traverse stairs behavior");
+         String message = "No regions received in traverse stairs behavior";
+         LogTools.debug(message);
+         throw new RuntimeException(message);
       }
-
-      int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
-      planningModule.clearCustomTerminationConditions();
-      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> (pathSize % 2 == 0) && (pathSize >= targetNumberOfFootsteps));
    }
 
    @Override
@@ -83,13 +87,23 @@ public class TraverseStairsPlanStepsState implements State
          MovingReferenceFrame soleFrame = remoteSyncedRobotModel.getReferenceFrames().getSoleFrame(robotSide);
          FramePose3D solePose = new FramePose3D(soleFrame);
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
+         solePoses.put(robotSide, new Pose3D(solePose));
       }
+
+      RobotSide steppingSide = planningModule.getFootstepPlannerParameters().getStepOnlyWithRequestedSide();
+      request.setRequestedInitialStanceSide(steppingSide.getOppositeSide());
 
       request.setStartFootPoses(solePoses.get(RobotSide.LEFT), solePoses.get(RobotSide.RIGHT));
       request.setSwingPlannerType(SwingPlannerType.PROPORTION);
-      request.setTimeout(12.0);
+      request.setTimeout(parameters.get(TraverseStairsBehaviorParameters.planningTimeout));
 
+      int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
+      planningModule.clearCustomTerminationConditions();
+      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= targetNumberOfFootsteps);
+
+      LogTools.debug(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
+      LogTools.debug(getClass().getSimpleName() + ": " + output.getFootstepPlanningResult());
 
       // generate log
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(planningModule);
@@ -97,14 +111,31 @@ public class TraverseStairsPlanStepsState implements State
       ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
    }
 
+   private boolean searchWasSuccessful()
+   {
+      if (output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION)
+      {
+         return true;
+      }
+      else if (output.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
+      {
+         int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
+         return output.getFootstepPlan().getNumberOfSteps() >= targetNumberOfFootsteps;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
    boolean shouldTransitionToExecute(double timeInState)
    {
-      return output.getFootstepPlanningResult() == FOUND_SOLUTION;
+      return searchWasSuccessful();
    }
 
    boolean shouldTransitionBackToPause(double timeInState)
    {
-      return output.getFootstepPlanningResult() != FOUND_SOLUTION;
+      return !searchWasSuccessful();
    }
 
    FootstepPlannerOutput getOutput()

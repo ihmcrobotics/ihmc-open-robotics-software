@@ -352,8 +352,6 @@ public class BuildingExplorationBehaviorCoordinator
    {
       private final KryoMessager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
-      private final IHMCROS2Publisher<Empty> startPublisher;
-      private final IHMCROS2Publisher<Empty> stopPublisher;
 
       private final AtomicBoolean isDone = new AtomicBoolean();
       private final Pose3DReadOnly bombPose;
@@ -361,9 +359,7 @@ public class BuildingExplorationBehaviorCoordinator
       public TraverseStairsState(ROS2Node ros2Node, KryoMessager messager, Pose3DReadOnly bombPose)
       {
          this.messager = messager;
-         this.goalPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.GOAL_INPUT);
-         this.startPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.START);
-         this.stopPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.STOP);
+         this.goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, TraverseStairsBehaviorAPI.GOAL_INPUT);
          this.bombPose = bombPose;
 
          ROS2Tools.createCallbackSubscription(ros2Node, TraverseStairsBehaviorAPI.COMPLETED, s -> isDone.set(true));
@@ -385,8 +381,6 @@ public class BuildingExplorationBehaviorCoordinator
 
          goalPublisher.publish(new Pose3D(bombPose));
          ThreadTools.sleep(100);
-
-         startPublisher.publish(new Empty());
       }
 
       @Override
@@ -416,8 +410,8 @@ public class BuildingExplorationBehaviorCoordinator
 
       // Start behavior coordinator
       BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
-      behaviorCoordinator.setBombPose(new Pose3D(14.5, 0.0, 0.0, 0.0, 0.0, 0.0));
-      behaviorCoordinator.requestState(BuildingExplorationStateName.LOOK_AND_STEP);
+      behaviorCoordinator.setBombPose(new Pose3D(14.2, 0.0, 0.86, 0.0, 0.0, 0.0));
+      behaviorCoordinator.requestState(BuildingExplorationStateName.TRAVERSE_STAIRS);
       behaviorCoordinator.start();
    }
 }
