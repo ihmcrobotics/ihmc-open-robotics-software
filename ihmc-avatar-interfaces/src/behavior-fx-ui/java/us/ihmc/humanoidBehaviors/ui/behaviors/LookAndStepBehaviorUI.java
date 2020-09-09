@@ -57,6 +57,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
+   private volatile boolean reviewingBodyPath = true;
 
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
@@ -95,7 +96,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanWithTextGraphic();
       footstepPlanGraphic.setTransparency(0.2);
-      behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
+      behaviorMessager.registerTopicListener(FootstepPlanForUI, footsteps ->
+      {
+         reviewingBodyPath = false;
+         footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
+      });
 
       planarRegionsRegionsGraphic = new LivePlanarRegionsGraphic(false);
       behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
@@ -113,6 +118,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(BodyPathPlanForUI,
       bodyPathPlan ->
       {
+         reviewingBodyPath = true;
          ArrayList<Point3DReadOnly> bodyPathAsPoints = new ArrayList<>();
          for (Pose3D pose3D : bodyPathPlan)
          {
@@ -213,14 +219,16 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void approve()
    {
-//      behaviorMessager.submitMessage(TakeStep, new Object());
       behaviorMessager.submitMessage(ReviewApproval, true);
    }
 
    @FXML public void reject()
    {
-//      behaviorMessager.submitMessage(RePlan, new Object());
       behaviorMessager.submitMessage(ReviewApproval, false);
+      if (reviewingBodyPath)
+         bodyPathPlanGraphic.clear();
+      else
+         footstepPlanGraphic.clear();
    }
 
    @FXML public void saveLookAndStepParameters()
