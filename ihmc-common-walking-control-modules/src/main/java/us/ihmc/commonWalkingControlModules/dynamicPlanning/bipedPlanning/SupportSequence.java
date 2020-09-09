@@ -51,6 +51,8 @@ public class SupportSequence implements ContactSupplier
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
+   private final CoPTrajectoryParametersReadOnly parameters;
+
    private final RecyclingArrayList<ConvexPolygon2D> supportPolygons = new RecyclingArrayList<>(INITIAL_CAPACITY, ConvexPolygon2D.class);
    private final TDoubleArrayList supportInitialTimes = new TDoubleArrayList(INITIAL_CAPACITY, UNSET_TIME);
 
@@ -73,16 +75,23 @@ public class SupportSequence implements ContactSupplier
     */
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
 
-   public SupportSequence(ConvexPolygon2DReadOnly defaultSupportPolygon, SideDependentList<? extends ReferenceFrame> soleFrames,
-                         SideDependentList<? extends ReferenceFrame> soleZUpFrames)
+   public SupportSequence(CoPTrajectoryParametersReadOnly parameters,
+                          ConvexPolygon2DReadOnly defaultSupportPolygon,
+                          SideDependentList<? extends ReferenceFrame> soleFrames,
+                          SideDependentList<? extends ReferenceFrame> soleZUpFrames)
    {
-      this(defaultSupportPolygon, soleFrames, soleZUpFrames, null, null, null);
+      this(parameters, defaultSupportPolygon, soleFrames, soleZUpFrames, null, null, null);
    }
 
-   public SupportSequence(ConvexPolygon2DReadOnly defaultSupportPolygon, SideDependentList<? extends ReferenceFrame> soleFrames,
-                         SideDependentList<? extends ReferenceFrame> soleZUpFrames, BipedSupportPolygons bipedSupportPolygons,
+   public SupportSequence(CoPTrajectoryParametersReadOnly parameters,
+                          ConvexPolygon2DReadOnly defaultSupportPolygon,
+                          SideDependentList<? extends ReferenceFrame> soleFrames,
+                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                          BipedSupportPolygons bipedSupportPolygons,
                           YoRegistry parentRegistry, YoGraphicsListRegistry graphicRegistry)
    {
+      this.parameters = parameters;
+
       if (graphicRegistry != null)
       {
          for (int i = 0; i < 10; i++)
@@ -444,11 +453,11 @@ public class SupportSequence implements ContactSupplier
 
    private final FramePoint3D stepLocation = new FramePoint3D();
 
-   private boolean shouldDoToeOff(ReferenceFrame stanceFrame, ReferenceFrame swingFootFrame)
+   private boolean shouldDoToeOff(ReferenceFrame stanceFrame, ReferenceFrame swingFootStartFrame)
    {
-      stepLocation.setToZero(swingFootFrame);
+      stepLocation.setToZero(swingFootStartFrame);
       stepLocation.changeFrame(stanceFrame);
-      return stepLocation.getX() < -0.05;
+      return stepLocation.getX() < -parameters.getStepLengthToPlanToeOff();
    }
 
    private void reset()
@@ -478,19 +487,19 @@ public class SupportSequence implements ContactSupplier
       }
    }
 
-   private static void extractSupportPolygon(Footstep footstep, ConvexPolygon2D footSupportPolygon, ConvexPolygon2DReadOnly defaultSupportPolygon)
+   private static void extractSupportPolygon(Footstep footstep, ConvexPolygon2DBasics footSupportPolygonToPack, ConvexPolygon2DReadOnly defaultSupportPolygon)
    {
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
       {
-         footSupportPolygon.clear();
+         footSupportPolygonToPack.clear();
          for (int i = 0; i < predictedContactPoints.size(); i++)
-            footSupportPolygon.addVertex(predictedContactPoints.get(i));
-         footSupportPolygon.update();
+            footSupportPolygonToPack.addVertex(predictedContactPoints.get(i));
+         footSupportPolygonToPack.update();
       }
       else
       {
-         footSupportPolygon.set(defaultSupportPolygon);
+         footSupportPolygonToPack.set(defaultSupportPolygon);
       }
    }
 
