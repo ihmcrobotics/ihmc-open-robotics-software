@@ -1,9 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import std_msgs.msg.dds.Empty;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
@@ -12,10 +13,12 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrameState;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAMParameters;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
+import us.ihmc.ros2.ROS2Topic;
 
 public class SLAMModuleAPI
 {
+   public static final ROS2Topic<Empty> CLEAR = ROS2Tools.REALSENSE_SLAM_MODULE.withInput().withType(Empty.class);
+
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("SLAM"));
    private static final CategoryTheme SLAMModule = apiFactory.createCategoryTheme("SLAMModule");
