@@ -306,6 +306,7 @@ public class SwingOverPlanarRegionsTest
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      registry.addChild(planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getYoVariableRegistry());
       YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
 
       RobotSide swingSide = RobotSide.RIGHT;
