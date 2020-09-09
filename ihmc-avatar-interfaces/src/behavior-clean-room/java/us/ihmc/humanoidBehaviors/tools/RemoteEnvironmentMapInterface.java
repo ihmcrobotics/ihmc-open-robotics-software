@@ -27,7 +27,7 @@ public class RemoteEnvironmentMapInterface
 
    public RemoteEnvironmentMapInterface(ROS2NodeInterface ros2Node)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput(), this::acceptRealsenseSLAMRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MODULE.withOutput(), this::acceptRealsenseSLAMRegions);
 
       // used to be "/ihmc/rea/custom_region/input/planar_regions_list"
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withOutput(), this::acceptAdditionalRegionList);
