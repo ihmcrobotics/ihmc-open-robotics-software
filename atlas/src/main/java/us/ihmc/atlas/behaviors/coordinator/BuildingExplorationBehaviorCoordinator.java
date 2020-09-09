@@ -353,13 +353,20 @@ public class BuildingExplorationBehaviorCoordinator
       private final KryoMessager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
 
+      private final IHMCROS2Publisher<Empty> startPublisher;
+      private final IHMCROS2Publisher<Empty> stopPublisher;
+
       private final AtomicBoolean isDone = new AtomicBoolean();
       private final Pose3DReadOnly bombPose;
 
       public TraverseStairsState(ROS2Node ros2Node, KryoMessager messager, Pose3DReadOnly bombPose)
       {
          this.messager = messager;
-         this.goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, TraverseStairsBehaviorAPI.GOAL_INPUT);
+
+         this.goalPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.GOAL_INPUT);
+         this.startPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.START);
+         this.stopPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.STOP);
+
          this.bombPose = bombPose;
 
          ROS2Tools.createCallbackSubscription(ros2Node, TraverseStairsBehaviorAPI.COMPLETED, s -> isDone.set(true));
