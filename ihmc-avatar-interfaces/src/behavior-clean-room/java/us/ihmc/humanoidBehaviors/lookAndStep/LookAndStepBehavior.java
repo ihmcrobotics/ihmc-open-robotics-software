@@ -118,6 +118,8 @@ public class LookAndStepBehavior implements BehaviorInterface
 
                                 robotInterface.pauseWalking();
 
+                                LogTools.info("Queuing reset");
+                                LogTools.error("Queuing reset");
                                 reset.queueReset();
                              });
       reset.initialize(statusLogger,

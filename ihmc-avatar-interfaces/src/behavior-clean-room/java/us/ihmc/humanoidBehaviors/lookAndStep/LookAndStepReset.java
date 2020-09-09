@@ -29,11 +29,13 @@ public class LookAndStepReset
    public void queueReset()
    {
       resetTimer.reset();
+      statusLogger.error("Queuing performReset");
       executor.queueExecution(this::performReset);
    }
 
    private void performReset()
    {
+      statusLogger.error("Performing reset");
       if (controllerStatusTracker.isWalking())
       {
          statusLogger.info("Waiting for walking to finish");
