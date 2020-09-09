@@ -17,7 +17,8 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class SLAMModuleAPI
 {
-   public static final ROS2Topic<Empty> CLEAR = ROS2Tools.REALSENSE_SLAM_MODULE.withInput().withType(Empty.class);
+   public static final ROS2Topic<Empty> CLEAR = ROS2Tools.REALSENSE_SLAM_MODULE.withInput().withType(Empty.class).withSuffix("clear");
+   public static final ROS2Topic<Empty> SHUTDOWN = ROS2Tools.REALSENSE_SLAM_MODULE.withType(Empty.class).withSuffix("shutdown");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("SLAM"));
