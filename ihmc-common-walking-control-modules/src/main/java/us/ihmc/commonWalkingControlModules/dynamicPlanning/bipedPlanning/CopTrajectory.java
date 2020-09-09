@@ -84,15 +84,14 @@ public class CopTrajectory
    {
       clear();
 
-      double startTime = 0.0;
       // First waypoint is a center of initial support.
       Point2DReadOnly centroid = supportPolygons.get(0).getCentroid();
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartCopPosition(centroid);
-      contactStateProvider.getTimeInterval().setStartTime(startTime);
+      contactStateProvider.getTimeInterval().setStartTime(0.0);
 
       for (int i = 1; i < supportPolygons.size(); i++)
-         startTime = addPolygon(supportPolygons, supportTimes, startTime, i);
+         addPolygon(supportPolygons, supportTimes, i);
 
       // Last waypoint is at center of final support.
       contactStateProviders.getLast().setEndCopPosition(supportPolygons.get(supportPolygons.size() - 1).getCentroid());
@@ -103,7 +102,7 @@ public class CopTrajectory
 
    private final Point2D waypoint = new Point2D();
 
-   private double addPolygon(List<? extends ConvexPolygon2DReadOnly> supportPolygons, TDoubleList supportTimes, double startTime, int i)
+   private void addPolygon(List<? extends ConvexPolygon2DReadOnly> supportPolygons, TDoubleList supportTimes, int i)
    {
       ConvexPolygon2DReadOnly previousPolygon = supportPolygons.get(i - 1);
       ConvexPolygon2DReadOnly polygon = supportPolygons.get(i);
@@ -127,8 +126,6 @@ public class CopTrajectory
 
       previousContactState.setEndCopPosition(waypoint);
       contactState.setStartCopPosition(waypoint);
-
-      return startTime;
    }
 
    public List<? extends ContactStateProvider> getContactStates()
