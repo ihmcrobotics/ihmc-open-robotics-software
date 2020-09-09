@@ -113,6 +113,11 @@ public class WalkingFootstepTracker
       return numberOfIncompleteFootsteps;
    }
 
+   public int getNumberOfCompletedFootsteps()
+   {
+      return stepsCompleted;
+   }
+
    public void reset()
    {
       synchronized (this)
