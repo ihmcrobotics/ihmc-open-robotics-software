@@ -35,6 +35,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
@@ -86,10 +87,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
       regionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                            PlanarRegionsListMessage.class,
                                                            REACommunicationProperties.subscriberCustomRegionsTopicName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    BipedalSupportPlanarRegionParametersMessage.class,
-                                                    ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                              .withInput(),
+      ROS2Tools.createCallbackSubscription(ros2Node, BipedalSupportPlanarRegionParametersMessage.class, getTopic(robotName),
                                            s -> latestParametersMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     WalkingStatusMessage.class,
@@ -248,5 +246,11 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
    public void closeAndDispose()
    {
       destroy();
+   }
+
+   public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getTopic(String robotName)
+   {
+      return ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                     .withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
    }
 }

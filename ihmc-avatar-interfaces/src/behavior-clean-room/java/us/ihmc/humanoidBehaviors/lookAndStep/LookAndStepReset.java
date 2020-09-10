@@ -10,18 +10,21 @@ public class LookAndStepReset
    private StatusLogger statusLogger;
    private ControllerStatusTracker controllerStatusTracker;
    private LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
-   private Runnable output;
+   private Runnable runBeforeWaitWalking;
+   private Runnable runAfterWaitWalking;
    private Timer resetTimer = new Timer();
 
    public void initialize(StatusLogger statusLogger,
                           ControllerStatusTracker controllerStatusTracker,
                           LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                          Runnable output)
+                          Runnable runBeforeWaitWalking,
+                          Runnable runAfterWaitWalking)
    {
       this.statusLogger = statusLogger;
       this.controllerStatusTracker = controllerStatusTracker;
       this.lookAndStepParameters = lookAndStepBehaviorParameters;
-      this.output = output;
+      this.runBeforeWaitWalking = runBeforeWaitWalking;
+      this.runAfterWaitWalking = runAfterWaitWalking;
 
       executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
    }
@@ -29,13 +32,13 @@ public class LookAndStepReset
    public void queueReset()
    {
       resetTimer.reset();
-      statusLogger.error("Queuing performReset");
       executor.queueExecution(this::performReset);
    }
 
    private void performReset()
    {
       statusLogger.error("Performing reset");
+      runBeforeWaitWalking.run();
       if (controllerStatusTracker.isWalking())
       {
          statusLogger.info("Waiting for walking to finish");
@@ -44,6 +47,6 @@ public class LookAndStepReset
       statusLogger.info("Finished walking. Waiting for remaining {} s", lookAndStepParameters.getResetDuration());
       resetTimer.sleepUntilExpiration(lookAndStepParameters.getResetDuration());
       statusLogger.info("Reset duration passed");
-      output.run();
+      runAfterWaitWalking.run();
    }
 }

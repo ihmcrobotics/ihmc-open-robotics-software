@@ -136,6 +136,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::publishFootstepPlanningParameters);
 
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
+      behaviorMessager.registerTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);

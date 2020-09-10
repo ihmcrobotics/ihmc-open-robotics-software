@@ -162,6 +162,11 @@ public class BehaviorHelper
       new IHMCROS2Callback<>(managedROS2Node, topic, callback);
    }
 
+   public void createROS2Callback(ROS2Topic<Empty> topic, Runnable callback)
+   {
+      new IHMCROS2Callback<>(managedROS2Node, topic, message -> callback.run());
+   }
+
    // TODO: Move to remote robot interface?
    public <T> void createROS2ControllerCallback(Class<T> messageClass, Consumer<T> callback)
    {

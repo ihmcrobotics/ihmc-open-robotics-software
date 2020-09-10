@@ -84,6 +84,7 @@ public class ROS2Tools
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
+   public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withType(REAStateRequestMessage.class);
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withType(VideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = VIDEO.withModule(D435_NAME);

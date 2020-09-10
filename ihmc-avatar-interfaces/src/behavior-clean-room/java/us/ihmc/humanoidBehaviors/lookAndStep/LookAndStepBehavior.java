@@ -1,8 +1,9 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.*;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -49,6 +50,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final AtomicBoolean isBeingReset = new AtomicBoolean();
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -102,29 +104,27 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps = new SideDependentList<>();
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
-      AtomicBoolean isBeingReset = new AtomicBoolean();
-      ROS2TypelessInput resetInput = helper.createROS2TypelessInput(RESET);
       ControllerStatusTracker controllerStatusTracker = new ControllerStatusTracker(statusLogger,
                                                                                    helper.getManagedROS2Node(),
                                                                                    helper.getRobotModel().getSimpleRobotName());
-      resetInput.addCallback(() ->
-                             {
-                                isBeingReset.set(true);
-                                statusLogger.error("Reset requested");
-
-                                bodyPathPlanning.reset();
-                                localization.reset();
-                                footstepPlanning.reset();
-                                stepping.reset();
-
-                                robotInterface.pauseWalking();
-
-                                statusLogger.error("Queuing reset");
-                                reset.queueReset();
-                             });
       reset.initialize(statusLogger,
                        controllerStatusTracker,
                        lookAndStepParameters,
+                       () ->
+                       {
+                          isBeingReset.set(true);
+                          statusLogger.error("Reset requested");
+
+                          operatorReviewEnabledInput.set(true);
+                          helper.publishToUI(OperatorReviewEnabledToUI, true);
+
+                          bodyPathPlanning.reset();
+                          localization.reset();
+                          footstepPlanning.reset();
+                          stepping.reset();
+
+                          robotInterface.pauseWalking();
+                       },
                        () ->
                        {
                           bodyPathPlanning.acceptGoal(null);
@@ -133,9 +133,27 @@ public class LookAndStepBehavior implements BehaviorInterface
                           helper.publishToUI(ResetForUI);
                           lastCommandedFootsteps.clear();
                           controllerStatusTracker.getFootstepTracker().reset();
+
+                          BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage
+                                = new BipedalSupportPlanarRegionParametersMessage();
+                          supportPlanarRegionParametersMessage.setEnable(true);
+                          statusLogger.info("Sending enable support regions");
+                          helper.publishROS2(BipedalSupportPlanarRegionPublisher.getTopic(helper.getRobotModel().getSimpleRobotName()),
+                                             supportPlanarRegionParametersMessage);
+                          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+                          clearMessage.setRequestClear(true);
+                          helper.publishROS2(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+                          helper.publishROS2(SLAMModuleAPI.CLEAR);
+
                           isBeingReset.set(false);
                           statusLogger.info("Behavior has been reset");
                        });
+      helper.createROS2Callback(RESET, reset::queueReset);
+      helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message ->
+      {
+         reset.queueReset();
+
+      });
 
       // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
 
