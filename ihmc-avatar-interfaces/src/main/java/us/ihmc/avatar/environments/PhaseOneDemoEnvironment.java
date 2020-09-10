@@ -109,16 +109,16 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       PlanarRegion groundRegion3 = new PlanarRegion(new RigidBodyTransform(), groundPolygon3);
       addRegions(new PlanarRegionsList(groundRegion3), YoAppearance.LightGray());
 
-//      PlanarRegionsListGenerator wallRegionsGenerator = new PlanarRegionsListGenerator();
-//      double wallRegionWidth = 1.0;
-//      double wallRegionHeight = 0.9;
-//      double wallSeparationWidth = 1.4;
-//      wallRegionsGenerator.translate(1.0 + 0.5 * wallRegionWidth, 0.5 * wallSeparationWidth + 0.5 * wallRegionWidth, 0.0);
-//      wallRegionsGenerator.addCubeReferencedAtBottomMiddle(wallRegionWidth, wallRegionWidth, wallRegionHeight);
-//      wallRegionsGenerator.identity();
-//      wallRegionsGenerator.translate(1.0 + 0.5 * wallRegionWidth, -0.5 * wallSeparationWidth - 0.5 * wallRegionWidth, 0.0);
-//      wallRegionsGenerator.addCubeReferencedAtBottomMiddle(wallRegionWidth, wallRegionWidth, wallRegionHeight);
-//      addRegions(wallRegionsGenerator.getPlanarRegionsList(), YoAppearance.DarkGray());
+      PlanarRegionsListGenerator wallRegionsGenerator = new PlanarRegionsListGenerator();
+      double wallRegionWidth = 1.0;
+      double wallRegionHeight = 0.9;
+      double wallSeparationWidth = 1.4;
+      wallRegionsGenerator.translate(1.0 + 0.5 * wallRegionWidth, 0.5 * wallSeparationWidth + 0.5 * wallRegionWidth, 0.0);
+      wallRegionsGenerator.addCubeReferencedAtBottomMiddle(wallRegionWidth, wallRegionWidth, wallRegionHeight);
+      wallRegionsGenerator.identity();
+      wallRegionsGenerator.translate(1.0 + 0.5 * wallRegionWidth, -0.5 * wallSeparationWidth - 0.5 * wallRegionWidth, 0.0);
+      wallRegionsGenerator.addCubeReferencedAtBottomMiddle(wallRegionWidth, wallRegionWidth, wallRegionHeight);
+      addRegions(wallRegionsGenerator.getPlanarRegionsList(), YoAppearance.DarkGray());
    }
 
    private void createPushDoor()
