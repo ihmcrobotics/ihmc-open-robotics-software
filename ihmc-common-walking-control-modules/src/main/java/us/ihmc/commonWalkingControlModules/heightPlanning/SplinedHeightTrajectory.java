@@ -203,7 +203,7 @@ public class SplinedHeightTrajectory
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
 
-      double xLength = Math.abs(endWaypoint.getX() - startWaypoint.getX());
+      double xLength = Math.max(1.0, Math.abs(endWaypoint.getX() - startWaypoint.getX()));
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
 
       trajectoryGenerator.compute(percentAlongSegment);
