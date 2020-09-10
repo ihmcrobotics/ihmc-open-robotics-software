@@ -144,10 +144,10 @@ public class LookAndStepBehavior implements BehaviorInterface
                           helper.publishROS2(BipedalSupportPlanarRegionPublisher.getTopic(helper.getRobotModel().getSimpleRobotName()),
                                              supportPlanarRegionParametersMessage);
 
-                          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-                          clearMessage.setRequestClear(true);
-                          statusLogger.info("Requesting clear REA");
-                          helper.publishROS2(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+//                          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+//                          clearMessage.setRequestClear(true);
+//                          statusLogger.info("Requesting clear REA");
+//                          helper.publishROS2(ROS2Tools.REA_STATE_REQUEST, clearMessage);
 
                           statusLogger.info("Requesting clear SLAM");
                           helper.publishROS2(SLAMModuleAPI.CLEAR);
