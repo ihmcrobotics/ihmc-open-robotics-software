@@ -17,6 +17,7 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.ihmcPerception.camera.FisheyeCameraReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.ROS2Topic;
@@ -171,6 +172,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          multisenseStereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
       }
 
+      LogTools.info("Enable depth point cloud publisher: {}", enableDepthPointCloudPublisher);
       if (enableDepthPointCloudPublisher)
       {
          pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory,
