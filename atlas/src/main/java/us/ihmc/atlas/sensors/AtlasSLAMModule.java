@@ -133,8 +133,10 @@ public class AtlasSLAMModule extends SLAMModule
    protected void dequeue()
    {
       super.dequeue();
-      stationaryFlagQueue.removeFirst();
-      reasonableVelocityFlagQueue.removeFirst();
+      if (!stationaryFlagQueue.isEmpty())
+         stationaryFlagQueue.removeFirst();
+      if (!reasonableVelocityFlagQueue.isEmpty())
+         reasonableVelocityFlagQueue.removeFirst();
    }
 
    @Override
