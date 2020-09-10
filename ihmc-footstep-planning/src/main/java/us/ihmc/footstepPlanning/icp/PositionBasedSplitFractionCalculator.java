@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.icp;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

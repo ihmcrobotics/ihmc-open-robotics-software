@@ -56,6 +56,7 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -236,6 +237,8 @@ public class SmoothCMPBasedICPPlannerTest
             midFeetZUpFrame.update();
          }
       });
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    private void setupVisualization()
@@ -443,11 +446,15 @@ public class SmoothCMPBasedICPPlannerTest
          }
       };
 
-      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleZUpFrames, feet, null, null, parentRegistry,
+      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames,
+                                                                      soleZUpFrames, feet, null, null, parentRegistry,
                                                                       graphicsListRegistry, gravity, plannerParameters);
       planner.setFinalTransferDuration(defaultFinalTransferTime);
       planner.setOmega0(omega);
       planner.ensureContinuityEnteringEachTransfer(true);
+
+      new DefaultParameterReader().readParametersInRegistry(parentRegistry);
+
       return planner;
    }
 

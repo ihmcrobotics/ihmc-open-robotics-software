@@ -1,13 +1,13 @@
-package us.ihmc.footstepPlanning.icp;
+package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
 public class SplitFractionTools
 {
-   static double appendSplitFraction(double desiredSplitFraction, double currentSplitFraction, double nominalSplitFraction)
+   public static double appendSplitFraction(double desiredSplitFraction, double currentSplitFraction, double nominalSplitFraction)
    {
       return combineTwoShifts(desiredSplitFraction, currentSplitFraction, nominalSplitFraction);
    }
 
-   static double appendWeightDistribution(double desiredWeightDistribution, double currentWeightDistribution, double nominalWeightDistribution)
+   public static double appendWeightDistribution(double desiredWeightDistribution, double currentWeightDistribution, double nominalWeightDistribution)
    {
       return combineTwoShifts(desiredWeightDistribution, currentWeightDistribution, nominalWeightDistribution);
    }
