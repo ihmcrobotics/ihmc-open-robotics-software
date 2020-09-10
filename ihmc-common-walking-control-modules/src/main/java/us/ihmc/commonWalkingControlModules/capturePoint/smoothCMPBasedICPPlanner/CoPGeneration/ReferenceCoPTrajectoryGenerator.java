@@ -186,12 +186,41 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
                                           List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
                                           List<YoDouble> weightDistributions, YoDouble finalTransferWeightDistribution, YoDouble finalTransferSplitFraction, boolean debug,
-                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
-                                          SideDependentList<? extends ReferenceFrame> soleFrames,
+                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData, SideDependentList<? extends ReferenceFrame> soleFrames,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry)
    {
+      this(namePrefix,
+           maxNumberOfFootstepsToConsider,
+           feetInSoleZUpFrames,
+           contactableFeet,
+           numberFootstepsToConsider,
+           swingDurations,
+           transferDurations,
+           swingSplitFractions,
+           swingDurationShiftFractions,
+           transferSplitFractions,
+           weightDistributions,
+           finalTransferWeightDistribution,
+           finalTransferSplitFraction,
+           debug,
+           numberOfUpcomingFootsteps,
+           upcomingFootstepsData,
+           soleFrames,
+           soleZUpFrames,
+           parentRegistry,
+           new DefaultSplitFractionCalculatorParameters());
+   }
+   public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
+                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
+                                          List<YoDouble> weightDistributions, YoDouble finalTransferWeightDistribution, YoDouble finalTransferSplitFraction, boolean debug,
+                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData, SideDependentList<? extends ReferenceFrame> soleFrames,
+                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry,
+                                          SplitFractionCalculatorParametersReadOnly defaultSplitFractionParameters)
+   {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
-      this.splitFractionParameters = new YoSplitFractionCalculatorParameters(new DefaultSplitFractionCalculatorParameters(), registry);
+      this.splitFractionParameters = new YoSplitFractionCalculatorParameters(defaultSplitFractionParameters, registry);
       this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
       this.debug = debug;
       additionalTimeForFinalTransfer = new YoDouble(fullPrefix + "AdditionalTimeForFinalTransfer", registry);

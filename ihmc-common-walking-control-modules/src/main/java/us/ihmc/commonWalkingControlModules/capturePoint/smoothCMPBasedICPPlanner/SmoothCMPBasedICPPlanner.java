@@ -327,7 +327,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                   finalTransferWeightDistribution,
                                                                   finalTransferDurationAlpha,
                                                                   debug, numberOfUpcomingFootsteps,
-                                                                  upcomingFootstepsData, soleFrames, soleZUpFrames, registry);
+                                                                  upcomingFootstepsData, soleFrames, soleZUpFrames, registry,
+                                                                  icpPlannerParameters.getSplitFractionCalculatorParameters());
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry,
                                                                   yoGraphicsListRegistry);
 
