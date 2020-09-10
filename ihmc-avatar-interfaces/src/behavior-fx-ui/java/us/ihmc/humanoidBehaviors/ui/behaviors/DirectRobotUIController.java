@@ -104,8 +104,7 @@ public class DirectRobotUIController extends Group
 
       supportRegionsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                              BipedalSupportPlanarRegionParametersMessage.class,
-                                                                             ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                                                       .withInput());
+                                                                             BipedalSupportPlanarRegionPublisher.getTopic(robotName));
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
       pumpPSI.getSelectionModel().select(1);
@@ -140,7 +139,7 @@ public class DirectRobotUIController extends Group
       realsenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> realsenseVideoOverlay.toggleMode());
       mainAnchorPane.getChildren().add(realsenseVideoStackPane);
 
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, ROS2Tools.REA_STATE_REQUEST);
       clearSLAMPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.CLEAR);
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));

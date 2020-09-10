@@ -44,6 +44,7 @@ public class LookAndStepBehaviorAPI
     */
    public static final MessagerAPIFactory.Topic<Boolean> InjectSupportRegion = topic("InjectSupportRegion");
    public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReviewEnabled");
+   public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabledToUI = topic("OperatorReviewEnabledToUI");
    public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 
    // Parameter tuning topics
