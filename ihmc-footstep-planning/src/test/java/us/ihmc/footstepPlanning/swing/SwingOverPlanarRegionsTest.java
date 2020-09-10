@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
@@ -24,6 +25,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -62,7 +64,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverPlanarRegionsTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
 
    @BeforeEach
    public void setup()
@@ -266,6 +268,7 @@ public class SwingOverPlanarRegionsTest
       checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
+   @Disabled
    @Test
    public void testTrickyStep2FullTrajectory()
    {
@@ -446,8 +449,7 @@ public class SwingOverPlanarRegionsTest
       while (twoWaypointSwingGenerator.doOptimizationUpdate())
          twoWaypointSwingGenerator.compute(0.0);
 
-      double minDistance =
-            Math.max(steppingParameters.getFootBackwardOffset(), steppingParameters.getFootForwardOffset()) + getParameters().getMinimumSwingFootClearance();
+      double minDistance = getParameters().getMinimumSwingFootClearance();
 
       double dt = 1e-3;
 
@@ -456,12 +458,19 @@ public class SwingOverPlanarRegionsTest
       double heelLength = getWalkingControllerParameters().getSteppingParameters().getFootBackwardOffset();
       double distance = Math.max(Math.max(footLength / 2.0, toeLength), heelLength);
 
+      Box3D foot = new Box3D();
+      foot.getSize().set(getWalkingControllerParameters().getSteppingParameters().getActualFootLength(),
+                         getWalkingControllerParameters().getSteppingParameters().getActualFootWidth(),
+                         0.1);
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
          twoWaypointSwingGenerator.compute(time);
          FramePoint3D desiredPosition = new FramePoint3D();
          twoWaypointSwingGenerator.getPosition(desiredPosition);
+
+         foot.getPosition().set(desiredPosition);
+         foot.getPosition().addX(0.5 * (heelLength - toeLength));
 
          boolean isInFirstSegment = time < twoWaypointSwingGenerator.getWaypointTime(0);
          boolean isInLastSegment = time > twoWaypointSwingGenerator.getWaypointTime(1);
@@ -487,7 +496,7 @@ public class SwingOverPlanarRegionsTest
                hittingEndGoal |= endFootPolygon.getMinX() < desiredPosition.getX();
                hittingStartGoal |= desiredPosition.getX() < startFootPolygon.getMaxX();
 
-               double distanceToCollision = collision.distance(desiredPosition);
+               double distanceToCollision = foot.distance(collision);
                if ((!hittingEndGoal && !hittingStartGoal && ignoreGroundSegments) && distanceToCollision < closestDistance)
                {
                   closestDistance = distanceToCollision;
