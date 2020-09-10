@@ -6,6 +6,11 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameter
 
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default boolean getEnableBipedalSupportRegions()
+   {
+      return get(enableBipedalSupportRegions);
+   }
+
    default boolean getFlatGroundBodyPathPlan()
    {
       return get(flatGroundBodyPathPlan);
