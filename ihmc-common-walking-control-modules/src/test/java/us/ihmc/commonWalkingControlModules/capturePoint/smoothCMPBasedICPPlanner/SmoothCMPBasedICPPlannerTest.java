@@ -443,7 +443,8 @@ public class SmoothCMPBasedICPPlannerTest
          }
       };
 
-      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleZUpFrames, feet, null, null, parentRegistry,
+      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames,
+                                                                      soleZUpFrames, feet, null, null, parentRegistry,
                                                                       graphicsListRegistry, gravity, plannerParameters);
       planner.setFinalTransferDuration(defaultFinalTransferTime);
       planner.setOmega0(omega);
