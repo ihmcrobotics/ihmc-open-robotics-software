@@ -243,6 +243,13 @@ public class KinematicsToolboxController extends ToolboxController
    private final FeedbackControlCommandBuffer previousUserFBCommands = new FeedbackControlCommandBuffer();
 
    /**
+    * Indicates whether the projection of the center of mass is to be contained inside the support
+    * polygon.It is {@code true} by default but can be disabled using the message
+    * {@link KinematicsToolboxConfigurationMessage}.
+    */
+   protected final YoBoolean enableSupportPolygonConstraint = new YoBoolean("enableSupportPolygonConstraint", registry);
+
+   /**
     * This is mostly for visualization to be able to keep track of the number of commands that the user
     * submitted.
     */
@@ -642,6 +649,9 @@ public class KinematicsToolboxController extends ToolboxController
          updateTools();
       }
 
+      // By default, always constrain the center of mass according to the current support polygon (if defined).
+      enableSupportPolygonConstraint.set(true);
+
       return hasRobotConfigurationData;
    }
 
@@ -766,6 +776,10 @@ public class KinematicsToolboxController extends ToolboxController
             setPreserveUserCommandHistory(false);
          else if (command.getEnableInputPersistence())
             setPreserveUserCommandHistory(true);
+         if (command.getEnableSupportPolygonConstraint())
+            enableSupportPolygonConstraint.set(true);
+         else if (command.getDisableSupportPolygonConstraint())
+            enableSupportPolygonConstraint.set(false);
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxPrivilegedConfigurationCommand.class))

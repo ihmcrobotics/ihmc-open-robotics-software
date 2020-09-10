@@ -132,12 +132,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
    private final FramePoint3D centerOfMassPositionToHold = new FramePoint3D();
    /**
-    * Indicates whether the projection of the center of mass is to be contained inside the support
-    * polygon.It is {@code true} by default but can be disabled using the message
-    * {@link HumanoidKinematicsToolboxConfigurationMessage}.
-    */
-   private final YoBoolean enableSupportPolygonConstraint = new YoBoolean("enableSupportPolygonConstraint", registry);
-   /**
     * Default weight used when holding a support rigid-body in place. It is rather high such that they
     * do not deviate much from their initial position/pose.
     */
@@ -424,7 +418,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateCoMPositionAndFootPoses();
 
       // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
-      enableSupportPolygonConstraint.set(true);
       holdSupportRigidBodies.set(true);
       holdCenterOfMassXYPosition.set(true);
 
@@ -441,7 +434,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          HumanoidKinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(HumanoidKinematicsToolboxConfigurationCommand.class);
 
-         enableSupportPolygonConstraint.set(command.enableSupportPolygonConstraint());
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportRigidBodies.set(command.holdSupportRigidBodies());
       }
