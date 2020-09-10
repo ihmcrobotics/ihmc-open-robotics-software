@@ -389,6 +389,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public DRCSensorSuiteManager setupSensorModule()
    {
+      LogTools.info("Setting up sensor module...");
       try
       {
          DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
