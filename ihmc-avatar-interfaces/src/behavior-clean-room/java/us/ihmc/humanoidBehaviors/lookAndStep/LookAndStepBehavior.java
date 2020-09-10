@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
-import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.communication.ROS2Tools;
@@ -17,10 +16,8 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepSteppingTask.LookAndStep
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -136,13 +133,18 @@ public class LookAndStepBehavior implements BehaviorInterface
 
                           BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage
                                 = new BipedalSupportPlanarRegionParametersMessage();
-                          supportPlanarRegionParametersMessage.setEnable(true);
-                          statusLogger.info("Sending enable support regions");
+                          boolean enableSupportRegions = lookAndStepParameters.getEnableBipedalSupportRegions();
+                          supportPlanarRegionParametersMessage.setEnable(enableSupportRegions);
+                          statusLogger.info("Sending enable support regions: {}", enableSupportRegions);
                           helper.publishROS2(BipedalSupportPlanarRegionPublisher.getTopic(helper.getRobotModel().getSimpleRobotName()),
                                              supportPlanarRegionParametersMessage);
+
                           REAStateRequestMessage clearMessage = new REAStateRequestMessage();
                           clearMessage.setRequestClear(true);
+                          statusLogger.info("Requesting clear REA");
                           helper.publishROS2(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+
+                          statusLogger.info("Requesting clear SLAM");
                           helper.publishROS2(SLAMModuleAPI.CLEAR);
 
                           isBeingReset.set(false);
