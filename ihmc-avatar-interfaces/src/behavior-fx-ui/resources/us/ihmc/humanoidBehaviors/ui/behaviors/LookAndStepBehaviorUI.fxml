@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane minWidth="-Infinity" prefHeight="240.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane minWidth="-Infinity" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <FlowPane prefWrapLength="1300.0">
+        <FlowPane prefWrapLength="1650.0">
          <children>
             <VBox alignment="CENTER">
                <children>
@@ -81,6 +81,16 @@
             <VBox>
                <children>
                   <Button fx:id="saveFootstepPlanningParameters" mnemonicParsing="false" onAction="#saveFootstepPlanningParameters" text="Save">
+                     <VBox.margin>
+                        <Insets bottom="5.0" top="5.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+            <TableView fx:id="swingPlannerParameterTable" prefHeight="233.0" prefWidth="419.0" />
+            <VBox>
+               <children>
+                  <Button fx:id="saveSwingPlannerParameters" mnemonicParsing="false" onAction="#saveSwingPlannerParameters" text="Save">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                      </VBox.margin>

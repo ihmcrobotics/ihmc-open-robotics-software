@@ -50,6 +50,7 @@ public class LookAndStepBehaviorAPI
    // Parameter tuning topics
    public static final MessagerAPIFactory.Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
    public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
+   public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
 
    // Visualization only topics
    public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
