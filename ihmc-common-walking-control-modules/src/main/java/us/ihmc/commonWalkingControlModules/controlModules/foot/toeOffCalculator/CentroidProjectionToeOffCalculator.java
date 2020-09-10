@@ -44,6 +44,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
+   private final FramePoint2D closestPointOnRay = new FramePoint2D();
    private final FrameLineSegment2D toeOffContactLine2d = new FrameLineSegment2D();
 
    private final FramePoint3D exitCMP = new FramePoint3D();
@@ -61,8 +62,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final YoDouble toeOffContactInterpolation;
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
-
-   private final FramePoint2D[] intersectionWithRay = new FramePoint2D[] {new FramePoint2D(), new FramePoint2D()};
 
    private final YoFramePoint2D rayOrigin;
    private final YoFramePoint2D rayEnd;
@@ -183,13 +182,14 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       if (!toeOffContactLine2d.intersectionWith(rayThroughExitCMP, toeOffContactPoint2d))
       {
          tmpPoint2d2.setToZero(soleFrame);
+         closestPointOnRay.setToZero(soleFrame);
          rayThroughExitCMP.getTwoPointsOnLine(tmpPoint2d, tmpPoint2d2);
          EuclidGeometryTools.closestPoint2DsBetweenTwoLineSegment2Ds(toeOffContactLine2d.getFirstEndpoint(),
                                                                      toeOffContactLine2d.getSecondEndpoint(),
                                                                      tmpPoint2d,
                                                                      tmpPoint2d2,
                                                                      toeOffContactPoint2d,
-                                                                     new FramePoint2D());
+                                                                     closestPointOnRay);
       }
 
       if (this.rayOrigin != null)
