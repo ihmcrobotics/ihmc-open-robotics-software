@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
@@ -50,6 +51,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final FrameVector2D exitCMPRayDirection2d = new FrameVector2D();
 
    private final FramePoint2D tmpPoint2d = new FramePoint2D();
+   private final FramePoint2D tmpPoint2d2 = new FramePoint2D();
    private final FrameLine2D rayThroughExitCMP = new FrameLine2D();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -176,8 +178,19 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
       }
 
-      footPolygon.intersectionWithRay(rayThroughExitCMP, intersectionWithRay[0], intersectionWithRay[1]);
-      toeOffContactPoint2d.setIncludingFrame(intersectionWithRay[0]);
+      computeToeOffContactLine(desiredCMP, trailingLeg);
+
+      if (!toeOffContactLine2d.intersectionWith(rayThroughExitCMP, toeOffContactPoint2d))
+      {
+         tmpPoint2d2.setToZero(soleFrame);
+         rayThroughExitCMP.getTwoPointsOnLine(tmpPoint2d, tmpPoint2d2);
+         EuclidGeometryTools.closestPoint2DsBetweenTwoLineSegment2Ds(toeOffContactLine2d.getFirstEndpoint(),
+                                                                     toeOffContactLine2d.getSecondEndpoint(),
+                                                                     tmpPoint2d,
+                                                                     tmpPoint2d2,
+                                                                     toeOffContactPoint2d,
+                                                                     new FramePoint2D());
+      }
 
       if (this.rayOrigin != null)
       {
@@ -187,7 +200,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       }
       if (this.rayEnd != null)
       {
-         tmpPoint2d.setIncludingFrame(intersectionWithRay[0]);
+         tmpPoint2d.setIncludingFrame(toeOffContactPoint2d);
          tmpPoint2d.changeFrameAndProjectToXYPlane(worldFrame);
          this.rayEnd.set(tmpPoint2d);
       }
