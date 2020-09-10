@@ -430,7 +430,8 @@ public class SLAMModule implements PerceptionModule
 
    protected void dequeue()
    {
-      pointCloudQueue.remove(0);
+      if (!pointCloudQueue.isEmpty())
+         pointCloudQueue.remove(0);
    }
 
    private final DecimalFormat df = new DecimalFormat("#.##");
