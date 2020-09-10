@@ -37,6 +37,7 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -206,6 +207,8 @@ public class FootstepAngularMomentumPredictorTest
       angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, maxNumberOfStepsToConsider, testRegistry);
       copTrajectoryGenerator.initializeParameters(testParameters);
       angularMomentumGenerator.initializeParameters(testParameters, robotMass, gravityZ);
+
+      new DefaultParameterReader().readParametersInRegistry(testRegistry);
    }
 
    private void getFootLocationFromCoMLocation(FramePoint3D footLocationToPack, RobotSide side, FramePoint3D comLocation,
