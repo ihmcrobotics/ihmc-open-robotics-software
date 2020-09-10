@@ -30,7 +30,7 @@ public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionC
    /** {@inheritDoc} */
    public double getLargestStepDownHeight()
    {
-      return 0.2;
+      return 0.175;
    }
 
    /** {@inheritDoc} */
@@ -43,6 +43,12 @@ public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionC
    public double getTransferWeightDistributionAtFullDepth()
    {
       return 0.75;
+   }
+
+   /** {@inheritDoc} */
+   public double getTransferFinalWeightDistributionAtFullDepth()
+   {
+      return 0.8;
    }
 
    /** {@inheritDoc} */
