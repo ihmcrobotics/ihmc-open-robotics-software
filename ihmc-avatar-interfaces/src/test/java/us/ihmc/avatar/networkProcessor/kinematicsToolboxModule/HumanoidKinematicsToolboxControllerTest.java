@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -282,8 +282,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          // Disable the support polygon constraint, the randomized model isn't constrained.
-         HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
-         configurationMessage.setEnableSupportPolygonConstraint(false);
+         KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+         configurationMessage.setDisableSupportPolygonConstraint(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -342,8 +342,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          // Disable the support polygon constraint, the randomized model isn't constrained.
-         HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
-         configurationMessage.setEnableSupportPolygonConstraint(false);
+         KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+         configurationMessage.setDisableSupportPolygonConstraint(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -425,8 +425,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          // Disable the support polygon constraint, the randomized model isn't constrained.
-         HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
-         configurationMessage.setEnableSupportPolygonConstraint(false);
+         KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+         configurationMessage.setDisableSupportPolygonConstraint(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);

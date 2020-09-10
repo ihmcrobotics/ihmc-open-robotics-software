@@ -19,6 +19,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private boolean enableInputPersistence = false;
    private boolean disableInputPersistence = false;
 
+   private boolean enableSupportPolygonConstraint = false;
+   private boolean disableSupportPolygonConstraint = false;
+
    @Override
    public void clear()
    {
@@ -31,6 +34,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       disableJointVelocityLimits = false;
       disableInputPersistence = false;
       enableInputPersistence = false;
+      enableSupportPolygonConstraint = false;
+      disableSupportPolygonConstraint = false;
    }
 
    @Override
@@ -47,6 +52,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       enableJointVelocityLimits = other.enableJointVelocityLimits;
       disableInputPersistence = other.disableInputPersistence;
       enableInputPersistence = other.enableInputPersistence;
+      enableSupportPolygonConstraint = other.enableSupportPolygonConstraint;
+      disableSupportPolygonConstraint = other.disableSupportPolygonConstraint;
    }
 
    @Override
@@ -63,6 +70,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       disableJointVelocityLimits = message.getDisableJointVelocityLimits();
       disableInputPersistence = message.getDisableInputPersistence();
       enableInputPersistence = message.getEnableInputPersistence();
+      enableSupportPolygonConstraint = message.getEnableSupportPolygonConstraint();
+      disableSupportPolygonConstraint = message.getDisableSupportPolygonConstraint();
    }
 
    public double getJointVelocityWeight()
@@ -103,6 +112,16 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public boolean getEnableInputPersistence()
    {
       return enableInputPersistence;
+   }
+
+   public boolean getEnableSupportPolygonConstraint()
+   {
+      return enableSupportPolygonConstraint;
+   }
+
+   public boolean getDisableSupportPolygonConstraint()
+   {
+      return disableSupportPolygonConstraint;
    }
 
    @Override
