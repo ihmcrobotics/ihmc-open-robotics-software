@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.icp;
+package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
 import org.junit.jupiter.api.Test;
 

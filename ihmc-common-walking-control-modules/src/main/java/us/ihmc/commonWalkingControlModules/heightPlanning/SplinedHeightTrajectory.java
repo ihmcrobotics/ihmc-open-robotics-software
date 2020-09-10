@@ -203,15 +203,15 @@ public class SplinedHeightTrajectory
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
 
+      double xLength = Math.abs(endWaypoint.getX() - startWaypoint.getX());
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
 
       trajectoryGenerator.compute(percentAlongSegment);
 
-      // FIXME these aren't scaled up
       double z = trajectoryGenerator.getPosition();
-      double dzds = trajectoryGenerator.getVelocity();
-      double d2zds2 = trajectoryGenerator.getAcceleration();
-      double d3zds3 = trajectoryGenerator.getJerk();
+      double dzds = trajectoryGenerator.getVelocity() / xLength ;
+      double d2zds2 = trajectoryGenerator.getAcceleration() / MathTools.square(xLength);
+      double d3zds3 = trajectoryGenerator.getJerk() / MathTools.pow(xLength, 3);
       partialDzDs.set(dzds);
       partialD2zDs2.set(d2zds2);
       partialD3zDs3.set(d3zds3);
