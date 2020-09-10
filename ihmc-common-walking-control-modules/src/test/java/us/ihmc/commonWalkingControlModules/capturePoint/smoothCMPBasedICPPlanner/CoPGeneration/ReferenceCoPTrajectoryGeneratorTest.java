@@ -37,6 +37,7 @@ import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -78,6 +79,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final ArrayList<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
    private final YoDouble percentageChickenSupport = new YoDouble("percentageChickenSupport", parentRegistry);
+   private final YoDouble finalTransferAlpha = new YoDouble("finalTransferAlpha", parentRegistry);
 
    @BeforeEach
    public void setUp()
@@ -153,16 +155,20 @@ public class ReferenceCoPTrajectoryGeneratorTest
       transferDurations.add(transferDuration);
       transferSplitFractions.add(transferSplitFraction);
       transferWeightDistributions.add(transferWeightDistribution);
+      finalTransferAlpha.set(0.5);
 
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
       testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
                                                              numberOfFootstepsToConsider, swingDurations, transferDurations, swingSplitFractions,
                                                              swingDurationShiftFractions, transferSplitFractions, transferWeightDistributions,
-                                                             percentageChickenSupport, numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames,
+                                                             percentageChickenSupport, finalTransferAlpha, numberOfUpcomingFootsteps, upcomingFootstepsData,
+                                                             soleZUpFrames, soleZUpFrames,
                                                              parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
+
+      new DefaultParameterReader().readParametersInRegistry(parentRegistry);
    }
 
    @AfterEach

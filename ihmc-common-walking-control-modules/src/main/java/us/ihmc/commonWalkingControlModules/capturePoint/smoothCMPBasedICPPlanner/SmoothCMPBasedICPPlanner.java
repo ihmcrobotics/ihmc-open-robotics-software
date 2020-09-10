@@ -229,16 +229,19 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
 
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
+                                   SideDependentList<? extends ReferenceFrame> soleFrames,
                                    SideDependentList<? extends ReferenceFrame> soleZUpFrames, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ, ICPPlannerParameters icpPlannerParameters)
    {
 
-      this(fullRobotModel.getTotalMass(), bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime, parentRegistry,
+      this(fullRobotModel.getTotalMass(), bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
+           soleFrames, soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime, parentRegistry,
            yoGraphicsListRegistry, gravityZ, icpPlannerParameters);
    }
 
    public SmoothCMPBasedICPPlanner(double robotMass, SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
+                                   SideDependentList<? extends ReferenceFrame> soleFrames,
                                    SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, MomentumTrajectoryHandler momentumTrajectoryHandler,
                                    YoDouble yoTime, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ,
@@ -322,8 +325,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
                                                                   numberFootstepsToConsider, swingDurations, transferDurations, swingDurationAlphas,
                                                                   swingDurationShiftFractions, transferDurationAlphas, transferWeightDistributions,
                                                                   finalTransferWeightDistribution,
+                                                                  finalTransferDurationAlpha,
                                                                   debug, numberOfUpcomingFootsteps,
-                                                                  upcomingFootstepsData, soleZUpFrames, registry);
+                                                                  upcomingFootstepsData, soleFrames, soleZUpFrames, registry,
+                                                                  icpPlannerParameters.getSplitFractionCalculatorParameters());
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry,
                                                                   yoGraphicsListRegistry);
 
@@ -976,6 +981,20 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       }
    }
 
+   private void setSplitFractionsToDefault()
+   {
+      for (int i = 0; i < transferDurationAlphas.size(); i++)
+      {
+         transferDurationAlphas.get(i).set(defaultTransferDurationAlpha.getDoubleValue());
+      }
+      for (int i = 0; i < transferWeightDistributions.size(); i++)
+      {
+         transferWeightDistributions.get(i).set(defaultTransferWeightDistribution.getDoubleValue());
+      }
+      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
+      finalTransferWeightDistribution.set(defaultTransferWeightDistribution.getDoubleValue());
+   }
+
    protected void updateTransferPlan(boolean maintainContinuity)
    {
       updateCount();
@@ -991,6 +1010,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       boolean smoothForContinuity = adjustPlanForDSContinuity.getBooleanValue() || smoothForInitialContinuity || smoothForFinalContinuity;
       boolean performSmoothingAdjustment = maintainContinuity && smoothForContinuity;
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(performSmoothingAdjustment);
+
+      setSplitFractionsToDefault();
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator
@@ -1057,6 +1078,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue();
       referenceCoPGenerator.setGoingToPerformSSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
+      setSplitFractionsToDefault();
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
