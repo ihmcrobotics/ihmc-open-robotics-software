@@ -362,4 +362,9 @@ public class SLAMFrame
    {
       return confidenceFactor;
    }
+
+   public RigidBodyTransformReadOnly getDriftCompensationTransform()
+   {
+      return driftCompensationTransform;
+   }
 }
