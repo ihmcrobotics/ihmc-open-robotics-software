@@ -70,14 +70,10 @@ public class ReferenceCoPTrajectoryGeneratorTest
    private final YoInteger numberOfFootstepsToConsider = new YoInteger("numberOfFootstepsToConsider", parentRegistry);
    private final YoInteger numberOfUpcomingFootsteps = new YoInteger("NumberOfUpcomingFootsteps", parentRegistry);
    private final ArrayList<YoDouble> swingDurations = new ArrayList<>();
-   private final ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
-   private final ArrayList<YoDouble> swingDurationShiftFractions = new ArrayList<>();
+
    private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
-   private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
-   private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
    private final ArrayList<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
-   private final YoDouble percentageChickenSupport = new YoDouble("percentageChickenSupport", parentRegistry);
 
    @BeforeEach
    public void setUp()
@@ -137,29 +133,19 @@ public class ReferenceCoPTrajectoryGeneratorTest
          transferWeightDistribution.setToNaN();
 
          swingDurations.add(swingDuration);
-         swingSplitFractions.add(swingSplitFraction);
-         swingDurationShiftFractions.add(swingDurationShiftFraction);
          transferDurations.add(transferDuration);
-         transferSplitFractions.add(transferSplitFraction);
-         transferWeightDistributions.add(transferWeightDistribution);
       }
-      percentageChickenSupport.set(0.5);
       YoDouble transferDuration = new YoDouble("transferDuration" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
       YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
-      YoDouble transferWeightDistribution = new YoDouble("transferWeightDistribution" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
       transferDuration.setToNaN();
       transferSplitFraction.setToNaN();
-      transferWeightDistribution.setToNaN();
       transferDurations.add(transferDuration);
-      transferSplitFractions.add(transferSplitFraction);
-      transferWeightDistributions.add(transferWeightDistribution);
 
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
       testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
-                                                             numberOfFootstepsToConsider, swingDurations, transferDurations, swingSplitFractions,
-                                                             swingDurationShiftFractions, transferSplitFractions, transferWeightDistributions,
-                                                             percentageChickenSupport, numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames,
+                                                             numberOfFootstepsToConsider, swingDurations, transferDurations, numberOfUpcomingFootsteps,
+                                                             upcomingFootstepsData, soleZUpFrames, soleZUpFrames,
                                                              parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
@@ -181,7 +167,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   public void sendFootStepMessages(int numberOfFootstepsToPlan)
+   public void sendFootStepMessages(int numberOfFootstepsToPlan, ReferenceCoPTrajectoryGenerator generator)
    {
       RobotSide robotSide = RobotSide.LEFT;
       FramePoint3D footstepLocation = new FramePoint3D();
@@ -196,16 +182,12 @@ public class ReferenceCoPTrajectoryGeneratorTest
          FootstepTiming timing = new FootstepTiming(swingTime, transferTime);
          if (i < transferDurations.size() - 1)
             transferDurations.get(i).set(transferTime);
-         if (i < transferSplitFractions.size() - 1)
-            transferSplitFractions.get(i).set(0.5);
-         if (i < transferWeightDistributions.size() - 1)
-            transferWeightDistributions.get(i).set(0.5);
          if (i < swingDurations.size() - 1)
             swingDurations.get(i).set(swingTime);
-         if (i < swingSplitFractions.size() - 1)
-            swingSplitFractions.get(i).set(0.5);
-         if (i < swingDurationShiftFractions.size() - 1)
-            swingDurationShiftFractions.get(i).set(0.95);
+
+         generator.setSwingDurationAlpha(i, 0.95);
+//         if (i < swingDurationShiftFractions.size() - 1)
+//            swingDurationShiftFractions.get(i).set(0.95);
          upcomingFootstepsData.add(new FootstepData(footstep, timing));
          robotSide = robotSide.getOppositeSide();
       }
@@ -216,7 +198,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    public void testDoubleSupportFootstepPlanFromRest()
    {
       int numberOfFootsteps = 3;
-      sendFootStepMessages(numberOfFootsteps);
+      sendFootStepMessages(numberOfFootsteps, testCoPGenerator);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(true, RobotSide.RIGHT, null);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
@@ -306,7 +288,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    @Test
    public void testDoubleSupportFootstepPlanMoving()
    {
-      sendFootStepMessages(10);
+      sendFootStepMessages(10, testCoPGenerator);
       //testCoPGenerator.setInitialCoPPosition(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT, RobotSide.LEFT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
@@ -392,7 +374,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
    public void testSingleSupportFootstepPlan()
    {
       int numberOfFootsteps = 10;
-      sendFootStepMessages(numberOfFootsteps);
+      sendFootStepMessages(numberOfFootsteps, testCoPGenerator);
       assertTrue("Footstep registration error", testCoPGenerator.getNumberOfFootstepsRegistered() == numberOfFootsteps);
       //testCoPGenerator.setInitialCoPPosition(initialCoPPosition);
       testCoPGenerator.initializeForSwing();

@@ -92,13 +92,8 @@ public class FootstepAngularMomentumPredictorTest
                                                                                        new FrameVector3D());
    private final List<YoDouble> swingDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> transferDurations = new ArrayList<YoDouble>();
-   private final List<YoDouble> swingSplitFractions = new ArrayList<YoDouble>();
-   private final List<YoDouble> transferSplitFractions = new ArrayList<YoDouble>();
-   private final List<YoDouble> swingShiftFractions = new ArrayList<YoDouble>();
-   private final List<YoDouble> transferWeightDistributions = new ArrayList<>();
    private final List<FootstepData> upcomingFootstepsData = new ArrayList<>();
 
-   private final YoDouble percentageChickenSupport = new YoDouble("percentageChickenSupport", testRegistry);
    // Some variables for setters, getters and intermediate computations
    private final FramePoint3D tempFramePoint1 = new FramePoint3D(), tempFramePoint2 = new FramePoint3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
@@ -164,30 +159,14 @@ public class FootstepAngularMomentumPredictorTest
          tempYoDouble = new YoDouble(testName + "Step" + i + "TransferDuration", testRegistry);
          tempYoDouble.set(transferTime);
          transferDurations.add(tempYoDouble);
-         tempYoDouble = new YoDouble(testName + "Step" + i + "SwingSplitFraction", testRegistry);
-         tempYoDouble.set(testParameters.getSwingSplitFraction());
-         swingSplitFractions.add(tempYoDouble);
-         tempYoDouble = new YoDouble(testName + "Step" + i + "SwingShiftFraction", testRegistry);
-         tempYoDouble.set(testParameters.getSwingDurationShiftFraction());
-         swingShiftFractions.add(tempYoDouble);
-         tempYoDouble = new YoDouble(testName + "Step" + i + "TransferSplit", testRegistry);
-         tempYoDouble.set(testParameters.getTransferSplitFraction());
-         transferSplitFractions.add(tempYoDouble);
-         tempYoDouble = new YoDouble(testName + "Step" + i + "TransferWeightDistribution", testRegistry);
-         tempYoDouble.set(0.5);
-         transferWeightDistributions.add(tempYoDouble);
       }
       YoDouble tempYoDouble = new YoDouble(testName + "Step" + testParameters.getNumberOfFootstepsToConsider() + "TransferDuration", testRegistry);
       tempYoDouble.set(transferTime);
       transferDurations.add(tempYoDouble);
-      tempYoDouble = new YoDouble(testName + "Step" + testParameters.getNumberOfFootstepsToConsider() + "TransferSplit", testRegistry);
-      tempYoDouble.set(testParameters.getTransferSplitFraction());
-      transferSplitFractions.add(tempYoDouble);
       isStanding = new YoBoolean(testName + "IsStanding", testRegistry);
       isDoubleSupport = new YoBoolean(testName + "IsDoubleSupport", testRegistry);
       isInitialTransfer = new YoBoolean(testName + "IsInitialTransfer", testRegistry);
 
-      percentageChickenSupport.set(0.5);
 
       numberOfFootstepsToConsider = new YoInteger(testName + "NumberOfFootstepsToConsider", testRegistry);
       numberOfFootstepsToConsider.set(testParameters.getNumberOfFootstepsToConsider());
@@ -196,9 +175,8 @@ public class FootstepAngularMomentumPredictorTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator", testParameters.getNumberOfFootstepsToConsider(),
                                                                    bipedSupportPolygons, contactableFeet, numberOfFootstepsToConsider, swingDurations,
-                                                                   transferDurations, swingSplitFractions, swingShiftFractions, transferSplitFractions,
-                                                                   transferWeightDistributions, percentageChickenSupport, numberOfUpcomingFootsteps,
-                                                                   upcomingFootstepsData, soleFrames, testRegistry);
+                                                                   transferDurations, numberOfUpcomingFootsteps,
+                                                                   upcomingFootstepsData, soleFrames, soleFrames, testRegistry);
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isStanding, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);

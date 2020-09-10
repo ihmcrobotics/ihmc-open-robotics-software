@@ -167,7 +167,8 @@ public class BalanceManager
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       SideDependentList<MovingReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime,
+      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, referenceFrames.getSoleFrames(),
+                                                      soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime,
                                                       registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ(), icpPlannerParameters);
       smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
 
