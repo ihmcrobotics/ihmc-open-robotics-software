@@ -44,8 +44,8 @@ public class DRCFlatGroundWalkingTrack
 
    private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "flat_ground_walking_track_simulation");
 
-   private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
-         && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
+   private static boolean createYoVariableServer = true;//System.getProperty("create.yovariable.server") != null
+//         && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)

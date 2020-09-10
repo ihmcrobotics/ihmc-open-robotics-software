@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
+
 public abstract interface ICPPlannerParameters extends ICPTrajectoryPlannerParameters, CoPPlannerParameters
 {
 
@@ -30,4 +33,9 @@ public abstract interface ICPPlannerParameters extends ICPTrajectoryPlannerParam
    boolean planTransferAngularMomentum();
 
    AngularMomentumEstimationParameters getAngularMomentumEstimationParameters();
+
+   default SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new DefaultSplitFractionCalculatorParameters();
+   }
 }

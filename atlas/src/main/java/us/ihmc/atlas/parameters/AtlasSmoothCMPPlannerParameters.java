@@ -1,6 +1,8 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -166,5 +168,11 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    public double getExitCoPForwardSafetyMarginOnToes()
    {
       return modelScale * (isRunningOnRealRobot ? 1.2e-2 : 1.6e-2);
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new AtlasICPSplitFractionCalculatorParameters();
    }
 }
