@@ -4,11 +4,8 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -48,9 +45,9 @@ public class SLAMModule implements PerceptionModule
    protected final AtomicReference<Boolean> enable;
 
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
-   protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
+   protected final CopyOnWriteArrayList<StereoVisionPointCloudMessage> pointCloudQueue = new CopyOnWriteArrayList<>();
 
-   private final AtomicLong lastTimestampProcessed = new AtomicLong(-1);
+   private final AtomicLong mostRecentTimestampProcessed = new AtomicLong(-1);
    protected final AtomicReference<SurfaceElementICPSLAMParameters> slamParameters;
    private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
    private final AtomicReference<NormalEstimationParameters> frameNormalEstimationParameters;
@@ -315,10 +312,12 @@ public class SLAMModule implements PerceptionModule
       if (pointCloudQueue.size() == 0)
          return false;
 
+      updateAndCompressQueue();
+
       updateSLAMParameters();
-      StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
+      StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.get(0);
       slam.handleBoundingBox(pointCloudToCompute.getSensorPosition(), pointCloudToCompute.getSensorOrientation(), atomicBoundingBoxParameters.get(), useBoundingBox.get());
-      lastTimestampProcessed.set(pointCloudToCompute.getTimestamp());
+      mostRecentTimestampProcessed.set(pointCloudToCompute.getTimestamp());
 
       slam.setFrameNormalEstimationParameters(frameNormalEstimationParameters.get());
 
@@ -360,26 +359,25 @@ public class SLAMModule implements PerceptionModule
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
    {
-      if (lastTimestampProcessed.get() > -1 &&
-          Conversions.nanosecondsToSeconds(pointCloud.getTimestamp() - lastTimestampProcessed.get()) > slamParameters.get().getLongestTimeToLag())
+      pointCloudQueue.add(pointCloud);
+   }
+
+   private void updateAndCompressQueue()
+   {
+      StereoVisionPointCloudMessage lastPointCloud = pointCloudQueue.get(pointCloudQueue.size() - 1);
+
+      if (mostRecentTimestampProcessed.get() > -1 &&
+          Conversions.nanosecondsToSeconds(lastPointCloud.getTimestamp() - mostRecentTimestampProcessed.get()) > slamParameters.get().getLongestTimeToLag())
       {
          compressQueueToSize(1);
-         pointCloudQueue.add(pointCloud);
-      }
-
-      if (pointCloudQueue.size() < slamParameters.get().getMaximumQueueSize())
-      {
-         pointCloudQueue.add(pointCloud);
-         return;
       }
 
       compressQueueToSize(slamParameters.get().getMaximumQueueSize());
-      pointCloudQueue.add(pointCloud);
    }
 
    private void compressQueueToSize(int desiredSize)
    {
-      long timestamp = lastTimestampProcessed.get();
+      long timestamp = mostRecentTimestampProcessed.get();
       int index = 0;
       while (index < pointCloudQueue.size() - 1 && pointCloudQueue.size() > desiredSize - 1)
       {
@@ -399,7 +397,7 @@ public class SLAMModule implements PerceptionModule
 
    protected void dequeue()
    {
-      pointCloudQueue.removeFirst();
+      pointCloudQueue.remove(0);
    }
 
    private final DecimalFormat df = new DecimalFormat("#.##");

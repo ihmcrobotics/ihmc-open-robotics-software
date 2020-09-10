@@ -29,6 +29,7 @@ public class SurfaceElementICPSLAMParameters
 
    private static final boolean DEFAULT_INSERT_MISS_IN_OCTREE = true;
    private static final boolean DEFAULT_COMPUTE_FRAMES_IN_PARALLEL = false;
+   private static final boolean DEFAULT_WARM_START_DRIFT_TRANSFORM = false;
 
    private static final double DEFAULT_TRANSLATION_PERTURBATION = 0.002;
    private static final double DEFAULT_ROTATION_PERTURBATION = 0.00001;
@@ -68,6 +69,7 @@ public class SurfaceElementICPSLAMParameters
    private double translationPerturbation;
    private double rotationPerturbation;
    private boolean includePitchAndRoll;
+   private boolean warmStartDriftTransform;
 
    private int maximumQueueSize;
    private double maximumTimeBetweenFrames;
@@ -114,6 +116,7 @@ public class SurfaceElementICPSLAMParameters
       translationPerturbation = other.translationPerturbation;
       rotationPerturbation = other.rotationPerturbation;
       includePitchAndRoll = other.includePitchAndRoll;
+      warmStartDriftTransform = other.warmStartDriftTransform;
 
       maximumQueueSize = other.maximumQueueSize;
       maximumTimeBetweenFrames = other.maximumTimeBetweenFrames;
@@ -148,6 +151,7 @@ public class SurfaceElementICPSLAMParameters
 
       insertMissInOcTree = DEFAULT_INSERT_MISS_IN_OCTREE;
       computeFramesInParalel = DEFAULT_COMPUTE_FRAMES_IN_PARALLEL;
+      warmStartDriftTransform = DEFAULT_WARM_START_DRIFT_TRANSFORM;
 
       translationPerturbation = DEFAULT_TRANSLATION_PERTURBATION;
       rotationPerturbation = DEFAULT_ROTATION_PERTURBATION;
@@ -289,6 +293,11 @@ public class SurfaceElementICPSLAMParameters
       return maxVelocity;
    }
 
+   public boolean getWarmStartDriftTransform()
+   {
+      return warmStartDriftTransform;
+   }
+
    public void setSurfaceElementResolution(double surfaceElementResolution)
    {
       this.surfaceElementResolution = surfaceElementResolution;
@@ -414,6 +423,11 @@ public class SurfaceElementICPSLAMParameters
       this.maxVelocity = maxVelocity;
    }
 
+   public void setWarmStartDriftTransform(boolean warmStartDriftTransform)
+   {
+      this.warmStartDriftTransform = warmStartDriftTransform;
+   }
+
    @Override
    public String toString()
    {
@@ -429,7 +443,7 @@ public class SurfaceElementICPSLAMParameters
              + getMaximumTimeBetweenFrames() + ", longestTimeToLag: " + getLongestTimeToLag() + ", maximumNumberOfSurfaceElements: "
              + getMaxNumberOfSurfaceElements() + ", maxNumberOfCorrespondences: " + getMaxNumberOfCorrespondences()
              + ", computeFramesInParallel: " + getComputeFramesInParallel() + ", stationaryVelocity: " + getStationaryVelocity()
-            + ", maxVelocity: " + getMaxVelocity();
+            + ", maxVelocity: " + getMaxVelocity() + ", warmStartDriftTransform: " + getWarmStartDriftTransform();
    }
 
    public static SurfaceElementICPSLAMParameters parse(String parametersAsString)
@@ -463,6 +477,7 @@ public class SurfaceElementICPSLAMParameters
       parameters.setComputeFramesInParallel(ScannerTools.readNextBoolean(scanner, parameters.getComputeFramesInParallel()));
       parameters.setStationaryVelocity(ScannerTools.readNextDouble(scanner, parameters.getStationaryVelocity()));
       parameters.setMaxVelocity(ScannerTools.readNextDouble(scanner, parameters.getMaxVelocity()));
+      parameters.setWarmStartDriftTransform(ScannerTools.readNextBoolean(scanner, parameters.getWarmStartDriftTransform()));
       scanner.close();
       return parameters;
    }

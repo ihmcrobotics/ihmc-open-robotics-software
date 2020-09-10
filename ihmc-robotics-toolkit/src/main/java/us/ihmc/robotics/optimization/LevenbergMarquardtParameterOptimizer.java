@@ -15,6 +15,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
@@ -115,6 +116,11 @@ public class LevenbergMarquardtParameterOptimizer
    public void setMaximumNumberOfCorrespondences(int maximumNumberOfCorrespondences)
    {
       this.maximumNumberOfCorrespondences = maximumNumberOfCorrespondences;
+   }
+
+   public void setInitialOptimalGuess(DMatrixRMaj initialOptimalGuess)
+   {
+      this.currentInput.set(initialOptimalGuess);
    }
 
    public boolean initialize()
@@ -246,6 +252,29 @@ public class LevenbergMarquardtParameterOptimizer
             transform.getTranslation().set(input.get(0), input.get(1), input.get(2));
             return transform;
          }
+      };
+   }
+
+   public static Function<RigidBodyTransformReadOnly, DMatrixRMaj> createInverseSpatialInputFunction(boolean includePitchAndRoll)
+   {
+      return (transform) ->
+      {
+         int size = includePitchAndRoll ? 6 : 4;
+         DMatrixRMaj input = new DMatrixRMaj(size, 1);
+
+         if (includePitchAndRoll)
+         {
+            input.set(3, transform.getRotation().getRoll());
+            input.set(4, transform.getRotation().getPitch());
+            input.set(5, transform.getRotation().getYaw());
+         }
+         else
+         {
+            input.set(3, transform.getRotation().getYaw());
+         }
+         transform.getTranslation().get(input);
+
+         return input;
       };
    }
 
