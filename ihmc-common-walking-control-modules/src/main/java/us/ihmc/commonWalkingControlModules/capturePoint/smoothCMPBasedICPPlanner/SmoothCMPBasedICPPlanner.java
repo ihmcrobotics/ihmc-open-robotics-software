@@ -981,6 +981,20 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       }
    }
 
+   private void setSplitFractionsToDefault()
+   {
+      for (int i = 0; i < transferDurationAlphas.size(); i++)
+      {
+         transferDurationAlphas.get(i).set(defaultTransferDurationAlpha.getDoubleValue());
+      }
+      for (int i = 0; i < transferWeightDistributions.size(); i++)
+      {
+         transferWeightDistributions.get(i).set(defaultTransferWeightDistribution.getDoubleValue());
+      }
+      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
+      finalTransferWeightDistribution.set(defaultTransferWeightDistribution.getDoubleValue());
+   }
+
    protected void updateTransferPlan(boolean maintainContinuity)
    {
       updateCount();
@@ -996,6 +1010,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       boolean smoothForContinuity = adjustPlanForDSContinuity.getBooleanValue() || smoothForInitialContinuity || smoothForFinalContinuity;
       boolean performSmoothingAdjustment = maintainContinuity && smoothForContinuity;
       referenceCoPGenerator.setGoingToPerformDSSmoothingAdjustment(performSmoothingAdjustment);
+
+      setSplitFractionsToDefault();
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator
@@ -1062,6 +1078,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       boolean goingToPerformSmoothingAdjustment = maintainContinuity && adjustPlanForSSContinuity.getBooleanValue();
       referenceCoPGenerator.setGoingToPerformSSSmoothingAdjustment(goingToPerformSmoothingAdjustment);
 
+      setSplitFractionsToDefault();
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs
       referenceCoPGenerator.computeReferenceCoPsStartingFromSingleSupport(supportSide);
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
