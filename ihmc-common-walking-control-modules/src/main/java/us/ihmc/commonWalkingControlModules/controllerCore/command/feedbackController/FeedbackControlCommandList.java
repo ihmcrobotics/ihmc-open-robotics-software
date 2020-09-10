@@ -103,6 +103,42 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
    }
 
    /**
+    * Returns the index of the first occurrence of the specified command in this list, or {@code -1} if
+    * this list does not contain it.
+    * 
+    * @param command the command to get the index of.
+    * @return the index of the command, or {@code -1} if it could not be found.
+    */
+   public int indexOf(FeedbackControlCommand<?> command)
+   {
+      return commandList.indexOf(command);
+   }
+
+   /**
+    * Removes the first occurrence of the specified command from this list, if it is present.
+    * 
+    * @param command the command to remove.
+    */
+   public void removeCommand(FeedbackControlCommand<?> command)
+   {
+      int indexOf = indexOf(command);
+
+      if (indexOf == -1)
+         return;
+      removeCommand(indexOf);
+   }
+
+   /**
+    * Removes the command at the specified position in this list and shifts the subsequent commands.
+    * 
+    * @param commandIndex the index of the command to be removed.
+    */
+   public void removeCommand(int commandIndex)
+   {
+      commandList.remove(commandIndex);
+   }
+
+   /**
     * Removes and returns the last command of this list.
     * 
     * @return the last command.
