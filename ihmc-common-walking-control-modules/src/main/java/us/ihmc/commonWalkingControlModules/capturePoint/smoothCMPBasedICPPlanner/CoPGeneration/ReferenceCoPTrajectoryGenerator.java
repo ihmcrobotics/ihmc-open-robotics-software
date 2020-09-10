@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
+import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -13,11 +14,13 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -79,6 +82,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoDouble additionalTimeForFinalTransfer;
 
    // State variables
+   private final SideDependentList<? extends ReferenceFrame> soleFrames;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2DReadOnly> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
    private final SideDependentList<ConvexPolygon2DReadOnly> defaultFootPolygons = new SideDependentList<>();
@@ -94,13 +98,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoDouble maxContinuityAdjustmentSegmentDurationDS;
    private final YoDouble maxContinuityAdjustmentSegmentDurationSS;
 
-   private final DoubleProvider finalTransferWeightDistribution;
-   private final List<YoDouble> transferWeightDistributions;
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
-   private final List<YoDouble> swingSplitFractions;
-   private final List<YoDouble> swingDurationShiftFractions;
-   private final List<YoDouble> transferSplitFractions;
    private final List<FootstepData> upcomingFootstepsData;
 
    private final YoEnum<CoPSplineType> orderOfSplineInterpolation;
@@ -110,6 +109,50 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoBoolean putExitCoPOnToes;
    private final YoBoolean putExitCoPOnToesWhenSteppingDown;
    private final YoBoolean planIsAvailable;
+
+   private final SplitFractionCalculatorParametersReadOnly splitFractionParameters ;
+
+   private static final String namePrefix = "icpPlanner";
+   /**
+    * Repartition of the swing duration around the exit corner point:
+    * <ul>
+    * <li>{@code alpha * swingDuration} is spent with the ICP located before the exit corner point.
+    * <li>{@code (1.0 - alpha) * swingDuration} is spent with the ICP located after the exit corner
+    * point.
+    * </ul>
+    * <p>
+    * This variable is only used when using two constant CMPs per support:
+    * {@code useTwoConstantCMPsPerSupport == true}.
+    * </p>
+    */
+   protected final YoDouble defaultSwingDurationAlpha = new YoDouble(namePrefix + "DefaultSwingDurationAlpha",
+                                                                     "Repartition of the swing duration around the exit corner point.", registry);
+   protected final ArrayList<YoDouble> swingDurationAlphas = new ArrayList<>();
+
+
+
+   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
+   private final YoDouble defaultSwingDurationShiftFraction;
+
+
+   /**
+    * Repartition of the transfer duration around the entry corner point:
+    * <ul>
+    * <li>{@code alpha * transferDuration} is spent with the ICP located before the entry corner
+    * point.
+    * <li>{@code (1.0 - alpha) * transferDuration} is spent with the ICP located after the entry
+    * corner point.
+    * </ul>
+    */
+   protected final YoDouble defaultTransferDurationAlpha = new YoDouble(namePrefix + "DefaultTransferDurationAlpha",
+                                                                        "Repartition of the transfer duration around the entry corner point.", registry);
+   protected final ArrayList<YoDouble> transferDurationAlphas = new ArrayList<>();
+
+   private final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
+
+   private final YoDouble defaultTransferWeightDistribution = new YoDouble(namePrefix + "DefaultWeightDistribution", registry);
+   private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
+   private final YoDouble finalTransferWeightDistribution = new YoDouble(namePrefix + "FinalTransferWeightDistribution", registry);
 
    // Output variables
    private final RecyclingArrayList<CoPPointsInFoot> copLocationWaypoints;
@@ -151,33 +194,42 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     * Creates CoP planner object. Should be followed by call to {@link #initializeParameters(ICPPlannerParameters)} ()} to
     * pass planning parameters
     */
-   public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
-                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
-                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
-                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, List<YoDouble> weightDistributions,
-                                          DoubleProvider finalTransferWeightDistribution, IntegerProvider numberOfUpcomingFootsteps,
-                                          List<FootstepData> upcomingFootstepsData, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+   public ReferenceCoPTrajectoryGenerator(String namePrefix,
+                                          int maxNumberOfFootstepsToConsider,
+                                          BipedSupportPolygons bipedSupportPolygons,
+                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                          YoInteger numberFootstepsToConsider,
+                                          List<YoDouble> swingDurations,
+                                          List<YoDouble> transferDurations,
+                                          IntegerProvider numberOfUpcomingFootsteps,
+                                          List<FootstepData> upcomingFootstepsData,
+                                          SideDependentList<? extends ReferenceFrame> soleFrames,
+                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                           YoRegistry parentRegistry)
    {
       this(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), contactableFeet, numberFootstepsToConsider,
-           swingDurations, transferDurations,
-           swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, weightDistributions, finalTransferWeightDistribution, false,
-           numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames, parentRegistry);
+           swingDurations, transferDurations, false,
+           numberOfUpcomingFootsteps, upcomingFootstepsData, soleFrames, soleZUpFrames, parentRegistry);
 
    }
 
-   public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
-                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
-                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
-                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
-                                          List<YoDouble> weightDistributions, DoubleProvider finalTransferWeightDistribution, boolean debug,
-                                          IntegerProvider numberOfUpcomingFootsteps, List<FootstepData> upcomingFootstepsData,
-                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoRegistry parentRegistry)
+   public ReferenceCoPTrajectoryGenerator(String namePrefix,
+                                          int maxNumberOfFootstepsToConsider,
+                                          SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
+                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                          YoInteger numberFootstepsToConsider,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations,
+                                          boolean debug,
+                                          IntegerProvider numberOfUpcomingFootsteps,
+                                          List<FootstepData> upcomingFootstepsData,
+                                          SideDependentList<? extends ReferenceFrame> soleFrames,
+                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                          YoRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
+      this.splitFractionParameters = new YoSplitFractionCalculatorParameters(new DefaultSplitFractionCalculatorParameters(), registry);
       this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
       this.debug = debug;
-      this.finalTransferWeightDistribution = finalTransferWeightDistribution;
       additionalTimeForFinalTransfer = new YoDouble(fullPrefix + "AdditionalTimeForFinalTransfer", registry);
       safeDistanceFromCoPToSupportEdges = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdges", registry);
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
@@ -195,12 +247,45 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       maxContinuityAdjustmentSegmentDurationDS.set(0.2);
       maxContinuityAdjustmentSegmentDurationSS.set(0.15);
 
-      this.transferWeightDistributions = weightDistributions;
+      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
+      {
+         YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
+         swingDuration.setToNaN();
+         swingDurations.add(swingDuration);
+         YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + i, registry);
+         transferDuration.setToNaN();
+         transferDurations.add(transferDuration);
+
+         YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + i,
+                                                       "Repartition of the transfer duration around the entry corner point.", registry);
+         transferDurationAlpha.setToNaN();
+         transferDurationAlphas.add(transferDurationAlpha);
+         YoDouble swingDurationAlpha = new YoDouble(namePrefix + "SwingDurationAlpha" + i,
+                                                    "Repartition of the transfer duration around the entry corner point.", registry);
+         swingDurationAlpha.setToNaN();
+         swingDurationAlphas.add(swingDurationAlpha);
+
+         YoDouble weightDistribution = new YoDouble(namePrefix + "TransferWeightDistribution" + i, registry);
+         weightDistribution.setToNaN();
+         transferWeightDistributions.add(weightDistribution);
+      }
+      YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + maxNumberOfFootstepsToConsider,
+                                                    "Repartition of the transfer duration around the entry corner point.", registry);
+      transferDurationAlphas.add(transferDurationAlpha);
+
+      defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
+
+      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
+      {
+         YoDouble swingDurationShiftFraction = new YoDouble(namePrefix + "SwingDurationShiftFraction" + i, registry);
+         swingDurationShiftFractions.add(swingDurationShiftFraction);
+      }
+
+      defaultTransferWeightDistribution.set(0.5);
+      finalTransferWeightDistribution.set(0.5);
+
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
-      this.swingSplitFractions = swingSplitFractions;
-      this.swingDurationShiftFractions = swingDurationShiftFractions;
-      this.transferSplitFractions = transferSplitFractions;
       this.numberOfUpcomingFootsteps = numberOfUpcomingFootsteps;
       this.upcomingFootstepsData = upcomingFootstepsData;
 
@@ -252,6 +337,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       transferCoPTrajectories.add(transferCoPTrajectory);
 
       this.soleZUpFrames = soleZUpFrames;
+      this.soleFrames = soleFrames;
 
       copLocationWaypoints = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider + 2, new CoPPointsInFootSupplier());
       copLocationWaypoints.clear();
@@ -305,6 +391,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       this.exitCoPName = parameters.getExitCoPName();
 
+      defaultTransferDurationAlpha.set(parameters.getTransferSplitFraction());
+      defaultSwingDurationAlpha.set(parameters.getSwingSplitFraction());
+      finalTransferDurationAlpha.set(parameters.getTransferSplitFraction());
+      defaultSwingDurationShiftFraction.set(parameters.getSwingDurationShiftFraction());
+
       this.footstepHeightThresholdToPutExitCoPOnToesSteppingDown.set(parameters.getStepHeightThresholdForExitCoPOnToesWhenSteppingDown());
       this.footstepLengthThresholdToPutExitCoPOnToesSteppingDown.set(parameters.getStepLengthThresholdForExitCoPOnToesWhenSteppingDown());
       this.safeDistanceFromCoPToSupportEdgesWhenSteppingDown.set(parameters.getCoPSafeDistanceAwayFromToesWhenSteppingDown());
@@ -334,6 +425,42 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          copPointParametersMap.get(swingCoPName).getMinCoPOffset().set(bounds.getX());
          copPointParametersMap.get(swingCoPName).getMaxCoPOffset().set(bounds.getY());
       }
+   }
+
+   public void setFinalTransferDurationAlpha(double durationAlpha)
+   {
+      if (!Double.isFinite(durationAlpha) || !MathTools.intervalContains(durationAlpha, 0.0, 1.0, false, false))
+         return;
+
+      finalTransferDurationAlpha.set(durationAlpha);
+   }
+
+   public void setFinalTransferWeightDistribution(double weightDistribution)
+   {
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0, false, false))
+         return;
+
+      finalTransferWeightDistribution.set(weightDistribution);
+   }
+
+   public void setTransferDurationAlpha(int stepNumber, double transferDurationAlpha)
+   {
+      transferDurationAlphas.get(stepNumber).set(transferDurationAlpha);
+   }
+
+   public void setSwingDurationAlpha(int stepNumber, double swingDurationAlpha)
+   {
+      swingDurationAlphas.get(stepNumber).set(swingDurationAlpha);
+   }
+
+   public double getTransferDurationAlpha(int stepNumber)
+   {
+      return transferDurationAlphas.get(stepNumber).getDoubleValue();
+   }
+
+   public double getSwingDurationAlpha(int stepNumber)
+   {
+      return swingDurationAlphas.get(stepNumber).getDoubleValue();
    }
 
    @Override
@@ -442,6 +569,28 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       desiredCoPVelocity.setToNaN();
       desiredCoPAcceleration.setToNaN();
       clearPlan();
+
+      for (int i = 0; i < swingDurations.size(); i++)
+      {
+         swingDurationAlphas.get(i).setToNaN();
+         transferDurationAlphas.get(i).setToNaN();
+         swingDurationShiftFractions.get(i).setToNaN();
+      }
+   }
+
+   public void initializeForStanding()
+   {
+      transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
+   }
+
+   public void initializeForTransfer(int numberOfFootstepsRegistered)
+   {
+      transferDurationAlphas.get(numberOfFootstepsRegistered).set(finalTransferDurationAlpha.getDoubleValue());
+   }
+
+   public void initializeForSingleSupport(int numberOfFootstepsRegistered)
+   {
+      transferDurationAlphas.get(numberOfFootstepsRegistered).set(finalTransferDurationAlpha.getDoubleValue());
    }
 
    public void clearPlan()
@@ -530,6 +679,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       lastTransferToSide = previousTransferToSide == null ? transferToSide.getOppositeSide() : previousTransferToSide;
       initializeAllFootPolygons(transferToSide, transferringToSameSideAsStartingFrom, false);
 
+      computeSplitFractionsFromPosition();
+      computeSplitFractionsFromArea();
+
       int numberOfUpcomingFootsteps = Math.min(numberFootstepsToConsider.getIntegerValue(), this.numberOfUpcomingFootsteps.getValue());
       boolean planIncludesFinalTransfer = numberOfUpcomingFootsteps < numberFootstepsToConsider.getIntegerValue();
 
@@ -608,6 +760,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       initializeAllFootPolygons(null, false, true);
       isDoneWalking.set(false);
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.add();
+
+      computeSplitFractionsFromPosition();
+      computeSplitFractionsFromArea();
 
       // compute cop waypoint location
       computeExitCoPPointLocationForPreviousPlan(previousCoPLocation, copPointParametersMap.get(exitCoPName), supportSide.getOppositeSide(), false);
@@ -985,7 +1140,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             PrintTools.warn("Using a default transfer time because it is currently invalid.");
       }
 
-      double splitFraction = transferSplitFractions.get(footstepIndex).getDoubleValue();
+      double splitFraction = transferDurationAlphas.get(footstepIndex).getDoubleValue();
       if (Double.isNaN(splitFraction))
       {
          splitFraction = 0.5;
@@ -1042,7 +1197,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          swingTime = SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE;
 
       double initialSegmentDuration =
-            swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * swingSplitFractions.get(footstepIndex).getDoubleValue();
+            swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * swingDurationAlphas.get(footstepIndex).getDoubleValue();
       double segmentDuration;
 
       switch (segmentIndex)
@@ -1052,7 +1207,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          break;
       case 1:
          segmentDuration =
-               swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * (1.0 - swingSplitFractions.get(footstepIndex).getDoubleValue());
+               swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue() * (1.0 - swingDurationAlphas.get(footstepIndex).getDoubleValue());
          break;
       case 2:
          segmentDuration = swingTime * (1.0 - swingDurationShiftFractions.get(footstepIndex).getDoubleValue());
@@ -1469,5 +1624,193 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                             tempPolygonA.getReferenceFrame());
       tempFramePoint1.changeFrame(copPositionToPack.getReferenceFrame());
       copPositionToPack.set(tempFramePoint1);
+   }
+
+
+   private final FramePose3D stanceFootPose = new FramePose3D();
+   private final FramePose3D nextFootPose = new FramePose3D();
+
+   public void computeSplitFractionsFromPosition()
+   {
+      if (getNumberOfFootstepsRegistered() == 0 || !splitFractionParameters.calculateSplitFractionsFromPositions())
+      {
+         return;
+      }
+
+      double defaultTransferSplitFraction = splitFractionParameters.getDefaultTransferSplitFraction();
+      double defaultWeightDistribution = 0.5;
+
+      for (int stepNumber = 0; stepNumber < getNumberOfFootstepsRegistered(); stepNumber++)
+      {
+         if (stepNumber == 0)
+         {
+            RobotSide initialStanceSide = getFootstep(stepNumber).getRobotSide().getOppositeSide();
+            stanceFootPose.setToZero(soleFrames.get(initialStanceSide));
+            stanceFootPose.changeFrame(worldFrame);
+         }
+         else
+         {
+            stanceFootPose.set(getFootstep(stepNumber - 1).getFootstepPose());
+         }
+
+         nextFootPose.set(getFootstep(stepNumber).getFootstepPose());
+
+         // This step is a big step down.
+         double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
+
+         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
+         {
+            double alpha = Math.min(1.0,
+                                    (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
+                                          splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
+            double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
+                                                                                splitFractionParameters.getTransferSplitFractionAtFullDepth(), alpha);
+            double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                                                                                     splitFractionParameters.getTransferWeightDistributionAtFullDepth(), alpha);
+
+            if (stepNumber == getNumberOfFootstepsRegistered() - 1)
+            { // this is the last step
+               double currentSplitFraction = finalTransferDurationAlpha.getDoubleValue();
+               double currentWeightDistribution = finalTransferWeightDistribution.getDoubleValue();
+
+               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
+
+               finalTransferDurationAlpha.set(splitFractionToSet);
+               finalTransferWeightDistribution.set(weightDistributionToSet);
+            }
+            else
+            {
+               double currentSplitFraction = transferDurationAlphas.get(stepNumber + 1).getDoubleValue();
+               double currentWeightDistribution = transferWeightDistributions.get(stepNumber + 1).getDoubleValue();
+
+               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
+
+               transferDurationAlphas.get(stepNumber + 1).set(splitFractionToSet);
+               transferWeightDistributions.get(stepNumber + 1).set(weightDistributionToSet);
+            }
+         }
+      }
+   }
+
+   private final ConvexPolygon2D previousPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D currentPolygon = new ConvexPolygon2D();
+
+   private final PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
+   private final PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
+
+   public void computeSplitFractionsFromArea()
+   {
+      if (getNumberOfFootstepsRegistered() == 0|| !splitFractionParameters.calculateSplitFractionsFromArea())
+      {
+         return;
+      }
+      double defaultTransferSplitFraction = splitFractionParameters.getDefaultTransferSplitFraction();
+      double defaultWeightDistribution = 0.5;
+
+      for (int stepNumber = 0; stepNumber < getNumberOfFootstepsRegistered(); stepNumber++)
+      {
+         if (stepNumber == 0)
+         {
+            RobotSide stanceSide = getFootstep(0).getRobotSide().getOppositeSide();
+            stanceFootPose.setToZero(soleFrames.get(stanceSide));
+            stanceFootPose.changeFrame(worldFrame);
+            previousFrame.setPoseAndUpdate(stanceFootPose);
+            previousPolygon.set(supportFootPolygonsInSoleZUpFrames.get(stanceSide));
+         }
+         else
+         {
+            Footstep previousStep = getFootstep(stepNumber - 1);
+            previousFrame.setPoseAndUpdate(previousStep.getFootstepPose());
+            if (previousStep.hasPredictedContactPoints())
+            {
+               previousPolygon.clear();
+               for (int i = 0; i < previousStep.getCustomPositionWaypoints().size(); i++)
+                  previousPolygon.addVertex(previousStep.getCustomPositionWaypoints().get(i));
+               previousPolygon.update();
+            }
+            else
+            {
+               previousPolygon.set(defaultFootPolygons.get(previousStep.getRobotSide()));
+            }
+         }
+
+         Footstep currentStep = getFootstep(stepNumber);
+         currentFrame.setPoseAndUpdate(currentStep.getFootstepPose());
+         if (currentStep.hasPredictedContactPoints())
+         {
+            currentPolygon.clear();
+            for (int i = 0; i < currentStep.getCustomPositionWaypoints().size(); i++)
+               currentPolygon.addVertex(currentStep.getCustomPositionWaypoints().get(i));
+            currentPolygon.update();
+         }
+         else
+         {
+            previousPolygon.set(defaultFootPolygons.get(currentStep.getRobotSide()));
+         }
+
+         double currentArea = currentPolygon.getArea();
+         double previousArea = previousPolygon.getArea();
+
+         double totalArea = currentArea + previousArea;
+
+         double currentWidth = currentPolygon.getBoundingBoxRangeY();
+         double previousWidth = previousPolygon.getBoundingBoxRangeY();
+
+         double totalWidth = currentWidth + previousWidth;
+
+         double percentAreaOnCurrentFoot = totalArea > 0.0 ? currentArea / totalArea : 0.5;
+         double percentWidthOnCurrentFoot = totalWidth > 0.0 ? currentWidth / totalWidth : 0.5;
+
+         if (MathTools.epsilonEquals(percentAreaOnCurrentFoot, 0.5, 1.0e-2) && MathTools.epsilonEquals(percentWidthOnCurrentFoot, 0.5, 2.0e-2))
+            continue;
+
+         double transferWeightDistributionFromArea = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                                                                                          splitFractionParameters.getFractionLoadIfFootHasFullSupport(),
+                                                                                          2.0 * percentAreaOnCurrentFoot - 1.0);
+         double transferWeightDistributionFromWidth = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                                                                                           splitFractionParameters.getFractionLoadIfOtherFootHasNoWidth(),
+                                                                                           2.0 * percentWidthOnCurrentFoot - 1.0);
+
+         // lower means it spends more time shifting to the center, higher means it spends less time shifting to the center
+         // e.g., if we set the fraction to 0 and the trailing foot has no area, the split fraction should be 1 because we spend no time on the first segment
+         double transferSplitFractionFromArea = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
+                                                                                     1.0 - splitFractionParameters.getFractionTimeOnFootIfFootHasFullSupport(),
+                                                                                     2.0 * percentAreaOnCurrentFoot - 1.0);
+         double transferSplitFractionFromWidth = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
+                                                                                      1.0 - splitFractionParameters.getFractionTimeOnFootIfOtherFootHasNoWidth(),
+                                                                                      2.0 * percentWidthOnCurrentFoot - 1.0);
+
+         double transferWeightDistribution = 0.5 * (transferWeightDistributionFromArea + transferWeightDistributionFromWidth);
+         double transferSplitFraction = 0.5 * (transferSplitFractionFromArea + transferSplitFractionFromWidth);
+
+         transferWeightDistribution = MathTools.clamp(transferWeightDistribution, 0.01, 0.99);
+         transferSplitFraction = MathTools.clamp(transferSplitFraction, 0.01, 0.99);
+
+         if (stepNumber == getNumberOfFootstepsRegistered() - 1)
+         { // this is the last step
+
+            double currentSplitFraction = finalTransferDurationAlpha.getDoubleValue();
+            double currentWeightDistribution = finalTransferWeightDistribution.getDoubleValue();
+
+            double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+            double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
+
+            finalTransferDurationAlpha.set(splitFractionToSet);
+            finalTransferWeightDistribution.set(weightDistributionToSet);
+         }
+         else
+         {
+            double currentSplitFraction = transferDurationAlphas.get(stepNumber + 1).getDoubleValue();
+            double currentWeightDistribution = transferWeightDistributions.get(stepNumber + 1).getDoubleValue();
+
+            double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+            double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
+
+            transferDurationAlphas.get(stepNumber + 1).set(splitFractionToSet);
+            transferWeightDistributions.get(stepNumber + 1).set(weightDistributionToSet);
+         }
+      }
    }
 }
