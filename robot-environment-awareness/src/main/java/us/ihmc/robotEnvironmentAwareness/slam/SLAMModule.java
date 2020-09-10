@@ -447,11 +447,17 @@ public class SLAMModule implements PerceptionModule
       NormalOcTree octreeMap = slam.getMapOcTree();
       SLAMFrame latestFrame = slam.getLatestFrame();
 
+      if (latestFrame == null)
+      {
+         LogTools.warn("Latest frame is null. Skipping publish results");
+         return;
+      }
+
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getMapOcTree()));
 
 
       long startTime = System.nanoTime();
-      Pose3D pose = new Pose3D(slam.getLatestFrame().getCorrectedSensorPoseInWorld());
+      Pose3D pose = new Pose3D(latestFrame.getCorrectedSensorPoseInWorld());
 
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
