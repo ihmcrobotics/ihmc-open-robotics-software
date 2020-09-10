@@ -39,11 +39,11 @@ public class LookAndStepReset
    {
       statusLogger.error("Performing reset");
       runBeforeWaitWalking.run();
-      if (controllerStatusTracker.isWalking())
-      {
-         statusLogger.info("Waiting for walking to finish");
-         controllerStatusTracker.getFinishedWalkingNotification().blockingPoll();
-      }
+//      if (controllerStatusTracker.isWalking())
+//      {
+//         statusLogger.info("Waiting for walking to finish");
+//         controllerStatusTracker.getFinishedWalkingNotification().blockingPoll();
+//      }
       statusLogger.info("Finished walking. Waiting for remaining {} s", lookAndStepParameters.getResetDuration());
       resetTimer.sleepUntilExpiration(lookAndStepParameters.getResetDuration());
       statusLogger.info("Reset duration passed");
