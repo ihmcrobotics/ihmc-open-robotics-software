@@ -36,7 +36,7 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private static final String namePrefix = "centProj";
