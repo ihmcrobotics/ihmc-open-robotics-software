@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -38,35 +39,35 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3DReadOnly exitCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.setExitCMP(exitCMP, trailingLeg);
    }
 
    @Override
-   public void computeToeOffContactPoint(FramePoint2D desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactPoint(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    @Override
-   public void getToeOffContactPoint(FramePoint2D contactPointToPack, RobotSide trailingLeg)
+   public void getToeOffContactPoint(FramePoint2DBasics contactPointToPack, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.getToeOffContactPoint(contactPointToPack, trailingLeg);
    }
 
    @Override
-   public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactLine(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg)
+   public void getToeOffContactLine(FrameLineSegment2DBasics contactLineToPack, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.getToeOffContactLine(contactLineToPack, trailingLeg);

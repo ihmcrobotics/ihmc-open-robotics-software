@@ -1270,8 +1270,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    public void getNextExitCMP(FramePoint3D exitCMPToPack)
    {
       List<CoPPointsInFoot> plannedCoPWaypoints = referenceCoPGenerator.getWaypoints();
-      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(1);
-      copPointsInFoot.get(copPointsInFoot.getNumberOfCoPPoints() - 1).getPosition(exitCMPToPack);
+      CoPPointsInFoot copPointsInFoot = plannedCoPWaypoints.get(0);
+      copPointsInFoot.get(0).getPosition(exitCMPToPack);
    }
 
    /** {@inheritDoc} */

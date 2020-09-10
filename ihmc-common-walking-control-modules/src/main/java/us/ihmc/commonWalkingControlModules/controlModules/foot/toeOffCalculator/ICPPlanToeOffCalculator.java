@@ -7,6 +7,10 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -65,7 +69,7 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3DReadOnly exitCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
       this.exitCMP.setIncludingFrame(exitCMP);
@@ -75,13 +79,13 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void computeToeOffContactPoint(FramePoint2D desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactPoint(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
       hasComputedToeOffContactPoint.set(true);
    }
 
    @Override
-   public void getToeOffContactPoint(FramePoint2D contactPointToPack, RobotSide trailingLeg)
+   public void getToeOffContactPoint(FramePoint2DBasics contactPointToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null, trailingLeg);
@@ -90,13 +94,13 @@ public class ICPPlanToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactLine(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
       hasComputedToeOffContactLine.set(true);
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg)
+   public void getToeOffContactLine(FrameLineSegment2DBasics contactLineToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactLine.getBooleanValue())
          computeToeOffContactLine(null, trailingLeg);
