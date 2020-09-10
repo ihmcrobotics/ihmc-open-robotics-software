@@ -88,7 +88,46 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    //////////////////////////////// End Planner Output ////////////////////////////////
 
    protected final YoDouble omega0 = new YoDouble(namePrefix + "Omega0", registry);
+   /**
+    * Repartition of the swing duration around the exit corner point:
+    * <ul>
+    * <li>{@code alpha * swingDuration} is spent with the ICP located before the exit corner point.
+    * <li>{@code (1.0 - alpha) * swingDuration} is spent with the ICP located after the exit corner
+    * point.
+    * </ul>
+    * <p>
+    * This variable is only used when using two constant CMPs per support:
+    * {@code useTwoConstantCMPsPerSupport == true}.
+    * </p>
+    */
+   protected final YoDouble defaultSwingDurationAlpha = new YoDouble(namePrefix + "DefaultSwingDurationAlpha",
+                                                                   "Repartition of the swing duration around the exit corner point.", registry);
+   protected final ArrayList<YoDouble> swingDurationAlphas = new ArrayList<>();
 
+
+
+   private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
+   private final YoDouble defaultSwingDurationShiftFraction;
+
+
+   /**
+    * Repartition of the transfer duration around the entry corner point:
+    * <ul>
+    * <li>{@code alpha * transferDuration} is spent with the ICP located before the entry corner
+    * point.
+    * <li>{@code (1.0 - alpha) * transferDuration} is spent with the ICP located after the entry
+    * corner point.
+    * </ul>
+    */
+   protected final YoDouble defaultTransferDurationAlpha = new YoDouble(namePrefix + "DefaultTransferDurationAlpha",
+                                                                      "Repartition of the transfer duration around the entry corner point.", registry);
+   protected final ArrayList<YoDouble> transferDurationAlphas = new ArrayList<>();
+
+   private final YoDouble finalTransferDurationAlpha = new YoDouble(namePrefix + "FinalTransferDurationAlpha", registry);
+
+   private final YoDouble defaultTransferWeightDistribution = new YoDouble(namePrefix + "DefaultWeightDistribution", registry);
+   private final ArrayList<YoDouble> transferWeightDistributions = new ArrayList<>();
+   private final YoDouble finalTransferWeightDistribution = new YoDouble(namePrefix + "FinalTransferWeightDistribution", registry);
 
    /** Time at which the current state was initialized. */
    protected final YoDouble initialTime = new YoDouble(namePrefix + "CurrentStateInitialTime", registry);
@@ -191,14 +230,13 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ReferenceFrame> soleFrames,
-                                   SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                   SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                   SideDependentList<? extends ReferenceFrame> soleZUpFrames, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoRegistry parentRegistry,
                                    YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ, ICPPlannerParameters icpPlannerParameters)
    {
 
-      this(fullRobotModel.getTotalMass(), bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames,
-           soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime, parentRegistry,
+      this(fullRobotModel.getTotalMass(), bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
+           soleFrames, soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime, parentRegistry,
            yoGraphicsListRegistry, gravityZ, icpPlannerParameters);
    }
 
@@ -228,21 +266,50 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       int maxNumberOfFootstepsToConsider = icpPlannerParameters.getNumberOfFootstepsToConsider();
       upcomingFootstepsData = new RecyclingArrayList<>(maxNumberOfFootstepsToConsider, FootstepData.class);
 
+      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
+      {
+         YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
+         swingDuration.setToNaN();
+         swingDurations.add(swingDuration);
+         YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + i, registry);
+         transferDuration.setToNaN();
+         transferDurations.add(transferDuration);
+
+         YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + i,
+                                                       "Repartition of the transfer duration around the entry corner point.", registry);
+         transferDurationAlpha.setToNaN();
+         transferDurationAlphas.add(transferDurationAlpha);
+         YoDouble swingDurationAlpha = new YoDouble(namePrefix + "SwingDurationAlpha" + i,
+                                                    "Repartition of the transfer duration around the entry corner point.", registry);
+         swingDurationAlpha.setToNaN();
+         swingDurationAlphas.add(swingDurationAlpha);
+
+         YoDouble weightDistribution = new YoDouble(namePrefix + "TransferWeightDistribution" + i, registry);
+         weightDistribution.setToNaN();
+         transferWeightDistributions.add(weightDistribution);
+      }
       YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + maxNumberOfFootstepsToConsider, registry);
       YoDouble transferDurationAlpha = new YoDouble(namePrefix + "TransferDurationAlpha" + maxNumberOfFootstepsToConsider,
                                                     "Repartition of the transfer duration around the entry corner point.", registry);
       transferDuration.setToNaN();
       transferDurationAlpha.setToNaN();
       transferDurations.add(transferDuration);
+      transferDurationAlphas.add(transferDurationAlpha);
 
       yoSingleSupportFinalCoM = new YoFramePoint3D(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
       endOfStateCoM = new YoFramePoint3D(namePrefix + "EndOfStateCoM", worldFrame, registry);
 
       this.gravityZ = gravityZ;
+      defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
       numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
 
       this.robotMass = robotMass;
 
+      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
+      {
+         YoDouble swingDurationShiftFraction = new YoDouble(namePrefix + "SwingDurationShiftFraction" + i, registry);
+         swingDurationShiftFractions.add(swingDurationShiftFraction);
+      }
 
       for (int i = 0; i < maxNumberOfICPCornerPointsVisualized - 1; i++)
       {
@@ -250,13 +317,17 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          icpPhaseExitCornerPoints.add(new YoMutableFramePoint3D(namePrefix + "ExitCornerPoints" + i, "", registry));
       }
 
+      defaultTransferWeightDistribution.set(0.5);
+      finalTransferWeightDistribution.set(0.5);
+
 
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, feetInSoleZUpFrames, contactableFeet,
-                                                                  numberFootstepsToConsider, swingDurations, transferDurations,
+                                                                  numberFootstepsToConsider, swingDurations, transferDurations, swingDurationAlphas,
+                                                                  swingDurationShiftFractions, transferDurationAlphas, transferWeightDistributions,
+                                                                  finalTransferWeightDistribution,
+                                                                  finalTransferDurationAlpha,
                                                                   debug, numberOfUpcomingFootsteps,
-                                                                  upcomingFootstepsData,
-                                                                  soleFrames,
-                                                                  soleZUpFrames, registry);
+                                                                  upcomingFootstepsData, soleFrames, soleZUpFrames, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, true, registry,
                                                                   yoGraphicsListRegistry);
 
@@ -282,6 +353,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
    private void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
+      defaultTransferDurationAlpha.set(icpPlannerParameters.getTransferSplitFraction());
+      defaultSwingDurationAlpha.set(icpPlannerParameters.getSwingSplitFraction());
+      finalTransferDurationAlpha.set(icpPlannerParameters.getTransferSplitFraction());
+
       velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
       velocityReductionFactor.set(Double.NaN);
 
@@ -290,6 +365,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceCoPGenerator.initializeParameters(icpPlannerParameters);
       referenceCMPGenerator.setGroundReaction(robotMass * gravityZ);
       angularMomentumTrajectoryGenerator.initializeParameters(icpPlannerParameters, robotMass, gravityZ);
+      defaultSwingDurationShiftFraction.set(icpPlannerParameters.getSwingDurationShiftFraction());
 
       adjustPlanForSSContinuity.set(icpPlannerParameters.adjustCoPPlanForSingleSupportContinuity());
       adjustPlanForDSContinuity.set(icpPlannerParameters.adjustEveryCoPPlanForDoubleSupportContinuity());
@@ -602,38 +678,44 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void setFinalTransferDurationAlpha(double durationAlpha)
    {
-      referenceCoPGenerator.setFinalTransferDurationAlpha(durationAlpha);
+      if (!Double.isFinite(durationAlpha) || !MathTools.intervalContains(durationAlpha, 0.0, 1.0, false, false))
+         return;
+
+      finalTransferDurationAlpha.set(durationAlpha);
    }
 
    @Override
    public void setFinalTransferWeightDistribution(double weightDistribution)
    {
-      referenceCoPGenerator.setFinalTransferWeightDistribution(weightDistribution);
+      if (!Double.isFinite(weightDistribution) || !MathTools.intervalContains(weightDistribution, 0.0, 1.0, false, false))
+         return;
+
+      finalTransferWeightDistribution.set(weightDistribution);
    }
 
 
    @Override
    public void setTransferDurationAlpha(int stepNumber, double transferDurationAlpha)
    {
-      referenceCoPGenerator.setTransferDurationAlpha(stepNumber, transferDurationAlpha);
+      transferDurationAlphas.get(stepNumber).set(transferDurationAlpha);
    }
 
    @Override
    public void setSwingDurationAlpha(int stepNumber, double swingDurationAlpha)
    {
-      referenceCoPGenerator.setSwingDurationAlpha(stepNumber, swingDurationAlpha);
+      swingDurationAlphas.get(stepNumber).set(swingDurationAlpha);
    }
 
    @Override
    public double getTransferDurationAlpha(int stepNumber)
    {
-      return referenceCoPGenerator.getTransferDurationAlpha(stepNumber);
+      return transferDurationAlphas.get(stepNumber).getDoubleValue();
    }
 
    @Override
    public double getSwingDurationAlpha(int stepNumber)
    {
-      return referenceCoPGenerator.getSwingDurationAlpha(stepNumber);
+      return swingDurationAlphas.get(stepNumber).getDoubleValue();
    }
 
    @Override
@@ -701,6 +783,9 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       {
          swingDurations.get(i).setToNaN();
          transferDurations.get(i).setToNaN();
+         swingDurationAlphas.get(i).setToNaN();
+         transferDurationAlphas.get(i).setToNaN();
+         swingDurationShiftFractions.get(i).setToNaN();
       }
 
       numberOfUpcomingFootsteps.set(0);
@@ -762,7 +847,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
       finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
 
-      /*
       double swingShiftFraction = shiftFractions.getSwingDurationShiftFraction();
       double swingDurationAlpha = shiftFractions.getSwingSplitFraction();
       double transferDurationAlpha = shiftFractions.getTransferSplitFraction();
@@ -785,8 +869,6 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          weightDistribution = defaultTransferWeightDistribution.getDoubleValue();
 
       transferWeightDistributions.get(footstepIndex).set(weightDistribution);
-
-       */
    }
 
    /** {@inheritDoc} */
@@ -803,7 +885,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       isStanding.set(true);
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
-      referenceCoPGenerator.initializeForStanding();
+      transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
       shouldClampDuration.set(true);
@@ -828,7 +910,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       isFinalTransfer.set(numberOfFootstepRegistered == 0);
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-      referenceCoPGenerator.initializeForTransfer(numberOfFootstepRegistered);
+      transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
@@ -858,7 +940,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
 
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-      referenceCoPGenerator.initializeForSingleSupport(numberOfFootstepRegistered);
+      transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoPGenerator.initializeForSwing();
       referenceCoMGenerator.initializeForSwingOrTransfer();
