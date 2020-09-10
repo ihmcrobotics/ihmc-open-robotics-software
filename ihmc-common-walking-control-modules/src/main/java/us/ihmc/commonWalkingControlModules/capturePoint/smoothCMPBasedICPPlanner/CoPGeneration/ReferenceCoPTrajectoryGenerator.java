@@ -34,6 +34,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
@@ -1532,6 +1533,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D nextFootPose = new FramePose3D();
 
+
+
    public void computeSplitFractionsFromPosition()
    {
       if (getNumberOfFootstepsRegistered() == 0 || !splitFractionParameters.calculateSplitFractionsFromPositions())
@@ -1589,6 +1592,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
                double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
 
+               if (weightDistributionToSet == 1.0)
+                  LogTools.info("What?");
                transferSplitFractions.get(stepNumber + 1).set(splitFractionToSet);
                transferWeightDistributions.get(stepNumber + 1).set(weightDistributionToSet);
             }
