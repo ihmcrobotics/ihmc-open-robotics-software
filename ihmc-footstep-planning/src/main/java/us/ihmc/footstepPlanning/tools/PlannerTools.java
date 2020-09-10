@@ -237,4 +237,18 @@ public class PlannerTools
 
       return false;
    }
+
+   public static void extrapolatePose(Pose3DReadOnly robotPose,
+                                      List<? extends Pose3DReadOnly> bodyPathWaypoints,
+                                      double horizonDistanceToCheck,
+                                      Pose3D poseToPack)
+   {
+      WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
+      bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
+
+      double alpha = bodyPathPlanHolder.getClosestPoint(new Point2D(robotPose.getX(), robotPose.getY()), new Pose3D());
+      double totalPathLength = bodyPathPlanHolder.computePathLength(0.0);
+      double alphaToQuery = MathTools.clamp(alpha + horizonDistanceToCheck / totalPathLength, 0.0, 1.0);
+      bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
+   }
 }
