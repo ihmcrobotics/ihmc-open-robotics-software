@@ -27,6 +27,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -94,7 +95,8 @@ public class StereoVisionPointCloudPublisher
          ROS2Tools.createCallbackSubscription(ros2Node,
                                               ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD)::publish;
+      LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
    }
 
    public StereoVisionPointCloudPublisher(String robotName,
@@ -108,7 +110,8 @@ public class StereoVisionPointCloudPublisher
       ROS2Tools.createCallbackSubscription(realtimeROS2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      pointcloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.D435_POINT_CLOUD)::publish;
+      LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
+      pointcloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, topic)::publish;
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)

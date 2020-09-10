@@ -126,12 +126,10 @@ public class SLAMModule implements PerceptionModule
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StereoVisionPointCloudMessage.class,
-                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StereoVisionPointCloudMessage.class,
-                                           REASourceType.DEPTH_POINT_CLOUD.getTopicName(),
+                                           ROS2Tools.D435_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            REAStateRequestMessage.class,
