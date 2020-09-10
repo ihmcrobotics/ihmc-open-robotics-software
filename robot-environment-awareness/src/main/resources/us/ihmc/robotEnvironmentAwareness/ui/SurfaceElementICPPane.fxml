@@ -104,6 +104,7 @@
             <ToggleButton fx:id="computeSurfaceNormalsInFrame" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Compute Frame Normals" />
             <ToggleButton fx:id="insertMissInOcTree" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Insert Miss in OcTree" />
             <ToggleButton fx:id="computeFramesInParallel" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Parallel Compute Frames" />
+            <ToggleButton fx:id="warmStartDriftTransform" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Warm Start Drift Transform" />
          </children>
       </VBox>
       <VBox layoutX="1347.0" layoutY="10.0" prefHeight="154.0" prefWidth="200.0" spacing="10.0" style="-fx-border-radius: 5; -fx-border-color: lightblue; -fx-border-width: 2; -fx-padding: 3;">
