@@ -3,6 +3,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <AnchorPane minWidth="-Infinity" prefHeight="240.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -24,7 +25,11 @@
                         </Button>
                      </children>
                   </FlowPane>
-                  <CheckBox fx:id="injectSupportRegion" mnemonicParsing="false" onAction="#injectSupportRegion" text="Inject Support Region" />
+                  <Button fx:id="publishSupportRegions" mnemonicParsing="false" onAction="#publishSupportRegions" text="Publish Support Regions">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
+                  </Button>
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />

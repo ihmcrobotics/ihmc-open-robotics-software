@@ -42,6 +42,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
    private final LookAndStepStepping stepping = new LookAndStepStepping();
    private final LookAndStepReset reset = new LookAndStepReset();
+   private final LookAndStepSupportRegionsPublisher supportRegionsPublisher = new LookAndStepSupportRegionsPublisher();
    private final BehaviorStateReference<State> behaviorStateReference;
    private final LookAndStepBehaviorParameters lookAndStepParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -93,7 +94,6 @@ public class LookAndStepBehavior implements BehaviorInterface
          footstepPlannerParameters.setAllFromStrings(parameters);
       }); // TODO: This overrides overrides?
 
-      AtomicReference<Boolean> injectSupportRegion = helper.createUIInput(InjectSupportRegion, false);
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
 
@@ -129,7 +129,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                           lastStanceSide.set(null);
                           helper.publishToUI(ResetForUI);
                           lastCommandedFootsteps.clear();
-                          controllerStatusTracker.getFootstepTracker().reset();
+                          controllerStatusTracker.reset();
 
                           BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage
                                 = new BipedalSupportPlanarRegionParametersMessage();
@@ -154,8 +154,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message ->
       {
          reset.queueReset();
-
       });
+      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publishROS2);
+      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, supportRegionsPublisher::acceptPlanarRegions);
+      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
+      helper.createUICallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
 
       // TODO: Implement neck tracker. Make sure neck is down on body path planning entrance
 
@@ -211,11 +214,9 @@ public class LookAndStepBehavior implements BehaviorInterface
             footstepPlannerParameters,
             swingPlannerParameters,
             helper::publishToUI,
-            helper::publishROS2,
             helper.getOrCreateFootstepPlanner(),
             FootstepPlanningModuleLauncher.createFootPolygons(helper.getRobotModel()),
             lastStanceSide,
-            injectSupportRegion::get,
             operatorReviewEnabledInput::get,
             robotInterface.newSyncedRobot(),
             behaviorStateReference::get,

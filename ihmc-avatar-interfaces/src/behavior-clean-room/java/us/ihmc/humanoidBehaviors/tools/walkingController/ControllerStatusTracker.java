@@ -45,6 +45,16 @@ public class ControllerStatusTracker
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
    }
 
+   public void reset()
+   {
+      footstepTracker.reset();
+      isWalking = false;
+      currentState = null;
+      lastPlanOffset.setToZero();
+      finishedWalkingNotification.poll();
+      capturabilityBasedStatusTimer.reset();
+   }
+
    private void acceptHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)
    {
       currentState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
