@@ -232,7 +232,13 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
-      feetManager = new FeetManager(controllerToolbox, walkingControllerParameters, swingFootGains, holdFootGains, toeOffFootGains, registry);
+      feetManager = new FeetManager(controllerToolbox,
+                                    walkingControllerParameters,
+                                    swingFootGains,
+                                    holdFootGains,
+                                    toeOffFootGains,
+                                    registry,
+                                    controllerToolbox.getYoGraphicsListRegistry());
 
       String footName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.LEFT).getName();
       Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
