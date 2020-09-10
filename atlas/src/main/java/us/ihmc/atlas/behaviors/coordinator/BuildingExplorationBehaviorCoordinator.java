@@ -1,29 +1,24 @@
 package us.ihmc.atlas.behaviors.coordinator;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import controller_msgs.msg.dds.BehaviorControlModePacket;
-import controller_msgs.msg.dds.BehaviorStatusPacket;
-import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
@@ -38,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -45,6 +41,14 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BuildingExplorationBehaviorCoordinator
 {
@@ -92,7 +96,7 @@ public class BuildingExplorationBehaviorCoordinator
       }
 
       teleopState = new TeleopState();
-      lookAndStepState = new LookAndStepState(ros2Node, messager, bombPose);
+      lookAndStepState = new LookAndStepState(robotName, ros2Node, messager, bombPose);
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
       traverseStairsState = new TraverseStairsState(ros2Node, messager, bombPose);
 
@@ -175,6 +179,8 @@ public class BuildingExplorationBehaviorCoordinator
       factory.addRequestedTransition(BuildingExplorationStateName.TRAVERSE_STAIRS, BuildingExplorationStateName.TELEOP, requestedState);
 
       factory.addTransition(BuildingExplorationStateName.LOOK_AND_STEP, BuildingExplorationStateName.WALK_THROUGH_DOOR, this::transitionToWalkThroughDoor);
+      factory.addTransition(BuildingExplorationStateName.LOOK_AND_STEP, BuildingExplorationStateName.TELEOP, t -> lookAndStepState.getDebrisDetected());
+      factory.addTransition(BuildingExplorationStateName.LOOK_AND_STEP, BuildingExplorationStateName.TRAVERSE_STAIRS, t -> lookAndStepState.getStairsDetected());
 
       return factory.build(BuildingExplorationStateName.TELEOP);
    }
@@ -231,18 +237,50 @@ public class BuildingExplorationBehaviorCoordinator
 
    private static class LookAndStepState implements State
    {
+      private static final double horizonFromDebrisToStop = 1.0;
+      private static final double horizonForStairs = 1.0;
+      private static final double heightIncreaseForStairs = 0.55;
+
+      private static final double debrisCheckBodyBoxWidth = 0.3;
+      private static final double debrisCheckBodyBoxDepth = 0.8;
+      private static final double debrisCheckBodyBoxHeight = 1.5;
+      private static final double debrisCheckBodyBoxBaseZ = 0.5;
+
       private final KryoMessager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
       private final IHMCROS2Publisher<Empty> resetPublisher;
+
       private final Pose3DReadOnly bombPose;
 
-      public LookAndStepState(ROS2Node ros2Node, KryoMessager messager, Pose3DReadOnly bombPose)
+      private final FootstepPlannerParametersBasics footstepPlannerParameters;
+
+      private final AtomicReference<List<Pose3D>> bodyPath;
+      private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+      private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
+
+      private final AtomicBoolean debrisDetected = new AtomicBoolean();
+      private final AtomicBoolean stairsDetected = new AtomicBoolean();
+
+      public LookAndStepState(String robotName, ROS2Node ros2Node, KryoMessager messager, Pose3DReadOnly bombPose)
       {
          this.messager = messager;
          this.bombPose = bombPose;
 
          goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class));
          resetPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class));
+
+         this.footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+         this.footstepPlannerParameters.setBodyBoxDepth(debrisCheckBodyBoxWidth);
+         this.footstepPlannerParameters.setBodyBoxWidth(debrisCheckBodyBoxDepth);
+         this.footstepPlannerParameters.setBodyBoxHeight(debrisCheckBodyBoxHeight);
+         this.footstepPlannerParameters.setBodyBoxBaseZ(debrisCheckBodyBoxBaseZ);
+
+         bodyPath = messager.createInput(LookAndStepBehaviorAPI.BodyPathPlanForUI);
+         ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, s -> planarRegions.set(s.takeNextData()));
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                       RobotConfigurationData.class,
+                                                       ROS2Tools.getControllerOutputTopic(robotName),
+                                                       s -> robotConfigurationData.set(s.takeNextData()));
       }
 
       @Override
@@ -260,6 +298,12 @@ public class BuildingExplorationBehaviorCoordinator
          goalPublisher.publish(new Pose3D(bombPose));
          ThreadTools.sleep(100);
 
+         planarRegions.set(null);
+         bodyPath.set(null);
+
+         debrisDetected.set(false);
+         stairsDetected.set(false);
+
          if (DEBUG)
          {
             LogTools.info("Entering " + getClass().getSimpleName());
@@ -269,7 +313,76 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void doAction(double timeInState)
       {
+         checkForDebris();
+         checkForStairs();
+      }
 
+      private void checkForDebris()
+      {
+         List<Pose3D> bodyPath = this.bodyPath.get();
+         if (bodyPath == null)
+            return;
+
+         PlanarRegionsListMessage planarRegionsMessage = this.planarRegions.get();
+         if (planarRegionsMessage == null)
+            return;
+
+         RobotConfigurationData robotConfigurationData = this.robotConfigurationData.get();
+         if (robotConfigurationData == null)
+            return;
+
+         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+
+         boolean debrisDetected = PlannerTools.doesPathContainBodyCollisions(rootPose, bodyPath, planarRegionsList, footstepPlannerParameters, horizonFromDebrisToStop);
+         if (debrisDetected)
+         {
+            if (!this.debrisDetected.get())
+            {
+               LogTools.debug("Debris detected");
+            }
+
+            this.debrisDetected.set(true);
+         }
+      }
+
+      private void checkForStairs()
+      {
+         List<Pose3D> bodyPath = this.bodyPath.get();
+         if (bodyPath == null)
+            return;
+
+         RobotConfigurationData robotConfigurationData = this.robotConfigurationData.get();
+         if (robotConfigurationData == null)
+            return;
+
+         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+         Pose3D currentPoseAlongBodyPath = new Pose3D();
+         Pose3D extrapolatedPoseAlongBodyPath = new Pose3D();
+
+         PlannerTools.extrapolatePose(rootPose, bodyPath, 0.0, currentPoseAlongBodyPath);
+         PlannerTools.extrapolatePose(rootPose, bodyPath, horizonForStairs, extrapolatedPoseAlongBodyPath);
+
+         boolean stairsDetected = Math.abs(currentPoseAlongBodyPath.getZ() - extrapolatedPoseAlongBodyPath.getZ()) >= heightIncreaseForStairs;
+         if (stairsDetected)
+         {
+            if (!this.stairsDetected.get())
+            {
+               LogTools.debug("Stairs detected");
+            }
+
+            this.stairsDetected.set(true);
+         }
+      }
+
+      boolean getDebrisDetected()
+      {
+         return debrisDetected.get();
+      }
+
+      boolean getStairsDetected()
+      {
+         return stairsDetected.get();
       }
 
       @Override
@@ -418,7 +531,7 @@ public class BuildingExplorationBehaviorCoordinator
       // Start behavior coordinator
       BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
       behaviorCoordinator.setBombPose(new Pose3D(14.2, 0.0, 0.86, 0.0, 0.0, 0.0));
-      behaviorCoordinator.requestState(BuildingExplorationStateName.TRAVERSE_STAIRS);
+      behaviorCoordinator.requestState(BuildingExplorationStateName.LOOK_AND_STEP);
       behaviorCoordinator.start();
    }
 }
