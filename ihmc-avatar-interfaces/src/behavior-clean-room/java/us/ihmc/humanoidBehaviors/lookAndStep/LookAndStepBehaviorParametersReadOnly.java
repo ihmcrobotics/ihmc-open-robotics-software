@@ -26,6 +26,16 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(minimumNumberOfPlannedSteps);
    }
 
+   default double getMinimumStepTranslation()
+   {
+      return get(minimumStepTranslation);
+   }
+
+   default double getMinimumStepOrientation()
+   {
+      return get(minimumStepOrientation);
+   }
+
    default double getGoalSatisfactionRadius()
    {
       return get(goalSatisfactionRadius);

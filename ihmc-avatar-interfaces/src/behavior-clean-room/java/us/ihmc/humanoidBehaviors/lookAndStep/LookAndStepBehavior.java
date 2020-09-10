@@ -92,7 +92,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          statusLogger.info("Accepting new footstep planner parameters");
          footstepPlannerParameters.setAllFromStrings(parameters);
-      }); // TODO: This overrides overrides?
+      });
+      helper.createUICallback(SwingPlannerParameters, parameters ->
+      {
+         statusLogger.info("Accepting new swing planner parameters");
+         swingPlannerParameters.setAllFromStrings(parameters);
+      });
 
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);

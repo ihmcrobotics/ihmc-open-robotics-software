@@ -17,6 +17,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
@@ -46,6 +48,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private SwingPlannerParametersBasics swingPlannerParameters;
 
    private Messager behaviorMessager;
    private ROS2PublisherMap ros2Publisher;
@@ -70,6 +73,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
    @FXML private TableView footstepPlannerParameterTable;
+   @FXML private TableView swingPlannerParameterTable;
 
    @Override
    public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
@@ -134,6 +138,10 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForLookAndStep");
       JavaFXStoredPropertyTable footstepPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(footstepPlannerParameterTable);
       footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::publishFootstepPlanningParameters);
+
+      swingPlannerParameters = robotModel.getSwingPlannerParameters("ForLookAndStep");
+      JavaFXStoredPropertyTable swingPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(swingPlannerParameterTable);
+      swingPlannerJavaFXStoredPropertyTable.setup(swingPlannerParameters, SwingPlannerParameterKeys.keys, this::publishSwingPlanningParameters);
 
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
       behaviorMessager.registerTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
@@ -216,6 +224,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
    }
 
+   private void publishSwingPlanningParameters()
+   {
+      behaviorMessager.submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
+   }
+
    @FXML public void placeGoalButton()
    {
       placeGoalActionMap.start();
@@ -243,6 +256,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void saveFootstepPlanningParameters()
    {
       footstepPlannerParameters.save();
+   }
+
+   @FXML public void saveSwingPlannerParameters()
+   {
+      swingPlannerParameters.save();
    }
 
    @FXML public void publishSupportRegions()

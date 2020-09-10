@@ -13,6 +13,8 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final BooleanStoredPropertyKey enableBipedalSupportRegions = keys.addBooleanKey("Enable bipedal support regions");
    public static final BooleanStoredPropertyKey flatGroundBodyPathPlan = keys.addBooleanKey("Flat ground body path plan");
    public static final IntegerStoredPropertyKey swingPlannerType = keys.addIntegerKey("Swing planner type");
+   public static final DoubleStoredPropertyKey minimumStepTranslation = keys.addDoubleKey("Minimum step translation");
+   public static final DoubleStoredPropertyKey minimumStepOrientation = keys.addDoubleKey("Minimum step orientation");
    public static final DoubleStoredPropertyKey neckPitchForBodyPath = keys.addDoubleKey("Neck pitch for body path");
    public static final DoubleStoredPropertyKey neckPitchTolerance = keys.addDoubleKey("Neck pitch tolerance");
    public static final DoubleStoredPropertyKey percentSwingToWait = keys.addDoubleKey("Percent swing to wait");

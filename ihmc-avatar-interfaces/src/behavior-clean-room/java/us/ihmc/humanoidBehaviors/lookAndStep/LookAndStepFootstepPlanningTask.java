@@ -334,8 +334,8 @@ public class LookAndStepFootstepPlanningTask
       private final Pose3D leftFootStancePose = new Pose3D();
       private final Pose3D rightFootStancePose = new Pose3D();
 
-      private double minimumTranslation = 0.05;
-      private double minimumRotation = Math.toRadians(15.0);
+      private double minimumTranslation = lookAndStepBehaviorParameters.getMinimumStepTranslation();
+      private double minimumRotation = Math.toRadians(lookAndStepBehaviorParameters.getMinimumStepOrientation());
 
       public void setStanceFeetPoses(SideDependentList<Pose3DReadOnly> stanceFeetPoses)
       {
