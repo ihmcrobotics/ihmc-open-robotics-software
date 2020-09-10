@@ -211,6 +211,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             footstepPlannerParameters,
             swingPlannerParameters,
             helper::publishToUI,
+            helper::publishROS2,
             helper.getOrCreateFootstepPlanner(),
             FootstepPlanningModuleLauncher.createFootPolygons(helper.getRobotModel()),
             lastStanceSide,

@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.communication.util.TimerSnapshotWithExpiration;
@@ -13,13 +14,9 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,12 +33,12 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.humanoidBehaviors.tools.interfaces.ROS2TypedPublisherInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,6 +59,7 @@ public class LookAndStepFootstepPlanningTask
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
    protected UIPublisher uiPublisher;
+   protected ROS2TypedPublisherInterface ros2Publisher;
    protected FootstepPlanningModule footstepPlanningModule;
    protected SideDependentList<ConvexPolygon2D> defaultFootPolygons;
    protected Supplier<Boolean> operatorReviewEnabledSupplier;
@@ -94,6 +92,7 @@ public class LookAndStepFootstepPlanningTask
                              FootstepPlannerParametersReadOnly footstepPlannerParameters,
                              SwingPlannerParametersReadOnly swingPlannerParameters,
                              UIPublisher uiPublisher,
+                             ROS2TypedPublisherInterface ros2Publisher,
                              FootstepPlanningModule footstepPlanningModule,
                              SideDependentList<ConvexPolygon2D> defaultFootPolygons,
                              AtomicReference<RobotSide> lastStanceSideReference,
@@ -110,6 +109,7 @@ public class LookAndStepFootstepPlanningTask
          this.footstepPlannerParameters = footstepPlannerParameters;
          this.swingPlannerParameters = swingPlannerParameters;
          this.uiPublisher = uiPublisher;
+         this.ros2Publisher = ros2Publisher;
          this.footstepPlanningModule = footstepPlanningModule;
          this.defaultFootPolygons = defaultFootPolygons;
          this.lastStanceSideReference = lastStanceSideReference;
@@ -225,59 +225,6 @@ public class LookAndStepFootstepPlanningTask
 
    protected void performTask()
    {
-      // merge support regions in if < 2 steps taken
-//      if (numberOfCompletedFootsteps < 2)
-      if (injectSupportRegions)
-      {
-         IDLSequence.Object<Point3D> leftPolygon = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
-         IDLSequence.Object<Point3D> rightPolygon = capturabilityBasedStatus.getRightFootSupportPolygon3d();
-
-         List<Point3D> allPoints = new ArrayList<>();
-         allPoints.addAll(leftPolygon);
-         allPoints.addAll(rightPolygon);
-
-         if (allPoints.size() >= 3)
-         {
-            // find place using first 3 points
-            Plane3D plane = new Plane3D(allPoints.get(0), allPoints.get(1), allPoints.get(2));
-            if (plane.getNormal().getZ() < 0)
-            {
-               plane.getNormal().negate();
-            }
-
-            // find transform of plane
-            Quaternion fromZUp = new Quaternion();
-            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, plane.getNormal(), fromZUp);
-
-            RigidBodyTransform transform = new RigidBodyTransform(fromZUp, plane.getPoint());
-
-            PoseReferenceFrame planeFrame = new PoseReferenceFrame("PlaneFrame", ReferenceFrame.getWorldFrame());
-            planeFrame.setPoseAndUpdate(plane.getPoint(), fromZUp);
-
-            ConvexPolygon2D polygon2D = new ConvexPolygon2D();
-            for (Point3D planarPoint3D : allPoints)
-            {
-               FramePoint3D framePoint3D = new FramePoint3D(ReferenceFrame.getWorldFrame(), planarPoint3D);
-               framePoint3D.changeFrame(planeFrame);
-               polygon2D.addVertex(framePoint3D);
-            }
-            polygon2D.update();
-
-            ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
-            ConvexPolygon2D grownPolygon = new ConvexPolygon2D();
-            convexPolygonScaler.scaleConvexPolygon(polygon2D, -0.07, grownPolygon);
-
-            PlanarRegion supportRegion = new PlanarRegion(transform, grownPolygon);
-            planarRegions.addPlanarRegion(supportRegion);
-
-            statusLogger.info("Added region with {} vertices", supportRegion.getConvexPolygon(0).getNumberOfVertices());
-         }
-         else
-         {
-            statusLogger.error("Not enough points to add support polygon");
-         }
-      }
-
       uiPublisher.publishToUI(PlanarRegionsForUI, planarRegions);
 
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
@@ -375,6 +322,8 @@ public class LookAndStepFootstepPlanningTask
             statusLogger.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
          }
 
+         publishSupportRegionsToREA();
+
          statusLogger.info("Footstep planning failure. Aborting task...");
          plannerFailedLastTime.set(true);
          planningFailedNotifier.run();
@@ -397,6 +346,100 @@ public class LookAndStepFootstepPlanningTask
          else
          {
             autonomousOutput.accept(footstepPlanEtc);
+         }
+      }
+   }
+
+   /**
+    * Under development
+    * Ideas:
+    * - If feet are squared up, maybe assume space between is filled?
+    */
+   private void publishSupportRegionsToREA()
+   {
+      // merge support regions in if < 2 steps taken
+      //      if (numberOfCompletedFootsteps < 2)
+      if (injectSupportRegions)
+      {
+         IDLSequence.Object<Point3D> leftPolygon = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+         IDLSequence.Object<Point3D> rightPolygon = capturabilityBasedStatus.getRightFootSupportPolygon3d();
+
+         List<Point3D> allPoints = new ArrayList<>();
+
+         // if any point has no region under it
+         int numberOfPointsWithNoRegion = 0;
+         for (Point3D point3D : leftPolygon)
+         {
+            if (PlanarRegionTools.projectPointToPlanesVertically(point3D, planarRegions) == null)
+            {
+               ++numberOfPointsWithNoRegion;
+            }
+         }
+
+         if (numberOfPointsWithNoRegion > 0)
+         {
+            statusLogger.info("{} left foot vertices with no region");
+
+            allPoints.addAll(leftPolygon);
+         }
+
+         numberOfPointsWithNoRegion = 0;
+         for (Point3D point3D : rightPolygon)
+         {
+            if (PlanarRegionTools.projectPointToPlanesVertically(point3D, planarRegions) == null)
+            {
+               ++numberOfPointsWithNoRegion;
+            }
+         }
+
+         if (numberOfPointsWithNoRegion > 0)
+         {
+            statusLogger.info("{} right foot vertices with no region");
+
+            allPoints.addAll(rightPolygon);
+         }
+
+         if (allPoints.size() >= 3)
+         {
+            // find place using first 3 points
+            Plane3D plane = new Plane3D(allPoints.get(0), allPoints.get(1), allPoints.get(2));
+            if (plane.getNormal().getZ() < 0)
+            {
+               plane.getNormal().negate();
+            }
+
+            // find transform of plane
+            Quaternion fromZUp = new Quaternion();
+            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, plane.getNormal(), fromZUp);
+
+            RigidBodyTransform transform = new RigidBodyTransform(fromZUp, plane.getPoint());
+
+            PoseReferenceFrame planeFrame = new PoseReferenceFrame("PlaneFrame", ReferenceFrame.getWorldFrame());
+            planeFrame.setPoseAndUpdate(plane.getPoint(), fromZUp);
+
+            ConvexPolygon2D polygon2D = new ConvexPolygon2D();
+            for (Point3D planarPoint3D : allPoints)
+            {
+               FramePoint3D framePoint3D = new FramePoint3D(ReferenceFrame.getWorldFrame(), planarPoint3D);
+               framePoint3D.changeFrame(planeFrame);
+               polygon2D.addVertex(framePoint3D);
+            }
+            polygon2D.update();
+
+            ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+            ConvexPolygon2D grownPolygon = new ConvexPolygon2D();
+            convexPolygonScaler.scaleConvexPolygon(polygon2D, -0.07, grownPolygon);
+
+            PlanarRegion supportRegion = new PlanarRegion(transform, grownPolygon);
+            planarRegions.addPlanarRegion(supportRegion);
+
+            PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(supportRegion);
+            ros2Publisher.publishROS2(ROS2Tools.REA_SUPPORT_REGIONS_INPUT, message);
+            statusLogger.info("Published region with {} vertices", supportRegion.getConvexPolygon(0).getNumberOfVertices());
+         }
+         else
+         {
+            statusLogger.error("Did not add support region");
          }
       }
    }
