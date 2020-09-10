@@ -202,6 +202,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       planarRegionsRegionsGraphic.clear();
       startAndGoalFootPoses.clear();
       footstepPlanGraphic.clear();
+      commandedFootsteps.clear();
+      closestPointAlongPathGraphic.clear();
    }
 
    private void publishLookAndStepParameters()
