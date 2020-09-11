@@ -208,7 +208,11 @@ public class LookAndStepBehavior implements BehaviorInterface
                   behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
                }
             },
-            () -> helper.publishROS2(REACHED_GOAL),
+            () ->
+            {
+               statusLogger.info("Publishing REACHED GOAL");
+               helper.publishROS2(REACHED_GOAL);
+            },
             lastCommandedFootsteps,
             footstepPlanning::acceptLocalizationResult
       );
