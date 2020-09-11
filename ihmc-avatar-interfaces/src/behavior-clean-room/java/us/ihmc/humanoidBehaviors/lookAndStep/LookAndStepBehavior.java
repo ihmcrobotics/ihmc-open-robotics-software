@@ -57,7 +57,7 @@ public class LookAndStepBehavior implements BehaviorInterface
     */
    public enum State
    {
-      BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING;
+      RESET, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING;
    }
 
    /**
@@ -115,7 +115,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                        () ->
                        {
                           isBeingReset.set(true);
-                          statusLogger.error("Reset requested");
+                          behaviorStateReference.set(State.RESET);
 
                           operatorReviewEnabledInput.set(true);
                           helper.publishToUI(OperatorReviewEnabledToUI, true);
@@ -130,7 +130,6 @@ public class LookAndStepBehavior implements BehaviorInterface
                        () ->
                        {
                           bodyPathPlanning.acceptGoal(null);
-                          behaviorStateReference.set(State.BODY_PATH_PLANNING);
                           lastStanceSide.set(null);
                           helper.publishToUI(ResetForUI);
                           lastCommandedFootsteps.clear();
@@ -149,11 +148,11 @@ public class LookAndStepBehavior implements BehaviorInterface
 //                          statusLogger.info("Requesting clear REA");
 //                          helper.publishROS2(ROS2Tools.REA_STATE_REQUEST, clearMessage);
 
-                          statusLogger.info("Requesting clear SLAM");
+                          statusLogger.info("Clearing SLAM");
                           helper.publishROS2(SLAMModuleAPI.CLEAR);
 
                           isBeingReset.set(false);
-                          statusLogger.info("Behavior has been reset");
+                          behaviorStateReference.set(State.BODY_PATH_PLANNING);
                        });
       helper.createROS2Callback(RESET, reset::queueReset);
       helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message ->
