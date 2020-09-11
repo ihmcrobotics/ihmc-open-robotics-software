@@ -37,16 +37,17 @@ public class LookAndStepReset
 
    private void performReset()
    {
-      statusLogger.error("Performing reset");
+      statusLogger.error("Resetting behavior");
       runBeforeWaitWalking.run();
 //      if (controllerStatusTracker.isWalking())
 //      {
 //         statusLogger.info("Waiting for walking to finish");
 //         controllerStatusTracker.getFinishedWalkingNotification().blockingPoll();
+//      statusLogger.info("Finished walking. Waiting for remaining {} s", lookAndStepParameters.getResetDuration());
 //      }
-      statusLogger.info("Finished walking. Waiting for remaining {} s", lookAndStepParameters.getResetDuration());
+      statusLogger.info("Waiting for {} s to expire", lookAndStepParameters.getResetDuration());
       resetTimer.sleepUntilExpiration(lookAndStepParameters.getResetDuration());
-      statusLogger.info("Reset duration passed");
       runAfterWaitWalking.run();
+      statusLogger.info("Reset complete");
    }
 }
