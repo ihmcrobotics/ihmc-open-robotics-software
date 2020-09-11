@@ -1,13 +1,13 @@
 package us.ihmc.valkyrie;
 
-import us.ihmc.avatar.initialSetup.AbstractHumanoidRobotMutableInitialSetup;
+import us.ihmc.avatar.initialSetup.HumanoidRobotMutableInitialSetup;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class ValkyrieMutableInitialSetup extends AbstractHumanoidRobotMutableInitialSetup
+public class ValkyrieMutableInitialSetup extends HumanoidRobotMutableInitialSetup
 {
    public ValkyrieMutableInitialSetup(DRCRobotJointMap jointMap)
    {

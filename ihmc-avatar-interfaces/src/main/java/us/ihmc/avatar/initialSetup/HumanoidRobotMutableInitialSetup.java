@@ -15,14 +15,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public abstract class AbstractHumanoidRobotMutableInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class HumanoidRobotMutableInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    public final Point3D rootJointPosition = new Point3D();
    public final Quaternion rootJointOrientation = new Quaternion();
    public final Map<String, Double> jointPositions = new HashMap<>();
    public final DRCRobotJointMap jointMap;
 
-   public AbstractHumanoidRobotMutableInitialSetup(DRCRobotJointMap jointMap)
+   public HumanoidRobotMutableInitialSetup(DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
    }
