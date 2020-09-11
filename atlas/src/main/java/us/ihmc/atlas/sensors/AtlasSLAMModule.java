@@ -147,6 +147,9 @@ public class AtlasSLAMModule extends SLAMModule
       if (estimatedPelvisPublisher != null)
       {
          SLAMFrame latestFrame = slam.getLatestFrame();
+         if (latestFrame == null)
+            return;
+
          StampedPosePacket posePacket = new StampedPosePacket();
          posePacket.setTimestamp(latestRobotTimeStamp.get());
          int maximumBufferOfQueue = 10;
