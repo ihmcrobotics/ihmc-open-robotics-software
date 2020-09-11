@@ -28,11 +28,13 @@
     <Label text="Current state" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
     <Label text="Debris detected" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
     <Label text="Stairs detected" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
+    <Label text="Door detected" GridPane.columnIndex="4" GridPane.rowIndex="3"/>
 
     <Text fx:id="currentState" GridPane.columnIndex="5" GridPane.rowIndex="0" />
     <Text fx:id="debrisDetected" GridPane.columnIndex="5" GridPane.rowIndex="1" />
     <Text fx:id="stairsDetected" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-    <Button text="Not debris" onAction="#ignoreDebris" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+    <Text fx:id="doorDetected" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+    <Button text="Not debris" onAction="#ignoreDebris" GridPane.columnIndex="5" GridPane.rowIndex="4" />
 
     <padding>
         <Insets bottom="5.0" left="5.0" right="12.0" top="12.0"/>

@@ -15,10 +15,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
@@ -87,6 +85,7 @@ public class BuildingExplorationBehaviorUI
       behaviorCoordinator.setStateChangedCallback(newState -> messager.submitMessage(CurrentState, newState));
       behaviorCoordinator.setDebrisDetectedCallback(() -> messager.submitMessage(DebrisDetected, true));
       behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
+      behaviorCoordinator.setDoorDetectedCallback(() -> messager.submitMessage(DoorDetected, true));
       messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
 
       messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
@@ -153,20 +152,14 @@ public class BuildingExplorationBehaviorUI
                                                     ControllerAPIDefinition.getOutputTopic(robotName),
                                                     s -> messager.submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData, s.takeNextData()));
 
-      AtomicReference<BuildingExplorationStateName> requestedState = messager.createInput(RequestedState);
       AtomicReference<Point3D> goal = messager.createInput(Goal);
 
+      messager.registerTopicListener(RequestedState, behaviorCoordinator::requestState);
       messager.registerTopicListener(Start, s ->
       {
-         if (requestedState.get() != null)
-         {
-            behaviorCoordinator.requestState(requestedState.get());
-         }
-
          behaviorCoordinator.setBombPosition(goal.get());
          behaviorCoordinator.start();
       });
-
       messager.registerTopicListener(Stop, s -> behaviorCoordinator.stop());
 
       return ros2Node;
