@@ -37,7 +37,7 @@ public class IHMCROS2Publisher<T>
 
    public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName)
    {
-      this(ros2Node, messageType, topicName.withType(messageType).toString());
+      this(ros2Node, messageType, topicName.withTypeName(messageType).toString());
    }
 
    public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
