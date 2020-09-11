@@ -193,7 +193,7 @@ public class LookAndStepLocalizationTask
       statusLogger.info("Waiting for walking to complete...");
       finishedWalkingNotification.poll();
       finishedWalkingNotification.blockingPoll();
-      statusLogger.info("Walking completed.");
+      statusLogger.info("Goal reached.");
       broadcastReachedGoal.run();
    }
 }
