@@ -28,6 +28,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
@@ -747,6 +748,56 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setSelectionMatrixToIdentity()
    {
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix such that only the linear part of this
+    * command will be considered in the optimization.
+    */
+   public void setSelectionMatrixForLinearControl()
+   {
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the angular part of this
+    * command and applying the given selection matrix to the linear part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
+    * </p>
+    * 
+    * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
+    *           Not modified.
+    */
+   public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
+   {
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl(linearSelectionMatrix);
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix such that only the angular part of this
+    * command will be considered in the optimization.
+    */
+   public void setSelectionMatrixForAngularControl()
+   {
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix by disabling the linear part of this command
+    * and applying the given selection matrix to the angular part.
+    * <p>
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
+    * </p>
+    * 
+    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
+    *           Not modified.
+    */
+   public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
+   {
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl(angularSelectionMatrix);
    }
 
    /**
