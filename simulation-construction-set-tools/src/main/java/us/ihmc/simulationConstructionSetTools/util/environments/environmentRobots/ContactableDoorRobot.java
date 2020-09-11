@@ -199,7 +199,9 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       
     	  //      qrCodeLinkGraphics.addCoordinateSystem(2.0);
     	  double cubeLength = 0.2032;
-    	  doorLinkGraphics.translate(0.68183125,depthY/2, 1.1414125);
+    	  double fiducialHeight = 1.1414125;
+
+    	  doorLinkGraphics.translate(0.68183125,depthY/2, fiducialHeight);
     	  AppearanceDefinition cubeAppearance = YoAppearance.Texture(doorFiducialID.getPathString());
 
     	  boolean[] textureFaces = new boolean[] { false, false, true, true, false, false };
