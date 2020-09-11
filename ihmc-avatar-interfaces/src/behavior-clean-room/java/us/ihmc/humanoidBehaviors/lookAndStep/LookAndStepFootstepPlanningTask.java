@@ -125,6 +125,7 @@ public class LookAndStepFootstepPlanningTask
                                        + " timeSinceLastUpdate: " + capturabilityBasedStatusReceptionTimerSnapshot.getTimePassedSinceReset(),
                                  () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No capturability based status. ", () -> capturabilityBasedStatus == null);
+         suppressor.addCondition(() -> "No localization result. ", () -> localizationResult == null);
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
