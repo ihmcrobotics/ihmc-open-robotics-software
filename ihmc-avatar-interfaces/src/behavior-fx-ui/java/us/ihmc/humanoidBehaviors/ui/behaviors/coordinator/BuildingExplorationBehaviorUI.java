@@ -87,6 +87,7 @@ public class BuildingExplorationBehaviorUI
       behaviorCoordinator.setStateChangedCallback(newState -> messager.submitMessage(CurrentState, newState));
       behaviorCoordinator.setDebrisDetectedCallback(() -> messager.submitMessage(DebrisDetected, true));
       behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
+      messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
 
       messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());

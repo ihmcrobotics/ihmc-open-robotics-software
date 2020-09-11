@@ -43,6 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -139,6 +140,12 @@ public class BuildingExplorationBehaviorCoordinator
    public void setStairsDetectedCallback(Runnable stairsDetectedCallback)
    {
       lookAndStepState.stairsDetectedCallback = stairsDetectedCallback;
+   }
+
+   public void ignoreDebris()
+   {
+      lookAndStepState.ignoreDebris();
+      requestState(BuildingExplorationStateName.LOOK_AND_STEP);
    }
 
    public void start()
@@ -252,7 +259,7 @@ public class BuildingExplorationBehaviorCoordinator
 
    private static class LookAndStepState implements State
    {
-      private static final double horizonFromDebrisToStop = 1.0;
+      private static final double horizonFromDebrisToStop = 0.8;
       private static final double horizonForStairs = 1.0;
       private static final double heightIncreaseForStairs = 0.55;
 
@@ -260,6 +267,7 @@ public class BuildingExplorationBehaviorCoordinator
       private static final double debrisCheckBodyBoxDepth = 0.8;
       private static final double debrisCheckBodyBoxHeight = 1.5;
       private static final double debrisCheckBodyBoxBaseZ = 0.5;
+      private static final int numberOfStepsToIgnoreDebrisAfterClearing = 4;
 
       private final KryoMessager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
@@ -275,6 +283,9 @@ public class BuildingExplorationBehaviorCoordinator
 
       private final AtomicBoolean debrisDetected = new AtomicBoolean();
       private final AtomicBoolean stairsDetected = new AtomicBoolean();
+
+      private final AtomicInteger stepCounter = new AtomicInteger();
+      private int numberOfStepsToIgnoreDebris = 0;
 
       private Runnable debrisDetectedCallback = () -> {};
       private Runnable stairsDetectedCallback = () -> {};
@@ -299,6 +310,13 @@ public class BuildingExplorationBehaviorCoordinator
                                                        RobotConfigurationData.class,
                                                        ROS2Tools.getControllerOutputTopic(robotName),
                                                        s -> robotConfigurationData.set(s.takeNextData()));
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName), s ->
+         {
+            if (s.takeNextData().getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+            {
+               stepCounter.incrementAndGet();
+            }
+         });
       }
 
       @Override
@@ -321,6 +339,7 @@ public class BuildingExplorationBehaviorCoordinator
 
          debrisDetected.set(false);
          stairsDetected.set(false);
+         stepCounter.set(0);
 
          if (DEBUG)
          {
@@ -331,7 +350,7 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void doAction(double timeInState)
       {
-         if (!debrisDetected.get())
+         if (!debrisDetected.get() && (stepCounter.get() > numberOfStepsToIgnoreDebris))
          {
             checkForDebris();
          }
@@ -339,6 +358,11 @@ public class BuildingExplorationBehaviorCoordinator
          {
             checkForStairs();
          }
+      }
+
+      private void ignoreDebris()
+      {
+         numberOfStepsToIgnoreDebris = numberOfStepsToIgnoreDebrisAfterClearing;
       }
 
       private void checkForDebris()
@@ -411,6 +435,7 @@ public class BuildingExplorationBehaviorCoordinator
             LogTools.info("Exiting " + getClass().getSimpleName());
          }
 
+         numberOfStepsToIgnoreDebris = 0;
          resetPublisher.publish(new Empty());
       }
    }

@@ -83,4 +83,10 @@ public class BuildingExplorationUIDashboardController
    {
       messager.submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
    }
+
+   @FXML
+   public void ignoreDebris()
+   {
+      messager.submitMessage(BuildingExplorationBehaviorAPI.IgnoreDebris, true);
+   }
 }
