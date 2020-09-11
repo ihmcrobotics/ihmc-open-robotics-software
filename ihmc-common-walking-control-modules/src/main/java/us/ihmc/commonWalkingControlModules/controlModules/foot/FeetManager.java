@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -71,7 +72,7 @@ public class FeetManager
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
-                      YoRegistry parentRegistry)
+                      YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       feet = controllerToolbox.getContactableFeet();
@@ -80,7 +81,11 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
-      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters.getToeOffParameters(), registry);
+      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates,
+                                                                                             feet,
+                                                                                             walkingControllerParameters.getToeOffParameters(),
+                                                                                             registry,
+                                                                                             graphicsListRegistry);
       ToeOffCalculator icpPlanCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
       ToeOffCalculator simpleCalculator = new SimpleToeOffCalculator(feet, registry);
 

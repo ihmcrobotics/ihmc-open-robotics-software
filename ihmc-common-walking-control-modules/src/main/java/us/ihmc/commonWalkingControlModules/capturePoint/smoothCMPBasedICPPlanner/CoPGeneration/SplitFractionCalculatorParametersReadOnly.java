@@ -45,6 +45,16 @@ public interface SplitFractionCalculatorParametersReadOnly
    double getTransferWeightDistributionAtFullDepth();
 
    /**
+    * Sets the desired transfer weight distribution if the robot is stepping down by {@link #getLargestStepDownHeight()}.
+    * If the step down height is between {@link #getStepHeightForLargeStepDown()} and {@link #getLargestStepDownHeight()}, the
+    * desired weight distribution is linearly interpolated between the default value and the value returned by this function.
+    */
+   default double getTransferFinalWeightDistributionAtFullDepth()
+   {
+      return getTransferWeightDistributionAtFullDepth();
+   }
+
+   /**
     * If using the area split fraction post processing module, this determines how much of the load a foot should carry during transfer if it has the full
     * support area. That is, if the foot has the full area, and we say it should carry the full load, this moves the midpoint CoP position to that foot.
     */
