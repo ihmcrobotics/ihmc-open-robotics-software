@@ -83,19 +83,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
-                                 HumanoidRobotSensorInformation sensorInformation,
-                                 HighLevelHumanoidControllerFactory controllerFactory,
-                                 HumanoidRobotContextDataFactory contextDataFactory,
-                                 DRCOutputProcessor outputProcessor,
-                                 RealtimeROS2Node realtimeROS2Node,
-                                 double gravity,
-                                 double estimatorDT)
-   {
-      this(robotName, robotModel, null, sensorInformation, controllerFactory, contextDataFactory, outputProcessor, realtimeROS2Node, gravity, estimatorDT);
-   }
-
-   public AvatarControllerThread(String robotName,
-                                 DRCRobotModel robotModel,
                                  DRCRobotInitialSetup robotInitialSetup,
                                  HumanoidRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory,
