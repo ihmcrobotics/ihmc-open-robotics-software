@@ -21,6 +21,7 @@ public class BuildingExplorationBehaviorAPI
 
    public static final MessagerAPIFactory.Topic<Boolean> DebrisDetected = topic("DebrisDetected");
    public static final MessagerAPIFactory.Topic<Boolean> StairsDetected = topic("StairsDetected");
+   public static final MessagerAPIFactory.Topic<Boolean> DoorDetected = topic("DoorDetected");
    public static final MessagerAPIFactory.Topic<Boolean> IgnoreDebris = topic("IgnoreDebris");
 
    public static final MessagerAPIFactory.Topic<Boolean> Start = topic("Start");

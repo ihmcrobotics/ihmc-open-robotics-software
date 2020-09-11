@@ -32,6 +32,8 @@ public class BuildingExplorationUIDashboardController
    private Text debrisDetected;
    @FXML
    private Text stairsDetected;
+   @FXML
+   private Text doorDetected;
 
    private Messager messager;
    private final Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D());
@@ -56,6 +58,7 @@ public class BuildingExplorationUIDashboardController
       currentState.setText("----");
       debrisDetected.setText("No");
       stairsDetected.setText("No");
+      doorDetected.setText("No");
 
       messager.registerTopicListener(CurrentState, state ->
       {
@@ -65,16 +68,25 @@ public class BuildingExplorationUIDashboardController
             debrisDetected.setText("No");
             stairsDetected.setText("No");
          }
+
+         if (state != BuildingExplorationStateName.WALK_THROUGH_DOOR)
+         {
+            doorDetected.setText("No");
+         }
       });
 
       messager.registerTopicListener(DebrisDetected, d -> debrisDetected.setText("Yes"));
       messager.registerTopicListener(StairsDetected, d -> stairsDetected.setText("Yes"));
+      messager.registerTopicListener(DoorDetected, d -> doorDetected.setText("Yes"));
+
+      requestedState.getSelectionModel()
+                    .selectedItemProperty()
+                    .addListener((observable, oldState, newState) -> messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, newState));
    }
 
    @FXML
    public void requestStart()
    {
-      messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, requestedState.getValue());
       messager.submitMessage(BuildingExplorationBehaviorAPI.Start, true);
    }
 

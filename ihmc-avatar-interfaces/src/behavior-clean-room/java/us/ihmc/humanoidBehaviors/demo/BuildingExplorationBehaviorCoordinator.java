@@ -59,6 +59,8 @@ public class BuildingExplorationBehaviorCoordinator
    private final StateMachine<BuildingExplorationStateName, State> stateMachine;
 
    private final AtomicBoolean isRunning = new AtomicBoolean();
+   private final AtomicBoolean stopRequested = new AtomicBoolean();
+
    private final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<>();
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final Point3D bombPosition = new Point3D();
@@ -67,6 +69,7 @@ public class BuildingExplorationBehaviorCoordinator
    private ScheduledFuture<?> stateMachineTask = null;
 
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
+   private Runnable doorDetectedCallback = () -> {};
 
    private final TeleopState teleopState;
    private final LookAndStepState lookAndStepState;
@@ -137,6 +140,11 @@ public class BuildingExplorationBehaviorCoordinator
       lookAndStepState.debrisDetectedCallback = debrisDetectedCallback;
    }
 
+   public void setDoorDetectedCallback(Runnable doorDetectedCallback)
+   {
+      this.doorDetectedCallback = doorDetectedCallback;
+   }
+
    public void setStairsDetectedCallback(Runnable stairsDetectedCallback)
    {
       lookAndStepState.stairsDetectedCallback = stairsDetectedCallback;
@@ -165,13 +173,7 @@ public class BuildingExplorationBehaviorCoordinator
    {
       if (isRunning.get())
       {
-         isRunning.set(false);
-
-         if (stateMachineTask != null)
-         {
-            stateMachineTask.cancel(true);
-            stateMachineTask = null;
-         }
+         stopRequested.set(true);
       }
    }
 
@@ -209,7 +211,24 @@ public class BuildingExplorationBehaviorCoordinator
 
    private void update()
    {
-      stateMachine.doActionAndTransition();
+      if (stopRequested.getAndSet(false))
+      {
+         requestState(BuildingExplorationStateName.TELEOP);
+         stateMachine.doActionAndTransition();
+
+         new Thread(() ->
+                    {
+                       if (stateMachineTask != null)
+                       {
+                          stateMachineTask.cancel(true);
+                          stateMachineTask = null;
+                       }
+                    }).start();
+      }
+      else
+      {
+         stateMachine.doActionAndTransition();
+      }
    }
 
    private static class TeleopState implements State
@@ -254,7 +273,13 @@ public class BuildingExplorationBehaviorCoordinator
       Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootTranslation());
 
       double xyDistanceToDoor = doorPosition.distanceXY(robotRootJointPosition);
-      return xyDistanceToDoor <= xyProximityToDoorToStopWalking;
+      boolean doorDetected = xyDistanceToDoor <= xyProximityToDoorToStopWalking;
+      if (doorDetected)
+      {
+         doorDetectedCallback.run();
+      }
+
+      return doorDetected;
    }
 
    private static class LookAndStepState implements State
