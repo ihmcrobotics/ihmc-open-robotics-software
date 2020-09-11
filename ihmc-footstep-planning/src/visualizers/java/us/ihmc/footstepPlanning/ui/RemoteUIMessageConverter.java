@@ -396,8 +396,8 @@ public class RemoteUIMessageConverter
    {
       ConvexPolygon2D leftFootPolygon = new ConvexPolygon2D();
       ConvexPolygon2D rightFootPolygon = new ConvexPolygon2D();
-      packet.getLeftFootSupportPolygon2d().forEach(leftFootPolygon::addVertex);
-      packet.getRightFootSupportPolygon2d().forEach(rightFootPolygon::addVertex);
+      packet.getLeftFootSupportPolygon3d().forEach(leftFootPolygon::addVertex);
+      packet.getRightFootSupportPolygon3d().forEach(rightFootPolygon::addVertex);
       leftFootPolygon.update();
       rightFootPolygon.update();
 

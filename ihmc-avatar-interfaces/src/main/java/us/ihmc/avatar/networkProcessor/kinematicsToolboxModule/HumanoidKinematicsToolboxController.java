@@ -513,8 +513,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return;
 
       newSupportPolygon.clear();
-      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatusInternal.getLeftFootSupportPolygon2d();
-      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatusInternal.getRightFootSupportPolygon2d();
+      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatusInternal.getLeftFootSupportPolygon3d();
+      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatusInternal.getRightFootSupportPolygon3d();
       for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
          newSupportPolygon.addVertex(leftFootSupportPolygon2d.get(i));
       for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
@@ -575,9 +575,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
       if (isLeftFootInSupport)
-         capturabilityBasedStatus.getLeftFootSupportPolygon2d().add();
+         capturabilityBasedStatus.getLeftFootSupportPolygon3d().add();
       if (isRightFootInSupport)
-         capturabilityBasedStatus.getRightFootSupportPolygon2d().add();
+         capturabilityBasedStatus.getRightFootSupportPolygon3d().add();
       updateCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 

@@ -107,8 +107,8 @@ public class StepConstraintToolboxController extends ToolboxController
          CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getAndSet(null);
          if (capturabilityBasedStatus != null)
          {
-            stepConstraintCalculator.setRightFootSupportPolygon(capturabilityBasedStatus.getRightFootSupportPolygon2d());
-            stepConstraintCalculator.setLeftFootSupportPolygon(capturabilityBasedStatus.getLeftFootSupportPolygon2d());
+            stepConstraintCalculator.setRightFootSupportPolygon(capturabilityBasedStatus.getRightFootSupportPolygon3d());
+            stepConstraintCalculator.setLeftFootSupportPolygon(capturabilityBasedStatus.getLeftFootSupportPolygon3d());
             stepConstraintCalculator.setOmega(capturabilityBasedStatus.getOmega());
             stepConstraintCalculator.setCapturePoint(capturabilityBasedStatus.getCapturePoint2d());
          }

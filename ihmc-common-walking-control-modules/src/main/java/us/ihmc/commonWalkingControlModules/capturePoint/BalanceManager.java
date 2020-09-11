@@ -834,7 +834,7 @@ public class BalanceManager
       capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
-         HumanoidMessageTools.packFootSupportPolygon(robotSide, bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide), capturabilityBasedStatus);
+         HumanoidMessageTools.packFootSupportPolygon(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide), capturabilityBasedStatus);
       }
 
       return capturabilityBasedStatus;
