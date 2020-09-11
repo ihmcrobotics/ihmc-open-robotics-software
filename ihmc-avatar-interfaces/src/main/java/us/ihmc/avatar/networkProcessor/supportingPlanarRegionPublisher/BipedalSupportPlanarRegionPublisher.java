@@ -150,8 +150,8 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
       referenceFrames.updateFrames();
 
-      SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon2d().isEmpty(),
-                                                                              !capturabilityBasedStatus.getRightFootSupportPolygon2d().isEmpty());
+      SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty(),
+                                                                              !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());
       if (feetAreInSamePlane(isInSupport))
       {
          ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
