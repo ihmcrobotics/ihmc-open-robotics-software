@@ -1570,13 +1570,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                           splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
                                                                                 splitFractionParameters.getTransferSplitFractionAtFullDepth(), alpha);
-            double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                     splitFractionParameters.getTransferWeightDistributionAtFullDepth(), alpha);
+
 
             if (stepNumber == getNumberOfFootstepsRegistered() - 1)
             { // this is the last step
                double currentSplitFraction = finalTransferSplitFraction.getDoubleValue();
                double currentWeightDistribution = finalTransferWeightDistribution.getDoubleValue();
+
+               double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                                                                                        splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth(), alpha);
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
                double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
@@ -1588,6 +1590,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             {
                double currentSplitFraction = transferSplitFractions.get(stepNumber + 1).getDoubleValue();
                double currentWeightDistribution = transferWeightDistributions.get(stepNumber + 1).getDoubleValue();
+
+               double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                                                                                        splitFractionParameters.getTransferWeightDistributionAtFullDepth(), alpha);
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
                double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);

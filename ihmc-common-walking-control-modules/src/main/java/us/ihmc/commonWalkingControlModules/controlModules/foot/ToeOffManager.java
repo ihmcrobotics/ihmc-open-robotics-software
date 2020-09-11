@@ -37,11 +37,7 @@ public class ToeOffManager
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean DO_TOE_OFF_FOR_SIDE_STEPS = true;
-   private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
-
    private static final double forwardSteppingThreshold = -0.05;
-   private static final double stepDownTooFarForToeOff = -0.10;
    private static final double minimumAngleForSideStepping = 45.0;
    private static final double extraCoMHeightWithToes = 0.08;
 
@@ -121,6 +117,10 @@ public class ToeOffManager
    private final DoubleProvider extraCoMMaxHeightWithToes;
 
    private final YoBoolean isSideStepping = new YoBoolean("isSideStepping", registry);
+   private final YoBoolean isSteppingDown = new YoBoolean("isSteppingDown", registry);
+   private final YoBoolean isSteppingUp = new YoBoolean("isSteppingUp", registry);
+   private final YoBoolean isForwardStepping = new YoBoolean("isForwardStepping", registry);
+
    private final YoBoolean isStepLongEnough = new YoBoolean("isStepLongEnough", registry);
    private final YoBoolean isStepLongEnoughAlongX = new YoBoolean("isStepLongEnoughAlongX", registry);
 
@@ -633,34 +633,22 @@ public class ToeOffManager
 
       double stepHeight = tempLeadingFootPositionInWorld.getZ() - tempTrailingFootPositionInWorld.getZ();
 
-      boolean isNextStepHighEnough = stepHeight > minStepHeightForToeOff.getValue();
-      if (isNextStepHighEnough)
+      isSteppingUp.set(stepHeight > minStepHeightForToeOff.getValue());
+      isForwardStepping.set(leadingFootPosition.getX() > forwardSteppingThreshold);
+      isSteppingDown.set(stepHeight < -minStepHeightForToeOff.getValue());
+      isSideStepping.set(Math.abs(Math.atan2(leadingFootPosition.getY(), leadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping));
+
+      double scale = 1.0;
+      if (isSteppingDown.getBooleanValue())
+         scale = 0.5;
+
+      isStepLongEnough.set(tempLeadingFootPosition.distance(tempTrailingFootPosition) > scale * minStepLengthForToeOff.getValue());
+      isStepLongEnoughAlongX.set(leadingFootPosition.getX() > scale * minStepForwardForToeOff.getValue());
+      
+      if (isSteppingUp.getBooleanValue())
          return true;
-
-      boolean isForwardStepping = tempLeadingFootPosition.getX() > forwardSteppingThreshold;
-      if (!isForwardStepping)
-         return false;
-
-      if (ENABLE_TOE_OFF_FOR_STEP_DOWN)
-      {
-         boolean isNextStepLowEnough = stepHeight < -minStepHeightForToeOff.getValue();
-         if (isNextStepLowEnough)
-            return true;
-      }
-      else
-      {
-         boolean isNextStepTooLow = stepHeight < stepDownTooFarForToeOff;
-         if (isNextStepTooLow)
-            return false;
-      }
-
-      isSideStepping.set(Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(minimumAngleForSideStepping));
-      if (isSideStepping.getValue() && !DO_TOE_OFF_FOR_SIDE_STEPS)
-         return false;
-
-      isStepLongEnough.set(tempLeadingFootPosition.distance(tempTrailingFootPosition) > minStepLengthForToeOff.getValue());
-      isStepLongEnoughAlongX.set(tempLeadingFootPosition.getX() > minStepForwardForToeOff.getValue());
-      return isStepLongEnough.getValue() && isStepLongEnoughAlongX.getValue();
+      
+      return isForwardStepping.getBooleanValue() && isStepLongEnough.getValue() && isStepLongEnoughAlongX.getValue();
    }
 
    /**

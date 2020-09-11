@@ -15,6 +15,7 @@ public class YoSplitFractionCalculatorParameters implements SplitFractionCalcula
    private final DoubleProvider largestStepDownHeight;
    private final DoubleProvider transferSplitFractionAtFullDepth;
    private final DoubleProvider transferWeightDistributionatFullDepth;
+   private final DoubleProvider transferFinalWeightDistributionatFullDepth;
    private final DoubleProvider fractionLoadIfFootHasFullSupport;
    private final DoubleProvider fractionTimeOnFootIfFootHasFullSupport;
    private final DoubleProvider fractionLoadIfOtherFootHasNoWidth;
@@ -35,6 +36,9 @@ public class YoSplitFractionCalculatorParameters implements SplitFractionCalcula
       transferWeightDistributionatFullDepth = new DoubleParameter("transferWeightDistributionatFullDepth",
                                                                   registry,
                                                                   defaultParameters.getTransferWeightDistributionAtFullDepth());
+      transferFinalWeightDistributionatFullDepth = new DoubleParameter("transferFinalWeightDistributionatFullDepth",
+                                                                       registry,
+                                                                       defaultParameters.getTransferFinalWeightDistributionAtFullDepth());
       fractionLoadIfFootHasFullSupport = new DoubleParameter("fractionLoadIfFootHasFullSupport",
                                                              registry,
                                                              defaultParameters.getFractionLoadIfFootHasFullSupport());
@@ -87,6 +91,12 @@ public class YoSplitFractionCalculatorParameters implements SplitFractionCalcula
    public double getTransferWeightDistributionAtFullDepth()
    {
       return transferWeightDistributionatFullDepth.getValue();
+   }
+
+   /** {@inheritDoc} */
+   public double getTransferFinalWeightDistributionAtFullDepth()
+   {
+      return transferFinalWeightDistributionatFullDepth.getValue();
    }
 
    /** {@inheritDoc} */

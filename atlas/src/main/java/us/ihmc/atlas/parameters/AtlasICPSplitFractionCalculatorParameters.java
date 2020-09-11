@@ -46,6 +46,12 @@ public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionC
    }
 
    /** {@inheritDoc} */
+   public double getTransferFinalWeightDistributionAtFullDepth()
+   {
+      return 0.8;
+   }
+
+   /** {@inheritDoc} */
    public double getFractionLoadIfFootHasFullSupport()
    {
       return 0.5;
