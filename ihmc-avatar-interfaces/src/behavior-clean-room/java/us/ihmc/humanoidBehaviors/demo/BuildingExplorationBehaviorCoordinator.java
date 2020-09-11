@@ -11,6 +11,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -46,6 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class BuildingExplorationBehaviorCoordinator
 {
@@ -100,7 +102,7 @@ public class BuildingExplorationBehaviorCoordinator
       teleopState = new TeleopState();
       lookAndStepState = new LookAndStepState(robotName, ros2Node, messager, bombPosition);
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
-      traverseStairsState = new TraverseStairsState(ros2Node, messager, bombPosition);
+      traverseStairsState = new TraverseStairsState(ros2Node, messager, bombPosition, robotConfigurationData::get);
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, DoorLocationPacket.class, objectDetectionTopic, s -> doorLocationPacket.set(s.takeNextData()));
@@ -539,8 +541,9 @@ public class BuildingExplorationBehaviorCoordinator
 
       private final AtomicBoolean isDone = new AtomicBoolean();
       private final Point3DReadOnly bombPosition;
+      private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
 
-      public TraverseStairsState(ROS2Node ros2Node, KryoMessager messager, Point3DReadOnly bombPosition)
+      public TraverseStairsState(ROS2Node ros2Node, KryoMessager messager, Point3DReadOnly bombPosition, Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
          this.messager = messager;
 
@@ -549,6 +552,7 @@ public class BuildingExplorationBehaviorCoordinator
          this.stopPublisher = ROS2Tools.createPublisher(ros2Node, TraverseStairsBehaviorAPI.STOP);
 
          this.bombPosition = bombPosition;
+         this.robotConfigurationDataSupplier = robotConfigurationDataSupplier;
 
          ROS2Tools.createCallbackSubscription(ros2Node, TraverseStairsBehaviorAPI.COMPLETED, s -> isDone.set(true));
       }
@@ -567,7 +571,19 @@ public class BuildingExplorationBehaviorCoordinator
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
 
-         goalPublisher.publish(new Pose3D(bombPosition, new Quaternion()));
+         Quaternion goalOrientation = new Quaternion();
+
+         if (robotConfigurationDataSupplier.get() != null)
+         {
+            Vector3D rootTranslation = robotConfigurationDataSupplier.get().getRootTranslation();
+            double dx = bombPosition.getX() - rootTranslation.getX();
+            double dy = bombPosition.getY() - rootTranslation.getY();
+            double yaw = Math.atan2(dy, dx);
+
+            goalOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
+         }
+
+         goalPublisher.publish(new Pose3D(bombPosition, goalOrientation));
          ThreadTools.sleep(100);
 
          startPublisher.publish(new Empty());
