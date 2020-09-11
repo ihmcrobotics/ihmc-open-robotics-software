@@ -40,25 +40,18 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -75,28 +68,21 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin(), current_alignment);
-
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRegionOrientation(), current_alignment);
 
-
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal(), current_alignment);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getVertexBuffer().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertexBuffer().get(i0), current_alignment);}
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -109,23 +95,16 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.StepConstraintMessage data, us.ihmc.idl.CDR cdr)
    {
-
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
-
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRegionOrientation(), cdr);
-
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
-
       if(data.getVertexBuffer().size() <= 1000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
-
       cdr.write_type_2(data.getConcaveHullSize());
 
-
       cdr.write_type_2(data.getNumberOfHolesInRegion());
-
 
       if(data.getHolePolygonsSize().size() <= 20)
       cdr.write_type_e(data.getHolePolygonsSize());else
@@ -135,21 +114,14 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.StepConstraintMessage data, us.ihmc.idl.CDR cdr)
    {
-
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);	
-
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRegionOrientation(), cdr);	
-
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);	
-
       cdr.read_type_e(data.getVertexBuffer());	
-
       data.setConcaveHullSize(cdr.read_type_2());
       	
-
       data.setNumberOfHolesInRegion(cdr.read_type_2());
       	
-
       cdr.read_type_e(data.getHolePolygonsSize());	
 
    }
@@ -157,44 +129,30 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.StepConstraintMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
-
 
       ser.write_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
 
-
       ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
 
-
       ser.write_type_e("vertex_buffer", data.getVertexBuffer());
-
       ser.write_type_2("concave_hull_size", data.getConcaveHullSize());
-
       ser.write_type_2("number_of_holes_in_region", data.getNumberOfHolesInRegion());
-
       ser.write_type_e("hole_polygons_size", data.getHolePolygonsSize());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StepConstraintMessage data)
    {
-
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
-
 
       ser.read_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
 
-
       ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
 
-
       ser.read_type_e("vertex_buffer", data.getVertexBuffer());
-
       data.setConcaveHullSize(ser.read_type_2("concave_hull_size"));
-
       data.setNumberOfHolesInRegion(ser.read_type_2("number_of_holes_in_region"));
-
       ser.read_type_e("hole_polygons_size", data.getHolePolygonsSize());
    }
 

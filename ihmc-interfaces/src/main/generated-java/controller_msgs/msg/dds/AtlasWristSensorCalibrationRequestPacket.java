@@ -11,16 +11,12 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket> implements Settable<AtlasWristSensorCalibrationRequestPacket>, EpsilonComparable<AtlasWristSensorCalibrationRequestPacket>
 {
-
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
-
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The robot side (left or right) for the wrist sensor you would like to request calibration for.
             */
@@ -28,9 +24,6 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
    public AtlasWristSensorCalibrationRequestPacket()
    {
-
-
-
    }
 
    public AtlasWristSensorCalibrationRequestPacket(AtlasWristSensorCalibrationRequestPacket other)
@@ -41,14 +34,11 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
    public void set(AtlasWristSensorCalibrationRequestPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       robot_side_ = other.robot_side_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -64,7 +54,6 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
    {
       return sequence_id_;
    }
-
 
    /**
             * The robot side (left or right) for the wrist sensor you would like to request calibration for.
@@ -99,9 +88,7 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
@@ -118,9 +105,7 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
       AtlasWristSensorCalibrationRequestPacket otherMyClass = (AtlasWristSensorCalibrationRequestPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
@@ -134,10 +119,8 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasWristSensorCalibrationRequestPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("robot_side=");
       builder.append(this.robot_side_);
       builder.append("}");

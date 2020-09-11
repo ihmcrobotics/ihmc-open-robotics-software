@@ -12,12 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> implements Settable<WeightMatrix3DMessage>, EpsilonComparable<WeightMatrix3DMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The ID of the reference frame defining the weight frame.
             * This reference frame defines the x axis, y axis, z axis for the weights.
@@ -25,17 +23,14 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
             * the weight matrix will then be generated regardless to what frame is it used in.
             */
    public long weight_frame_id_;
-
    /**
             * Specifies the qp weight for the x-axis, if set to NaN or to a negative value the controller will use the default weight for this axis. The weight is -1 by default.
             */
    public double x_weight_ = -1.0;
-
    /**
             * Specifies the qp weight for the y-axis, if set to NaN or to a negative value the controller will use the default weight for this axis. The weight is -1 by default.
             */
    public double y_weight_ = -1.0;
-
    /**
             * Specifies the qp weight for the z-axis, if set to NaN or to a negative value the controller will use the default weight for this axis. The weight is -1 by default.
             */
@@ -43,12 +38,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
    public WeightMatrix3DMessage()
    {
-
-
-
-
-
-
    }
 
    public WeightMatrix3DMessage(WeightMatrix3DMessage other)
@@ -59,23 +48,17 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
    public void set(WeightMatrix3DMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       weight_frame_id_ = other.weight_frame_id_;
 
-
       x_weight_ = other.x_weight_;
 
-
       y_weight_ = other.y_weight_;
-
 
       z_weight_ = other.z_weight_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -91,7 +74,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    {
       return sequence_id_;
    }
-
 
    /**
             * The ID of the reference frame defining the weight frame.
@@ -114,7 +96,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
       return weight_frame_id_;
    }
 
-
    /**
             * Specifies the qp weight for the x-axis, if set to NaN or to a negative value the controller will use the default weight for this axis. The weight is -1 by default.
             */
@@ -130,7 +111,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
       return x_weight_;
    }
 
-
    /**
             * Specifies the qp weight for the y-axis, if set to NaN or to a negative value the controller will use the default weight for this axis. The weight is -1 by default.
             */
@@ -145,7 +125,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    {
       return y_weight_;
    }
-
 
    /**
             * Specifies the qp weight for the z-axis, if set to NaN or to a negative value the controller will use the default weight for this axis. The weight is -1 by default.
@@ -180,18 +159,13 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_frame_id_, other.weight_frame_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_weight_, other.x_weight_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_weight_, other.y_weight_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.z_weight_, other.z_weight_, epsilon)) return false;
 
@@ -208,18 +182,13 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
       WeightMatrix3DMessage otherMyClass = (WeightMatrix3DMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.weight_frame_id_ != otherMyClass.weight_frame_id_) return false;
 
-
       if(this.x_weight_ != otherMyClass.x_weight_) return false;
 
-
       if(this.y_weight_ != otherMyClass.y_weight_) return false;
-
 
       if(this.z_weight_ != otherMyClass.z_weight_) return false;
 
@@ -233,19 +202,14 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("WeightMatrix3DMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("weight_frame_id=");
       builder.append(this.weight_frame_id_);      builder.append(", ");
-
       builder.append("x_weight=");
       builder.append(this.x_weight_);      builder.append(", ");
-
       builder.append("y_weight=");
       builder.append(this.y_weight_);      builder.append(", ");
-
       builder.append("z_weight=");
       builder.append(this.z_weight_);
       builder.append("}");

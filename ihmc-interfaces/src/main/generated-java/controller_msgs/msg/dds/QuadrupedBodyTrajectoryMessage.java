@@ -15,17 +15,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajectoryMessage> implements Settable<QuadrupedBodyTrajectoryMessage>, EpsilonComparable<QuadrupedBodyTrajectoryMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * If true, the times are expressed in absolute time relative to the robot start
             */
    public boolean is_expressed_in_absolute_time_ = true;
-
    /**
             * The position/orientation trajectory information.
             */
@@ -33,11 +30,7 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
    public QuadrupedBodyTrajectoryMessage()
    {
-
-
-
       se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
-
    }
 
    public QuadrupedBodyTrajectoryMessage(QuadrupedBodyTrajectoryMessage other)
@@ -48,16 +41,12 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
    public void set(QuadrupedBodyTrajectoryMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       is_expressed_in_absolute_time_ = other.is_expressed_in_absolute_time_;
 
-
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -74,7 +63,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
       return sequence_id_;
    }
 
-
    /**
             * If true, the times are expressed in absolute time relative to the robot start
             */
@@ -89,7 +77,6 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
    {
       return is_expressed_in_absolute_time_;
    }
-
 
 
    /**
@@ -118,12 +105,9 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_expressed_in_absolute_time_, other.is_expressed_in_absolute_time_, epsilon)) return false;
-
 
       if (!this.se3_trajectory_.epsilonEquals(other.se3_trajectory_, epsilon)) return false;
 
@@ -139,12 +123,9 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
       QuadrupedBodyTrajectoryMessage otherMyClass = (QuadrupedBodyTrajectoryMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.is_expressed_in_absolute_time_ != otherMyClass.is_expressed_in_absolute_time_) return false;
-
 
       if (!this.se3_trajectory_.equals(otherMyClass.se3_trajectory_)) return false;
 
@@ -157,13 +138,10 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuadrupedBodyTrajectoryMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("is_expressed_in_absolute_time=");
       builder.append(this.is_expressed_in_absolute_time_);      builder.append(", ");
-
       builder.append("se3_trajectory=");
       builder.append(this.se3_trajectory_);
       builder.append("}");

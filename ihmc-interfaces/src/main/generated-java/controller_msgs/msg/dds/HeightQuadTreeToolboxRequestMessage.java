@@ -11,22 +11,15 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeToolboxRequestMessage> implements Settable<HeightQuadTreeToolboxRequestMessage>, EpsilonComparable<HeightQuadTreeToolboxRequestMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public boolean request_clear_quad_tree_;
-
    public boolean request_quad_tree_update_;
 
    public HeightQuadTreeToolboxRequestMessage()
    {
-
-
-
-
    }
 
    public HeightQuadTreeToolboxRequestMessage(HeightQuadTreeToolboxRequestMessage other)
@@ -37,17 +30,13 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
 
    public void set(HeightQuadTreeToolboxRequestMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       request_clear_quad_tree_ = other.request_clear_quad_tree_;
-
 
       request_quad_tree_update_ = other.request_quad_tree_update_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -64,7 +53,6 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       return sequence_id_;
    }
 
-
    public void setRequestClearQuadTree(boolean request_clear_quad_tree)
    {
       request_clear_quad_tree_ = request_clear_quad_tree;
@@ -73,7 +61,6 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
    {
       return request_clear_quad_tree_;
    }
-
 
    public void setRequestQuadTreeUpdate(boolean request_quad_tree_update)
    {
@@ -102,12 +89,9 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_clear_quad_tree_, other.request_clear_quad_tree_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_quad_tree_update_, other.request_quad_tree_update_, epsilon)) return false;
 
@@ -124,12 +108,9 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
 
       HeightQuadTreeToolboxRequestMessage otherMyClass = (HeightQuadTreeToolboxRequestMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.request_clear_quad_tree_ != otherMyClass.request_clear_quad_tree_) return false;
-
 
       if(this.request_quad_tree_update_ != otherMyClass.request_quad_tree_update_) return false;
 
@@ -143,13 +124,10 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeToolboxRequestMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("request_clear_quad_tree=");
       builder.append(this.request_clear_quad_tree_);      builder.append(", ");
-
       builder.append("request_quad_tree_update=");
       builder.append(this.request_quad_tree_update_);
       builder.append("}");
