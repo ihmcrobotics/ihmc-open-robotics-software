@@ -14,8 +14,9 @@ public class AtlasNetworkProcessor
    private static final Application DEFAULT = AtlasNetworkProcessor::defaultNetworkProcessor;
    private static final Application VR = AtlasNetworkProcessor::vrNetworkProcessor;
    private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
+   private static final Application STAIRS = AtlasNetworkProcessor::stairsNetworkProcessor;
 
-   private static final Application APPLICATION = DEFAULT;
+   private static final Application APPLICATION = STAIRS;
 
    public static void main(String[] args) throws JSAPException
    {
@@ -134,6 +135,21 @@ public class AtlasNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBehaviorModule(false, false, 0);
    }
+
+   private static void stairsNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+
+      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupKinematicsToolboxModule(false);
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 15));
+   }
+
 
    private static void minimalNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
    {
