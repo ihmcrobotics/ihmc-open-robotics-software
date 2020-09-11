@@ -51,15 +51,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: Add reviewing
+// TODO: Add reviewing; Add status logger to visualizer
 @Execution(ExecutionMode.SAME_THREAD)
 @TestMethodOrder(OrderAnnotation.class)
 public class AtlasLookAndStepBehaviorTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));
+   public static final CommunicationMode COMMUNICATION_MODE = CommunicationMode.INTRAPROCESS;
+
    static
    {
       System.setProperty("create.scs.gui", Boolean.toString(VISUALIZE));
@@ -90,11 +91,21 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.add(new TestWaypoint());
       waypoints.get(0).name = "HALFWAY";
       waypoints.get(0).goalPose = new Pose3D(1.5, 0.0, 0.0, 0.0, 0.0, 0.0);
-      waypoints.get(0).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 0.8;
+      waypoints.get(0).reachedCondition = pelvisPose ->
+      {
+         double remainingDistance = 0.8 - pelvisPose.getPosition().getX();
+         LogTools.info("Remaining distance: {}", remainingDistance);
+         return remainingDistance < 0.0;
+      };
       waypoints.add(new TestWaypoint());
       waypoints.get(1).name = "ALL THE WAY";
       waypoints.get(1).goalPose = new Pose3D(3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-      waypoints.get(1).reachedCondition = pelvisPose -> pelvisPose.getPosition().getX() > 2.2;
+      waypoints.get(1).reachedCondition = pelvisPose ->
+      {
+         double remainingDistance = 2.2 - pelvisPose.getPosition().getX();
+         LogTools.info("Remaining distance: {}", remainingDistance);
+         return remainingDistance < 0.0;
+      };
 
       boolean useDynamicsSimulation = false;
       boolean runRealsenseSLAM = false;
@@ -162,12 +173,12 @@ public class AtlasLookAndStepBehaviorTest
          ThreadTools.startAsDaemon(() -> kinematicSimulation(finishedSimulationSetup), "KinematicsSimulation");
       }
 
-      ros2Node = ROS2Tools.createROS2Node(INTRAPROCESS, "Helper");
+      ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE.getPubSubImplementation(), "Helper");
 
 
       AtlasRobotModel robotModelForBehavior = createRobotModel();
       robotModelForBehavior.getSwingPlannerParameters().setMinimumSwingFootClearance(0.0);
-      behaviorModule = BehaviorModule.createIntraprocess(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), robotModelForBehavior);
+      behaviorModule = new BehaviorModule(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), robotModelForBehavior, COMMUNICATION_MODE, COMMUNICATION_MODE);
       behaviorMessager = behaviorModule.getMessager();
 
       if (VISUALIZE)
@@ -198,9 +209,12 @@ public class AtlasLookAndStepBehaviorTest
       LookAndStepBehaviorParameters lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
       behaviorMessager.submitMessage(LookAndStepBehaviorAPI.LookAndStepParameters, lookAndStepBehaviorParameters.getAllAsStrings());
 
-      behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
-      new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message -> reachedGoalOrFallen.set());
+      new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message ->
+      {
+         LogTools.info("REACHED GOAL");
+         reachedGoalOrFallen.set();
+      });
 
       RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
       monitorThread = new PausablePeriodicThread(
@@ -209,8 +223,23 @@ public class AtlasLookAndStepBehaviorTest
             () -> monitorThread(currentState, syncedRobot, waypoints));
       monitorThread.start();
 
+      Notification bodyPathPlanningStateReached = new Notification();
+      behaviorMessager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+      {
+         if (state.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING.name()))
+         {
+            bodyPathPlanningStateReached.set();
+         }
+      });
+      LogTools.info("Waiting for BODY_PATH_PLANNING state...");
+      bodyPathPlanningStateReached.blockingPoll();
+      LogTools.info("BODY_PATH_PLANNING state reached");
+      behaviorMessager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+
+
       for (TestWaypoint waypoint : waypoints)
       {
+         LogTools.info("Publishing goal pose: {}", waypoint.goalPose);
          goalInputPublisher.publish(waypoint.goalPose);
          reachedGoalOrFallen.blockingPoll();
          assertTrue(waypoint.reachedNotification.poll(), "NOT " + waypoint.name);
@@ -229,20 +258,26 @@ public class AtlasLookAndStepBehaviorTest
    {
       syncedRobot.update();
       FramePose3DReadOnly pelvisPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame);
-      LogTools.info("{} pose: {}", currentState.get(), pelvisPose);
 
-      for (TestWaypoint waypoint : waypoints)
+      LogTools.info("{} pose: {}", currentState.get(), pelvisPose);
+      for (int i = 0; i < waypoints.size(); i++)
       {
+         TestWaypoint waypoint = waypoints.get(i);
          if (waypoint.reachedCondition.apply(pelvisPose))
          {
+            LogTools.info("Waypoint {} reached", i);
             waypoint.reachedNotification.set();
+         }
+         else
+         {
+            LogTools.info("Waypoint {} not reached", i);
          }
       }
    }
 
    private void perceptionStack(Supplier<PlanarRegionsList> environment, boolean runRealsenseSLAM)
    {
-      perceptionStack = new AtlasPerceptionSimulation(CommunicationMode.INTRAPROCESS, environment.get(), runRealsenseSLAM, false, createRobotModel());
+      perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE, environment.get(), runRealsenseSLAM, false, createRobotModel());
    }
 
    private void dynamicsSimulation(Supplier<PlanarRegionsList> environment, Notification finishedSettingUp)
@@ -252,7 +287,7 @@ public class AtlasLookAndStepBehaviorTest
       int scsDataBufferSize = 10;
       dynamicsSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
                                                           createCommonAvatarEnvironment(environment),
-                                                          INTRAPROCESS,
+                                                          COMMUNICATION_MODE.getPubSubImplementation(),
                                                           recordFrequencySpeedup,
                                                           scsDataBufferSize,
                                                           !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
@@ -265,7 +300,7 @@ public class AtlasLookAndStepBehaviorTest
    {
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
-      kinematicsSimulationParameters.setPubSubImplementation(INTRAPROCESS);
+      kinematicsSimulationParameters.setPubSubImplementation(COMMUNICATION_MODE.getPubSubImplementation());
       kinematicsSimulationParameters.setLogToFile(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
