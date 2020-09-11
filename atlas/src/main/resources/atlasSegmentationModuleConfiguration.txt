@@ -1,6 +1,6 @@
 #
 #Mon Sep 07 14:07:05 CDT 2020
-PlanarSegmentationRoot/PlanarSegmentation/CustomRegionsMergingEnable=false
+PlanarSegmentationRoot/PlanarSegmentation/CustomRegionsMergingEnable=true
 PlanarSegmentationRoot/PlanarSegmentation/CustomRegionsMergingParameters=search radius\: 0.22, max distance from plane\: 0.05, maxAngleFromPlane\: 0.17453292519943295
 PlanarSegmentationRoot/PlanarSegmentation/OcTreeBoundingBoxEnable=true
 PlanarSegmentationRoot/PlanarSegmentation/OcTreeBoundingBoxParameters=min\: (-0.5, -1.0, -1.5), max\: (2.0, 1.0, 0.5)
