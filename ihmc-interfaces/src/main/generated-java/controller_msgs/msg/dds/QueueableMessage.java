@@ -12,18 +12,13 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class QueueableMessage extends Packet<QueueableMessage> implements Settable<QueueableMessage>, EpsilonComparable<QueueableMessage>
 {
-
    public static final byte EXECUTION_MODE_OVERRIDE = (byte) 0;
-
    public static final byte EXECUTION_MODE_QUEUE = (byte) 1;
-
    public static final byte EXECUTION_MODE_STREAM = (byte) 2;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * When EXECUTION_MODE_OVERRIDE is chosen:
             * - For trajectory messages: the time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point.
@@ -43,31 +38,26 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
             * These discontinuities can be solved by using EXECUTION_MODE_STREAM with stream_integration_duration greater than the time interval between two consecutive messages of a stream.
             */
    public byte execution_mode_;
-
    /**
             * Defines a unique ID for this message. Only needed when you want to queue another message to this message.
             */
    public long message_id_ = -1;
-
    /**
             * Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this message should be queued to.
             * It is used by the controller to ensure that no message has been lost on the way.
             * If a message appears to be missing (previous_message_id different from the last message_id received by the controller), the motion is aborted.
             */
    public long previous_message_id_;
-
    /**
             * The time to delay this message on the controller side before being executed.
             */
    public double execution_delay_time_;
-
    /**
             * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
             * This integration allows to improve continuity of execution for streams.
             * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
             */
    public double stream_integration_duration_;
-
    /**
             * Timestamp (in nanoseconds) when this message was created.
             * The timestamp can be generated from the computer where this message originates.
@@ -76,14 +66,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
    public QueueableMessage()
    {
-
-
-
-
-
-
-
-
    }
 
    public QueueableMessage(QueueableMessage other)
@@ -94,29 +76,21 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
    public void set(QueueableMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       execution_mode_ = other.execution_mode_;
 
-
       message_id_ = other.message_id_;
-
 
       previous_message_id_ = other.previous_message_id_;
 
-
       execution_delay_time_ = other.execution_delay_time_;
 
-
       stream_integration_duration_ = other.stream_integration_duration_;
-
 
       timestamp_ = other.timestamp_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -132,7 +106,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
    {
       return sequence_id_;
    }
-
 
    /**
             * When EXECUTION_MODE_OVERRIDE is chosen:
@@ -179,7 +152,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       return execution_mode_;
    }
 
-
    /**
             * Defines a unique ID for this message. Only needed when you want to queue another message to this message.
             */
@@ -194,7 +166,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
    {
       return message_id_;
    }
-
 
    /**
             * Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this message should be queued to.
@@ -215,7 +186,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       return previous_message_id_;
    }
 
-
    /**
             * The time to delay this message on the controller side before being executed.
             */
@@ -230,7 +200,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
    {
       return execution_delay_time_;
    }
-
 
    /**
             * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
@@ -250,7 +219,6 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
    {
       return stream_integration_duration_;
    }
-
 
    /**
             * Timestamp (in nanoseconds) when this message was created.
@@ -287,24 +255,17 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_mode_, other.execution_mode_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.message_id_, other.message_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.previous_message_id_, other.previous_message_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stream_integration_duration_, other.stream_integration_duration_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
@@ -321,24 +282,17 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
       QueueableMessage otherMyClass = (QueueableMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.execution_mode_ != otherMyClass.execution_mode_) return false;
 
-
       if(this.message_id_ != otherMyClass.message_id_) return false;
-
 
       if(this.previous_message_id_ != otherMyClass.previous_message_id_) return false;
 
-
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
-
       if(this.stream_integration_duration_ != otherMyClass.stream_integration_duration_) return false;
-
 
       if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
@@ -352,25 +306,18 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("QueueableMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("execution_mode=");
       builder.append(this.execution_mode_);      builder.append(", ");
-
       builder.append("message_id=");
       builder.append(this.message_id_);      builder.append(", ");
-
       builder.append("previous_message_id=");
       builder.append(this.previous_message_id_);      builder.append(", ");
-
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);      builder.append(", ");
-
       builder.append("stream_integration_duration=");
       builder.append(this.stream_integration_duration_);      builder.append(", ");
-
       builder.append("timestamp=");
       builder.append(this.timestamp_);
       builder.append("}");

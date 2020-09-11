@@ -11,22 +11,15 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> implements Settable<RequestLidarScanMessage>, EpsilonComparable<RequestLidarScanMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public boolean remove_shadows_ = true;
-
    public boolean remove_self_collisions_ = true;
 
    public RequestLidarScanMessage()
    {
-
-
-
-
    }
 
    public RequestLidarScanMessage(RequestLidarScanMessage other)
@@ -37,17 +30,13 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
 
    public void set(RequestLidarScanMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       remove_shadows_ = other.remove_shadows_;
-
 
       remove_self_collisions_ = other.remove_self_collisions_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -64,7 +53,6 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
       return sequence_id_;
    }
 
-
    public void setRemoveShadows(boolean remove_shadows)
    {
       remove_shadows_ = remove_shadows;
@@ -73,7 +61,6 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
    {
       return remove_shadows_;
    }
-
 
    public void setRemoveSelfCollisions(boolean remove_self_collisions)
    {
@@ -102,12 +89,9 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.remove_shadows_, other.remove_shadows_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.remove_self_collisions_, other.remove_self_collisions_, epsilon)) return false;
 
@@ -124,12 +108,9 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
 
       RequestLidarScanMessage otherMyClass = (RequestLidarScanMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.remove_shadows_ != otherMyClass.remove_shadows_) return false;
-
 
       if(this.remove_self_collisions_ != otherMyClass.remove_self_collisions_) return false;
 
@@ -143,13 +124,10 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
       StringBuilder builder = new StringBuilder();
 
       builder.append("RequestLidarScanMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("remove_shadows=");
       builder.append(this.remove_shadows_);      builder.append(", ");
-
       builder.append("remove_self_collisions=");
       builder.append(this.remove_self_collisions_);
       builder.append("}");

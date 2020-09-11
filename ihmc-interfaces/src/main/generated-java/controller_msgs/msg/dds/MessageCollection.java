@@ -15,12 +15,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class MessageCollection extends Packet<MessageCollection> implements Settable<MessageCollection>, EpsilonComparable<MessageCollection>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The sequence IDs of all the messages that are expected to be received.
             */
@@ -28,10 +26,7 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
 
    public MessageCollection()
    {
-
-
       sequences_ = new us.ihmc.idl.IDLSequence.Long (100, "type_4");
-
 
    }
 
@@ -43,13 +38,10 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
 
    public void set(MessageCollection other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       sequences_.set(other.sequences_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -65,7 +57,6 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
    {
       return sequence_id_;
    }
-
 
 
    /**
@@ -94,9 +85,7 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.sequences_, other.sequences_, epsilon)) return false;
 
@@ -113,9 +102,7 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
 
       MessageCollection otherMyClass = (MessageCollection) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if (!this.sequences_.equals(otherMyClass.sequences_)) return false;
 
@@ -128,10 +115,8 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("MessageCollection {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("sequences=");
       builder.append(this.sequences_);
       builder.append("}");

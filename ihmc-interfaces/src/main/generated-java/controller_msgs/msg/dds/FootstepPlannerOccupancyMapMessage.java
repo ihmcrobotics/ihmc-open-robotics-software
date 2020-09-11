@@ -12,12 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOccupancyMapMessage> implements Settable<FootstepPlannerOccupancyMapMessage>, EpsilonComparable<FootstepPlannerOccupancyMapMessage>
 {
-
    /**
             * This is the ID of the planning request which this message corresponds to
             */
    public long sequence_id_;
-
    /**
             * List of cells that the planner has explored
             */
@@ -25,8 +23,6 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
 
    public FootstepPlannerOccupancyMapMessage()
    {
-
-
       occupied_cells_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerCellMessage> (10000, new controller_msgs.msg.dds.FootstepPlannerCellMessagePubSubType());
 
    }
@@ -39,13 +35,10 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
 
    public void set(FootstepPlannerOccupancyMapMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       occupied_cells_.set(other.occupied_cells_);
    }
-
 
    /**
             * This is the ID of the planning request which this message corresponds to
@@ -61,7 +54,6 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
    {
       return sequence_id_;
    }
-
 
 
    /**
@@ -90,9 +82,7 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (this.occupied_cells_.size() != other.occupied_cells_.size()) { return false; }
       else
@@ -114,9 +104,7 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
 
       FootstepPlannerOccupancyMapMessage otherMyClass = (FootstepPlannerOccupancyMapMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if (!this.occupied_cells_.equals(otherMyClass.occupied_cells_)) return false;
 
@@ -129,10 +117,8 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlannerOccupancyMapMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("occupied_cells=");
       builder.append(this.occupied_cells_);
       builder.append("}");
