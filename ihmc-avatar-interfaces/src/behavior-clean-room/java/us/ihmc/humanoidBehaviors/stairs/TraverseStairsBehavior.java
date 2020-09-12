@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -21,6 +22,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI.Enabled;
 import static us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI.create;
 
 public class TraverseStairsBehavior implements BehaviorInterface
@@ -42,6 +44,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
+   private final AtomicBoolean enabledInternal = new AtomicBoolean();
 
    private final StateMachine<TraverseStairsStateName, State> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -69,6 +72,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
+      helper.createUICallback(Enabled, enabledInternal::set);
 
       completedPublisher = ROS2Tools.createPublisher(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
       supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getManagedROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
@@ -108,6 +112,8 @@ public class TraverseStairsBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enable)
    {
+      LogTools.debug((enable ? "Enable" : "Disable") + " requested");
+
       if (enable)
       {
          if (isRunning.getAndSet(true))
@@ -152,12 +158,16 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
       try
       {
-         stateMachine.doActionAndTransition();
-
-         if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
+         if (enabledInternal.get())
          {
-            completedPublisher.publish(new Empty());
-            hasPublishedCompleted.set(true);
+            stateMachine.doActionAndTransition();
+
+            if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
+            {
+               completedPublisher.publish(new Empty());
+               hasPublishedCompleted.set(true);
+               enabledInternal.set(false);
+            }
          }
       }
       catch (Exception e)

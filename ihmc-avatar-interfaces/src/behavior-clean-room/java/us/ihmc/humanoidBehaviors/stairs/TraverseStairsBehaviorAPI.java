@@ -31,7 +31,7 @@ public class TraverseStairsBehaviorAPI
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("TraverseStairsBehavior");
    private static final MessagerAPIFactory.CategoryTheme BehaviorTheme = apiFactory.createCategoryTheme("TraverseStairs");
 
-   // TODO add api
+   public static final MessagerAPIFactory.Topic<Boolean> Enabled = topic("Enabled");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
