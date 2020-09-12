@@ -1,13 +1,12 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import org.opencv.xfeatures2d.HarrisLaplaceFeatureDetector;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
@@ -105,10 +104,32 @@ public class TraverseStairsPlanStepsState implements State
       this.output = planningModule.handleRequest(request);
       LogTools.debug(getClass().getSimpleName() + ": " + output.getFootstepPlanningResult());
 
+      // lower height of first step down
+      mutateFirstStepDownHeight(solePoses.get(request.getRequestedInitialStanceSide()));
+
       // generate log
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(planningModule);
       footstepPlannerLogger.logSession();
       ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+   }
+
+   private void mutateFirstStepDownHeight(Pose3DReadOnly initialStancePose)
+   {
+      double initialStanceHeight = initialStancePose.getZ();
+
+      FootstepPlan footstepPlan = output.getFootstepPlan();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         double previousStepHeight = (i == 0) ? initialStanceHeight : footstepPlan.getFootstep(i - 1).getFootstepPose().getZ();
+         double stepHeight = footstepPlan.getFootstep(i).getFootstepPose().getZ();
+
+         if (stepHeight < previousStepHeight - parameters.get(TraverseStairsBehaviorParameters.heightToConsiderStepDown))
+         {
+            double heightAdjustment = parameters.get(TraverseStairsBehaviorParameters.amountToLowerFirstStepDown);
+            footstepPlan.getFootstep(i).getFootstepPose().getPosition().subZ(heightAdjustment);
+            break;
+         }
+      }
    }
 
    private boolean searchWasSuccessful()
