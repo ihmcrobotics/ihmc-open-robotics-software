@@ -165,14 +165,18 @@ public class BuildingExplorationBehaviorCoordinator
 
    public void start()
    {
-      if (!isRunning.get())
+      if (!isRunning.getAndSet(true))
       {
+         LogTools.debug("Starting behavior coordinator");
+
          doorLocationPacket.set(null);
          robotConfigurationData.set(null);
 
-         isRunning.set(true);
-         stateMachine.resetToInitialState();
          stateMachineTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
+      }
+      else
+      {
+         LogTools.debug("Start called but module is already running");
       }
    }
 
@@ -180,6 +184,7 @@ public class BuildingExplorationBehaviorCoordinator
    {
       if (isRunning.get())
       {
+         LogTools.debug("Stop requested. Shutting down on next update");
          stopRequested.set(true);
       }
    }
@@ -231,6 +236,8 @@ public class BuildingExplorationBehaviorCoordinator
                           stateMachineTask.cancel(true);
                           stateMachineTask = null;
                        }
+
+                       isRunning.set(false);
                     }).start();
       }
       else
@@ -577,6 +584,9 @@ public class BuildingExplorationBehaviorCoordinator
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
          ThreadTools.sleep(100);
 
+         messager.submitMessage(TraverseStairsBehaviorAPI.Enabled, true);
+         ThreadTools.sleep(100);
+
          Quaternion goalOrientation = new Quaternion();
 
          if (robotConfigurationDataSupplier.get() != null)
@@ -607,6 +617,8 @@ public class BuildingExplorationBehaviorCoordinator
          {
             LogTools.info("Exiting " + getClass().getSimpleName());
          }
+
+         messager.submitMessage(TraverseStairsBehaviorAPI.Enabled, false);
       }
 
       @Override

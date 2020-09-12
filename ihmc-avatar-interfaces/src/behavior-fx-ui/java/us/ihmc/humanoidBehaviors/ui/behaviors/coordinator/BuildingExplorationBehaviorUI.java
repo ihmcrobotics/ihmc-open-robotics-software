@@ -17,12 +17,14 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
+import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pubsub.DomainFactory;
@@ -155,9 +157,13 @@ public class BuildingExplorationBehaviorUI
       AtomicReference<Point3D> goal = messager.createInput(Goal);
 
       messager.registerTopicListener(RequestedState, behaviorCoordinator::requestState);
+      AtomicReference<BuildingExplorationStateName> requestedState = messager.createInput(RequestedState);
+
       messager.registerTopicListener(Start, s ->
       {
+         LogTools.debug("Start requested in UI... starting behavior coordinator");
          behaviorCoordinator.setBombPosition(goal.get());
+         behaviorCoordinator.requestState(requestedState.get());
          behaviorCoordinator.start();
       });
       messager.registerTopicListener(Stop, s -> behaviorCoordinator.stop());
