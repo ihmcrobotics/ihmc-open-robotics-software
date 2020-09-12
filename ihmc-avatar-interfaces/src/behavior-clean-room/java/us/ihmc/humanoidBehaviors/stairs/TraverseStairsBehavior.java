@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -37,6 +38,8 @@ public class TraverseStairsBehavior implements BehaviorInterface
    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
    private final IHMCROS2Publisher<Empty> completedPublisher;
+   private final IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionParametersPublisher;
+
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
 
@@ -68,6 +71,9 @@ public class TraverseStairsBehavior implements BehaviorInterface
       statusLogger = helper.getOrCreateStatusLogger();
 
       completedPublisher = ROS2Tools.createPublisher(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
+      supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getManagedROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
+                                                                            ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER
+                                                                                  .withRobot(helper.getRobotModel().getSimpleRobotName()).withInput());
 
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
@@ -108,6 +114,10 @@ public class TraverseStairsBehavior implements BehaviorInterface
          {
             return;
          }
+
+         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+         supportRegionParametersMessage.setEnable(false);
+         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
 
          hasPublishedCompleted.set(false);
          behaviorHasCrashed.set(false);
