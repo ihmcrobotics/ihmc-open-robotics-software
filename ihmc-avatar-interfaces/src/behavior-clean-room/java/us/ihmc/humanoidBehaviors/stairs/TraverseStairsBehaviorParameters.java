@@ -17,6 +17,8 @@ public class TraverseStairsBehaviorParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey trajectoryTime = keys.addDoubleKey("Trajectory Time", 4.0);
    public static final DoubleStoredPropertyKey chestPitch = keys.addDoubleKey("Chest Pitch", Math.toRadians(10.0));
    public static final DoubleStoredPropertyKey headPitch = keys.addDoubleKey("Neck Pitch", Math.toRadians(48.0));
+   public static final DoubleStoredPropertyKey amountToLowerFirstStepDown = keys.addDoubleKey("Amount to lower first step down", 0.01);
+   public static final DoubleStoredPropertyKey heightToConsiderStepDown = keys.addDoubleKey("Height to consider step down", 0.07);
 
    public static final DoubleStoredPropertyKey xyProximityForCompletion = keys.addDoubleKey("XY Proximity For Completion", 0.8);
 
