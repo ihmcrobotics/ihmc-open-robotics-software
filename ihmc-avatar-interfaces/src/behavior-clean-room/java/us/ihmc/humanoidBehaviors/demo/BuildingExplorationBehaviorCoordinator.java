@@ -66,6 +66,7 @@ public class BuildingExplorationBehaviorCoordinator
    private final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<>();
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final Point3D bombPosition = new Point3D();
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
 
    private final ScheduledExecutorService executorService;
    private ScheduledFuture<?> stateMachineTask = null;
@@ -108,7 +109,11 @@ public class BuildingExplorationBehaviorCoordinator
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, DoorLocationPacket.class, objectDetectionTopic, s -> doorLocationPacket.set(s.takeNextData()));
 
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> robotConfigurationData.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    controllerOutputTopic,
+                                                    s -> robotConfigurationData.set(s.takeNextData()));
+      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
       try
       {
@@ -217,6 +222,7 @@ public class BuildingExplorationBehaviorCoordinator
       {
          requestState(BuildingExplorationStateName.TELEOP);
          stateMachine.doActionAndTransition();
+         abortWalkingPublisher.publish(new AbortWalkingMessage());
 
          new Thread(() ->
                     {
