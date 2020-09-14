@@ -20,15 +20,15 @@ public class LookAndStepBehaviorAPI
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
     * If look and step is already working on a goal, first send a RESET and then send a new GOAL_INPUT. (Todo: Make this better.)
     */
-   public static final ROS2Topic<Pose3D> GOAL_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class);
+   public static final ROS2Topic<Pose3D> GOAL_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput().withTypeName(Pose3D.class);
    /**
     * Robot will finish taking the current step, the goal will be cleared, and the behavior will wait for a new GOAL_INPUT.
     */
-   public static final ROS2Topic<Empty> RESET = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class);
+   public static final ROS2Topic<Empty> RESET = ROS2Tools.BEHAVIOR_MODULE.withInput().withTypeName(Empty.class);
    /**
     * Output that will be send upon reaching the goal.
     */
-   public static final ROS2Topic<Empty> REACHED_GOAL = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class);
+   public static final ROS2Topic<Empty> REACHED_GOAL = ROS2Tools.BEHAVIOR_MODULE.withOutput().withTypeName(Empty.class);
 
    /*
     * TODO: Add PAUSE and RESUME that work in any state.
