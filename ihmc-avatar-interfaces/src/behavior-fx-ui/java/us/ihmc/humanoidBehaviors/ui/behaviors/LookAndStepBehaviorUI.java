@@ -5,9 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
@@ -20,6 +17,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
@@ -36,6 +35,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
@@ -48,9 +48,11 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private SwingPlannerParametersBasics swingPlannerParameters;
 
    private Messager behaviorMessager;
    private ROS2PublisherMap ros2Publisher;
+   private FootstepPlanWithTextGraphic commandedFootsteps;
    private FootstepPlanWithTextGraphic footstepPlanGraphic;
    private FootstepPlanWithTextGraphic startAndGoalFootPoses;
    private LivePlanarRegionsGraphic planarRegionsRegionsGraphic;
@@ -58,6 +60,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
+   private volatile boolean reviewingBodyPath = true;
 
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
@@ -65,10 +68,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FXUIActionMap placeGoalActionMap;
 
    @FXML private Button placeGoalButton;
+   @FXML private Button publishSupportRegions;
    @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
    @FXML private TableView footstepPlannerParameterTable;
+   @FXML private TableView swingPlannerParameterTable;
 
    @Override
    public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
@@ -87,34 +92,20 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       rectangle.setFill(Color.BLUE);
       view2DGroup.getChildren().add(rectangle);
 
-      NumberAxis xAxis = new NumberAxis(0.0, 10.0, 1.0);
-      NumberAxis yAxis = new NumberAxis(0.0, 10.0, 1.0);
-      ScatterChart<Number, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
-
-      XYChart.Series series1 = new XYChart.Series();
-      series1.setName("Set1");
-      series1.getData().add(new XYChart.Data(0.0, 3.0));
-      series1.getData().add(new XYChart.Data(1.0, 5.0));
-      series1.getData().add(new XYChart.Data(2.0, 3.0));
-      series1.getData().add(new XYChart.Data(3.0, 3.0));
-      series1.getData().add(new XYChart.Data(4.0, 3.0));
-      series1.getData().add(new XYChart.Data(5.0, 3.0));
-      series1.getData().add(new XYChart.Data(6.0, 3.0));
-      series1.getData().add(new XYChart.Data(7.0, 3.0));
-      series1.getData().add(new XYChart.Data(8.0, 3.0));
-      series1.getData().add(new XYChart.Data(9.0, 3.0));
-      series1.getData().add(new XYChart.Data(10.0, 3.0));
-
-      scatterChart.getData().add(series1);
-
-//      scatterChart.setPrefWidth(200.0);
-
-      visualizationPane.getChildren().addAll(scatterChart);
-
       startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
+      startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
+      startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
+      startAndGoalFootPoses.setTransparency(0.4);
       behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
+      commandedFootsteps = new FootstepPlanWithTextGraphic();
+      behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanWithTextGraphic();
-      behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
+      footstepPlanGraphic.setTransparency(0.2);
+      behaviorMessager.registerTopicListener(FootstepPlanForUI, footsteps ->
+      {
+         reviewingBodyPath = false;
+         footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
+      });
 
       planarRegionsRegionsGraphic = new LivePlanarRegionsGraphic(false);
       behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
@@ -132,6 +123,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(BodyPathPlanForUI,
       bodyPathPlan ->
       {
+         reviewingBodyPath = true;
          ArrayList<Point3DReadOnly> bodyPathAsPoints = new ArrayList<>();
          for (Pose3D pose3D : bodyPathPlan)
          {
@@ -143,11 +135,16 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
 
-      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForLookAndStep");
       JavaFXStoredPropertyTable footstepPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(footstepPlannerParameterTable);
-      footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::footstepPlanningParameters);
+      footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::publishFootstepPlanningParameters);
+
+      swingPlannerParameters = robotModel.getSwingPlannerParameters("ForLookAndStep");
+      JavaFXStoredPropertyTable swingPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(swingPlannerParameterTable);
+      swingPlannerJavaFXStoredPropertyTable.setup(swingPlannerParameters, SwingPlannerParameterKeys.keys, this::publishSwingPlanningParameters);
 
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
+      behaviorMessager.registerTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
@@ -193,6 +190,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().remove(planarRegionsRegionsGraphic));
          Platform.runLater(() -> getChildren().remove(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().remove(footstepPlanGraphic));
+         Platform.runLater(() -> getChildren().remove(commandedFootsteps));
       }
       else
       {
@@ -203,6 +201,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().add(planarRegionsRegionsGraphic));
          Platform.runLater(() -> getChildren().add(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
+         Platform.runLater(() -> getChildren().add(commandedFootsteps));
       }
    }
 
@@ -211,6 +210,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       planarRegionsRegionsGraphic.clear();
       startAndGoalFootPoses.clear();
       footstepPlanGraphic.clear();
+      commandedFootsteps.clear();
+      closestPointAlongPathGraphic.clear();
    }
 
    private void publishLookAndStepParameters()
@@ -218,9 +219,14 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.submitMessage(LookAndStepParameters, lookAndStepParameters.getAllAsStrings());
    }
 
-   private void footstepPlanningParameters()
+   private void publishFootstepPlanningParameters()
    {
       behaviorMessager.submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
+   }
+
+   private void publishSwingPlanningParameters()
+   {
+      behaviorMessager.submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
    }
 
    @FXML public void placeGoalButton()
@@ -230,14 +236,16 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void approve()
    {
-//      behaviorMessager.submitMessage(TakeStep, new Object());
       behaviorMessager.submitMessage(ReviewApproval, true);
    }
 
    @FXML public void reject()
    {
-//      behaviorMessager.submitMessage(RePlan, new Object());
       behaviorMessager.submitMessage(ReviewApproval, false);
+      if (reviewingBodyPath)
+         bodyPathPlanGraphic.clear();
+      else
+         footstepPlanGraphic.clear();
    }
 
    @FXML public void saveLookAndStepParameters()
@@ -248,6 +256,16 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void saveFootstepPlanningParameters()
    {
       footstepPlannerParameters.save();
+   }
+
+   @FXML public void saveSwingPlannerParameters()
+   {
+      swingPlannerParameters.save();
+   }
+
+   @FXML public void publishSupportRegions()
+   {
+      behaviorMessager.submitMessage(PublishSupportRegions, new Object());
    }
 
    @FXML public void operatorReviewCheckBox()

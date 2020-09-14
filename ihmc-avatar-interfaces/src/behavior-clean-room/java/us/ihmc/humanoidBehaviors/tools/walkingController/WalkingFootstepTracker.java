@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -12,6 +11,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
+
+import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
+import static us.ihmc.tools.string.StringTools.format;
 
 /**
  * The purpose of this class is to check on the robot progress
@@ -28,8 +30,8 @@ public class WalkingFootstepTracker
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
-      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
-      new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
+      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepDataListMessage.class, robotName), this::interceptFootstepDataListMessage);
+      new IHMCROS2Callback<>(ros2Node, getTopic(FootstepStatusMessage.class, robotName), this::acceptFootstepStatusMessage);
 
       // TODO: Observe when footsteps are cancelled / walking aborted?
    }
@@ -38,6 +40,9 @@ public class WalkingFootstepTracker
    {
       if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.COMPLETED)
       {
+         int priorNumerator = stepsCompleted;
+         int priorDenominator = stepsCommanded;
+
          synchronized (this)
          {
             ++stepsCompleted;
@@ -49,7 +54,12 @@ public class WalkingFootstepTracker
             }
          }
 
-         LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}",
+                              RobotSide.fromByte(footstepStatusMessage.getRobotSide()),
+                              priorNumerator,
+                              priorDenominator,
+                              stepsCompleted,
+                              stepsCommanded));
       }
    }
 
@@ -57,6 +67,8 @@ public class WalkingFootstepTracker
    {
       ExecutionMode executionMode = ExecutionMode.fromByte(footstepDataListMessage.getQueueingProperties().getExecutionMode());
       int size = footstepDataListMessage.getFootstepDataList().size();
+      int priorNumerator = stepsCompleted;
+      int priorDenominator = stepsCommanded;
 
       synchronized (this)
       {
@@ -76,7 +88,14 @@ public class WalkingFootstepTracker
          lastCommandedFootsteps.set(RobotSide.fromByte(footstep.getRobotSide()), footstep);
       }
 
-      LogTools.info("Footstep completion: {}/{}", stepsCompleted, stepsCommanded);
+      LogTools.info(format("{}ing {} footstep{}. Completion: {}/{} -> {}/{}",
+                           executionMode.name(),
+                           size,
+                           size > 1 ? "s" : "",
+                           priorNumerator,
+                           priorDenominator,
+                           stepsCompleted,
+                           stepsCommanded));
    }
 
    public ImmutablePair<FootstepDataMessage, FootstepDataMessage> getLastCommandedFootsteps()
@@ -92,6 +111,11 @@ public class WalkingFootstepTracker
          numberOfIncompleteFootsteps = stepsCommanded - stepsCompleted;
       }
       return numberOfIncompleteFootsteps;
+   }
+
+   public int getNumberOfCompletedFootsteps()
+   {
+      return stepsCompleted;
    }
 
    public void reset()

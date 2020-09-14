@@ -2,12 +2,15 @@ package us.ihmc.tools.processManagement;
 
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.fusesource.jansi.AnsiPrintStream;
+import org.fusesource.jansi.WindowsAnsiPrintStream;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,10 +75,8 @@ public class JavaProcessManager
                                             timestampOfCreation + "_" + processNames.get(i) + "Log.txt");
                String[] jvmProperties = ArrayUtils.add(parentJVMProperties, "-D" + FORKED_PROCESS_INDEX + "=" + i);
 
-//               new AnsiPrintStream() // TODO: Filter out ANSI codes to file
-
-               TeeOutputStream outputTee = new TeeOutputStream(System.out, Files.newOutputStream(logFilePath));
-               TeeOutputStream errorTee = new TeeOutputStream(System.err, Files.newOutputStream(logFilePath));
+               TeeOutputStream outputTee = new TeeOutputStream(System.out, ProcessTools.createJansiFilteredStream(logFilePath));
+               TeeOutputStream errorTee = new TeeOutputStream(System.err, ProcessTools.createJansiFilteredStream(logFilePath));
                PrintStream outputStream = new PrintStream(outputTee);
                PrintStream errorStream = new PrintStream(errorTee);
 

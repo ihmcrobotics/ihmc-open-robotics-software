@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -12,19 +11,19 @@ public class LookAndStepLocalizationResult
 {
    private final Point3D closestPointAlongPath;
    private final int closestSegmentIndex;
-   private final FramePose3D subGoalPoseBetweenFeet;
+   private final Pose3DReadOnly midFeetAlongPath;
    private final List<? extends Pose3DReadOnly> bodyPathPlan;
    private final SideDependentList<MinimalFootstep> stanceForPlanning;
 
    public LookAndStepLocalizationResult(Point3D closestPointAlongPath,
                                         int closestSegmentIndex,
-                                        FramePose3D subGoalPoseBetweenFeet,
+                                        Pose3DReadOnly midFeetAlongPath,
                                         List<? extends Pose3DReadOnly> bodyPathPlan,
                                         SideDependentList<MinimalFootstep> stanceForPlanning)
    {
       this.closestPointAlongPath = closestPointAlongPath;
       this.closestSegmentIndex = closestSegmentIndex;
-      this.subGoalPoseBetweenFeet = subGoalPoseBetweenFeet;
+      this.midFeetAlongPath = midFeetAlongPath;
       this.bodyPathPlan = bodyPathPlan;
       this.stanceForPlanning = stanceForPlanning;
    }
@@ -39,9 +38,9 @@ public class LookAndStepLocalizationResult
       return closestSegmentIndex;
    }
 
-   public FramePose3D getSubGoalPoseBetweenFeet()
+   public Pose3DReadOnly getMidFeetAlongPath()
    {
-      return subGoalPoseBetweenFeet;
+      return midFeetAlongPath;
    }
 
    public List<? extends Pose3DReadOnly> getBodyPathPlan()

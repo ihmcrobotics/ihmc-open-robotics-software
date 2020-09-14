@@ -68,7 +68,7 @@ public class LiveMapModule implements PerceptionModule
       this.ros2Node = ros2Node;
       this.messager = messager;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP, this::dispatchLocalizedMap);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_REGIONS, this::dispatchLocalizedMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic, this::dispatchLidarMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic, this::dispatchRegionsAtFeet);
 
@@ -205,7 +205,7 @@ public class LiveMapModule implements PerceptionModule
 
       shouldUpdateMap |= hasNewLocalizedMap.get() || hasNewRegionsAtFeet.get() || hasNewLidarMap.get() || hasNewParameters.get();
 
-      if (shouldUpdateMap && mostRecentLocalizedMap.get() != null)
+      if (shouldUpdateMap)
       {
          PlanarRegionsList localizedMap = null;
          if (mostRecentLocalizedMap.get() != null)
@@ -218,7 +218,7 @@ public class LiveMapModule implements PerceptionModule
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
             if (localizedMap != null)
-               localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
+               localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(regionsToFuse, localizedMap, slamParameters, null);
             else
                localizedMap = regionsToFuse;
 

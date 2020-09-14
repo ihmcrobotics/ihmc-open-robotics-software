@@ -186,8 +186,7 @@ public abstract class SimpleConcaveHullFactory
       }
       catch (ConstraintEnforcementException | LocateFailureException e)
       { // Adding the line segments as constraints failed, removing them.
-         if (VERBOSE)
-            LogTools.warn("Delaunay triangulation failed, removing line segment constraints.");
+         LogTools.warn("Delaunay triangulation failed, removing line segment constraints.");
          conformingDelaunayTriangulationBuilder.setConstraints(null);
          subdivision = conformingDelaunayTriangulationBuilder.getSubdivision();
       }

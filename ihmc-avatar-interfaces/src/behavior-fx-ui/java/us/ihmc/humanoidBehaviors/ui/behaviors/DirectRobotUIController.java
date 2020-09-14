@@ -10,12 +10,14 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
@@ -25,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeComman
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2Node;
@@ -51,6 +54,7 @@ public class DirectRobotUIController extends Group
    private IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private IHMCROS2Publisher<Empty> clearSLAMPublisher;
    private IHMCROS2Publisher<NeckTrajectoryMessage> neckTrajectoryPublisher;
    private LivePlanarRegionsGraphic lidarRegionsGraphic;
    private LivePlanarRegionsGraphic realsenseRegionsGraphic;
@@ -100,8 +104,7 @@ public class DirectRobotUIController extends Group
 
       supportRegionsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                              BipedalSupportPlanarRegionParametersMessage.class,
-                                                                             ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                                                       .withInput());
+                                                                             BipedalSupportPlanarRegionPublisher.getTopic(robotName));
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
       pumpPSI.getSelectionModel().select(1);
@@ -110,7 +113,7 @@ public class DirectRobotUIController extends Group
       lidarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
       lidarRegionsGraphic.setEnabled(false);
       getChildren().add(lidarRegionsGraphic);
-      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, false);
+      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, LookAndStepBehaviorAPI.REGIONS_FOR_FOOTSTEP_PLANNING, false);
       realsenseRegionsGraphic.setEnabled(false);
       getChildren().add(realsenseRegionsGraphic);
       mapRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
@@ -136,7 +139,8 @@ public class DirectRobotUIController extends Group
       realsenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> realsenseVideoOverlay.toggleMode());
       mainAnchorPane.getChildren().add(realsenseVideoStackPane);
 
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, ROS2Tools.REA_STATE_REQUEST);
+      clearSLAMPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.CLEAR);
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
       supportRegionScale.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> sendSupportRegionParameters());
@@ -262,6 +266,11 @@ public class DirectRobotUIController extends Group
       REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       clearMessage.setRequestClear(true);
       reaStateRequestPublisher.publish(clearMessage);
+   }
+
+   @FXML public void clearSLAM()
+   {
+      clearSLAMPublisher.publish(new Empty());
    }
 
    public void stanceHeightSliderDragged()

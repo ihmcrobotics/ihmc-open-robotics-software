@@ -133,8 +133,10 @@ public class AtlasSLAMModule extends SLAMModule
    protected void dequeue()
    {
       super.dequeue();
-      stationaryFlagQueue.removeFirst();
-      reasonableVelocityFlagQueue.removeFirst();
+      if (!stationaryFlagQueue.isEmpty())
+         stationaryFlagQueue.removeFirst();
+      if (!reasonableVelocityFlagQueue.isEmpty())
+         reasonableVelocityFlagQueue.removeFirst();
    }
 
    @Override
@@ -145,6 +147,9 @@ public class AtlasSLAMModule extends SLAMModule
       if (estimatedPelvisPublisher != null)
       {
          SLAMFrame latestFrame = slam.getLatestFrame();
+         if (latestFrame == null)
+            return;
+
          StampedPosePacket posePacket = new StampedPosePacket();
          posePacket.setTimestamp(latestRobotTimeStamp.get());
          int maximumBufferOfQueue = 10;

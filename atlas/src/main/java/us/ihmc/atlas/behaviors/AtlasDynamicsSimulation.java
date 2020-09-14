@@ -51,6 +51,20 @@ public class AtlasDynamicsSimulation
                                                 int dataBufferSize,
                                                 boolean logToFile)
    {
+      return create(robotModel, environment, 0.0, 0.0, 0.0, 0.0, pubSubImplementation, recordTicksPerControllerTick, dataBufferSize, logToFile);
+   }
+
+   public static AtlasDynamicsSimulation create(DRCRobotModel robotModel,
+                                                CommonAvatarEnvironmentInterface environment,
+                                                double groundHeight,
+                                                double startingX,
+                                                double startingY,
+                                                double startingYaw,
+                                                PubSubImplementation pubSubImplementation,
+                                                int recordTicksPerControllerTick,
+                                                int dataBufferSize,
+                                                boolean logToFile)
+   {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
@@ -59,6 +73,7 @@ public class AtlasDynamicsSimulation
       scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT() * recordTicksPerControllerTick);
       scsInitialSetup.setUsePerfectSensors(true);
       scsInitialSetup.setSimulationDataBufferSize(dataBufferSize);
+      scsInitialSetup.setUseExperimentalPhysicsEngine(false);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
@@ -97,7 +112,7 @@ public class AtlasDynamicsSimulation
       avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(environment);
-      avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(0.0, 0.0));
+      avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(groundHeight, startingYaw, startingX, startingY));
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);

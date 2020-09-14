@@ -1,13 +1,15 @@
 package us.ihmc.tools.processManagement;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.fusesource.jansi.AnsiPrintStream;
+import org.fusesource.jansi.WindowsAnsiPrintStream;
 
 public class ProcessTools
 {
@@ -84,5 +86,22 @@ public class ProcessTools
       }
 
       return spawnString;
+   }
+
+   public static PrintStream createJansiFilteredStream(Path outputFile) throws IOException
+   {
+      return createJansiFilteredStream(Files.newOutputStream(outputFile));
+   }
+
+   public static PrintStream createJansiFilteredStream(OutputStream outputStream) throws IOException
+   {
+      if (SystemUtils.IS_OS_WINDOWS)
+      {
+         return new WindowsAnsiPrintStream(new PrintStream(outputStream));
+      }
+      else
+      {
+         return new AnsiPrintStream(new PrintStream(outputStream));
+      }
    }
 }

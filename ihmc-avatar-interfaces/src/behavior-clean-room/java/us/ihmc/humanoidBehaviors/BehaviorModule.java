@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -20,6 +21,7 @@ import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.lists.PairList;
 
 import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
@@ -115,6 +117,8 @@ public class BehaviorModule
    // API created here from build
    public static class API
    {
+      public static final ROS2Topic<Empty> SHUTDOWN = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class).withSuffix("shutdown");
+
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("Root");
       private static final MessagerAPIFactory.CategoryTheme BehaviorModuleTheme = apiFactory.createCategoryTheme("BehaviorModule");

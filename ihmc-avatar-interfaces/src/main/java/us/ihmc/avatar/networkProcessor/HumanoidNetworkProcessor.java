@@ -16,6 +16,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManag
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
+import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarStereoREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
@@ -108,7 +109,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (parameters.isUseWalkingPreviewModule())
          humanoidNetworkProcessor.setupWalkingPreviewModule(parameters.isVisualizeWalkingPreviewModule());
       if (parameters.isUseHumanoidAvatarREAStateUpdater())
-         humanoidNetworkProcessor.setupHumanoidAvatarREAStateUpdater();
+         humanoidNetworkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
 
       return humanoidNetworkProcessor;
    }
@@ -388,6 +389,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public DRCSensorSuiteManager setupSensorModule()
    {
+      LogTools.info("Setting up sensor module...");
       try
       {
          DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
@@ -540,13 +542,30 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public HumanoidAvatarREAStateUpdater setupHumanoidAvatarREAStateUpdater()
+   public HumanoidAvatarREAStateUpdater setupHumanoidAvatarLidarREAStateUpdater()
    {
       checkIfModuleCanBeCreated(HumanoidAvatarREAStateUpdater.class);
 
       try
       {
          HumanoidAvatarREAStateUpdater module = new HumanoidAvatarREAStateUpdater(robotModel, pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+
+   public HumanoidAvatarStereoREAStateUpdater setupHumanoidAvatarRealSenseREAStateUpdater()
+   {
+      checkIfModuleCanBeCreated(HumanoidAvatarStereoREAStateUpdater.class);
+
+      try
+      {
+         HumanoidAvatarStereoREAStateUpdater module = new HumanoidAvatarStereoREAStateUpdater(robotModel, pubSubImplementation, stereoInputTopic);
          modulesToClose.add(module);
          return module;
       }

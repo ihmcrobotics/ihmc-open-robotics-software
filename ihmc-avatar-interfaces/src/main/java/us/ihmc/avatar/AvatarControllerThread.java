@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -80,11 +81,22 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
-   public AvatarControllerThread(String robotName, DRCRobotModel robotModel, HumanoidRobotSensorInformation sensorInformation,
-                                 HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
-                                 DRCOutputProcessor outputProcessor, RealtimeROS2Node realtimeROS2Node, double gravity, double estimatorDT)
+   public AvatarControllerThread(String robotName,
+                                 DRCRobotModel robotModel,
+                                 DRCRobotInitialSetup robotInitialSetup,
+                                 HumanoidRobotSensorInformation sensorInformation,
+                                 HighLevelHumanoidControllerFactory controllerFactory,
+                                 HumanoidRobotContextDataFactory contextDataFactory,
+                                 DRCOutputProcessor outputProcessor,
+                                 RealtimeROS2Node realtimeROS2Node,
+                                 double gravity,
+                                 double estimatorDT)
    {
-      this.controllerFullRobotModel = robotModel.createFullRobotModel();
+      controllerFullRobotModel = robotModel.createFullRobotModel();
+      if (robotInitialSetup != null)
+      {
+         robotInitialSetup.initializeFullRobotModel(controllerFullRobotModel);
+      }
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));

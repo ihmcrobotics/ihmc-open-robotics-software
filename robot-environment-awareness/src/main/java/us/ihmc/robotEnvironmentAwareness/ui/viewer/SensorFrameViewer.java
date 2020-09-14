@@ -16,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -28,6 +29,7 @@ import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
@@ -144,12 +146,19 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       }
       if (numberOfSensorFrames > 1)
       {
-         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfSensorFrames,
-                                                                                                              TRAJECTORY_RADIAL_RESOLUTION,
-                                                                                                              TRAJECTORY_MESH_RADIUS);
-         segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
-         for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
-            meshBuilder.addMesh(mesh, Color.ALICEBLUE);
+         try
+         {
+            SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfSensorFrames,
+                                                                                                                 TRAJECTORY_RADIAL_RESOLUTION,
+                                                                                                                 TRAJECTORY_MESH_RADIUS);
+            segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
+            for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+               meshBuilder.addMesh(mesh, Color.ALICEBLUE);
+         }
+         catch (NotARotationMatrixException e)
+         {
+            LogTools.warn("Could not compute sensor frame trajectory mesh!");
+         }
       }
 
       MeshView historyMeshView = new MeshView(meshBuilder.generateMesh());

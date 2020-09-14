@@ -13,6 +13,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.ROS2Node;
@@ -33,6 +34,7 @@ public class AtlasPointCloudSensorManager
                                        RobotROSClockCalculator rosClockCalculator,
                                        boolean useTrackingData)
    {
+      LogTools.info("Creating sensor bridges...");
       realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.D435_POINT_CLOUD);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 

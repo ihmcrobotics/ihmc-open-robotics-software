@@ -10,7 +10,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MinimalFootstep
 {
@@ -54,6 +56,23 @@ public class MinimalFootstep
    public ConvexPolygon2DReadOnly getFoothold()
    {
       return foothold;
+   }
+
+   public static ArrayList<MinimalFootstep> reduceFootstepsForUIMessager(SideDependentList<PlannedFootstepReadOnly> footsteps)
+   {
+      ArrayList<MinimalFootstep> footstepLocations = new ArrayList<>();
+      for (RobotSide side : RobotSide.values)  // this code makes the message smaller to send over the network, TODO investigate
+      {
+         PlannedFootstepReadOnly footstep = footsteps.get(side);
+         if (footstep != null)
+         {
+            FramePose3D soleFramePoseToPack = new FramePose3D();
+            footstep.getFootstepPose(soleFramePoseToPack);
+            soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
+            footstepLocations.add(new MinimalFootstep(footstep.getRobotSide(), new Pose3D(soleFramePoseToPack), footstep.getFoothold(), ""));
+         }
+      }
+      return footstepLocations;
    }
 
    public static ArrayList<MinimalFootstep> reduceFootstepPlanForUIMessager(FootstepPlan footstepPlan, String description)

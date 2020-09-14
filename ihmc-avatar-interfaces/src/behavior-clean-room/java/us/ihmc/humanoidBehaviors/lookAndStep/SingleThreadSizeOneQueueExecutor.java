@@ -40,7 +40,7 @@ public class SingleThreadSizeOneQueueExecutor
          // This is fine. We are just trying to replace the one element.
       }
 
-      executor.execute(runnable);
+      executor.execute(() -> exceptionHandlingWrapper(runnable));
    }
 
    public void interruptAndReset()
@@ -49,7 +49,6 @@ public class SingleThreadSizeOneQueueExecutor
       recreate();
    }
 
-   // TODO: Why isn't this used?
    private void exceptionHandlingWrapper(Runnable runnable)
    {
       try
