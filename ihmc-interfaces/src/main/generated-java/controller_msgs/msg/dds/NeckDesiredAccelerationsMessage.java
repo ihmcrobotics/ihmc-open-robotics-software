@@ -13,12 +13,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerationsMessage> implements Settable<NeckDesiredAccelerationsMessage>, EpsilonComparable<NeckDesiredAccelerationsMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The desired joint acceleration information.
             */
@@ -26,10 +24,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
 
    public NeckDesiredAccelerationsMessage()
    {
-
-
       desired_accelerations_ = new controller_msgs.msg.dds.DesiredAccelerationsMessage();
-
    }
 
    public NeckDesiredAccelerationsMessage(NeckDesiredAccelerationsMessage other)
@@ -40,13 +35,10 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
 
    public void set(NeckDesiredAccelerationsMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.staticCopy(other.desired_accelerations_, desired_accelerations_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -62,7 +54,6 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    {
       return sequence_id_;
    }
-
 
 
    /**
@@ -91,9 +82,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!this.desired_accelerations_.epsilonEquals(other.desired_accelerations_, epsilon)) return false;
 
@@ -109,9 +98,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
 
       NeckDesiredAccelerationsMessage otherMyClass = (NeckDesiredAccelerationsMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if (!this.desired_accelerations_.equals(otherMyClass.desired_accelerations_)) return false;
 
@@ -124,10 +111,8 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       StringBuilder builder = new StringBuilder();
 
       builder.append("NeckDesiredAccelerationsMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("desired_accelerations=");
       builder.append(this.desired_accelerations_);
       builder.append("}");

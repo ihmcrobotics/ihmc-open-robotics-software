@@ -13,19 +13,16 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> implements Settable<ClearDelayQueueMessage>, EpsilonComparable<ClearDelayQueueMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * If only a specific message type is to be cleared, use this field.
             * The integer represents the hash code of the message simple name.
             * The hash code of a string should be computed as in java.lang.String.hashCode().
             */
    public int class_simple_name_based_hash_code_;
-
    /**
             * If all the messages should be cleared, then this field should be set to true.
             */
@@ -33,10 +30,6 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
    public ClearDelayQueueMessage()
    {
-
-
-
-
    }
 
    public ClearDelayQueueMessage(ClearDelayQueueMessage other)
@@ -47,17 +40,13 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
    public void set(ClearDelayQueueMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       class_simple_name_based_hash_code_ = other.class_simple_name_based_hash_code_;
-
 
       clear_all_delay_buffers_ = other.clear_all_delay_buffers_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -73,7 +62,6 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
    {
       return sequence_id_;
    }
-
 
    /**
             * If only a specific message type is to be cleared, use this field.
@@ -93,7 +81,6 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
    {
       return class_simple_name_based_hash_code_;
    }
-
 
    /**
             * If all the messages should be cleared, then this field should be set to true.
@@ -128,12 +115,9 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.class_simple_name_based_hash_code_, other.class_simple_name_based_hash_code_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.clear_all_delay_buffers_, other.clear_all_delay_buffers_, epsilon)) return false;
 
@@ -150,12 +134,9 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
       ClearDelayQueueMessage otherMyClass = (ClearDelayQueueMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.class_simple_name_based_hash_code_ != otherMyClass.class_simple_name_based_hash_code_) return false;
-
 
       if(this.clear_all_delay_buffers_ != otherMyClass.clear_all_delay_buffers_) return false;
 
@@ -169,13 +150,10 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
       StringBuilder builder = new StringBuilder();
 
       builder.append("ClearDelayQueueMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("class_simple_name_based_hash_code=");
       builder.append(this.class_simple_name_based_hash_code_);      builder.append(", ");
-
       builder.append("clear_all_delay_buffers=");
       builder.append(this.clear_all_delay_buffers_);
       builder.append("}");

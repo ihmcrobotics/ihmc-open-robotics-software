@@ -40,9 +40,7 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -59,9 +57,7 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -73,9 +69,7 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.FootstepPlannerCellMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_2(data.getXIndex());
-
 
       cdr.write_type_2(data.getYIndex());
 
@@ -83,10 +77,8 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerCellMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setXIndex(cdr.read_type_2());
       	
-
       data.setYIndex(cdr.read_type_2());
       	
 
@@ -95,18 +87,14 @@ public class FootstepPlannerCellMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerCellMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_2("x_index", data.getXIndex());
-
       ser.write_type_2("y_index", data.getYIndex());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerCellMessage data)
    {
-
       data.setXIndex(ser.read_type_2("x_index"));
-
       data.setYIndex(ser.read_type_2("y_index"));
    }
 

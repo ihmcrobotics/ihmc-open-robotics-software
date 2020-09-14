@@ -40,9 +40,7 @@ public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -59,9 +57,7 @@ public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -73,9 +69,7 @@ public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.QuixUrgentUserInfoMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_9(data.getUrgentUserInfoName());
 
@@ -83,10 +77,8 @@ public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.QuixUrgentUserInfoMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setUrgentUserInfoName(cdr.read_type_9());
       	
 
@@ -95,18 +87,14 @@ public class QuixUrgentUserInfoMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.QuixUrgentUserInfoMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_9("urgent_user_info_name", data.getUrgentUserInfoName());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuixUrgentUserInfoMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setUrgentUserInfoName(ser.read_type_9("urgent_user_info_name"));
    }
 

@@ -385,10 +385,11 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl)
+   public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl,HumanoidBehaviorType behavior)
    {
       BehaviorStatusPacket message = new BehaviorStatusPacket();
       message.setCurrentBehaviorStatus(requestedControl.toByte());
+      message.setHumanoidBehaviorType(behavior.toByte());
       return message;
    }
 

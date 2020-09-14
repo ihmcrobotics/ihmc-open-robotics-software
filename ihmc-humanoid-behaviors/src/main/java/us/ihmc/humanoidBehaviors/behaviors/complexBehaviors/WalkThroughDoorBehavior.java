@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.WalkThroughDoorBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -21,6 +23,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -33,6 +37,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -91,6 +96,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    private final HumanoidReferenceFrames referenceFrames;
+   
+   private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
+
 
    public WalkThroughDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                                   FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
@@ -129,8 +137,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                       doorOpenDetectorBehaviorService,
                                                       yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
+      
+      ROS2Topic outputTopic = IHMCHumanoidBehaviorManager.getOutputTopic(robotName);
+      behaviorStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorStatusPacket.class, outputTopic);
 
-      //setup publisher for sending door location to UI
       setupStateMachine();
    }
 
@@ -438,6 +448,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_FINISHED_FAILED, HumanoidBehaviorType.WALK_THROUGH_DOOR));
             publishTextToSpeech("Walking Through Door Failed");
          }
       };
@@ -447,6 +458,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_FINISHED_SUCCESS, HumanoidBehaviorType.WALK_THROUGH_DOOR));
             sleepBehavior.setSleepTime(1);
             publishTextToSpeech("Finished Walking Through Door");
          }
@@ -535,7 +547,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.RESET_ROBOT, resetRobot, WalkThroughDoorBehaviorState.DONE);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
+      factory.addState(WalkThroughDoorBehaviorState.FAILED, failedState);
       factory.addState(WalkThroughDoorBehaviorState.DONE, doneState);
 
       factory.addStateChangedListener((from, to) ->

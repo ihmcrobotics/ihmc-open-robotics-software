@@ -14,24 +14,20 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage> implements Settable<PelvisHeightTrajectoryMessage>, EpsilonComparable<PelvisHeightTrajectoryMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
             */
    public boolean enable_user_pelvis_control_;
-
    /**
             * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
             * will keep the height manager in user mode while walking.
             * If this is false the height manager will switch back to controller mode when walking.
             */
    public boolean enable_user_pelvis_control_during_walking_;
-
    /**
             * The position trajectory information.
             */
@@ -39,12 +35,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
    public PelvisHeightTrajectoryMessage()
    {
-
-
-
-
       euclidean_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
-
    }
 
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
@@ -55,19 +46,14 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
    public void set(PelvisHeightTrajectoryMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       enable_user_pelvis_control_ = other.enable_user_pelvis_control_;
 
-
       enable_user_pelvis_control_during_walking_ = other.enable_user_pelvis_control_during_walking_;
-
 
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -84,7 +70,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       return sequence_id_;
    }
 
-
    /**
             * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
             */
@@ -99,7 +84,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    {
       return enable_user_pelvis_control_;
    }
-
 
    /**
             * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
@@ -119,7 +103,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    {
       return enable_user_pelvis_control_during_walking_;
    }
-
 
 
    /**
@@ -148,15 +131,11 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_user_pelvis_control_, other.enable_user_pelvis_control_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_user_pelvis_control_during_walking_, other.enable_user_pelvis_control_during_walking_, epsilon)) return false;
-
 
       if (!this.euclidean_trajectory_.epsilonEquals(other.euclidean_trajectory_, epsilon)) return false;
 
@@ -172,15 +151,11 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
       PelvisHeightTrajectoryMessage otherMyClass = (PelvisHeightTrajectoryMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.enable_user_pelvis_control_ != otherMyClass.enable_user_pelvis_control_) return false;
 
-
       if(this.enable_user_pelvis_control_during_walking_ != otherMyClass.enable_user_pelvis_control_during_walking_) return false;
-
 
       if (!this.euclidean_trajectory_.equals(otherMyClass.euclidean_trajectory_)) return false;
 
@@ -193,16 +168,12 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       StringBuilder builder = new StringBuilder();
 
       builder.append("PelvisHeightTrajectoryMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("enable_user_pelvis_control=");
       builder.append(this.enable_user_pelvis_control_);      builder.append(", ");
-
       builder.append("enable_user_pelvis_control_during_walking=");
       builder.append(this.enable_user_pelvis_control_during_walking_);      builder.append(", ");
-
       builder.append("euclidean_trajectory=");
       builder.append(this.euclidean_trajectory_);
       builder.append("}");

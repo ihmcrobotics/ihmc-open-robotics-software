@@ -12,24 +12,15 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage> implements Settable<QuixUrgentUserInfoMessage>, EpsilonComparable<QuixUrgentUserInfoMessage>
 {
-
    public static final byte EMPTY = (byte) 0;
-
    public static final byte ESTOP_PRESSED = (byte) 1;
-
    public static final byte MOTOR_OVER_TEMP = (byte) 2;
-
    public static final byte LOW_BATTERY = (byte) 3;
-
    public long sequence_id_;
-
    public byte urgent_user_info_name_;
 
    public QuixUrgentUserInfoMessage()
    {
-
-
-
    }
 
    public QuixUrgentUserInfoMessage(QuixUrgentUserInfoMessage other)
@@ -40,14 +31,11 @@ public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage>
 
    public void set(QuixUrgentUserInfoMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       urgent_user_info_name_ = other.urgent_user_info_name_;
 
    }
-
 
    public void setSequenceId(long sequence_id)
    {
@@ -57,7 +45,6 @@ public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage>
    {
       return sequence_id_;
    }
-
 
    public void setUrgentUserInfoName(byte urgent_user_info_name)
    {
@@ -86,9 +73,7 @@ public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage>
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.urgent_user_info_name_, other.urgent_user_info_name_, epsilon)) return false;
 
@@ -105,9 +90,7 @@ public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage>
 
       QuixUrgentUserInfoMessage otherMyClass = (QuixUrgentUserInfoMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.urgent_user_info_name_ != otherMyClass.urgent_user_info_name_) return false;
 
@@ -121,10 +104,8 @@ public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuixUrgentUserInfoMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("urgent_user_info_name=");
       builder.append(this.urgent_user_info_name_);
       builder.append("}");
