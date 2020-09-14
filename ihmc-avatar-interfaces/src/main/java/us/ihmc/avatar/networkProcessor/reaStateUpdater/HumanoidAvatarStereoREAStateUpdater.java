@@ -97,7 +97,7 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
          break;
       case ABORT_REQUESTED:
       default:
-          // Do nothing?
+         // Do nothing?
          break;
       }
    }
