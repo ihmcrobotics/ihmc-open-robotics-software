@@ -446,7 +446,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
       {
          return new SimulatedValkyrieFingerController(simulatedRobot,
                                                       realtimeROS2Node,
-                                                      this, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                      this,
+                                                      ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
       }
       else
@@ -621,7 +622,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public UIParameters getUIParameters()
    {
-      return new ValkyrieUIParameters(getRobotPhysicalProperties());
+      return new ValkyrieUIParameters(getRobotPhysicalProperties(), getJointMap());
    }
 
    @Override

@@ -65,7 +65,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
 
-   protected final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
+   protected final ThreadFactory threadFactory = ThreadTools.createNamedThreadFactory(name);
    protected final ScheduledExecutorService executorService;
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
@@ -442,6 +442,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
     */
    abstract public List<Class<? extends Settable<?>>> createListOfSupportedStatus();
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
    /**
     * @return the collection of commands that cannot wake up this module.
     */
@@ -458,7 +463,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract ROS2Topic getOutputTopic();
+   public abstract ROS2Topic<?> getOutputTopic();
 
-   public abstract ROS2Topic getInputTopic();
+   public abstract ROS2Topic<?> getInputTopic();
 }

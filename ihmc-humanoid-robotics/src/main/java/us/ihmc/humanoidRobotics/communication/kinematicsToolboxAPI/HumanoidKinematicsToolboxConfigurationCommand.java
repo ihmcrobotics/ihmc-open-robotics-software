@@ -7,40 +7,35 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       implements Command<HumanoidKinematicsToolboxConfigurationCommand, HumanoidKinematicsToolboxConfigurationMessage>
 {
    private long sequenceId;
-   private boolean enableSupportPolygonConstraint = true;
    private boolean holdCurrentCenterOfMassXYPosition = true;
-   private boolean holdSupportFootPositions = true;
+   private boolean enableAutoSupportPolygon = true;
+   private boolean holdSupportRigidBodies = true;
 
    @Override
    public void clear()
    {
       sequenceId = 0;
-      enableSupportPolygonConstraint = true;
       holdCurrentCenterOfMassXYPosition = true;
-      holdSupportFootPositions = true;
+      enableAutoSupportPolygon = true;
+      holdSupportRigidBodies = true;
    }
 
    @Override
    public void set(HumanoidKinematicsToolboxConfigurationCommand other)
    {
       sequenceId = other.sequenceId;
-      enableSupportPolygonConstraint = other.enableSupportPolygonConstraint;
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
-      holdSupportFootPositions = other.holdSupportFootPositions;
+      enableAutoSupportPolygon = other.enableAutoSupportPolygon;
+      holdSupportRigidBodies = other.holdSupportRigidBodies;
    }
 
    @Override
    public void setFromMessage(HumanoidKinematicsToolboxConfigurationMessage message)
    {
       sequenceId = message.getSequenceId();
-      enableSupportPolygonConstraint = message.getEnableSupportPolygonConstraint();
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
-      holdSupportFootPositions = message.getHoldSupportFootPositions();
-   }
-
-   public boolean enableSupportPolygonConstraint()
-   {
-      return enableSupportPolygonConstraint;
+      enableAutoSupportPolygon = message.getEnableAutoSupportPolygon();
+      holdSupportRigidBodies = message.getHoldSupportRigidBodies();
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()
@@ -48,9 +43,14 @@ public class HumanoidKinematicsToolboxConfigurationCommand
       return holdCurrentCenterOfMassXYPosition;
    }
 
-   public boolean holdSupportFootPositions()
+   public boolean enableAutoSupportPolygon()
    {
-      return holdSupportFootPositions;
+      return enableAutoSupportPolygon;
+   }
+
+   public boolean holdSupportRigidBodies()
+   {
+      return holdSupportRigidBodies;
    }
 
    @Override
