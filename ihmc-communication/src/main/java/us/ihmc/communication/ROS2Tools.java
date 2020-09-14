@@ -87,7 +87,7 @@ public class ROS2Tools
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT
          = REA.withRobot(null).withInput().withType(PlanarRegionsListMessage.class).withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);
-   public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withType(REAStateRequestMessage.class);
+   public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = VIDEO.withModule(D435_NAME);
@@ -102,7 +102,7 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_REA = ROS2Tools.REA.withOutput().withPrefix("stereo").withTypeName(PlanarRegionsListMessage.class);
    public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from Atlas Realsense SLAM module */
-   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MAP.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
 
