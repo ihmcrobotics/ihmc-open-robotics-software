@@ -40,24 +40,17 @@ public class ExoStepStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -74,29 +67,22 @@ public class ExoStepStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -108,24 +94,17 @@ public class ExoStepStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.ExoStepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_9(data.getFootstepStatus());
 
-
       cdr.write_type_2(data.getFootstepIndex());
-
 
       cdr.write_type_9(data.getRobotSide());
 
-
       cdr.write_type_6(data.getDesiredStepLength());
 
-
       cdr.write_type_6(data.getDesiredStepHeight());
-
 
       cdr.write_type_6(data.getDesiredStepPitch());
 
@@ -133,25 +112,18 @@ public class ExoStepStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.ExoStepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setFootstepStatus(cdr.read_type_9());
       	
-
       data.setFootstepIndex(cdr.read_type_2());
       	
-
       data.setRobotSide(cdr.read_type_9());
       	
-
       data.setDesiredStepLength(cdr.read_type_6());
       	
-
       data.setDesiredStepHeight(cdr.read_type_6());
       	
-
       data.setDesiredStepPitch(cdr.read_type_6());
       	
 
@@ -160,38 +132,24 @@ public class ExoStepStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.ExoStepStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_9("footstep_status", data.getFootstepStatus());
-
       ser.write_type_2("footstep_index", data.getFootstepIndex());
-
       ser.write_type_9("robot_side", data.getRobotSide());
-
       ser.write_type_6("desired_step_length", data.getDesiredStepLength());
-
       ser.write_type_6("desired_step_height", data.getDesiredStepHeight());
-
       ser.write_type_6("desired_step_pitch", data.getDesiredStepPitch());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ExoStepStatusMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setFootstepStatus(ser.read_type_9("footstep_status"));
-
       data.setFootstepIndex(ser.read_type_2("footstep_index"));
-
       data.setRobotSide(ser.read_type_9("robot_side"));
-
       data.setDesiredStepLength(ser.read_type_6("desired_step_length"));
-
       data.setDesiredStepHeight(ser.read_type_6("desired_step_height"));
-
       data.setDesiredStepPitch(ser.read_type_6("desired_step_pitch"));
    }
 

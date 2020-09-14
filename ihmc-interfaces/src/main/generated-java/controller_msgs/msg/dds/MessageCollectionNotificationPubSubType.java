@@ -40,9 +40,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -59,9 +57,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -73,9 +69,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_4(data.getMessageCollectionSequenceId());
 
@@ -83,10 +77,8 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
 
    public static void read(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setMessageCollectionSequenceId(cdr.read_type_4());
       	
 
@@ -95,18 +87,14 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_4("message_collection_sequence_id", data.getMessageCollectionSequenceId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MessageCollectionNotification data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setMessageCollectionSequenceId(ser.read_type_4("message_collection_sequence_id"));
    }
 

@@ -40,15 +40,11 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<controlle
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (4000000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -65,17 +61,13 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<controlle
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -88,15 +80,11 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<controlle
 
    public static void write(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_2(data.getWidth());
 
-
       cdr.write_type_2(data.getHeight());
-
 
       if(data.getRgbdata().size() <= 4000000)
       cdr.write_type_e(data.getRgbdata());else
@@ -106,16 +94,12 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<controlle
 
    public static void read(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setWidth(cdr.read_type_2());
       	
-
       data.setHeight(cdr.read_type_2());
       	
-
       cdr.read_type_e(data.getRgbdata());	
 
    }
@@ -123,26 +107,18 @@ public class Image32PubSubType implements us.ihmc.pubsub.TopicDataType<controlle
    @Override
    public final void serialize(controller_msgs.msg.dds.Image32 data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_2("width", data.getWidth());
-
       ser.write_type_2("height", data.getHeight());
-
       ser.write_type_e("rgbdata", data.getRgbdata());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.Image32 data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setWidth(ser.read_type_2("width"));
-
       data.setHeight(ser.read_type_2("height"));
-
       ser.read_type_e("rgbdata", data.getRgbdata());
    }
 

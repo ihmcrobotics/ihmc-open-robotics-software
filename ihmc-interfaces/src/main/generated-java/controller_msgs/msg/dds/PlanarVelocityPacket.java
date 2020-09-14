@@ -11,14 +11,11 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket> implements Settable<PlanarVelocityPacket>, EpsilonComparable<PlanarVelocityPacket>
 {
-
    public us.ihmc.euclid.tuple3D.Vector3D velocity_;
 
    public PlanarVelocityPacket()
    {
-
       velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-
    }
 
    public PlanarVelocityPacket(PlanarVelocityPacket other)
@@ -29,10 +26,7 @@ public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket> implement
 
    public void set(PlanarVelocityPacket other)
    {
-
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.velocity_, velocity_);
-   }
-
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.velocity_, velocity_);   }
 
 
    public us.ihmc.euclid.tuple3D.Vector3D getVelocity()
@@ -58,7 +52,6 @@ public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket> implement
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!this.velocity_.epsilonEquals(other.velocity_, epsilon)) return false;
 
       return true;
@@ -73,7 +66,6 @@ public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket> implement
 
       PlanarVelocityPacket otherMyClass = (PlanarVelocityPacket) other;
 
-
       if (!this.velocity_.equals(otherMyClass.velocity_)) return false;
 
       return true;
@@ -85,7 +77,6 @@ public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("PlanarVelocityPacket {");
-
       builder.append("velocity=");
       builder.append(this.velocity_);
       builder.append("}");
