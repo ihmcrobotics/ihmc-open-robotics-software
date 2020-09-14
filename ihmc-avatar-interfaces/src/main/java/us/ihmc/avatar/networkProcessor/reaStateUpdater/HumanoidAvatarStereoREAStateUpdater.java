@@ -83,23 +83,23 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
       if (executorService.isShutdown())
          return;
 
-//      WalkingStatusMessage newMessage = subscriber.takeNextData();
-//
-//      switch (WalkingStatus.fromByte(newMessage.getWalkingStatus()))
-//      {
-//      case STARTED:
-//      case RESUMED:
-//         executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
-//         break;
-//      case COMPLETED:
-//      case PAUSED:
-//         executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
-//         break;
-//      case ABORT_REQUESTED:
-//      default:
-//          Do nothing?
-//         break;
-//      }
+      WalkingStatusMessage newMessage = subscriber.takeNextData();
+
+      switch (WalkingStatus.fromByte(newMessage.getWalkingStatus()))
+      {
+      case STARTED:
+      case RESUMED:
+         executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
+         break;
+      case COMPLETED:
+      case PAUSED:
+         executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
+         break;
+      case ABORT_REQUESTED:
+      default:
+          // Do nothing?
+         break;
+      }
    }
 
    private void shutdown()
