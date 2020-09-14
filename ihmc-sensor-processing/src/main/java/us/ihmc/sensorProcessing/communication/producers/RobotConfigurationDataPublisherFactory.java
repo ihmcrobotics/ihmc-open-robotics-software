@@ -1,8 +1,11 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.log.LogTools;
@@ -249,10 +252,20 @@ public class RobotConfigurationDataPublisherFactory
 
    private List<IMUSensorReadOnly> filterIMUSensorDataToPublish()
    {
+      IMUDefinition[] imuSelection = imuDefinitionsField.get();
+
+      if (imuSelection == null || imuSelection.length == 0)
+         return Collections.emptyList();
+
       List<IMUSensorReadOnly> sensorDataToPublish = new ArrayList<>();
 
-      IMUDefinition[] imuSelection = imuDefinitionsField.get();
       List<? extends IMUSensorReadOnly> allSensorData = imuSensorData.get();
+
+      if (allSensorData == null || allSensorData.isEmpty())
+      {
+         LogTools.warn("Could not find any sensor data for the IMUs.");
+         return Stream.of(imuSelection).map(definition -> new IMUSensor(definition, null)).collect(Collectors.toList());
+      }
 
       for (IMUDefinition imu : imuSelection)
       {
@@ -275,10 +288,20 @@ public class RobotConfigurationDataPublisherFactory
 
    private List<ForceSensorDataReadOnly> filterForceSensorDataToPublish()
    {
+      ForceSensorDefinition[] forceSensorSelection = forceSensorDefinitionsField.get();
+
+      if (forceSensorSelection == null || forceSensorSelection.length == 0)
+         return Collections.emptyList();
+
       List<ForceSensorDataReadOnly> sensorDataToPublish = new ArrayList<>();
 
-      ForceSensorDefinition[] forceSensorSelection = forceSensorDefinitionsField.get();
       ForceSensorDataHolderReadOnly allSensorData = forceSensorDataHolder.get();
+
+      if (allSensorData == null)
+      {
+         LogTools.warn("Could not find any sensor data for the F/T sensors.");
+         return Stream.of(forceSensorSelection).map(definition -> createEmptyForceSensor(definition)).collect(Collectors.toList());
+      }
 
       for (ForceSensorDefinition forceSensor : forceSensorSelection)
       {
@@ -290,12 +313,17 @@ public class RobotConfigurationDataPublisherFactory
          }
          else
          {
-            ForceSensorData dummySensor = new ForceSensorData();
-            dummySensor.setDefinition(forceSensor);
-            sensorDataToPublish.add(dummySensor);
+            sensorDataToPublish.add(createEmptyForceSensor(forceSensor));
             LogTools.warn("Could not find sensor data for the F/T sensor: " + forceSensor.getSensorName());
          }
       }
       return sensorDataToPublish;
+   }
+
+   private static ForceSensorData createEmptyForceSensor(ForceSensorDefinition forceSensor)
+   {
+      ForceSensorData dummySensor = new ForceSensorData();
+      dummySensor.setDefinition(forceSensor);
+      return dummySensor;
    }
 }
