@@ -57,6 +57,7 @@ public class ControllerAPIDefinition
       commands.add(PlanarRegionsListCommand.class);
       commands.add(StepConstraintRegionCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
+      commands.add(WholeBodyMultiContactTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
