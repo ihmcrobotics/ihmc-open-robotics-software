@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -55,12 +56,13 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 
    private static long DEFAULT_PUBLISHING_PERIOD_MS = 250;
    private final ScheduledExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CANCEL_AND_REPORT);
+   private ScheduledFuture<?> scheduledFuture;
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();
    private int indexToPublish = 0;
 
    public SLAMDataManagerAnchorPaneController()
    {
-      executor.scheduleAtFixedRate(this::publish, 0, DEFAULT_PUBLISHING_PERIOD_MS, TimeUnit.MILLISECONDS);
+      scheduledFuture = executor.scheduleAtFixedRate(this::publish, 0, DEFAULT_PUBLISHING_PERIOD_MS, TimeUnit.MILLISECONDS);
    }
 
    public void setMainWindow(Window ownerWindow)
@@ -159,5 +161,16 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
          stereoVisionPublisher.publish(stereoVisionPointCloudMessage);
          indexToPublish++;
       }
+   }
+
+   public void destroy()
+   {
+      if (scheduledFuture != null)
+      {
+         scheduledFuture.cancel(true);
+         scheduledFuture = null;
+      }
+
+      executor.shutdownNow();
    }
 }

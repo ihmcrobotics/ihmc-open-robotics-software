@@ -92,7 +92,8 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    {
       synchronized (this) // to avoid collision with ROS 2 thread
       {
-         latestPlanarRegionsList.clear();
+         if (latestPlanarRegionsList != null)
+            latestPlanarRegionsList.clear();
          executorService.submit(() -> generateMeshes(latestPlanarRegionsList));
       }
    }

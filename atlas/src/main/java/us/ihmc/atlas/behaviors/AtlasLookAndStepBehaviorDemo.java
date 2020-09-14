@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
@@ -28,6 +29,8 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments.TRIPLE_PLATFORM_HEIGHT;
+
 public class AtlasLookAndStepBehaviorDemo
 {
    private static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
@@ -38,7 +41,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
    private static boolean RUN_LIDAR_AND_CAMERA_SIMULATION = Boolean.parseBoolean(System.getProperty("run.lidar.and.camera.simulation"));
    private static boolean USE_INTERPROCESS = Boolean.parseBoolean(System.getProperty("use.interprocess"));
-   private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam"));
+   private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam", "true"));
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
    private static boolean USE_ADDITIONAL_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("use.additional.contact.points"));
 
@@ -48,14 +51,27 @@ public class AtlasLookAndStepBehaviorDemo
    private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
 
    {
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
                                                                0.0, 0.0, 0.0, 0.0));
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
                                                                0.0, Math.PI, 6.0, 0.0));
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
-                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, Math.PI, 3.0, 0.0));
-      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
-                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 3.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, Math.PI, 2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, 0.0,2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               0.0, 0.0, 0.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               0.0, Math.PI, 6.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, Math.PI, 2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               TRIPLE_PLATFORM_HEIGHT, 0.0, 2.8, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateRealisticEasierStartingBlockRegions,
+                                                               RealisticLabTerrainBuilder.PALLET_HEIGHT * 2.0, 0.0, 0.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockStepsUpAndDown,
+                                                               0.0, 0.0, 0.0, 0.0));
+
    }
    private final Random random = new Random();
    private final EnvironmentInitialSetup environmentInitialSetup = environmentInitialSetups.get(random.nextInt(environmentInitialSetups.size()));
@@ -115,6 +131,10 @@ public class AtlasLookAndStepBehaviorDemo
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
       dynamicSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
                                                          createCommonAvatarEnvironment(),
+                                                         environmentInitialSetup.getGroundZ(),
+                                                         environmentInitialSetup.getInitialX(),
+                                                         environmentInitialSetup.getInitialY(),
+                                                         environmentInitialSetup.getInitialYaw(),
                                                          communicationMode.getPubSubImplementation(),
                                                          recordFrequencySpeedup,
                                                          dataBufferSize,

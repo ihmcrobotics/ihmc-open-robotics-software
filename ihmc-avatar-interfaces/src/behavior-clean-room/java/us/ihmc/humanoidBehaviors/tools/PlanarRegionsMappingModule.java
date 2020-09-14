@@ -34,7 +34,7 @@ public class PlanarRegionsMappingModule
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MODULE.withOutput());
       ROS2Topic realsenseTopic = ROS2Tools.REA.withOutput().withSuffix("realsense");
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, realsenseTopic, this::process);
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.LIDAR_REA_REGIONS, this::process);

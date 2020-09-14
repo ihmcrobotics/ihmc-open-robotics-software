@@ -6,13 +6,16 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,6 +27,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
@@ -57,7 +61,8 @@ public class SLAMModule implements PerceptionModule
    private final AtomicReference<Boolean> isOcTreeBoundingBoxRequested;
    private final AtomicReference<BoundingBoxParametersMessage> atomicBoundingBoxParameters;
    private final AtomicReference<Boolean> useBoundingBox;
-   
+   private final AtomicBoolean clearSlam = new AtomicBoolean(false);
+
    protected final SurfaceElementICPSLAM slam;
 
    private static final int SLAM_PERIOD_MILLISECONDS = 250;
@@ -121,13 +126,21 @@ public class SLAMModule implements PerceptionModule
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StereoVisionPointCloudMessage.class,
-                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StereoVisionPointCloudMessage.class,
-                                           REASourceType.DEPTH_POINT_CLOUD.getTopicName(),
+                                           ROS2Tools.D435_POINT_CLOUD,
                                            this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           REAStateRequestMessage.class,
+                                           REACommunicationProperties.stereoInputTopic,
+                                           this::handleREAStateRequestMessage);
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+         stop();
+      });
 
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
@@ -193,6 +206,18 @@ public class SLAMModule implements PerceptionModule
       this.ocTreeConsumers.remove(ocTreeConsumer);
    }
 
+   private void handleREAStateRequestMessage(Subscriber<REAStateRequestMessage> subscriber)
+   {
+      REAStateRequestMessage newMessage = subscriber.takeNextData();
+
+      if (newMessage.getRequestResume())
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, true);
+      else if (newMessage.getRequestPause()) // We guarantee to resume if requested, regardless of the pause request.
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, false);
+      if (newMessage.getRequestClear())
+         clearSlam.set(true);
+   }
+
    @Override
    public void start()
    {
@@ -248,6 +273,8 @@ public class SLAMModule implements PerceptionModule
          executorService.shutdownNow();
          executorService = null;
       }
+
+      LogTools.info("Shutdown complete");
    }
 
    private boolean isMainThreadInterrupted()
@@ -282,6 +309,9 @@ public class SLAMModule implements PerceptionModule
    {
       if (isMainThreadInterrupted())
          return;
+
+      if (clearSlam.getAndSet(false))
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMClear, true);
 
       slam.setNormalEstimationParameters(normalEstimationParameters.get());
       if (clearNormals.getAndSet(false))
@@ -397,7 +427,8 @@ public class SLAMModule implements PerceptionModule
 
    protected void dequeue()
    {
-      pointCloudQueue.remove(0);
+      if (!pointCloudQueue.isEmpty())
+         pointCloudQueue.remove(0);
    }
 
    private final DecimalFormat df = new DecimalFormat("#.##");
@@ -416,11 +447,17 @@ public class SLAMModule implements PerceptionModule
       NormalOcTree octreeMap = slam.getMapOcTree();
       SLAMFrame latestFrame = slam.getLatestFrame();
 
+      if (latestFrame == null)
+      {
+         LogTools.warn("Latest frame is null. Skipping publish results");
+         return;
+      }
+
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, OcTreeMessageConverter.convertToMessage(slam.getMapOcTree()));
 
 
       long startTime = System.nanoTime();
-      Pose3D pose = new Pose3D(slam.getLatestFrame().getCorrectedSensorPoseInWorld());
+      Pose3D pose = new Pose3D(latestFrame.getCorrectedSensorPoseInWorld());
 
       for (OcTreeConsumer ocTreeConsumer : ocTreeConsumers)
       {
@@ -478,6 +515,7 @@ public class SLAMModule implements PerceptionModule
 
    public void clearSLAM()
    {
+      LogTools.info("Clearing");
       newPointCloud.set(null);
       pointCloudQueue.clear();
       slam.clear();

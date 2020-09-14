@@ -228,6 +228,16 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load(String fileName)
    {
+      load(fileName, true);
+   }
+
+   public void loadUnsafe()
+   {
+      load(saveFileName, false);
+   }
+
+   private void load(String fileName, boolean crashIfMissingKeys)
+   {
       this.saveFileName = fileName;
 
       ExceptionTools.handle(() ->
@@ -248,7 +258,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
             {
                if (!properties.containsKey(key.getCamelCasedName()))
                {
-                  if (key.hasDefaultValue())
+                  if (!crashIfMissingKeys && key.hasDefaultValue())
                   {
                      setInternal(key, key.getDefaultValue());
                      continue;

@@ -18,6 +18,7 @@ import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.Scan;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
@@ -62,7 +63,21 @@ public class SLAMBasics implements SLAMInterface
       Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
       scan.getPointCloud().setTimestamp(frame.getTimeStamp());
 
-      mapOcTree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
+      try
+      {
+         mapOcTree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
+      }
+      catch (RuntimeException e)
+      {
+         if (e.getMessage().equals("The given node is null."))
+         {
+            LogTools.warn("Failed to insert scan. null node in jOctoMap");
+         }
+         else
+         {
+            throw e;
+         }
+      }
       mapOcTree.enableParallelComputationForNormals(true);
    }
 

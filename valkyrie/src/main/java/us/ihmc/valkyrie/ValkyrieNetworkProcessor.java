@@ -45,7 +45,7 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
       ValkyrieSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
@@ -81,7 +81,7 @@ public class ValkyrieNetworkProcessor
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
       ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();

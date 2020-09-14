@@ -31,7 +31,7 @@ public class IHMCROS2Callback<T>
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName, Consumer<T> messageCallback)
    {
-      this(ros2Node, topicName.getType(), topicName, messageCallback);
+      this(ros2Node, topicName.getType(), topicName.getName(), messageCallback);
    }
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, Consumer<T> messageCallback)

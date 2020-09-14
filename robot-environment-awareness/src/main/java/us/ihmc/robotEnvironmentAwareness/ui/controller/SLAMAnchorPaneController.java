@@ -109,6 +109,8 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
       initializeSetup();
 
+      uiMessager.bindPropertyToTopic(SLAMModuleAPI.SensorStatus, sensorMovingProperty);
+
       updateSensorStatusViz(false);
       sensorMovingProperty.addListener((o, oldValue, newValue) ->
       {

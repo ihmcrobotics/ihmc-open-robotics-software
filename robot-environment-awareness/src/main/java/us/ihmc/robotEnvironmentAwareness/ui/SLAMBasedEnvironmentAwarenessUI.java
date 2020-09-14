@@ -7,15 +7,22 @@ import java.util.function.Function;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import std_msgs.msg.dds.Empty;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -27,6 +34,9 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporte
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
+
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 {
@@ -39,6 +49,8 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
    private final SensorFrameViewer<StereoVisionPointCloudMessage> depthFrameViewer;
    private final SensorFrameViewer<StampedPosePacket> pelvisFrameViewer;
    private final FootstepMeshViewer footstepViewer;
+   private boolean shuttingDown = false;
+   private boolean closedExternally = false;
 
    @FXML
    private SLAMAnchorPaneController slamAnchorPaneController;
@@ -58,6 +70,7 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
    private final UIConnectionHandler uiConnectionHandler;
 
    private final StereoVisionPointCloudDataExporter stereoVisionPointCloudDataExporter;
+   private final ROS2Node ros2Node;
 
    private SLAMBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
    {
@@ -136,7 +149,31 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       Scene mainScene = new Scene(mainPane, 600, 400);
 
       primaryStage.setScene(mainScene);
-      primaryStage.setOnCloseRequest(event -> stop());
+
+      ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "slam_ui");
+      IHMCROS2Publisher<Empty> shutdownPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.SHUTDOWN);
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         if (!shuttingDown)
+         {
+            LogTools.info("Received SHUTDOWN. Shutting down...");
+            closeAndStop();
+         }
+         else
+            LogTools.info("Received SHUTDOWN. Already shutting down...");
+      });
+      primaryStage.setOnCloseRequest(event ->
+      {
+         shuttingDown = true;
+         if (!closedExternally)
+         {
+            ThreadTools.startAThread(() ->
+            {
+               shutdownPublisher.publish(new Empty());
+               stop();
+            }, "SLAMModuleUIShutdown");
+         }
+      });
    }
 
    private void refreshModuleState()
@@ -197,6 +234,17 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       primaryStage.show();
    }
 
+   public void closeAndStop()
+   {
+      closedExternally = true;
+      Platform.runLater(() ->
+      {
+         uiConnectionHandler.stop();
+         primaryStage.close();
+      });
+      stop();
+   }
+
    @Override
    public void stop()
    {
@@ -212,7 +260,11 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
          if (footstepViewer != null)
             footstepViewer.stop();
 
+         slamDataManagerAnchorPaneController.destroy();
+
          stereoVisionPointCloudDataExporter.shutdown();
+
+         ros2Node.destroy();
       }
       catch (Exception e)
       {

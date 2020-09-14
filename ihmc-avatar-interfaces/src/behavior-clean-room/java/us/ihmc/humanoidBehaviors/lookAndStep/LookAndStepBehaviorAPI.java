@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -13,6 +14,8 @@ import java.util.List;
 
 public class LookAndStepBehaviorAPI
 {
+   public static final ROS2Topic<PlanarRegionsListMessage> REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.REALSENSE_SLAM_REGIONS;
+
    /**
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
     * If look and step is already working on a goal, first send a RESET and then send a new GOAL_INPUT. (Todo: Make this better.)
@@ -39,17 +42,21 @@ public class LookAndStepBehaviorAPI
    /*
     * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
     */
+   public static final MessagerAPIFactory.Topic<Object> PublishSupportRegions = topic("PublishSupportRegions");
    public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReviewEnabled");
+   public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabledToUI = topic("OperatorReviewEnabledToUI");
    public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 
    // Parameter tuning topics
    public static final MessagerAPIFactory.Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
    public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
+   public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
 
    // Visualization only topics
    public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> FootstepPlanForUI = topic("FootstepPlanForUI");
+   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> LastCommandedFootsteps = topic("LastCommandedFootsteps");
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");

@@ -2,6 +2,7 @@ package us.ihmc.atlas.sensors;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Platform;
@@ -12,10 +13,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -28,7 +32,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {
@@ -36,7 +43,8 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    private static final String SLAM_CONFIGURATION_FILE_NAME = "atlasSLAMModuleConfiguration.txt";
    private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "atlasSegmentationModuleConfiguration.txt";
-   private final boolean spawnUIs;
+   private final boolean spawnSegmentationUI;
+   private final boolean spawnSLAMUI;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
 
    private ROS2Node ros2Node;
@@ -50,11 +58,18 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnUIs, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this.spawnUIs = spawnUIs;
+      this(spawnUIs, spawnUIs, pubSubImplementation);
+   }
+   
+   public AtlasSLAMBasedREAStandaloneLauncher(boolean spawnSegmentationUI, boolean spawnSLAMUI, DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      this.spawnSegmentationUI = spawnSegmentationUI;
+      this.spawnSLAMUI = spawnSLAMUI;
+
       this.pubSubImplementation = pubSubImplementation;
 
       Runnable setup = () -> ExceptionTools.handle(this::setup, DefaultExceptionHandler.PRINT_STACKTRACE);
-      if (spawnUIs)
+      if (spawnSegmentationUI || spawnSLAMUI)
       {
          JavaFXApplicationCreator.createAJavaFXApplication();
          Platform.runLater(setup);
@@ -68,7 +83,7 @@ public class AtlasSLAMBasedREAStandaloneLauncher
    public void setup() throws Exception
    {
       Stage primaryStage = null;
-      if (spawnUIs)
+      if (spawnSLAMUI)
       {
          primaryStage = new Stage();
       }
@@ -84,27 +99,28 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
-      slamMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
+      slamMessager = spawnSLAMUI ? new SharedMemoryJavaFXMessager(SLAMModuleAPI.API) : new SharedMemoryMessager(SLAMModuleAPI.API);
       slamMessager.startMessager();
 
       if (launchSegmentation)
       {
-         segmentationMessager = spawnUIs ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
+         segmentationMessager = spawnSegmentationUI ? new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API) : new SharedMemoryMessager(SegmentationModuleAPI.API);
          segmentationMessager.startMessager();
       }
 
-      if (spawnUIs)
+      if (spawnSLAMUI)
       {
          ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(slamMessager, primaryStage, defaultContactPoints);
       }
       Path slamConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
       slamConfigurationFilePath = Paths.get(slamConfigurationFilePath.toString(), "/atlas/src/main/resources/" + SLAM_CONFIGURATION_FILE_NAME);
+      LogTools.info("Loading configuration file: {}", slamConfigurationFilePath.toAbsolutePath().normalize());
       module = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, slamMessager, slamConfigurationFilePath);
 
       Stage secondStage = null;
       if (launchSegmentation)
       {
-         if (spawnUIs)
+         if (spawnSegmentationUI)
          {
             secondStage = new Stage();
             planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
@@ -117,16 +133,20 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          module.attachOcTreeConsumer(segmentationModule);
       }
 
-      if (spawnUIs)
+      if (spawnSLAMUI)
       {
-         primaryStage.setOnCloseRequest(event -> stop());
-         if (secondStage != null)
-            secondStage.setOnCloseRequest(event -> stop());
-
          ui.show();
-         if (planarSegmentationUI != null)
-            planarSegmentationUI.show();
       }
+      if (spawnSegmentationUI && launchSegmentation)
+      {
+         planarSegmentationUI.show();
+      }
+
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+         stop();
+      });
 
       module.start();
       if (segmentationModule != null)
@@ -135,16 +155,12 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public void stop()
    {
-      if (spawnUIs) ui.stop();
-      module.stop();
+      ThreadTools.sleepSeconds(2.0);
 
       ExceptionTools.handle(() -> slamMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
 
       if (launchSegmentation)
       {
-         if (spawnUIs)
-            planarSegmentationUI.stop();
-         segmentationModule.stop();
          ExceptionTools.handle(() -> segmentationMessager.closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
       }
 
@@ -153,6 +169,25 @@ public class AtlasSLAMBasedREAStandaloneLauncher
 
    public static void main(String[] args)
    {
-      new AtlasSLAMBasedREAStandaloneLauncher(true, DomainFactory.PubSubImplementation.FAST_RTPS);
+      JavaProcessManager manager = new JavaProcessManager();
+      manager.runOrRegister("AtlasSLAMBasedREA", () -> new AtlasSLAMBasedREAStandaloneLauncher(true, true, FAST_RTPS));
+      ArrayList<Process> processes = manager.spawnProcesses(AtlasSLAMBasedREAStandaloneLauncher.class, args);
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "test_node");
+      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+
+         ThreadTools.startAsDaemon(() ->
+                                   {
+                                      ThreadTools.sleepSeconds(2.0);
+                                      for (Process process : processes)
+                                      {
+                                         LogTools.info("Destoying process  forcibly");
+                                         process.destroyForcibly();
+                                      }
+                                      ros2Node.destroy();
+                                   }, "DestroyThread");
+      });
    }
 }

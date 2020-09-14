@@ -1,12 +1,18 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -17,6 +23,7 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.string.StringTools;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,8 +36,10 @@ public class LookAndStepLocalizationTask
    protected UIPublisher uiPublisher;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
    protected RemoteSyncedRobotModel syncedRobot;
-   protected Runnable reachedGoalOutput;
+   protected Runnable clearAndActivateBodyPathPlanning;
+   protected Runnable broadcastReachedGoal;
    protected Consumer<LookAndStepLocalizationResult> footstepPlanningOutput;
+   protected Notification finishedWalkingNotification;
 
    public static class LookAndStepLocalization extends LookAndStepLocalizationTask
    {
@@ -44,13 +53,17 @@ public class LookAndStepLocalizationTask
                              UIPublisher uiPublisher,
                              LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
                              RemoteSyncedRobotModel syncedRobot,
-                             Runnable reachedGoalOutput,
+                             Notification finishedWalkingNotification,
+                             Runnable clearAndActivateBodyPathPlanning,
+                             Runnable broadcastReachedGoal,
                              SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps,
                              Consumer<LookAndStepLocalizationResult> footstepPlanningOutput)
       {
          this.lastCommandedFootsteps = lastCommandedFootsteps;
          this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
-         this.reachedGoalOutput = reachedGoalOutput;
+         this.finishedWalkingNotification = finishedWalkingNotification;
+         this.clearAndActivateBodyPathPlanning = clearAndActivateBodyPathPlanning;
+         this.broadcastReachedGoal = broadcastReachedGoal;
          this.footstepPlanningOutput = footstepPlanningOutput;
          this.statusLogger = statusLogger;
          this.uiPublisher = uiPublisher;
@@ -88,12 +101,11 @@ public class LookAndStepLocalizationTask
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          syncedRobot.update();
 
-         // if lastCommandedFootsteps are null we are going to assume the robot is standing still TODO: Check this later
-         stanceForChecking = new SideDependentList<>();
+         eventualStanceFeet = new SideDependentList<>();
          for (RobotSide side : RobotSide.values)
          {
             FramePose3D solePose = new FramePose3D();
-            if (lastCommandedFootsteps.get(side) == null)
+            if (lastCommandedFootsteps.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
             {
                solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -104,14 +116,14 @@ public class LookAndStepLocalizationTask
                {
                   foothold.addVertex(vertex);
                }
-               stanceForChecking.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
+               eventualStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
             }
             else
             {
                lastCommandedFootsteps.get(side).getFootstepPose(solePose);
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
-               stanceForChecking.set(side,
-                                     new MinimalFootstep(side,
+               eventualStanceFeet.set(side,
+                                      new MinimalFootstep(side,
                                                          solePose,
                                                          lastCommandedFootsteps.get(side).getFoothold(),
                                                          side.getPascalCaseName() + " Commanded Stance"));
@@ -123,52 +135,65 @@ public class LookAndStepLocalizationTask
    }
 
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
-   protected SideDependentList<MinimalFootstep> stanceForChecking;
+   protected SideDependentList<MinimalFootstep> eventualStanceFeet;
    protected CapturabilityBasedStatus capturabilityBasedStatus;
 
    protected void run()
    {
-      statusLogger.info("Finding next sub goal for footstep planning...");
+      statusLogger.info("Localizing eventual pose to body path...");
 
-      FramePose3D initialPoseBetweenFeet = new FramePose3D();
-      initialPoseBetweenFeet.setToZero(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
-      double midFeetZ = initialPoseBetweenFeet.getZ();
+      Pose3D midFeetPose = new Pose3D(eventualStanceFeet.get(RobotSide.LEFT).getSolePoseInWorld());
+      midFeetPose.interpolate(eventualStanceFeet.get(RobotSide.RIGHT).getSolePoseInWorld(), 0.5);
 
-      FramePose3D pelvisPose = new FramePose3D();
-      pelvisPose.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
-      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FramePose3D subGoalPoseBetweenFeet = new FramePose3D();
-      subGoalPoseBetweenFeet.setIncludingFrame(pelvisPose);
-      subGoalPoseBetweenFeet.setZ(midFeetZ);
+      Vector3D midFeetZNormal = new Vector3D(Axis3D.Z);
+      midFeetPose.getOrientation().transform(midFeetZNormal);
+      Quaternion toZUp = new Quaternion();
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(midFeetZNormal, Axis3D.Z, toZUp);
+      midFeetPose.appendRotation(toZUp);
 
       // find closest point along body path plan
       Point3D closestPointAlongPath = new Point3D();
-      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, subGoalPoseBetweenFeet.getPosition(), closestPointAlongPath);
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, midFeetPose.getPosition(), closestPointAlongPath);
 
-      uiPublisher.publishToUI(ClosestPointForUI, new Pose3D(closestPointAlongPath, new Quaternion()));
+      Pose3D eventualPoseAlongPath = new Pose3D(midFeetPose);
+      eventualPoseAlongPath.getPosition().set(closestPointAlongPath);
+      uiPublisher.publishToUI(ClosestPointForUI, eventualPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
       boolean reachedGoalZone = distanceToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionRadius();
-      double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw()));
+      double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFeetPose.getYaw(), terminalGoal.getYaw()));
       reachedGoalZone &= yawToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
 
+      statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
+      statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
+                                           FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
+                                           lookAndStepBehaviorParameters.getGoalSatisfactionRadius(),
+                                           FormattingTools.getFormattedDecimal3D(yawToExactGoal),
+                                           lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
       if (reachedGoalZone)
       {
-         statusLogger.warn("Goal reached.");
-         reachedGoalOutput.run();
+         statusLogger.info("Eventual pose reaches goal.");
+         clearAndActivateBodyPathPlanning.run();
+         ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
       else
       {
-         statusLogger.info("Remaining travel distance: {} yaw: {}", distanceToExactGoal, yawToExactGoal);
          LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
                                                                                   closestSegmentIndex,
-                                                                                  subGoalPoseBetweenFeet,
-                                                                                  bodyPathPlan,
-                                                                                  stanceForChecking);
+                                                                                  midFeetPose,
+                                                                                  bodyPathPlan, eventualStanceFeet);
          footstepPlanningOutput.accept(result);
       }
+   }
+
+   /** Here we wait until the robot is finished walking to report reached goal */
+   private void reachedGoalPublicationThread()
+   {
+      statusLogger.info("Waiting for walking to complete...");
+      finishedWalkingNotification.poll();
+      finishedWalkingNotification.blockingPoll();
+      statusLogger.info("Goal reached.");
+      broadcastReachedGoal.run();
    }
 }

@@ -164,7 +164,6 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public void updateCurrentPlan()
    {
       timeDelay.set(0.0);
-      previousTime.set(getTimeInCurrentState());
       icpPlanner.updateCurrentPlan();
    }
 
