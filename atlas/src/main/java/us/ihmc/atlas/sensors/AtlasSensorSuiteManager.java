@@ -254,7 +254,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withType(RobotConfigurationData.class);
+      ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withTypeName(RobotConfigurationData.class);
       LidarScanPublisher lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
       lidarScanPublisher.setShadowFilter();

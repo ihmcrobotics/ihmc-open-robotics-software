@@ -110,7 +110,7 @@ public class NetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic topicName = inputTopic.withType(multipleMessageType);
+      ROS2Topic topicName = inputTopic.withTypeName(multipleMessageType);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, multipleMessageType, topicName,
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
@@ -159,7 +159,7 @@ public class NetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Topic topicName = inputTopic.withType(MessageCollection.class);
+      ROS2Topic topicName = inputTopic.withTypeName(MessageCollection.class);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MessageCollection.class, topicName, s -> {
          s.takeNextData(messageCollection, null);
 
@@ -211,7 +211,7 @@ public class NetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2Topic topicName = inputTopic.withType(messageClass);
+         ROS2Topic topicName = inputTopic.withTypeName(messageClass);
 
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, messageClass, topicName, s -> {
             s.takeNextData(messageLocalInstance, null);

@@ -42,7 +42,7 @@ public abstract class BehaviorService
    
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      ROS2Topic topicName = controllerInputTopic.withType(messageType);
+      ROS2Topic topicName = controllerInputTopic.withTypeName(messageType);
       return createPublisher(messageType, topicName);
    }
 
@@ -67,7 +67,7 @@ public abstract class BehaviorService
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      ROS2Topic topicName = controllerOutputTopic.withType(messageType);
+      ROS2Topic topicName = controllerOutputTopic.withTypeName(messageType);
       createSubscriber(messageType, topicName, consumer);
    }
 

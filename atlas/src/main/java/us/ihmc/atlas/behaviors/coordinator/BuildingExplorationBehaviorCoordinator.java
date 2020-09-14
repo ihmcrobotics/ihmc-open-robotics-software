@@ -219,8 +219,8 @@ public class BuildingExplorationBehaviorCoordinator
       public LookAndStepState(ROS2Node ros2Node)
       {
          BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
-         goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class));
-         resetPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class));
+         goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withTypeName(Pose3D.class));
+         resetPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withTypeName(Empty.class));
 
          messager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
                                               "127.0.0.1",

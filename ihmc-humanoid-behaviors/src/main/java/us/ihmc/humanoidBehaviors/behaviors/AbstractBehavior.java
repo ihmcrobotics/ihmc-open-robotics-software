@@ -136,7 +136,7 @@ public abstract class AbstractBehavior implements RobotController
    @SuppressWarnings("unchecked")
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
-      ROS2Topic<T> typedNamedTopic = topicName.withType(messageType);
+      ROS2Topic<T> typedNamedTopic = topicName.withTypeName(messageType);
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(typedNamedTopic);
 
       if (publisher == null) // !containsKey
