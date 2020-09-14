@@ -89,22 +89,22 @@ public class ROS2Tools
          = REA.withRobot(null).withInput().withType(PlanarRegionsListMessage.class).withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withType(REAStateRequestMessage.class);
 
-   public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withType(VideoPacket.class);
+   public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = VIDEO.withModule(D435_NAME);
 
-   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withType(StereoVisionPointCloudMessage.class)
-                                                                                            .withSuffix(D435_NAME);
-   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = IHMC_ROOT.withType(StereoVisionPointCloudMessage.class);
-   public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withType(StampedPosePacket.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
+                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    /** Output regions from Lidar (Multisense) from REA */
-   public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withType(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_REA = ROS2Tools.REA.withOutput().withPrefix("stereo").withType(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_REA = ROS2Tools.REA.withOutput().withPrefix("stereo").withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from Atlas Realsense SLAM module */
-   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MODULE.withOutput().withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MAP.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
-   public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
@@ -130,7 +130,7 @@ public class ROS2Tools
 
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
    {
-      return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
+      return new ROS2Topic<>().withTypeName(messageType).withTypeName();
    }
 
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<?> topicName)

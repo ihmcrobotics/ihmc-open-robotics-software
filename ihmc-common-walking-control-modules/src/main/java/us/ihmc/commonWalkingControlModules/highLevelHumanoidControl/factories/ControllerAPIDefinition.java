@@ -193,11 +193,11 @@ public class ControllerAPIDefinition
    {
       if (inputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withType(messageClass);
+         return getInputTopic(robotName).withTypeName(messageClass);
       }
       if (outputMessageClasses.contains(messageClass))
       {
-         return getOutputTopic(robotName).withType(messageClass);
+         return getOutputTopic(robotName).withTypeName(messageClass);
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);

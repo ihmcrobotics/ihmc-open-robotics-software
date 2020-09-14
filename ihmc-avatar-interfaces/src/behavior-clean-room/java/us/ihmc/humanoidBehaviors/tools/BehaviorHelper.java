@@ -260,7 +260,7 @@ public class BehaviorHelper
 
    public ROS2PlanarRegionsInput createPlanarRegionsInput(String specifier)
    {
-      ROS2Topic topic = ROS2Tools.REA.withOutput().withType(PlanarRegionsListMessage.class).withNaming(typeName -> typeName + "_" + specifier);
+      ROS2Topic topic = ROS2Tools.REA.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix(specifier);
       return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, topic.getName());
    }
 
