@@ -225,7 +225,7 @@ public class SupportSequence implements ContactSupplier
          RobotSide stepSide = footstep.getRobotSide();
 
          // Add swing - no support for foot
-         addLiftOffPolygon(footstep, footstepTiming, stepStartTime);
+         addSwingPolygon(footstep, footstepTiming, stepStartTime);
          footSupportSequences.get(stepSide).add().clearAndUpdate();
          footSupportInitialTimes.get(stepSide).add(stepStartTime + footstepTiming.getTransferTime());
 
@@ -317,7 +317,7 @@ public class SupportSequence implements ContactSupplier
 //      }
    }
 
-   private void addLiftOffPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
+   private void addSwingPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
    {
 //      boolean doPartialFootholdLiftoff = checkForLiftoff(footstep, footstepTiming);
 

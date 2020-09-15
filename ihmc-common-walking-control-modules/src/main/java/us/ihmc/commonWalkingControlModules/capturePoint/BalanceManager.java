@@ -394,10 +394,7 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
-//      if (hasLastFootstep.getValue())
-//         supportSeqence.update(footsteps, footstepTimings, lastFootstep, lastFootstepTiming);
-//      else
-         supportSeqence.update(footsteps, footstepTimings);
+      supportSeqence.update(footsteps, footstepTimings);
 
       copTrajectory.update(supportSeqence, finalTransferDuration);
 
@@ -408,10 +405,8 @@ public class BalanceManager
 
       if (footstepTimings.isEmpty())
          yoFinalDesiredICP.setToNaN();
-//      else // TODO
-//         nummericalICPPlanner.getIcp(currentTiming.getStepTime() - timeInSupportSequence.getValue(), yoFinalDesiredICP);
 
-      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
+      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence! // FIXME is this right
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
          timeInSupportSequence.add(controllerToolbox.getControlDT());
 
