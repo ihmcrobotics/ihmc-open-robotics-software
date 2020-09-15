@@ -23,6 +23,7 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.List;
