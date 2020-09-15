@@ -10,11 +10,9 @@ import java.util.function.Consumer;
 
 public class JavaFXReactiveSlider
 {
-   private final Consumer<Number> action;
-   private volatile boolean changing = false;
-
    private static final double MAX_ACTION_FREQUENCY = UnitConversions.hertzToSeconds(4);
 
+   private final Consumer<Number> action;
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -23,7 +21,6 @@ public class JavaFXReactiveSlider
       this.action = action;
 
       slider.valueProperty().addListener(this::valueListener);
-      slider.valueChangingProperty().addListener(this::valueChangingListener);
    }
 
    private void valueListener(Observable observable, Number oldValue, Number newValue)
@@ -36,10 +33,5 @@ public class JavaFXReactiveSlider
       throttleTimer.sleepUntilExpiration(MAX_ACTION_FREQUENCY);
       action.accept(newValue);
       throttleTimer.reset();
-   }
-
-   private void valueChangingListener(Observable observable, Boolean wasChanging, Boolean isChanging)
-   {
-
    }
 }
