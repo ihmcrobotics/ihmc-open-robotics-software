@@ -25,6 +25,7 @@ import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.javafx.JavaFXReactiveSlider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -77,9 +78,11 @@ public class DirectRobotUIController extends Group
          neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class,
                                                            ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput());
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-         setupSlider(neckSlider, () ->
+         new JavaFXReactiveSlider(stanceHeightSlider, value -> LogTools.info("Stance height {}", value));
+         new JavaFXReactiveSlider(leanForwardSlider, value -> LogTools.info("Lean forward {}", value));
+         new JavaFXReactiveSlider(neckSlider, sliderValue ->
          {
-            double percent = neckSlider.getValue() / 100.0;
+            double percent = sliderValue.doubleValue() / 100.0;
             percent = 1.0 - percent;
             MathTools.checkIntervalContains(percent, 0.0, 1.0);
             double range = neckJoint.getJointLimitUpper() - neckJoint.getJointLimitLower();
@@ -87,7 +90,6 @@ public class DirectRobotUIController extends Group
             LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckSlider.getValue(), jointAngle);
             neckTrajectoryPublisher.publish(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
          });
-
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
       {
@@ -146,9 +148,6 @@ public class DirectRobotUIController extends Group
       supportRegionScale.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> sendSupportRegionParameters());
       enableSupportRegions.setSelected(true);
       enableSupportRegions.selectedProperty().addListener(observable -> sendSupportRegionParameters());
-
-      setupSlider(stanceHeightSlider, () -> LogTools.info("stanceHeightSlider: {}", stanceHeightSlider.getValue()));
-      setupSlider(leanForwardSlider, () -> LogTools.info("leanForwardSlider: {}", leanForwardSlider.getValue()));
    }
 
    private void setupSlider(Slider slider, Runnable onChange)
