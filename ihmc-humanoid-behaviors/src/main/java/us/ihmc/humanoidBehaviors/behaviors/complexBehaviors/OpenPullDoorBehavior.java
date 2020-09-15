@@ -499,15 +499,12 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addState(OpenDoorState.DONE, done);
       factory.addState(OpenDoorState.FAILED, failed);
 
-      factory.addTransition(OpenDoorState.PULL_ON_DOOR, OpenDoorState.FAILED, t -> pullDoorALittle.isDone());// &&doorOpenDetectorBehaviorService.getLastupdateTime()>=timeFirstDoorPullFinished && !doorOpenDetectorBehaviorService.isDoorOpen());
-     
-      //these checks have to be removed until the video delays are fixed.
-      //factory.addTransition(OpenDoorState.PULL_ON_DOOR, OpenDoorState.PULL_ON_DOOR_MORE, t -> doorOpenDetectorBehaviorService.isDoorOpen());
+     // factory.addTransition(OpenDoorState.PULL_ON_DOOR, OpenDoorState.FAILED, t -> pullDoorALittle.isDone() &&doorOpenDetectorBehaviorService.getLastupdateTime()>=timeFirstDoorPullFinished && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PULL_ON_DOOR, OpenDoorState.PULL_ON_DOOR_MORE, t -> pullDoorMore.isDone());//doorOpenDetectorBehaviorService.isDoorOpen());
       
       
-      factory.addTransition(OpenDoorState.PULL_ON_DOOR_MORE, OpenDoorState.FAILED, t -> pullDoorMore.isDone());// && !doorOpenDetectorBehaviorService.isDoorOpen());
-      //these checks have to be removed until the video delays are fixed.
-      //factory.addTransition(OpenDoorState.PULL_ON_DOOR_MORE, OpenDoorState.PUT_LEFT_HAND_IN_DOOR, t -> pullDoorMore.isDone()&&doorOpenDetectorBehaviorService.isDoorOpen());
+     // factory.addTransition(OpenDoorState.PULL_ON_DOOR_MORE, OpenDoorState.FAILED, t -> pullDoorMore.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PULL_ON_DOOR_MORE, OpenDoorState.PUT_LEFT_HAND_IN_DOOR, t -> pullDoorMore.isDone());//&&doorOpenDetectorBehaviorService.isDoorOpen());
       
       
       factory.addStateAndDoneTransition(OpenDoorState.PUT_LEFT_HAND_IN_DOOR, putLeftHandInDoor, OpenDoorState.RELEASE_DOOR_KNOB);
