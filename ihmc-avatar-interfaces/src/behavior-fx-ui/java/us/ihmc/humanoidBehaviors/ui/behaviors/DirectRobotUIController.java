@@ -34,8 +34,6 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class DirectRobotUIController extends Group
 {
    @FXML private ComboBox<Integer> pumpPSI;
@@ -150,24 +148,6 @@ public class DirectRobotUIController extends Group
       enableSupportRegions.selectedProperty().addListener(observable -> sendSupportRegionParameters());
    }
 
-   private void setupSlider(Slider slider, Runnable onChange)
-   {
-      AtomicBoolean changing = new AtomicBoolean(false);
-      slider.valueProperty().addListener((observable, oldValue, newValue) -> {
-         if (!changing.get())
-         {
-            onChange.run();
-         }
-      });
-      slider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
-         changing.set(isChanging);
-         if (wasChanging)
-         {
-            onChange.run();
-         }
-      });
-   }
-
    @FXML public void homeAll()
    {
       GoHomeMessage homeLeftArm = new GoHomeMessage();
@@ -270,10 +250,5 @@ public class DirectRobotUIController extends Group
    @FXML public void clearSLAM()
    {
       clearSLAMPublisher.publish(new Empty());
-   }
-
-   public void stanceHeightSliderDragged()
-   {
-      LogTools.info("Stand height slider drag exited: {}", stanceHeightSlider.getValue());
    }
 }
