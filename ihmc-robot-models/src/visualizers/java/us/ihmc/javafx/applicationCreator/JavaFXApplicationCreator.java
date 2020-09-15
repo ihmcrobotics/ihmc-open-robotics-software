@@ -2,6 +2,7 @@ package us.ihmc.javafx.applicationCreator;
 
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -74,6 +75,22 @@ public class JavaFXApplicationCreator extends Application
    public static void keepJavaFXAliveEvenAfterAllWindowsAreClosed()
    {
       Platform.setImplicitExit(false);
+   }
+
+   public static void buildJavaFXApplication(Runnable builder)
+   {
+      createAJavaFXApplication();
+      Platform.runLater(builder);
+   }
+
+   public static void buildJavaFXApplication(Consumer<Stage> builder)
+   {
+      createAJavaFXApplication();
+      Platform.runLater(() ->
+                        {
+                           Stage primaryStage = new Stage();
+                           builder.accept(primaryStage);
+                        });
    }
 
    /**
