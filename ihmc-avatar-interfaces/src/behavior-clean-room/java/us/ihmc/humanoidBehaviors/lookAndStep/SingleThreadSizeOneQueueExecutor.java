@@ -23,6 +23,7 @@ public class SingleThreadSizeOneQueueExecutor
 
       recreate();
    }
+
    private void recreate()
    {
       sizeOneQueue = new ArrayBlockingQueue<>(1);
