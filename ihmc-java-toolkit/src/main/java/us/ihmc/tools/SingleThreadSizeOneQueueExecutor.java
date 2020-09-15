@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.tools;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;

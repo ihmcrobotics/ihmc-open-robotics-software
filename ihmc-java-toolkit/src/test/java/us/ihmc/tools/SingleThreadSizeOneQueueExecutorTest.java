@@ -1,9 +1,9 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.tools;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
+import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
