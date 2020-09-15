@@ -13,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -24,6 +25,7 @@ import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.javafx.JavaFXReactiveSlider;
 import us.ihmc.log.LogTools;
@@ -55,6 +57,7 @@ public class DirectRobotUIController extends Group
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private IHMCROS2Publisher<Empty> clearSLAMPublisher;
    private IHMCROS2Publisher<NeckTrajectoryMessage> neckTrajectoryPublisher;
+   private IHMCROS2Publisher<PelvisHeightTrajectoryCommand> pelvisHeightTrajectoryPublisher;
    private LivePlanarRegionsGraphic lidarRegionsGraphic;
    private LivePlanarRegionsGraphic realsenseRegionsGraphic;
    private LivePlanarRegionsGraphic mapRegionsGraphic;
@@ -73,8 +76,10 @@ public class DirectRobotUIController extends Group
       {
          robotLowLevelMessenger = new AtlasDirectRobotInterface(ros2Node, robotModel);
 
-         neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class,
-                                                           ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput());
+         neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                           ControllerAPIDefinition.getTopic(NeckTrajectoryMessage.class, robotName));
+         pelvisHeightTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                                   ControllerAPIDefinition.getTopic(PelvisHeightTrajectoryCommand.class, robotName));
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
          new JavaFXReactiveSlider(stanceHeightSlider, value -> LogTools.info("Stance height {}", value));
          new JavaFXReactiveSlider(leanForwardSlider, value -> LogTools.info("Lean forward {}", value));
