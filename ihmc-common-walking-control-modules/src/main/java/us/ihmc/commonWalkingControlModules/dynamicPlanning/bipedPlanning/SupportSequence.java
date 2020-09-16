@@ -51,7 +51,7 @@ public class SupportSequence implements ContactSupplier
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
-   private final CoPTrajectoryParametersReadOnly parameters;
+   private final CoPTrajectoryPolygonParametersReadOnly parameters;
 
    private final RecyclingArrayList<ConvexPolygon2D> supportPolygons = new RecyclingArrayList<>(INITIAL_CAPACITY, ConvexPolygon2D.class);
    private final TDoubleArrayList supportInitialTimes = new TDoubleArrayList(INITIAL_CAPACITY, UNSET_TIME);
@@ -75,7 +75,7 @@ public class SupportSequence implements ContactSupplier
     */
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
 
-   public SupportSequence(CoPTrajectoryParametersReadOnly parameters,
+   public SupportSequence(CoPTrajectoryPolygonParametersReadOnly parameters,
                           ConvexPolygon2DReadOnly defaultSupportPolygon,
                           SideDependentList<? extends ReferenceFrame> soleFrames,
                           SideDependentList<? extends ReferenceFrame> soleZUpFrames)
@@ -83,7 +83,7 @@ public class SupportSequence implements ContactSupplier
       this(parameters, defaultSupportPolygon, soleFrames, soleZUpFrames, null, null, null);
    }
 
-   public SupportSequence(CoPTrajectoryParametersReadOnly parameters,
+   public SupportSequence(CoPTrajectoryPolygonParametersReadOnly parameters,
                           ConvexPolygon2DReadOnly defaultSupportPolygon,
                           SideDependentList<? extends ReferenceFrame> soleFrames,
                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -225,7 +225,8 @@ public class SupportSequence implements ContactSupplier
          RobotSide stepSide = footstep.getRobotSide();
 
          // Add swing - no support for foot
-         addSwingPolygon(footstep, footstepTiming, stepStartTime);
+         addMidStanceFootPolygon(footstep, footstepTiming, stepStartTime);
+         addToeOffPolygon(footstep, footstepTiming, stepStartTime);
          footSupportSequences.get(stepSide).add().clearAndUpdate();
          footSupportInitialTimes.get(stepSide).add(stepStartTime + footstepTiming.getTransferTime());
 
@@ -317,26 +318,20 @@ public class SupportSequence implements ContactSupplier
 //      }
    }
 
-   private void addSwingPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
+   private void addMidStanceFootPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
    {
-//      boolean doPartialFootholdLiftoff = checkForLiftoff(footstep, footstepTiming);
 
+   }
+   private void addToeOffPolygon(Footstep footstep, FootstepTiming footstepTiming, double stepStartTime)
+   {
       RobotSide stepSide = footstep.getRobotSide();
       PoseReferenceFrame stepFrame = last(stepFrames.get(stepSide));
 
-//      if (doPartialFootholdLiftoff)
-//      {
-//         double initialTime = stepStartTime + footstepTiming.getTransferTime() - footstepTiming.getLiftoffDuration();
-//         FrameConvexPolygon2D liftoffPolygon = insertAt(stepSide, initialTime);
-//         if (computeLiftoffPitch(footstep) > 0.0)
-//            computeToePolygon(liftoffPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
-//         else
-//            computeHeelPolygon(liftoffPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
-//      }
       if (shouldDoToeOff(last(stepFrames.get(stepSide.getOppositeSide())), stepFrame))
       {
          FrameConvexPolygon2DBasics liftoffPolygon = footSupportSequences.get(stepSide).add();
          computeToePolygon(liftoffPolygon, movingPolygonsInSole.get(stepSide), stepFrame);
+
          // TODO: This timing is a heuristic. Make this tunable.
          footSupportInitialTimes.get(stepSide).add(stepStartTime + footstepTiming.getTransferTime() / 2.0);
       }
