@@ -12,48 +12,40 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsToolboxConfigurationMessage> implements Settable<KinematicsToolboxConfigurationMessage>, EpsilonComparable<KinematicsToolboxConfigurationMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies how much high joint velocity values should be penalized in the optimization problem.
             * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
             * A value of -1 will result in the solver using its default value.
             */
    public double joint_velocity_weight_ = -1.0;
-
    /**
             * Specifying how much high joint acceleration values should be penalized in the optimization problem.
             * A value of -1 will result in the solver using its default value.
             */
    public double joint_acceleration_weight_ = -1.0;
-
    /**
             * When true, the solver will enforce the joint velocity limits as defined in the robot model.
             * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
             */
    public boolean enable_joint_velocity_limits_;
-
    /**
             * When true, the solver will ignore the joint velocity limits.
             * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
             */
    public boolean disable_joint_velocity_limits_;
-
    /**
             * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
             * In case it has undesirable effects, use this flag to disable it.
             */
    public boolean disable_collision_avoidance_;
-
    /**
             * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
             */
    public boolean enable_collision_avoidance_;
-
    /**
             * By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
             * For instance, if the user sends a command for controlling a certain body, the command will persist even if the user stops sending it.
@@ -63,19 +55,16 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * When persistence is disabled, it is strongly recommended to use KinematicsToolboxInputCollectionMessage to send inputs to the toolbox.
             */
    public boolean disable_input_persistence_;
-
    /**
             * In case input persistence has been disabled, use this flat to re-enable it while leaving disable_input_persistence to false.
             */
    public boolean enable_input_persistence_;
-
    /**
             * When true, the solver enforces the solution to have the projection of the center of mass contained
             * inside the current support polygon. The support polygon can be determined automatically using the controller's ouput if running.
             * The support polygon can also be defined by the user by sending a KinematicsToolboxContactStateMessage.
             */
    public boolean enable_support_polygon_constraint_;
-
    /**
             * When true, this disables the support polygon constraint on the center of mass.
             */
@@ -83,18 +72,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
    public KinematicsToolboxConfigurationMessage()
    {
-
-
-
-
-
-
-
-
-
-
-
-
    }
 
    public KinematicsToolboxConfigurationMessage(KinematicsToolboxConfigurationMessage other)
@@ -105,41 +82,29 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
    public void set(KinematicsToolboxConfigurationMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       joint_velocity_weight_ = other.joint_velocity_weight_;
 
-
       joint_acceleration_weight_ = other.joint_acceleration_weight_;
-
 
       enable_joint_velocity_limits_ = other.enable_joint_velocity_limits_;
 
-
       disable_joint_velocity_limits_ = other.disable_joint_velocity_limits_;
-
 
       disable_collision_avoidance_ = other.disable_collision_avoidance_;
 
-
       enable_collision_avoidance_ = other.enable_collision_avoidance_;
-
 
       disable_input_persistence_ = other.disable_input_persistence_;
 
-
       enable_input_persistence_ = other.enable_input_persistence_;
 
-
       enable_support_polygon_constraint_ = other.enable_support_polygon_constraint_;
-
 
       disable_support_polygon_constraint_ = other.disable_support_polygon_constraint_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -155,7 +120,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       return sequence_id_;
    }
-
 
    /**
             * Specifies how much high joint velocity values should be penalized in the optimization problem.
@@ -176,7 +140,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return joint_velocity_weight_;
    }
 
-
    /**
             * Specifying how much high joint acceleration values should be penalized in the optimization problem.
             * A value of -1 will result in the solver using its default value.
@@ -193,7 +156,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       return joint_acceleration_weight_;
    }
-
 
    /**
             * When true, the solver will enforce the joint velocity limits as defined in the robot model.
@@ -212,7 +174,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return enable_joint_velocity_limits_;
    }
 
-
    /**
             * When true, the solver will ignore the joint velocity limits.
             * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
@@ -229,7 +190,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       return disable_joint_velocity_limits_;
    }
-
 
    /**
             * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
@@ -248,7 +208,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return disable_collision_avoidance_;
    }
 
-
    /**
             * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
             */
@@ -263,7 +222,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       return enable_collision_avoidance_;
    }
-
 
    /**
             * By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
@@ -290,7 +248,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return disable_input_persistence_;
    }
 
-
    /**
             * In case input persistence has been disabled, use this flat to re-enable it while leaving disable_input_persistence to false.
             */
@@ -305,7 +262,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       return enable_input_persistence_;
    }
-
 
    /**
             * When true, the solver enforces the solution to have the projection of the center of mass contained
@@ -325,7 +281,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    {
       return enable_support_polygon_constraint_;
    }
-
 
    /**
             * When true, this disables the support polygon constraint on the center of mass.
@@ -360,36 +315,25 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_velocity_weight_, other.joint_velocity_weight_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_acceleration_weight_, other.joint_acceleration_weight_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_joint_velocity_limits_, other.enable_joint_velocity_limits_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_joint_velocity_limits_, other.disable_joint_velocity_limits_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_collision_avoidance_, other.disable_collision_avoidance_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_collision_avoidance_, other.enable_collision_avoidance_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_input_persistence_, other.disable_input_persistence_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_input_persistence_, other.enable_input_persistence_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_support_polygon_constraint_, other.enable_support_polygon_constraint_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_support_polygon_constraint_, other.disable_support_polygon_constraint_, epsilon)) return false;
 
@@ -406,36 +350,25 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       KinematicsToolboxConfigurationMessage otherMyClass = (KinematicsToolboxConfigurationMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.joint_velocity_weight_ != otherMyClass.joint_velocity_weight_) return false;
 
-
       if(this.joint_acceleration_weight_ != otherMyClass.joint_acceleration_weight_) return false;
-
 
       if(this.enable_joint_velocity_limits_ != otherMyClass.enable_joint_velocity_limits_) return false;
 
-
       if(this.disable_joint_velocity_limits_ != otherMyClass.disable_joint_velocity_limits_) return false;
-
 
       if(this.disable_collision_avoidance_ != otherMyClass.disable_collision_avoidance_) return false;
 
-
       if(this.enable_collision_avoidance_ != otherMyClass.enable_collision_avoidance_) return false;
-
 
       if(this.disable_input_persistence_ != otherMyClass.disable_input_persistence_) return false;
 
-
       if(this.enable_input_persistence_ != otherMyClass.enable_input_persistence_) return false;
 
-
       if(this.enable_support_polygon_constraint_ != otherMyClass.enable_support_polygon_constraint_) return false;
-
 
       if(this.disable_support_polygon_constraint_ != otherMyClass.disable_support_polygon_constraint_) return false;
 
@@ -449,37 +382,26 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxConfigurationMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("joint_velocity_weight=");
       builder.append(this.joint_velocity_weight_);      builder.append(", ");
-
       builder.append("joint_acceleration_weight=");
       builder.append(this.joint_acceleration_weight_);      builder.append(", ");
-
       builder.append("enable_joint_velocity_limits=");
       builder.append(this.enable_joint_velocity_limits_);      builder.append(", ");
-
       builder.append("disable_joint_velocity_limits=");
       builder.append(this.disable_joint_velocity_limits_);      builder.append(", ");
-
       builder.append("disable_collision_avoidance=");
       builder.append(this.disable_collision_avoidance_);      builder.append(", ");
-
       builder.append("enable_collision_avoidance=");
       builder.append(this.enable_collision_avoidance_);      builder.append(", ");
-
       builder.append("disable_input_persistence=");
       builder.append(this.disable_input_persistence_);      builder.append(", ");
-
       builder.append("enable_input_persistence=");
       builder.append(this.enable_input_persistence_);      builder.append(", ");
-
       builder.append("enable_support_polygon_constraint=");
       builder.append(this.enable_support_polygon_constraint_);      builder.append(", ");
-
       builder.append("disable_support_polygon_constraint=");
       builder.append(this.disable_support_polygon_constraint_);
       builder.append("}");
