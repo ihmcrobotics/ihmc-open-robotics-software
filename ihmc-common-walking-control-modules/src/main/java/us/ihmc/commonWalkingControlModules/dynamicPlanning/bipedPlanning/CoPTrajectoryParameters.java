@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-public class CoPTrajectoryParameters implements CoPTrajectoryParametersReadOnly
+public class CoPTrajectoryParameters
 {
-   public double stepLengthToDoToeOff = 0.05;
+   public double minimumDistanceInsidePolygon = 0.01;
 
-   public double getStepLengthToPlanToeOff()
+   public double getMinimumDistanceInsidePolygon()
    {
-      return stepLengthToDoToeOff;
+      return minimumDistanceInsidePolygon;
    }
 }

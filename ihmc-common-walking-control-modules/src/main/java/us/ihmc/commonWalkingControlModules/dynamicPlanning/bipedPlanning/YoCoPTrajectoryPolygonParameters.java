@@ -4,11 +4,11 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class YoCoPTrajectoryParameters implements CoPTrajectoryParametersReadOnly
+public class YoCoPTrajectoryPolygonParameters implements CoPTrajectoryPolygonParametersReadOnly
 {
    private final DoubleProvider stepLengthPlanToeOff;
 
-   public YoCoPTrajectoryParameters(CoPTrajectoryParametersReadOnly defaultParameters, YoRegistry registry)
+   public YoCoPTrajectoryPolygonParameters(CoPTrajectoryPolygonParametersReadOnly defaultParameters, YoRegistry registry)
    {
       stepLengthPlanToeOff = new DoubleParameter("stepLengthToPlanToeOff", registry, defaultParameters.getStepLengthToPlanToeOff());
    }
