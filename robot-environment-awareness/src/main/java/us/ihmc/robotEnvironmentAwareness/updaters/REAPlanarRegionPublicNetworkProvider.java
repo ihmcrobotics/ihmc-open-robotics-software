@@ -6,9 +6,13 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersConverter;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.ros2.NewMessageListener;
@@ -33,10 +37,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    private final ROS2Topic<PlanarRegionsListMessage> outputTopic;
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
-   public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic,
-                                               ROS2Topic lidarOutputTopic,
-                                               ROS2Topic stereoOutputTopic,
-                                               ROS2Topic depthOutputTopic)
+   public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic, ROS2Topic lidarOutputTopic, ROS2Topic stereoOutputTopic, ROS2Topic depthOutputTopic)
    {
       this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            outputTopic,
@@ -68,8 +69,20 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       isUsingLidar = messager.createInput(REAModuleAPI.LidarBufferEnable);
       isUsingStereoVision = messager.createInput(REAModuleAPI.StereoVisionBufferEnable);
       isUsingDepthCloud = messager.createInput(REAModuleAPI.DepthCloudBufferEnable);
-   }
 
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    NormalEstimationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersConverter.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PlanarRegionSegmentationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, REAParametersConverter.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PolygonizerParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersConverter.convertFromMessage(s.takeNextData())));
+   }
 
    @Override
    public void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated)
@@ -108,7 +121,10 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    @Override
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, REASourceType.STEREO_POINT_CLOUD.getTopicName(), stereoVisionPointCloudHandler);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           StereoVisionPointCloudMessage.class,
+                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           stereoVisionPointCloudHandler);
    }
 
    @Override
