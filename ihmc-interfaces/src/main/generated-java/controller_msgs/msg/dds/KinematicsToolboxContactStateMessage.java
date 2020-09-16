@@ -17,23 +17,19 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolboxContactStateMessage> implements Settable<KinematicsToolboxContactStateMessage>, EpsilonComparable<KinematicsToolboxContactStateMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies the minimum distance to keep the center of mass away from the support polygon's edges.
             */
    public double center_of_mass_margin_ = -1.0;
-
    /**
             * The list of active contact points to use evaluate the support polygon.
             * Each contact point is expected to be expressed in body frame.
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  contact_points_in_body_frame_;
-
    /**
             * The id used to retrieve the contacting body for each contact point.
             */
@@ -41,11 +37,7 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
 
    public KinematicsToolboxContactStateMessage()
    {
-
-
-
       contact_points_in_body_frame_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (20, new geometry_msgs.msg.dds.PointPubSubType());
-
       contacting_body_ids_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
 
 
@@ -59,18 +51,13 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
 
    public void set(KinematicsToolboxContactStateMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       center_of_mass_margin_ = other.center_of_mass_margin_;
 
-
       contact_points_in_body_frame_.set(other.contact_points_in_body_frame_);
-
       contacting_body_ids_.set(other.contacting_body_ids_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -86,7 +73,6 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
    {
       return sequence_id_;
    }
-
 
    /**
             * Specifies the minimum distance to keep the center of mass away from the support polygon's edges.
@@ -104,7 +90,6 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
    }
 
 
-
    /**
             * The list of active contact points to use evaluate the support polygon.
             * Each contact point is expected to be expressed in body frame.
@@ -113,7 +98,6 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
    {
       return contact_points_in_body_frame_;
    }
-
 
 
    /**
@@ -142,12 +126,9 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_of_mass_margin_, other.center_of_mass_margin_, epsilon)) return false;
-
 
       if (this.contact_points_in_body_frame_.size() != other.contact_points_in_body_frame_.size()) { return false; }
       else
@@ -155,7 +136,6 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
          for (int i = 0; i < this.contact_points_in_body_frame_.size(); i++)
          {  if (!this.contact_points_in_body_frame_.get(i).epsilonEquals(other.contact_points_in_body_frame_.get(i), epsilon)) return false; }
       }
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.contacting_body_ids_, other.contacting_body_ids_, epsilon)) return false;
 
@@ -172,15 +152,11 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
 
       KinematicsToolboxContactStateMessage otherMyClass = (KinematicsToolboxContactStateMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.center_of_mass_margin_ != otherMyClass.center_of_mass_margin_) return false;
 
-
       if (!this.contact_points_in_body_frame_.equals(otherMyClass.contact_points_in_body_frame_)) return false;
-
       if (!this.contacting_body_ids_.equals(otherMyClass.contacting_body_ids_)) return false;
 
       return true;
@@ -192,16 +168,12 @@ public class KinematicsToolboxContactStateMessage extends Packet<KinematicsToolb
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxContactStateMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("center_of_mass_margin=");
       builder.append(this.center_of_mass_margin_);      builder.append(", ");
-
       builder.append("contact_points_in_body_frame=");
       builder.append(this.contact_points_in_body_frame_);      builder.append(", ");
-
       builder.append("contacting_body_ids=");
       builder.append(this.contacting_body_ids_);
       builder.append("}");

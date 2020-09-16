@@ -40,15 +40,11 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -65,17 +61,13 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -87,15 +79,11 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
    public static void write(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_7(data.getHoldCurrentCenterOfMassXyPosition());
 
-
       cdr.write_type_7(data.getEnableAutoSupportPolygon());
-
 
       cdr.write_type_7(data.getHoldSupportRigidBodies());
 
@@ -103,16 +91,12 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
    public static void read(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setHoldCurrentCenterOfMassXyPosition(cdr.read_type_7());
       	
-
       data.setEnableAutoSupportPolygon(cdr.read_type_7());
       	
-
       data.setHoldSupportRigidBodies(cdr.read_type_7());
       	
 
@@ -121,26 +105,18 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final void serialize(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
-
       ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
-
       ser.write_type_7("hold_support_rigid_bodies", data.getHoldSupportRigidBodies());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
-
       data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
-
       data.setHoldSupportRigidBodies(ser.read_type_7("hold_support_rigid_bodies"));
    }
 
