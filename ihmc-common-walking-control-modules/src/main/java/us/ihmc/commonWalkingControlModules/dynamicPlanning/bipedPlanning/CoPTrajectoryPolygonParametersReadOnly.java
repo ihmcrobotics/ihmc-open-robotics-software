@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-public interface CoPTrajectoryParametersReadOnly
+public interface CoPTrajectoryPolygonParametersReadOnly
 {
    double getStepLengthToPlanToeOff();
 }
