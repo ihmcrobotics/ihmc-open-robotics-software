@@ -13,4 +13,8 @@ controller_msgs/QuixMotionStateMessage requested_motion_state
 
 bool execute_behavior
 
+bool continuous_walking
+
+controller_msgs/FlatStepTypeMessage flat_step_type
+
 
