@@ -135,16 +135,6 @@ public class LIDARBasedREAModule implements PerceptionModule
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
       planarRegionFeatureUpdater.bindControls();
 
-      networkProvider.registerMessager(reaMessager);
-      networkProvider.registerLidarScanHandler(reaMessager, this::dispatchLidarScanMessage);
-      networkProvider.registerDepthPointCloudHandler(reaMessager, this::dispatchDepthPointCloudMessage);
-      networkProvider.registerStereoVisionPointCloudHandler(reaMessager, this::dispatchStereoVisionPointCloudMessage);
-      networkProvider.registerStampedPosePacketHandler(reaMessager, this::dispatchStampedPosePacket);
-      networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
-      networkProvider.registerPlanarRegionsListRequestHandler(this::handleRequestPlanarRegionsListMessage);
-      networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
-      networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
-
       loadConfigurationFile(filePropertyHelper);
 
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
@@ -165,6 +155,16 @@ public class LIDARBasedREAModule implements PerceptionModule
       enableLidarBuffer = reaMessager.createInput(REAModuleAPI.LidarBufferEnable, true);
       enableDepthCloudBuffer = reaMessager.createInput(REAModuleAPI.DepthCloudBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
+
+      networkProvider.registerMessager(reaMessager);
+      networkProvider.registerLidarScanHandler(reaMessager, this::dispatchLidarScanMessage);
+      networkProvider.registerDepthPointCloudHandler(reaMessager, this::dispatchDepthPointCloudMessage);
+      networkProvider.registerStereoVisionPointCloudHandler(reaMessager, this::dispatchStereoVisionPointCloudMessage);
+      networkProvider.registerStampedPosePacketHandler(reaMessager, this::dispatchStampedPosePacket);
+      networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
+      networkProvider.registerPlanarRegionsListRequestHandler(this::handleRequestPlanarRegionsListMessage);
+      networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
+      networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
