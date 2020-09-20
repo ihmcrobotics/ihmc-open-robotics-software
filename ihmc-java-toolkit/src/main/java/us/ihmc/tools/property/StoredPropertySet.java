@@ -390,6 +390,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
       // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
       // of just save the file in the working directory
 
+      // TODO: This should probably use PathTools#findDirectoryInline
+
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
 
       Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
