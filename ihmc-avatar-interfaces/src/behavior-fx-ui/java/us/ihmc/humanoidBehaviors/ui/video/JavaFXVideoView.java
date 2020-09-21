@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors.ui.video;
 
-import controller_msgs.msg.dds.VideoPacket;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 
@@ -50,14 +50,14 @@ public class JavaFXVideoView extends ImageView
       executorService.shutdownNow();
    }
 
-   protected void acceptVideo(VideoPacket message)
+   protected void acceptVideo(IDLSequence.Byte compressedImageData)
    {
       if (running)
       {
          executorService.submit(() ->
          {
             // decompress and pack writableimage
-            BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().toArray());
+            BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(compressedImageData.toArray());
             LogTools.trace("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
 
             WritableImage nextImage = writableImageBuffer.next();
