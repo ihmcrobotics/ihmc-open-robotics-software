@@ -245,6 +245,7 @@ public class BehaviorUI
       {
          behaviorUIInterface.destroy();
       }
+      directRobotUIController.destroy();
       ros2Node.destroy();
    }
 }
