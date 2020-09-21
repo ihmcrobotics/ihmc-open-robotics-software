@@ -139,4 +139,9 @@ public class FootstepPlanWithTextGraphic extends Group
    {
       generateMeshes(new ArrayList<>());
    }
+
+   public void destroy()
+   {
+      executorService.shutdownNow();
+   }
 }

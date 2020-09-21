@@ -12,4 +12,6 @@ public abstract class BehaviorUIInterface extends Group
    public abstract void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel);
 
    public abstract void setEnabled(boolean enabled);
+
+   public abstract void destroy();
 }

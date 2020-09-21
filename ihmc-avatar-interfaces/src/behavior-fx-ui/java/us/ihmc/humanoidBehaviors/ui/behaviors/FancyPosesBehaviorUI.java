@@ -75,4 +75,10 @@ public class FancyPosesBehaviorUI extends BehaviorUIInterface
    {
       behaviorMessager.submitMessage(FancyPosesBehavior.API.GoToShutdownPose, false);
    }
+
+   @Override
+   public void destroy()
+   {
+
+   }
 }
