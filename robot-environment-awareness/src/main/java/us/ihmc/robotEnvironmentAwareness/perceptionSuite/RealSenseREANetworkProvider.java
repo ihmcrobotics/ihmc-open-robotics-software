@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
@@ -16,7 +16,6 @@ import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 public class RealSenseREANetworkProvider implements REANetworkProvider
@@ -48,17 +47,17 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
                                                     NormalEstimationParametersMessage.class,
                                                     inputTopic,
                                                     s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
-                                                                                REAParametersConverter.convertFromMessage(s.takeNextData())));
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionSegmentationParametersMessage.class,
                                                     inputTopic,
                                                     s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
-                                                                                REAParametersConverter.convertFromMessage(s.takeNextData())));
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PolygonizerParametersMessage.class,
                                                     inputTopic,
                                                     s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters,
-                                                                                REAParametersConverter.convertFromMessage(s.takeNextData())));
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
    }
 
    @Override

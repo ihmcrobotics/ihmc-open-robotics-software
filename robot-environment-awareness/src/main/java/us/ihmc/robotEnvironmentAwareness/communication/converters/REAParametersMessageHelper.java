@@ -7,7 +7,7 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 
-public class REAParametersConverter
+public class REAParametersMessageHelper
 {
    public static NormalEstimationParameters convertFromMessage(NormalEstimationParametersMessage message)
    {
@@ -52,5 +52,44 @@ public class REAParametersConverter
       parameters.setCutNarrowPassage(message.getCutNarrowPassage());
 
       return parameters;
+   }
+
+   public static void setToDefaults(NormalEstimationParametersMessage message)
+   {
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+
+      message.setSearchRadius(normalEstimationParameters.getSearchRadius());
+      message.setMaxDistanceFromPlane(normalEstimationParameters.getMaxDistanceFromPlane());
+      message.setMinConsensusRatio(normalEstimationParameters.getMinConsensusRatio());
+      message.setMaxAverageDeviationRatio(normalEstimationParameters.getMaxAverageDeviationRatio());
+      message.setNumberOfIterations(normalEstimationParameters.getNumberOfIterations());
+      message.setEnableLeastSquaresEstimation(normalEstimationParameters.isLeastSquaresEstimationEnabled());
+      message.setWeightByNumberOfHits(normalEstimationParameters.isWeightByNumberOfHits());
+   }
+
+   public static void setToDefaults(PlanarRegionSegmentationParametersMessage message)
+   {
+      PlanarRegionSegmentationParameters parameters = new PlanarRegionSegmentationParameters();
+
+      message.setSearchRadius(parameters.getSearchRadius());
+      message.setMaxDistanceFromPlane(parameters.getMaxDistanceFromPlane());
+      message.setMaxAngleFromPlane(parameters.getMaxAngleFromPlane());
+      message.setMinNormalQuality(parameters.getMinNormalQuality());
+      message.setMinRegionSize(parameters.getMinRegionSize());
+      message.setMaxStandardDeviation(parameters.getMaxStandardDeviation());
+      message.setMinVolumicDensity(parameters.getMinVolumicDensity());
+   }
+
+   public static void setToDefaults(PolygonizerParametersMessage message)
+   {
+      PolygonizerParameters parameters = new PolygonizerParameters();
+
+      message.setConcaveHullThreshold(parameters.getConcaveHullThreshold());
+      message.setMinNumberOfNodes(parameters.getMinNumberOfNodes());
+      message.setShallowAngleThreshold(parameters.getShallowAngleThreshold());
+      message.setPeakAngleThreshold(parameters.getPeakAngleThreshold());
+      message.setLengthThreshold(parameters.getLengthThreshold());
+      message.setDepthThreshold(parameters.getDepthThreshold());
+      message.setCutNarrowPassage(parameters.getCutNarrowPassage());
    }
 }
