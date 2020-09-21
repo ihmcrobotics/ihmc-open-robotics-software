@@ -445,4 +445,64 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       // Possible ass a single parameter that is shared between all joints here.
       return null;
    }
+
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+                                                                 ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                                 double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureSymmetricBehavior(behaviors,
+                                                                                                            jointMap,
+                                                                                                            jointName,
+                                                                                                            controlMode,
+                                                                                                            stiffness,
+                                                                                                            damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
+
+   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+                                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                                 double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureSymmetricBehavior(behaviors,
+                                                                                                            jointMap,
+                                                                                                            jointName,
+                                                                                                            controlMode,
+                                                                                                            stiffness,
+                                                                                                            damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
+
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+                                                        NeckJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                        double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureBehavior(behaviors,
+                                                                                                   jointMap,
+                                                                                                   jointName,
+                                                                                                   controlMode,
+                                                                                                   stiffness,
+                                                                                                   damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
+
+   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
+                                                        SpineJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                        double maxPositionError, double maxVelocityError)
+   {
+      JointDesiredBehavior jointBehavior = configureBehavior(behaviors,
+                                                                                                   jointMap,
+                                                                                                   jointName,
+                                                                                                   controlMode,
+                                                                                                   stiffness,
+                                                                                                   damping);
+      jointBehavior.setMaxPositionError(maxPositionError);
+      jointBehavior.setMaxVelocityError(maxVelocityError);
+      return jointBehavior;
+   }
 }
