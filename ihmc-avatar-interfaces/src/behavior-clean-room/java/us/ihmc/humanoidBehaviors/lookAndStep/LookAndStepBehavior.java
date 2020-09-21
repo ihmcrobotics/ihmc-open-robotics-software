@@ -33,6 +33,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
+   private boolean enabled = false;
    private final BehaviorHelper helper;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
@@ -274,9 +275,13 @@ public class LookAndStepBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      helper.setCommunicationCallbacksEnabled(enabled);
-      statusLogger.info("Look and step behavior selected = {}", enabled);
-      behaviorStateReference.broadcast();
-      reset.queueReset();
+      if (this.enabled != enabled)
+      {
+         this.enabled = enabled;
+         helper.setCommunicationCallbacksEnabled(enabled);
+         statusLogger.info("Look and step behavior selected = {}", enabled);
+         behaviorStateReference.broadcast();
+         reset.queueReset();
+      }
    }
 }
