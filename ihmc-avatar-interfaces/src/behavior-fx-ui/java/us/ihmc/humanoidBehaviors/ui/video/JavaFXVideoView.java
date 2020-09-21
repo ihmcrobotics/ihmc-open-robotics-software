@@ -60,7 +60,7 @@ public class JavaFXVideoView extends ImageView
             {
                // decompress and pack writableimage
                BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(compressedImageData.toArray());
-               LogTools.info("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
+               LogTools.trace("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
 
                WritableImage nextImage = writableImageBuffer.next();
 
