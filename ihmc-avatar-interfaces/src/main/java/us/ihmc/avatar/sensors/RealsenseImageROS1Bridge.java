@@ -1,24 +1,14 @@
 package us.ihmc.avatar.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.Image32;
-import controller_msgs.msg.dds.VideoPacket;
-import org.jboss.netty.buffer.ChannelBuffer;
-import sensor_msgs.Image;
+import sensor_msgs.msg.dds.CompressedImage;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.producers.CompressedVideoDataFactory;
-import us.ihmc.communication.producers.CompressedVideoHandler;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -27,83 +17,103 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class RealsenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
+public class RealsenseImageROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
-   private final IHMCROS2Publisher<VideoPacket> imagePublisher;
-   private final RosCameraCompressedImageReceiver cameraImageReceiver;
+   private final IHMCROS2Publisher<CompressedImage> imagePublisher;
 
    public RealsenseImageROS1Bridge()
    {
-      super(Image._TYPE);
+      super(sensor_msgs.CompressedImage._TYPE);
 
       URI masterURI = NetworkParameters.getROSURI();
       RosMainNode rosMainNode = new RosMainNode(masterURI, "ImagePublisher", true);
-      rosMainNode.attachSubscriber("/depthcam/color/image_raw", this);
+      rosMainNode.attachSubscriber("/depthcam/color/image_raw/compressed", this);
       rosMainNode.execute();
 
       LogTools.info(ROS2Tools.D435_VIDEO);
-      imagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.D435_VIDEO);
+      imagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.D435_VIDEO);
    }
 
-   class CompressedVideoHandler implements us.ihmc.communication.producers.CompressedVideoHandler
-   {
-      @Override
-      public void addNetStateListener(ConnectionStateListener compressedVideoDataServer)
-      {
-
-      }
-
-      @Override
-      public boolean isConnected()
-      {
-         return true;
-      }
-
-      @Override
-      public void onFrame(VideoSource videoSource, byte[] compressedImageData, long timestamp, Point3DReadOnly cameraPosition,
-                          QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParamaters)
-      {
-
-      }
-   }
+   int i = 0;
 
    @Override
-   public void onNewMessage(Image image)
+   public void onNewMessage(sensor_msgs.CompressedImage ros1Image)
    {
-      int width = image.getWidth();
-      int height = image.getHeight();
-
-      Image32 message = new Image32();
-      BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
-      message.setHeight(height);
-      message.setWidth(width);
-
-      ChannelBuffer data = image.getData();
-      byte[] array = data.array();
-      int dataIndex = data.arrayOffset();
-      for (int i = 0; i < height; i++)
+      try
       {
-         for (int j = 0; j < width; j++)
-         {
-            int b = array[dataIndex];
-            dataIndex++;
-            int g = array[dataIndex];
-            dataIndex++;
-            int r = array[dataIndex];
-            dataIndex++;
+//         LogTools.info(StringTools.format("Format: {}", ros1Image.getFormat()));
+         CompressedImage ros2Image = new CompressedImage();
+         //      ros2Image.setHeight(ros1Image.getHeight());
+         //      ros2Image.setWidth(ros1Image.getWidth());
+         byte[] data = ros1Image.getData().array();
+         int dataOffset = ros1Image.getData().arrayOffset();
+         int length = data.length;
+                  ros2Image.getData().add(data, dataOffset, length - dataOffset);
+         //         ros2Image.getData().add(data);
 
-            int rgbColor = convertBGR2RGB(b, g, r);
-            message.getRgbdata().add(rgbColor);
-            bufferedImage.setRGB(j, i, rgbColor);
-         }
+         //      Image ros2Image = new Image();
+         //      ros2Image.setHeight(ros1Image.getHeight());
+         //      ros2Image.setWidth(ros1Image.getWidth());
+         //      byte[] data = ros1Image.getData().array();
+         //      int dataOffset = ros1Image.getData().arrayOffset();
+         //      int length = data.length;
+         ////      LogTools.info(StringTools.format("Copying width {} height {} length {} offset: {}",
+         ////                                       ros1Image.getWidth(), ros1Image.getHeight(), length, dataOffset));
+         ////      ros2Image.getData().add(data, dataOffset, length - dataOffset);
+         //      ros2Image.getData().add(data);
+
+         //      Image32 ros2Image = new Image32();
+         //      ros2Image.setHeight(ros1Image.getHeight());
+         //      ros2Image.setWidth(ros1Image.getWidth());
+         //
+         //      ChannelBuffer data = ros1Image.getData();
+         //      byte[] array = data.array();
+         //      int dataIndex = data.arrayOffset();
+         //      for (int i = 0; i < ros1Image.getHeight(); i++)
+         //      {
+         //         for (int j = 0; j < ros1Image.getWidth(); j++)
+         //         {
+         //            int b = array[dataIndex];
+         //            dataIndex++;
+         //            int g = array[dataIndex];
+         //            dataIndex++;
+         //            int r = array[dataIndex];
+         //            dataIndex++;
+         //
+         //            int rgbColor = convertBGR2RGB(b, g, r);
+         //            ros2Image.getRgbdata().add(rgbColor);
+         //         }
+         //      }
+
+         //      ChannelBuffer data = ros1Image.getData();
+         //      byte[] array = data.array();
+         //      int dataIndex = data.arrayOffset();
+         //      for (int i = 0; i < ros1Image.getHeight(); i++)
+         //      {
+         //         for (int j = 0; j < ros1Image.getWidth(); j++)
+         //         {
+         //            byte b = array[dataIndex];
+         //            dataIndex++;
+         //            byte g = array[dataIndex];
+         //            dataIndex++;
+         //            byte r = array[dataIndex];
+         //            dataIndex++;
+         //
+         //            ros2Image.getData().add(r);
+         //            ros2Image.getData().add(g);
+         //            ros2Image.getData().add(b);
+         //         }
+         //      }
+
+         imagePublisher.publish(ros2Image);
       }
-
-      VideoPacket message = HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters);
-
-      imagePublisher.publish(message);
+      catch (Exception e)
+      {
+         LogTools.error(e.getMessage());
+         e.printStackTrace();
+      }
    }
 
    private static int convertBGR2RGB(int b, int g, int r)
