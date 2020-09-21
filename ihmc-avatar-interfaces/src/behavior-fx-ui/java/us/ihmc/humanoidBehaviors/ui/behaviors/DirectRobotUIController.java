@@ -277,4 +277,12 @@ public class DirectRobotUIController extends Group
    {
       LogTools.info("Stand height slider drag exited: {}", stanceHeightSlider.getValue());
    }
+
+   public void destroy()
+   {
+      lidarRegionsGraphic.destroy();
+      mapRegionsGraphic.destroy();
+      realsenseRegionsGraphic.destroy();
+      supportRegionsGraphic.destroy();
+   }
 }

@@ -494,4 +494,10 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    {
       upDownCenterPlacementActionMap.start();
    }
+
+   @Override
+   public void destroy()
+   {
+
+   }
 }
