@@ -5,6 +5,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import us.ihmc.avatar.sensors.RealsenseImageROS1Bridge;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -12,8 +13,8 @@ import us.ihmc.ros2.ROS2Node;
 
 public class JavaFXROS2VideoViewer
 {
-   private static final int width = 1024;
-   private static final int height = 544;
+   private static final int width = 640;
+   private static final int height = 480;
    private ROS2Node ros2Node;
 
    public JavaFXROS2VideoViewer(ROS2Node ros2Node)
@@ -27,7 +28,7 @@ public class JavaFXROS2VideoViewer
    {
       Stage primaryStage = new Stage();
 
-      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.VIDEO, width, height, false, false);
+      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, width, height, false, false);
 
       StackPane stackPaneNode = new StackPane(ros2VideoView);
       stackPaneNode.setPrefSize(width, height);
@@ -48,6 +49,7 @@ public class JavaFXROS2VideoViewer
 
    public static void main(String[] args)
    {
+      new RealsenseImageROS1Bridge();
       new JavaFXROS2VideoViewer(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
    }
 }

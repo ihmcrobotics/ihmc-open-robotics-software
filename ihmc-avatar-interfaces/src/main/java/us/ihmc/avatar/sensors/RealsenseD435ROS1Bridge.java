@@ -13,7 +13,7 @@ public class RealsenseD435ROS1Bridge
    
    public RealsenseD435ROS1Bridge(RosMainNode rosMainNode, ROS2Node ros2Node)
    {
-      videoPacketHandler = new VideoPacketHandler(ros2Node, ROS2Tools.D435_VIDEO);
+//      videoPacketHandler = new VideoPacketHandler(ros2Node, ROS2Tools.D435_VIDEO);
 //      cameraImageReceiver = new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
    }
 }

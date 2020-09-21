@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
+import sensor_msgs.msg.dds.CompressedImage;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
@@ -90,7 +92,7 @@ public class ROS2Tools
    public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<VideoPacket> D435_VIDEO = VIDEO.withModule(D435_NAME);
+   public static final ROS2Topic<CompressedImage> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(CompressedImage.class).withSuffix("video");
 
    public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
