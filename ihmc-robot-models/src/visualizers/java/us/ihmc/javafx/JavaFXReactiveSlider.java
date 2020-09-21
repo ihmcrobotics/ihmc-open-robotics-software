@@ -12,12 +12,14 @@ public class JavaFXReactiveSlider
 {
    private static final double MAX_ACTION_FREQUENCY = UnitConversions.hertzToSeconds(4);
 
+   private final Slider slider;
    private final Consumer<Number> action;
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
    public JavaFXReactiveSlider(Slider slider, Consumer<Number> action)
    {
+      this.slider = slider;
       this.action = action;
 
       slider.valueProperty().addListener(this::valueListener);
@@ -33,5 +35,13 @@ public class JavaFXReactiveSlider
       throttleTimer.sleepUntilExpiration(MAX_ACTION_FREQUENCY);
       action.accept(newValue);
       throttleTimer.reset();
+   }
+
+   public void acceptUpdatedValue(double newValue)
+   {
+      if (!executor.isExecuting())
+      {
+         slider.setValue(newValue);
+      }
    }
 }

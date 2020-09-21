@@ -28,7 +28,6 @@ public class RemoteSyncedRobotModel
    private final int jointNameHash;
    private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
    private final HumanoidReferenceFrames referenceFrames;
-
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
@@ -109,5 +108,10 @@ public class RemoteSyncedRobotModel
    public synchronized TimerSnapshot getDataReceptionTimerSnapshot()
    {
       return dataReceptionTimer.createSnapshot();
+   }
+
+   public void addRobotConfigurationDataReceivedCallback(Runnable callback)
+   {
+      robotConfigurationDataInput.addCallback(message -> callback.run());
    }
 }
