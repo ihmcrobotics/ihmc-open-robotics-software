@@ -5,7 +5,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import us.ihmc.avatar.sensors.RealsenseImageROS1Bridge;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -49,7 +48,6 @@ public class JavaFXROS2VideoViewer
 
    public static void main(String[] args)
    {
-      new RealsenseImageROS1Bridge();
       new JavaFXROS2VideoViewer(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
    }
 }
