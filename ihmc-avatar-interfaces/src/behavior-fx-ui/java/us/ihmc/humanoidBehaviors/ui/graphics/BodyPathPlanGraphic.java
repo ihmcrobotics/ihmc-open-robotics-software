@@ -96,4 +96,9 @@ public class BodyPathPlanGraphic extends Group
          meshView.setMaterial(material);
       }
    }
+
+   public void destroy()
+   {
+      executorService.shutdownNow();
+   }
 }

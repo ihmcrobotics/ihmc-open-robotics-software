@@ -42,9 +42,12 @@ public class BehaviorUI
 
    private BorderPane mainPane;
    private final Messager behaviorMessager;
+   private final ROS2Node ros2Node;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
    private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
+   private LocalParameterServer parameterServer;
+   private JavaFXRemoteRobotVisualizer robotVisualizer;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
@@ -70,11 +73,11 @@ public class BehaviorUI
    {
       this.behaviorMessager = behaviorMessager;
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_ui");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
       {
-         LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
+         parameterServer = new LocalParameterServer(getClass(), 16784);
          LabelGraphic.initializeYoVariables(parameterServer.getRegistry());
          parameterServer.start();
       }
@@ -134,7 +137,8 @@ public class BehaviorUI
 
          directRobotUIController.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
          view3DFactory.addNodeToView(directRobotUIController);
-         view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+         robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
+         view3DFactory.addNodeToView(robotVisualizer);
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
          mainSplitPane.getItems().add(mainAnchorPane);
@@ -142,7 +146,7 @@ public class BehaviorUI
          mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();
-         primaryStage.setTitle(getClass().getSimpleName());
+         primaryStage.setTitle("Behavior UI");
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
@@ -167,6 +171,7 @@ public class BehaviorUI
          {
             LogTools.info("Publishing SHUTDOWN on {}", BehaviorModule.API.SHUTDOWN.getName());
             shutdownPublisher.publish(new Empty());
+            destroy();
          });
 
          // do this last for now in case events starts firing early
@@ -228,5 +233,19 @@ public class BehaviorUI
          BehaviorUI.ACTIVE_EDITOR = claimingEditor;
          LogTools.debug("editor activated: {}", claimingEditor.getClass().getSimpleName());
       }
+   }
+
+   public void destroy()
+   {
+      if (robotVisualizer != null)
+         robotVisualizer.destroy();
+      if (parameterServer != null)
+         parameterServer.destroy();
+      for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
+      {
+         behaviorUIInterface.destroy();
+      }
+      directRobotUIController.destroy();
+      ros2Node.destroy();
    }
 }

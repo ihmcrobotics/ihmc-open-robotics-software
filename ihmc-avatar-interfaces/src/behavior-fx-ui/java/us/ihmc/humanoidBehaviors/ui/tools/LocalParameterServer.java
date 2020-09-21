@@ -20,6 +20,8 @@ public class LocalParameterServer
    private final Class<?> clazz;
    private final String lowerCaseName;
    private final int port;
+   private YoVariableServer yoVariableServer;
+   private ExceptionHandlingThreadScheduler scheduler;
 
    public static YoRegistry create(Class<?> clazz, int port)
    {
@@ -39,7 +41,7 @@ public class LocalParameterServer
    {
       LogTools.info("Starting YoVariableServer on port {}", port);
       ParameterLoaderHelper.loadParameters(getClass(), clazz.getClassLoader().getResourceAsStream(lowerCaseName + "Parameters.xml"), registry);
-      YoVariableServer yoVariableServer = new YoVariableServer(clazz.getSimpleName(),
+      yoVariableServer = new YoVariableServer(clazz.getSimpleName(),
                                                                null,
                                                                new DataServerSettings(false,
                                                                                       DataServerSettings.DEFAULT_AUTODISCOVERABLE,
@@ -48,9 +50,15 @@ public class LocalParameterServer
                                                                0.01);
       yoVariableServer.setMainRegistry(registry, null, null);
       ExceptionTools.handle(() -> yoVariableServer.start(), DefaultExceptionHandler.PRINT_STACKTRACE);
-      ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(clazz.getSimpleName() + "YoVariableServer");
+      scheduler = new ExceptionHandlingThreadScheduler(clazz.getSimpleName() + "YoVariableServer");
       AtomicLong timestamp = new AtomicLong();
       scheduler.schedule(() -> yoVariableServer.update(timestamp.getAndAdd(10000)), PERIOD_MS, TimeUnit.MILLISECONDS);
+   }
+
+   public void destroy()
+   {
+      scheduler.shutdown();
+      yoVariableServer.close();
    }
 
    public YoRegistry getRegistry()

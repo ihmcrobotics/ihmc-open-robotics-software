@@ -51,4 +51,10 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
    {
       behaviorMessager.submitMessage(StepThroughAlgorithm, new Object());
    }
+
+   @Override
+   public void destroy()
+   {
+
+   }
 }

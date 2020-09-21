@@ -277,4 +277,14 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    {
       ros2Publisher.publish(RESET);
    }
+
+   @Override
+   public void destroy()
+   {
+      planarRegionsRegionsGraphic.destroy();
+      footstepPlanGraphic.destroy();
+      commandedFootsteps.destroy();
+      startAndGoalFootPoses.destroy();
+      bodyPathPlanGraphic.destroy();
+   }
 }
