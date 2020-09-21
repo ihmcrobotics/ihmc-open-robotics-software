@@ -15,6 +15,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -24,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
@@ -73,6 +75,9 @@ public class DirectRobotUIController extends Group
    private StackPane multisenseVideoStackPane;
    private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
    private StackPane realsenseVideoStackPane;
+   private JavaFXReactiveSlider stanceHeightReactiveSlider;
+   private JavaFXReactiveSlider leanForwardReactiveSlider;
+   private JavaFXReactiveSlider neckReactiveSlider;
 
    public void init(AnchorPane mainAnchorPane, SubScene subScene, ROS2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -89,7 +94,8 @@ public class DirectRobotUIController extends Group
          pelvisHeightTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                                    ControllerAPIDefinition.getTopic(PelvisHeightTrajectoryMessage.class, robotName));
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-         new JavaFXReactiveSlider(stanceHeightSlider, value ->
+
+         stanceHeightReactiveSlider = new JavaFXReactiveSlider(stanceHeightSlider, value ->
          {
             double sliderValue = value.doubleValue();
             double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
@@ -117,8 +123,8 @@ public class DirectRobotUIController extends Group
             message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
             pelvisHeightTrajectoryPublisher.publish(message);
          });
-         new JavaFXReactiveSlider(leanForwardSlider, value -> LogTools.info("Lean forward {}", value));
-         new JavaFXReactiveSlider(neckSlider, sliderValue ->
+         leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value -> LogTools.info("Lean forward {}", value));
+         neckReactiveSlider = new JavaFXReactiveSlider(neckSlider, sliderValue ->
          {
             double percent = sliderValue.doubleValue() / 100.0;
             percent = 1.0 - percent;
@@ -127,6 +133,13 @@ public class DirectRobotUIController extends Group
             double jointAngle = neckJoint.getJointLimitLower() + percent * range;
             LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckSlider.getValue(), jointAngle);
             neckTrajectoryPublisher.publish(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
+         });
+
+         new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
+         {
+
+//            stanceHeightReactiveSlider.acceptUpdatedValue(newHeightSliderValue);
+            LogTools.info("Callback");
          });
       }
       else if (robotName.toLowerCase().contains("valkyrie"))

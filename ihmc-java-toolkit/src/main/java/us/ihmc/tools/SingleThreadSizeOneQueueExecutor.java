@@ -50,6 +50,11 @@ public class SingleThreadSizeOneQueueExecutor
       recreate();
    }
 
+   public boolean isExecuting()
+   {
+      return executor.getActiveCount() > 0 || sizeOneQueue.size() > 0;
+   }
+
    private void exceptionHandlingWrapper(Runnable runnable)
    {
       try
