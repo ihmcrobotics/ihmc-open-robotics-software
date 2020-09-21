@@ -46,6 +46,11 @@ import us.ihmc.tools.string.StringTools;
 
 public class DirectRobotUIController extends Group
 {
+   private static final double MIN_PELVIS_HEIGHT = 0.52;
+   private static final double MAX_PELVIS_HEIGHT = 0.90;
+   private static final double PELVIS_HEIGHT_RANGE = MAX_PELVIS_HEIGHT - MIN_PELVIS_HEIGHT;
+   private static final double SLIDER_RANGE = 100.0;
+
    @FXML private ComboBox<Integer> pumpPSI;
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
@@ -97,20 +102,16 @@ public class DirectRobotUIController extends Group
 
          stanceHeightReactiveSlider = new JavaFXReactiveSlider(stanceHeightSlider, value ->
          {
+            syncedRobot.update();
             double sliderValue = value.doubleValue();
             double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
             double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
             FramePose3D midFeetZUp = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
             midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
-            double minHeight = 0.52;
-            double maxHeight = 0.90;
-            double heightRange = maxHeight - minHeight;
-            double sliderRange = 100.0;
-            double desiredHeight = minHeight + heightRange * sliderValue / sliderRange;
+            double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
             LogTools.info(StringTools.format3D("Stance height slider: {} desired: {} (pelvis - midFeetZ): {}",
                                                sliderValue, desiredHeight, pelvisZ - midFeetZ));
             desiredHeight += midFeetZUp.getZ(); // convert to world frame
-            syncedRobot.update();
             PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
             message.getEuclideanTrajectory()
                    .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
@@ -137,9 +138,11 @@ public class DirectRobotUIController extends Group
 
          new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
          {
-
-//            stanceHeightReactiveSlider.acceptUpdatedValue(newHeightSliderValue);
-            LogTools.info("Callback");
+            double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
+            double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+            double midFeetToPelvis = pelvisZ - midFeetZ;
+            double newSliderValue = SLIDER_RANGE * midFeetToPelvis / PELVIS_HEIGHT_RANGE;
+            stanceHeightReactiveSlider.acceptUpdatedValue(newSliderValue);
          });
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
