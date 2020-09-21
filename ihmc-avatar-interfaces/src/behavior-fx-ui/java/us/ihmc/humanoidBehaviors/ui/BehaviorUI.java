@@ -146,7 +146,7 @@ public class BehaviorUI
          mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();
-         primaryStage.setTitle(getClass().getSimpleName());
+         primaryStage.setTitle("Behavior UI");
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
@@ -241,6 +241,10 @@ public class BehaviorUI
          robotVisualizer.destroy();
       if (parameterServer != null)
          parameterServer.destroy();
+      for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
+      {
+         behaviorUIInterface.destroy();
+      }
       ros2Node.destroy();
    }
 }
