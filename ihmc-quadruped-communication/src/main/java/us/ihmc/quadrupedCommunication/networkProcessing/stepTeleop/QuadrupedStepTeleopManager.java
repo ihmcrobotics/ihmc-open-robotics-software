@@ -5,7 +5,14 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -101,7 +108,7 @@ public class QuadrupedStepTeleopManager
       planarRegionSnapper.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
    }
 
-   public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   public void processGroundPlaneMessage(GroundPlaneMessage message)
    {
       groundPlaneSnapper.submitGroundPlane(message);
    }
