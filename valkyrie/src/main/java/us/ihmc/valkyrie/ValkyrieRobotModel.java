@@ -76,6 +76,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
 
+   private double controllerDT;
+   private double estimatorDT;
+   private double simulateDT;
+
    private double modelSizeScale = 1.0;
    private double modelMassScale = 1.0;
    private double transparency = Double.NaN;
@@ -112,6 +116,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       this.target = target;
       this.robotVersion = robotVersion;
+
+      controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
+      estimatorDT = 0.002;
+      simulateDT = estimatorDT / 3.0;
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -138,6 +146,36 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (jointMap == null)
          jointMap = new ValkyrieJointMap(getRobotPhysicalProperties(), robotVersion);
       return jointMap;
+   }
+
+   /**
+    * Sets the period of a controller tick in second.
+    * 
+    * @param controllerDT the period of the controller thread in second.
+    */
+   public void setControllerDT(double controllerDT)
+   {
+      this.controllerDT = controllerDT;
+   }
+
+   /**
+    * Sets the period of a estimator tick in second.
+    * 
+    * @param estimatorDT the period of the estimator thread in second.
+    */
+   public void setEstimatorDT(double estimatorDT)
+   {
+      this.estimatorDT = estimatorDT;
+   }
+
+   /**
+    * Sets the period of a simulation tick in second.
+    * 
+    * @param simulationDT the period of the simulation thread in second.
+    */
+   public void setSimulateDT(double simulateDT)
+   {
+      this.simulateDT = simulateDT;
    }
 
    /**
@@ -403,22 +441,19 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public double getSimulateDT()
    {
-      return getEstimatorDT() / 3.0;
+      return simulateDT;
    }
 
    @Override
    public double getEstimatorDT()
    {
-      return 0.002;
+      return estimatorDT;
    }
 
    @Override
    public double getControllerDT()
    {
-      if (target == RobotTarget.SCS)
-         return 0.004;
-      else
-         return 0.006;
+      return controllerDT;
    }
 
    @Override
