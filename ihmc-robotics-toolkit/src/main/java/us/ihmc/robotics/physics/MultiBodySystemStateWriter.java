@@ -9,9 +9,19 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 
 public interface MultiBodySystemStateWriter
 {
+   /**
+    * Sets the multi-body system that this writer is to update the state of.
+    * 
+    * @param multiBodySystem the system to update the state of in {@link #write()}.
+    */
    void setMultiBodySystem(MultiBodySystemBasics multiBodySystem);
 
-   void write();
+   /**
+    * Update the state of the multi-body system and returns whether the state was actually modified.
+    * 
+    * @return {@code true} if the state changed, {@code false} otherwise.
+    */
+   boolean write();
 
    public static <T extends JointBasics> MultiBodySystemStateWriter singleJointStateWriter(String jointName, Consumer<T> jointStateWriter)
    {
@@ -20,9 +30,10 @@ public interface MultiBodySystemStateWriter
          private T joint;
 
          @Override
-         public void write()
+         public boolean write()
          {
             jointStateWriter.accept(joint);
+            return true;
          }
 
          @SuppressWarnings("unchecked")
