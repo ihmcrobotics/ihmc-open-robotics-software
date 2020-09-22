@@ -12,6 +12,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -153,6 +154,12 @@ public class JavaFXRobotVisualizer
          jointAngleArray[i] = (float) jointAngles.applyAsDouble(allJoints[i].getName());
       }
       newJointConfigurationReference.set(jointAngleArray);
+   }
+
+   public void submitNewConfiguration(Tuple3DReadOnly rootJointTranslation, Orientation3DReadOnly rootJointOrientation, float[] jointAngles)
+   {
+      newRootJointPoseReference.set(new RigidBodyTransform(rootJointOrientation, rootJointTranslation));
+      newJointConfigurationReference.set(jointAngles);
    }
 
    public void setRobotLoadedCallback(Runnable robotLoadedCallback)
