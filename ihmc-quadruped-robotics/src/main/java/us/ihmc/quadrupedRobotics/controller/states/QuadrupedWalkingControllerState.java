@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -110,7 +110,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
    private final QuadrantDependentList<QuadrupedFootstepStatusMessage> footstepStatusMessages = new QuadrantDependentList<>();
    private final YoInteger stepIndex = new YoInteger("currentStepIndex", registry);
-   private final QuadrupedGroundPlaneMessage groundPlaneMessage = new QuadrupedGroundPlaneMessage();
+   private final GroundPlaneMessage groundPlaneMessage = new GroundPlaneMessage();
 
    private final boolean deactivateAccelerationIntegrationInWBC;
 
