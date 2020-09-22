@@ -13,13 +13,13 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.net.URI;
 
-public class RealsenseImageROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
+public class RealsenseD435ROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
    private final IHMCROS2Publisher<CompressedImage> imagePublisher;
 
-   public RealsenseImageROS1Bridge()
+   public RealsenseD435ROS1Bridge()
    {
       super(sensor_msgs.CompressedImage._TYPE);
 
@@ -55,6 +55,6 @@ public class RealsenseImageROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
    public static void main(String[] args)
    {
-      new RealsenseImageROS1Bridge();
+      new RealsenseD435ROS1Bridge();
    }
 }
