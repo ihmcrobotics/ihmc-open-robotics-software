@@ -24,6 +24,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -84,10 +86,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
 
-      helper.createUICallback(LookAndStepParameters, parameters ->
+      helper.createROS2Callback(LOOK_AND_STEP_PARAMETERS, parameters ->
       {
-         statusLogger.info("Accepting new look and step parameters");
-         lookAndStepParameters.setAllFromStrings(parameters);
+         List<String> values = Arrays.asList(parameters.getStrings().toStringArray());
+
+         if (!lookAndStepParameters.getAllAsStrings().equals(values))
+         {
+            statusLogger.info("Accepting new look and step parameters");
+            lookAndStepParameters.setAllFromStrings(values);
+         }
       });
       helper.createUICallback(FootstepPlannerParameters, parameters ->
       {
