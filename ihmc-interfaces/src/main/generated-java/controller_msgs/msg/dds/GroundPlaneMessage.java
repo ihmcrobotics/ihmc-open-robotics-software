@@ -11,7 +11,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message contains the controller's estimate of the ground plane.
        * It is defined by an origin and a normal
        */
-public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMessage> implements Settable<QuadrupedGroundPlaneMessage>, EpsilonComparable<QuadrupedGroundPlaneMessage>
+public class GroundPlaneMessage extends Packet<GroundPlaneMessage> implements Settable<GroundPlaneMessage>, EpsilonComparable<GroundPlaneMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -20,19 +20,19 @@ public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMess
    public us.ihmc.euclid.tuple3D.Point3D region_origin_;
    public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
 
-   public QuadrupedGroundPlaneMessage()
+   public GroundPlaneMessage()
    {
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
-   public QuadrupedGroundPlaneMessage(QuadrupedGroundPlaneMessage other)
+   public GroundPlaneMessage(GroundPlaneMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(QuadrupedGroundPlaneMessage other)
+   public void set(GroundPlaneMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -68,19 +68,19 @@ public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMess
    }
 
 
-   public static Supplier<QuadrupedGroundPlaneMessagePubSubType> getPubSubType()
+   public static Supplier<GroundPlaneMessagePubSubType> getPubSubType()
    {
-      return QuadrupedGroundPlaneMessagePubSubType::new;
+      return GroundPlaneMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return QuadrupedGroundPlaneMessagePubSubType::new;
+      return GroundPlaneMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(QuadrupedGroundPlaneMessage other, double epsilon)
+   public boolean epsilonEquals(GroundPlaneMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -98,9 +98,9 @@ public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMess
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof QuadrupedGroundPlaneMessage)) return false;
+      if(!(other instanceof GroundPlaneMessage)) return false;
 
-      QuadrupedGroundPlaneMessage otherMyClass = (QuadrupedGroundPlaneMessage) other;
+      GroundPlaneMessage otherMyClass = (GroundPlaneMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -115,7 +115,7 @@ public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMess
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("QuadrupedGroundPlaneMessage {");
+      builder.append("GroundPlaneMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("region_origin=");

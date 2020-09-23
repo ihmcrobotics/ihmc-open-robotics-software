@@ -149,6 +149,7 @@ public class AdaptiveSwingTrajectoryCalculator
       {
          step.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
          step.setSwingHeight(swingPlannerParameters.getSwingHeightIfCollisionDetected());
+         step.setCustomWaypointProportions(waypointProportions[0], waypointProportions[1]);
       }
    }
 

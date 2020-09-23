@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
+import controller_msgs.msg.dds.StoredPropertySetMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.application.Platform;
 import org.junit.jupiter.api.*;
@@ -52,6 +53,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
 
 // TODO: Add reviewing; Add status logger to visualizer
 @Execution(ExecutionMode.SAME_THREAD)
@@ -207,7 +209,10 @@ public class AtlasLookAndStepBehaviorTest
                              });
 
       LookAndStepBehaviorParameters lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
-      behaviorMessager.submitMessage(LookAndStepBehaviorAPI.LookAndStepParameters, lookAndStepBehaviorParameters.getAllAsStrings());
+      StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
+      lookAndStepBehaviorParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
+      IHMCROS2Publisher<StoredPropertySetMessage> parametersPublisher = new IHMCROS2Publisher<>(ros2Node, LOOK_AND_STEP_PARAMETERS);
+      parametersPublisher.publish(storedPropertySetMessage);
 
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
       new IHMCROS2Callback<>(ros2Node, LookAndStepBehaviorAPI.REACHED_GOAL, message ->
