@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 
-class ValkyrieSimulationPositionControlParameters implements HighLevelControllerParameters
+public class ValkyrieSimulationPositionControlParameters implements HighLevelControllerParameters
 {
    private final HighLevelControllerParameters originalParameters;
    private final ValkyrieJointMap jointMap;
@@ -141,29 +141,32 @@ class ValkyrieSimulationPositionControlParameters implements HighLevelController
 
    protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getPositionControlBehavior()
    {
-      double maxPositionError = 0.17;
+      double maxPositionError = 0.05;
       double maxVelocityError = 0.5;
 
       List<GroupParameter<JointDesiredBehaviorReadOnly>> jointBehaviors = new ArrayList<>();
-      configureSymmetricBehavior(jointBehaviors, jointMap, SHOULDER_PITCH, POSITION, 6000.0, 200.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, SHOULDER_ROLL, POSITION, 6000.0, 200.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, SHOULDER_YAW, POSITION, 6000.0, 100.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, ELBOW_PITCH, POSITION, 6000.0, 75.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, ELBOW_ROLL, POSITION, 1500.0, 15.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, WRIST_ROLL, POSITION, 150.0, 3.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, FIRST_WRIST_PITCH, POSITION, 150.0, 3.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, HIP_YAW, POSITION, 6000.0, 200.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, HIP_ROLL, POSITION, 6000.0, 200.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, HIP_PITCH, POSITION, 6000.0, 100.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, KNEE_PITCH, POSITION, 6000.0, 100.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_PITCH, POSITION, 6000.0, 75.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_ROLL, POSITION, 6000.0, 75.0, maxPositionError, maxVelocityError);
-      configureBehavior(jointBehaviors, jointMap, SPINE_YAW, POSITION, 10000.0, 400.0, maxPositionError, maxVelocityError);
-      configureBehavior(jointBehaviors, jointMap, SPINE_PITCH, POSITION, 10000.0, 400.0, maxPositionError, maxVelocityError);
-      configureBehavior(jointBehaviors, jointMap, SPINE_ROLL, POSITION, 10000.0, 400.0, maxPositionError, maxVelocityError);
-      configureBehavior(jointBehaviors, jointMap, PROXIMAL_NECK_PITCH, POSITION, 1500.0, 50.0, maxPositionError, maxVelocityError);
-      configureBehavior(jointBehaviors, jointMap, DISTAL_NECK_YAW, POSITION, 1500.0, 50.0, maxPositionError, maxVelocityError);
-      configureBehavior(jointBehaviors, jointMap, DISTAL_NECK_PITCH, POSITION, 1500.0, 50.0, maxPositionError, maxVelocityError);
+
+      // @formatter:off
+      configureSymmetricBehavior(jointBehaviors, jointMap, SHOULDER_PITCH, POSITION     ,  8000.0, 100.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, SHOULDER_ROLL, POSITION      ,  8000.0, 100.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, SHOULDER_YAW, POSITION       ,  8000.0,  50.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, ELBOW_PITCH, POSITION        ,  8000.0,  50.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, ELBOW_ROLL, POSITION         ,  1500.0,  15.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, WRIST_ROLL, POSITION         ,   150.0,   1.5, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, FIRST_WRIST_PITCH, POSITION  ,   150.0,   1.5, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, HIP_YAW, POSITION            ,  8000.0, 100.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, HIP_ROLL, POSITION           , 10000.0, 150.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, HIP_PITCH, POSITION          , 10000.0, 150.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, KNEE_PITCH, POSITION         ,  8000.0, 100.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_PITCH, POSITION        ,  4000.0,  40.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_ROLL, POSITION         ,  2000.0,  20.0, maxPositionError, maxVelocityError);
+      configureBehavior         (jointBehaviors, jointMap, SPINE_YAW, POSITION          , 10000.0, 250.0, maxPositionError, maxVelocityError);
+      configureBehavior         (jointBehaviors, jointMap, SPINE_PITCH, POSITION        , 30000.0, 800.0, maxPositionError, maxVelocityError);
+      configureBehavior         (jointBehaviors, jointMap, SPINE_ROLL, POSITION         , 30000.0, 800.0, maxPositionError, maxVelocityError);
+      configureBehavior         (jointBehaviors, jointMap, PROXIMAL_NECK_PITCH, POSITION,  1500.0,  50.0, maxPositionError, maxVelocityError);
+      configureBehavior         (jointBehaviors, jointMap, DISTAL_NECK_YAW, POSITION    ,  1500.0,  50.0, maxPositionError, maxVelocityError);
+      configureBehavior         (jointBehaviors, jointMap, DISTAL_NECK_PITCH, POSITION  ,  1500.0,  50.0, maxPositionError, maxVelocityError);
+      // @formatter:on
       return jointBehaviors;
    }
 }
