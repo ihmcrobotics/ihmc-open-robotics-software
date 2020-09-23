@@ -54,6 +54,51 @@ public class REAParametersMessageHelper
       return parameters;
    }
 
+   public static NormalEstimationParametersMessage convertToMessage(NormalEstimationParameters parameters)
+   {
+      NormalEstimationParametersMessage message = new NormalEstimationParametersMessage();
+      
+      message.setSearchRadius(parameters.getSearchRadius());
+      message.setMaxDistanceFromPlane(parameters.getMaxDistanceFromPlane());
+      message.setMinConsensusRatio(parameters.getMinConsensusRatio());
+      message.setMaxAverageDeviationRatio(parameters.getMaxAverageDeviationRatio());
+      message.setNumberOfIterations(parameters.getNumberOfIterations());
+      message.setEnableLeastSquaresEstimation(parameters.isLeastSquaresEstimationEnabled());
+      message.setWeightByNumberOfHits(parameters.isWeightByNumberOfHits());
+
+      return message;
+   }
+
+   public static PlanarRegionSegmentationParametersMessage convertToMessage(PlanarRegionSegmentationParameters parameters)
+   {
+      PlanarRegionSegmentationParametersMessage message = new PlanarRegionSegmentationParametersMessage();
+
+      message.setSearchRadius(parameters.getSearchRadius());
+      message.setMaxDistanceFromPlane(parameters.getMaxDistanceFromPlane());
+      message.setMaxAngleFromPlane(parameters.getMaxAngleFromPlane());
+      message.setMinNormalQuality(parameters.getMinNormalQuality());
+      message.setMinRegionSize(parameters.getMinRegionSize());
+      message.setMaxStandardDeviation(parameters.getMaxStandardDeviation());
+      message.setMinVolumicDensity(parameters.getMinVolumicDensity());
+
+      return message;
+   }
+
+   public static PolygonizerParametersMessage convertToMessage(PolygonizerParameters parameters)
+   {
+      PolygonizerParametersMessage message = new PolygonizerParametersMessage();
+
+      message.setConcaveHullThreshold(parameters.getConcaveHullThreshold());
+      message.setMinNumberOfNodes(parameters.getMinNumberOfNodes());
+      message.setShallowAngleThreshold(parameters.getShallowAngleThreshold());
+      message.setPeakAngleThreshold(parameters.getPeakAngleThreshold());
+      message.setLengthThreshold(parameters.getLengthThreshold());
+      message.setDepthThreshold(parameters.getDepthThreshold());
+      message.setCutNarrowPassage(parameters.getCutNarrowPassage());
+
+      return message;
+   }
+
    public static void setToDefaults(NormalEstimationParametersMessage message)
    {
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
