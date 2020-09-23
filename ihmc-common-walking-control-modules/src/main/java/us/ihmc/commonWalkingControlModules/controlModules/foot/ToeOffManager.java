@@ -305,29 +305,6 @@ public class ToeOffManager
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP)
    {
-      if (!doToeOffIfPossibleInSingleSupport.getValue())
-      {
-         doLineToeOff.set(false);
-         doPointToeOff.set(false);
-
-         isDesiredICPOKForToeOff.set(false);
-         isDesiredICPOKForToeOffFilt.set(false);
-
-         isCurrentICPOKForToeOff.set(false);
-         isCurrentICPOKForToeOffFilt.set(false);
-
-         isDesiredECMPOKForToeOff.set(false);
-         isDesiredECMPOKForToeOffFilt.set(false);
-
-         isDesiredCoPOKForToeOff.set(false);
-         isDesiredCoPOKForToeOffFilt.set(false);
-
-         isFrontFootWellPositionedForToeOff.set(false);
-         computeToePointContact.set(false);
-         computeToeLineContact.set(false);
-         return;
-      }
-
       RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
       double percentProximity = icpPercentOfStanceForSSToeOff.getValue();
 
@@ -363,7 +340,8 @@ public class ToeOffManager
       if (!toeContact.evaluateToeOffConditions(trailingLeg))
          return;
 
-      toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
+      if (doToeOffIfPossibleInSingleSupport.getValue())
+         toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
    }
 
    /**
@@ -397,29 +375,6 @@ public class ToeOffManager
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP)
    {
-      if (!doToeOffIfPossibleInDoubleSupport.getValue())
-      {
-         doLineToeOff.set(false);
-         doPointToeOff.set(false);
-
-         isDesiredICPOKForToeOff.set(false);
-         isDesiredICPOKForToeOffFilt.set(false);
-
-         isCurrentICPOKForToeOff.set(false);
-         isCurrentICPOKForToeOffFilt.set(false);
-
-         isDesiredECMPOKForToeOff.set(false);
-         isDesiredECMPOKForToeOffFilt.set(false);
-
-         isDesiredCoPOKForToeOff.set(false);
-         isDesiredCoPOKForToeOffFilt.set(false);
-
-         needToSwitchToToeOffForJointLimit.set(false);
-         computeToePointContact.set(false);
-         computeToeLineContact.set(false);
-         return;
-      }
-
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
       if (lookAtTwoStepCapturabilityForToeOff.getValue() && setPolygonFromNextFootstep(nextFootSupportPolygon))
       {
@@ -459,7 +414,8 @@ public class ToeOffManager
       if (!toeContact.evaluateToeOffConditions(trailingLeg))
          return;
 
-      toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
+      if (doToeOffIfPossibleInDoubleSupport.getValue())
+         toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
    }
 
    /**
