@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -104,6 +105,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
+
+   private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
    private ValkyrieSensorSuiteManager sensorSuiteManager = null;
 
@@ -645,6 +648,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.highLevelControllerParameters = highLevelControllerParameters;
    }
 
+   public void setSimulationLowLevelControllerFactory(SimulationLowLevelControllerFactory simulationLowLevelControllerFactory)
+   {
+      if (this.simulationLowLevelControllerFactory != null)
+         throw new IllegalArgumentException("Cannot set low-level controller factory once simulation has been setup.");
+      this.simulationLowLevelControllerFactory = simulationLowLevelControllerFactory;
+   }
+
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
@@ -673,6 +683,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
       ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
+   }
+
+   @Override
+   public SimulationLowLevelControllerFactory getSimulationLowLevelControllerFactory()
+   {
+      if (simulationLowLevelControllerFactory == null)
+         simulationLowLevelControllerFactory = DRCRobotModel.super.getSimulationLowLevelControllerFactory();
+      return simulationLowLevelControllerFactory;
    }
 
    @Override
