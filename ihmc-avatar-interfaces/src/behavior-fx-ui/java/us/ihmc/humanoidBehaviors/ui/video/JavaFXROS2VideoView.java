@@ -5,6 +5,7 @@ import sensor_msgs.msg.dds.CompressedImage;
 import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2NodeInterface;
 
@@ -26,7 +27,7 @@ public class JavaFXROS2VideoView extends JavaFXVideoView
    public void start()
    {
       LogTools.info("Subscribing to {}", topic.getName());
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, topic, message ->
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), message ->
       {
          if (message instanceof VideoPacket)
          {
