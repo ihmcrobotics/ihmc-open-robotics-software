@@ -131,7 +131,7 @@ public class DirectRobotUIController extends Group
       multisenseVideoOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> multisenseVideoOverlay.toggleMode());
       mainAnchorPane.getChildren().add(multisenseVideoStackPane);
 
-      realsenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 1024, 544, false, false)); // TODO: res
+      realsenseVideoOverlay = new JavaFXROS2VideoViewOverlay(new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, 640, 480, false, false));
       realsenseVideoStackPane = new StackPane(realsenseVideoOverlay.getNode());
       realsenseVideoStackPane.setVisible(false);
       AnchorPane.setBottomAnchor(realsenseVideoStackPane, 10.0);
