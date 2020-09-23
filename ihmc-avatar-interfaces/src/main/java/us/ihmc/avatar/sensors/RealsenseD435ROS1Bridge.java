@@ -7,6 +7,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -30,7 +31,7 @@ public class RealsenseD435ROS1Bridge extends AbstractRosTopicSubscriber<sensor_m
 
       ROS2Topic<CompressedImage> topic = ROS2Tools.D435_VIDEO;
       LogTools.info("Publishing to {}", topic.getName());
-      imagePublisher = ROS2Tools.createPublisher(ros2Node, topic);
+      imagePublisher = ROS2Tools.createPublisher(ros2Node, topic, ROS2QosProfile.DEFAULT());
    }
 
    @Override
