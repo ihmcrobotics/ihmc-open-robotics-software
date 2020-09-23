@@ -146,9 +146,6 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
-      // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
-      reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
-
       preserveStereoOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       preserveDepthOcTreeHistory = reaMessager.createInput(REAModuleAPI.DepthCloudBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
@@ -165,6 +162,9 @@ public class LIDARBasedREAModule implements PerceptionModule
       networkProvider.registerPlanarRegionsListRequestHandler(this::handleRequestPlanarRegionsListMessage);
       networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
       networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
+
+      // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
+      reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
