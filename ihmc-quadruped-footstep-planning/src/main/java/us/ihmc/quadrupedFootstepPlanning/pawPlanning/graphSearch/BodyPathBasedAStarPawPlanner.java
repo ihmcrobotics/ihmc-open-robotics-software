@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
 import java.util.Arrays;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -120,7 +120,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    }
 
    @Override
-   public void setGroundPlane(QuadrupedGroundPlaneMessage groundPlane)
+   public void setGroundPlane(GroundPlaneMessage groundPlane)
    {
 
    }
