@@ -7,10 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.ros2.*;
 import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +31,11 @@ public class IHMCROS2Callback<T>
       this(ros2Node, topicName.getType(), topicName.getName(), messageCallback);
    }
 
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName, ROS2QosProfile qosProfile, Consumer<T> messageCallback)
+   {
+      this(ros2Node, topicName.getType(), topicName.getName(), qosProfile, messageCallback);
+   }
+
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, Consumer<T> messageCallback)
    {
       this(ros2Node, messageType, topicName.withTypeName(messageType).toString(), messageCallback);
@@ -41,10 +43,15 @@ public class IHMCROS2Callback<T>
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)
    {
+      this(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), messageCallback);
+   }
+
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ROS2QosProfile qosProfile, Consumer<T> messageCallback)
+   {
       this.messageCallback = messageCallback;
       ExceptionTools.handle(() ->
       {
-         subscription = ros2Node.createSubscription(newMessageTopicDataTypeInstance(messageType), this::nullOmissionCallback, topicName);
+         subscription = ros2Node.createSubscription(newMessageTopicDataTypeInstance(messageType), this::nullOmissionCallback, topicName, qosProfile);
       }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 

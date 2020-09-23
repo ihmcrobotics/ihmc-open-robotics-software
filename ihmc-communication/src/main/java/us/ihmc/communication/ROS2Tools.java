@@ -430,6 +430,11 @@ public class ROS2Tools
       return createPublisher(ros2Node, topic.getType(), topic.getName());
    }
 
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, ROS2QosProfile qosProfile)
+   {
+      return createPublisher(ros2Node, topic.getType(), topic.getName(), qosProfile, RUNTIME_EXCEPTION);
+   }
+
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, messageType, topicName.toString());
@@ -442,10 +447,19 @@ public class ROS2Tools
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
+      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node,
+                                                          Class<T> messageType,
+                                                          String topicName,
+                                                          ROS2QosProfile qosProfile,
+                                                          ExceptionHandler exceptionHandler)
+   {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.DEFAULT()));
+         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
       }
       catch (IOException e)
       {
