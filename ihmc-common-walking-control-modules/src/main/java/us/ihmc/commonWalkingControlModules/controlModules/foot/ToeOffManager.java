@@ -341,7 +341,14 @@ public class ToeOffManager
          return;
 
       if (doToeOffIfPossibleInSingleSupport.getValue())
+      {
          toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
+      }
+      else
+      {
+         doLineToeOff.set(false);
+         doPointToeOff.set(false);
+      }
    }
 
    /**
@@ -415,7 +422,14 @@ public class ToeOffManager
          return;
 
       if (doToeOffIfPossibleInDoubleSupport.getValue())
+      {
          toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
+      }
+      else
+      {
+         doLineToeOff.set(false);
+         doPointToeOff.set(false);
+      }
    }
 
    /**

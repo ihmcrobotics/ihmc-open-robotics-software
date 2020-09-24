@@ -626,6 +626,5 @@ public class FeetManager
       footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
       footControlModules.get(side).touchDown(initialPitch, initialPitchVelocity, pitch, duration);
-      reset();
    }
 }
