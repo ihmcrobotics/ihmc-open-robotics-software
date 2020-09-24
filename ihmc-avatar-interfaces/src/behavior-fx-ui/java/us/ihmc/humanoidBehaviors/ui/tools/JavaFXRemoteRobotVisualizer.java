@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 
 import javafx.scene.Group;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
@@ -12,9 +13,12 @@ import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 
+import java.util.concurrent.ExecutorService;
+
 public class JavaFXRemoteRobotVisualizer extends Group
 {
    private final RemoteSyncedRobotModel syncedRobot;
+   private final ExecutorService executor;
 
    private GraphicsRobot graphicsRobot;
    private JavaFXGraphics3DNode robotRootNode;
@@ -26,7 +30,8 @@ public class JavaFXRemoteRobotVisualizer extends Group
    {
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
-      new Thread(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()), "RobotVisualizerLoading").start();
+      executor = ThreadTools.newSingleDaemonThreadExecutor("RobotVisualizerLoading");
+      executor.submit(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()));
 
       animationTimer.start();
    }
@@ -63,5 +68,10 @@ public class JavaFXRemoteRobotVisualizer extends Group
       JavaFXGraphics3DNode node = new JavaFXGraphics3DNode(graphics3dNode);
       parentNode.addChild(node);
       graphics3dNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
+   }
+
+   public void destroy()
+   {
+      executor.shutdownNow();
    }
 }

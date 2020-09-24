@@ -18,10 +18,13 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    public boolean start_behavior_;
    public controller_msgs.msg.dds.QuixMotionStateMessage requested_motion_state_;
    public boolean execute_behavior_;
+   public boolean continuous_walking_;
+   public controller_msgs.msg.dds.FlatStepTypeMessage flat_step_type_;
 
    public QuixCrutchMessage()
    {
       requested_motion_state_ = new controller_msgs.msg.dds.QuixMotionStateMessage();
+      flat_step_type_ = new controller_msgs.msg.dds.FlatStepTypeMessage();
    }
 
    public QuixCrutchMessage(QuixCrutchMessage other)
@@ -43,6 +46,9 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       controller_msgs.msg.dds.QuixMotionStateMessagePubSubType.staticCopy(other.requested_motion_state_, requested_motion_state_);
       execute_behavior_ = other.execute_behavior_;
 
+      continuous_walking_ = other.continuous_walking_;
+
+      controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.staticCopy(other.flat_step_type_, flat_step_type_);
    }
 
    public void setSequenceId(long sequence_id)
@@ -96,6 +102,21 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       return execute_behavior_;
    }
 
+   public void setContinuousWalking(boolean continuous_walking)
+   {
+      continuous_walking_ = continuous_walking;
+   }
+   public boolean getContinuousWalking()
+   {
+      return continuous_walking_;
+   }
+
+
+   public controller_msgs.msg.dds.FlatStepTypeMessage getFlatStepType()
+   {
+      return flat_step_type_;
+   }
+
 
    public static Supplier<QuixCrutchMessagePubSubType> getPubSubType()
    {
@@ -125,6 +146,9 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.requested_motion_state_.epsilonEquals(other.requested_motion_state_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_behavior_, other.execute_behavior_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.continuous_walking_, other.continuous_walking_, epsilon)) return false;
+
+      if (!this.flat_step_type_.epsilonEquals(other.flat_step_type_, epsilon)) return false;
 
       return true;
    }
@@ -149,6 +173,9 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.requested_motion_state_.equals(otherMyClass.requested_motion_state_)) return false;
       if(this.execute_behavior_ != otherMyClass.execute_behavior_) return false;
 
+      if(this.continuous_walking_ != otherMyClass.continuous_walking_) return false;
+
+      if (!this.flat_step_type_.equals(otherMyClass.flat_step_type_)) return false;
 
       return true;
    }
@@ -170,7 +197,11 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       builder.append("requested_motion_state=");
       builder.append(this.requested_motion_state_);      builder.append(", ");
       builder.append("execute_behavior=");
-      builder.append(this.execute_behavior_);
+      builder.append(this.execute_behavior_);      builder.append(", ");
+      builder.append("continuous_walking=");
+      builder.append(this.continuous_walking_);      builder.append(", ");
+      builder.append("flat_step_type=");
+      builder.append(this.flat_step_type_);
       builder.append("}");
       return builder.toString();
    }

@@ -12,27 +12,22 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsToolboxInputCollectionMessage> implements Settable<KinematicsToolboxInputCollectionMessage>, EpsilonComparable<KinematicsToolboxInputCollectionMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Inputs for controlling the center of mass position.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage>  center_of_mass_inputs_;
-
    /**
             * Inputs for controlling rigid-bodies.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage>  rigid_body_inputs_;
-
    /**
             * Inputs for controlling 1-DoF joints.
             */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage>  joint_inputs_;
-
    /**
             * Input for overriding the default support polygon with a custom one.
             */
@@ -40,14 +35,9 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
 
    public KinematicsToolboxInputCollectionMessage()
    {
-
-
       center_of_mass_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage> (3, new controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType());
-
       rigid_body_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage> (20, new controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType());
-
       joint_inputs_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage> (20, new controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType());
-
       contact_state_input_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxContactStateMessage> (1, new controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType());
 
    }
@@ -60,19 +50,13 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
 
    public void set(KinematicsToolboxInputCollectionMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       center_of_mass_inputs_.set(other.center_of_mass_inputs_);
-
       rigid_body_inputs_.set(other.rigid_body_inputs_);
-
       joint_inputs_.set(other.joint_inputs_);
-
       contact_state_input_.set(other.contact_state_input_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -90,7 +74,6 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    }
 
 
-
    /**
             * Inputs for controlling the center of mass position.
             */
@@ -98,7 +81,6 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    {
       return center_of_mass_inputs_;
    }
-
 
 
    /**
@@ -110,7 +92,6 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    }
 
 
-
    /**
             * Inputs for controlling 1-DoF joints.
             */
@@ -118,7 +99,6 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
    {
       return joint_inputs_;
    }
-
 
 
    /**
@@ -147,9 +127,7 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (this.center_of_mass_inputs_.size() != other.center_of_mass_inputs_.size()) { return false; }
       else
@@ -158,7 +136,6 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
          {  if (!this.center_of_mass_inputs_.get(i).epsilonEquals(other.center_of_mass_inputs_.get(i), epsilon)) return false; }
       }
 
-
       if (this.rigid_body_inputs_.size() != other.rigid_body_inputs_.size()) { return false; }
       else
       {
@@ -166,14 +143,12 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
          {  if (!this.rigid_body_inputs_.get(i).epsilonEquals(other.rigid_body_inputs_.get(i), epsilon)) return false; }
       }
 
-
       if (this.joint_inputs_.size() != other.joint_inputs_.size()) { return false; }
       else
       {
          for (int i = 0; i < this.joint_inputs_.size(); i++)
          {  if (!this.joint_inputs_.get(i).epsilonEquals(other.joint_inputs_.get(i), epsilon)) return false; }
       }
-
 
       if (this.contact_state_input_.size() != other.contact_state_input_.size()) { return false; }
       else
@@ -195,16 +170,11 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
 
       KinematicsToolboxInputCollectionMessage otherMyClass = (KinematicsToolboxInputCollectionMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.center_of_mass_inputs_.equals(otherMyClass.center_of_mass_inputs_)) return false;
-
       if (!this.rigid_body_inputs_.equals(otherMyClass.rigid_body_inputs_)) return false;
-
       if (!this.joint_inputs_.equals(otherMyClass.joint_inputs_)) return false;
-
       if (!this.contact_state_input_.equals(otherMyClass.contact_state_input_)) return false;
 
       return true;
@@ -216,19 +186,14 @@ public class KinematicsToolboxInputCollectionMessage extends Packet<KinematicsTo
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxInputCollectionMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("center_of_mass_inputs=");
       builder.append(this.center_of_mass_inputs_);      builder.append(", ");
-
       builder.append("rigid_body_inputs=");
       builder.append(this.rigid_body_inputs_);      builder.append(", ");
-
       builder.append("joint_inputs=");
       builder.append(this.joint_inputs_);      builder.append(", ");
-
       builder.append("contact_state_input=");
       builder.append(this.contact_state_input_);
       builder.append("}");

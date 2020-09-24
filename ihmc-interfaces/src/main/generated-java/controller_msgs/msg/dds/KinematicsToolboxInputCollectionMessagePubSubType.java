@@ -40,22 +40,17 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxContactStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -72,9 +67,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -82,18 +75,15 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassInputs().get(i0), current_alignment);}
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getRigidBodyInputs().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getCdrSerializedSize(data.getRigidBodyInputs().get(i0), current_alignment);}
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getJointInputs().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessagePubSubType.getCdrSerializedSize(data.getJointInputs().get(i0), current_alignment);}
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getContactStateInput().size(); ++i0)
@@ -106,24 +96,19 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
 
    public static void write(controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       if(data.getCenterOfMassInputs().size() <= 3)
       cdr.write_type_e(data.getCenterOfMassInputs());else
           throw new RuntimeException("center_of_mass_inputs field exceeds the maximum length");
 
-
       if(data.getRigidBodyInputs().size() <= 20)
       cdr.write_type_e(data.getRigidBodyInputs());else
           throw new RuntimeException("rigid_body_inputs field exceeds the maximum length");
 
-
       if(data.getJointInputs().size() <= 20)
       cdr.write_type_e(data.getJointInputs());else
           throw new RuntimeException("joint_inputs field exceeds the maximum length");
-
 
       if(data.getContactStateInput().size() <= 1)
       cdr.write_type_e(data.getContactStateInput());else
@@ -133,16 +118,11 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       cdr.read_type_e(data.getCenterOfMassInputs());	
-
       cdr.read_type_e(data.getRigidBodyInputs());	
-
       cdr.read_type_e(data.getJointInputs());	
-
       cdr.read_type_e(data.getContactStateInput());	
 
    }
@@ -150,30 +130,20 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_e("center_of_mass_inputs", data.getCenterOfMassInputs());
-
       ser.write_type_e("rigid_body_inputs", data.getRigidBodyInputs());
-
       ser.write_type_e("joint_inputs", data.getJointInputs());
-
       ser.write_type_e("contact_state_input", data.getContactStateInput());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       ser.read_type_e("center_of_mass_inputs", data.getCenterOfMassInputs());
-
       ser.read_type_e("rigid_body_inputs", data.getRigidBodyInputs());
-
       ser.read_type_e("joint_inputs", data.getJointInputs());
-
       ser.read_type_e("contact_state_input", data.getContactStateInput());
    }
 

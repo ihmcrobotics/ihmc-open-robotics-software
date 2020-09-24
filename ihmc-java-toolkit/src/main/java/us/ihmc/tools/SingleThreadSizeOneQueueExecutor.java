@@ -27,7 +27,7 @@ public class SingleThreadSizeOneQueueExecutor
    private void recreate()
    {
       sizeOneQueue = new ArrayBlockingQueue<>(1);
-      executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, sizeOneQueue, ThreadTools.createNamedThreadFactory(prefix));
+      executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, sizeOneQueue, ThreadTools.createNamedDaemonThreadFactory(prefix));
    }
 
    public void queueExecution(Runnable runnable)

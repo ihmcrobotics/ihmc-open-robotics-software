@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__QuadrupedGroundPlaneMessage__idl__
-#define __controller_msgs__msg__QuadrupedGroundPlaneMessage__idl__
+#ifndef __controller_msgs__msg__GroundPlaneMessage__idl__
+#define __controller_msgs__msg__GroundPlaneMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
@@ -15,8 +15,8 @@ module controller_msgs
        * This message contains the controller's estimate of the ground plane.
        * It is defined by an origin and a normal
        */
-      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedGroundPlaneMessage_")
-      struct QuadrupedGroundPlaneMessage
+      @TypeCode(type="controller_msgs::msg::dds_::GroundPlaneMessage_")
+      struct GroundPlaneMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.

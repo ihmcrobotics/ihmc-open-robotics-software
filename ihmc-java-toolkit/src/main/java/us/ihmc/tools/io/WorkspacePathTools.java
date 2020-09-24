@@ -17,6 +17,8 @@ public class WorkspacePathTools
     * For example, if directoryNameToFind is ihmc-open-robotics-software and the current working directory is
     * ihmc-open-robotics-software/ihmc-java-toolkit/src, this will return the absolute path to ihmc-open-robotics-software.
     *
+    * TODO: IHMC Commons's PathTools#findDirectoryInline is supposed to do this. Switch to that.
+    *
     * @param directoryNameToFind
     * @return absolute path to that directory, or null if fails
     */

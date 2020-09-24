@@ -40,17 +40,13 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -66,20 +62,16 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getContactPointsInBodyFrame().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getContactPointsInBodyFrame().get(i0), current_alignment);}
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getContactingBodyIds().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -91,17 +83,13 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
 
    public static void write(controller_msgs.msg.dds.KinematicsToolboxContactStateMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
 
-
       cdr.write_type_6(data.getCenterOfMassMargin());
-
 
       if(data.getContactPointsInBodyFrame().size() <= 20)
       cdr.write_type_e(data.getContactPointsInBodyFrame());else
           throw new RuntimeException("contact_points_in_body_frame field exceeds the maximum length");
-
 
       if(data.getContactingBodyIds().size() <= 20)
       cdr.write_type_e(data.getContactingBodyIds());else
@@ -111,15 +99,11 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxContactStateMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setCenterOfMassMargin(cdr.read_type_6());
       	
-
       cdr.read_type_e(data.getContactPointsInBodyFrame());	
-
       cdr.read_type_e(data.getContactingBodyIds());	
 
    }
@@ -127,26 +111,18 @@ public class KinematicsToolboxContactStateMessagePubSubType implements us.ihmc.p
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxContactStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_6("center_of_mass_margin", data.getCenterOfMassMargin());
-
       ser.write_type_e("contact_points_in_body_frame", data.getContactPointsInBodyFrame());
-
       ser.write_type_e("contacting_body_ids", data.getContactingBodyIds());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxContactStateMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setCenterOfMassMargin(ser.read_type_6("center_of_mass_margin"));
-
       ser.read_type_e("contact_points_in_body_frame", data.getContactPointsInBodyFrame());
-
       ser.read_type_e("contacting_body_ids", data.getContactingBodyIds());
    }
 

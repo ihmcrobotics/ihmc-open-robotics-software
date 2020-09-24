@@ -40,30 +40,21 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -80,37 +71,28 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPrivilegedRootJointPosition(), current_alignment);
 
-
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getPrivilegedRootJointOrientation(), current_alignment);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getPrivilegedJointHashCodes().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getPrivilegedJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -122,32 +104,23 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
    public static void write(controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_7(data.getUsePrivilegedRootJointPosition());
 
-
       cdr.write_type_7(data.getUsePrivilegedRootJointOrientation());
 
-
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPrivilegedRootJointPosition(), cdr);
-
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getPrivilegedRootJointOrientation(), cdr);
-
       if(data.getPrivilegedJointHashCodes().size() <= 100)
       cdr.write_type_e(data.getPrivilegedJointHashCodes());else
           throw new RuntimeException("privileged_joint_hash_codes field exceeds the maximum length");
-
 
       if(data.getPrivilegedJointAngles().size() <= 100)
       cdr.write_type_e(data.getPrivilegedJointAngles());else
           throw new RuntimeException("privileged_joint_angles field exceeds the maximum length");
 
-
       cdr.write_type_6(data.getPrivilegedWeight());
-
 
       cdr.write_type_6(data.getPrivilegedGain());
 
@@ -155,27 +128,18 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setUsePrivilegedRootJointPosition(cdr.read_type_7());
       	
-
       data.setUsePrivilegedRootJointOrientation(cdr.read_type_7());
       	
-
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPrivilegedRootJointPosition(), cdr);	
-
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getPrivilegedRootJointOrientation(), cdr);	
-
       cdr.read_type_e(data.getPrivilegedJointHashCodes());	
-
       cdr.read_type_e(data.getPrivilegedJointAngles());	
-
       data.setPrivilegedWeight(cdr.read_type_6());
       	
-
       data.setPrivilegedGain(cdr.read_type_6());
       	
 
@@ -184,50 +148,32 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_7("use_privileged_root_joint_position", data.getUsePrivilegedRootJointPosition());
-
       ser.write_type_7("use_privileged_root_joint_orientation", data.getUsePrivilegedRootJointOrientation());
-
       ser.write_type_a("privileged_root_joint_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPrivilegedRootJointPosition());
-
 
       ser.write_type_a("privileged_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getPrivilegedRootJointOrientation());
 
-
       ser.write_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
-
       ser.write_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
-
       ser.write_type_6("privileged_weight", data.getPrivilegedWeight());
-
       ser.write_type_6("privileged_gain", data.getPrivilegedGain());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setUsePrivilegedRootJointPosition(ser.read_type_7("use_privileged_root_joint_position"));
-
       data.setUsePrivilegedRootJointOrientation(ser.read_type_7("use_privileged_root_joint_orientation"));
-
       ser.read_type_a("privileged_root_joint_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPrivilegedRootJointPosition());
-
 
       ser.read_type_a("privileged_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getPrivilegedRootJointOrientation());
 
-
       ser.read_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
-
       ser.read_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
-
       data.setPrivilegedWeight(ser.read_type_6("privileged_weight"));
-
       data.setPrivilegedGain(ser.read_type_6("privileged_gain"));
    }
 

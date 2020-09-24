@@ -295,4 +295,10 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
          group.getChildren().add(boundingBox3DGraphic.getNode());
       }
    }
+
+   @Override
+   public void destroy()
+   {
+
+   }
 }

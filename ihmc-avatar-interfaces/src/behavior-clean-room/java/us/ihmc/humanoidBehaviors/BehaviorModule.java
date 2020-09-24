@@ -9,6 +9,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
@@ -89,6 +90,13 @@ public class BehaviorModule
          {
             behavior.getRight().setEnabled(behavior.getLeft().getName().equals(selection));
          }
+      });
+
+      new IHMCROS2Callback<>(ros2Node, BehaviorModule.API.SHUTDOWN, message ->
+      {
+         LogTools.info("Received SHUTDOWN. Shutting down...");
+
+         ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
    }
 

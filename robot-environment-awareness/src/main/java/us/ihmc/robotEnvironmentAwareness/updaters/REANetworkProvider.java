@@ -49,6 +49,18 @@ public interface REANetworkProvider
    {
    }
 
+   default void registerNormalEstimationParametersHandler(NewMessageListener<NormalEstimationParametersMessage> parametersHandler)
+   {
+   }
+
+   default void registerPlanarRegionSegmentationParametersHandler(NewMessageListener<PlanarRegionSegmentationParametersMessage> parametersHandler)
+   {
+   }
+
+   default void registerPolygonizerParametersHandler(NewMessageListener<PolygonizerParametersMessage> parametersHandler)
+   {
+   }
+
    void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated);
 
    void publishCurrentState();

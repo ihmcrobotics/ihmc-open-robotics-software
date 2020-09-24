@@ -37,4 +37,10 @@ public class StepInPlaceBehaviorUI extends BehaviorUIInterface
    {
       behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
    }
+
+   @Override
+   public void destroy()
+   {
+
+   }
 }

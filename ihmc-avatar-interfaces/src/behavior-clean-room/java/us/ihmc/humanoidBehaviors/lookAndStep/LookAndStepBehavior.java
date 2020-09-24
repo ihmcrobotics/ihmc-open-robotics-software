@@ -24,6 +24,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,6 +35,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
+   private boolean enabled = false;
    private final BehaviorHelper helper;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
@@ -83,10 +86,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
 
-      helper.createUICallback(LookAndStepParameters, parameters ->
+      helper.createROS2Callback(LOOK_AND_STEP_PARAMETERS, parameters ->
       {
-         statusLogger.info("Accepting new look and step parameters");
-         lookAndStepParameters.setAllFromStrings(parameters);
+         List<String> values = Arrays.asList(parameters.getStrings().toStringArray());
+
+         if (!lookAndStepParameters.getAllAsStrings().equals(values))
+         {
+            statusLogger.info("Accepting new look and step parameters");
+            lookAndStepParameters.setAllFromStrings(values);
+         }
       });
       helper.createUICallback(FootstepPlannerParameters, parameters ->
       {
@@ -274,9 +282,13 @@ public class LookAndStepBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enabled)
    {
-      helper.setCommunicationCallbacksEnabled(enabled);
-      statusLogger.info("Look and step behavior selected = {}", enabled);
-      behaviorStateReference.broadcast();
-      reset.queueReset();
+      if (this.enabled != enabled)
+      {
+         this.enabled = enabled;
+         helper.setCommunicationCallbacksEnabled(enabled);
+         statusLogger.info("Look and step behavior selected = {}", enabled);
+         behaviorStateReference.broadcast();
+         reset.queueReset();
+      }
    }
 }

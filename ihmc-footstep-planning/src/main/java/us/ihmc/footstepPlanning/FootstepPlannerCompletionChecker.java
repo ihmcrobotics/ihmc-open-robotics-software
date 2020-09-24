@@ -111,7 +111,7 @@ public class FootstepPlannerCompletionChecker
       {
          FootstepNode childNode = iterationData.getValidChildNodes().get(i);
 
-         double cost = iterationConductor.getGraph().getCostFromStart(childNode) + heuristics.compute(childNode);
+         double cost = heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;

@@ -307,4 +307,12 @@ public class DirectRobotUIController extends Group
    {
       clearSLAMPublisher.publish(new Empty());
    }
+
+   public void destroy()
+   {
+      lidarRegionsGraphic.destroy();
+      mapRegionsGraphic.destroy();
+      realsenseRegionsGraphic.destroy();
+      supportRegionsGraphic.destroy();
+   }
 }
