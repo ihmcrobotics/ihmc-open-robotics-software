@@ -133,7 +133,7 @@ public class DirectRobotUIController extends Group
          leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value ->
          {
             syncedRobot.update();
-            double sliderValue = value.doubleValue();
+            double sliderValue = 100.0 - value.doubleValue();
             double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
 
             FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
@@ -174,8 +174,14 @@ public class DirectRobotUIController extends Group
             double newSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
             stanceHeightReactiveSlider.acceptUpdatedValue(newSliderValue);
 
-            double chestPitch = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame).getPitch();
-            LogTools.info("Chest pitch: {}", chestPitch);
+            FrameYawPitchRoll chestFrame = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+            chestFrame.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+            double leanForwardValue = chestFrame.getPitch();
+            double pitchInRange = leanForwardValue - MIN_CHEST_PITCH;
+            double newChestSliderValue = SLIDER_RANGE * pitchInRange / CHEST_PITCH_RANGE;
+            double flippedSliderValue = 100.0 - newChestSliderValue;
+            leanForwardReactiveSlider.acceptUpdatedValue(flippedSliderValue);
+            LogTools.info("Chest pitch: {}", pitchInRange);
          });
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
