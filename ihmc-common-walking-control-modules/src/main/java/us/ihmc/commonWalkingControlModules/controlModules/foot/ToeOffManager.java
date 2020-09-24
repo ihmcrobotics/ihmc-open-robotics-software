@@ -659,7 +659,7 @@ public class ToeOffManager
     */
    public boolean canDoSingleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
    {
-      if (!doToeOffIfPossibleInSingleSupport.getValue() && !doToeOffIfPossibleInDoubleSupport.getValue())
+      if (!doToeOffIfPossibleInSingleSupport.getValue())
          return false;
 
       return canDoToeOff(nextFootstep, transferToSide);
