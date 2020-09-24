@@ -256,8 +256,23 @@ public class CoPTrajectoryGenerator
          // compute all the upcoming footsteps
          for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
          {
-            computeCoPPointsForFootstepTransfer(footstepIndex);
-            computeCoPPointsForFootstepSwing(footstepIndex);
+            RobotSide supportSide = upcomingFootstepsData.get(footstepIndex).getSupportSide();
+            FrameConvexPolygon2DReadOnly previousPolygon = transferringFromPolygon.get(footstepIndex);
+            FrameConvexPolygon2DReadOnly currentPolygon = transferringToPolygon.get(footstepIndex);
+            FrameConvexPolygon2DReadOnly nextPolygon = transferringToPolygon.get(footstepIndex + 1);
+
+            computeCoPPointsForFootstepTransfer(transferDurations.get(footstepIndex).getDoubleValue(),
+                                                transferSplitFractions.get(footstepIndex).getDoubleValue(),
+                                                transferWeightDistributions.get(footstepIndex).getDoubleValue(),
+                                                previousPolygon,
+                                                currentPolygon,
+                                                supportSide);
+            computeCoPPointsForFootstepSwing(Math.min(swingDurations.get(footstepIndex).getDoubleValue(), SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE),
+                                             swingShiftFractions.get(footstepIndex).getDoubleValue(),
+                                             swingSplitFractions.get(footstepIndex).getDoubleValue(),
+                                             currentPolygon,
+                                             nextPolygon,
+                                             supportSide);
          }
          computeCoPPointsForFinalTransfer(numberOfUpcomingFootsteps, atAStop);
       }
@@ -285,15 +300,44 @@ public class CoPTrajectoryGenerator
 
       if (upcomingFootstepData.getSwingTime() == Double.POSITIVE_INFINITY)
       { // We're in flamingo support, so only do the current one
-         computeCoPPointsForFootstepTransfer(0);
-         computeCoPPointsForFlamingoSingleSupport();
+         RobotSide currentSupportSide = upcomingFootstepsData.get(0).getSupportSide();
+         FrameConvexPolygon2DReadOnly previousPolygon = transferringFromPolygon.get(0);
+         FrameConvexPolygon2DReadOnly currentPolygon = transferringToPolygon.get(0);
+         FrameConvexPolygon2DReadOnly nextPolygon = transferringToPolygon.get(1);
+
+         computeCoPPointsForFootstepTransfer(transferDurations.get(0).getDoubleValue(),
+                                             transferSplitFractions.get(0).getDoubleValue(),
+                                             transferWeightDistributions.get(0).getDoubleValue(),
+                                             previousPolygon,
+                                             currentPolygon,
+                                             currentSupportSide);
+         computeCoPPointsForFlamingoSingleSupport(Math.min(swingDurations.get(0).getDoubleValue(), SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE),
+                                                  swingShiftFractions.get(0).getDoubleValue() * swingSplitFractions.get(0).getDoubleValue(),
+                                                  currentPolygon,
+                                                  nextPolygon,
+                                                  currentSupportSide);
       }
       else
       { // Compute all the upcoming waypoints
          for (int footstepIndex = 0; footstepIndex < numberOfUpcomingFootsteps; footstepIndex++)
          {
-            computeCoPPointsForFootstepTransfer(footstepIndex);
-            computeCoPPointsForFootstepSwing(footstepIndex);
+            RobotSide currentSupportSide = upcomingFootstepsData.get(footstepIndex).getSupportSide();
+            FrameConvexPolygon2DReadOnly previousPolygon = transferringFromPolygon.get(footstepIndex);
+            FrameConvexPolygon2DReadOnly currentPolygon = transferringToPolygon.get(footstepIndex);
+            FrameConvexPolygon2DReadOnly nextPolygon = transferringToPolygon.get(footstepIndex + 1);
+
+            computeCoPPointsForFootstepTransfer(transferDurations.get(footstepIndex).getDoubleValue(),
+                                                transferSplitFractions.get(footstepIndex).getDoubleValue(),
+                                                transferWeightDistributions.get(footstepIndex).getDoubleValue(),
+                                                previousPolygon,
+                                                currentPolygon,
+                                                currentSupportSide);
+            computeCoPPointsForFootstepSwing(Math.min(swingDurations.get(footstepIndex).getDoubleValue(), SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE),
+                                             swingShiftFractions.get(footstepIndex).getDoubleValue(),
+                                             swingSplitFractions.get(footstepIndex).getDoubleValue(),
+                                             currentPolygon,
+                                             nextPolygon,
+                                             currentSupportSide);
          }
          computeCoPPointsForFinalTransfer(numberOfUpcomingFootsteps, false);
       }
@@ -438,16 +482,6 @@ public class CoPTrajectoryGenerator
       framePointToPack.changeFrame(referenceFrameToConvertTo);
    }
 
-   private void computeCoPPointsForFootstepTransfer(int footstepIndex)
-   {
-      computeCoPPointsForFootstepTransfer(transferDurations.get(footstepIndex).getDoubleValue(),
-                                          transferSplitFractions.get(footstepIndex).getDoubleValue(),
-                                          transferWeightDistributions.get(footstepIndex).getDoubleValue(),
-                                          transferringFromPolygon.get(footstepIndex),
-                                          transferringToPolygon.get(footstepIndex),
-                                          upcomingFootstepsData.get(footstepIndex).getSupportSide());
-   }
-
    private void computeCoPPointsForFootstepTransfer(double duration,
                                                     double splitFraction,
                                                     double weightDistribution,
@@ -467,16 +501,6 @@ public class CoPTrajectoryGenerator
       contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
    }
 
-   private void computeCoPPointsForFootstepSwing(int footstepIndex)
-   {
-      computeCoPPointsForFootstepSwing(swingDurations.get(footstepIndex).getDoubleValue(),
-                                       swingShiftFractions.get(footstepIndex).getDoubleValue(),
-                                       swingSplitFractions.get(footstepIndex).getDoubleValue(),
-                                       transferringToPolygon.get(footstepIndex),
-                                       transferringToPolygon.get(footstepIndex + 1),
-                                       upcomingFootstepsData.get(footstepIndex).getSupportSide());
-   }
-
    private void computeCoPPointsForFootstepSwing(double duration,
                                                  double shiftFraction,
                                                  double splitFraction,
@@ -486,7 +510,7 @@ public class CoPTrajectoryGenerator
    {
       computeBallCoPLocation(tempPointForCoPCalculation, supportPolygon, nextPolygon, supportSide);
       SettableContactStateProvider contactState = contactStateProviders.getLast();
-      contactState.setDuration(getShiftToBallDuration(shiftFraction, splitFraction, duration));
+      contactState.setDuration(shiftFraction * splitFraction * duration);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
 
       SettableContactStateProvider previousContactState = contactState;
@@ -495,39 +519,38 @@ public class CoPTrajectoryGenerator
 
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setDuration(getShiftToToeDuration(shiftFraction, splitFraction, duration));
+      contactState.setDuration(shiftFraction * (1.0 - splitFraction) * duration);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setDuration(getDurationOnToe(shiftFraction, duration));
+      contactState.setDuration((1.0 - shiftFraction) * duration);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
    }
 
-   private void computeCoPPointsForFlamingoSingleSupport()
+   private void computeCoPPointsForFlamingoSingleSupport(double duration,
+                                                         double shiftFraction,
+                                                         FrameConvexPolygon2DReadOnly supportPolygon,
+                                                         FrameConvexPolygon2DReadOnly nextPolygon,
+                                                         RobotSide supportSide)
    {
-      RobotSide supportSide = upcomingFootstepsData.get(0).getSupportSide();
+      double shiftDuration = shiftFraction * duration;
+      double constantDuration = duration - shiftDuration;
 
-      computeBallCoPLocation(tempPointForCoPCalculation, transferringToPolygon.getFirst(), transferringToPolygon.get(1), supportSide);
+      computeBallCoPLocation(tempPointForCoPCalculation, supportPolygon, nextPolygon, supportSide);
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(getShiftToBallDuration(0));
+      contactState.setDuration(shiftDuration);
 
-      computeFlamingoStanceCoPLocation(tempPointForCoPCalculation, transferringToPolygon.getFirst());
+      computeFlamingoStanceCoPLocation(tempPointForCoPCalculation, supportPolygon);
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(getShiftToToeDuration(0));
-
-      previousContactState = contactState;
-      contactState = contactStateProviders.add();
-      contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(getDurationOnToe(0));
+      contactState.setDuration(constantDuration);
    }
 
    private void computeExitCoPPointLocationForPreviousPlan(FramePoint3D exitCoPFromLastPlanToPack,
@@ -618,50 +641,6 @@ public class CoPTrajectoryGenerator
 
       constrainToPolygon(copLocationToPack, footPolygon, parameters.getMinimumDistanceInsidePolygon());
       copLocationToPack.changeFrame(worldFrame);
-   }
-
-   private double getShiftToBallDuration(int footstepIndex)
-   {
-      return getShiftToBallDuration(swingShiftFractions.get(footstepIndex).getDoubleValue(),
-                                    swingSplitFractions.get(footstepIndex).getDoubleValue(),
-                                    swingDurations.get(footstepIndex).getDoubleValue());
-   }
-
-   private double getShiftToBallDuration(double shiftFraction, double splitFraction, double duration)
-   {
-      if (Double.isInfinite(duration))
-         duration = SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE;
-
-      return shiftFraction * splitFraction * duration;
-   }
-
-   private double getShiftToToeDuration(int footstepIndex)
-   {
-      return getShiftToToeDuration(swingShiftFractions.get(footstepIndex).getDoubleValue(),
-                                   swingSplitFractions.get(footstepIndex).getDoubleValue(),
-                                   swingDurations.get(footstepIndex).getDoubleValue());
-   }
-
-   private double getShiftToToeDuration(double shiftFraction, double splitFraction, double duration)
-   {
-      if (Double.isInfinite(duration))
-         duration = SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE;
-
-      return shiftFraction * (1.0 - splitFraction) * duration;
-   }
-
-   private double getDurationOnToe(int footstepIndex)
-   {
-      return getDurationOnToe(swingShiftFractions.get(footstepIndex).getDoubleValue(),
-                              swingDurations.get(footstepIndex).getDoubleValue());
-   }
-
-   private double getDurationOnToe(double shiftFraction, double duration)
-   {
-      if (Double.isInfinite(duration))
-         duration = SmoothCMPBasedICPPlanner.SUFFICIENTLY_LARGE;
-
-      return (1.0 - shiftFraction) * duration;
    }
 
    /**
