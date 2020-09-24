@@ -112,12 +112,16 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
       {
          for (int i = 0; i < messageHashCodes.size(); i++)
          {
-            joints.add(jointHashCodeResolver.castAndGetJoint(messageHashCodes.get(i)));
-         }
-
-         for (int i = 0; i < messageJointAngles.size(); i++)
-         {
-            privilegedJointAngles.add(messageJointAngles.get(i));
+            try
+            {
+               OneDoFJointBasics joint = jointHashCodeResolver.castAndGetJoint(messageHashCodes.get(i));
+               joints.add(joint);
+               privilegedJointAngles.add(messageJointAngles.get(i));
+            }
+            catch (RuntimeException e)
+            {
+               // unknown joint, skip.
+            }
          }
       }
 
