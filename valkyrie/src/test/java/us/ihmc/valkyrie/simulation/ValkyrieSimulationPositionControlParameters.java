@@ -159,7 +159,7 @@ public class ValkyrieSimulationPositionControlParameters implements HighLevelCon
       configureSymmetricBehavior(jointBehaviors, jointMap, HIP_PITCH, POSITION          , 10000.0, 150.0, maxPositionError, maxVelocityError);
       configureSymmetricBehavior(jointBehaviors, jointMap, KNEE_PITCH, POSITION         ,  8000.0, 100.0, maxPositionError, maxVelocityError);
       configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_PITCH, POSITION        ,  4000.0,  40.0, maxPositionError, maxVelocityError);
-      configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_ROLL, POSITION         ,  2000.0,  20.0, maxPositionError, maxVelocityError);
+      configureSymmetricBehavior(jointBehaviors, jointMap, ANKLE_ROLL, POSITION         ,  2000.0,  30.0, maxPositionError, maxVelocityError);
       configureBehavior         (jointBehaviors, jointMap, SPINE_YAW, POSITION          , 10000.0, 250.0, maxPositionError, maxVelocityError);
       configureBehavior         (jointBehaviors, jointMap, SPINE_PITCH, POSITION        , 30000.0, 800.0, maxPositionError, maxVelocityError);
       configureBehavior         (jointBehaviors, jointMap, SPINE_ROLL, POSITION         , 30000.0, 800.0, maxPositionError, maxVelocityError);
