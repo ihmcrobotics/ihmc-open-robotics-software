@@ -149,6 +149,7 @@ public class BalanceManager
 
    private final List<Footstep> footsteps = new ArrayList<>();
    private final List<FootstepTiming> footstepTimings = new ArrayList<>();
+   private final List<FootstepShiftFractions> footstepShiftFractions = new ArrayList<>();
 
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
    private final YoBoolean inFinalTransfer = new YoBoolean("InFinalTransfer", registry);
@@ -258,6 +259,7 @@ public class BalanceManager
    {
       footsteps.add(footstep);
       footstepTimings.add(timing);
+      footstepShiftFractions.add(shiftFractions);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -279,6 +281,7 @@ public class BalanceManager
    {
       footsteps.clear();
       footstepTimings.clear();
+      footstepShiftFractions.clear();
    }
 
    public void setICPPlanSupportSide(RobotSide supportSide)
