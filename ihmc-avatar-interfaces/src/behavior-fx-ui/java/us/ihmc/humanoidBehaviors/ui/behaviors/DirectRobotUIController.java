@@ -15,13 +15,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
@@ -49,6 +50,9 @@ public class DirectRobotUIController extends Group
    private static final double MIN_PELVIS_HEIGHT = 0.52;
    private static final double MAX_PELVIS_HEIGHT = 0.90;
    private static final double PELVIS_HEIGHT_RANGE = MAX_PELVIS_HEIGHT - MIN_PELVIS_HEIGHT;
+   private static final double MIN_CHEST_PITCH = Math.toRadians(-15.0);
+   private static final double MAX_CHEST_PITCH = Math.toRadians(50.0);
+   private static final double CHEST_PITCH_RANGE = MAX_CHEST_PITCH - MIN_CHEST_PITCH;
    private static final double SLIDER_RANGE = 100.0;
 
    @FXML private ComboBox<Integer> pumpPSI;
@@ -71,6 +75,7 @@ public class DirectRobotUIController extends Group
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private IHMCROS2Publisher<Empty> clearSLAMPublisher;
    private IHMCROS2Publisher<NeckTrajectoryMessage> neckTrajectoryPublisher;
+   private IHMCROS2Publisher<ChestTrajectoryMessage> chestTrajectoryPublisher;
    private IHMCROS2Publisher<PelvisHeightTrajectoryMessage> pelvisHeightTrajectoryPublisher;
    private LivePlanarRegionsGraphic lidarRegionsGraphic;
    private LivePlanarRegionsGraphic realsenseRegionsGraphic;
@@ -96,6 +101,8 @@ public class DirectRobotUIController extends Group
 
          neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                            ControllerAPIDefinition.getTopic(NeckTrajectoryMessage.class, robotName));
+         chestTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                           ControllerAPIDefinition.getTopic(ChestTrajectoryMessage.class, robotName));
          pelvisHeightTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                                    ControllerAPIDefinition.getTopic(PelvisHeightTrajectoryMessage.class, robotName));
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
@@ -109,7 +116,7 @@ public class DirectRobotUIController extends Group
             FramePose3D midFeetZUp = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
             midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
             double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
-            LogTools.info(StringTools.format3D("Stance height slider: {} desired: {} (pelvis - midFeetZ): {}",
+            LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {}",
                                                sliderValue, desiredHeight, pelvisZ - midFeetZ));
             PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
             message.getEuclideanTrajectory()
@@ -123,7 +130,30 @@ public class DirectRobotUIController extends Group
             message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
             pelvisHeightTrajectoryPublisher.publish(message);
          });
-         leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value -> LogTools.info("Lean forward {}", value));
+         leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value ->
+         {
+            syncedRobot.update();
+            double sliderValue = value.doubleValue();
+            double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
+
+            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+            frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+            frameChestYawPitchRoll.setPitch(desiredChestPitch);
+            frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
+
+            LogTools.info(StringTools.format3D("Commanding chest pitch. slider: {} pitch: {}", sliderValue, desiredChestPitch));
+
+            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+            message.getSo3Trajectory()
+                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+                                                                        frameChestYawPitchRoll,
+                                                                        EuclidCoreTools.zeroVector3D,
+                                                                        ReferenceFrame.getWorldFrame()));
+            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+            chestTrajectoryPublisher.publish(message);
+         });
          neckReactiveSlider = new JavaFXReactiveSlider(neckSlider, sliderValue ->
          {
             double percent = sliderValue.doubleValue() / 100.0;
@@ -143,6 +173,9 @@ public class DirectRobotUIController extends Group
             double heightInRange = midFeetToPelvis - MIN_PELVIS_HEIGHT;
             double newSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
             stanceHeightReactiveSlider.acceptUpdatedValue(newSliderValue);
+
+            double chestPitch = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame).getPitch();
+            LogTools.info("Chest pitch: {}", chestPitch);
          });
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
