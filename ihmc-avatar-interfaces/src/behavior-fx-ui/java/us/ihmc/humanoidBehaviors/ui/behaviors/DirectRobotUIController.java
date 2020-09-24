@@ -111,7 +111,6 @@ public class DirectRobotUIController extends Group
             double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
             LogTools.info(StringTools.format3D("Stance height slider: {} desired: {} (pelvis - midFeetZ): {}",
                                                sliderValue, desiredHeight, pelvisZ - midFeetZ));
-            desiredHeight += midFeetZUp.getZ(); // convert to world frame
             PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
             message.getEuclideanTrajectory()
                    .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
@@ -141,7 +140,8 @@ public class DirectRobotUIController extends Group
             double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
             double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
             double midFeetToPelvis = pelvisZ - midFeetZ;
-            double newSliderValue = SLIDER_RANGE * midFeetToPelvis / PELVIS_HEIGHT_RANGE;
+            double heightInRange = midFeetToPelvis - MIN_PELVIS_HEIGHT;
+            double newSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
             stanceHeightReactiveSlider.acceptUpdatedValue(newSliderValue);
          });
       }

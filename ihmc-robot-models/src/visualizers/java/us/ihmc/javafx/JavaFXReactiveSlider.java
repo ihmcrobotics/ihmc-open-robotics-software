@@ -1,5 +1,6 @@
 package us.ihmc.javafx;
 
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.scene.control.Slider;
 import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
@@ -17,6 +18,8 @@ public class JavaFXReactiveSlider
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
+   private boolean skipNextChange = false; // prevent feedback loo
+
    public JavaFXReactiveSlider(Slider slider, Consumer<Number> action)
    {
       this.slider = slider;
@@ -27,6 +30,11 @@ public class JavaFXReactiveSlider
 
    private void valueListener(Observable observable, Number oldValue, Number newValue)
    {
+      if (skipNextChange)
+      {
+         skipNextChange = false;
+         return;
+      }
       executor.queueExecution(() -> waitThenAct(newValue));
    }
 
@@ -39,9 +47,16 @@ public class JavaFXReactiveSlider
 
    public void acceptUpdatedValue(double newValue)
    {
-      if (!executor.isExecuting())
+      Platform.runLater(() ->
       {
-         slider.setValue(newValue);
-      }
+         boolean executing = executor.isExecuting();
+         boolean valueChanging = slider.isValueChanging();
+
+         if (!executing && !valueChanging)
+         {
+            skipNextChange = true;
+            slider.setValue(newValue);
+         }
+      });
    }
 }
