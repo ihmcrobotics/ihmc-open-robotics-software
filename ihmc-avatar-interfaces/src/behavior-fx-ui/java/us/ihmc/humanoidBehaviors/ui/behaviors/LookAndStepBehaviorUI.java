@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import controller_msgs.msg.dds.StoredPropertySetMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
@@ -216,7 +217,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private void publishLookAndStepParameters()
    {
-      behaviorMessager.submitMessage(LookAndStepParameters, lookAndStepParameters.getAllAsStrings());
+      StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
+      lookAndStepParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
+      ros2Publisher.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
    }
 
    private void publishFootstepPlanningParameters()
@@ -276,5 +279,15 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void reset()
    {
       ros2Publisher.publish(RESET);
+   }
+
+   @Override
+   public void destroy()
+   {
+      planarRegionsRegionsGraphic.destroy();
+      footstepPlanGraphic.destroy();
+      commandedFootsteps.destroy();
+      startAndGoalFootPoses.destroy();
+      bodyPathPlanGraphic.destroy();
    }
 }

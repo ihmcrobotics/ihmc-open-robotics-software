@@ -40,36 +40,25 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -86,45 +75,34 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -136,36 +114,25 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_6(data.getJointVelocityWeight());
 
-
       cdr.write_type_6(data.getJointAccelerationWeight());
-
 
       cdr.write_type_7(data.getEnableJointVelocityLimits());
 
-
       cdr.write_type_7(data.getDisableJointVelocityLimits());
-
 
       cdr.write_type_7(data.getDisableCollisionAvoidance());
 
-
       cdr.write_type_7(data.getEnableCollisionAvoidance());
-
 
       cdr.write_type_7(data.getDisableInputPersistence());
 
-
       cdr.write_type_7(data.getEnableInputPersistence());
 
-
       cdr.write_type_7(data.getEnableSupportPolygonConstraint());
-
 
       cdr.write_type_7(data.getDisableSupportPolygonConstraint());
 
@@ -173,37 +140,26 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setJointVelocityWeight(cdr.read_type_6());
       	
-
       data.setJointAccelerationWeight(cdr.read_type_6());
       	
-
       data.setEnableJointVelocityLimits(cdr.read_type_7());
       	
-
       data.setDisableJointVelocityLimits(cdr.read_type_7());
       	
-
       data.setDisableCollisionAvoidance(cdr.read_type_7());
       	
-
       data.setEnableCollisionAvoidance(cdr.read_type_7());
       	
-
       data.setDisableInputPersistence(cdr.read_type_7());
       	
-
       data.setEnableInputPersistence(cdr.read_type_7());
       	
-
       data.setEnableSupportPolygonConstraint(cdr.read_type_7());
       	
-
       data.setDisableSupportPolygonConstraint(cdr.read_type_7());
       	
 
@@ -212,54 +168,32 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_6("joint_velocity_weight", data.getJointVelocityWeight());
-
       ser.write_type_6("joint_acceleration_weight", data.getJointAccelerationWeight());
-
       ser.write_type_7("enable_joint_velocity_limits", data.getEnableJointVelocityLimits());
-
       ser.write_type_7("disable_joint_velocity_limits", data.getDisableJointVelocityLimits());
-
       ser.write_type_7("disable_collision_avoidance", data.getDisableCollisionAvoidance());
-
       ser.write_type_7("enable_collision_avoidance", data.getEnableCollisionAvoidance());
-
       ser.write_type_7("disable_input_persistence", data.getDisableInputPersistence());
-
       ser.write_type_7("enable_input_persistence", data.getEnableInputPersistence());
-
       ser.write_type_7("enable_support_polygon_constraint", data.getEnableSupportPolygonConstraint());
-
       ser.write_type_7("disable_support_polygon_constraint", data.getDisableSupportPolygonConstraint());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setJointVelocityWeight(ser.read_type_6("joint_velocity_weight"));
-
       data.setJointAccelerationWeight(ser.read_type_6("joint_acceleration_weight"));
-
       data.setEnableJointVelocityLimits(ser.read_type_7("enable_joint_velocity_limits"));
-
       data.setDisableJointVelocityLimits(ser.read_type_7("disable_joint_velocity_limits"));
-
       data.setDisableCollisionAvoidance(ser.read_type_7("disable_collision_avoidance"));
-
       data.setEnableCollisionAvoidance(ser.read_type_7("enable_collision_avoidance"));
-
       data.setDisableInputPersistence(ser.read_type_7("disable_input_persistence"));
-
       data.setEnableInputPersistence(ser.read_type_7("enable_input_persistence"));
-
       data.setEnableSupportPolygonConstraint(ser.read_type_7("enable_support_polygon_constraint"));
-
       data.setDisableSupportPolygonConstraint(ser.read_type_7("disable_support_polygon_constraint"));
    }
 

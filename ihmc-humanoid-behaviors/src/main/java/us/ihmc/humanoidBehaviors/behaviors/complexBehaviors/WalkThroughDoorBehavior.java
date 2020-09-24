@@ -536,12 +536,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       factory.addState(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk);
 
-      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
-                            WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
-                            t -> setUpForWalk.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      //factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+      //                      WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
+       //                     t -> setUpForWalk.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
       factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
                             WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
-                            t -> setUpForWalk.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
+                            t -> setUpForWalk.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
 
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);

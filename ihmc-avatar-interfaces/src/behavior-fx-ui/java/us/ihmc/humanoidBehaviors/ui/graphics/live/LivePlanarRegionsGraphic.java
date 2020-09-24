@@ -107,4 +107,9 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    {
       return latestPlanarRegionsList.copy();
    }
+
+   public void destroy()
+   {
+      executorService.shutdownNow();
+   }
 }

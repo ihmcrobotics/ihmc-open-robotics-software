@@ -6,6 +6,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REACurrentStateProvider;
@@ -53,6 +55,19 @@ public class LidarREANetworkProvider implements REANetworkProvider
    public void registerMessager(Messager messager)
    {
       currentStateProvider = new REACurrentStateProvider(ros2Node, outputTopic, messager);
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    NormalEstimationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PlanarRegionSegmentationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PolygonizerParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
    }
 
 

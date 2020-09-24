@@ -135,16 +135,6 @@ public class LIDARBasedREAModule implements PerceptionModule
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
       planarRegionFeatureUpdater.bindControls();
 
-      networkProvider.registerMessager(reaMessager);
-      networkProvider.registerLidarScanHandler(reaMessager, this::dispatchLidarScanMessage);
-      networkProvider.registerDepthPointCloudHandler(reaMessager, this::dispatchDepthPointCloudMessage);
-      networkProvider.registerStereoVisionPointCloudHandler(reaMessager, this::dispatchStereoVisionPointCloudMessage);
-      networkProvider.registerStampedPosePacketHandler(reaMessager, this::dispatchStampedPosePacket);
-      networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
-      networkProvider.registerPlanarRegionsListRequestHandler(this::handleRequestPlanarRegionsListMessage);
-      networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
-      networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
-
       loadConfigurationFile(filePropertyHelper);
 
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
@@ -156,15 +146,25 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
-      // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
-      reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
-
       preserveStereoOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       preserveDepthOcTreeHistory = reaMessager.createInput(REAModuleAPI.DepthCloudBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       enableLidarBuffer = reaMessager.createInput(REAModuleAPI.LidarBufferEnable, true);
       enableDepthCloudBuffer = reaMessager.createInput(REAModuleAPI.DepthCloudBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
+
+      networkProvider.registerMessager(reaMessager);
+      networkProvider.registerLidarScanHandler(reaMessager, this::dispatchLidarScanMessage);
+      networkProvider.registerDepthPointCloudHandler(reaMessager, this::dispatchDepthPointCloudMessage);
+      networkProvider.registerStereoVisionPointCloudHandler(reaMessager, this::dispatchStereoVisionPointCloudMessage);
+      networkProvider.registerStampedPosePacketHandler(reaMessager, this::dispatchStampedPosePacket);
+      networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
+      networkProvider.registerPlanarRegionsListRequestHandler(this::handleRequestPlanarRegionsListMessage);
+      networkProvider.registerREAStateRequestHandler(this::handleREAStateRequestMessage);
+      networkProvider.registerREASensorDataFilterParametersHandler(this::handleREASensorDataFilterParametersMessage);
+
+      // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
+      reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)

@@ -1,25 +1,37 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 
-import controller_msgs.msg.dds.*;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
-import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
-import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
-import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.HighLevelStateMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
@@ -55,7 +67,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
                                            s -> processFootstepStatusMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopic,
                                            s -> processSteppingStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedGroundPlaneMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, GroundPlaneMessage.class, controllerOutputTopic,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
@@ -99,7 +111,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
          stepTeleopController.processSteppingStateChangeMessage(message);
    }
 
-   private void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   private void processGroundPlaneMessage(GroundPlaneMessage message)
    {
       if (stepTeleopController != null)
          stepTeleopController.processGroundPlaneMessage(message);

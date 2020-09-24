@@ -269,6 +269,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
          generator.translate(stepDepth, 0.0, 0.0);
       }
 
+      generator.translate(- 0.5 * stepDepth + 0.5 * topPlatformLength, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(topPlatformLength, topPlatformWidth, stepHeight * numberOfSteps);
       addRegions(generator.getPlanarRegionsList(), YoAppearance.Grey());
    }

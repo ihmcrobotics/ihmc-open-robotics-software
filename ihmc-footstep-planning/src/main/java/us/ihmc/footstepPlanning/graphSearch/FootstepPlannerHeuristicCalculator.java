@@ -83,6 +83,13 @@ public class FootstepPlannerHeuristicCalculator
 
          initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;
+
+         /** TODO remove when {@link FootstepPlannerParametersReadOnly#getStepOnlyWithRequestedSide()} is removed */
+         if (node.getRobotSide() == parameters.getStepOnlyWithRequestedSide())
+         {
+            walkDistance += 0.5 * parameters.getIdealFootstepLength();
+         }
+
          finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pathHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
@@ -92,6 +99,6 @@ public class FootstepPlannerHeuristicCalculator
 
    public void resetLoggedVariables()
    {
-      heuristicCost.set(0.0);
+      heuristicCost.set(Double.NaN);
    }
 }
