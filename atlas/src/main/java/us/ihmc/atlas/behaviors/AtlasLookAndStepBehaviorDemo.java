@@ -47,6 +47,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam", "true"));
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
    private static boolean USE_ADDITIONAL_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("use.additional.contact.points"));
+   private static int ENVIRONMENT = Integer.parseInt(System.getProperty("environment", "-1"));
 
    private final CommunicationMode communicationModeROS2 = USE_INTERPROCESS_ROS2 ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
    private final CommunicationMode communicationModeKryo = USE_INTERPROCESS_KRYO ? CommunicationMode.INTERPROCESS : CommunicationMode.INTRAPROCESS;
@@ -78,7 +79,8 @@ public class AtlasLookAndStepBehaviorDemo
 
    }
    private final Random random = new Random();
-   private final EnvironmentInitialSetup environmentInitialSetup = environmentInitialSetups.get(random.nextInt(environmentInitialSetups.size()));
+   private final EnvironmentInitialSetup environmentInitialSetup
+         = environmentInitialSetups.get(ENVIRONMENT > 0 ? ENVIRONMENT : random.nextInt(environmentInitialSetups.size()));
 
    private BehaviorUI behaviorUI;
    private final BehaviorModule behaviorModule;
