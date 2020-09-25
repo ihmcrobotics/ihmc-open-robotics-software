@@ -1,78 +1,79 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.ros2.Ros2Node;
 
 
 public class LineSegmentDetectorUI extends Application {
 
+    private Point3D sensorPosition;
+
     private BorderPane mainPane;
-    private JavaFXPlanarRegionsViewer planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-    private Ros2Node ros2Node;
+    private JavaFXPlanarRegionsViewer planarRegionsViewer;
+    private Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");;
 
     private LineSegmentEstimator lineSegmentEstimator;
-
 
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("Line Segment Detector");
-
-
-        Button button = new Button("Click Me");
+        Sphere sphere = new Sphere(0.1);
 
         mainPane = new BorderPane();
-        mainPane.getChildren().add(button);
+        planarRegionsViewer = new JavaFXPlanarRegionsViewer();
 
-        this.ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
-        ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
+        lineSegmentEstimator = new LineSegmentEstimator();
+        lineSegmentEstimator.setPlanarRegionsViewer(planarRegionsViewer);
+        lineSegmentEstimator.setSensorNode(sphere);
 
         View3DFactory view3dFactory = View3DFactory.createSubscene();
 
-        Sphere sphere = new Sphere(0.1);
 
         view3dFactory.addNodeToView(sphere);
-
-
         view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
-
         view3dFactory.addWorldCoordinateSystem(0.3);
         Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
         mainPane.setCenter(subScene);
 
         FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
-
         Translate rootJointOffset = new Translate();
         cameraController.prependTransform(rootJointOffset);
-        Translate manipulationFocusPoint = new Translate(0.0, 0.0, 1.0);
+        Translate manipulationFocusPoint = new Translate(0.0, 0.0, 0.0);
         cameraController.prependTransform(manipulationFocusPoint);
 
-        this.planarRegionsViewer.start();
 
         Scene scene = new Scene(mainPane, 3200,1800);
 
+        stage.setOnCloseRequest(event -> stop());
         stage.setScene(scene);
         stage.show();
 
+        planarRegionsViewer.start();
 
-        // this.lineSegmentEstimator = new LineSegmentEstimator();
+    }
 
-        // this.planarRegionsViewer.submitPlanarRegions(currentPlanarRegionsListMessage);
-
-
+    @Override
+    public void stop(){
+        planarRegionsViewer.stop();
+        ThreadTools.sleep(100);
+        try {
+            super.stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.exit(0);
     }
 }
