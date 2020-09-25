@@ -140,7 +140,7 @@ public class AtlasNetworkProcessor
    {
       networkProcessor.setupRosModule();
 
-//      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();

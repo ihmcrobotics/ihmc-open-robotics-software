@@ -36,7 +36,7 @@ public class CombinedFootRotationDetector implements FootRotationDetector
 
       rotationDetectorType = new YoEnum<>(side.getCamelCaseName() + "RotationDetectorType", registry, RotationDetectorType.class);
 
-      rotationDetectorType.set(RotationDetectorType.KINEMATIC_AND_VELOCITY);
+      rotationDetectorType.set(RotationDetectorType.VELOCITY);
 
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
    }
