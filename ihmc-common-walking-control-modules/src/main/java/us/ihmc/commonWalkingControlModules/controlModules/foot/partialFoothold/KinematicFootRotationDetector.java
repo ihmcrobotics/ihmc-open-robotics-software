@@ -105,6 +105,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       pointingBackwardVector.scale(0.15); // FIXME magic number?
       pointingBackwardVector.changeFrame(worldFrame);
 
+      // This foot drop or lift doesn't work on non-flat ground.
       footDropOrLift.set(pointingBackwardVector.getZ());
       angularVelocityMagnitude.set(footAngularVelocityFiltered.length());
 

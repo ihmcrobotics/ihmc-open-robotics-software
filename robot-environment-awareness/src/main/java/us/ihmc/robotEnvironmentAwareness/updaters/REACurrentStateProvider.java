@@ -37,15 +37,6 @@ public class REACurrentStateProvider
 
    public void publishCurrentState()
    {
-      if (isRunning.get() == null
-      || isUsingLidar.get() == null
-      || isUsingStereoVision.get() == null
-      || isUsingDepthCloud.get() == null
-      || minRange.get() == null
-      || maxRange.get() == null
-      || boundingBoxParameters.get() == null)
-         return;
-
       currentState.setIsRunning(isRunning.get());
       currentState.setIsUsingLidar(isUsingLidar.get());
       currentState.setIsUsingStereoVision(isUsingStereoVision.get());
