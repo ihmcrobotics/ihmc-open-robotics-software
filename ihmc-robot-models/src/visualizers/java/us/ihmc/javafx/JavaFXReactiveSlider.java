@@ -3,6 +3,7 @@ package us.ihmc.javafx;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.scene.control.Slider;
+import us.ihmc.commons.MathTools;
 import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -47,6 +48,7 @@ public class JavaFXReactiveSlider
 
    public void acceptUpdatedValue(double newValue)
    {
+      double clampedValue = MathTools.clamp(newValue, 0.0, 100.0);
       Platform.runLater(() ->
       {
          boolean executing = executor.isExecuting();
@@ -55,7 +57,7 @@ public class JavaFXReactiveSlider
          if (!executing && !valueChanging)
          {
             skipNextChange = true;
-            slider.setValue(newValue);
+            slider.setValue(clampedValue);
          }
       });
    }
