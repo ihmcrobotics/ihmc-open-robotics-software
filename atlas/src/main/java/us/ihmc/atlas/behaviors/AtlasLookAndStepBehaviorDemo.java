@@ -214,6 +214,13 @@ public class AtlasLookAndStepBehaviorDemo
 
    public static void main(String[] args)
    {
-      JavaProcessManager.teeToLogFile(AtlasLookAndStepBehaviorDemo.class);
+      if (LOG_TO_FILE)
+      {
+         JavaProcessManager.teeToLogFile(AtlasLookAndStepBehaviorDemo.class);
+      }
+      else
+      {
+         new AtlasLookAndStepBehaviorDemo();
+      }
    }
 }
