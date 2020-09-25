@@ -16,6 +16,8 @@ public class JavaFXROS2VideoViewOverlay
    private SizeMode currentMode = SizeMode.MIN;
 
    private final DoubleProperty animationDurationProperty = new SimpleDoubleProperty(this, "animationDuration", 0.15);
+   private Timeline toggleModeTimeline;
+   private Timeline transistionBlendingTimeline;
 
    private enum SizeMode
    {
@@ -49,13 +51,13 @@ public class JavaFXROS2VideoViewOverlay
 
    private void transitionBlending(double endOpacity, BlendMode endBlendMode)
    {
-      Timeline timeline = new Timeline();
-      timeline.setAutoReverse(false);
-      timeline.setCycleCount(1);
-      timeline.getKeyFrames().add(new KeyFrame(Duration.ZERO, new KeyValue(videoView.opacityProperty(), videoView.getOpacity())));
-      timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(animationDurationProperty.get()), new KeyValue(videoView.opacityProperty(), endOpacity)));
-      timeline.setOnFinished(e2 -> videoView.setBlendMode(endBlendMode));
-      timeline.play();
+      transistionBlendingTimeline = new Timeline();
+      transistionBlendingTimeline.setAutoReverse(false);
+      transistionBlendingTimeline.setCycleCount(1);
+      transistionBlendingTimeline.getKeyFrames().add(new KeyFrame(Duration.ZERO, new KeyValue(videoView.opacityProperty(), videoView.getOpacity())));
+      transistionBlendingTimeline.getKeyFrames().add(new KeyFrame(Duration.seconds(animationDurationProperty.get()), new KeyValue(videoView.opacityProperty(), endOpacity)));
+      transistionBlendingTimeline.setOnFinished(e2 -> videoView.setBlendMode(endBlendMode));
+      transistionBlendingTimeline.play();
    }
 
    public void toggleMode()
@@ -77,14 +79,14 @@ public class JavaFXROS2VideoViewOverlay
          throw new RuntimeException("Unhandle mode: " + currentMode);
       }
 
-      Timeline timeline = new Timeline();
-      timeline.setAutoReverse(false);
-      timeline.setCycleCount(1);
-      timeline.getKeyFrames().add(new KeyFrame(Duration.ZERO, new KeyValue(videoView.fitWidthProperty(), videoView.getFitWidth())));
-      timeline.getKeyFrames()
-              .add(new KeyFrame(Duration.seconds(animationDurationProperty.get()), new KeyValue(videoView.fitWidthProperty(), endMode.getWidth())));
-      timeline.setOnFinished(event -> currentMode = endMode);
-      timeline.play();
+      toggleModeTimeline = new Timeline();
+      toggleModeTimeline.setAutoReverse(false);
+      toggleModeTimeline.setCycleCount(1);
+      toggleModeTimeline.getKeyFrames().add(new KeyFrame(Duration.ZERO, new KeyValue(videoView.fitWidthProperty(), videoView.getFitWidth())));
+      toggleModeTimeline.getKeyFrames()
+                        .add(new KeyFrame(Duration.seconds(animationDurationProperty.get()), new KeyValue(videoView.fitWidthProperty(), endMode.getWidth())));
+      toggleModeTimeline.setOnFinished(event -> currentMode = endMode);
+      toggleModeTimeline.play();
    }
 
    public void start()
@@ -99,6 +101,8 @@ public class JavaFXROS2VideoViewOverlay
 
    public void destroy()
    {
+      toggleModeTimeline.stop();
+      transistionBlendingTimeline.stop();
       videoView.destroy();
    }
 

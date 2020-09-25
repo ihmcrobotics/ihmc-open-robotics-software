@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
+import sensor_msgs.msg.dds.CompressedImage;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
@@ -90,7 +92,7 @@ public class ROS2Tools
    public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<VideoPacket> D435_VIDEO = VIDEO.withModule(D435_NAME);
+   public static final ROS2Topic<CompressedImage> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(CompressedImage.class).withSuffix("video");
 
    public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
@@ -428,6 +430,11 @@ public class ROS2Tools
       return createPublisher(ros2Node, topic.getType(), topic.getName());
    }
 
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, ROS2QosProfile qosProfile)
+   {
+      return createPublisher(ros2Node, topic.getType(), topic.getName(), qosProfile, RUNTIME_EXCEPTION);
+   }
+
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, messageType, topicName.toString());
@@ -440,10 +447,19 @@ public class ROS2Tools
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
+      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node,
+                                                          Class<T> messageType,
+                                                          String topicName,
+                                                          ROS2QosProfile qosProfile,
+                                                          ExceptionHandler exceptionHandler)
+   {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.DEFAULT()));
+         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
       }
       catch (IOException e)
       {
