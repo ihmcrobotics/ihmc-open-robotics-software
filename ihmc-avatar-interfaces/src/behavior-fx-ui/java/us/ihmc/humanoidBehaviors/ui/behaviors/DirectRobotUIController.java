@@ -54,6 +54,7 @@ public class DirectRobotUIController extends Group
    private static final double MAX_CHEST_PITCH = Math.toRadians(50.0);
    private static final double CHEST_PITCH_RANGE = MAX_CHEST_PITCH - MIN_CHEST_PITCH;
    private static final double SLIDER_RANGE = 100.0;
+   private static final double ROBOT_DATA_EXPIRATION = 1.0;
 
    @FXML private ComboBox<Integer> pumpPSI;
    @FXML private CheckBox enableSupportRegions;
@@ -114,23 +115,23 @@ public class DirectRobotUIController extends Group
 
          stanceHeightReactiveSlider = new JavaFXReactiveSlider(stanceHeightSlider, value ->
          {
-            if (syncedRobotForHeightSlider.hasReceivedFirstMessage())
+            if (syncedRobotForHeightSlider.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
             {
                syncedRobotForHeightSlider.update();
                double sliderValue = value.doubleValue();
                double pelvisZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
                double midFeetZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
-               FramePose3D midFeetZUp = new FramePose3D(syncedRobotForHeightSlider.getReferenceFrames().getMidFeetZUpFrame());
-               midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
                double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
-               LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {}",
+               double desiredHeightInWorld = desiredHeight + midFeetZ;
+               LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {} in world: {}",
                                                   sliderValue,
                                                   desiredHeight,
-                                                  pelvisZ - midFeetZ));
+                                                  pelvisZ - midFeetZ,
+                                                  desiredHeightInWorld));
                PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
                message.getEuclideanTrajectory()
                       .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
-                                                                                 new Point3D(0.0, 0.0, desiredHeight),
+                                                                                 new Point3D(0.0, 0.0, desiredHeightInWorld),
                                                                                  ReferenceFrame.getWorldFrame()));
                long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
                message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
@@ -142,7 +143,7 @@ public class DirectRobotUIController extends Group
          });
          leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value ->
          {
-            if (syncedRobotForChestSlider.hasReceivedFirstMessage())
+            if (syncedRobotForChestSlider.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
             {
                syncedRobotForChestSlider.update();
                double sliderValue = 100.0 - value.doubleValue();
