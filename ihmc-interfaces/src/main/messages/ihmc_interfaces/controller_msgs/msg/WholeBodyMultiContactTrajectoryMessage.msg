@@ -1,4 +1,4 @@
-# This message is part of the IHMC whole-body controller API.
+# This message is part of the IHMC multi-contact controller API.
 # Experimental mode of specifying a desired configuration in terms of root pose and joint angles.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
