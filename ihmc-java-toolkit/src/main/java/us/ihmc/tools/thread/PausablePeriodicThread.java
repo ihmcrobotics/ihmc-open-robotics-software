@@ -12,15 +12,20 @@ public class PausablePeriodicThread
 
    public PausablePeriodicThread(String name, double period, Runnable runnable)
    {
-      this(name, period, 0, runnable);
+      this(name, period, 0, false, runnable);
    }
 
    public PausablePeriodicThread(String name, double period, int crashesBeforeGivingUp, Runnable runnable)
    {
+      this(name, period, crashesBeforeGivingUp, false, runnable);
+   }
+
+   public PausablePeriodicThread(String name, double period, int crashesBeforeGivingUp, boolean runAsDaemon, Runnable runnable)
+   {
       this.runnable = runnable;
       this.period = period;
 
-      scheduler = new ExceptionHandlingThreadScheduler(name, ExceptionHandlingThreadScheduler.DEFAULT_HANDLER, crashesBeforeGivingUp);
+      scheduler = new ExceptionHandlingThreadScheduler(name, ExceptionHandlingThreadScheduler.DEFAULT_HANDLER, crashesBeforeGivingUp, runAsDaemon);
    }
 
    public void start()

@@ -63,7 +63,13 @@ public class ExceptionHandlingThreadScheduler
     */
    public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp)
    {
-      executorService = ThreadTools.newSingleThreadScheduledExecutor(prefix);
+      this(prefix,exceptionHandler, crashesBeforeGivingUp, false);
+   }
+
+   public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp, boolean runAsDaemon)
+   {
+      executorService = runAsDaemon ?
+            ThreadTools.newSingleDaemonThreadScheduledExecutor(prefix) : ThreadTools.newSingleThreadScheduledExecutor(prefix);
       this.exceptionHandler = exceptionHandler;
       this.crashesBeforeGivingUp = crashesBeforeGivingUp;
    }
