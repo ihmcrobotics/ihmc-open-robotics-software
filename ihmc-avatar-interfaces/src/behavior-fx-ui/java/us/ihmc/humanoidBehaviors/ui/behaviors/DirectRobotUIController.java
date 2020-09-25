@@ -69,7 +69,8 @@ public class DirectRobotUIController extends Group
    @FXML private Slider neckSlider;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
-   private RemoteSyncedRobotModel syncedRobot;
+   private RemoteSyncedRobotModel syncedRobotForHeightSlider;
+   private RemoteSyncedRobotModel syncedRobotForChestSlider;
    private IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
@@ -93,7 +94,8 @@ public class DirectRobotUIController extends Group
    {
       String robotName = robotModel.getSimpleRobotName();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobotForHeightSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobotForChestSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       if (robotName.toLowerCase().contains("atlas"))
       {
@@ -106,61 +108,71 @@ public class DirectRobotUIController extends Group
          pelvisHeightTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                                    ControllerAPIDefinition.getTopic(PelvisHeightTrajectoryMessage.class, robotName));
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
+         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
+         double neckJointJointLimitLower = neckJoint.getJointLimitLower();
+         double neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
 
          stanceHeightReactiveSlider = new JavaFXReactiveSlider(stanceHeightSlider, value ->
          {
-            syncedRobot.update();
-            double sliderValue = value.doubleValue();
-            double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
-            double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
-            FramePose3D midFeetZUp = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-            midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
-            double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
-            LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {}",
-                                               sliderValue, desiredHeight, pelvisZ - midFeetZ));
-            PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
-            message.getEuclideanTrajectory()
-                   .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
-                                                                              new Point3D(0.0, 0.0, desiredHeight),
-                                                                              ReferenceFrame.getWorldFrame()));
-            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-            message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-            message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
-            message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
-            message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-            pelvisHeightTrajectoryPublisher.publish(message);
+            if (syncedRobotForHeightSlider.hasReceivedFirstMessage())
+            {
+               syncedRobotForHeightSlider.update();
+               double sliderValue = value.doubleValue();
+               double pelvisZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
+               double midFeetZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+               FramePose3D midFeetZUp = new FramePose3D(syncedRobotForHeightSlider.getReferenceFrames().getMidFeetZUpFrame());
+               midFeetZUp.changeFrame(ReferenceFrame.getWorldFrame());
+               double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
+               LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {}",
+                                                  sliderValue,
+                                                  desiredHeight,
+                                                  pelvisZ - midFeetZ));
+               PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
+               message.getEuclideanTrajectory()
+                      .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
+                                                                                 new Point3D(0.0, 0.0, desiredHeight),
+                                                                                 ReferenceFrame.getWorldFrame()));
+               long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+               message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+               message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
+               message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
+               message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
+               pelvisHeightTrajectoryPublisher.publish(message);
+            }
          });
          leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value ->
          {
-            syncedRobot.update();
-            double sliderValue = 100.0 - value.doubleValue();
-            double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
+            if (syncedRobotForChestSlider.hasReceivedFirstMessage())
+            {
+               syncedRobotForChestSlider.update();
+               double sliderValue = 100.0 - value.doubleValue();
+               double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
 
-            FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-            frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-            frameChestYawPitchRoll.setPitch(desiredChestPitch);
-            frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
+               FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobotForChestSlider.getReferenceFrames().getChestFrame());
+               frameChestYawPitchRoll.changeFrame(syncedRobotForChestSlider.getReferenceFrames().getPelvisZUpFrame());
+               frameChestYawPitchRoll.setPitch(desiredChestPitch);
+               frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
 
-            LogTools.info(StringTools.format3D("Commanding chest pitch. slider: {} pitch: {}", sliderValue, desiredChestPitch));
+               LogTools.info(StringTools.format3D("Commanding chest pitch. slider: {} pitch: {}", sliderValue, desiredChestPitch));
 
-            ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-            message.getSo3Trajectory()
-                   .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
-                                                                        frameChestYawPitchRoll,
-                                                                        EuclidCoreTools.zeroVector3D,
-                                                                        ReferenceFrame.getWorldFrame()));
-            long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-            message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+               ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+               message.getSo3Trajectory()
+                      .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+                                                                           frameChestYawPitchRoll,
+                                                                           EuclidCoreTools.zeroVector3D,
+                                                                           ReferenceFrame.getWorldFrame()));
+               long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+               message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
-            chestTrajectoryPublisher.publish(message);
+               chestTrajectoryPublisher.publish(message);
+            }
          });
          neckReactiveSlider = new JavaFXReactiveSlider(neckSlider, sliderValue ->
          {
             double percent = sliderValue.doubleValue() / 100.0;
             percent = 1.0 - percent;
             MathTools.checkIntervalContains(percent, 0.0, 1.0);
-            double range = neckJoint.getJointLimitUpper() - neckJoint.getJointLimitLower();
-            double jointAngle = neckJoint.getJointLimitLower() + percent * range;
+            double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
             LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckSlider.getValue(), jointAngle);
             neckTrajectoryPublisher.publish(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
          });
@@ -171,17 +183,22 @@ public class DirectRobotUIController extends Group
             double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
             double midFeetToPelvis = pelvisZ - midFeetZ;
             double heightInRange = midFeetToPelvis - MIN_PELVIS_HEIGHT;
-            double newSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
-            stanceHeightReactiveSlider.acceptUpdatedValue(newSliderValue);
+            double newHeightSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
+            stanceHeightReactiveSlider.acceptUpdatedValue(newHeightSliderValue);
 
             FrameYawPitchRoll chestFrame = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
             chestFrame.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
             double leanForwardValue = chestFrame.getPitch();
             double pitchInRange = leanForwardValue - MIN_CHEST_PITCH;
             double newChestSliderValue = SLIDER_RANGE * pitchInRange / CHEST_PITCH_RANGE;
-            double flippedSliderValue = 100.0 - newChestSliderValue;
-            leanForwardReactiveSlider.acceptUpdatedValue(flippedSliderValue);
-            LogTools.info("Chest pitch: {}", pitchInRange);
+            double flippedChestSliderValue = 100.0 - newChestSliderValue;
+            leanForwardReactiveSlider.acceptUpdatedValue(flippedChestSliderValue);
+
+            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
+            double angleInRange = neckAngle - neckJointJointLimitLower;
+            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
+            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
+            neckReactiveSlider.acceptUpdatedValue(flippedNeckSliderValue);
          });
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
