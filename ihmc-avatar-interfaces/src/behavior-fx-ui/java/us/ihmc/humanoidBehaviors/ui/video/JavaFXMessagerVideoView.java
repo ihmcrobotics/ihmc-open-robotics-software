@@ -7,7 +7,8 @@ import us.ihmc.messager.TopicListener;
 
 public class JavaFXMessagerVideoView extends JavaFXVideoView
 {
-   private final TopicListener<VideoPacket> acceptVideoTopicListener = this::acceptVideo; // necessary to remove listener
+   // necessary to remove listener
+   private final TopicListener<VideoPacket> acceptVideoTopicListener = videoPacket -> acceptVideo(videoPacket.getData());
 
    private Messager messager;
    private Topic<VideoPacket> topic;

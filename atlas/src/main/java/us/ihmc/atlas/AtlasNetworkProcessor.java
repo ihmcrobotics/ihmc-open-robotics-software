@@ -16,7 +16,7 @@ public class AtlasNetworkProcessor
    private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
    private static final Application STAIRS = AtlasNetworkProcessor::stairsNetworkProcessor;
 
-   private static final Application APPLICATION = STAIRS;
+   private static final Application APPLICATION = DEFAULT;
 
    public static void main(String[] args) throws JSAPException
    {
