@@ -2,8 +2,12 @@ package us.ihmc.communication;
 
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ROS2TopicHz
 {
@@ -13,7 +17,9 @@ public class ROS2TopicHz
    private double minDelay;
    private double maxDelay;
    private double standardDeviation;
-   private double window;
+   private int window;
+
+   private final List<Double> deltas = new ArrayList<>();
 
    private Stopwatch stopwatch = new Stopwatch();
 
@@ -41,7 +47,23 @@ public class ROS2TopicHz
 
    public synchronized void ping()
    {
+      newMessages = true;
+
       ++window;
+
+      double elapsed = stopwatch.lap();
+      averageRate = UnitConversions.secondsToHertz(stopwatch.averageLap());
+
+      if (Double.isNaN(minDelay) || elapsed < minDelay)
+      {
+         minDelay = elapsed;
+      }
+
+      if (Double.isNaN(maxDelay) || elapsed > maxDelay)
+      {
+         maxDelay = elapsed;
+      }
+
 
    }
 
@@ -54,6 +76,6 @@ public class ROS2TopicHz
       standardDeviation = Double.NaN;
       window = -1;
 
-      stopwatch.start();
+      stopwatch.reset();
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2TopicHz;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LiveStereoVisionPointCloudGraphic;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;

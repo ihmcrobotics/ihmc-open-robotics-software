@@ -5,6 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2TopicHz;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
@@ -24,6 +25,7 @@ public class LiveStereoVisionPointCloudGraphic extends Group
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::updateScene);
+   private final ROS2TopicHz hz = new ROS2TopicHz();
 
    protected final AtomicReference<MeshView> scanMeshToRender = new AtomicReference<>(null);
    private final SingleThreadSizeOneQueueExecutor threadQueue;
@@ -41,6 +43,7 @@ public class LiveStereoVisionPointCloudGraphic extends Group
 
    private void queueRender(StereoVisionPointCloudMessage message)
    {
+      hz.ping();
       threadQueue.queueExecution(() -> buildMesh(message));
    }
 
