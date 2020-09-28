@@ -200,10 +200,13 @@ public class AStarFootstepPlanner
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
-         if (completionChecker.checkIfGoalIsReached(iterationData))
+         FootstepNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
+         if (achievedGoalNode != null)
          {
             // the final graph expansion is handled manually
-            AStarIterationData<FootstepNode> finalIterationData = footstepPlanner.getIterationData();
+            AStarIterationData<FootstepNode> finalIterationData = new AStarIterationData<>();
+            finalIterationData.setParentNode(achievedGoalNode);
+            finalIterationData.getValidChildNodes().add(completionChecker.getEndNode());
             recordIterationData(finalIterationData);
             iterationCallback.accept(finalIterationData);
 
