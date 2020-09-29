@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.tools;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
@@ -48,6 +48,11 @@ public class SingleThreadSizeOneQueueExecutor
    {
       executor.shutdownNow();
       recreate();
+   }
+
+   public boolean isExecuting()
+   {
+      return executor.getActiveCount() > 0 || sizeOneQueue.size() > 0;
    }
 
    private void exceptionHandlingWrapper(Runnable runnable)

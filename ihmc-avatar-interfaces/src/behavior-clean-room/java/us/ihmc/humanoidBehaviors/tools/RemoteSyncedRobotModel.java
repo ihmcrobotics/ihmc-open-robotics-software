@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.tools;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.Timer;
-import us.ihmc.communication.util.TimerSnapshot;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -28,7 +28,6 @@ public class RemoteSyncedRobotModel
    private final int jointNameHash;
    private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
    private final HumanoidReferenceFrames referenceFrames;
-
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
@@ -109,5 +108,10 @@ public class RemoteSyncedRobotModel
    public synchronized TimerSnapshot getDataReceptionTimerSnapshot()
    {
       return dataReceptionTimer.createSnapshot();
+   }
+
+   public void addRobotConfigurationDataReceivedCallback(Runnable callback)
+   {
+      robotConfigurationDataInput.addCallback(message -> callback.run());
    }
 }
