@@ -1,8 +1,12 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -20,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class TraverseStairsPlanStepsState implements State
@@ -30,10 +35,14 @@ public class TraverseStairsPlanStepsState implements State
    private final TraverseStairsBehaviorParameters parameters;
    private final AtomicReference<Pose3D> goalInput = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+   private final IHMCROS2Publisher<FootstepDataListMessage> footstepListPublisher;
 
    private final RemoteSyncedRobotModel remoteSyncedRobotModel;
    private final FootstepPlanningModule planningModule;
    private FootstepPlannerOutput output;
+
+   private final AtomicBoolean executeStepsSignaled = new AtomicBoolean();
+   private final AtomicBoolean planSteps = new AtomicBoolean();
 
    public TraverseStairsPlanStepsState(BehaviorHelper helper, TraverseStairsBehaviorParameters parameters)
    {
@@ -49,12 +58,19 @@ public class TraverseStairsPlanStepsState implements State
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       planningModule.getFootstepPlannerParameters().load(footstepPlannerParameterFileName);
+
+      footstepListPublisher = new IHMCROS2Publisher<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
+      new IHMCROS2Callback<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
+      new IHMCROS2Callback<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
    }
 
    @Override
    public void onEntry()
    {
       LogTools.debug("Entering " + getClass().getSimpleName());
+
+      executeStepsSignaled.set(false);
+      planSteps.set(true);
 
       if (goalInput.get() == null)
       {
@@ -72,6 +88,14 @@ public class TraverseStairsPlanStepsState implements State
 
    @Override
    public void doAction(double timeInState)
+   {
+      if (planSteps.getAndSet(false))
+      {
+         planSteps();
+      }
+   }
+
+   private void planSteps()
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
@@ -111,6 +135,11 @@ public class TraverseStairsPlanStepsState implements State
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(planningModule);
       footstepPlannerLogger.logSession();
       ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+
+      // publish to ui
+      FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
+      planningModule.getOutput().setPacket(outputStatus);
+      footstepListPublisher.publish(outputStatus.getFootstepDataList());
    }
 
    private void mutateFirstStepDownHeight(Pose3DReadOnly initialStancePose)
@@ -151,7 +180,7 @@ public class TraverseStairsPlanStepsState implements State
 
    boolean shouldTransitionToExecute(double timeInState)
    {
-      return searchWasSuccessful();
+      return searchWasSuccessful() && executeStepsSignaled.get();
    }
 
    boolean shouldTransitionBackToPause(double timeInState)
