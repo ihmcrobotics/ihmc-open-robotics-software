@@ -1,4 +1,4 @@
-package us.ihmc.communication.util;
+package us.ihmc.tools;
 
 public class TimerSnapshot
 {

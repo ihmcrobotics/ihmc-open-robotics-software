@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.walkingController;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.util.Timer;
+import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
