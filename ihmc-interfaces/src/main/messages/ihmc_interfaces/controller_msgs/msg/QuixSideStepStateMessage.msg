@@ -12,6 +12,7 @@ byte SWING_CLOSE_LEFT_SUPPORT = 7
 byte SWING_CLOSE_RIGHT_SUPPORT = 8
 
 
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
