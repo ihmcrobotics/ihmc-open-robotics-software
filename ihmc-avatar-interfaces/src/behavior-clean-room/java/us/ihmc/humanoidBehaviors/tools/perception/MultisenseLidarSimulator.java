@@ -3,11 +3,9 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -33,12 +31,14 @@ public class MultisenseLidarSimulator
 
    private final RemoteSyncedRobotModel syncedRobot;
    private final PlanarRegionsList map;
-   private MovingReferenceFrame neckFrame;
-   private YawPitchRoll sensorRoll = new YawPitchRoll();
-   private PoseReferenceFrame sensorFrame;
-   private FramePose3D sensorPose = new FramePose3D();
+   private final MovingReferenceFrame neckFrame;
+   private final YawPitchRoll sensorRoll = new YawPitchRoll();
+   private final PoseReferenceFrame sensorFrame;
+   private final FramePose3D sensorPose = new FramePose3D();
 
-   private final double fov = Math.toRadians(270.0);
+   private final FramePose3D sensorPoseForUser = new FramePose3D();
+
+   private final double fov = Math.toRadians(90.0);
    private final double range = 10.0;
    private final int scanSize = 1000;
    private final double angularVelocity = 2.183;
@@ -53,7 +53,7 @@ public class MultisenseLidarSimulator
       neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       sensorFrame = new PoseReferenceFrame("LidarSensorFrame", neckFrame); // TODO: Add actual Multisense offset
 
-      new PausablePeriodicThread("SpinSensorThread", THREAD_PERIOD, 0, true, this::spinAndUpdate);
+      new PausablePeriodicThread("SpinSensorThread", THREAD_PERIOD, 0, true, this::spinAndUpdate).start();
    }
 
    private void spinAndUpdate()
@@ -81,7 +81,11 @@ public class MultisenseLidarSimulator
             rangeRay.set(Axis3D.X);
             sensorPose.getOrientation().transform(rangeRay);
 
-            ImmutablePair<Point3D, PlanarRegion> planarRegionIntersection = PlanarRegionTools.intersectRegionsWithRay(map, sensorPose.getPosition(), rangeRay);
+            ImmutablePair<Point3D, PlanarRegion> planarRegionIntersection = PlanarRegionTools.intersectRegionsWithRay(map,
+                                                                                                                      sensorPose.getPosition(),
+                                                                                                                      rangeRay);
+            if (planarRegionIntersection == null)
+               continue;
 
             scan.add(planarRegionIntersection.getLeft());
          }
@@ -109,5 +113,12 @@ public class MultisenseLidarSimulator
          }
       }
       return pointCloudInstance;
+   }
+
+   public Pose3DReadOnly getSensorPose()
+   {
+      sensorPoseForUser.setToZero(sensorFrame);
+      sensorPoseForUser.changeFrame(ReferenceFrame.getWorldFrame());
+      return sensorPoseForUser;
    }
 }
