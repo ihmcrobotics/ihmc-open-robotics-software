@@ -1,6 +1,7 @@
 package us.ihmc.avatar.ros;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class RobotROSClockCalculatorFromPPSOffset implements RobotROSClockCalculator
@@ -9,6 +10,7 @@ public class RobotROSClockCalculatorFromPPSOffset implements RobotROSClockCalcul
 
    public RobotROSClockCalculatorFromPPSOffset(DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
+      LogTools.info("Using PPS offset provider: {}", ppsTimestampOffsetProvider);
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
    }
 
