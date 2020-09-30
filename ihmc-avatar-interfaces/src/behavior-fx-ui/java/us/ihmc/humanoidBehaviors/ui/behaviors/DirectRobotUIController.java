@@ -13,11 +13,20 @@ import javafx.scene.layout.StackPane;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
@@ -25,6 +34,8 @@ import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewOverlay;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.javafx.JavaFXReactiveSlider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -32,11 +43,19 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+import us.ihmc.tools.string.StringTools;
 
 public class DirectRobotUIController extends Group
 {
+   private static final double MIN_PELVIS_HEIGHT = 0.52;
+   private static final double MAX_PELVIS_HEIGHT = 0.90;
+   private static final double PELVIS_HEIGHT_RANGE = MAX_PELVIS_HEIGHT - MIN_PELVIS_HEIGHT;
+   private static final double MIN_CHEST_PITCH = Math.toRadians(-15.0);
+   private static final double MAX_CHEST_PITCH = Math.toRadians(50.0);
+   private static final double CHEST_PITCH_RANGE = MAX_CHEST_PITCH - MIN_CHEST_PITCH;
+   private static final double SLIDER_RANGE = 100.0;
+   private static final double ROBOT_DATA_EXPIRATION = 1.0;
+
    @FXML private ComboBox<Integer> pumpPSI;
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
@@ -51,11 +70,15 @@ public class DirectRobotUIController extends Group
    @FXML private Slider neckSlider;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
+   private RemoteSyncedRobotModel syncedRobotForHeightSlider;
+   private RemoteSyncedRobotModel syncedRobotForChestSlider;
    private IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private IHMCROS2Publisher<Empty> clearSLAMPublisher;
    private IHMCROS2Publisher<NeckTrajectoryMessage> neckTrajectoryPublisher;
+   private IHMCROS2Publisher<ChestTrajectoryMessage> chestTrajectoryPublisher;
+   private IHMCROS2Publisher<PelvisHeightTrajectoryMessage> pelvisHeightTrajectoryPublisher;
    private LivePlanarRegionsGraphic lidarRegionsGraphic;
    private LivePlanarRegionsGraphic realsenseRegionsGraphic;
    private LivePlanarRegionsGraphic mapRegionsGraphic;
@@ -64,30 +87,120 @@ public class DirectRobotUIController extends Group
    private StackPane multisenseVideoStackPane;
    private JavaFXROS2VideoViewOverlay realsenseVideoOverlay;
    private StackPane realsenseVideoStackPane;
+   private JavaFXReactiveSlider stanceHeightReactiveSlider;
+   private JavaFXReactiveSlider leanForwardReactiveSlider;
+   private JavaFXReactiveSlider neckReactiveSlider;
 
    public void init(AnchorPane mainAnchorPane, SubScene subScene, ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      syncedRobotForHeightSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobotForChestSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       if (robotName.toLowerCase().contains("atlas"))
       {
          robotLowLevelMessenger = new AtlasDirectRobotInterface(ros2Node, robotModel);
 
-         neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class,
-                                                           ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput());
+         neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                           ControllerAPIDefinition.getTopic(NeckTrajectoryMessage.class, robotName));
+         chestTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                           ControllerAPIDefinition.getTopic(ChestTrajectoryMessage.class, robotName));
+         pelvisHeightTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                                   ControllerAPIDefinition.getTopic(PelvisHeightTrajectoryMessage.class, robotName));
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-         setupSlider(neckSlider, () ->
+         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
+         double neckJointJointLimitLower = neckJoint.getJointLimitLower();
+         double neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+
+         stanceHeightReactiveSlider = new JavaFXReactiveSlider(stanceHeightSlider, value ->
          {
-            double percent = neckSlider.getValue() / 100.0;
+            if (syncedRobotForHeightSlider.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
+            {
+               syncedRobotForHeightSlider.update();
+               double sliderValue = value.doubleValue();
+               double pelvisZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
+               double midFeetZ = syncedRobotForHeightSlider.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+               double desiredHeight = MIN_PELVIS_HEIGHT + PELVIS_HEIGHT_RANGE * sliderValue / SLIDER_RANGE;
+               double desiredHeightInWorld = desiredHeight + midFeetZ;
+               LogTools.info(StringTools.format3D("Commanding height trajectory. slider: {} desired: {} (pelvis - midFeetZ): {} in world: {}",
+                                                  sliderValue,
+                                                  desiredHeight,
+                                                  pelvisZ - midFeetZ,
+                                                  desiredHeightInWorld));
+               PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
+               message.getEuclideanTrajectory()
+                      .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(2.0,
+                                                                                 new Point3D(0.0, 0.0, desiredHeightInWorld),
+                                                                                 ReferenceFrame.getWorldFrame()));
+               long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+               message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+               message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
+               message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
+               message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
+               pelvisHeightTrajectoryPublisher.publish(message);
+            }
+         });
+         leanForwardReactiveSlider = new JavaFXReactiveSlider(leanForwardSlider, value ->
+         {
+            if (syncedRobotForChestSlider.getDataReceptionTimerSnapshot().isRunning(ROBOT_DATA_EXPIRATION))
+            {
+               syncedRobotForChestSlider.update();
+               double sliderValue = 100.0 - value.doubleValue();
+               double desiredChestPitch = MIN_CHEST_PITCH + CHEST_PITCH_RANGE * sliderValue / SLIDER_RANGE;
+
+               FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobotForChestSlider.getReferenceFrames().getChestFrame());
+               frameChestYawPitchRoll.changeFrame(syncedRobotForChestSlider.getReferenceFrames().getPelvisZUpFrame());
+               frameChestYawPitchRoll.setPitch(desiredChestPitch);
+               frameChestYawPitchRoll.changeFrame(ReferenceFrame.getWorldFrame());
+
+               LogTools.info(StringTools.format3D("Commanding chest pitch. slider: {} pitch: {}", sliderValue, desiredChestPitch));
+
+               ChestTrajectoryMessage message = new ChestTrajectoryMessage();
+               message.getSo3Trajectory()
+                      .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
+                                                                           frameChestYawPitchRoll,
+                                                                           EuclidCoreTools.zeroVector3D,
+                                                                           ReferenceFrame.getWorldFrame()));
+               long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
+               message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+
+               chestTrajectoryPublisher.publish(message);
+            }
+         });
+         neckReactiveSlider = new JavaFXReactiveSlider(neckSlider, sliderValue ->
+         {
+            double percent = sliderValue.doubleValue() / 100.0;
             percent = 1.0 - percent;
             MathTools.checkIntervalContains(percent, 0.0, 1.0);
-            double range = neckJoint.getJointLimitUpper() - neckJoint.getJointLimitLower();
-            double jointAngle = neckJoint.getJointLimitLower() + percent * range;
+            double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
             LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckSlider.getValue(), jointAngle);
             neckTrajectoryPublisher.publish(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
          });
 
+         new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
+         {
+            double pelvisZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getZ();
+            double midFeetZ = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ();
+            double midFeetToPelvis = pelvisZ - midFeetZ;
+            double heightInRange = midFeetToPelvis - MIN_PELVIS_HEIGHT;
+            double newHeightSliderValue = SLIDER_RANGE * heightInRange / PELVIS_HEIGHT_RANGE;
+            stanceHeightReactiveSlider.acceptUpdatedValue(newHeightSliderValue);
+
+            FrameYawPitchRoll chestFrame = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
+            chestFrame.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+            double leanForwardValue = chestFrame.getPitch();
+            double pitchInRange = leanForwardValue - MIN_CHEST_PITCH;
+            double newChestSliderValue = SLIDER_RANGE * pitchInRange / CHEST_PITCH_RANGE;
+            double flippedChestSliderValue = 100.0 - newChestSliderValue;
+            leanForwardReactiveSlider.acceptUpdatedValue(flippedChestSliderValue);
+
+            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
+            double angleInRange = neckAngle - neckJointJointLimitLower;
+            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
+            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
+            neckReactiveSlider.acceptUpdatedValue(flippedNeckSliderValue);
+         });
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
       {
@@ -146,27 +259,6 @@ public class DirectRobotUIController extends Group
       supportRegionScale.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> sendSupportRegionParameters());
       enableSupportRegions.setSelected(true);
       enableSupportRegions.selectedProperty().addListener(observable -> sendSupportRegionParameters());
-
-      setupSlider(stanceHeightSlider, () -> LogTools.info("stanceHeightSlider: {}", stanceHeightSlider.getValue()));
-      setupSlider(leanForwardSlider, () -> LogTools.info("leanForwardSlider: {}", leanForwardSlider.getValue()));
-   }
-
-   private void setupSlider(Slider slider, Runnable onChange)
-   {
-      AtomicBoolean changing = new AtomicBoolean(false);
-      slider.valueProperty().addListener((observable, oldValue, newValue) -> {
-         if (!changing.get())
-         {
-            onChange.run();
-         }
-      });
-      slider.valueChangingProperty().addListener((observable, wasChanging, isChanging) -> {
-         changing.set(isChanging);
-         if (wasChanging)
-         {
-            onChange.run();
-         }
-      });
    }
 
    @FXML public void homeAll()
@@ -271,11 +363,6 @@ public class DirectRobotUIController extends Group
    @FXML public void clearSLAM()
    {
       clearSLAMPublisher.publish(new Empty());
-   }
-
-   public void stanceHeightSliderDragged()
-   {
-      LogTools.info("Stand height slider drag exited: {}", stanceHeightSlider.getValue());
    }
 
    public void destroy()

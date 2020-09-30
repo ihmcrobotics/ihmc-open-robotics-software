@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
+import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;

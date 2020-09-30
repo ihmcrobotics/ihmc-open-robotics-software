@@ -1,4 +1,4 @@
-package us.ihmc.communication.util;
+package us.ihmc.tools;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
