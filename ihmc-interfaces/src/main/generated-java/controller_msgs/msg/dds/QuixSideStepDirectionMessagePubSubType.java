@@ -64,13 +64,13 @@ public class QuixSideStepDirectionMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.QuixSideStepDirectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_9(data.getSideStepDirection());
+      cdr.write_type_9(data.getStepDirection());
 
    }
 
    public static void read(controller_msgs.msg.dds.QuixSideStepDirectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSideStepDirection(cdr.read_type_9());
+      data.setStepDirection(cdr.read_type_9());
       	
 
    }
@@ -78,13 +78,13 @@ public class QuixSideStepDirectionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.QuixSideStepDirectionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_9("side_step_direction", data.getSideStepDirection());
+      ser.write_type_9("step_direction", data.getStepDirection());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuixSideStepDirectionMessage data)
    {
-      data.setSideStepDirection(ser.read_type_9("side_step_direction"));   }
+      data.setStepDirection(ser.read_type_9("step_direction"));   }
 
    public static void staticCopy(controller_msgs.msg.dds.QuixSideStepDirectionMessage src, controller_msgs.msg.dds.QuixSideStepDirectionMessage dest)
    {

@@ -21,7 +21,7 @@ module controller_msgs
       struct QuixSideStepDirectionMessage
       {
         @defaultValue(value=255)
-        octet side_step_direction;
+        octet step_direction;
       };
     };
   };

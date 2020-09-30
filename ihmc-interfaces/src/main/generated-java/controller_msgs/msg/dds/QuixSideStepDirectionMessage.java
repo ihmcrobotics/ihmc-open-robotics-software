@@ -13,7 +13,7 @@ public class QuixSideStepDirectionMessage extends Packet<QuixSideStepDirectionMe
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public byte side_step_direction_ = (byte) 255;
+   public byte step_direction_ = (byte) 255;
 
    public QuixSideStepDirectionMessage()
    {
@@ -27,17 +27,17 @@ public class QuixSideStepDirectionMessage extends Packet<QuixSideStepDirectionMe
 
    public void set(QuixSideStepDirectionMessage other)
    {
-      side_step_direction_ = other.side_step_direction_;
+      step_direction_ = other.step_direction_;
 
    }
 
-   public void setSideStepDirection(byte side_step_direction)
+   public void setStepDirection(byte step_direction)
    {
-      side_step_direction_ = side_step_direction;
+      step_direction_ = step_direction;
    }
-   public byte getSideStepDirection()
+   public byte getStepDirection()
    {
-      return side_step_direction_;
+      return step_direction_;
    }
 
 
@@ -58,7 +58,7 @@ public class QuixSideStepDirectionMessage extends Packet<QuixSideStepDirectionMe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.side_step_direction_, other.side_step_direction_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_direction_, other.step_direction_, epsilon)) return false;
 
       return true;
    }
@@ -72,7 +72,7 @@ public class QuixSideStepDirectionMessage extends Packet<QuixSideStepDirectionMe
 
       QuixSideStepDirectionMessage otherMyClass = (QuixSideStepDirectionMessage) other;
 
-      if(this.side_step_direction_ != otherMyClass.side_step_direction_) return false;
+      if(this.step_direction_ != otherMyClass.step_direction_) return false;
 
 
       return true;
@@ -84,8 +84,8 @@ public class QuixSideStepDirectionMessage extends Packet<QuixSideStepDirectionMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuixSideStepDirectionMessage {");
-      builder.append("side_step_direction=");
-      builder.append(this.side_step_direction_);
+      builder.append("step_direction=");
+      builder.append(this.step_direction_);
       builder.append("}");
       return builder.toString();
    }

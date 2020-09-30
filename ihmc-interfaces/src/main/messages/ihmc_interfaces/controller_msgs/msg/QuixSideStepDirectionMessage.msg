@@ -3,4 +3,4 @@
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
-byte side_step_direction 255
+byte step_direction 255
