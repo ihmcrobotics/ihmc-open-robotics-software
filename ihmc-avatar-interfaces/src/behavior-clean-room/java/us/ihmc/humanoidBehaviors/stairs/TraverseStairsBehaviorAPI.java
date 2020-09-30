@@ -1,10 +1,15 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.util.List;
 
 public class TraverseStairsBehaviorAPI
 {
@@ -26,6 +31,18 @@ public class TraverseStairsBehaviorAPI
     * Signals that the robot has reached the goal
     */
    public static final ROS2Topic<Empty> COMPLETED = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class).withSuffix(ROS_TOPIC_QUALIFIER + "/completed");
+   /**
+    * Planned steps to visualize
+    */
+   public static final ROS2Topic<FootstepDataListMessage> PLANNED_STEPS = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(FootstepDataListMessage.class).withSuffix(ROS_TOPIC_QUALIFIER);
+   /**
+    * Signals the behavior to execute the steps, sent from the ui
+    */
+   public static final ROS2Topic<Empty> EXECUTE_STEPS = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class).withSuffix(ROS_TOPIC_QUALIFIER + "/execute_steps");
+   /**
+    * Signals the behavior to replan steps, sent from the ui
+    */
+   public static final ROS2Topic<Empty> REPLAN = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class).withSuffix(ROS_TOPIC_QUALIFIER + "/replan");
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("TraverseStairsBehavior");

@@ -1,16 +1,21 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors.coordinator;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.text.Text;
+import std_msgs.msg.dds.Empty;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
+import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
+import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI.*;
 
@@ -38,7 +43,10 @@ public class BuildingExplorationUIDashboardController
    private Messager messager;
    private final Point3DProperty goalProperty = new Point3DProperty(this, "goalProperty", new Point3D());
 
-   public void bindControls(JavaFXMessager messager)
+   private IHMCROS2Publisher<Empty> executeStairsStepsPublisher;
+   private IHMCROS2Publisher<Empty> replanStairsStepsPublisher;
+
+   public void bindControls(JavaFXMessager messager, ROS2Node ros2Node)
    {
       this.messager = messager;
       requestedState.setItems(FXCollections.observableArrayList(BuildingExplorationStateName.values()));
@@ -82,6 +90,9 @@ public class BuildingExplorationUIDashboardController
       requestedState.getSelectionModel()
                     .selectedItemProperty()
                     .addListener((observable, oldState, newState) -> messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, newState));
+
+      executeStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.EXECUTE_STEPS);
+      replanStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.REPLAN);
    }
 
    @FXML
@@ -100,5 +111,17 @@ public class BuildingExplorationUIDashboardController
    public void ignoreDebris()
    {
       messager.submitMessage(BuildingExplorationBehaviorAPI.IgnoreDebris, true);
+   }
+
+   @FXML
+   public void approveStairsSteps()
+   {
+      executeStairsStepsPublisher.publish(new Empty());
+   }
+
+   @FXML
+   public void replanStairsSteps()
+   {
+      replanStairsStepsPublisher.publish(new Empty());
    }
 }
