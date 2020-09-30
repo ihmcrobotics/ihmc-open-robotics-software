@@ -14,19 +14,21 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class PeriodicPointCloudPublisher
+public class PeriodicPointCloudPublisher<T>
 {
    private final Supplier<List<Point3DReadOnly>> pointCloudSupplier;
    private final Supplier<Pose3DReadOnly> sensorPoseProvider;
-   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
+   private final IHMCROS2Publisher<T> publisher;
    private final PausablePeriodicThread thread;
+   private final ROS2Topic<T> topic;
 
    public PeriodicPointCloudPublisher(ROS2Node ros2Node,
-                                      ROS2Topic<StereoVisionPointCloudMessage> topic,
+                                      ROS2Topic<T> topic,
                                       double period,
                                       Supplier<List<Point3DReadOnly>> pointCloudSupplier,
                                       Supplier<Pose3DReadOnly> sensorPoseProvider)
    {
+      this.topic = topic;
       this.pointCloudSupplier = pointCloudSupplier;
       this.sensorPoseProvider = sensorPoseProvider;
 
@@ -52,16 +54,18 @@ public class PeriodicPointCloudPublisher
          colors[i] = 0;
       }
 
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(System.nanoTime(),
-                                                                                       pointArray,
-                                                                                       colors,
-                                                                                       pointArray.length,
-                                                                                       0.005,
-                                                                                       null);
-
-      message.getSensorPosition().set(sensorPose.getPosition());
-      message.getSensorOrientation().set(sensorPose.getOrientation());
-
+      T message;
+      if (topic.getType().equals(StereoVisionPointCloudMessage.class))
+      {
+         message = (T) PointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null);
+         StereoVisionPointCloudMessage stereoVisionPointCloudMessage = (StereoVisionPointCloudMessage) message;
+         stereoVisionPointCloudMessage.getSensorPosition().set(sensorPose.getPosition());
+         stereoVisionPointCloudMessage.getSensorOrientation().set(sensorPose.getOrientation());
+      }
+      else
+      {
+         throw new RuntimeException("Please implement for type " + topic.getType());
+      }
       publisher.publish(message);
    }
 
