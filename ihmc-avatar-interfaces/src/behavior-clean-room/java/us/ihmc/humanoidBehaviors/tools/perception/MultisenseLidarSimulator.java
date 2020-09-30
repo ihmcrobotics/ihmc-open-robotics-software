@@ -35,12 +35,13 @@ public class MultisenseLidarSimulator
    private final YawPitchRoll sensorRoll = new YawPitchRoll();
    private final PoseReferenceFrame sensorFrame;
    private final FramePose3D sensorPose = new FramePose3D();
+   private final Vector3D rangeRay = new Vector3D();
 
    private final FramePose3D sensorPoseForUser = new FramePose3D();
 
-   private final double fov = Math.toRadians(90.0);
-   private final double range = 10.0;
-   private final int scanSize = 1000;
+   private final double fov = Math.toRadians(100.0);
+   private final double range = 5.0;
+   private final int scanSize = 500;
    private final double angularVelocity = 2.183;
    private final int scanHistorySize = 50;
 
@@ -68,7 +69,6 @@ public class MultisenseLidarSimulator
 
          // TODO: Calculate sections in parallel
 
-         Vector3D rangeRay = new Vector3D();
          double maxYaw = fov / 2.0;
          double minYaw = -maxYaw;
          double angleIncrement = fov / scanSize;
@@ -84,7 +84,8 @@ public class MultisenseLidarSimulator
             ImmutablePair<Point3D, PlanarRegion> planarRegionIntersection = PlanarRegionTools.intersectRegionsWithRay(map,
                                                                                                                       sensorPose.getPosition(),
                                                                                                                       rangeRay);
-            if (planarRegionIntersection == null)
+            if (planarRegionIntersection == null
+             || planarRegionIntersection.getLeft().distance(sensorPose.getPosition()) > range)
                continue;
 
             scan.add(planarRegionIntersection.getLeft());
