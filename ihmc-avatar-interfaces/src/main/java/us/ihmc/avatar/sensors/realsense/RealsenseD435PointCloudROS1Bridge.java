@@ -3,7 +3,13 @@ package us.ihmc.avatar.sensors.realsense;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.msg.dds.CompressedImage;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -20,7 +26,6 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
    private static final int MAX_POINTS = 50000;
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
-   private final ROS2TopicHz hz = new ROS2TopicHz();
 
    public RealsenseD435PointCloudROS1Bridge(RosMainNode ros1Node, ROS2Node ros2Node)
    {
@@ -35,12 +40,35 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
       publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
 
 
+      // subscribe to /multisense/stamped_pps?
    }
+
+//   private RobotROSClockCalculator getROSClockCalculator()
+//   {
+//      DRCROSPPSTimestampOffsetProvider timestampOffsetProvider = null;
+//
+//      if (target == RobotTarget.REAL_ROBOT)
+//      {
+//         timestampOffsetProvider = AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
+//      }
+//
+//      if (AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
+//      {
+//         if (target == RobotTarget.SCS)
+//         {
+//            timestampOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+//         }
+//      }
+//
+//      if (timestampOffsetProvider == null)
+//         timestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
+//
+//      return new RobotROSClockCalculatorFromPPSOffset(timestampOffsetProvider);
+//   }
 
    @Override
    public void onNewMessage(sensor_msgs.PointCloud2 ros1PointCloud)
    {
-      hz.ping();
       try
       {
          boolean hasColors = true;
@@ -112,7 +140,7 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
 //         ros2PointCloud.getSensorPosition().set(sensorPose.getPosition());
 //         ros2PointCloud.getSensorOrientation().set(sensorPose.getOrientation());
 //         long endTime = System.nanoTime();
-//
+
 //         publisher.publish(ros2PointCloud);
       }
       catch (Exception e)

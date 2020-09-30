@@ -3,7 +3,6 @@ package us.ihmc.avatar.sensors.realsense;
 import sensor_msgs.msg.dds.CompressedImage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2TopicHz;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -14,7 +13,6 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
    private final IHMCROS2Publisher<CompressedImage> publisher;
-   private final ROS2TopicHz hz = new ROS2TopicHz();
 
    public RealsenseD435VideoROS1Bridge(RosMainNode ros1Node, ROS2Node ros2Node)
    {
@@ -32,7 +30,6 @@ public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sen
    @Override
    public void onNewMessage(sensor_msgs.CompressedImage ros1Image)
    {
-      hz.ping();
       try
       {
          CompressedImage ros2Image = new CompressedImage();

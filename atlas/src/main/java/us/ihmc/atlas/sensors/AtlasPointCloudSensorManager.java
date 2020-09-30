@@ -36,6 +36,7 @@ public class AtlasPointCloudSensorManager
    {
       LogTools.info("Creating sensor bridges...");
       realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, ROS2Tools.D435_POINT_CLOUD);
+      LogTools.info("Using ROS clock calculator {}", rosClockCalculator.getClass());
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
       trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node);
