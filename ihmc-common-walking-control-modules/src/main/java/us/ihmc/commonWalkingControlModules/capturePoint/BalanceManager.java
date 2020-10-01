@@ -13,9 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryPolygonParameters;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CopTrajectory;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.SupportSequence;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
@@ -98,6 +96,8 @@ public class BalanceManager
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
+   private final FramePoint2D initialReferenceCop = new FramePoint2D();
+
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
@@ -156,8 +156,9 @@ public class BalanceManager
    private final YoBoolean inFinalTransfer = new YoBoolean("InFinalTransfer", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
-   private final CopTrajectory copTrajectory;
-   private final SupportSequence supportSeqence;
+//   private final CopTrajectory copTrajectory;
+//   private final SupportSequence supportSeqence;
+   private final CoPTrajectoryGenerator copTrajectory;
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -213,10 +214,17 @@ public class BalanceManager
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       SideDependentList<MovingReferenceFrame> soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       SideDependentList<MovingReferenceFrame> soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
-      supportSeqence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleZUpFrames, bipedSupportPolygons, registry, controllerToolbox.getYoGraphicsListRegistry());
+//      supportSeqence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleZUpFrames, bipedSupportPolygons, registry, controllerToolbox.getYoGraphicsListRegistry());
       comTrajectoryPlanner = new CoMTrajectoryPlanner(gravityZ, 1.0, registry);
       ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
-      copTrajectory = new CopTrajectory(registry, controllerToolbox.getYoGraphicsListRegistry());
+      copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
+                                                 bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
+                                                 defaultSupportPolygon,
+                                                 () -> 3,
+                                                 soleFrames,
+                                                 soleZUpFrames,
+                                                 registry);
+//      copTrajectory = new CopTrajectory(registry, controllerToolbox.getYoGraphicsListRegistry());
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -398,12 +406,10 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
-      supportSeqence.update(footsteps, footstepTimings);
-
-      copTrajectory.update(supportSeqence, finalTransferDuration);
+      copTrajectory.update(footsteps, footstepTimings, footstepShiftFractions, initialReferenceCop);
 
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStates());
+      comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStateProviders());
       int segment = inSingleSupport.getBooleanValue() ? 1 : 0;
       comTrajectoryPlanner.compute(segment, timeInSupportSequence.getDoubleValue());
 
@@ -530,7 +536,8 @@ public class BalanceManager
       yoDesiredCapturePoint.set(tempCapturePoint);
 
       desiredCapturePoint2d.set(tempCapturePoint);
-      supportSeqence.initializeStance();
+      initialReferenceCop.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
+      copTrajectory.initializeStance();
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
@@ -549,7 +556,7 @@ public class BalanceManager
    {
       inSingleSupport.set(true);
       inFinalTransfer.set(false);
-      supportSeqence.changeFootFrame(footsteps.get(0).getRobotSide(), worldFrame);
+//      copTrajectory.changeFootFrame(footsteps.get(0).getRobotSide(), worldFrame);
       timeInSupportSequence.set(0.0);
 
       initializeForSingleSupport = true;
@@ -569,7 +576,7 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      supportSeqence.initializeStance();
+      copTrajectory.initializeStance();
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
@@ -585,7 +592,7 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      supportSeqence.initializeStance();
+      copTrajectory.initializeStance();
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(true);
@@ -602,7 +609,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
 
-      supportSeqence.initializeStance();
+      copTrajectory.initializeStance();
       currentTiming.set(footstepTimings.get(0));
       timeInSupportSequence.set(0.0);
       inFinalTransfer.set(false);
