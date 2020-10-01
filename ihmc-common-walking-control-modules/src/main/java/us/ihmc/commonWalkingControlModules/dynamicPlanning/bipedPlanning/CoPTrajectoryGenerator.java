@@ -24,6 +24,8 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -55,7 +57,7 @@ public class CoPTrajectoryGenerator
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
 
    // Planner parameters
-   private final YoInteger numberFootstepsToConsider;
+   private final IntegerProvider numberFootstepsToConsider;
    private final YoDouble finalTransferWeightDistribution;
 
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
@@ -70,17 +72,15 @@ public class CoPTrajectoryGenerator
    private final FramePoint2D previousCoPPosition = new FramePoint2D();
    private final FramePoint2D midfootCoP = new FramePoint2D();
 
-   public CoPTrajectoryGenerator(String namePrefix,
-                                 CoPTrajectoryParameters parameters,
+   public CoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                  BipedSupportPolygons bipedSupportPolygons,
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
-                                 YoInteger numberFootstepsToConsider,
+                                 IntegerProvider numberFootstepsToConsider,
                                  SideDependentList<? extends ReferenceFrame> soleFrames,
                                  SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                  YoRegistry parentRegistry)
    {
-      this(namePrefix,
-           parameters,
+      this(parameters,
            bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
            defaultSupportPolygon,
            numberFootstepsToConsider,
@@ -89,11 +89,10 @@ public class CoPTrajectoryGenerator
            parentRegistry);
    }
 
-   public CoPTrajectoryGenerator(String namePrefix,
-                                 CoPTrajectoryParameters parameters,
+   public CoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
-                                 YoInteger numberFootstepsToConsider,
+                                 IntegerProvider numberFootstepsToConsider,
                                  SideDependentList<? extends ReferenceFrame> soleFrames,
                                  SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                  YoRegistry parentRegistry)
@@ -104,11 +103,10 @@ public class CoPTrajectoryGenerator
       this.defaultSupportPolygon.set(defaultSupportPolygon);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      String fullPrefix = namePrefix + "CoPTrajectoryGenerator";
-      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
-      exitCoPForwardSafetyMarginOnToes = new YoDouble(fullPrefix + "ExitCoPForwardSafetyMarginOnToes", parentRegistry);
+      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble("SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
+      exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
-      percentageStandingWeightDistributionOnLeftFoot = new YoDouble(namePrefix + "PercentageStandingWeightDistributionOnLeftFoot", registry);
+      percentageStandingWeightDistributionOnLeftFoot = new YoDouble("PercentageStandingWeightDistributionOnLeftFoot", registry);
 
       finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
       finalTransferWeightDistribution.setToNaN();
@@ -132,6 +130,12 @@ public class CoPTrajectoryGenerator
 
       parentRegistry.addChild(registry);
       clear();
+   }
+
+   public void initializeStance()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         initializeStance(robotSide);
    }
 
    /**
@@ -245,6 +249,11 @@ public class CoPTrajectoryGenerator
          else
             percentageStandingWeightDistributionOnLeftFoot.set(finalTransferWeightDistribution.getValue());
       }
+   }
+
+   public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
+   {
+      return contactStateProviders;
    }
 
    private ReferenceFrame extractStepFrame(Footstep footstep)
