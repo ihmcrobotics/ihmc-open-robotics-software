@@ -56,8 +56,6 @@ public class CoPTrajectoryGenerator
 
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
 
-   // Planner parameters
-   private final IntegerProvider numberFootstepsToConsider;
    private final YoDouble finalTransferWeightDistribution;
 
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
@@ -75,7 +73,6 @@ public class CoPTrajectoryGenerator
    public CoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                  BipedSupportPolygons bipedSupportPolygons,
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
-                                 IntegerProvider numberFootstepsToConsider,
                                  SideDependentList<? extends ReferenceFrame> soleFrames,
                                  SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                  YoRegistry parentRegistry)
@@ -83,7 +80,6 @@ public class CoPTrajectoryGenerator
       this(parameters,
            bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
            defaultSupportPolygon,
-           numberFootstepsToConsider,
            soleFrames,
            soleZUpFrames,
            parentRegistry);
@@ -92,12 +88,10 @@ public class CoPTrajectoryGenerator
    public CoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                  SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
-                                 IntegerProvider numberFootstepsToConsider,
                                  SideDependentList<? extends ReferenceFrame> soleFrames,
                                  SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                  YoRegistry parentRegistry)
    {
-      this.numberFootstepsToConsider = numberFootstepsToConsider;
       this.feetInSoleZUpFrames = feetInSoleZUpFrames;
       this.parameters = parameters;
       this.defaultSupportPolygon.set(defaultSupportPolygon);
@@ -185,7 +179,7 @@ public class CoPTrajectoryGenerator
                       List<FootstepShiftFractions> footstepShiftFractions,
                       Point2DReadOnly initialCoP)
    {
-      int numberOfUpcomingFootsteps = Math.min(numberFootstepsToConsider.getIntegerValue(), footsteps.size());
+      int numberOfUpcomingFootsteps = Math.min(parameters.getNumberOfStepsToConsider(), footsteps.size());
 
       reset();
       // Add initial support states of the feet and set the moving polygons
