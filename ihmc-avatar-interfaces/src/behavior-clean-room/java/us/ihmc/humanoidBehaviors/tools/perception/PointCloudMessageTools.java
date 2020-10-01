@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,11 +22,31 @@ public class PointCloudMessageTools
          colors[i] = 0;
       }
 
-      PointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null); // TODO: make parameters to method
-
-      StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
+      // TODO: make parameters to method
+      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
+      return message;
+   }
+
+   public static LidarScanMessage toLidarScanMessage(List<? extends Point3DReadOnly> scan, Pose3DReadOnly scanSensorPose)
+   {
+      LidarScanMessage message = new LidarScanMessage();
+
+      // TODO: apply filters
+
+      for (Point3DReadOnly scanPoint : scan)
+      {
+         message.getScan().add(scanPoint.getX32());
+         message.getScan().add(scanPoint.getY32());
+         message.getScan().add(scanPoint.getZ32());
+      }
+
+      message.setRobotTimestamp(System.nanoTime());
+      message.setSensorPoseConfidence(1.0);
+      message.setPointCloudConfidence(1.0);
+      message.getLidarPosition().set(scanSensorPose.getPosition());
+      message.getLidarOrientation().set(scanSensorPose.getOrientation());
       return message;
    }
 }
