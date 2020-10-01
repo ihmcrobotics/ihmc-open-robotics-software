@@ -1,11 +1,15 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.ContactStateChangeMessage;
 import controller_msgs.msg.dds.WholeBodyMultiContactTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+
+import java.util.List;
 
 public class WholeBodyMultiContactTrajectoryCommand
       implements Command<WholeBodyMultiContactTrajectoryCommand, WholeBodyMultiContactTrajectoryMessage>, EpsilonComparable<WholeBodyMultiContactTrajectoryCommand>
@@ -14,6 +18,7 @@ public class WholeBodyMultiContactTrajectoryCommand
    private double trajectoryDuration;
    private final TDoubleArrayList jointAngles = new TDoubleArrayList(50);
    private final Pose3D pelvisPose = new Pose3D();
+   private final RecyclingArrayList<ContactStateChangeMessage> contactStateChangs = new RecyclingArrayList<>(10, ContactStateChangeMessage.class);
 
    @Override
    public void clear()
@@ -22,6 +27,7 @@ public class WholeBodyMultiContactTrajectoryCommand
       trajectoryDuration = Double.NaN;
       jointAngles.reset();
       pelvisPose.setToNaN();
+      contactStateChangs.clear();
    }
 
    @Override
@@ -34,6 +40,11 @@ public class WholeBodyMultiContactTrajectoryCommand
       for (int i = 0; i < message.getJointAngles().size(); i++)
       {
          jointAngles.add(message.getJointAngles().get(i));
+      }
+
+      for (int i = 0; i < message.getContactStateChanges().size(); i++)
+      {
+         contactStateChangs.add().set(message.getContactStateChanges().get(i));
       }
    }
 
@@ -56,6 +67,11 @@ public class WholeBodyMultiContactTrajectoryCommand
    public Pose3D getPelvisPose()
    {
       return pelvisPose;
+   }
+
+   public List<ContactStateChangeMessage> getContactStateChangs()
+   {
+      return contactStateChangs;
    }
 
    @Override
@@ -89,6 +105,18 @@ public class WholeBodyMultiContactTrajectoryCommand
       for (int i = 0; i < jointAngles.size(); i++)
       {
          if (!EuclidCoreTools.epsilonEquals(jointAngles.get(i), other.jointAngles.get(i), epsilon))
+         {
+            return false;
+         }
+      }
+
+      if (contactStateChangs.size() != other.contactStateChangs.size())
+      {
+         return false;
+      }
+      for (int i = 0; i < contactStateChangs.size(); i++)
+      {
+         if (contactStateChangs.get(i).epsilonEquals(other.contactStateChangs.get(i), epsilon))
          {
             return false;
          }
