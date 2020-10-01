@@ -56,7 +56,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -93,7 +93,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.getCdrSerializedSize(data.getFlatStepType(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.getCdrSerializedSize(data.getSideStepDirection(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.getCdrSerializedSize(data.getStairsStepType(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -115,7 +115,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_7(data.getContinuousWalking());
 
       controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.write(data.getFlatStepType(), cdr);
-      controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.write(data.getSideStepDirection(), cdr);
+      controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.write(data.getStairsStepType(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.QuixCrutchMessage data, us.ihmc.idl.CDR cdr)
@@ -134,7 +134,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setContinuousWalking(cdr.read_type_7());
       	
       controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.read(data.getFlatStepType(), cdr);	
-      controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.read(data.getSideStepDirection(), cdr);	
+      controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.read(data.getStairsStepType(), cdr);	
 
    }
 
@@ -151,7 +151,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_7("continuous_walking", data.getContinuousWalking());
       ser.write_type_a("flat_step_type", new controller_msgs.msg.dds.FlatStepTypeMessagePubSubType(), data.getFlatStepType());
 
-      ser.write_type_a("side_step_direction", new controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType(), data.getSideStepDirection());
+      ser.write_type_a("stairs_step_type", new controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType(), data.getStairsStepType());
 
    }
 
@@ -168,7 +168,7 @@ public class QuixCrutchMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setContinuousWalking(ser.read_type_7("continuous_walking"));
       ser.read_type_a("flat_step_type", new controller_msgs.msg.dds.FlatStepTypeMessagePubSubType(), data.getFlatStepType());
 
-      ser.read_type_a("side_step_direction", new controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType(), data.getSideStepDirection());
+      ser.read_type_a("stairs_step_type", new controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType(), data.getStairsStepType());
 
    }
 
