@@ -33,6 +33,8 @@ public class CoPTrajectoryParameters
    private final double ballCMPLengthOffsetFactor = 1.0 / 8.0;
    private final double exitCMPLengthOffsetFactor = 1.0 / 3.0;
 
+   private final int numberOfStepsToConsider = 3;
+
    private final PlanForToeOffCalculator planForToeOffCalculator = new PlanForToeOffCalculator()
    {
       @Override
@@ -89,7 +91,7 @@ public class CoPTrajectoryParameters
 
    public double getEntryCMPMaxX()
    {
-      return exitCMPMaxX;
+      return entryCMPMaxX;
    }
 
    public double getBallCMPMinX()
@@ -140,6 +142,11 @@ public class CoPTrajectoryParameters
    public double getExitCMPLengthOffsetFactor()
    {
       return exitCMPLengthOffsetFactor;
+   }
+
+   public int getNumberOfStepsToConsider()
+   {
+      return numberOfStepsToConsider;
    }
 
    public PlanForToeOffCalculator getPlanForToeOffCalculator()
