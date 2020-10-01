@@ -13,9 +13,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class ContactStateChangeMessage extends Packet<ContactStateChangeMessage> implements Settable<ContactStateChangeMessage>, EpsilonComparable<ContactStateChangeMessage>
 {
    /**
-            * Time relative to when the message is received that the change in contact will be processed
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
-   public double time_;
+   public long sequence_id_;
    /**
             * Hash code of the rigid body that will have a contact change
             */
@@ -40,7 +40,7 @@ public class ContactStateChangeMessage extends Packet<ContactStateChangeMessage>
 
    public void set(ContactStateChangeMessage other)
    {
-      time_ = other.time_;
+      sequence_id_ = other.sequence_id_;
 
       rigid_body_hash_code_ = other.rigid_body_hash_code_;
 
@@ -49,18 +49,18 @@ public class ContactStateChangeMessage extends Packet<ContactStateChangeMessage>
    }
 
    /**
-            * Time relative to when the message is received that the change in contact will be processed
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
-   public void setTime(double time)
+   public void setSequenceId(long sequence_id)
    {
-      time_ = time;
+      sequence_id_ = sequence_id;
    }
    /**
-            * Time relative to when the message is received that the change in contact will be processed
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
-   public double getTime()
+   public long getSequenceId()
    {
-      return time_;
+      return sequence_id_;
    }
 
    /**
@@ -117,7 +117,7 @@ public class ContactStateChangeMessage extends Packet<ContactStateChangeMessage>
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rigid_body_hash_code_, other.rigid_body_hash_code_, epsilon)) return false;
 
@@ -136,7 +136,7 @@ public class ContactStateChangeMessage extends Packet<ContactStateChangeMessage>
 
       ContactStateChangeMessage otherMyClass = (ContactStateChangeMessage) other;
 
-      if(this.time_ != otherMyClass.time_) return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if(this.rigid_body_hash_code_ != otherMyClass.rigid_body_hash_code_) return false;
 
@@ -152,8 +152,8 @@ public class ContactStateChangeMessage extends Packet<ContactStateChangeMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ContactStateChangeMessage {");
-      builder.append("time=");
-      builder.append(this.time_);      builder.append(", ");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("rigid_body_hash_code=");
       builder.append(this.rigid_body_hash_code_);      builder.append(", ");
       builder.append("add_contact_point=");

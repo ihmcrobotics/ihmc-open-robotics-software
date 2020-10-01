@@ -1,8 +1,8 @@
 # This message is part of the IHMC multi-contact controller API.
 # Provides a way for a user or module external to the controller to signal a change in contact state
 
-# Time relative to when the message is received that the change in contact will be processed
-float64 time
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Hash code of the rigid body that will have a contact change
 int32 rigid_body_hash_code

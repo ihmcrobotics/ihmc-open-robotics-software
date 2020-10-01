@@ -12,6 +12,3 @@ float64[<=50] joint_angles
 geometry_msgs/Pose pelvis_pose
 # Hash of joint array
 int32 joint_name_hash
-
-# Contact state changes associated with this trajectory
-ContactStateChangeMessage[<=10] contact_state_changes

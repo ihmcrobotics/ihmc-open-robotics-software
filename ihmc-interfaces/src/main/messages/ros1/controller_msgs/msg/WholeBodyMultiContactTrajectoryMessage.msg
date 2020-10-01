@@ -16,7 +16,4 @@ geometry_msgs/Pose pelvis_pose
 # Hash of joint array
 int32 joint_name_hash
 
-# Contact state changes associated with this trajectory
-controller_msgs/ContactStateChangeMessage[] contact_state_changes
-
 
