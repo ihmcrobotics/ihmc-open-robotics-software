@@ -8,16 +8,26 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class SaveableModule
 {
    private final List<YoDouble> doubles = new ArrayList<>();
    private final List<YoInteger> integers = new ArrayList<>();
    private final List<YoBoolean> booleans = new ArrayList<>();
+
+   private File file;
+
+   public void setFileToSave(File file)
+   {
+      this.file = SaveableModuleTools.ensureFileExists(file);
+   }
+
+   public void setFileToSave(String filePath)
+   {
+      this.file = SaveableModuleTools.ensureFileExists(new File(filePath));
+   }
 
    public void registerDoubleToSave(YoDouble dble)
    {
@@ -89,67 +99,56 @@ public class SaveableModule
       parametersAsString = parametersAsString.replace(",", "");
       Scanner scanner = new Scanner(parametersAsString);
       for (int i = 0; i < doubles.size(); i++)
-         doubles.get(i).set(readNextDouble(scanner));
+         doubles.get(i).set(SaveableModuleTools.readNextDouble(scanner));
       for (int i = 0; i < integers.size(); i++)
-         integers.get(i).set(readNextInt(scanner));
+         integers.get(i).set(SaveableModuleTools.readNextInt(scanner));
       for (int i = 0; i < booleans.size(); i++)
-         booleans.get(i).set(readNextBoolean(scanner));
+         booleans.get(i).set(SaveableModuleTools.readNextBoolean(scanner));
    }
 
-   private static double readNextDouble(Scanner scanner)
+   public void save(String propertyName)
    {
-      return readNextDouble(scanner, Double.NaN);
-   }
+      if (file == null)
+      {
+         throw new IllegalArgumentException("File has not been set.");
+      }
 
-   private static double readNextDouble(Scanner scanner, double defaultValue)
-   {
+      Properties properties = new Properties()
+      {
+         private static final long serialVersionUID = -8814683165980261816L;
+
+         @Override
+         public synchronized Enumeration<Object> keys()
+         {
+            return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+         }
+      };
+
+      FileInputStream fileIn = null;
+      FileOutputStream fileOut = null;
+
       try
       {
-         while (!scanner.hasNextDouble())
-            scanner.next();
-         return scanner.nextDouble();
+         if (file.exists() && file.isFile())
+         {
+            fileIn = new FileInputStream(file);
+            properties.load(fileIn);
+         }
+
+         properties.setProperty(propertyName, toString());
+         fileOut = new FileOutputStream(file);
+         properties.store(fileOut, "");
       }
-      catch (NoSuchElementException e)
+      catch (Exception ex)
       {
-         return defaultValue;
+         throw new RuntimeException("Problem when saving property.");
+      }
+      finally
+      {
+         SaveableModuleTools.closeStreamSilently(fileIn);
+         SaveableModuleTools.closeStreamSilently(fileOut);
       }
    }
 
-   public static int readNextInt(Scanner scanner)
-   {
-      return readNextInt(scanner, -1);
-   }
 
-   public static int readNextInt(Scanner scanner, int defaultValue)
-   {
-      try
-      {
-         while (!scanner.hasNextInt())
-            scanner.next();
-         return scanner.nextInt();
-      }
-      catch (NoSuchElementException e)
-      {
-         return defaultValue;
-      }
-   }
-
-   public static boolean readNextBoolean(Scanner scanner)
-   {
-      return readNextBoolean(scanner, false);
-   }
-
-   public static boolean readNextBoolean(Scanner scanner, boolean defaultValue)
-   {
-      try
-      {
-         while (!scanner.hasNextBoolean())
-            scanner.next();
-         return scanner.nextBoolean();
-      }
-      catch (NoSuchElementException e)
-      {
-         return defaultValue;
-      }
-   }
 }
