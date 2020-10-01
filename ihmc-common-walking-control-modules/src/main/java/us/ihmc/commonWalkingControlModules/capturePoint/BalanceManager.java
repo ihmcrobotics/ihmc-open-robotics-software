@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryPolygonParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CopTrajectory;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.SupportSequence;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
@@ -212,7 +213,7 @@ public class BalanceManager
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       SideDependentList<MovingReferenceFrame> soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       SideDependentList<MovingReferenceFrame> soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
-      supportSeqence = new SupportSequence(defaultSupportPolygon, soleFrames, soleZUpFrames, bipedSupportPolygons, registry, controllerToolbox.getYoGraphicsListRegistry());
+      supportSeqence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleZUpFrames, bipedSupportPolygons, registry, controllerToolbox.getYoGraphicsListRegistry());
       comTrajectoryPlanner = new CoMTrajectoryPlanner(gravityZ, 1.0, registry);
       ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
       copTrajectory = new CopTrajectory(registry, controllerToolbox.getYoGraphicsListRegistry());
