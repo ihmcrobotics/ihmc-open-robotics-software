@@ -1,117 +1,72 @@
 package us.ihmc.robotics.saveableModule;
 
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.TreeSet;
 
-import java.io.*;
-import java.util.*;
-
-public class SaveableModule
+public abstract class SaveableModule<T extends SaveableModuleState>
 {
-   private final List<YoDouble> doubles = new ArrayList<>();
-   private final List<YoInteger> integers = new ArrayList<>();
-   private final List<YoBoolean> booleans = new ArrayList<>();
-
    private File file;
+   private T state;
+
+   public abstract void compute(T state);
 
    public void setFileToSave(File file)
    {
       this.file = SaveableModuleTools.ensureFileExists(file);
    }
 
-   public void setFileToSave(String filePath)
+   public void setFilePathToSave(String filePath)
    {
-      this.file = SaveableModuleTools.ensureFileExists(new File(filePath));
+      setFileToSave(new File(filePath));
    }
 
-   public void registerDoubleToSave(YoDouble dble)
+   public void setSaveableModuleState(T state)
    {
-      doubles.add(dble);
+      this.state = state;
    }
 
-   public void registerIntegerToSave(YoInteger integer)
+   public void load(String propertyName)
    {
-      integers.add(integer);
-   }
+      if (file == null|| !file.exists() || !file.isFile())
+         throw new IllegalArgumentException("File has not been set.");
+      if (state == null)
+         throw new IllegalArgumentException("State has not been set.");
 
-   public void registerBooleanToSave(YoBoolean yoBoolean)
-   {
-      booleans.add(yoBoolean);
-   }
+      FileInputStream fileIn = null;
+      String propertyValue = null;
 
-   public void registerYoFramePoint3DToSave(YoFramePoint3D framePoint3D)
-   {
-      registerDoubleToSave(framePoint3D.getYoX());
-      registerDoubleToSave(framePoint3D.getYoY());
-      registerDoubleToSave(framePoint3D.getYoZ());
-   }
-
-   public void registerYoFramePoint2DToSave(YoFramePoint2D framePoint2D)
-   {
-      registerDoubleToSave(framePoint2D.getYoX());
-      registerDoubleToSave(framePoint2D.getYoY());
-   }
-
-   public void registerYoFrameQuaternionToSave(YoFrameQuaternion frameQuaternion)
-   {
-      registerDoubleToSave(frameQuaternion.getYoQs());
-      registerDoubleToSave(frameQuaternion.getYoQx());
-      registerDoubleToSave(frameQuaternion.getYoQy());
-      registerDoubleToSave(frameQuaternion.getYoQz());
-   }
-
-   public void registerYoFramePose3DToSave(YoFramePose3D framePose3D)
-   {
-      registerYoFramePoint3DToSave(framePose3D.getPosition());
-      registerYoFrameQuaternionToSave(framePose3D.getOrientation());
-   }
-
-   @Override
-   public String toString()
-   {
-      String string = "";
-      for (int i = 0; i < doubles.size(); i++)
+      try
       {
-         YoDouble yoDouble = doubles.get(i);
-         string += yoDouble.getFullNameString() + ": " + yoDouble.getValue() + ", ";
+         Properties properties = new Properties();
+
+         fileIn = new FileInputStream(file);
+         properties.load(fileIn);
+         propertyValue = properties.getProperty(propertyName);
       }
-      for (int i = 0; i < integers.size(); i++)
+      catch (Exception ex)
       {
-         YoInteger yoInteger = integers.get(i);
-         string += yoInteger.getFullNameString() + ": " + yoInteger.getValue() + ", ";
+         throw new RuntimeException("Problem when loading module.");
       }
-      for (int i = 0; i < booleans.size(); i++)
+      finally
       {
-         YoBoolean yoBoolean = booleans.get(i);
-         string += yoBoolean.getFullNameString() + ": " + yoBoolean.getValue() + ", ";
+         SaveableModuleTools.closeStreamSilently(fileIn);
       }
 
-      return string;
+      state.loadValues(propertyValue);
    }
 
-   public void load(String parametersAsString)
-   {
-      parametersAsString = parametersAsString.replace(",", "");
-      Scanner scanner = new Scanner(parametersAsString);
-      for (int i = 0; i < doubles.size(); i++)
-         doubles.get(i).set(SaveableModuleTools.readNextDouble(scanner));
-      for (int i = 0; i < integers.size(); i++)
-         integers.get(i).set(SaveableModuleTools.readNextInt(scanner));
-      for (int i = 0; i < booleans.size(); i++)
-         booleans.get(i).set(SaveableModuleTools.readNextBoolean(scanner));
-   }
 
    public void save(String propertyName)
    {
       if (file == null)
-      {
          throw new IllegalArgumentException("File has not been set.");
-      }
+      if (state == null)
+         throw new IllegalArgumentException("State has not been set.");
 
       Properties properties = new Properties()
       {
@@ -135,13 +90,13 @@ public class SaveableModule
             properties.load(fileIn);
          }
 
-         properties.setProperty(propertyName, toString());
+         properties.setProperty(propertyName, state.toString());
          fileOut = new FileOutputStream(file);
          properties.store(fileOut, "");
       }
       catch (Exception ex)
       {
-         throw new RuntimeException("Problem when saving property.");
+         throw new RuntimeException("Problem when saving module.");
       }
       finally
       {

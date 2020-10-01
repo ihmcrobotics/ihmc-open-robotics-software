@@ -36,8 +36,6 @@ public class SaveableModuleTools
       }
    }
 
-
-
    public static double readNextDouble(Scanner scanner)
    {
       return readNextDouble(scanner, Double.NaN);
