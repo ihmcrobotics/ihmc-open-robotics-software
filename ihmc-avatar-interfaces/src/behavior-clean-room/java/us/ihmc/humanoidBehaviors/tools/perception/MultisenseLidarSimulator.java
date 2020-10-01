@@ -21,9 +21,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.function.Consumer;
 
 public class MultisenseLidarSimulator
 {
@@ -31,6 +30,7 @@ public class MultisenseLidarSimulator
 
    private final RemoteSyncedRobotModel syncedRobot;
    private final PlanarRegionsList map;
+   private final ArrayList<Consumer<ArrayList<Point3DReadOnly>>> scanListeners = new ArrayList<>();
    private final MovingReferenceFrame neckFrame;
    private final YawPitchRoll sensorRoll = new YawPitchRoll();
    private final PoseReferenceFrame sensorFrame;
@@ -43,9 +43,6 @@ public class MultisenseLidarSimulator
    private final double range = 5.0;
    private final int scanSize = 500;
    private final double angularVelocity = 2.183;
-   private final int scanHistorySize = 50;
-
-   private final ArrayDeque<ArrayList<Point3DReadOnly>> pointCloud = new ArrayDeque<>();
 
    public MultisenseLidarSimulator(DRCRobotModel robotModel, ROS2Node ros2Node, PlanarRegionsList map)
    {
@@ -91,29 +88,16 @@ public class MultisenseLidarSimulator
             scan.add(planarRegionIntersection.getLeft());
          }
 
-         synchronized (this)
+         for (Consumer<ArrayList<Point3DReadOnly>> scanListener : scanListeners)
          {
-            pointCloud.addFirst(scan);
-
-            while (pointCloud.size() > scanHistorySize)
-            {
-               pointCloud.removeLast();
-            }
+            scanListener.accept(scan);
          }
       }
    }
 
-   public List<Point3DReadOnly> getPointCloud()
+   public void addLidarScanListener(Consumer<ArrayList<Point3DReadOnly>> scanConsumer)
    {
-      ArrayList<Point3DReadOnly> pointCloudInstance = new ArrayList<>();
-      synchronized (this)
-      {
-         for (ArrayList<Point3DReadOnly> point : pointCloud)
-         {
-            pointCloudInstance.addAll(point);
-         }
-      }
-      return pointCloudInstance;
+      scanListeners.add(scanConsumer);
    }
 
    public Pose3DReadOnly getSensorPose()
