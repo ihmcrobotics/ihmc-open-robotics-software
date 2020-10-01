@@ -50,9 +50,6 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
-      {
-          current_alignment += controller_msgs.msg.dds.ContactStateChangeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -81,11 +78,6 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getContactStateChanges().size(); ++i0)
-      {
-          current_alignment += controller_msgs.msg.dds.ContactStateChangeMessagePubSubType.getCdrSerializedSize(data.getContactStateChanges().get(i0), current_alignment);}
-
 
       return current_alignment - initial_alignment;
    }
@@ -103,10 +95,6 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPelvisPose(), cdr);
       cdr.write_type_2(data.getJointNameHash());
 
-      if(data.getContactStateChanges().size() <= 10)
-      cdr.write_type_e(data.getContactStateChanges());else
-          throw new RuntimeException("contact_state_changes field exceeds the maximum length");
-
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyMultiContactTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -119,7 +107,6 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPelvisPose(), cdr);	
       data.setJointNameHash(cdr.read_type_2());
       	
-      cdr.read_type_e(data.getContactStateChanges());	
 
    }
 
@@ -132,7 +119,6 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       ser.write_type_a("pelvis_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPelvisPose());
 
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
-      ser.write_type_e("contact_state_changes", data.getContactStateChanges());
    }
 
    @Override
@@ -144,7 +130,6 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       ser.read_type_a("pelvis_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPelvisPose());
 
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
-      ser.read_type_e("contact_state_changes", data.getContactStateChanges());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.WholeBodyMultiContactTrajectoryMessage src, controller_msgs.msg.dds.WholeBodyMultiContactTrajectoryMessage dest)
