@@ -220,7 +220,6 @@ public class BalanceManager
       copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
                                                  bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
                                                  defaultSupportPolygon,
-                                                 () -> 3,
                                                  soleFrames,
                                                  soleZUpFrames,
                                                  registry);
