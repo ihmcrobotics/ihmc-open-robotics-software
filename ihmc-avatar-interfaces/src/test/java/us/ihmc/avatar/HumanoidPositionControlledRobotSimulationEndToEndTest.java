@@ -97,7 +97,6 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    @Test
    public void testPositionController(TestInfo testInfo) throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setUsePefectSensors(true);
 
       DRCRobotModel robotModel = getRobotModel();
