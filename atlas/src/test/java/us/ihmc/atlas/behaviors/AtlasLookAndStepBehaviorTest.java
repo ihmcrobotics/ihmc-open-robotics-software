@@ -111,8 +111,13 @@ public class AtlasLookAndStepBehaviorTest
 
       boolean useDynamicsSimulation = false;
       boolean runRealsenseSLAM = false;
+      boolean runLidarREA = true;
       assertTimeoutPreemptively(Duration.ofMinutes(3),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround, useDynamicsSimulation, runRealsenseSLAM, waypoints));
+                                () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround,
+                                                 useDynamicsSimulation,
+                                                 runRealsenseSLAM,
+                                                 runLidarREA,
+                                                 waypoints));
    }
 
    @Test
@@ -132,10 +137,12 @@ public class AtlasLookAndStepBehaviorTest
 
       boolean useDynamicsSimulation = true;
       boolean runRealsenseSLAM = false;
+      boolean runLidarREA = true;
       assertTimeoutPreemptively(Duration.ofMinutes(5),
                                 () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
+                                                 runLidarREA,
                                                  waypoints));
    }
 
@@ -155,16 +162,22 @@ public class AtlasLookAndStepBehaviorTest
 
       boolean useDynamicsSimulation = true;
       boolean runRealsenseSLAM = true;
+      boolean runLidarREA = true;
       assertTimeoutPreemptively(Duration.ofMinutes(5),
                                 () -> runTheTest(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
+                                                 runLidarREA,
                                                  waypoints));
    }
 
-   private void runTheTest(Supplier<PlanarRegionsList> environment, boolean useDynamicsSimulation, boolean runRealsenseSLAM, List<TestWaypoint> waypoints)
+   private void runTheTest(Supplier<PlanarRegionsList> environment,
+                           boolean useDynamicsSimulation,
+                           boolean runRealsenseSLAM,
+                           boolean runLidarREA,
+                           List<TestWaypoint> waypoints)
    {
-      ThreadTools.startAsDaemon(() -> perceptionStack(environment, runRealsenseSLAM), "PerceptionStack");
+      ThreadTools.startAsDaemon(() -> perceptionStack(environment, runRealsenseSLAM, runLidarREA), "PerceptionStack");
       Notification finishedSimulationSetup = new Notification();
       if (useDynamicsSimulation)
       {
@@ -280,9 +293,9 @@ public class AtlasLookAndStepBehaviorTest
       }
    }
 
-   private void perceptionStack(Supplier<PlanarRegionsList> environment, boolean runRealsenseSLAM)
+   private void perceptionStack(Supplier<PlanarRegionsList> environment, boolean runRealsenseSLAM, boolean runLidarREA)
    {
-      perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE, environment.get(), runRealsenseSLAM, false, createRobotModel());
+      perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE, environment.get(), runRealsenseSLAM, false, runLidarREA, createRobotModel());
    }
 
    private void dynamicsSimulation(Supplier<PlanarRegionsList> environment, Notification finishedSettingUp)
