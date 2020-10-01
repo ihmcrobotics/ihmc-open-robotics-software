@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -435,7 +434,7 @@ public class CoPTrajectoryGenerator
    {
       copLocationToPack.setIncludingFrame(basePolygon.getCentroid());
 
-      double copXOffset = MathTools.clamp(copOffset.getX() + getStepLengthToCoPOffset(lengthOffsetFactor, otherPolygon, basePolygon),
+      double copXOffset = MathTools.clamp(copOffset.getX() + lengthOffsetFactor * getStepLength(otherPolygon, basePolygon),
                                           minXOffset,
                                           maxXOffset);
       copLocationToPack.add(copXOffset, supportSide.negateIfRightSide(copOffset.getY()));
@@ -485,7 +484,7 @@ public class CoPTrajectoryGenerator
 
    private final FramePoint2D mostForwardPointOnOtherPolygon = new FramePoint2D();
 
-   private double getStepLengthToCoPOffset(double lengthOffsetFactor, FrameConvexPolygon2DReadOnly otherPolygon, FrameConvexPolygon2DReadOnly basePolygon)
+   private double getStepLength(FrameConvexPolygon2DReadOnly otherPolygon, FrameConvexPolygon2DReadOnly basePolygon)
    {
       mostForwardPointOnOtherPolygon.setIncludingFrame(otherPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(otherPolygon,
                                                                                                                          true,
@@ -493,8 +492,7 @@ public class CoPTrajectoryGenerator
                                                                                                                          Bound.MAX)));
       mostForwardPointOnOtherPolygon.changeFrameAndProjectToXYPlane(basePolygon.getReferenceFrame());
 
-      double length = mostForwardPointOnOtherPolygon.getX() - basePolygon.getMaxX();
-      return lengthOffsetFactor * length;
+     return mostForwardPointOnOtherPolygon.getX() - basePolygon.getMaxX();
    }
 
    /**
