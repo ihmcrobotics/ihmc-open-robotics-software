@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJoi
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
@@ -32,15 +33,25 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
+/**
+ * This high-level controller state offers an API for tracking trajectories defined in joint-space
+ * only. The input command for this controller is {@link WholeBodyJointspaceTrajectoryCommand} which
+ * allows to define trajectories for each individual joint. This controller relies on the low-level
+ * robot controller to perform position tracking in joint-space given desired position and velocity
+ * over time.
+ */
 public class JointspacePositionControllerState extends HighLevelControllerState
 {
    private final JointDesiredOutputListReadOnly highLevelControllerOutput;
    private final JointDesiredOutputList jointDesiredOutputList;
 
    private final OneDoFJointBasics[] joints;
-   private final OneDoFJointController[] jointControllers;
+   private final OneDoFJointManager[] jointManagers;
    private final TIntIntHashMap hashCodeToJointIndexMap = new TIntIntHashMap(40, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
    private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusOutputManager;
+
+   private final RecyclingArrayList<JointspaceTrajectoryStatusMessage> combinedStatuses = new RecyclingArrayList<>(JointspaceTrajectoryStatusMessage::new);
 
    public JointspacePositionControllerState(HighLevelControllerName stateEnum, CommandInputManager commandInputManager,
                                             StatusMessageOutputManager statusOutputManager, OneDoFJointBasics[] controlledJoints,
@@ -49,17 +60,18 @@ public class JointspacePositionControllerState extends HighLevelControllerState
    {
       super(stateEnum, highLevelControllerParameters, controlledJoints);
       this.commandInputManager = commandInputManager;
+      this.statusOutputManager = statusOutputManager;
 
       this.highLevelControllerOutput = highLevelControllerOutput;
 
       joints = controlledJoints;
-      jointControllers = new OneDoFJointController[joints.length];
+      jointManagers = new OneDoFJointManager[joints.length];
 
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
          OneDoFJointBasics joint = joints[jointIndex];
-         OneDoFJointController controller = new OneDoFJointController(joint, controllerToolbox.getYoTime(), registry);
-         jointControllers[jointIndex] = controller;
+         OneDoFJointManager manager = new OneDoFJointManager(joint, controllerToolbox.getYoTime(), registry);
+         jointManagers[jointIndex] = manager;
          if (joint.hashCode() == hashCodeToJointIndexMap.getNoEntryKey())
             throw new IllegalStateException("Cannot register a joint's hash-code that is equal to the NO_ENTRY key value.");
          hashCodeToJointIndexMap.put(joint.hashCode(), jointIndex);
@@ -72,7 +84,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
-         jointControllers[jointIndex].holdCurrent();
+         jointManagers[jointIndex].holdCurrent();
       }
    }
 
@@ -82,13 +94,13 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
          OneDoFJointBasics joint = joints[jointIndex];
-         OneDoFJointController controller = jointControllers[jointIndex];
+         OneDoFJointManager manager = jointManagers[jointIndex];
 
          JointDesiredOutputReadOnly jointData = highLevelControllerOutput.getJointDesiredOutput(joint);
          if (jointData != null && jointData.hasDesiredPosition())
-            controller.holderPosition(jointData.getDesiredPosition());
+            manager.holderPosition(jointData.getDesiredPosition());
          else
-            controller.holdCurrent();
+            manager.holdCurrent();
       }
    }
 
@@ -97,17 +109,67 @@ public class JointspacePositionControllerState extends HighLevelControllerState
    {
       consumeCommands();
 
+      combinedStatuses.clear();
+
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
          OneDoFJointBasics joint = joints[jointIndex];
-         OneDoFJointController controller = jointControllers[jointIndex];
+         OneDoFJointManager manager = jointManagers[jointIndex];
 
          JointDesiredOutputBasics desiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
          desiredOutput.clear();
-         controller.doControl(desiredOutput);
+         manager.doControl(desiredOutput);
+
+         JointspaceTrajectoryStatusMessage status = manager.pollStatusToReport();
+
+         if (status != null)
+         {
+            combineStatus(status);
+         }
       }
 
       jointDesiredOutputList.completeWith(getStateSpecificJointSettings());
+
+      for (int i = 0; i < combinedStatuses.size(); i++)
+         statusOutputManager.reportStatusMessage(combinedStatuses.get(i));
+   }
+
+   private void combineStatus(JointspaceTrajectoryStatusMessage jointStatus)
+   {
+      JointspaceTrajectoryStatusMessage matchingCombinedStatus = null;
+
+      for (int i = 0; i < combinedStatuses.size(); i++)
+      {
+         JointspaceTrajectoryStatusMessage candidate = combinedStatuses.get(i);
+
+         if (candidate.getTimestamp() != jointStatus.getTimestamp())
+            continue;
+         if (candidate.getSequenceId() != jointStatus.getSequenceId())
+            continue;
+         if (candidate.getTrajectoryExecutionStatus() != jointStatus.getTrajectoryExecutionStatus())
+            continue;
+
+         matchingCombinedStatus = candidate;
+         break;
+      }
+
+      if (matchingCombinedStatus == null)
+      {
+         matchingCombinedStatus = combinedStatuses.add();
+         matchingCombinedStatus.getJointNames().clear();
+         matchingCombinedStatus.getActualJointPositions().reset();
+         matchingCombinedStatus.getDesiredJointPositions().reset();
+         matchingCombinedStatus.setTimestamp(jointStatus.getTimestamp());
+         matchingCombinedStatus.setSequenceId(jointStatus.getSequenceId());
+         matchingCombinedStatus.setTrajectoryExecutionStatus(jointStatus.getTrajectoryExecutionStatus());
+      }
+
+      for (int i = 0; i < jointStatus.getJointNames().size(); i++)
+      { // There should be only one joint, but oh well
+         matchingCombinedStatus.getJointNames().add(jointStatus.getJointNames().getString(i));
+         matchingCombinedStatus.getActualJointPositions().add(jointStatus.getActualJointPositions().get(i));
+         matchingCombinedStatus.getDesiredJointPositions().add(jointStatus.getDesiredJointPositions().get(i));
+      }
    }
 
    @Override
@@ -134,7 +196,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
                continue;
             }
 
-            jointControllers[jointIndex].handleTrajectoryCommand(jointTrajectory, command);
+            jointManagers[jointIndex].handleTrajectoryCommand(jointTrajectory, command);
          }
       }
    }
@@ -145,9 +207,9 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       return jointDesiredOutputList;
    }
 
-   private static class OneDoFJointController
+   public static class OneDoFJointManager
    {
-      public static final String shortName = "JointController";
+      public static final String shortName = "JointManager";
 
       private final OneDoFJointBasics joint;
 
@@ -171,7 +233,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       private final DoubleProvider time;
 
-      public OneDoFJointController(OneDoFJointBasics joint, DoubleProvider time, YoRegistry registry)
+      public OneDoFJointManager(OneDoFJointBasics joint, DoubleProvider time, YoRegistry registry)
       {
          this.joint = joint;
          this.time = time;
