@@ -35,6 +35,131 @@ public class ValkyrieInitialSetupFactories
       return initialSetup;
    }
 
+   public static ValkyrieMutableInitialSetup newCrawl3(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(0.0, 0.0, -1.25, 1.75, -0.8, 0.0);
+      initialSetup.setArmJointQs(-1.5, -1.05, 1.5, -1.3);
+      initialSetup.setSpineJointQs(0.0, 0.1, 0.0);
+      initialSetup.setRootJointPose(0.0, 0.0, 0.56, 0.0, 0.4, 0.0, 0.5);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalPosture_Start(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(0.0, 0.0, -1.25, 1.75, -0.8, 0.0);
+      initialSetup.setArmJointQs(-1.5, -1.05, 1.5, -1.3);
+      initialSetup.setSpineJointQs(0.0, 0.1, 0.0);
+      initialSetup.setRootJointPose(0.0, 0.0, 0.56, 0.0, 0.4, 0.0, 0.5);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalPosture_End(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(0.0003,-0.0000,0.6931,0.0000,0.6763,-0.0001,0.7366);
+      initialSetup.setSpineJointQs(-0.0000, 0.2500, -0.0004);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-1.7262, -1.1905, 1.3867, -1.0519);
+      initialSetup.setLegJointQs(RobotSide.LEFT,-0.0013,0.0014,-1.3512,1.2825,-0.5345,0.0011);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-1.7251, 1.1907, 1.3844, 1.0520);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,0.0014,-0.0016,-1.3513,1.2826,-0.5345,-0.0012);
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_Start(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(RobotSide.LEFT, 0.003, -0.03, -1.527, 2.043, -0.8, 0.0);
+      initialSetup.setLegJointQs(RobotSide.RIGHT, 0.002, -0.03, -1.54, 2.057, -0.8, 0.0);
+      initialSetup.setArmJointQs(RobotSide.LEFT, -1.585, -1.091, 1.317, -1.104);
+      initialSetup.setArmJointQs(RobotSide.RIGHT, -1.675, 1.255, 1.372, 1.004);
+      initialSetup.setSpineJointQs(0.0, 0.025, 0.05);
+      initialSetup.setRootJointPose(-0.13, -0.006, 0.557, 0.0119, 0.6181, -0.0106, 0.7859);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_LeftArmUp(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(-0.1295,-0.0059,0.5543,0.0114,0.6224,-0.0102,0.7826);
+      initialSetup.setSpineJointQs(-0.0001, 0.0143, 0.0514);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-1.6142, -0.8850, 1.3335, -1.5654);
+      initialSetup.setLegJointQs(RobotSide.LEFT,0.0031,-0.0287,-1.5383,2.0435,-0.8000,0.0000);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-1.6726, 1.2498, 1.3622, 1.0235);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,0.0021,-0.0287,-1.5507,2.0569,-0.8000,0.0000);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_LeftArmBack(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(-0.1682,0.0149,0.6070,0.0048,0.5312,-0.0042,0.8472);
+      initialSetup.setSpineJointQs(0.0012, 0.2452, 0.0756);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-1.0748, -1.4776, 1.0568, -1.2281);
+      initialSetup.setLegJointQs(RobotSide.LEFT,-0.0383,-0.0012,-1.3556,2.0570,-0.7985,-0.0914);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-1.7419, 1.5190, 1.4403, 0.4261);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,-0.0271,-0.0246,-1.3573,2.0570,-0.8191,-0.0059);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_LeftArmDown(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(-0.1530,0.0170,0.5868,0.0445,0.5489,-0.0388,0.8338);
+      initialSetup.setSpineJointQs(-0.1306, 0.2614, -0.0942);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-1.0651, -1.4158, 0.9452, -1.1441);
+      initialSetup.setLegJointQs(RobotSide.LEFT,-0.0637,-0.1500,-1.3681,2.0570,-0.8007,0.0004);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-1.7117, 1.5190, 1.0866, 0.5880);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,-0.0511,-0.1873,-1.3775,2.0472,-0.8644,0.1393);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_RightArmUp(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(-0.1563,0.0133,0.6124,0.0008,0.5199,-0.0144,0.8541);
+      initialSetup.setSpineJointQs(-0.2368, 0.2376, -0.1194);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-1.0469, -1.3083, 1.0325, -1.1331);
+      initialSetup.setLegJointQs(RobotSide.LEFT,-0.0054,-0.0302,-1.3036,2.0570,-0.7955,0.0052);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-1.5261, 1.5190, 0.9055, 0.9208);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,0.0127,-0.0638,-1.2662,1.9727,0.0382,0.3457);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_PitchBodyUp(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(-0.1778,-0.0431,0.6202,0.0444,0.4976,-0.0788,0.8627);
+      initialSetup.setSpineJointQs(-0.2065, 0.2677, -0.0815);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-0.9551, -1.1995, 0.8851, -1.1818);
+      initialSetup.setLegJointQs(RobotSide.LEFT,0.1126,-0.1349,-1.2398,2.0570,-0.7931,-0.0185);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-0.8043, 1.4455, 0.7358, 1.2639);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,0.1288,-0.1765,-1.2754,2.0442,0.0385,0.3480);
+
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newExperimentalCrawl_Other(DRCRobotJointMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setRootJointPose(-0.2245,-0.0921,0.6406,0.0541,0.4516,-0.1156,0.8831);
+      initialSetup.setSpineJointQs(-0.1386, 0.0482, -0.1945);
+      initialSetup.setArmJointQs(RobotSide.LEFT,-1.1427, -1.5150, 0.9971, -0.0516);
+      initialSetup.setLegJointQs(RobotSide.LEFT,0.2091,-0.0817,-1.1501,2.0570,-0.8328,-0.1947);
+      initialSetup.setArmJointQs(RobotSide.RIGHT,-0.8061, 1.4544, 0.7178, 1.2680);
+      initialSetup.setLegJointQs(RobotSide.RIGHT,0.3384,-0.2926,-1.2094,2.0570,0.8233,0.0921);
+
+      return initialSetup;
+   }
+
    public static ValkyrieMutableInitialSetup newKneel1(DRCRobotJointMap jointMap)
    {
       ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
