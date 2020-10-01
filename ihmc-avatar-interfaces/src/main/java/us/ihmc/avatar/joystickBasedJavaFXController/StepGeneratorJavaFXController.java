@@ -381,8 +381,8 @@ public class StepGeneratorJavaFXController
       {
          footstepPublisher.publish(footstepsToSend);
       }
-      if (!isWalking.get())
-         sendPauseMessage();
+//      if (!isWalking.get())
+//         sendPauseMessage();
    }
 
    private void sendREAClearRequest()
