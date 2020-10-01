@@ -52,6 +52,7 @@ import controller_msgs.msg.dds.JointDesiredOutputMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import controller_msgs.msg.dds.MomentumTrajectoryMessage;
+import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
@@ -108,6 +109,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyJointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyMultiContactTrajectoryCommand;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -156,11 +158,13 @@ public class ControllerAPIDefinition
       commands.add(PlanarRegionsListCommand.class);
       commands.add(StepConstraintRegionCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
-      commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(WholeBodyMultiContactTrajectoryCommand.class);
       commands.add(ContactStateChangeCommand.class);
+
+      /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
+      commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
