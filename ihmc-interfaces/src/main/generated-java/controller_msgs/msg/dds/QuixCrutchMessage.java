@@ -20,13 +20,13 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    public boolean execute_behavior_;
    public boolean continuous_walking_;
    public controller_msgs.msg.dds.FlatStepTypeMessage flat_step_type_;
-   public controller_msgs.msg.dds.QuixSideStepDirectionMessage side_step_direction_;
+   public controller_msgs.msg.dds.QuixStairsStepTypeMessage stairs_step_type_;
 
    public QuixCrutchMessage()
    {
       requested_motion_state_ = new controller_msgs.msg.dds.QuixMotionStateMessage();
       flat_step_type_ = new controller_msgs.msg.dds.FlatStepTypeMessage();
-      side_step_direction_ = new controller_msgs.msg.dds.QuixSideStepDirectionMessage();
+      stairs_step_type_ = new controller_msgs.msg.dds.QuixStairsStepTypeMessage();
    }
 
    public QuixCrutchMessage(QuixCrutchMessage other)
@@ -51,7 +51,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       continuous_walking_ = other.continuous_walking_;
 
       controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.staticCopy(other.flat_step_type_, flat_step_type_);
-      controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.staticCopy(other.side_step_direction_, side_step_direction_);
+      controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.staticCopy(other.stairs_step_type_, stairs_step_type_);
    }
 
    public void setSequenceId(long sequence_id)
@@ -121,9 +121,9 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    }
 
 
-   public controller_msgs.msg.dds.QuixSideStepDirectionMessage getSideStepDirection()
+   public controller_msgs.msg.dds.QuixStairsStepTypeMessage getStairsStepType()
    {
-      return side_step_direction_;
+      return stairs_step_type_;
    }
 
 
@@ -158,7 +158,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.continuous_walking_, other.continuous_walking_, epsilon)) return false;
 
       if (!this.flat_step_type_.epsilonEquals(other.flat_step_type_, epsilon)) return false;
-      if (!this.side_step_direction_.epsilonEquals(other.side_step_direction_, epsilon)) return false;
+      if (!this.stairs_step_type_.epsilonEquals(other.stairs_step_type_, epsilon)) return false;
 
       return true;
    }
@@ -186,7 +186,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if(this.continuous_walking_ != otherMyClass.continuous_walking_) return false;
 
       if (!this.flat_step_type_.equals(otherMyClass.flat_step_type_)) return false;
-      if (!this.side_step_direction_.equals(otherMyClass.side_step_direction_)) return false;
+      if (!this.stairs_step_type_.equals(otherMyClass.stairs_step_type_)) return false;
 
       return true;
    }
@@ -213,8 +213,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       builder.append(this.continuous_walking_);      builder.append(", ");
       builder.append("flat_step_type=");
       builder.append(this.flat_step_type_);      builder.append(", ");
-      builder.append("side_step_direction=");
-      builder.append(this.side_step_direction_);
+      builder.append("stairs_step_type=");
+      builder.append(this.stairs_step_type_);
       builder.append("}");
       return builder.toString();
    }
