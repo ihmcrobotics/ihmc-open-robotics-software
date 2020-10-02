@@ -15,12 +15,14 @@ public class OneDoFMotionControlAnchorDescription
 {
    public static final String ANCHOR_JSON = OneDoFMotionControlAnchorDescription.class.getSimpleName();
    public static final String JOINT_NAME_JSON = "jointName";
+   public static final String IS_TRACKING_CONTROLLER_JSON = "isTrackingController";
    public static final String IK_SOLVER_MESSAGE_JSON = SixDoFMotionControlAnchorDescription.IK_SOLVER_MESSAGE_JSON;
 
    private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
    private static final JSONSerializer<KinematicsToolboxOneDoFJointMessage> messageSerializer = new JSONSerializer<>(new KinematicsToolboxOneDoFJointMessagePubSubType());
 
    public String jointName;
+   private boolean isTrackingController;
    public KinematicsToolboxOneDoFJointMessage inputMessage;
 
    public OneDoFMotionControlAnchorDescription()
@@ -30,6 +32,7 @@ public class OneDoFMotionControlAnchorDescription
    public OneDoFMotionControlAnchorDescription(OneDoFMotionControlAnchorDescription other)
    {
       jointName = other.jointName;
+      isTrackingController = other.isTrackingController;
       inputMessage = new KinematicsToolboxOneDoFJointMessage(other.inputMessage);
    }
 
@@ -41,6 +44,7 @@ public class OneDoFMotionControlAnchorDescription
       {
          OneDoFMotionControlAnchorDescription description = new OneDoFMotionControlAnchorDescription();
          description.setJointName(anchorNode.get(JOINT_NAME_JSON).asText());
+         description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
          description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
          return description;
       }
@@ -55,7 +59,8 @@ public class OneDoFMotionControlAnchorDescription
       ObjectNode root = objectMapper.createObjectNode();
       ObjectNode anchorJSON = root.putObject(ANCHOR_JSON);
 
-      anchorJSON.put(jointName, jointName);
+      anchorJSON.put(JOINT_NAME_JSON, jointName);
+      anchorJSON.put(IS_TRACKING_CONTROLLER_JSON, isTrackingController);
 
       try
       {
@@ -80,6 +85,11 @@ public class OneDoFMotionControlAnchorDescription
       return jointName;
    }
 
+   public boolean isTrackingController()
+   {
+      return isTrackingController;
+   }
+
    public KinematicsToolboxOneDoFJointMessage getInputMessage()
    {
       return inputMessage;
@@ -88,6 +98,11 @@ public class OneDoFMotionControlAnchorDescription
    public void setJointName(String jointName)
    {
       this.jointName = jointName;
+   }
+
+   public void setTrackingController(boolean isTrackingController)
+   {
+      this.isTrackingController = isTrackingController;
    }
 
    public void setInputMessage(KinematicsToolboxOneDoFJointMessage inputMessage)
