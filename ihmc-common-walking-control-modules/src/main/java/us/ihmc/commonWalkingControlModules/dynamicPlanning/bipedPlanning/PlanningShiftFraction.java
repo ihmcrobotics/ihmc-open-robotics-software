@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.robotics.saveableModule.SaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,11 +34,39 @@ public class PlanningShiftFraction extends SaveableModuleState
       clear();
    }
 
+   public double getSwingDurationShiftFraction()
+   {
+      return swingDurationShiftFraction.getDoubleValue();
+   }
+
+   public double getSwingSplitFraction()
+   {
+      return swingSplitFraction.getDoubleValue();
+   }
+
+   public double getTransferSplitFraction()
+   {
+      return transferSplitFraction.getDoubleValue();
+   }
+
+   public double getTransferWeightDistribution()
+   {
+      return transferWeightDistribution.getDoubleValue();
+   }
+
    public void clear()
    {
       swingDurationShiftFraction.setToNaN();
       swingSplitFraction.setToNaN();
       transferSplitFraction.setToNaN();
       transferWeightDistribution.setToNaN();
+   }
+
+   public void set(FootstepShiftFractions shiftFractions)
+   {
+      swingDurationShiftFraction.set(shiftFractions.getSwingDurationShiftFraction());
+      swingSplitFraction.set(shiftFractions.getSwingSplitFraction());
+      transferSplitFraction.set(shiftFractions.getTransferSplitFraction());
+      transferWeightDistribution.set(shiftFractions.getTransferWeightDistribution());
    }
 }

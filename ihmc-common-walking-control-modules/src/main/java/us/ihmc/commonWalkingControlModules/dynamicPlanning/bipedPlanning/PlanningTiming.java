@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.saveableModule.SaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,9 +23,25 @@ public class PlanningTiming extends SaveableModuleState
       clear();
    }
 
+   public double getSwingTime()
+   {
+      return swingTime.getDoubleValue();
+   }
+
+   public double getTransferTime()
+   {
+      return transferTime.getDoubleValue();
+   }
+
    public void clear()
    {
       swingTime.setToNaN();
       transferTime.setToNaN();
+   }
+
+   public void set(FootstepTiming timing)
+   {
+      this.swingTime.set(timing.getSwingTime());
+      this.transferTime.set(timing.getTransferTime());
    }
 }
