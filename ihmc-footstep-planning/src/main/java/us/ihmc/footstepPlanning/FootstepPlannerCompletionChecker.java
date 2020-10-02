@@ -7,8 +7,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerIterationConductor;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -24,7 +24,7 @@ public class FootstepPlannerCompletionChecker
    private static final double yawEpsilonForSquaredUp = Math.toRadians(20.0);
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final AStarFootstepPlannerIterationConductor iterationConductor;
+   private final FootstepPlannerIterationConductor iterationConductor;
    private final FootstepPlannerHeuristicCalculator heuristics;
 
    private final SquaredUpStepComparator squaredUpStepComparator;
@@ -43,7 +43,7 @@ public class FootstepPlannerCompletionChecker
    private double endNodeCost;
 
    public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
-                                           AStarFootstepPlannerIterationConductor iterationConductor,
+                                           FootstepPlannerIterationConductor iterationConductor,
                                            FootstepPlannerHeuristicCalculator heuristics)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -75,7 +75,7 @@ public class FootstepPlannerCompletionChecker
     * Checks if goal is reachable. If it is, the goal step is appended by a goal step on the opposite side and the expanded step is returned.
     * If the goal is not reached this returns null
     */
-   public FootstepNode checkIfGoalIsReached(AStarIterationData<FootstepNode> iterationData)
+   public FootstepNode checkIfGoalIsReached(FootstepPlannerIterationData<FootstepNode> iterationData)
    {
       if (isProximityModeEnabled())
       {

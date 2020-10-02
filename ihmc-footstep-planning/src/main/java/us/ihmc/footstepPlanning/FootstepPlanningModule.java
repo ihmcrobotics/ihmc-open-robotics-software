@@ -8,7 +8,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -20,7 +20,6 @@ import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
 import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
-import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
@@ -65,7 +64,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
-   private final AStarFootstepPlanner aStarFootstepPlanner;
+   private final BipedalFootstepPlanner bipedalFootstepPlanner;
    private final List<VariableDescriptor> variableDescriptors;
 
    private final FootstepPlanPostProcessHandler postProcessHandler;
@@ -110,15 +109,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                             registry);
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
-      this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
+      this.bipedalFootstepPlanner = new BipedalFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
       this.postProcessHandler = new FootstepPlanPostProcessHandler(footstepPlannerParameters,
                                                                    swingPlannerParameters,
                                                                    splitFractionParameters,
                                                                    walkingControllerParameters,
                                                                    footPolygons);
       registry.addChild(postProcessHandler.getYoVariableRegistry());
-      aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
-      this.variableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
+      bipedalFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
+      this.variableDescriptors = collectVariableDescriptors(bipedalFootstepPlanner.getRegistry());
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
@@ -219,7 +218,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       if (request.getPerformAStarSearch())
       {
          postProcessHandler.setStatusCallback(statusCallback);
-         aStarFootstepPlanner.handleRequest(request, output);
+         bipedalFootstepPlanner.handleRequest(request, output);
       }
       else
       {
@@ -276,9 +275,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       requestCallback = requestCallback.andThen(callback);
    }
 
-   public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
+   public void addIterationCallback(Consumer<FootstepPlannerIterationData<FootstepNode>> callback)
    {
-      aStarFootstepPlanner.addIterationCallback(callback);
+      bipedalFootstepPlanner.addIterationCallback(callback);
    }
 
    public void addStatusCallback(Consumer<FootstepPlannerOutput> callback)
@@ -288,12 +287,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public void addCustomTerminationCondition(FootstepPlannerTerminationCondition plannerTerminationCondition)
    {
-      aStarFootstepPlanner.addCustomTerminationCondition(plannerTerminationCondition);
+      bipedalFootstepPlanner.addCustomTerminationCondition(plannerTerminationCondition);
    }
 
    public void clearCustomTerminationConditions()
    {
-      aStarFootstepPlanner.clearCustomTerminationConditions();
+      bipedalFootstepPlanner.clearCustomTerminationConditions();
    }
 
    public boolean registerRosNode(ROS2Node ros2Node)
@@ -306,7 +305,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public void halt()
    {
-      aStarFootstepPlanner.halt();
+      bipedalFootstepPlanner.halt();
    }
 
    public String getName()
@@ -351,17 +350,17 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public SideDependentList<ConvexPolygon2D> getFootPolygons()
    {
-      return aStarFootstepPlanner.getFootPolygons();
+      return bipedalFootstepPlanner.getFootPolygons();
    }
 
    public FootstepNodeSnapAndWiggler getSnapper()
    {
-      return aStarFootstepPlanner.getSnapper();
+      return bipedalFootstepPlanner.getSnapper();
    }
 
    public FootstepNodeChecker getChecker()
    {
-      return aStarFootstepPlanner.getChecker();
+      return bipedalFootstepPlanner.getChecker();
    }
 
    public VisibilityGraphPathPlanner getBodyPathPlanner()
@@ -376,22 +375,22 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepNode getEndNode()
    {
-      return aStarFootstepPlanner.getEndNode();
+      return bipedalFootstepPlanner.getEndNode();
    }
 
    public HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
-      return aStarFootstepPlanner.getEdgeDataMap();
+      return bipedalFootstepPlanner.getEdgeDataMap();
    }
 
-   public List<FootstepPlannerIterationData> getIterationData()
+   public List<us.ihmc.footstepPlanning.log.FootstepPlannerIterationData> getIterationData()
    {
-      return aStarFootstepPlanner.getIterationData();
+      return bipedalFootstepPlanner.getIterationData();
    }
 
    public YoRegistry getAStarPlannerRegistry()
    {
-      return aStarFootstepPlanner.getRegistry();
+      return bipedalFootstepPlanner.getRegistry();
    }
 
    public List<VariableDescriptor> getVariableDescriptors()

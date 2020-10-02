@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerIterationData;
 
 import java.util.function.Consumer;
 
-public class FootstepPlannerOccupancyMapAssembler implements Consumer<AStarIterationData<FootstepNode>>
+public class FootstepPlannerOccupancyMapAssembler implements Consumer<FootstepPlannerIterationData<FootstepNode>>
 {
    private final PlannerOccupancyMap occupancyMap = new PlannerOccupancyMap();
 
@@ -15,7 +15,7 @@ public class FootstepPlannerOccupancyMapAssembler implements Consumer<AStarItera
    }
 
    @Override
-   public void accept(AStarIterationData<FootstepNode> iterationData)
+   public void accept(FootstepPlannerIterationData<FootstepNode> iterationData)
    {
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {

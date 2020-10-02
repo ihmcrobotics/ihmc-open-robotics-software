@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.footstepPlanning.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.BipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
@@ -16,13 +16,13 @@ import java.util.function.ToDoubleFunction;
 
 /**
  * Class that performs planning iterations given generic node expansion, checker, cost and heuristic calculators.
- * Interfaces between {@link AStarFootstepPlanner} and {@link DirectedGraph}
+ * Interfaces between {@link BipedalFootstepPlanner} and {@link DirectedGraph}
  */
-public class AStarFootstepPlannerIterationConductor
+public class FootstepPlannerIterationConductor
 {
    private final HashSet<FootstepNode> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<FootstepNode> graph = new DirectedGraph<>();
-   private final AStarIterationData<FootstepNode> iterationData = new AStarIterationData<>();
+   private final FootstepPlannerIterationData<FootstepNode> iterationData = new FootstepPlannerIterationData<>();
    private final List<FootstepNode> neighbors = new ArrayList<>();
 
    private final PriorityQueue<FootstepNode> stack;
@@ -36,10 +36,10 @@ public class AStarFootstepPlannerIterationConductor
     * @param edgeCostCalculator calculates the cost of an edge (nodes are assumed zero cost), the arguments are {@code edgeCostCalculator.applyAsDouble(parentNode, childNode)}
     * @param heuristicsCalculator calling {@code heuristicsCalculator.applyAsDouble(node)} returns the heuristic cost from the node to the goal
     */
-   public AStarFootstepPlannerIterationConductor(FootstepNodeExpansion nodeExpansion,
-                                                 BiPredicate<FootstepNode, FootstepNode> edgeChecker,
-                                                 ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCostCalculator,
-                                                 ToDoubleFunction<FootstepNode> heuristicsCalculator)
+   public FootstepPlannerIterationConductor(FootstepNodeExpansion nodeExpansion,
+                                            BiPredicate<FootstepNode, FootstepNode> edgeChecker,
+                                            ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCostCalculator,
+                                            ToDoubleFunction<FootstepNode> heuristicsCalculator)
    {
       this.nodeExpansion = nodeExpansion;
       this.edgeChecker = edgeChecker;
@@ -69,7 +69,7 @@ public class AStarFootstepPlannerIterationConductor
     * @param nodeToExpand the node that will be expanded
     * @return the node that was expanded and all child nodes that were added to the graph
     */
-   public AStarIterationData<FootstepNode> doPlanningIteration(FootstepNode nodeToExpand, boolean performIterativeExpansion)
+   public FootstepPlannerIterationData<FootstepNode> doPlanningIteration(FootstepNode nodeToExpand, boolean performIterativeExpansion)
    {
       iterationData.clear();
       iterationData.setParentNode(nodeToExpand);
@@ -134,7 +134,7 @@ public class AStarFootstepPlannerIterationConductor
       return graph;
    }
 
-   public AStarIterationData<FootstepNode> getIterationData()
+   public FootstepPlannerIterationData<FootstepNode> getIterationData()
    {
       return iterationData;
    }

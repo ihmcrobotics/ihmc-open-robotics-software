@@ -2,14 +2,13 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 
-public class AStarIterationDataTest
+public class FootstepPlannerIterationDataTest
 {
    @Test
    public void testConstructor()
    {
-      AStarIterationData<Object> data = new AStarIterationData<>();
+      FootstepPlannerIterationData<Object> data = new FootstepPlannerIterationData<>();
       Assertions.assertTrue(data.getValidChildNodes().isEmpty());
       Assertions.assertTrue(data.getInvalidChildNodes().isEmpty());
       Assertions.assertNull(data.getParentNode());
@@ -18,7 +17,7 @@ public class AStarIterationDataTest
    @Test
    public void testClear()
    {
-      AStarIterationData<Object> data = new AStarIterationData<>();
+      FootstepPlannerIterationData<Object> data = new FootstepPlannerIterationData<>();
       data.setParentNode(new Object());
       data.getValidChildNodes().add(new Object());
       data.getInvalidChildNodes().add(new Object());

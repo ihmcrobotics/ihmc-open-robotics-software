@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AStarIterationData<N>
+public class FootstepPlannerIterationData<N>
 {
    private N parentNode;
    private final List<N> validChildNodes = new ArrayList<>();

@@ -4,21 +4,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.ToDoubleBiFunction;
 
-public class AStarFootstepPlannerIterationConductorTest
+public class FootstepPlannerIterationConductorTest
 {
    @Test
    public void testSimple2DGridSearch()
    {
       ManhattanDistanceCalculator distanceCalculator = new ManhattanDistanceCalculator();
-      AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors, (n1, n2) -> true, (n1, n2) -> 1.0, distanceCalculator::getManhattanDistance);
+      FootstepPlannerIterationConductor planner = new FootstepPlannerIterationConductor(this::getNeighbors, (n1, n2) -> true, (n1, n2) -> 1.0, distanceCalculator::getManhattanDistance);
 
       FootstepNode startNode = new FootstepNode(0, 0, 0, RobotSide.LEFT);
       FootstepNode goalNode = new FootstepNode(5, 0, 0, RobotSide.RIGHT);
@@ -27,7 +25,7 @@ public class AStarFootstepPlannerIterationConductorTest
 
       for (int i = 0; i < 5; i++)
       {
-         AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
+         FootstepPlannerIterationData<FootstepNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
          Assertions.assertEquals(iterationData.getParentNode().getXIndex(), i);
          Assertions.assertEquals(iterationData.getParentNode().getYIndex(), 0);
          Assertions.assertEquals(iterationData.getValidChildNodes().size(), 4);
@@ -53,7 +51,7 @@ public class AStarFootstepPlannerIterationConductorTest
       ManhattanDistanceCalculator distanceCalculator = new ManhattanDistanceCalculator();
       BiPredicate<FootstepNode, FootstepNode> edgeChecker = (child, parent) -> !child.getLatticeNode().equals(new LatticeNode(0, 4, 0));
       ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCost = (n1, n2) -> 1.0 + (n2.getXIndex() < 0 ? 2.0 : 0.0);
-      AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors, edgeChecker, edgeCost, distanceCalculator::getManhattanDistance);
+      FootstepPlannerIterationConductor planner = new FootstepPlannerIterationConductor(this::getNeighbors, edgeChecker, edgeCost, distanceCalculator::getManhattanDistance);
 
       FootstepNode startNode = new FootstepNode(0, 0, 0, RobotSide.LEFT);
       FootstepNode goalNode = new FootstepNode(0, 5, 0, RobotSide.RIGHT);
@@ -63,7 +61,7 @@ public class AStarFootstepPlannerIterationConductorTest
       planningLoop:
       while (true)
       {
-         AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
+         FootstepPlannerIterationData<FootstepNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
          List<FootstepNode> childNodes = iterationData.getValidChildNodes();
          for (int i = 0; i < childNodes.size(); i++)
          {

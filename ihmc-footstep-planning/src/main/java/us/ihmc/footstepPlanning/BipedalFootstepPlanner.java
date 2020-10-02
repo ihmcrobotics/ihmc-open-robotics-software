@@ -8,8 +8,8 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerIterationConductor;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.graphSearch.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -21,7 +21,6 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
-import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -39,11 +38,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class AStarFootstepPlanner
+public class BipedalFootstepPlanner
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final AStarFootstepPlannerIterationConductor footstepPlanner;
+   private final FootstepPlannerIterationConductor footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepNodeSnapAndWiggler snapper;
    private final ParameterBasedNodeExpansion expansion;
@@ -55,7 +54,7 @@ public class AStarFootstepPlanner
 
    private final FootstepPlannerEdgeData edgeData;
    private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
-   private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
+   private final List<us.ihmc.footstepPlanning.log.FootstepPlannerIterationData> iterationData = new ArrayList<>();
    private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
@@ -63,15 +62,15 @@ public class AStarFootstepPlanner
    private final AtomicBoolean haltRequested = new AtomicBoolean();
 
    private Consumer<Pair<FootstepPlannerRequest, FootstepPlannerOutput>> postProcessorCallback = null;
-   private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
+   private Consumer<FootstepPlannerIterationData<FootstepNode>> iterationCallback = iterationData -> {};
 
    private final Stopwatch stopwatch = new Stopwatch();
    private int iterations = 0;
    private FootstepPlanningResult result = null;
 
-   public AStarFootstepPlanner(FootstepPlannerParametersBasics footstepPlannerParameters,
-                               SideDependentList<ConvexPolygon2D> footPolygons,
-                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder)
+   public BipedalFootstepPlanner(FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 SideDependentList<ConvexPolygon2D> footPolygons,
+                                 WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
@@ -85,7 +84,7 @@ public class AStarFootstepPlanner
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, registry);
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons, registry);
 
-      this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
+      this.footstepPlanner = new FootstepPlannerIterationConductor(expansion, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
       this.checker.setParentNodeSupplier(node -> footstepPlanner.getGraph().getParentNode(node));
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, footstepPlanner, distanceAndYawHeuristics);
 
@@ -195,7 +194,7 @@ public class AStarFootstepPlanner
 
          checker.onIterationStart(nodeToExpand);
 
-         AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration(nodeToExpand, true);
+         FootstepPlannerIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration(nodeToExpand, true);
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
@@ -203,7 +202,7 @@ public class AStarFootstepPlanner
          if (achievedGoalNode != null)
          {
             // the final graph expansion is handled manually
-            AStarIterationData<FootstepNode> finalIterationData = new AStarIterationData<>();
+            FootstepPlannerIterationData<FootstepNode> finalIterationData = new FootstepPlannerIterationData<>();
             finalIterationData.setParentNode(achievedGoalNode);
             finalIterationData.getValidChildNodes().add(completionChecker.getEndNode());
             recordIterationData(finalIterationData);
@@ -280,14 +279,14 @@ public class AStarFootstepPlanner
       }
    }
 
-   private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
+   private void recordIterationData(FootstepPlannerIterationData<FootstepNode> iterationData)
    {
       if (iterationData.getParentNode() == null)
       {
          return;
       }
 
-      FootstepPlannerIterationData loggedData = null;
+      us.ihmc.footstepPlanning.log.FootstepPlannerIterationData loggedData = null;
       for (int i = 0; i < this.iterationData.size(); i++)
       {
          if (this.iterationData.get(i).getStanceNode().equals(iterationData.getParentNode()))
@@ -299,7 +298,7 @@ public class AStarFootstepPlanner
 
       if (loggedData == null)
       {
-         loggedData = new FootstepPlannerIterationData();
+         loggedData = new us.ihmc.footstepPlanning.log.FootstepPlannerIterationData();
          loggedData.setStanceNode(iterationData.getParentNode());
          loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
          loggedData.setStanceNodeSnapData(snapper.snapFootstepNode(iterationData.getParentNode()));
@@ -340,7 +339,7 @@ public class AStarFootstepPlanner
       this.postProcessorCallback = postProcessorCallback;
    }
 
-   public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
+   public void addIterationCallback(Consumer<FootstepPlannerIterationData<FootstepNode>> callback)
    {
       iterationCallback = iterationCallback.andThen(callback);
    }
@@ -438,7 +437,7 @@ public class AStarFootstepPlanner
       return checker;
    }
 
-   public AStarFootstepPlannerIterationConductor getLowLevelStepPlanner()
+   public FootstepPlannerIterationConductor getLowLevelStepPlanner()
    {
       return footstepPlanner;
    }
@@ -453,7 +452,7 @@ public class AStarFootstepPlanner
       return edgeDataMap;
    }
 
-   public List<FootstepPlannerIterationData> getIterationData()
+   public List<us.ihmc.footstepPlanning.log.FootstepPlannerIterationData> getIterationData()
    {
       return iterationData;
    }
