@@ -41,15 +41,15 @@ public class SixDoFMotionControlAnchorDescription
 
    public static SixDoFMotionControlAnchorDescription fromJSON(JsonNode node)
    {
-      JsonNode abchorNode = node.get(ANCHOR_JSON);
+      JsonNode anchorNode = node.get(ANCHOR_JSON);
 
       try
       {
          SixDoFMotionControlAnchorDescription description = new SixDoFMotionControlAnchorDescription();
-         description.setRigidBodyName(abchorNode.get(RIGID_BODY_NAME_JSON).asText());
-         description.setContactState(abchorNode.get(IS_CONTACT_STATE_JSON).asBoolean());
-         description.setTrackingController(abchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
-         description.setInputMessage(messageSerializer.deserialize(abchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
+         description.setRigidBodyName(anchorNode.get(RIGID_BODY_NAME_JSON).asText());
+         description.setContactState(anchorNode.get(IS_CONTACT_STATE_JSON).asBoolean());
+         description.setTrackingController(anchorNode.get(IS_TRACKING_CONTROLLER_JSON).asBoolean());
+         description.setInputMessage(messageSerializer.deserialize(anchorNode.get(IK_SOLVER_MESSAGE_JSON).toString()));
          return description;
       }
       catch (IOException e)

@@ -26,6 +26,7 @@ public class KinematicsToolboxSnapshotDescription
    public static final String CONTROLLER_CONFIGURATION_JSON = "controllerConfiguration";
    public static final String IK_SOLUTION_JSON = "ikSolution";
    public static final String IK_PRIVILEGED_CONFIGURATION_JSON = "ikPrivilegedConfiguration";
+   public static final String COM_ANCHOR_JSON = "centerOfMassAnchor";
    public static final String SIX_DOF_ANCHORS_JSON = "sixDoFAnchors";
    public static final String ONE_DOF_ANCHORS_JSON = "oneDoFAnchors";
 
@@ -37,6 +38,7 @@ public class KinematicsToolboxSnapshotDescription
    public RobotConfigurationData controllerConfiguration;
    public KinematicsToolboxOutputStatus ikSolution;
    public KinematicsToolboxPrivilegedConfigurationMessage ikPrivilegedConfiguration;
+   public CenterOfMassMotionControlAnchorDescription centerOfMassAnchor;
    public List<SixDoFMotionControlAnchorDescription> sixDoFAnchors;
    public List<OneDoFMotionControlAnchorDescription> oneDoFAnchors;
 
@@ -49,6 +51,7 @@ public class KinematicsToolboxSnapshotDescription
       controllerConfiguration = new RobotConfigurationData(other.controllerConfiguration);
       ikSolution = new KinematicsToolboxOutputStatus(other.ikSolution);
       ikPrivilegedConfiguration = new KinematicsToolboxPrivilegedConfigurationMessage(other.ikPrivilegedConfiguration);
+      centerOfMassAnchor = new CenterOfMassMotionControlAnchorDescription(other.centerOfMassAnchor);
       sixDoFAnchors = other.sixDoFAnchors.stream().map(SixDoFMotionControlAnchorDescription::new).collect(Collectors.toList());
       oneDoFAnchors = other.oneDoFAnchors.stream().map(OneDoFMotionControlAnchorDescription::new).collect(Collectors.toList());
    }
@@ -63,6 +66,8 @@ public class KinematicsToolboxSnapshotDescription
          description.setControllerConfiguration(rcdSerializer.deserialize(configurationNode.get(CONTROLLER_CONFIGURATION_JSON).toString()));
          description.setIkSolution(ktosSerializer.deserialize(configurationNode.get(IK_SOLUTION_JSON).toString()));
          description.setIkPrivilegedConfiguration(ktpcmSerializer.deserialize(configurationNode.get(IK_PRIVILEGED_CONFIGURATION_JSON).toString()));
+
+         description.setCenterOfMassAnchor(CenterOfMassMotionControlAnchorDescription.fromJSON(configurationNode.get(COM_ANCHOR_JSON)));
 
          JsonNode sixDoFAnchorsNode = configurationNode.get(SIX_DOF_ANCHORS_JSON);
          ArrayList<SixDoFMotionControlAnchorDescription> sixDoFAnchors = new ArrayList<>();
@@ -100,6 +105,8 @@ public class KinematicsToolboxSnapshotDescription
          configurationJSON.set(CONTROLLER_CONFIGURATION_JSON, messageToJSON(rcdSerializer, controllerConfiguration));
          configurationJSON.set(IK_SOLUTION_JSON, messageToJSON(ktosSerializer, ikSolution));
          configurationJSON.set(IK_PRIVILEGED_CONFIGURATION_JSON, messageToJSON(ktpcmSerializer, ikPrivilegedConfiguration));
+         if (centerOfMassAnchor != null)
+            configurationJSON.set(COM_ANCHOR_JSON, centerOfMassAnchor.toJSON(objectMapper));
          ArrayNode arraySixDoFAnchorNode = configurationJSON.arrayNode(sixDoFAnchors.size());
          sixDoFAnchors.forEach(anchor -> arraySixDoFAnchorNode.add(anchor.toJSON(objectMapper)));
          configurationJSON.set(SIX_DOF_ANCHORS_JSON, arraySixDoFAnchorNode);
@@ -135,6 +142,11 @@ public class KinematicsToolboxSnapshotDescription
       return ikPrivilegedConfiguration;
    }
 
+   public CenterOfMassMotionControlAnchorDescription getCenterOfMassAnchor()
+   {
+      return centerOfMassAnchor;
+   }
+
    public List<SixDoFMotionControlAnchorDescription> getSixDoFAnchors()
    {
       return sixDoFAnchors;
@@ -153,6 +165,11 @@ public class KinematicsToolboxSnapshotDescription
    public void setIkSolution(KinematicsToolboxOutputStatus ikSolution)
    {
       this.ikSolution = ikSolution;
+   }
+
+   public void setCenterOfMassAnchor(CenterOfMassMotionControlAnchorDescription centerOfMassAnchor)
+   {
+      this.centerOfMassAnchor = centerOfMassAnchor;
    }
 
    public void setSixDoFAnchors(List<SixDoFMotionControlAnchorDescription> sixDoFAnchors)
