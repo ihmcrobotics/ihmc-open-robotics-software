@@ -1,18 +1,32 @@
 package us.ihmc.avatar.multiContact;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.robotics.optimization.OutputCalculator;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 public class RobotTransformOptimizer
 {
@@ -20,7 +34,9 @@ public class RobotTransformOptimizer
    private final RigidBodyReadOnly heaviestBodyB;
    private final RigidBodyReadOnly[] rigidBodiesA;
    private final RigidBodyReadOnly[] rigidBodiesB;
-   private final List<RigidBodyPair> rigidBodyPairs = new ArrayList<>();
+   private final List<RigidBodyPairSpatialErrorCalculator> rigidBodyPairs = new ArrayList<>();
+   private final Map<String, Pair<RigidBodyReadOnly, RigidBodyReadOnly>> nameAToBodyMap = new HashMap<>();
+   private final Map<String, Pair<RigidBodyReadOnly, RigidBodyReadOnly>> nameBToBodyMap = new HashMap<>();
 
    private boolean initializeWithHeaviestBody = false;
    private int maxIterations = 100;
@@ -52,6 +68,9 @@ public class RobotTransformOptimizer
             candidateA = bodyA;
             candidateB = bodyB;
          }
+
+         nameAToBodyMap.put(bodyA.getName(), new ImmutablePair<>(bodyA, bodyB));
+         nameBToBodyMap.put(bodyB.getName(), new ImmutablePair<>(bodyA, bodyB));
       }
 
       heaviestBodyA = candidateA;
@@ -70,7 +89,7 @@ public class RobotTransformOptimizer
       this.initializeWithHeaviestBody = initializeWithHeaviestBody;
    }
 
-   public void configureBodiesToMatch(Predicate<RigidBodyReadOnly> bodySelector)
+   public void addDefaultRigidBodyErrorCalculators(BiPredicate<RigidBodyReadOnly, RigidBodyReadOnly> bodySelector)
    {
       rigidBodyPairs.clear();
 
@@ -79,11 +98,50 @@ public class RobotTransformOptimizer
          RigidBodyReadOnly bodyA = rigidBodiesA[i];
          RigidBodyReadOnly bodyB = rigidBodiesB[i];
 
-         if (bodySelector.test(bodyA))
+         if (bodySelector.test(bodyA, bodyB))
          {
-            rigidBodyPairs.add(new RigidBodyPair(bodyA, bodyB));
+            rigidBodyPairs.add(new RigidBodyPairSpatialErrorCalculator(bodyA, bodyB));
          }
       }
+   }
+
+   public RigidBodyPairSpatialErrorCalculator addSpatialRigidBodyErrorCalculator(String bodyName)
+   {
+      Pair<RigidBodyReadOnly, RigidBodyReadOnly> bodyPair = nameAToBodyMap.get(bodyName);
+
+      if (bodyPair == null)
+         bodyPair = nameBToBodyMap.get(bodyName);
+
+      if (bodyPair == null)
+         return null;
+
+      return new RigidBodyPairSpatialErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+   }
+
+   public RigidBodyPairLinearErrorCalculator addLinearRigidBodyErrorCalculator(String bodyName)
+   {
+      Pair<RigidBodyReadOnly, RigidBodyReadOnly> bodyPair = nameAToBodyMap.get(bodyName);
+
+      if (bodyPair == null)
+         bodyPair = nameBToBodyMap.get(bodyName);
+
+      if (bodyPair == null)
+         return null;
+
+      return new RigidBodyPairLinearErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+   }
+
+   public RigidBodyPairAngularErrorCalculator addAngularRigidBodyErrorCalculator(String bodyName)
+   {
+      Pair<RigidBodyReadOnly, RigidBodyReadOnly> bodyPair = nameAToBodyMap.get(bodyName);
+
+      if (bodyPair == null)
+         bodyPair = nameBToBodyMap.get(bodyName);
+
+      if (bodyPair == null)
+         return null;
+
+      return new RigidBodyPairAngularErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
    }
 
    public void compute()
@@ -106,7 +164,7 @@ public class RobotTransformOptimizer
       else
       {
          Vector3D average = new Vector3D();
-         rigidBodyPairs.forEach(bodyPair -> average.add(bodyPair.computeError()));
+         rigidBodyPairs.forEach(bodyPair -> average.add(bodyPair.computeError().getLinearPart()));
          average.scale(1.0 / rigidBodyPairs.size());
          average.get(initialGuess);
       }
@@ -140,40 +198,273 @@ public class RobotTransformOptimizer
       return transformFromBToA;
    }
 
-   private static class RigidBodyPair
+   public static abstract class RigidBodyPairErrorCalculator
    {
-      private final RigidBodyReadOnly bodyA;
-      private final RigidBodyReadOnly bodyB;
+      protected final RigidBodyReadOnly bodyA;
+      protected final RigidBodyReadOnly bodyB;
 
+      protected final PoseReferenceFrame controlFrameA;
+      protected final PoseReferenceFrame controlFrameB;
+
+      protected RigidBodyPairErrorCalculator(RigidBodyReadOnly bodyA, RigidBodyReadOnly bodyB)
+      {
+         this.bodyA = bodyA;
+         this.bodyB = bodyB;
+
+         controlFrameA = new PoseReferenceFrame(bodyA.getName() + "ControlFrame", bodyA.getBodyFixedFrame());
+         controlFrameB = new PoseReferenceFrame(bodyB.getName() + "ControlFrame", bodyB.getBodyFixedFrame());
+      }
+
+      protected abstract void initialize();
+
+      protected SpatialVector computeError()
+      {
+         return computeError(null);
+      }
+
+      protected abstract SpatialVector computeError(RigidBodyTransform transformForB);
+
+      public abstract SpatialVectorReadOnly getError();
+
+      public RigidBodyReadOnly getBodyA()
+      {
+         return bodyA;
+      }
+
+      public RigidBodyReadOnly getBodyB()
+      {
+         return bodyB;
+      }
+
+      public void setControlFrameOffset(RigidBodyTransform controlFrameOffset)
+      {
+         controlFrameA.setPoseAndUpdate(controlFrameOffset);
+         controlFrameB.setPoseAndUpdate(controlFrameOffset);
+      }
+
+      public ReferenceFrame getControlFrameA()
+      {
+         return controlFrameA;
+      }
+
+      public ReferenceFrame getControlFrameB()
+      {
+         return controlFrameB;
+      }
+   }
+
+   public static class RigidBodyPairSpatialErrorCalculator extends RigidBodyPairErrorCalculator
+   {
+      private final RigidBodyTransform poseInitialA = new RigidBodyTransform();
+      private final RigidBodyTransform poseInitialB = new RigidBodyTransform();
+
+      private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+      private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+
+      private final RigidBodyTransform errorTransform = new RigidBodyTransform();
+      private final SpatialVector error = new SpatialVector(ReferenceFrame.getWorldFrame());
+      private final SpatialVector subSpaceError = new SpatialVector(ReferenceFrame.getWorldFrame());
+      private final SpatialVector weightedSubSpaceError = new SpatialVector(ReferenceFrame.getWorldFrame());
+
+      private final FrameVector3D tempError3D = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+      protected RigidBodyPairSpatialErrorCalculator(RigidBodyReadOnly bodyA, RigidBodyReadOnly bodyB)
+      {
+         super(bodyA, bodyB);
+
+         // By default the weights are all NaNs
+         weightMatrix.setAngularWeights(1.0, 1.0, 1.0);
+         weightMatrix.setLinearWeights(1.0, 1.0, 1.0);
+      }
+
+      @Override
+      protected void initialize()
+      {
+         poseInitialA.set(controlFrameA.getTransformToRoot());
+         poseInitialB.set(controlFrameB.getTransformToRoot());
+      }
+
+      @Override
+      protected SpatialVector computeError(RigidBodyTransform transformForB)
+      {
+         errorTransform.set(poseInitialA);
+         errorTransform.multiplyInvertOther(poseInitialB);
+         if (transformForB != null)
+            errorTransform.multiplyInvertOther(transformForB);
+
+         errorTransform.getRotation().getRotationVector(error.getAngularPart());
+         error.getLinearPart().set(errorTransform.getTranslation());
+
+         tempError3D.setIncludingFrame(error.getAngularPart());
+         selectionMatrix.applyAngularSelection(tempError3D);
+         subSpaceError.getAngularPart().set(tempError3D);
+         tempError3D.setIncludingFrame(error.getLinearPart());
+         selectionMatrix.applyLinearSelection(tempError3D);
+         subSpaceError.getLinearPart().set(tempError3D);
+
+         tempError3D.setIncludingFrame(subSpaceError.getAngularPart());
+         weightMatrix.applyAngularWeight(tempError3D);
+         weightedSubSpaceError.getAngularPart().set(tempError3D);
+         tempError3D.setIncludingFrame(subSpaceError.getLinearPart());
+         weightMatrix.applyLinearWeight(tempError3D);
+         weightedSubSpaceError.getLinearPart().set(tempError3D);
+
+         return weightedSubSpaceError;
+      }
+
+      @Override
+      public SpatialVectorReadOnly getError()
+      {
+         return weightedSubSpaceError;
+      }
+
+      public SelectionMatrix6D getSelectionMatrix()
+      {
+         return selectionMatrix;
+      }
+
+      public WeightMatrix6D getWeightMatrix()
+      {
+         return weightMatrix;
+      }
+   }
+
+   public static class RigidBodyPairLinearErrorCalculator extends RigidBodyPairErrorCalculator
+   {
       private final Point3D pointInitialA = new Point3D();
       private final Point3D pointInitialB = new Point3D();
       private final Point3D pointCorrectedB = new Point3D();
 
-      private final Vector3D error = new Vector3D();
+      private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
+      private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
-      public RigidBodyPair(RigidBodyReadOnly bodyA, RigidBodyReadOnly bodyB)
+      private final SpatialVector error = new SpatialVector(ReferenceFrame.getWorldFrame());
+      private final SpatialVector subSpaceError = new SpatialVector(ReferenceFrame.getWorldFrame());
+      private final SpatialVector weightedSubSpaceError = new SpatialVector(ReferenceFrame.getWorldFrame());
+
+      private final FrameVector3D tempError3D = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+      protected RigidBodyPairLinearErrorCalculator(RigidBodyReadOnly bodyA, RigidBodyReadOnly bodyB)
       {
-         this.bodyA = bodyA;
-         this.bodyB = bodyB;
+         super(bodyA, bodyB);
+
+         // By default the weights are all NaNs
+         weightMatrix.setWeights(1.0, 1.0, 1.0);
       }
 
-      private void initialize()
+      @Override
+      protected void initialize()
       {
-         pointInitialA.set(bodyA.getBodyFixedFrame().getTransformToRoot().getTranslation());
-         pointInitialB.set(bodyB.getBodyFixedFrame().getTransformToRoot().getTranslation());
+         pointInitialA.set(controlFrameA.getTransformToRoot().getTranslation());
+         pointInitialB.set(controlFrameB.getTransformToRoot().getTranslation());
       }
 
-      private Vector3D computeError()
+      @Override
+      protected SpatialVector computeError(RigidBodyTransform transformForB)
       {
-         error.sub(pointInitialA, pointInitialB);
-         return error;
+         if (transformForB != null)
+         {
+            transformForB.transform(pointInitialB, pointCorrectedB);
+            error.getLinearPart().sub(pointInitialA, pointCorrectedB);
+         }
+         else
+         {
+            error.getLinearPart().sub(pointInitialA, pointInitialB);
+         }
+
+         tempError3D.setIncludingFrame(error.getLinearPart());
+         selectionMatrix.applySelection(tempError3D);
+         subSpaceError.getLinearPart().set(tempError3D);
+
+         tempError3D.setIncludingFrame(subSpaceError.getLinearPart());
+         weightMatrix.applyWeight(tempError3D);
+         weightedSubSpaceError.getLinearPart().set(tempError3D);
+
+         return weightedSubSpaceError;
       }
 
-      private Vector3D computeError(RigidBodyTransform transformForB)
+      @Override
+      public SpatialVectorReadOnly getError()
       {
-         transformForB.transform(pointInitialB, pointCorrectedB);
-         error.sub(pointInitialA, pointCorrectedB);
-         return error;
+         return weightedSubSpaceError;
+      }
+
+      public SelectionMatrix3D getSelectionMatrix()
+      {
+         return selectionMatrix;
+      }
+
+      public WeightMatrix3D getWeightMatrix()
+      {
+         return weightMatrix;
+      }
+   }
+
+   public static class RigidBodyPairAngularErrorCalculator extends RigidBodyPairErrorCalculator
+   {
+      private final Quaternion orientationInitialA = new Quaternion();
+      private final Quaternion orientationInitialB = new Quaternion();
+
+      private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
+      private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+
+      private final Quaternion orientationError = new Quaternion();
+      private final SpatialVector error = new SpatialVector(ReferenceFrame.getWorldFrame());
+      private final SpatialVector subSpaceError = new SpatialVector(ReferenceFrame.getWorldFrame());
+      private final SpatialVector weightedSubSpaceError = new SpatialVector(ReferenceFrame.getWorldFrame());
+
+      private final FrameVector3D tempError3D = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+      protected RigidBodyPairAngularErrorCalculator(RigidBodyReadOnly bodyA, RigidBodyReadOnly bodyB)
+      {
+         super(bodyA, bodyB);
+
+         // By default the weights are all NaNs
+         weightMatrix.setWeights(1.0, 1.0, 1.0);
+      }
+
+      @Override
+      protected void initialize()
+      {
+         orientationInitialA.set(controlFrameA.getTransformToRoot().getRotation());
+         orientationInitialB.set(controlFrameB.getTransformToRoot().getRotation());
+      }
+
+      @Override
+      protected SpatialVector computeError(RigidBodyTransform transformForB)
+      {
+         orientationError.set(orientationInitialA);
+         orientationError.multiplyConjugateOther(orientationInitialB);
+         if (transformForB != null)
+            orientationError.appendInvertOther(transformForB.getRotation());
+
+         orientationError.getRotationVector(error.getAngularPart());
+
+         tempError3D.setIncludingFrame(error.getAngularPart());
+         selectionMatrix.applySelection(tempError3D);
+         subSpaceError.getAngularPart().set(tempError3D);
+
+         tempError3D.setIncludingFrame(subSpaceError.getAngularPart());
+         weightMatrix.applyWeight(tempError3D);
+         weightedSubSpaceError.getAngularPart().set(tempError3D);
+
+         return weightedSubSpaceError;
+      }
+
+      @Override
+      public SpatialVectorReadOnly getError()
+      {
+         return weightedSubSpaceError;
+      }
+
+      public SelectionMatrix3D getSelectionMatrix()
+      {
+         return selectionMatrix;
+      }
+
+      public WeightMatrix3D getWeightMatrix()
+      {
+         return weightMatrix;
       }
    }
 
@@ -187,7 +478,7 @@ public class RobotTransformOptimizer
 
          for (int i = 0; i < rigidBodyPairs.size(); i++)
          {
-            RigidBodyPair bodyPair = rigidBodyPairs.get(i);
+            RigidBodyPairSpatialErrorCalculator bodyPair = rigidBodyPairs.get(i);
             errorSpace.set(i, bodyPair.computeError(correction).length());
          }
          return errorSpace;
