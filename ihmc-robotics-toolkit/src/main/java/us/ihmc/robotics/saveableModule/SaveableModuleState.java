@@ -29,6 +29,31 @@ public class SaveableModuleState
       booleans.add(yoBoolean);
    }
 
+   public void registerStateToSave(SaveableModuleState other)
+   {
+      for (int i = 0; i < other.getDoublesToSave().size(); i++)
+         doubles.add(other.getDoublesToSave().get(i));
+      for (int i = 0; i < other.getIntegersToSave().size(); i++)
+         integers.add(other.getIntegersToSave().get(i));
+      for (int i = 0; i < other.getBooleansToSave().size(); i++)
+         booleans.add(other.getBooleansToSave().get(i));
+   }
+
+   public List<YoDouble> getDoublesToSave()
+   {
+      return doubles;
+   }
+
+   public List<YoInteger> getIntegersToSave()
+   {
+      return integers;
+   }
+
+   public List<YoBoolean> getBooleansToSave()
+   {
+      return booleans;
+   }
+
    @Override
    public String toString()
    {
