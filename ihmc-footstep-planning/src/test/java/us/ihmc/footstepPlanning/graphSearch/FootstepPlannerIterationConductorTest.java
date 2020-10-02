@@ -21,7 +21,7 @@ public class FootstepPlannerIterationConductorTest
       FootstepNode startNode = new FootstepNode(0, 0, 0, RobotSide.LEFT);
       FootstepNode goalNode = new FootstepNode(5, 0, 0, RobotSide.RIGHT);
       distanceCalculator.setGoalNode(goalNode);
-      planner.initialize(startNode);
+      planner.initialize(startNode, true);
 
       for (int i = 0; i < 5; i++)
       {
@@ -56,7 +56,7 @@ public class FootstepPlannerIterationConductorTest
       FootstepNode startNode = new FootstepNode(0, 0, 0, RobotSide.LEFT);
       FootstepNode goalNode = new FootstepNode(0, 5, 0, RobotSide.RIGHT);
       distanceCalculator.setGoalNode(goalNode);
-      planner.initialize(startNode);
+      planner.initialize(startNode, true);
 
       planningLoop:
       while (true)
