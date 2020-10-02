@@ -2,6 +2,7 @@ package us.ihmc.robotics.saveableModule;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public class SaveableModuleState
    private final List<YoDouble> doubles = new ArrayList<>();
    private final List<YoInteger> integers = new ArrayList<>();
    private final List<YoBoolean> booleans = new ArrayList<>();
+   private final List<YoEnum<?>> enums = new ArrayList<>();
 
    public void registerDoubleToSave(YoDouble yoDouble)
    {
@@ -29,6 +31,11 @@ public class SaveableModuleState
       booleans.add(yoBoolean);
    }
 
+   public void registerEnumToSave(YoEnum<?> yoEnum)
+   {
+      enums.add(yoEnum);
+   }
+
    public void registerStateToSave(SaveableModuleState other)
    {
       for (int i = 0; i < other.getDoublesToSave().size(); i++)
@@ -37,6 +44,8 @@ public class SaveableModuleState
          integers.add(other.getIntegersToSave().get(i));
       for (int i = 0; i < other.getBooleansToSave().size(); i++)
          booleans.add(other.getBooleansToSave().get(i));
+      for (int i = 0; i < other.getEnumsToSave().size(); i++)
+         enums.add(other.getEnumsToSave().get(i));
    }
 
    public List<YoDouble> getDoublesToSave()
@@ -52,6 +61,11 @@ public class SaveableModuleState
    public List<YoBoolean> getBooleansToSave()
    {
       return booleans;
+   }
+
+   public List<YoEnum<?>> getEnumsToSave()
+   {
+      return enums;
    }
 
    @Override
@@ -73,6 +87,11 @@ public class SaveableModuleState
          YoBoolean yoBoolean = booleans.get(i);
          string += yoBoolean.getFullNameString() + ": " + yoBoolean.getValue() + ", ";
       }
+      for (int i = 0; i < enums.size(); i++)
+      {
+         YoEnum<?> yoEnum = enums.get(i);
+         string += yoEnum.getFullNameString() + ": " + yoEnum.getOrdinal() + ", ";
+      }
 
       return string;
    }
@@ -87,6 +106,9 @@ public class SaveableModuleState
          integers.get(i).set(SaveableModuleTools.readNextInt(scanner));
       for (int i = 0; i < booleans.size(); i++)
          booleans.get(i).set(SaveableModuleTools.readNextBoolean(scanner));
+      for (int i = 0; i < enums.size(); i++)
+         enums.get(i).set(SaveableModuleTools.readNextInt(scanner));
+
       scanner.close();
    }
 }
