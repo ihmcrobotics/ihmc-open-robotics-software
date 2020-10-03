@@ -41,7 +41,17 @@ public class PlanningTiming extends SaveableModuleState
 
    public void set(FootstepTiming timing)
    {
-      this.swingTime.set(timing.getSwingTime());
-      this.transferTime.set(timing.getTransferTime());
+      setSwingTime(timing.getSwingTime());
+      setTransferTime(timing.getTransferTime());
+   }
+
+   public void setSwingTime(double swingTime)
+   {
+      this.swingTime.set(swingTime);
+   }
+
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime.set(transferTime);
    }
 }
