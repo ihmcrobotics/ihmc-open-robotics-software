@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -56,6 +55,8 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
    private final FramePoint2D previousCoPPosition = new FramePoint2D();
    private final FramePoint2D midfootCoP = new FramePoint2D();
 
+   private WaypointViewer viewer = null;
+
    public CoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
                                  YoRegistry parentRegistry)
@@ -89,6 +90,11 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
       parentRegistry.addChild(registry);
       clear();
+   }
+
+   public void setWaypointViewer(WaypointViewer viewer)
+   {
+      this.viewer = viewer;
    }
 
    public void clear()
@@ -190,8 +196,10 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
          else
             percentageStandingWeightDistributionOnLeftFoot.set(finalTransferWeightDistribution.getValue());
       }
-   }
 
+      if (viewer != null)
+         viewer.updateWaypoints(contactStateProviders);
+   }
 
    public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
    {
