@@ -215,7 +215,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
 
-      if (request.getPerformAStarSearch())
+      if (request.getPerformFootstepSearch())
       {
          postProcessHandler.setStatusCallback(statusCallback);
          bipedalFootstepPlanner.handleRequest(request, output);

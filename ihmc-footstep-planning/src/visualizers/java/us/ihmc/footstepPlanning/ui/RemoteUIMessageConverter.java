@@ -69,7 +69,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<Boolean> planBodyPath;
-   private final AtomicReference<Boolean> performAStarSearch;
+   private final AtomicReference<Boolean> performFootstepSearch;
    private final AtomicReference<SwingPlannerType> requestedSwingPlanner;
    private final AtomicReference<Boolean> performPositionBasedSplitFractionCalculation;
    private final AtomicReference<Boolean> performAreaBasedSplitFractionCalculation;
@@ -146,7 +146,7 @@ public class RemoteUIMessageConverter
       abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
-      performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
+      performFootstepSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformFootstepSearch, true);
       requestedSwingPlanner = messager.createInput(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.NONE);
       performPositionBasedSplitFractionCalculation = messager.createInput(FootstepPlannerMessagerAPI.PerformPositionBasedSplitFractionCalculation, true);
       performAreaBasedSplitFractionCalculation = messager.createInput(FootstepPlannerMessagerAPI.PerformAreaBasedSplitFractionCalculation, false);
@@ -299,7 +299,7 @@ public class RemoteUIMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformFootstepSearch, packet.getPerformFootstepSearch());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(packet.getRequestedSwingPlanner()));
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformPositionBasedSplitFractionCalculation, packet.getPerformPositionBasedSplitFractionCalculation());
@@ -514,7 +514,7 @@ public class RemoteUIMessageConverter
          packet.setTimeout(plannerTimeoutReference.get());
 
       packet.setPlanBodyPath(planBodyPath.get());
-      packet.setPerformAStarSearch(performAStarSearch.get());
+      packet.setPerformFootstepSearch(performFootstepSearch.get());
       packet.setRequestedSwingPlanner(requestedSwingPlanner.get().toByte());
       packet.setPerformPositionBasedSplitFractionCalculation(performPositionBasedSplitFractionCalculation.get());
       packet.setPerformAreaBasedSplitFractionCalculation(performAreaBasedSplitFractionCalculation.get());

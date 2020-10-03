@@ -86,10 +86,11 @@ module controller_msgs
          */
         boolean plan_body_path;
         /**
-         * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+         * If true, does A* or depth-first search, according to the field depth_first_mode in FootstepPlannerParametersPacket.
+         * If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
          */
         @defaultValue(value=True)
-        boolean perform_a_star_search;
+        boolean perform_footstep_search;
         /**
          * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
          */

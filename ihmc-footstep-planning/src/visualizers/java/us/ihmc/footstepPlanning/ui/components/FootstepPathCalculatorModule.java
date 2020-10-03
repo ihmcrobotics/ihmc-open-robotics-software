@@ -1,13 +1,9 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -67,7 +63,7 @@ public class FootstepPathCalculatorModule
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
-      performAStarSearch = messager.createInput(PerformAStarSearch, false);
+      performAStarSearch = messager.createInput(PerformFootstepSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);
@@ -144,7 +140,7 @@ public class FootstepPathCalculatorModule
          request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
          request.setPlanBodyPath(planBodyPath.get());
-         request.setPerformAStarSearch(performAStarSearch.get());
+         request.setPerformFootstepSearch(performAStarSearch.get());
          request.setSnapGoalSteps(snapGoalSteps.get());
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
 

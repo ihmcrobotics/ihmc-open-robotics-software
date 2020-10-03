@@ -286,7 +286,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       planningRequestPacket.setRequestedInitialStanceSide(initialSupportSide.toByte());
       planningRequestPacket.setHorizonLength(continuousPlanningRequestPacket.getHorizonLength());
       planningRequestPacket.setPlanBodyPath(true);
-      planningRequestPacket.setPerformAStarSearch(true);
+      planningRequestPacket.setPerformFootstepSearch(true);
       planningRequestPacket.getStartLeftFootPose().set(currentFeetPositions.get(RobotSide.LEFT));
       planningRequestPacket.getStartRightFootPose().set(currentFeetPositions.get(RobotSide.RIGHT));
       planningRequestPacket.setTimeout(continuousPlanningRequestPacket.getTimeout());

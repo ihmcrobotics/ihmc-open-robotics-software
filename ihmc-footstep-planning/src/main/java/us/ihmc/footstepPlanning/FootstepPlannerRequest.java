@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -66,9 +67,10 @@ public class FootstepPlannerRequest
    private boolean planBodyPath;
 
    /**
-    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+    * If true, does A* or Depth-first search, on {@link FootstepPlannerParametersReadOnly#getDepthFirstMode}.
+    * If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
     */
-   private boolean performAStarSearch;
+   private boolean performFootstepSearch;
 
    /**
     * (beta) This specifies an acceptable xy distance that is acceptable to terminate planning. Set to non-positive value to disable.
@@ -151,7 +153,7 @@ public class FootstepPlannerRequest
       abortIfGoalStepSnappingFails = false;
       abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
-      performAStarSearch = true;
+      performFootstepSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
       desiredHeading = 0.0;
@@ -252,9 +254,9 @@ public class FootstepPlannerRequest
       this.planBodyPath = planBodyPath;
    }
 
-   public void setPerformAStarSearch(boolean performAStarSearch)
+   public void setPerformFootstepSearch(boolean performFootstepSearch)
    {
-      this.performAStarSearch = performAStarSearch;
+      this.performFootstepSearch = performFootstepSearch;
    }
 
    public void setGoalDistanceProximity(double goalDistanceProximity)
@@ -362,9 +364,9 @@ public class FootstepPlannerRequest
       return planBodyPath;
    }
 
-   public boolean getPerformAStarSearch()
+   public boolean getPerformFootstepSearch()
    {
-      return performAStarSearch;
+      return performFootstepSearch;
    }
 
    public double getGoalDistanceProximity()
@@ -448,7 +450,7 @@ public class FootstepPlannerRequest
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
       setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
       setPlanBodyPath(requestPacket.getPlanBodyPath());
-      setPerformAStarSearch(requestPacket.getPerformAStarSearch());
+      setPerformFootstepSearch(requestPacket.getPerformFootstepSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
       setTimeout(requestPacket.getTimeout());
@@ -501,7 +503,7 @@ public class FootstepPlannerRequest
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
       requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
       requestPacket.setPlanBodyPath(getPlanBodyPath());
-      requestPacket.setPerformAStarSearch(getPerformAStarSearch());
+      requestPacket.setPerformFootstepSearch(getPerformFootstepSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
       requestPacket.setRequestedPathHeading(getDesiredHeading());
@@ -555,7 +557,7 @@ public class FootstepPlannerRequest
       this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
-      this.performAStarSearch = other.performAStarSearch;
+      this.performFootstepSearch = other.performFootstepSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
       this.desiredHeading = other.desiredHeading;

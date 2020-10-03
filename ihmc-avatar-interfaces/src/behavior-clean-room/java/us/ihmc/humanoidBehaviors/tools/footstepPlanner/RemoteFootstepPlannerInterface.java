@@ -175,9 +175,9 @@ public class RemoteFootstepPlannerInterface
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
 
       boolean planBodyPath = false;
-      boolean performAStarSearch = true;
+      boolean performFootstepSearch = true;
       packet.setPlanBodyPath(planBodyPath);
-      packet.setPerformAStarSearch(performAStarSearch);
+      packet.setPerformFootstepSearch(performFootstepSearch);
 
       packet.setRequestedInitialStanceSide(initialStanceSide.toByte());
       packet.getStartLeftFootPose().set(startSteps.get(RobotSide.LEFT));

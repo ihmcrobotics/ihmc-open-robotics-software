@@ -140,7 +140,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
    public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
-   public static final Topic<Boolean> PerformAStarSearch = topic("PerformAStarSearch");
+   public static final Topic<Boolean> PerformFootstepSearch = topic("PerformFootstepSearch");
    public static final Topic<SwingPlannerType> RequestedSwingPlannerType = topic("RequestedSwingPlannerType");
    public static final Topic<Boolean> PerformPositionBasedSplitFractionCalculation = topic("PerformPositionBasedSplitFractionCalculation");
    public static final Topic<Boolean> PerformAreaBasedSplitFractionCalculation = topic("PerformAreaBasedSplitFractionCalculation");

@@ -58,7 +58,7 @@ public class MainTabController
    @FXML
    private CheckBox planBodyPath;
    @FXML
-   private CheckBox performAStarSearch;
+   private CheckBox performFootstepSearch;
    @FXML
    private CheckBox performPositionBasedSplitFractionCalculation;
    @FXML
@@ -281,7 +281,7 @@ public class MainTabController
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
-      messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
+      messager.bindBidirectional(PerformFootstepSearch, performFootstepSearch.selectedProperty(), true);
       messager.bindBidirectional(PerformPositionBasedSplitFractionCalculation, performPositionBasedSplitFractionCalculation.selectedProperty(), true);
       messager.bindBidirectional(PerformAreaBasedSplitFractionCalculation, performAreaBasedSplitFractionCalculation.selectedProperty(), true);
       messager.bindBidirectional(RequestedSwingPlannerType, swingPlannerType.valueProperty(), true);

@@ -161,19 +161,19 @@ public class FootstepPlanningModuleOnFlatTest
    private void runTest(FramePose3D goalPose3d, FootstepPlannerRequest request)
    {
       // test without A*
-      request.setPerformAStarSearch(false);
+      request.setPerformFootstepSearch(false);
       request.setPlanBodyPath(false);
       FootstepPlannerOutput plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
 
       // test with A* without body path
-      request.setPerformAStarSearch(true);
+      request.setPerformFootstepSearch(true);
       request.setPlanBodyPath(false);
       plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));
 
       // test with A* and body path
-      request.setPerformAStarSearch(true);
+      request.setPerformFootstepSearch(true);
       request.setPlanBodyPath(true);
       plannerOutput = new FootstepPlanningModule(getClass().getSimpleName()).handleRequest(request);
       assertTrue(PlannerTools.isGoalNextToLastStep(goalPose3d, plannerOutput.getFootstepPlan()));

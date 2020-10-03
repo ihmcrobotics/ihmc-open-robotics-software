@@ -66,9 +66,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean plan_body_path_;
    /**
-            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+            * If true, does A* or depth-first search, according to the field depth_first_mode in FootstepPlannerParametersPacket.
+            * If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
-   public boolean perform_a_star_search_ = true;
+   public boolean perform_footstep_search_ = true;
    /**
             * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
             */
@@ -171,7 +172,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       plan_body_path_ = other.plan_body_path_;
 
-      perform_a_star_search_ = other.perform_a_star_search_;
+      perform_footstep_search_ = other.perform_footstep_search_;
 
       body_path_waypoints_.set(other.body_path_waypoints_);
       goal_distance_proximity_ = other.goal_distance_proximity_;
@@ -348,18 +349,20 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+            * If true, does A* or depth-first search, according to the field depth_first_mode in FootstepPlannerParametersPacket.
+            * If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
-   public void setPerformAStarSearch(boolean perform_a_star_search)
+   public void setPerformFootstepSearch(boolean perform_footstep_search)
    {
-      perform_a_star_search_ = perform_a_star_search;
+      perform_footstep_search_ = perform_footstep_search;
    }
    /**
-            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+            * If true, does A* or depth-first search, according to the field depth_first_mode in FootstepPlannerParametersPacket.
+            * If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
-   public boolean getPerformAStarSearch()
+   public boolean getPerformFootstepSearch()
    {
-      return perform_a_star_search_;
+      return perform_footstep_search_;
    }
 
 
@@ -627,7 +630,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_footstep_search_, other.perform_footstep_search_, epsilon)) return false;
 
       if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
       else
@@ -694,7 +697,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
-      if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
+      if(this.perform_footstep_search_ != otherMyClass.perform_footstep_search_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
@@ -758,8 +761,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
-      builder.append("perform_a_star_search=");
-      builder.append(this.perform_a_star_search_);      builder.append(", ");
+      builder.append("perform_footstep_search=");
+      builder.append(this.perform_footstep_search_);      builder.append(", ");
       builder.append("body_path_waypoints=");
       builder.append(this.body_path_waypoints_);      builder.append(", ");
       builder.append("goal_distance_proximity=");

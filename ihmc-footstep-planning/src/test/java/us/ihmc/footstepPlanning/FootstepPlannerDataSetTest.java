@@ -293,7 +293,7 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalSteps.get(RobotSide.RIGHT));
 
       messager.submitMessage(PlanBodyPath, getPlanBodyPath());
-      messager.submitMessage(PerformAStarSearch, getPerformAStarSearch());
+      messager.submitMessage(PerformFootstepSearch, getPerformAStarSearch());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 

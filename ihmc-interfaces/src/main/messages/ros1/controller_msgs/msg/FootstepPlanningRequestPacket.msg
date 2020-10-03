@@ -50,9 +50,10 @@ bool abort_if_body_path_planner_fails
 # If true, will plan a body path. If false, will follow a straight-line path to the goal
 bool plan_body_path
 
-# If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+# If true, does A* or depth-first search, according to the field depth_first_mode in FootstepPlannerParametersPacket.
+# If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
 # Field default value True
-bool perform_a_star_search
+bool perform_footstep_search
 
 # Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
 geometry_msgs/Pose[] body_path_waypoints
