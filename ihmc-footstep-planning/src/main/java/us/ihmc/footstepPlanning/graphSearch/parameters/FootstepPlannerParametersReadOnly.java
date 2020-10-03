@@ -845,4 +845,12 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    {
       return RobotSide.fromByte((byte) get(stepOnlyWithRequestedSide));
    }
+
+   /**
+    * If true, enables depth-first mode, otherwise the planner's in A* mode. Depth-first is generally faster but less thorough
+    */
+   default boolean getDepthFirstMode()
+   {
+      return get(depthFirstMode);
+   }
 }

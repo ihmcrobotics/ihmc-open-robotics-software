@@ -484,6 +484,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
             */
    public byte step_only_with_requested_side_ = (byte) 255;
+   /**
+            * If true, enables depth-first search mode. Otherwise A* search is enabled. In general depth-first is faster but less thorough.
+            */
+   public boolean depth_first_mode_;
 
    public FootstepPlannerParametersPacket()
    {
@@ -638,6 +642,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       shin_height_offet_ = other.shin_height_offet_;
 
       step_only_with_requested_side_ = other.step_only_with_requested_side_;
+
+      depth_first_mode_ = other.depth_first_mode_;
 
    }
 
@@ -2030,6 +2036,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return step_only_with_requested_side_;
    }
 
+   /**
+            * If true, enables depth-first search mode. Otherwise A* search is enabled. In general depth-first is faster but less thorough.
+            */
+   public void setDepthFirstMode(boolean depth_first_mode)
+   {
+      depth_first_mode_ = depth_first_mode;
+   }
+   /**
+            * If true, enables depth-first search mode. Otherwise A* search is enabled. In general depth-first is faster but less thorough.
+            */
+   public boolean getDepthFirstMode()
+   {
+      return depth_first_mode_;
+   }
+
 
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -2190,6 +2211,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_only_with_requested_side_, other.step_only_with_requested_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.depth_first_mode_, other.depth_first_mode_, epsilon)) return false;
+
 
       return true;
    }
@@ -2345,6 +2368,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.step_only_with_requested_side_ != otherMyClass.step_only_with_requested_side_) return false;
 
+      if(this.depth_first_mode_ != otherMyClass.depth_first_mode_) return false;
+
 
       return true;
    }
@@ -2496,7 +2521,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("shin_height_offet=");
       builder.append(this.shin_height_offet_);      builder.append(", ");
       builder.append("step_only_with_requested_side=");
-      builder.append(this.step_only_with_requested_side_);
+      builder.append(this.step_only_with_requested_side_);      builder.append(", ");
+      builder.append("depth_first_mode=");
+      builder.append(this.depth_first_mode_);
       builder.append("}");
       return builder.toString();
    }

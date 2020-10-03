@@ -67,6 +67,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  shinHeelClearance                            = keys.addDoubleKey("Shin heel clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
    public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);
+   public static final BooleanStoredPropertyKey depthFirstMode                               = keys.addBooleanKey("Depth first mode", false);
 
    // cost parameters
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                        = keys.addDoubleKey ("AStar heuristics weight", 1.5);

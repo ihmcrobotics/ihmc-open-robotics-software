@@ -106,6 +106,7 @@ public class FootstepPlannerMessageTools
 
       RobotSide stepOnlyWithRequestedSide = parameters.getStepOnlyWithRequestedSide();
       packet.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide == null ? -1 : stepOnlyWithRequestedSide.toByte());
+      packet.setDepthFirstMode(parameters.getDepthFirstMode());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

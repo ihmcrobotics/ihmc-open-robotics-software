@@ -358,6 +358,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(stepOnlyWithRequestedSide, side);
    }
 
+   default void setDepthFirstMode(boolean enabled)
+   {
+      set(depthFirstMode, enabled);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -491,5 +496,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
       setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
+      setDepthFirstMode(parametersPacket.getDepthFirstMode());
    }
 }

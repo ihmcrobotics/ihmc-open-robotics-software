@@ -148,7 +148,7 @@ public class BipedalFootstepPlanner
       // Setup footstep planner
       FootstepNode startNode = createStartNode(request);
       addFootPosesToSnapper(request);
-      footstepPlanner.initialize(startNode, true);
+      footstepPlanner.initialize(startNode, !footstepPlannerParameters.getDepthFirstMode());
       distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
       idealStepCalculator.initialize(goalNodes, request.getDesiredHeading());
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());

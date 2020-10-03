@@ -182,6 +182,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -408,6 +410,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -556,6 +561,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_9(data.getStepOnlyWithRequestedSide());
 
+      cdr.write_type_7(data.getDepthFirstMode());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -702,6 +709,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setStepOnlyWithRequestedSide(cdr.read_type_9());
       	
+      data.setDepthFirstMode(cdr.read_type_7());
+      	
 
    }
 
@@ -779,6 +788,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("shin_length", data.getShinLength());
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
       ser.write_type_9("step_only_with_requested_side", data.getStepOnlyWithRequestedSide());
+      ser.write_type_7("depth_first_mode", data.getDepthFirstMode());
    }
 
    @Override
@@ -855,6 +865,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinLength(ser.read_type_6("shin_length"));
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
       data.setStepOnlyWithRequestedSide(ser.read_type_9("step_only_with_requested_side"));
+      data.setDepthFirstMode(ser.read_type_7("depth_first_mode"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)

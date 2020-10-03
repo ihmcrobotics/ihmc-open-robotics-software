@@ -405,3 +405,6 @@ float64 shin_height_offet -11.1
 # so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
 # encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
 byte step_only_with_requested_side 255
+
+# If true, enables depth-first search mode. Otherwise A* search is enabled. In general depth-first is faster but less thorough.
+bool depth_first_mode

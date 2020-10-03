@@ -469,4 +469,7 @@ float64 shin_height_offet
 # Field default value 255
 int8 step_only_with_requested_side
 
+# If true, enables depth-first search mode. Otherwise A* search is enabled. In general depth-first is faster but less thorough.
+bool depth_first_mode
+
 

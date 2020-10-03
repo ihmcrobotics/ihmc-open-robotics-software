@@ -246,5 +246,9 @@ public class FootstepPlannerParametersTest
       byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
       parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);
       assertEquals(RobotSide.fromByte(stepOnlyWithRequestedSide), parameters.getStepOnlyWithRequestedSide());
+
+      boolean depthFirstMode = random.nextBoolean();
+      parameters.setDepthFirstMode(depthFirstMode);
+      assertEquals(depthFirstMode, parameters.getDepthFirstMode());
    }
 }
