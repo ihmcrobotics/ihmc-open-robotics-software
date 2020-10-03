@@ -32,7 +32,7 @@ public class SupportSequenceTest
    {
       ConvexPolygon2D defaultSupportPolygon = createDefaultSupportPolygon();
       SideDependentList<PoseReferenceFrame> soleFrames = createSoleFrames();
-      SupportSequence supportSequence = new SupportSequence(defaultSupportPolygon, soleFrames, soleFrames);
+      SupportSequence supportSequence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleFrames);
 
       Footstep footstep = new Footstep(RobotSide.LEFT);
       footstep.setX(0.2);
