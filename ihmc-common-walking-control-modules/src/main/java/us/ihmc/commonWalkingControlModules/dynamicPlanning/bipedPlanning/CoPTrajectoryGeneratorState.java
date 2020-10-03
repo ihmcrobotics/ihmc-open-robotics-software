@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.saveableModule.SaveableModuleState;
@@ -21,24 +21,23 @@ import java.util.List;
 
 public class CoPTrajectoryGeneratorState extends SaveableModuleState
 {
-   private final PreallocatedList<PlanningFootstep> footsteps;
-   private final PreallocatedList<PlanningTiming> footstepTimings;
-   private final PreallocatedList<PlanningShiftFraction> footstepShiftFractions;
+   private final YoPreallocatedList<PlanningFootstep> footsteps;
+   private final YoPreallocatedList<PlanningTiming> footstepTimings;
+   private final YoPreallocatedList<PlanningShiftFraction> footstepShiftFractions;
 
    private final YoFramePoint2D initialCoP;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
    private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
 
-   private final SideDependentList<? extends ReferenceFrame> soleFrames;
-
    public CoPTrajectoryGeneratorState(SideDependentList<? extends ReferenceFrame> soleFrames, YoRegistry registry)
    {
-      this.soleFrames = soleFrames;
-
-      footsteps = new PreallocatedList<>(PlanningFootstep.class, () -> createFootstep(registry), 3);
-      footstepTimings = new PreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), 3);
-      footstepShiftFractions = new PreallocatedList<>(PlanningShiftFraction.class, () -> createShiftFractions(registry), 3);
+      footsteps = new YoPreallocatedList<>(PlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, 3);
+      footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, 3);
+      footstepShiftFractions = new YoPreallocatedList<>(PlanningShiftFraction.class, () -> createShiftFractions(registry), "footstepShiftFraction", registry, 3);
+      registerIntegerToSave(footsteps.getYoPosition());
+      registerIntegerToSave(footstepTimings.getYoPosition());
+      registerIntegerToSave(footstepShiftFractions.getYoPosition());
 
       initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
       SaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
@@ -66,16 +65,17 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       }
    }
 
-   public void initializeStance(SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames)
+   public void initializeStance(SideDependentList<? extends FrameConvexPolygon2DReadOnly> feetInSoleZUpFrames,
+                                SideDependentList<? extends ReferenceFrame> soleFrames)
    {
       for (RobotSide robotSide : RobotSide.values)
-         initializeStance(robotSide, feetInSoleZUpFrames.get(robotSide));
+         initializeStance(robotSide, feetInSoleZUpFrames.get(robotSide), soleFrames.get(robotSide));
    }
 
-   public void initializeStance(RobotSide robotSide, FrameConvexPolygon2DReadOnly supportPolygon)
+   public void initializeStance(RobotSide robotSide, FrameConvexPolygon2DReadOnly supportPolygon, ReferenceFrame soleFrame)
    {
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
-      footPoses.get(robotSide).setFromReferenceFrame(soleFrames.get(robotSide));
+      footPoses.get(robotSide).setFromReferenceFrame(soleFrame);
    }
 
    public int getNumberOfFootstep()
@@ -143,6 +143,11 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    {
       if (footstepShiftFractions.size() < footstepShiftFractions.capacity())
          footstepShiftFractions.add().set(shiftFraction);
+   }
+
+   public void setInitialCoP(FramePoint2DReadOnly initialCoP)
+   {
+      this.initialCoP.set(initialCoP);
    }
 
    private int footstepCounter = 0;
