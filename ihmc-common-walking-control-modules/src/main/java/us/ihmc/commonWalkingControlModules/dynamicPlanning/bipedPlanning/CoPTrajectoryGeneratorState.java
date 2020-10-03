@@ -145,23 +145,29 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
          footstepShiftFractions.add().set(shiftFraction);
    }
 
+   private int footstepCounter = 0;
+
    private PlanningFootstep createFootstep(YoRegistry registry)
    {
-      PlanningFootstep footstep = new PlanningFootstep("" + footsteps.size(), registry);
+      PlanningFootstep footstep = new PlanningFootstep("" + footstepCounter++, registry);
       registerStateToSave(footstep);
       return footstep;
    }
 
+   private int timingCounter = 0;
+
    private PlanningTiming createTiming(YoRegistry registry)
    {
-      PlanningTiming timing = new PlanningTiming("" + footstepTimings.size(), registry);
+      PlanningTiming timing = new PlanningTiming("" + timingCounter++, registry);
       registerStateToSave(timing);
       return timing;
    }
 
+   private int shiftFractionCounter = 0;
+
    private PlanningShiftFraction createShiftFractions(YoRegistry registry)
    {
-      PlanningShiftFraction shiftFractions = new PlanningShiftFraction("" + footstepShiftFractions.size(), registry);
+      PlanningShiftFraction shiftFractions = new PlanningShiftFraction("" + shiftFractionCounter++, registry);
       registerStateToSave(shiftFractions);
       return shiftFractions;
    }

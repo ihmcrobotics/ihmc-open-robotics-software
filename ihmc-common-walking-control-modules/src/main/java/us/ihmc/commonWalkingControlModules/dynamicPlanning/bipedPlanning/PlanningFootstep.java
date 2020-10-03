@@ -35,9 +35,11 @@ public class PlanningFootstep extends SaveableModuleState
       clear();
    }
 
+   private int contactPointCounter = 0;
+
    private YoPoint2D createYoContactPoint(String suffix, YoRegistry registry)
    {
-      YoPoint2D point = new YoPoint2D("footstep" + suffix + "ContactPoint" + predictedContactPoints.size(), registry);
+      YoPoint2D point = new YoPoint2D("footstep" + suffix + "ContactPoint" + contactPointCounter++, registry);
       SaveableModuleStateTools.registerYoTuple2DToSave(point, this);
       return point;
    }
