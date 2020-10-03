@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
+       * This message is part of the IHMC multi-contact controller API.
        * Experimental mode of specifying a desired configuration in terms of root pose and joint angles.
        */
 public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMultiContactTrajectoryMessage> implements Settable<WholeBodyMultiContactTrajectoryMessage>, EpsilonComparable<WholeBodyMultiContactTrajectoryMessage>
