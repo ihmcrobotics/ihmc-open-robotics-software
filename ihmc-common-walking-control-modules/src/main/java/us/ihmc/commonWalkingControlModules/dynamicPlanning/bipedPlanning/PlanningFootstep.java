@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.saveableModule.SaveableModuleState;
 import us.ihmc.robotics.saveableModule.SaveableModuleStateTools;
@@ -20,7 +21,7 @@ import java.util.List;
 
 public class PlanningFootstep extends SaveableModuleState
 {
-   private final PreallocatedList<YoPoint2D> predictedContactPoints;
+   private final YoPreallocatedList<YoPoint2D> predictedContactPoints;
    private final YoFramePose3D footstepPose;
    private final YoEnum<RobotSide> stepSide;
 
@@ -28,7 +29,8 @@ public class PlanningFootstep extends SaveableModuleState
    {
       footstepPose = new YoFramePose3D("footstepPose" + suffix, ReferenceFrame.getWorldFrame(), registry);
       SaveableModuleStateTools.registerYoFramePose3DToSave(footstepPose, this);
-      predictedContactPoints = new PreallocatedList<>(YoPoint2D.class, () -> createYoContactPoint(suffix, registry), 6);
+      predictedContactPoints = new YoPreallocatedList<>(YoPoint2D.class, () -> createYoContactPoint(suffix, registry), "footstep" + suffix + "ContactPoint", registry, 6);
+      registerIntegerToSave(predictedContactPoints.getYoPosition());
       stepSide = new YoEnum<>("stepSide" + suffix, registry, RobotSide.class);
       registerEnumToSave(stepSide);
 
@@ -76,6 +78,9 @@ public class PlanningFootstep extends SaveableModuleState
    {
       footstepPose.set(footstep.getFootstepPose());
       stepSide.set(footstep.getRobotSide());
+      if (!footstep.hasPredictedContactPoints())
+         return;
+
       for (int i = 0; i < Math.min(footstep.getPredictedContactPoints().size(), predictedContactPoints.capacity()); i++)
          predictedContactPoints.add().set(footstep.getPredictedContactPoints().get(i));
    }
