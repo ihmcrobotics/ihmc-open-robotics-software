@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  */
 public class BehaviorTaskSuppressor
 {
-   private static final Runnable NOOP = () -> {};
+   public static final Runnable NOOP = () -> {};
 
    private ConditionHolder currentSuppressionCause;
    private ConditionHolder lastSuppressionCause = new ConditionHolder(); // so first evaluation is always changed
@@ -58,6 +58,11 @@ public class BehaviorTaskSuppressor
    public void addCondition(Supplier<String> onSuppressMessageSupplier, BooleanSupplier evaluateShouldSuppress)
    {
       addCondition(onSuppressMessageSupplier, evaluateShouldSuppress, NOOP);
+   }
+
+   public void addCondition(SuppressionCondition condition)
+   {
+      addCondition(condition.getOnSuppressMessageSupplier(), condition.getEvaluateShouldSuppress(), condition.getOnSuppressAction());
    }
 
    public void addCondition(Supplier<String> onSuppressMessageSupplier, BooleanSupplier evaluateShouldSuppress, Runnable onSuppressAction)
