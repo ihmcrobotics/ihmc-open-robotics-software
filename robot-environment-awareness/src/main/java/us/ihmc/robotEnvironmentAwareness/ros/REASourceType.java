@@ -13,7 +13,7 @@ public enum REASourceType
       switch (this)
       {
       case LIDAR_SCAN:
-         return "/ihmc/lidar_scan";
+         return ROS2Tools.MULTISENSE_LIDAR_SCAN.getName();
       case STEREO_POINT_CLOUD:
          return ROS2Tools.MULTISENSE_STEREO_POINT_CLOUD.getName();
       case DEPTH_POINT_CLOUD:
