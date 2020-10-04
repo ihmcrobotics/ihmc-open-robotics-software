@@ -11,6 +11,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
+import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -35,6 +36,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
+import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -112,8 +114,41 @@ public class AtlasLookAndStepBehaviorTest
       boolean useDynamicsSimulation = false;
       boolean runRealsenseSLAM = true;
       boolean runLidarREA = true;
+      EnvironmentInitialSetup environment = new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::flatGround, 0.0, 0.0, 0.0, 0.0);
       assertTimeoutPreemptively(Duration.ofMinutes(3),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround,
+                                () -> runTheTest(environment,
+                                                 useDynamicsSimulation,
+                                                 runRealsenseSLAM,
+                                                 runLidarREA,
+                                                 waypoints));
+   }
+
+   @Test
+   @Order(2)
+   public void testLookAndStepDemoPart1()
+   {
+      List<TestWaypoint> waypoints = new ArrayList<>();
+      waypoints.add(new TestWaypoint());
+      waypoints.get(0).name = "ALL THE WAY";
+      waypoints.get(0).goalPose = new Pose3D(4.1, 0.0, 0.0, 0.0, 0.0, 0.0);
+      waypoints.get(0).reachedCondition = pelvisPose ->
+      {
+         double remainingDistance = 0.8 - pelvisPose.getPosition().getX();
+         LogTools.info("Remaining distance: {}", remainingDistance);
+         return remainingDistance < 0.0;
+      };
+
+
+      boolean useDynamicsSimulation = false;
+      boolean runRealsenseSLAM = true;
+      boolean runLidarREA = true;
+      EnvironmentInitialSetup environment = new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::generateRealisticEasierStartingBlockRegions,
+                                                                        RealisticLabTerrainBuilder.PALLET_HEIGHT * 2.0,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0);
+      assertTimeoutPreemptively(Duration.ofMinutes(3),
+                                () -> runTheTest(environment,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
                                                  runLidarREA,
@@ -122,7 +157,7 @@ public class AtlasLookAndStepBehaviorTest
 
    @Test
    @Disabled
-   @Order(2)
+   @Order(3)
    public void testLookAndStepOverRoughTerrain()
    {
       List<TestWaypoint> waypoints = new ArrayList<>();
@@ -138,8 +173,13 @@ public class AtlasLookAndStepBehaviorTest
       boolean useDynamicsSimulation = true;
       boolean runRealsenseSLAM = false;
       boolean runLidarREA = true;
+      EnvironmentInitialSetup environment = new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0);
       assertTimeoutPreemptively(Duration.ofMinutes(5),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStepsWithFlatTop,
+                                () -> runTheTest(environment,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
                                                  runLidarREA,
@@ -147,7 +187,8 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    @Test
-   @Order(3)
+   @Disabled
+   @Order(4)
    public void testLookAndStepOverStairStepsWRealsenseSLAM()
    {
       List<TestWaypoint> waypoints = new ArrayList<>();
@@ -163,15 +204,19 @@ public class AtlasLookAndStepBehaviorTest
       boolean useDynamicsSimulation = true;
       boolean runRealsenseSLAM = true;
       boolean runLidarREA = true;
-      assertTimeoutPreemptively(Duration.ofMinutes(5),
-                                () -> runTheTest(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
+      EnvironmentInitialSetup environment = new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createFlatUpAndDownStepsWithFlatTop,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0,
+                                                                        0.0);
+      assertTimeoutPreemptively(Duration.ofMinutes(5), () -> runTheTest(environment,
                                                  useDynamicsSimulation,
                                                  runRealsenseSLAM,
                                                  runLidarREA,
                                                  waypoints));
    }
 
-   private void runTheTest(Supplier<PlanarRegionsList> environment,
+   private void runTheTest(EnvironmentInitialSetup environment,
                            boolean useDynamicsSimulation,
                            boolean runRealsenseSLAM,
                            boolean runLidarREA,
@@ -185,7 +230,7 @@ public class AtlasLookAndStepBehaviorTest
       }
       else
       {
-         ThreadTools.startAsDaemon(() -> kinematicSimulation(finishedSimulationSetup), "KinematicsSimulation");
+         ThreadTools.startAsDaemon(() -> kinematicSimulation(environment, finishedSimulationSetup), "KinematicsSimulation");
       }
 
       ros2Node = ROS2Tools.createROS2Node(COMMUNICATION_MODE.getPubSubImplementation(), "Helper");
@@ -293,18 +338,27 @@ public class AtlasLookAndStepBehaviorTest
       }
    }
 
-   private void perceptionStack(Supplier<PlanarRegionsList> environment, boolean runRealsenseSLAM, boolean runLidarREA)
+   private void perceptionStack(EnvironmentInitialSetup environment, boolean runRealsenseSLAM, boolean runLidarREA)
    {
-      perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE, environment.get(), runRealsenseSLAM, false, runLidarREA, createRobotModel());
+      perceptionStack = new AtlasPerceptionSimulation(COMMUNICATION_MODE,
+                                                      environment.getPlanarRegionsSupplier().get(),
+                                                      runRealsenseSLAM,
+                                                      false,
+                                                      runLidarREA,
+                                                      createRobotModel());
    }
 
-   private void dynamicsSimulation(Supplier<PlanarRegionsList> environment, Notification finishedSettingUp)
+   private void dynamicsSimulation(EnvironmentInitialSetup environment, Notification finishedSettingUp)
    {
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int scsDataBufferSize = 10;
       dynamicsSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
                                                           createCommonAvatarEnvironment(environment),
+                                                          environment.getGroundZ(),
+                                                          environment.getInitialX(),
+                                                          environment.getInitialY(),
+                                                          environment.getInitialYaw(),
                                                           COMMUNICATION_MODE.getPubSubImplementation(),
                                                           recordFrequencySpeedup,
                                                           scsDataBufferSize,
@@ -314,7 +368,7 @@ public class AtlasLookAndStepBehaviorTest
       finishedSettingUp.set();
    }
 
-   private void kinematicSimulation(Notification finishedSimulationSetup)
+   private void kinematicSimulation(EnvironmentInitialSetup environment, Notification finishedSimulationSetup)
    {
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
@@ -325,16 +379,20 @@ public class AtlasLookAndStepBehaviorTest
          kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos")); // TODO: Get logging on Bamboo working
       }
       kinematicsSimulationParameters.setCreateYoVariableServer(false);
+      kinematicsSimulationParameters.setInitialGroundHeight(environment.getGroundZ());
+      kinematicsSimulationParameters.setInitialRobotYaw(environment.getInitialYaw());
+      kinematicsSimulationParameters.setInitialRobotX(environment.getInitialX());
+      kinematicsSimulationParameters.setInitialRobotY(environment.getInitialY());
       kinematicsSimulation = AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
       finishedSimulationSetup.set();
    }
 
-   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment(Supplier<PlanarRegionsList> environment)
+   private CommonAvatarEnvironmentInterface createCommonAvatarEnvironment(EnvironmentInitialSetup environment)
    {
       String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
       return new PlanarRegionsListDefinedEnvironment(environmentName,
-                                                     environment.get(),
+                                                     environment.getPlanarRegionsSupplier().get(),
                                                      cinderBlockTexture,
                                                      0.02,
                                                      false);
