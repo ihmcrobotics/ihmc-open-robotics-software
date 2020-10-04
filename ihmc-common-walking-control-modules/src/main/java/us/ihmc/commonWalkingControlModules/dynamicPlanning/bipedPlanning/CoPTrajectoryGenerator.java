@@ -48,6 +48,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
    private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
+   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
    private final FramePoint3D tempFramePoint1 = new FramePoint3D();
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
    private final FramePoint2D tempPointForCoPCalculation = new FramePoint2D();
@@ -141,15 +142,15 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
       contactStateProvider.setStartCopPosition(state.getInitialCoP());
-      
+
       // Put first CoP as per chicken support computations in case starting from rest
       if (numberOfUpcomingFootsteps == 0)
       {
          // just standing there
-         computeCoPPointsForFinalTransfer(RobotSide.LEFT,
-                                          state.getFinalTransferDuration(),
-                                          state.getFinalTransferSplitFraction(),
-                                          percentageStandingWeightDistributionOnLeftFoot.getDoubleValue());
+         computeCoPPointsForStanding(RobotSide.LEFT,
+                                     state.getFinalTransferDuration(),
+                                     state.getFinalTransferSplitFraction(),
+                                     percentageStandingWeightDistributionOnLeftFoot.getDoubleValue());
       }
       else
       {
@@ -233,6 +234,30 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
    }
 
 
+   private void computeCoPPointsForStanding(RobotSide lastFootstepSide,
+                                           double finalTransferDuration,
+                                           double finalTransferSplitFraction,
+                                           double finalTransferWeightDistribution)
+   {
+      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide).getCentroid());
+      tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
+      tempFramePoint2D.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid());
+      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
+      tempPointForCoPCalculation.interpolate(tempFramePoint2D, finalTransferWeightDistribution);
+
+      double segmentDuration = finalTransferSplitFraction * finalTransferDuration;
+      SettableContactStateProvider contactState = contactStateProviders.getLast();
+      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setDuration(segmentDuration);
+
+      segmentDuration = (1.0 - finalTransferSplitFraction) * finalTransferDuration;
+      SettableContactStateProvider previousContactState = contactState;
+      contactState = contactStateProviders.add();
+      contactState.setStartFromEnd(previousContactState);
+      contactState.setEndCopPosition(tempPointForCoPCalculation);
+      contactState.setDuration(segmentDuration);
+   }
+
    private void computeCoPPointsForFinalTransfer(RobotSide lastFootstepSide,
                                                  double finalTransferDuration,
                                                  double finalTransferSplitFraction,
@@ -240,9 +265,11 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
    {
       ContactStateProvider previousContactState = contactStateProviders.getLast();
 
-      tempPointForCoPCalculation.interpolate(movingPolygonsInSole.get(lastFootstepSide).getCentroid(),
-                                             movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid(),
-                                             finalTransferWeightDistribution);
+      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide).getCentroid());
+      tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
+      tempFramePoint2D.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid());
+      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
+      tempPointForCoPCalculation.interpolate(tempFramePoint2D, finalTransferWeightDistribution);
 
       double segmentDuration = finalTransferSplitFraction * finalTransferDuration;
       SettableContactStateProvider contactState = contactStateProviders.add();
