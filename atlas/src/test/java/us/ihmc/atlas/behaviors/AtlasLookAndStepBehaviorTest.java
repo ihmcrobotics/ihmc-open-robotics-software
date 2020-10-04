@@ -110,7 +110,7 @@ public class AtlasLookAndStepBehaviorTest
       };
 
       boolean useDynamicsSimulation = false;
-      boolean runRealsenseSLAM = false;
+      boolean runRealsenseSLAM = true;
       boolean runLidarREA = true;
       assertTimeoutPreemptively(Duration.ofMinutes(3),
                                 () -> runTheTest(BehaviorPlanarRegionEnvironments::flatGround,
