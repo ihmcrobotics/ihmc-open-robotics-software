@@ -63,12 +63,15 @@ public class AtlasPerceptionSimulation
 
          ExceptionTools.handle(() ->
          {
-            REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(outputTopic,
-                                                                                          lidarOutputTopic,
-                                                                                          stereoOutputTopic,
-                                                                                          depthOutputTopic);
+            REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(
+                  ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), ROS2Tools.REA_NODE_NAME),
+                  outputTopic,
+                  lidarOutputTopic,
+                  stereoOutputTopic,
+                  depthOutputTopic
+            );
             File reaConfigurationFile = Paths.get(System.getProperty("user.home")).resolve(".ihmc/REAModuleConfiguration.txt").toFile();
-            lidarREA = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(reaConfigurationFile), networkProvider);
+            lidarREA = LIDARBasedREAModule.createRemoteModule(new FilePropertyHelper(reaConfigurationFile), networkProvider);
             lidarREA.start();
          }, DefaultExceptionHandler.PRINT_STACKTRACE);
       }
