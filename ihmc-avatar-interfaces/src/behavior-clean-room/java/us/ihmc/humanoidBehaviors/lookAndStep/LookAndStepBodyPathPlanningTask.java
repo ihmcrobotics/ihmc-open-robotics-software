@@ -104,16 +104,14 @@ public class LookAndStepBodyPathPlanningTask
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
          suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
                                  () -> neckTrajectoryTimerSnapshot.isRunning());
-         suppressor.addCondition(() -> "Neck at wrong angle: " + neckPitch
-                                       + " != " + lookAndStepBehaviorParameters.getNeckPitchForBodyPath()
-                                       + " +/- " + lookAndStepBehaviorParameters.getNeckPitchTolerance(),
-                                 () -> Math.abs(neckPitch - lookAndStepBehaviorParameters.getNeckPitchForBodyPath())
-                                       > lookAndStepBehaviorParameters.getNeckPitchTolerance(),
-                                 () ->
-                                 {
-                                    commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
-                                    neckTrajectoryTimer.reset();
-                                 });
+         suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
+                                                                               lookAndStepBehaviorParameters::getNeckPitchForBodyPath,
+                                                                               lookAndStepBehaviorParameters::getNeckPitchTolerance,
+                                           () ->
+                                           {
+                                              commandPitchHeadWithRespectToChest.accept(lookAndStepBehaviorParameters.getNeckPitchForBodyPath());
+                                              neckTrajectoryTimer.reset();
+                                           }));
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
                                  () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
