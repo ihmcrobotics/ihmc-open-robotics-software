@@ -737,21 +737,17 @@ public class BalanceManager
 
    public void setFinalTransferWeightDistribution(double weightDistribution)
    {
-      // TODO
-//      icpPlanner.setFinalTransferWeightDistribution(weightDistribution);
+      copTrajectoryState.setFinalTransferWeightDistribution(weightDistribution);
    }
 
    public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
    {
-      // TODO
-//      icpPlanner.setFinalTransferDurationAlpha(finalTransferSplitFraction);
+      copTrajectoryState.setFinalTransferSplitFraction(finalTransferSplitFraction);
    }
 
    public void setFinalTransferTime(double finalTransferDuration)
    {
-      // todo
-//      icpPlanner.setFinalTransferDuration(finalTransferDuration);
-      this.finalTransferDuration = finalTransferDuration;
+      copTrajectoryState.setFinalTransferDuration(finalTransferDuration);
    }
 
    /**
