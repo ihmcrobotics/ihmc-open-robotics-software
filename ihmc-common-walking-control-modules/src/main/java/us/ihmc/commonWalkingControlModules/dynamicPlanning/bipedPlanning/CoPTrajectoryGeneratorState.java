@@ -14,6 +14,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -24,6 +25,10 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    private final YoPreallocatedList<PlanningFootstep> footsteps;
    private final YoPreallocatedList<PlanningTiming> footstepTimings;
    private final YoPreallocatedList<PlanningShiftFraction> footstepShiftFractions;
+
+   private final YoDouble finalTransferSplitFraction;
+   private final YoDouble finalTransferWeightDistribution;
+   private final YoDouble finalTransferDuration;
 
    private final YoFramePoint2D initialCoP;
 
@@ -38,6 +43,13 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       registerIntegerToSave(footsteps.getYoPosition());
       registerIntegerToSave(footstepTimings.getYoPosition());
       registerIntegerToSave(footstepShiftFractions.getYoPosition());
+
+      finalTransferSplitFraction = new YoDouble("finalTransferSplitFraction", registry);
+      finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
+      finalTransferDuration = new YoDouble("finalTransferDuration", registry);
+      registerDoubleToSave(finalTransferSplitFraction);
+      registerDoubleToSave(finalTransferWeightDistribution);
+      registerDoubleToSave(finalTransferDuration);
 
       initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
       SaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
@@ -111,6 +123,36 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    public FrameConvexPolygon2DReadOnly getFootPolygonInSole(RobotSide robotSide)
    {
       return footPolygonsInSole.get(robotSide);
+   }
+
+   public double getFinalTransferDuration()
+   {
+      return finalTransferDuration.getDoubleValue();
+   }
+
+   public double getFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction.getDoubleValue();
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution.getDoubleValue();
+   }
+
+   public void setFinalTransferDuration(double transferDuration)
+   {
+      finalTransferDuration.set(transferDuration);
+   }
+
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+      this.finalTransferSplitFraction.set(finalTransferSplitFraction);
+   }
+
+   public void setFinalTransferWeightDistribution(double finalTransferWeightDistribution)
+   {
+      this.finalTransferWeightDistribution.set(finalTransferWeightDistribution);
    }
 
    public void clear()

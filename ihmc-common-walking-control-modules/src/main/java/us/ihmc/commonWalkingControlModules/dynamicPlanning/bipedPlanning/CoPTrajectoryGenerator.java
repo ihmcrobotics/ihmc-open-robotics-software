@@ -34,14 +34,13 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
    private final YoDouble safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
    private final YoDouble exitCoPForwardSafetyMarginOnToes;
+   // FIXME this is kind of a state variable
    private final YoDouble percentageStandingWeightDistributionOnLeftFoot;
 
    private final ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
    private final SideDependentList<RecyclingArrayList<PoseReferenceFrame>> stepFrames = new SideDependentList<>();
-
-   private final YoDouble finalTransferWeightDistribution;
 
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
@@ -70,8 +69,6 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
       percentageStandingWeightDistributionOnLeftFoot = new YoDouble("PercentageStandingWeightDistributionOnLeftFoot", registry);
 
-      finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
-      finalTransferWeightDistribution.setToNaN();
 
 
       for (RobotSide robotSide : RobotSide.values)
@@ -144,15 +141,15 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
       contactStateProvider.setStartCopPosition(state.getInitialCoP());
-
+      
       // Put first CoP as per chicken support computations in case starting from rest
       if (numberOfUpcomingFootsteps == 0)
       {
          // just standing there
-         computeCoPPointsForStanding(state.getTiming(0),
-                                     state.getShiftFraction(0),
-                                     state.getFootPolygonInSole(RobotSide.LEFT),
-                                     state.getFootPolygonInSole(RobotSide.RIGHT));
+         computeCoPPointsForFinalTransfer(RobotSide.LEFT,
+                                          state.getFinalTransferDuration(),
+                                          state.getFinalTransferSplitFraction(),
+                                          percentageStandingWeightDistributionOnLeftFoot.getDoubleValue());
       }
       else
       {
@@ -186,15 +183,16 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
             movingPolygonsInSole.get(swingSide).setIncludingFrame(nextPolygon);
          }
-         computeCoPPointsForFinalTransfer(state.getFootstep(numberOfUpcomingFootsteps - 1),
-                                          state.getTiming(numberOfUpcomingFootsteps),
-                                          state.getShiftFraction(numberOfUpcomingFootsteps));
+         computeCoPPointsForFinalTransfer(state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide(),
+                                          state.getFinalTransferDuration(),
+                                          state.getFinalTransferSplitFraction(),
+                                          state.getFinalTransferWeightDistribution());
 
          RobotSide lastStepSide = state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide().getOppositeSide();
          if (lastStepSide == RobotSide.RIGHT)
-            percentageStandingWeightDistributionOnLeftFoot.set(1.0 - finalTransferWeightDistribution.getValue());
+            percentageStandingWeightDistributionOnLeftFoot.set(1.0 - state.getFinalTransferWeightDistribution());
          else
-            percentageStandingWeightDistributionOnLeftFoot.set(finalTransferWeightDistribution.getValue());
+            percentageStandingWeightDistributionOnLeftFoot.set(state.getFinalTransferWeightDistribution());
       }
 
       if (viewer != null)
@@ -234,51 +232,25 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       }
    }
 
-   private void computeCoPPointsForStanding(PlanningTiming footstepTimings,
-                                            PlanningShiftFraction footstepShiftFractions,
-                                            FrameConvexPolygon2DReadOnly leftFootPolygon,
-                                            FrameConvexPolygon2DReadOnly rightFootPolygon)
-   {
-      SettableContactStateProvider contactStateProvider = contactStateProviders.getLast();
 
-      tempPointForCoPCalculation.interpolate(leftFootPolygon.getCentroid(),
-                                             rightFootPolygon.getCentroid(),
-                                             percentageStandingWeightDistributionOnLeftFoot.getDoubleValue());
-
-      double transferDuration = footstepTimings.getTransferTime();
-      double splitFraction = footstepShiftFractions.getTransferSplitFraction();
-      double segmentDuration = splitFraction * transferDuration;
-      contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
-      contactStateProvider.setDuration(segmentDuration);
-
-      SettableContactStateProvider previousContactState = contactStateProvider;
-      contactStateProvider = contactStateProviders.add();
-      contactStateProvider.setStartFromEnd(previousContactState);
-
-      segmentDuration = (1.0 - splitFraction) * transferDuration;
-      contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
-      contactStateProvider.setDuration(segmentDuration);
-   }
-
-   private void computeCoPPointsForFinalTransfer(PlanningFootstep lastFootstep,
-                                                 PlanningTiming footstepTimings,
-                                                 PlanningShiftFraction footstepShiftFractions)
+   private void computeCoPPointsForFinalTransfer(RobotSide lastFootstepSide,
+                                                 double finalTransferDuration,
+                                                 double finalTransferSplitFraction,
+                                                 double finalTransferWeightDistribution)
    {
       ContactStateProvider previousContactState = contactStateProviders.getLast();
 
-      tempPointForCoPCalculation.interpolate(movingPolygonsInSole.get(lastFootstep.getRobotSide()).getCentroid(),
-                                             movingPolygonsInSole.get(lastFootstep.getRobotSide().getOppositeSide()).getCentroid(),
-                                             finalTransferWeightDistribution.getValue());
+      tempPointForCoPCalculation.interpolate(movingPolygonsInSole.get(lastFootstepSide).getCentroid(),
+                                             movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid(),
+                                             finalTransferWeightDistribution);
 
-      double transferDuration = footstepTimings.getTransferTime();
-      double splitFraction = footstepShiftFractions.getTransferSplitFraction();
-      double segmentDuration = splitFraction * transferDuration;
+      double segmentDuration = finalTransferSplitFraction * finalTransferDuration;
       SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
 
-      segmentDuration = (1.0 - splitFraction) * transferDuration;
+      segmentDuration = (1.0 - finalTransferSplitFraction) * finalTransferDuration;
       previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
