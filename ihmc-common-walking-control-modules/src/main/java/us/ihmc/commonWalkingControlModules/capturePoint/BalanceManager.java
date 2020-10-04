@@ -97,8 +97,6 @@ public class BalanceManager
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
-   private final FramePoint2D initialReferenceCop = new FramePoint2D();
-
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
@@ -541,7 +539,7 @@ public class BalanceManager
       yoDesiredCapturePoint.set(tempCapturePoint);
 
       desiredCapturePoint2d.set(tempCapturePoint);
-      initialReferenceCop.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
+      copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
