@@ -110,7 +110,6 @@ public class AtlasPerceptionSimulation
       LogTools.info("Shutting down...");
       if (runLidarREA)
       {
-         multisenseLidarPublisher.stop();
          lidarREA.stop();
       }
       else
