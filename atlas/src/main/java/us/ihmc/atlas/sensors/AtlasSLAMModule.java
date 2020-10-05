@@ -226,8 +226,8 @@ public class AtlasSLAMModule extends SLAMModule
       return new AtlasSLAMModule(messager, drcRobotModel);
    }
 
-   public static AtlasSLAMModule createIntraprocessModule(ROS2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager, Path configurationFilePath)
+   public static AtlasSLAMModule createIntraprocessModule(ROS2Node ros2Node, DRCRobotModel drcRobotModel, Messager messager, File configurationFile)
    {
-      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel, configurationFilePath.toFile());
+      return new AtlasSLAMModule(ros2Node, messager, drcRobotModel, configurationFile);
    }
 }
