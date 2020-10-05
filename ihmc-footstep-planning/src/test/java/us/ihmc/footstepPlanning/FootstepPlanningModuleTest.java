@@ -218,7 +218,7 @@ public class FootstepPlanningModuleTest
       // test shuffling left
       Pose3D goalMidFootPose = new Pose3D(0.0, 1.25, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setDesiredHeading(FootstepPlanHeading.LEFT);
+      request.setDesiredHeading( -0.5 * Math.PI);
       request.setRequestedInitialStanceSide(RobotSide.RIGHT);
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
@@ -233,7 +233,7 @@ public class FootstepPlanningModuleTest
       // test shuffling right
       goalMidFootPose.set(0.0, -1.25, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setDesiredHeading(FootstepPlanHeading.RIGHT);
+      request.setDesiredHeading(0.5 * Math.PI);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
@@ -248,7 +248,7 @@ public class FootstepPlanningModuleTest
       // test walking backward
       goalMidFootPose.set(-1.25, 0.0, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setDesiredHeading(FootstepPlanHeading.BACKWARD);
+      request.setDesiredHeading(Math.PI);
       plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
