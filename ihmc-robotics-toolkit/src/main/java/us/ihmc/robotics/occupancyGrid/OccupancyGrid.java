@@ -4,8 +4,8 @@ import com.esotericsoftware.kryo.util.IntMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -36,12 +36,12 @@ public class OccupancyGrid
    final List<OccupancyGridCell> allCellsPool = new ArrayList<>();
    private final List<OccupancyGridCell> allActiveCells = new ArrayList<>();
 
-   public OccupancyGrid(String namePrefix, ReferenceFrame gridFrame, YoVariableRegistry parentRegistry)
+   public OccupancyGrid(String namePrefix, ReferenceFrame gridFrame, YoRegistry parentRegistry)
    {
       this.gridFrame = gridFrame;
 
       String name = getClass().getSimpleName();
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + name);
+      YoRegistry registry = new YoRegistry(namePrefix + name);
 
       cellXSize = new YoDouble(namePrefix + "CellXSize", registry);
       cellYSize = new YoDouble(namePrefix + "CellYSize", registry);
@@ -63,13 +63,13 @@ public class OccupancyGrid
 
    private void setupChangedGridParameterListeners()
    {
-      VariableChangedListener changedGridSizeListener = (v) ->
+      YoVariableChangedListener changedGridSizeListener = (v) ->
       {
          cellArea.set(cellXSize.getDoubleValue() * cellYSize.getDoubleValue());
       };
-      cellYSize.addVariableChangedListener(changedGridSizeListener);
-      cellXSize.addVariableChangedListener(changedGridSizeListener);
-      changedGridSizeListener.notifyOfVariableChange(null);
+      cellYSize.addListener(changedGridSizeListener);
+      cellXSize.addListener(changedGridSizeListener);
+      changedGridSizeListener.changed(null);
    }
 
    public void setThresholdForCellOccupancy(double thresholdForCellOccupancy)

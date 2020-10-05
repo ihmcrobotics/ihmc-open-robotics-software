@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.ui.components;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -59,10 +58,17 @@ public class UIFootstepPlanManager
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualSwingHeight, value -> updateStepHeights());
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, this::updateStepPlacements);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.OverrideSpecificSwingTime, this::updateSpecificStepSwingTime);
 
       // Send plan to robot when requested
       Runnable dispathPlanRunnable = () -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, adjustedPath.get());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send -> new Thread(dispathPlanRunnable).start());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send ->
+      {
+         if (adjustedPath.get() != null)
+         {
+            new Thread(dispathPlanRunnable, "SendPlan").start();
+         }
+      });
    }
 
    private void updatePartialFootholds(boolean ignorePartialFootholds)
@@ -122,6 +128,15 @@ public class UIFootstepPlanManager
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepToUpdateViz, Pair.of(stepIndex, footstepDataMessage));
    }
 
+   private void updateSpecificStepSwingTime(Pair<Integer, Double> specificStepSwingTime)
+   {
+      int index = specificStepSwingTime.getKey();
+      if (index >= 0 && index < adjustedPath.get().getFootstepDataList().size())
+      {
+         adjustedPath.get().getFootstepDataList().get(index).setSwingDuration(specificStepSwingTime.getValue());
+      }
+   }
+
    private void updatePaths(FootstepDataListMessage plannedPath)
    {
       FootstepDataListMessage adjustedPath = new FootstepDataListMessage();
@@ -158,12 +173,18 @@ public class UIFootstepPlanManager
 
    private static void setManualStepTimes(FootstepDataListMessage messageToSet, double manualSwingTime, double manualTransferTime)
    {
+      if (messageToSet == null)
+         return;
+
       messageToSet.getFootstepDataList().forEach(message -> message.setSwingDuration(manualSwingTime));
       messageToSet.getFootstepDataList().forEach(message -> message.setTransferDuration(manualTransferTime));
    }
 
    private static void copyStepTimes(FootstepDataListMessage messageToCopyFrom, FootstepDataListMessage messageToSet)
    {
+      if (messageToCopyFrom == null || messageToSet == null)
+         return;
+
       for (int i = 0; i < messageToSet.getFootstepDataList().size(); i++)
       {
          double swingTimeToCopy = messageToCopyFrom.getFootstepDataList().get(i).getSwingDuration();

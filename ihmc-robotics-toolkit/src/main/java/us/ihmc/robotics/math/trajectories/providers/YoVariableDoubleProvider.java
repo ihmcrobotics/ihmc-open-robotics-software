@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 
@@ -9,7 +9,7 @@ public class YoVariableDoubleProvider implements DoubleProvider
 {
    private final YoDouble value;
 
-   public YoVariableDoubleProvider(String name, YoVariableRegistry registry)
+   public YoVariableDoubleProvider(String name, YoRegistry registry)
    {
       value = new YoDouble(name, registry);
    }

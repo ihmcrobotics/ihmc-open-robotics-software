@@ -1,6 +1,8 @@
 package us.ihmc.avatar.testTools;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -36,7 +38,6 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -54,7 +55,9 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
@@ -68,8 +71,8 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -83,7 +86,7 @@ public class DRCSimulationTestHelper
 
    private final SimulationTestingParameters simulationTestingParameters;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_simulation_test_helper");
 
    private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -142,7 +145,7 @@ public class DRCSimulationTestHelper
 
       for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
       {
-         Class<?> messageClass = ROS2Tools.newMessageInstance(command).getMessageClass();
+         Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
          IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
@@ -204,7 +207,7 @@ public class DRCSimulationTestHelper
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
          simulationStarter.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
          simulationStarter.attachControllerFailureListener(direction -> notifyControllerHasFailed());
-         if (scs.getVariable("desiredICPX") != null && scs.getVariable("desiredICPY") != null)
+         if (scs.findVariable("desiredICPX") != null && scs.findVariable("desiredICPY") != null)
             blockingSimulationRunner.createValidDesiredICPListener();
          blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }
@@ -222,14 +225,14 @@ public class DRCSimulationTestHelper
          setupPlanContinuityTesters();
    }
 
-   public YoVariable<?> getYoVariable(String name)
+   public YoVariable getYoVariable(String name)
    {
-      return scs.getVariable(name);
+      return scs.findVariable(name);
    }
 
-   public YoVariable<?> getYoVariable(String nameSpace, String name)
+   public YoVariable getYoVariable(String namespace, String name)
    {
-      return scs.getVariable(nameSpace, name);
+      return scs.findVariable(namespace, name);
    }
 
    public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
@@ -445,12 +448,12 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public void addChildRegistry(YoVariableRegistry childRegistry)
+   public void addChildRegistry(YoRegistry childRegistry)
    {
       scs.getRootRegistry().addChild(childRegistry);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return scs.getRootRegistry();
    }
@@ -677,7 +680,7 @@ public class DRCSimulationTestHelper
       return robotName;
    }
 
-   public Ros2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }
@@ -693,12 +696,12 @@ public class DRCSimulationTestHelper
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(robotName));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator generator)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic generator)
    {
-      return ROS2Tools.createPublisher(ros2Node, messageType, generator);
+      return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
@@ -708,12 +711,12 @@ public class DRCSimulationTestHelper
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), consumer);
+      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(robotName), consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2Topic generator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
@@ -733,10 +736,10 @@ public class DRCSimulationTestHelper
       final MutableInt xTicks = new MutableInt(0);
       final MutableInt yTicks = new MutableInt(0);
 
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      desiredICPX.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (scs == null || !scs.isSimulating())
                return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.
@@ -753,10 +756,10 @@ public class DRCSimulationTestHelper
          }
       });
 
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      desiredICPY.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (scs == null || !scs.isSimulating())
                return; // Do not perform this check if the sim is not running, so the user can scrub the data when sim is done.

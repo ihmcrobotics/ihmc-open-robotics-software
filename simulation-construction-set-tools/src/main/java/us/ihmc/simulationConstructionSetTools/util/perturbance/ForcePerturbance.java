@@ -1,13 +1,13 @@
 package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ForcePerturbance implements DirectedPerturbance
 {
    private final String name = "ForcePerturbance";
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final ForcePerturbable forcePerturbable;
 
@@ -16,7 +16,7 @@ public class ForcePerturbance implements DirectedPerturbance
 
    private final double ballVelocityMagnitude;
 
-   public ForcePerturbance(ForcePerturbable forcePerturbable, double magnitude, double duration, double ballVelocityMagnitudeForViz, YoVariableRegistry parentRegistry)
+   public ForcePerturbance(ForcePerturbable forcePerturbable, double magnitude, double duration, double ballVelocityMagnitudeForViz, YoRegistry parentRegistry)
    {
       this.forcePerturbable = forcePerturbable;
       this.disturbanceMagnitude.set(magnitude);

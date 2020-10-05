@@ -5,13 +5,13 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PlanarRegionsListHandler
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final int maxNumberOfPlanarRegions = 100;
    private final YoBoolean hasNewPlanarRegionsList = new YoBoolean("hasNewPlanarRegionsList", registry);
@@ -20,7 +20,7 @@ public class PlanarRegionsListHandler
 
    private final YoBoolean waitingOnNewPlanarRegions = new YoBoolean("waitingOnNewPlanarRegions", registry);
 
-   public PlanarRegionsListHandler(StatusMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
+   public PlanarRegionsListHandler(StatusMessageOutputManager requestOutputManager, YoRegistry parentRegistry)
    {
       planarRegions.clear();
 

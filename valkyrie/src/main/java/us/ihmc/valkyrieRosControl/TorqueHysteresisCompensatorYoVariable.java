@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -38,14 +38,14 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
    public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJointBasics joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
                                                 YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
-                                                YoVariableRegistry registry)
+                                                YoRegistry registry)
    {
       this(prefix, joint, output, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, rampTime, yoTime, registry);
    }
 
    public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJointBasics joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
                                                 YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
-                                                YoDouble yoTime, YoVariableRegistry registry)
+                                                YoDouble yoTime, YoRegistry registry)
    {
       super(prefix + joint.getName(), registry);
       this.joint = joint;

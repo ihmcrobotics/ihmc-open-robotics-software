@@ -31,7 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -43,7 +43,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoDouble yoTime = new YoDouble("t_stateEstimator", registry);
    private final AtomicReference<StateEstimatorMode> atomicOperationMode = new AtomicReference<>(null);
    private final YoEnum<StateEstimatorMode> operatingMode = new YoEnum<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
@@ -355,7 +355,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

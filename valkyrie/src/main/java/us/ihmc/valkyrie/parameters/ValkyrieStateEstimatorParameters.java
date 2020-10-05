@@ -24,7 +24,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
@@ -116,7 +116,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       String[] namesOfJointsUsingOutputEncoder = jointMap.getNamesOfJointsUsingOutputEncoder();
       String[] armJointNames = createArrayWithArmJointNames();
 
-      YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
+      YoRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       if (DEBUG_VELOCITY_WITH_FD)
       {

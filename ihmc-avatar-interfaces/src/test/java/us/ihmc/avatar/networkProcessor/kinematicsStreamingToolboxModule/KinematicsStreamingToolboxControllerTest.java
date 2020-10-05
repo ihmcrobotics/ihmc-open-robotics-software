@@ -21,13 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
@@ -37,11 +31,9 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -72,8 +64,9 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -84,11 +77,11 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
@@ -105,7 +98,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
-   protected YoVariableRegistry toolboxRegistry;
+   protected YoRegistry toolboxRegistry;
    protected YoGraphicsListRegistry yoGraphicsListRegistry;
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
@@ -113,13 +106,13 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected SimulationConstructionSet scs;
    protected DRCSimulationTestHelper drcSimulationTestHelper;
    protected HumanoidFloatingRootJointRobot robot, ghost;
-   protected Ros2Node ros2Node;
+   protected ROS2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected MessageTopicNameGenerator controllerSubGenerator;
-   protected MessageTopicNameGenerator controllerPubGenerator;
-   protected MessageTopicNameGenerator toolboxSubGenerator;
-   protected MessageTopicNameGenerator toolboxPubGenerator;
+   protected ROS2Topic controllerInputTopic;
+   protected ROS2Topic controllerOutputTopic;
+   protected ROS2Topic toolboxInputTopic;
+   protected ROS2Topic toolboxOutputTopic;
    protected ScheduledExecutorService executor;
 
    /**
@@ -142,34 +135,34 @@ public abstract class KinematicsStreamingToolboxControllerTest
       createToolboxController(ghostRobotModel);
       setupCollisions(ghostRobotModel.getHumanoidRobotKinematicsCollisionModel(), ghost);
 
-      ros2Node = drcSimulationTestHelper.getRos2Node();
+      ros2Node = drcSimulationTestHelper.getROS2Node();
 
-      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      toolboxSubGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      toolboxPubGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-      RealtimeRos2Node toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
-      new ControllerNetworkSubscriber(toolboxSubGenerator, commandInputManager, toolboxPubGenerator, statusOutputManager, toolboxRos2Node);
-      IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                WholeBodyTrajectoryMessage.class,
-                                                                                                controllerSubGenerator);
+      RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
+      IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                         WholeBodyTrajectoryMessage.class,
+                                                                                                         controllerInputTopic);
       toolboxController.setOutputPublisher(outputPublisher::publish);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    controllerOutputTopic,
                                            s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    CapturabilityBasedStatus.class,
+                                                    controllerOutputTopic,
                                            s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 
-      inputPublisher = ROS2Tools.createPublisher(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxSubGenerator);
-      statePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxSubGenerator);
+      inputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
+      statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
-      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxOutputStatus.class, toolboxPubGenerator, s -> toolboxViz.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxOutputTopic, s -> toolboxViz.set(s.takeNextData()));
 
       ghost.setController(new RobotController()
       {
@@ -191,7 +184,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return toolboxRegistry;
          }
@@ -203,7 +196,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             ghost.setController(ghostController, (int) (toolboxControllerPeriod / ghostRobotModel.getSimulateDT()));
       }
 
-      toolboxRos2Node.spin();
+      toolboxROS2Node.spin();
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       scs = drcSimulationTestHelper.getSimulationConstructionSet();
    }
@@ -232,7 +225,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       {
          Robot[] robots = ghost != null ? new Robot[] {robot, ghost} : new Robot[] {robot};
          scs = new SimulationConstructionSet(robots, simulationTestingParameters);
-         scs.addYoVariableRegistry(toolboxRegistry);
+         scs.addYoRegistry(toolboxRegistry);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
          scs.setCameraFix(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
@@ -267,7 +260,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    private void createToolboxController(DRCRobotModel robotModel)
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
-      toolboxRegistry = new YoVariableRegistry("toolboxMain");
+      toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
@@ -423,7 +416,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    @Test
    public void testStreamingToController() throws SimulationExceededMaximumTimeException
    {
-      YoVariableRegistry spyRegistry = new YoVariableRegistry("spy");
+      YoRegistry spyRegistry = new YoRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
    
@@ -453,12 +446,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
             if (!needsToInitialize)
                return;
    
-            time = (YoDouble) toolboxRegistry.getVariable("time");
-            isStreaming = (YoBoolean) toolboxRegistry.getVariable("isStreaming");
-            streamingStartTime = (YoDouble) toolboxRegistry.getVariable("streamingStartTime");
-            streamingBlendingDuration = (YoDouble) toolboxRegistry.getVariable("streamingBlendingDuration");
-            mainStateMachineSwitchTime = (YoDouble) toolboxRegistry.getVariable("mainStateMachineSwitchTime");
-            mainStateMachineCurrentState = (YoEnum<KSTState>) toolboxRegistry.getVariable("mainStateMachineCurrentState");
+            time = (YoDouble) toolboxRegistry.findVariable("time");
+            isStreaming = (YoBoolean) toolboxRegistry.findVariable("isStreaming");
+            streamingStartTime = (YoDouble) toolboxRegistry.findVariable("streamingStartTime");
+            streamingBlendingDuration = (YoDouble) toolboxRegistry.findVariable("streamingBlendingDuration");
+            mainStateMachineSwitchTime = (YoDouble) toolboxRegistry.findVariable("mainStateMachineSwitchTime");
+            mainStateMachineCurrentState = (YoEnum<KSTState>) toolboxRegistry.findVariable("mainStateMachineCurrentState");
    
             needsToInitialize = false;
          }
@@ -507,7 +500,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
    
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return spyRegistry;
          }

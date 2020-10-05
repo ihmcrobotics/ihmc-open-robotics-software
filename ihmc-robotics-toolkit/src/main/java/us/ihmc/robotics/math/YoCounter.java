@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoCounter
@@ -8,7 +8,7 @@ public class YoCounter
    private final YoInteger count;
    private final YoInteger maxCount;
    
-   public YoCounter(String namePrefix, YoVariableRegistry registry)
+   public YoCounter(String namePrefix, YoRegistry registry)
    {
       count = new YoInteger(namePrefix + "Count", registry);
       maxCount = new YoInteger(namePrefix + "MaxCount", registry);

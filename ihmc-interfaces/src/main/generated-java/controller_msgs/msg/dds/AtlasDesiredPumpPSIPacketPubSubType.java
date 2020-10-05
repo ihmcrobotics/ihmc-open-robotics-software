@@ -40,9 +40,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -59,9 +57,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -73,9 +69,7 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_2(data.getDesiredPumpPsi());
 
@@ -83,10 +77,8 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setDesiredPumpPsi(cdr.read_type_2());
       	
 
@@ -95,18 +87,14 @@ public class AtlasDesiredPumpPSIPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_2("desired_pump_psi", data.getDesiredPumpPsi());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setDesiredPumpPsi(ser.read_type_2("desired_pump_psi"));
    }
 

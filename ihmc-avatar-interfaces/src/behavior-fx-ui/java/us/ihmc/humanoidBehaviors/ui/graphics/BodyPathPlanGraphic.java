@@ -14,6 +14,7 @@ import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,7 +43,7 @@ public class BodyPathPlanGraphic extends Group
    /**
     * To process in parallel.
     */
-   public void generateMeshesAsynchronously(List<Point3DReadOnly> bodyPath)
+   public void generateMeshesAsynchronously(List<? extends Point3DReadOnly> bodyPath)
    {
       executorService.submit(() -> {
          LogTools.debug("Received body path plan containing {} points", bodyPath.size());
@@ -50,7 +51,7 @@ public class BodyPathPlanGraphic extends Group
       });
    }
 
-   public void generateMeshes(List<Point3DReadOnly> bodyPath)
+   public void generateMeshes(List<? extends Point3DReadOnly> bodyPath)
    {
       meshBuilder.clear();
 
@@ -82,6 +83,11 @@ public class BodyPathPlanGraphic extends Group
       }
    }
 
+   public void clear()
+   {
+      generateMeshes(new ArrayList<>());
+   }
+
    private void handle(long now)
    {
       synchronized (this)
@@ -89,5 +95,10 @@ public class BodyPathPlanGraphic extends Group
          meshView.setMesh(mesh);
          meshView.setMaterial(material);
       }
+   }
+
+   public void destroy()
+   {
+      executorService.shutdownNow();
    }
 }

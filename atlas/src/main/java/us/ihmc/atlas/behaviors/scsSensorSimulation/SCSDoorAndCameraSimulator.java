@@ -10,7 +10,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.Axis3D;
@@ -22,9 +23,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory;
@@ -32,7 +31,7 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.Robot;
@@ -57,16 +56,18 @@ import java.util.List;
 public class SCSDoorAndCameraSimulator
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
-   private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames;
+   private final RemoteSyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSDoorAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
+   public SCSDoorAndCameraSimulator(ROS2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
    {
-      robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+      robotConfigurationData = new ROS2Input<>(ros2Node,
+                                               RobotConfigurationData.class,
+                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withOutput());
 
-      remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
+      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       Robot robot = new Robot("Robot");
 
@@ -120,9 +121,9 @@ public class SCSDoorAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 robotModel.getSimpleRobotName(),
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER);
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
+                                                                                                              .withOutput());
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       cameraConfiguration.setCameraFieldOfView(80.0);
@@ -188,8 +189,8 @@ public class SCSDoorAndCameraSimulator
 
    private void doControl()
    {
-      HumanoidRobotState humanoidRobotState = remoteSyncedHumanoidFrames.pollHumanoidRobotState();
-      tempNeckFramePose.setToZero(humanoidRobotState.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+      syncedRobot.update();
+      tempNeckFramePose.setToZero(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
       tempNeckFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       floatingHeadJoint.setPosition(tempNeckFramePose.getPosition());
@@ -219,7 +220,7 @@ public class SCSDoorAndCameraSimulator
                                                   DefaultExceptionHandler.PRINT_STACKTRACE);
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture(image);
       return new PlanarRegionsListDefinedEnvironment(environmentName,
-                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStairsWithFlatTop(),
+                                                     BehaviorPlanarRegionEnvironments.createRoughUpAndDownStepsWithFlatTop(),
                                                      cinderBlockTexture,
                                                      0.02,
                                                      false);
@@ -231,7 +232,7 @@ public class SCSDoorAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA.getNodeName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
 //      new SCSDoorAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());

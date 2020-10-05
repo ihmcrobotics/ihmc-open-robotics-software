@@ -8,7 +8,7 @@ import javafx.stage.StageStyle;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class QuadrupedJavaFXROS2VideoViewer extends Application
 {
@@ -18,7 +18,7 @@ public class QuadrupedJavaFXROS2VideoViewer extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer");
 
       QuadrupedJavaFXROS2VideoView ros2VideoView = new QuadrupedJavaFXROS2VideoView(width, height, false, false);
 

@@ -56,12 +56,18 @@ public class NetworkPorts
    public static final NetworkPorts CONTROLLER_FILTER_MODULE_PORT = new NetworkPorts(6029, "controller_filter_module");
    public static final NetworkPorts JOYSTICK_BASED_CONTINUOUS_STEPPING = new NetworkPorts(6030, "joystick_based_stepping");
    public static final NetworkPorts SLAM_MODULE_UI_PORT = new NetworkPorts(6031, "slam_module_ui");
+   public static final NetworkPorts PLANAR_SEGMENTATION_UI_PORT = new NetworkPorts(6032, "planar_segmentation_ui");
+   public static final NetworkPorts PERCEPTION_SUITE_UI_PORT = new NetworkPorts(6033, "perception_suite_ui");
+   public static final NetworkPorts REA_MODULE2_UI_PORT = new NetworkPorts(6034, "rea_module2_ui");
+   public static final NetworkPorts LIVEMAP_UI_PORT = new NetworkPorts(6035, "livemap_ui");
+
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046, "mission_control_server");
    public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(2147, "mission_control_cpu0_test");
    public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(2148, "mission_control_cpu1_test");
-   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(2149, "mission_control_cpu2_test");
+//   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(2149, "mission_control_cpu2_test");
+   public static final NetworkPorts MISSION_CONTROL_JETSON_TEST_PORT = new NetworkPorts(2150, "mission_control_jetson_test");
 
    // Teleop ports
    public static final NetworkPorts XBOX_CONTROLLER_TELEOP_PORT = new NetworkPorts(3001, "xbox_controller_teleop");

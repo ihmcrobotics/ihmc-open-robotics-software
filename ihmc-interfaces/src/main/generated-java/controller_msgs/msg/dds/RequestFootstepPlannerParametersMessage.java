@@ -7,19 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC footstep planning module.
-   
- */
+       * This message is part of the IHMC footstep planning module.
+       */
 public class RequestFootstepPlannerParametersMessage extends Packet<RequestFootstepPlannerParametersMessage> implements Settable<RequestFootstepPlannerParametersMessage>, EpsilonComparable<RequestFootstepPlannerParametersMessage>
 {
-
    public boolean unused_placeholder_field_;
 
    public RequestFootstepPlannerParametersMessage()
    {
-
-
    }
 
    public RequestFootstepPlannerParametersMessage(RequestFootstepPlannerParametersMessage other)
@@ -30,11 +25,9 @@ public class RequestFootstepPlannerParametersMessage extends Packet<RequestFoots
 
    public void set(RequestFootstepPlannerParametersMessage other)
    {
-
       unused_placeholder_field_ = other.unused_placeholder_field_;
 
    }
-
 
    public void setUnusedPlaceholderField(boolean unused_placeholder_field)
    {
@@ -63,7 +56,6 @@ public class RequestFootstepPlannerParametersMessage extends Packet<RequestFoots
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon)) return false;
 
 
@@ -79,7 +71,6 @@ public class RequestFootstepPlannerParametersMessage extends Packet<RequestFoots
 
       RequestFootstepPlannerParametersMessage otherMyClass = (RequestFootstepPlannerParametersMessage) other;
 
-
       if(this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_) return false;
 
 
@@ -92,7 +83,6 @@ public class RequestFootstepPlannerParametersMessage extends Packet<RequestFoots
       StringBuilder builder = new StringBuilder();
 
       builder.append("RequestFootstepPlannerParametersMessage {");
-
       builder.append("unused_placeholder_field=");
       builder.append(this.unused_placeholder_field_);
       builder.append("}");

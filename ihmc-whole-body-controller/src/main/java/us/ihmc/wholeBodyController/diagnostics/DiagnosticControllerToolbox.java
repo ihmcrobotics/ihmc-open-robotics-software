@@ -19,12 +19,12 @@ import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticControllerToolbox
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble yoTime;
 
    private final DiagnosticParameters diagnosticParameters;
@@ -47,7 +47,7 @@ public class DiagnosticControllerToolbox
 
    public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, JointDesiredOutputList lowLevelOutput, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double dt,
-         DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoVariableRegistry parentRegistry)
+         DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.lowLevelOutput = lowLevelOutput;

@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.filters;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -15,17 +15,17 @@ public class SimpleMovingAverageFilteredYoVariable extends YoDouble
    private final YoInteger windowSize;
    private final YoDouble yoVariableToFilter;
 
-   private final DenseMatrix64F previousUpdateValues = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj previousUpdateValues = new DMatrixRMaj(0, 0);
    private int bufferPosition = 0;
 
    private boolean bufferHasBeenFilled = false;
 
-   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoVariableRegistry registry)
+   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoRegistry registry)
    {
       this(name, windowSize, null, registry);
    }
 
-   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoDouble yoVariableToFilter, YoVariableRegistry registry)
+   public SimpleMovingAverageFilteredYoVariable(String name, int windowSize, YoDouble yoVariableToFilter, YoRegistry registry)
    {
       super(name, registry);
 
@@ -34,7 +34,7 @@ public class SimpleMovingAverageFilteredYoVariable extends YoDouble
       this.windowSize.set(windowSize);
 
       previousUpdateValues.reshape(windowSize, 1);
-      CommonOps.fill(previousUpdateValues, 0.0);
+      CommonOps_DDRM.fill(previousUpdateValues, 0.0);
    }
 
    public void setWindowSize(int windowSize)

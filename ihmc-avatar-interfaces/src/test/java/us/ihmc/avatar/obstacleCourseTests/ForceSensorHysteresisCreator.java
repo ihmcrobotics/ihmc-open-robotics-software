@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
@@ -20,7 +20,7 @@ public class ForceSensorHysteresisCreator extends ModularRobotController
    
    private final WrenchCalculatorInterface wrenchCalculatorInterface;
    private final double totalRobotWeightInNewtons;
-   private DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE,1);
+   private DMatrixRMaj wrench = new DMatrixRMaj(Wrench.SIZE,1);
    private double tmpHysteresis = 0;
    private YoDouble hysteresisInZDirection;
    

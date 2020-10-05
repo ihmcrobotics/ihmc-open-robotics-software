@@ -6,8 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -25,17 +25,17 @@ public class ContactPointWrenchMatrixCalculator
 {
    private final ReferenceFrame centerOfMassFrame;
 
-   private final DenseMatrix64F q;
+   private final DMatrixRMaj q;
    private final Map<RigidBodyBasics, Wrench> wrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
 
    // intermediate result storage:
    private final ArrayList<FrameVector3D> normalizedSupportVectors = new ArrayList<FrameVector3D>(4);
    private final FramePoint3D tempContactPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FrameVector3D tempVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
-   private final DenseMatrix64F qBlock = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F rhoBlock = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F rhoMin;
+   private final DMatrixRMaj qBlock = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj rhoBlock = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj wrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj rhoMin;
 
    public ContactPointWrenchMatrixCalculator(ReferenceFrame centerOfMassFrame, int nSupportVectorsPerContactPoint, int nColumns)
    {
@@ -45,11 +45,11 @@ public class ContactPointWrenchMatrixCalculator
       {
          normalizedSupportVectors.add(new FrameVector3D(ReferenceFrame.getWorldFrame()));
       }
-      q = new DenseMatrix64F(Wrench.SIZE, nColumns);
-      rhoMin = new DenseMatrix64F(nColumns, 1);
+      q = new DMatrixRMaj(Wrench.SIZE, nColumns);
+      rhoMin = new DMatrixRMaj(nColumns, 1);
    }
 
-   public DenseMatrix64F getRhoMin(Collection<? extends PlaneContactState> contactStates, double rhoMinScalar)
+   public DMatrixRMaj getRhoMin(Collection<? extends PlaneContactState> contactStates, double rhoMinScalar)
    {
       rhoMin.zero();
       int index = 0;
@@ -97,12 +97,12 @@ public class ContactPointWrenchMatrixCalculator
       }
    }
 
-   public DenseMatrix64F getMatrix()
+   public DMatrixRMaj getMatrix()
    {
       return q;
    }
 
-   public Map<RigidBodyBasics, Wrench> computeWrenches(LinkedHashMap<RigidBodyBasics, ? extends PlaneContactState> contactStates, DenseMatrix64F rho)
+   public Map<RigidBodyBasics, Wrench> computeWrenches(LinkedHashMap<RigidBodyBasics, ? extends PlaneContactState> contactStates, DMatrixRMaj rho)
    {
       wrenches.clear();
       int columnNumber = 0;
@@ -114,12 +114,12 @@ public class ContactPointWrenchMatrixCalculator
          if (nColumns > 0)
          {
             qBlock.reshape(Wrench.SIZE, nColumns);
-            CommonOps.extract(q, 0, Wrench.SIZE, columnNumber, columnNumber + nColumns, qBlock, 0, 0);
+            CommonOps_DDRM.extract(q, 0, Wrench.SIZE, columnNumber, columnNumber + nColumns, qBlock, 0, 0);
 
             rhoBlock.reshape(nColumns, 1);
-            CommonOps.extract(rho, columnNumber, columnNumber + nColumns, 0, 1, rhoBlock, 0, 0);
+            CommonOps_DDRM.extract(rho, columnNumber, columnNumber + nColumns, 0, 1, rhoBlock, 0, 0);
 
-            CommonOps.mult(qBlock, rhoBlock, wrenchMatrix);
+            CommonOps_DDRM.mult(qBlock, rhoBlock, wrenchMatrix);
 
             Wrench wrench = new Wrench(rigidBody.getBodyFixedFrame(), centerOfMassFrame);
             wrench.setIncludingFrame(centerOfMassFrame, wrenchMatrix);

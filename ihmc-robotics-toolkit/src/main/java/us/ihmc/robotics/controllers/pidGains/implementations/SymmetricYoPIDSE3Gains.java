@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Provides symmetric PID gains for SE3 control. This means that all six axes will use
@@ -11,12 +11,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class SymmetricYoPIDSE3Gains extends DefaultYoPID3DGains implements YoPIDSE3Gains
 {
-   public SymmetricYoPIDSE3Gains(String suffix, YoVariableRegistry registry)
+   public SymmetricYoPIDSE3Gains(String suffix, YoRegistry registry)
    {
       super(suffix, GainCoupling.XYZ, true, registry);
    }
 
-   public SymmetricYoPIDSE3Gains(String suffix, boolean useIntegrator, YoVariableRegistry registry)
+   public SymmetricYoPIDSE3Gains(String suffix, boolean useIntegrator, YoRegistry registry)
    {
       super(suffix, GainCoupling.XYZ, useIntegrator, registry);
    }

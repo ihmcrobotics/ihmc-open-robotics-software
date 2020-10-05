@@ -6,13 +6,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class AngularMomentumIntegrator
 {
@@ -33,7 +33,7 @@ public class AngularMomentumIntegrator
 
    private final double controlDT;
 
-   public AngularMomentumIntegrator(String prefix, ICPOptimizationParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoVariableRegistry registry)
+   public AngularMomentumIntegrator(String prefix, ICPOptimizationParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoRegistry registry)
    {
       this.controlDT = controlDT;
       this.feedbackGains = feedbackGains;

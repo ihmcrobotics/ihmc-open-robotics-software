@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.functionApproximation.OnlineLine2DLinearRegression;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
-
-import java.awt.*;
 
 /**
  * This class aims to calculate the edge of rotation of the foot by fitting a line to the the CoP history when the foot is rotating.
@@ -35,7 +35,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            ReferenceFrame soleFrame,
                                            FootholdRotationParameters rotationParameters,
                                            double dt,
-                                           YoVariableRegistry parentRegistry,
+                                           YoRegistry parentRegistry,
                                            Color color,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -60,12 +60,12 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
                                            DoubleProvider inlineStdDevThreshold,
                                            DoubleProvider transverseStdDevThreshold,
                                            double dt,
-                                           YoVariableRegistry parentRegistry,
+                                           YoRegistry parentRegistry,
                                            Color color,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = side.getLowerCaseName() + "CoPHistory";
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       lineStable = new YoBoolean(namePrefix + "IsStable", registry);
       statisticsStable = new YoBoolean(namePrefix + "StatisticsStable", registry);
 

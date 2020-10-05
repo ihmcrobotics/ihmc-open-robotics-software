@@ -4,26 +4,26 @@ import static us.ihmc.robotics.physics.ContactImpulseTools.negateMult;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 public class ContactImpulseRandomTools
 {
-   public static DenseMatrix64F nextSquareFullRank(Random random)
+   public static DMatrixRMaj nextSquareFullRank(Random random)
    {
       return nextSquareFullRank(random, 1.0e-3, 10.0);
    }
 
-   public static DenseMatrix64F nextSquareFullRank(Random random, double singularValueMin, double singularValueMax)
+   public static DMatrixRMaj nextSquareFullRank(Random random, double singularValueMin, double singularValueMax)
    {
       return nextSquareFullRank(random, singularValueMin, singularValueMax, 0.25);
    }
 
-   public static DenseMatrix64F nextSquareFullRank(Random random, double singularValueMin, double singularValueMax, double probabilityNegativeSingularValue)
+   public static DMatrixRMaj nextSquareFullRank(Random random, double singularValueMin, double singularValueMax, double probabilityNegativeSingularValue)
    {
       double[] singularValues = new double[3];
 
@@ -33,31 +33,31 @@ public class ContactImpulseRandomTools
          if (random.nextDouble() < probabilityNegativeSingularValue)
             singularValues[j] = -singularValues[j];
       }
-      DenseMatrix64F M_inv = RandomMatrices.createSingularValues(3, 3, random, singularValues);
+      DMatrixRMaj M_inv = RandomMatrices_DDRM.singular(3, 3, random, singularValues);
       return M_inv;
    }
 
-   public static DenseMatrix64F nextPositiveDefiniteMatrix(Random random, double singularValueMin, double singularValueMax)
+   public static DMatrixRMaj nextPositiveDefiniteMatrix(Random random, double singularValueMin, double singularValueMax)
    {
-      DenseMatrix64F M = RandomMatrices.createDiagonal(3, singularValueMin, singularValueMax, random);
-      DenseMatrix64F P = nextSquareFullRank(random);
-      DenseMatrix64F Pinv = new DenseMatrix64F(3, 3);
-      CommonOps.invert(P, Pinv);
-      DenseMatrix64F PM = new DenseMatrix64F(3, 3);
-      CommonOps.mult(P, M, PM);
-      DenseMatrix64F PMPinv = new DenseMatrix64F(3, 3);
-      CommonOps.mult(PM, Pinv, PMPinv);
+      DMatrixRMaj M = RandomMatrices_DDRM.diagonal(3, singularValueMin, singularValueMax, random);
+      DMatrixRMaj P = nextSquareFullRank(random);
+      DMatrixRMaj Pinv = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.invert(P, Pinv);
+      DMatrixRMaj PM = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(P, M, PM);
+      DMatrixRMaj PMPinv = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(PM, Pinv, PMPinv);
       return PMPinv;
    }
 
-   public static DenseMatrix64F nextPositiveDefiniteSymmetricMatrix(Random random, double min, double max)
+   public static DMatrixRMaj nextPositiveDefiniteSymmetricMatrix(Random random, double min, double max)
    {
-      return RandomMatrices.createEigenvaluesSymm(3, random, RandomNumbers.nextDoubleArray(random, 3, min, max));
+      return RandomMatrices_DDRM.symmetricWithEigenvalues(3, random, RandomNumbers.nextDoubleArray(random, 3, min, max));
    }
 
-   public static DenseMatrix64F nextSlippingClosingVelocity(Random random, DenseMatrix64F M_inv, double mu)
+   public static DMatrixRMaj nextSlippingClosingVelocity(Random random, DMatrixRMaj M_inv, double mu)
    {
-      DenseMatrix64F lambda_v_0 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj lambda_v_0 = new DMatrixRMaj(3, 1);
       lambda_v_0.set(2, EuclidCoreRandomTools.nextDouble(random, 1.0e-2, 10.0));
 
       double minFrictionImpulse = mu * lambda_v_0.get(2);
@@ -66,7 +66,7 @@ public class ContactImpulseRandomTools
       double theta = EuclidCoreRandomTools.nextDouble(random, Math.PI);
       lambda_v_0.set(0, frictionImpulse * Math.cos(theta));
       lambda_v_0.set(1, frictionImpulse * Math.sin(theta));
-      DenseMatrix64F c = negateMult(M_inv, lambda_v_0);
+      DMatrixRMaj c = negateMult(M_inv, lambda_v_0);
 
       if (c.get(2) > 0.0)
       {

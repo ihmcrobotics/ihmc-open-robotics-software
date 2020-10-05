@@ -10,14 +10,14 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MultipleWaypointsBlendedPositionTrajectoryGenerator extends BlendedPositionTrajectoryGenerator
 {
    private final MultipleWaypointsPositionTrajectoryGenerator trajectory;
 
    public MultipleWaypointsBlendedPositionTrajectoryGenerator(String prefix, MultipleWaypointsPositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
-                                                              YoVariableRegistry parentRegistry)
+                                                              YoRegistry parentRegistry)
    {
       super(prefix, trajectory, trajectoryFrame, parentRegistry);
 

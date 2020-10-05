@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
 
 public class FirstOrderFilteredYoVariableTest
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+   private final YoRegistry registry = new YoRegistry("testRegistry");
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private final double DT = 0.001;

@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
@@ -317,7 +317,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry)
    {
       return null;
    }

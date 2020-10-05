@@ -10,11 +10,11 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedStandController implements EventState
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ReferenceFrame supportFrame;
 
@@ -24,7 +24,7 @@ public class QuadrupedStandController implements EventState
    private final QuadrupedControllerToolbox controllerToolbox;
 
    public QuadrupedStandController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                   YoVariableRegistry parentRegistry)
+                                   YoRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       // frames
@@ -39,7 +39,7 @@ public class QuadrupedStandController implements EventState
       parentRegistry.addChild(registry);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

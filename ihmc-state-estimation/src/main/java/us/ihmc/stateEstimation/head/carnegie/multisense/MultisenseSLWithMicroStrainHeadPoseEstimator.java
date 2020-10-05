@@ -18,16 +18,16 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainData;
 import us.ihmc.sensors.imu.lord.microstrain.MicroStrainUDPPacketListener;
 import us.ihmc.stateEstimation.head.EKFHeadPoseEstimator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.YoPoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoPoint3D;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -88,14 +88,14 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       this.getRobotConfigurationDataFromNetwork = getRobotConfigurationDataFromNetwork;
       if (this.getRobotConfigurationDataFromNetwork)
       {
-         RealtimeRos2Node realtimeRos2Node = ROS2Tools
-               .createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "multisense_microstrain_head_pose_estimator");
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, ROS2Tools::generateDefaultTopicName, this::onNewDataMessage);
+         RealtimeROS2Node realtimeROS2Node = ROS2Tools
+               .createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "multisense_microstrain_head_pose_estimator");
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, ROS2Tools.IHMC_ROOT, this::onNewDataMessage);
       }
 
       headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
-      YoVariableRegistry registry = getYoVariableRegistry();
+      YoRegistry registry = getYoRegistry();
 
       String prefix = "MicroStrainData";
       imuAngularVelocity = new YoFrameVector3D(prefix, "AngularVelocity", ReferenceFrame.getWorldFrame(), registry);

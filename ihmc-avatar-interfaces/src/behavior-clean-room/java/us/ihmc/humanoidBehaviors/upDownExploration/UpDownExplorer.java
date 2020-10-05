@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
@@ -71,12 +72,12 @@ public class UpDownExplorer
       upDownCenter = behaviorHelper.createUIInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
-   public void onNavigateEntry(HumanoidReferenceFrames humanoidReferenceFrames)
+   public void onNavigateEntry(RemoteSyncedRobotModel syncedRobot)
    {
       // TODO this should plan only if
 
       FramePose3D midFeetZUpPose = new FramePose3D();
-      midFeetZUpPose.setFromReferenceFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
+      midFeetZUpPose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
 
       state = decideNextAction(midFeetZUpPose, true);
 
@@ -86,7 +87,7 @@ public class UpDownExplorer
          boolean requireHeightChange = isCloseToCenter;
          PlanarRegionsList latestPlanarRegionList = rea.getLatestPlanarRegionsList();
          
-         upDownSearchNotification = upDownFlatAreaFinder.upOrDownOnAThread(humanoidReferenceFrames.getMidFeetZUpFrame(),
+         upDownSearchNotification = upDownFlatAreaFinder.upOrDownOnAThread(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(),
                                                                            latestPlanarRegionList,
                                                                            requireHeightChange);
       }

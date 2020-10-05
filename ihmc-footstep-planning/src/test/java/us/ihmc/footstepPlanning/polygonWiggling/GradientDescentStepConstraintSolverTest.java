@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
 import org.junit.jupiter.api.*;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.PointInPolygonSolver;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -27,7 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +36,7 @@ public class GradientDescentStepConstraintSolverTest
    private GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry graphicsListRegistry;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private WiggleParameters wiggleParameters;
 
    @BeforeEach
@@ -52,7 +49,7 @@ public class GradientDescentStepConstraintSolverTest
       {
          scs = new SimulationConstructionSet(new Robot("testRobot"));
          scs.setGroundVisible(false);
-         registry = new YoVariableRegistry(getClass().getSimpleName());
+         registry = new YoRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
          gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
@@ -249,7 +246,13 @@ public class GradientDescentStepConstraintSolverTest
    {
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       initialFoot.applyTransform(initialFootTransform, false);
-      RigidBodyTransform transform = gradientDescentStepConstraintSolver.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      GradientDescentStepConstraintInput input = new GradientDescentStepConstraintInput();
+
+      input.setInitialStepPolygon(initialFoot);
+      input.setPolygonToWiggleInto(polygon);
+      input.setWiggleParameters(wiggleParameters);
+
+      RigidBodyTransform transform = gradientDescentStepConstraintSolver.wigglePolygon(input);
 
       ConvexPolygon2D transformedFoot = new ConvexPolygon2D(initialFoot);
       transformedFoot.applyTransform(transform, false);
@@ -316,13 +319,19 @@ public class GradientDescentStepConstraintSolverTest
       long[] concaveTimes = new long[testConfigs.size()];
       long[] convexTimes = new long[testConfigs.size()];
 
+      GradientDescentStepConstraintInput input = new GradientDescentStepConstraintInput();
+
       // warmup
       for (int i = 0; i < numWarmupLoops; i++)
       {
          for (int j = 0; j < testConfigs.size(); j++)
          {
             TimingTestConfiguration testConfig = testConfigs.get(j);
-            wiggler.wigglePolygon(testConfig.initialPolygon, testConfig.concavePolygon, testConfig.wiggleParameters);
+
+            input.setInitialStepPolygon(testConfig.initialPolygon);
+            input.setPolygonToWiggleInto(testConfig.concavePolygon);
+            input.setWiggleParameters(testConfig.wiggleParameters);
+            wiggler.wigglePolygon(input);
          }
       }
 
@@ -333,7 +342,12 @@ public class GradientDescentStepConstraintSolverTest
          {
             TimingTestConfiguration testConfig = testConfigs.get(j);
             long s = System.nanoTime();
-            wiggler.wigglePolygon(testConfig.initialPolygon, testConfig.concavePolygon, testConfig.wiggleParameters);
+
+            input.setInitialStepPolygon(testConfig.initialPolygon);
+            input.setPolygonToWiggleInto(testConfig.concavePolygon);
+            input.setWiggleParameters(testConfig.wiggleParameters);
+            wiggler.wigglePolygon(input);
+
             concaveTimes[j]  = System.nanoTime() - s;
          }
       }
@@ -441,7 +455,7 @@ public class GradientDescentStepConstraintSolverTest
       transformGenerator.rotate(shinPitch, Axis3D.Y);
       transformGenerator.translate(0.0, 0.0, 0.5 * shinLength);
       RigidBodyTransform transformToSoleFrame = transformGenerator.getRigidBodyTransformCopy();
-      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, 15.0, transformToSoleFrame);
+      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, transformToSoleFrame);
 
       RigidBodyTransform footTransformInLocal = new RigidBodyTransform();
       footTransformInLocal.appendYawRotation(Math.toRadians(180.0));
@@ -449,14 +463,21 @@ public class GradientDescentStepConstraintSolverTest
 
       footPolygon.applyTransform(footTransformInLocal);
 
-      gradientDescentStepConstraintSolver.wigglePolygon(footPolygon, wiggleParameters, footTransformInLocal, firstStep, stairCaseRegions);
+      GradientDescentStepConstraintInput input = new GradientDescentStepConstraintInput();
+      input.setInitialStepPolygon(footPolygon);
+      input.setPlanarRegion(firstStep);
+      input.setWiggleParameters(wiggleParameters);
+      input.setFootstepInRegionFrame(footTransformInLocal);
+      input.setPlanarRegionsList(stairCaseRegions);
+
+      gradientDescentStepConstraintSolver.wigglePolygon(input);
    }
 
    @Disabled
    @Test
    public void testShinCollisionOnDataSet()
    {
-      DataSet stairsDataSet = DataSetIOTools.loadDataSet(DataSetName._20200513_151318_StairsIHMC);
+      DataSet stairsDataSet = DataSetIOTools.loadDataSet(DataSetName._20200513_151318_StairsIHMC_Bottom);
       PlanarRegionsList stairsRegions = stairsDataSet.getPlanarRegionsList();
 
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -476,9 +497,16 @@ public class GradientDescentStepConstraintSolverTest
       transformGenerator.translate(0.0, 0.0, 0.5 * shinLength);
       RigidBodyTransform transformToSoleFrame = transformGenerator.getRigidBodyTransformCopy();
 
-      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, 15.0, transformToSoleFrame);
+      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, transformToSoleFrame);
 
-      gradientDescentStepConstraintSolver.wigglePolygon(footPolygon, new WiggleParameters(), footTransformInLocal, step, stairsRegions);
+      GradientDescentStepConstraintInput input = new GradientDescentStepConstraintInput();
+      input.setInitialStepPolygon(footPolygon);
+      input.setPlanarRegion(step);
+      input.setWiggleParameters(new WiggleParameters());
+      input.setFootstepInRegionFrame(footTransformInLocal);
+      input.setPlanarRegionsList(stairsRegions);
+
+      gradientDescentStepConstraintSolver.wigglePolygon(input);
    }
 
    private PlanarRegion packStep(int stepIndex, PlanarRegionsList stairsRegions, ConvexPolygon2D footPolygon, RigidBodyTransform footTransformInLocal)

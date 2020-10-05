@@ -44,6 +44,11 @@ public class PositionGraphic implements PositionEditable
       update();
    }
 
+   public void setVisible(boolean visible)
+   {
+      sphere.setVisible(visible);
+   }
+
    @Override
    public void setPosition(Point3DReadOnly position)
    {

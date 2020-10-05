@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -27,7 +27,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * <ul>
  * <li>{@link #getJacobianMatrix()} can be used to get the reference to the raw matrix can be used
  * to then perform external operations with it using the third-party library EJML.
- * <li>{@link #computeJointTorques(Wrench, DenseMatrix64F)} computes the joint torques necessary to
+ * <li>{@link #computeJointTorques(Wrench, DMatrixRMaj)} computes the joint torques necessary to
  * achieve a given {@code Wrench} at the end-effector or descendant of this Jacobian. It uses the
  * relation: <br>
  * &tau; = J<sup>T</sup> * W </br>
@@ -45,11 +45,11 @@ public class GeometricJacobian
     * {@link ConvectiveTermCalculator} when the list of joints of the Jacobian is not continuous.
     */
    private final JointBasics[] jointPathFromBaseToEndEffector;
-   private final DenseMatrix64F jacobian;
+   private final DMatrixRMaj jacobian;
    private ReferenceFrame jacobianFrame;
 
    // Temporary variables
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(Twist.SIZE, 1);
 
    private final boolean allowChangeFrame;
    private final int hashCode;
@@ -87,7 +87,7 @@ public class GeometricJacobian
       this.joints = new JointBasics[joints.length];
       System.arraycopy(joints, 0, this.joints, 0, joints.length);
       this.jacobianFrame = jacobianFrame;
-      this.jacobian = new DenseMatrix64F(SpatialVector.SIZE, MultiBodySystemTools.computeDegreesOfFreedom(joints));
+      this.jacobian = new DMatrixRMaj(SpatialVector.SIZE, MultiBodySystemTools.computeDegreesOfFreedom(joints));
       this.jointPathFromBaseToEndEffector = MultiBodySystemTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 
@@ -182,9 +182,9 @@ public class GeometricJacobian
     * @return the twist of the end effector with respect to the base, expressed in the
     *         jacobianFrame.
     */
-   public void getTwist(DenseMatrix64F jointVelocities, Twist twistToPack)
+   public void getTwist(DMatrixRMaj jointVelocities, Twist twistToPack)
    {
-      CommonOps.mult(jacobian, jointVelocities, tempMatrix);
+      CommonOps_DDRM.mult(jacobian, jointVelocities, tempMatrix);
       twistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, 0, tempMatrix);
    }
 
@@ -199,9 +199,9 @@ public class GeometricJacobian
     *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
-   public DenseMatrix64F computeJointTorques(WrenchReadOnly wrench)
+   public DMatrixRMaj computeJointTorques(WrenchReadOnly wrench)
    {
-      DenseMatrix64F jointTorques = new DenseMatrix64F(1, jacobian.getNumCols());
+      DMatrixRMaj jointTorques = new DMatrixRMaj(1, jacobian.getNumCols());
       computeJointTorques(wrench, jointTorques);
       return jointTorques;
    }
@@ -216,7 +216,7 @@ public class GeometricJacobian
     *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
     *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
-   public void computeJointTorques(WrenchReadOnly wrench, DenseMatrix64F jointTorquesToPack)
+   public void computeJointTorques(WrenchReadOnly wrench, DMatrixRMaj jointTorquesToPack)
    {
       // reference frame check
       wrench.getReferenceFrame().checkReferenceFrameMatch(this.jacobianFrame);
@@ -224,17 +224,17 @@ public class GeometricJacobian
       //      wrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
       wrench.get(tempMatrix);
       jointTorquesToPack.reshape(1, jacobian.getNumCols());
-      CommonOps.multTransA(tempMatrix, jacobian, jointTorquesToPack);
-      CommonOps.transpose(jointTorquesToPack);
+      CommonOps_DDRM.multTransA(tempMatrix, jacobian, jointTorquesToPack);
+      CommonOps_DDRM.transpose(jointTorquesToPack);
    }
 
    /**
-    * Returns a reference to the underlying {@code DenseMatrix64F} object. Does not recompute the
+    * Returns a reference to the underlying {@code DMatrixRMaj} object. Does not recompute the
     * Jacobian.
     * 
-    * @return a reference to the underlying {@code DenseMatrix64F} object
+    * @return a reference to the underlying {@code DMatrixRMaj} object
     */
-   public DenseMatrix64F getJacobianMatrix()
+   public DMatrixRMaj getJacobianMatrix()
    {
       return jacobian;
    }
@@ -244,7 +244,7 @@ public class GeometricJacobian
     */
    public double det()
    {
-      return CommonOps.det(jacobian);
+      return CommonOps_DDRM.det(jacobian);
    }
 
    /**

@@ -11,7 +11,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -20,12 +20,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.BasicCoPPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm.LIPMDDPCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -48,12 +43,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.trajectoryOptimization.DiscreteOptimizationTrajectory;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -77,7 +72,7 @@ public class LIPMDDPCalculatorVisualizer
    private final SimulationConstructionSet scs;
    private final YoDouble yoTime;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
+   private final YoRegistry registry = new YoRegistry("ICPViz");
 
    private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
    private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
@@ -156,10 +151,10 @@ public class LIPMDDPCalculatorVisualizer
 
       updatesPerRequest.set(1);
       trajectoryDT.set(0.01);
-      trajectoryDT.addVariableChangedListener(new VariableChangedListener()
+      trajectoryDT.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             ddp.setDeltaT(trajectoryDT.getDoubleValue());
          }
@@ -201,7 +196,7 @@ public class LIPMDDPCalculatorVisualizer
       Robot robot = new Robot("Dummy");
       yoTime = robot.getYoTime();
       scs = new SimulationConstructionSet(robot, scsParameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.025);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -247,14 +242,14 @@ public class LIPMDDPCalculatorVisualizer
 
       plotCoPPlan(trajectoryTime);
 
-      DenseMatrix64F currentCoMState;
+      DMatrixRMaj currentCoMState;
       if (useSimple)
       {
-         currentCoMState = new DenseMatrix64F(4, 1);
+         currentCoMState = new DMatrixRMaj(4, 1);
       }
       else
       {
-         currentCoMState = new DenseMatrix64F(6, 1);
+         currentCoMState = new DMatrixRMaj(6, 1);
          currentCoMState.set(2, 0, 1.0);
       }
 
@@ -314,8 +309,8 @@ public class LIPMDDPCalculatorVisualizer
 
       for (int i = 0; i < trajectory.size(); i++)
       {
-         DenseMatrix64F control = trajectory.getControl(i);
-         DenseMatrix64F state = trajectory.getState(i);
+         DMatrixRMaj control = trajectory.getControl(i);
+         DMatrixRMaj state = trajectory.getState(i);
 
          tempPoint.set(control.get(0), control.get(1), 0.0);
          modifiedCopTrack.setBallLoop(tempPoint);

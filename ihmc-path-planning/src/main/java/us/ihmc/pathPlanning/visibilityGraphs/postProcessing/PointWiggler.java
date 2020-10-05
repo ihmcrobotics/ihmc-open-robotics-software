@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -88,10 +88,10 @@ public class PointWiggler
 
       int numberOfPointsWithinProximity = pointsInfoToAvoid.size();
 
-      DenseMatrix64F A = new DenseMatrix64F(2, 2);
-      DenseMatrix64F b = new DenseMatrix64F(2, 1);
-      DenseMatrix64F CI = new DenseMatrix64F(numberOfPointsWithinProximity, 2);
-      DenseMatrix64F ci = new DenseMatrix64F(numberOfPointsWithinProximity, 1);
+      DMatrixRMaj A = new DMatrixRMaj(2, 2);
+      DMatrixRMaj b = new DMatrixRMaj(2, 1);
+      DMatrixRMaj CI = new DMatrixRMaj(numberOfPointsWithinProximity, 2);
+      DMatrixRMaj ci = new DMatrixRMaj(numberOfPointsWithinProximity, 1);
 
       int numberOfPointsAdded = 0;
 
@@ -132,13 +132,13 @@ public class PointWiggler
       A.set(1, 1, numberOfPointsAdded);
 
       // done because expectation is 0.5 x^T A x + b
-      CommonOps.scale(2.0, A);
+      CommonOps_DDRM.scale(2.0, A);
 
       JavaQuadProgSolver solver = new JavaQuadProgSolver();
       solver.setQuadraticCostFunction(A, b, 0.0);
       solver.setLinearInequalityConstraints(CI, ci);
 
-      DenseMatrix64F shiftedPointSolutionVector = new DenseMatrix64F(2, 1);
+      DMatrixRMaj shiftedPointSolutionVector = new DMatrixRMaj(2, 1);
       solver.solve(shiftedPointSolutionVector);
 
       Point2D shiftedPoint = new Point2D();

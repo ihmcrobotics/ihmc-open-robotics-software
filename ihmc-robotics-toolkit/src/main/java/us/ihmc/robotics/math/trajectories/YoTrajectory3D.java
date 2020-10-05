@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoTrajectory3D
 {
@@ -19,7 +19,7 @@ public class YoTrajectory3D
    protected final YoTrajectory yTrajectory;
    protected final YoTrajectory zTrajectory;
 
-   public YoTrajectory3D(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoTrajectory3D(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       xTrajectory = new YoTrajectory(name + "X", maximumNumberOfCoefficients, registry);
       yTrajectory = new YoTrajectory(name + "Y", maximumNumberOfCoefficients, registry);

@@ -7,32 +7,21 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message notifies the user that a previously sent message was rejected by the whole-body controller.
-   
- */
+       * This message notifies the user that a previously sent message was rejected by the whole-body controller.
+       */
 public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotificationPacket> implements Settable<InvalidPacketNotificationPacket>, EpsilonComparable<InvalidPacketNotificationPacket>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    public java.lang.StringBuilder packet_class_simple_name_;
-
    public java.lang.StringBuilder error_message_;
 
    public InvalidPacketNotificationPacket()
    {
-
-
       packet_class_simple_name_ = new java.lang.StringBuilder(255);
-
       error_message_ = new java.lang.StringBuilder(255);
-
    }
 
    public InvalidPacketNotificationPacket(InvalidPacketNotificationPacket other)
@@ -43,39 +32,30 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
    public void set(InvalidPacketNotificationPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       packet_class_simple_name_.setLength(0);
       packet_class_simple_name_.append(other.packet_class_simple_name_);
-
 
       error_message_.setLength(0);
       error_message_.append(other.error_message_);
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
-
 
    public void setPacketClassSimpleName(java.lang.String packet_class_simple_name)
    {
@@ -91,7 +71,6 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
    {
       return packet_class_simple_name_;
    }
-
 
    public void setErrorMessage(java.lang.String error_message)
    {
@@ -126,12 +105,9 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.packet_class_simple_name_, other.packet_class_simple_name_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.error_message_, other.error_message_, epsilon)) return false;
 
@@ -148,12 +124,9 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
       InvalidPacketNotificationPacket otherMyClass = (InvalidPacketNotificationPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!us.ihmc.idl.IDLTools.equals(this.packet_class_simple_name_, otherMyClass.packet_class_simple_name_)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.equals(this.error_message_, otherMyClass.error_message_)) return false;
 
@@ -167,13 +140,10 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       StringBuilder builder = new StringBuilder();
 
       builder.append("InvalidPacketNotificationPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("packet_class_simple_name=");
       builder.append(this.packet_class_simple_name_);      builder.append(", ");
-
       builder.append("error_message=");
       builder.append(this.error_message_);
       builder.append("}");

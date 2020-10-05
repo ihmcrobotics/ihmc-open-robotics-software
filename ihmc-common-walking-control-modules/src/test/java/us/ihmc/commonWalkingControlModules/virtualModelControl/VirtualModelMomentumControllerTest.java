@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,6 @@ import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelContr
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotArm;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -36,7 +34,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
@@ -439,10 +436,10 @@ public class VirtualModelMomentumControllerTest
 
       JointIndexHandler jointIndexHandler = new JointIndexHandler(controlledJoints);
 
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
-      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
-      CommonOps.invert(transposeJacobianMatrix);
+      DMatrixRMaj jacobianMatrix = jacobian.getJacobianMatrix();
+      DMatrixRMaj transposeJacobianMatrix = new DMatrixRMaj(jacobianMatrix.numCols, Wrench.SIZE);
+      CommonOps_DDRM.transpose(jacobianMatrix, transposeJacobianMatrix);
+      CommonOps_DDRM.invert(transposeJacobianMatrix);
 
       VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(jointIndexHandler);
 
@@ -459,10 +456,10 @@ public class VirtualModelMomentumControllerTest
       desiredWrench.changeFrame(pelvis.getBodyFixedFrame());
 
       // compute end effector force from torques
-      DenseMatrix64F jointEffortMatrix = virtualModelControlSolution.getJointTorques();
+      DMatrixRMaj jointEffortMatrix = virtualModelControlSolution.getJointTorques();
 
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
+      DMatrixRMaj appliedWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      CommonOps_DDRM.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
       Wrench appliedWrench = new Wrench(endEffector.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
 
       VirtualModelMomentumControllerTestHelper.compareWrenches(desiredWrench, appliedWrench);
@@ -603,10 +600,10 @@ public class VirtualModelMomentumControllerTest
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
       jacobian.compute();
 
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
-      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
-      CommonOps.invert(transposeJacobianMatrix);
+      DMatrixRMaj jacobianMatrix = jacobian.getJacobianMatrix();
+      DMatrixRMaj transposeJacobianMatrix = new DMatrixRMaj(jacobianMatrix.numCols, Wrench.SIZE);
+      CommonOps_DDRM.transpose(jacobianMatrix, transposeJacobianMatrix);
+      CommonOps_DDRM.invert(transposeJacobianMatrix);
 
       VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(new JointIndexHandler(controlledJoints));
 
@@ -626,10 +623,10 @@ public class VirtualModelMomentumControllerTest
       virtualModelController.populateTorqueSolution(virtualModelControlSolution);
 
       // compute end effector force from torques
-      DenseMatrix64F jointEffortMatrix = virtualModelControlSolution.getJointTorques();
+      DMatrixRMaj jointEffortMatrix = virtualModelControlSolution.getJointTorques();
 
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
+      DMatrixRMaj appliedWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      CommonOps_DDRM.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
       Wrench appliedWrench = new Wrench(endEffector.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
 
       if (selectionMatrix == null)

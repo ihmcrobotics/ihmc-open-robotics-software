@@ -94,7 +94,7 @@ public class FootstepPostProcessingMeshViewer extends AnimationTimer
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         plan.getFootstep(i).getSoleFramePose(footPose);
+         plan.getFootstep(i).getFootstepPose(footPose);
          FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
 
          for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())

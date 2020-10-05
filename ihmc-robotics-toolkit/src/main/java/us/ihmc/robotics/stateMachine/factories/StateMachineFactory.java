@@ -15,7 +15,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -49,7 +49,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class StateMachineFactory<K extends Enum<K>, S extends State>
 {
    private String namePrefix = "stateMachine";
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    protected final Map<K, S> states;
    private final Map<K, StateTransition<K>> stateTransitions;
@@ -61,7 +61,7 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
     * Creates a new factory ready to be used for configuring and creating a new {@link StateMachine}.
     * <p>
     * Once the factory created, do not forget to setup the name, registry, and clock, via
-    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoVariableRegistry)}, and
+    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoRegistry)}, and
     * {@link #buildYoClock(DoubleProvider)} respectively.
     * </p>
     * 
@@ -94,7 +94,7 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
     * @param registry the registry to add the {@code YoVariable}s.
     * @return this factory for chaining operations.
     */
-   public StateMachineFactory<K, S> setRegistry(YoVariableRegistry registry)
+   public StateMachineFactory<K, S> setRegistry(YoRegistry registry)
    {
       this.registry = registry;
       return this;
@@ -126,7 +126,7 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
     * @param timeProvider the variable used to obtain the time information.
     * @return this factory for chaining operations.
     * @throws RuntimeException if the registry has not been set. The registry can be added via
-    *            {@link #setRegistry(YoVariableRegistry)}.
+    *            {@link #setRegistry(YoRegistry)}.
     */
    public StateMachineFactory<K, S> buildYoClock(DoubleProvider timeProvider)
    {
@@ -475,7 +475,7 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
     * Instantiate the state machine.
     * <p>
     * Before calling this method, make sure you have provided: a name, registry, and clock via
-    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoVariableRegistry)}, and
+    * {@link #setNamePrefix(String)}, {@link #setRegistry(YoRegistry)}, and
     * {@link #buildYoClock(DoubleProvider)} respectively.
     * </p>
     * 

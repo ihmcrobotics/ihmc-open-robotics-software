@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -34,12 +34,12 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  */
 public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private int commandId;
    /**
     * It defines the 6-components of the desired momentum to achieve for the next control.
     * <p>
@@ -47,7 +47,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * expressed in world frame.
     * </p>
     */
-   private final DenseMatrix64F momentum = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final DMatrixRMaj momentum = new DMatrixRMaj(Momentum.SIZE, 1);
    /**
     * Weights on a per component basis to use in the optimization function. A higher weight means
     * higher priority of this task.
@@ -80,6 +80,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    @Override
    public void set(MomentumCommand other)
    {
+      commandId = other.commandId;
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       momentum.set(other.momentum);
@@ -93,6 +94,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public void setProperties(MomentumRateCommand command)
    {
+      commandId = command.getCommandId();
       weightMatrix.set(command.getWeightMatrix());
       command.getSelectionMatrix(selectionMatrix);
    }
@@ -113,9 +115,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param momentum the desired momentum at the center of mass expressed in world frame. Not
-    *           modified.
+    *                 modified.
     */
-   public void setMomentum(DenseMatrix64F momentum)
+   public void setMomentum(DMatrixRMaj momentum)
    {
       this.momentum.set(momentum);
    }
@@ -128,10 +130,10 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param angularMomentum the desired angular momentum at the center of mass expressed in world
-    *           frame. Not modified.
-    * @param linearMomentum the desired linear momentum in world frame. Not modified.
+    *                        frame. Not modified.
+    * @param linearMomentum  the desired linear momentum in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code angularMomentum} or {@code linearMomentum} is
-    *            not expressed in world frame.
+    *                                         not expressed in world frame.
     */
    public void setMomentum(FrameVector3DReadOnly angularMomentum, FrameVector3DReadOnly linearMomentum)
    {
@@ -151,9 +153,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param angularMomentum the desired angular momentum at the center of mass expressed in world
-    *           frame. Not modified.
+    *                        frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code angularMomentum} is not expressed in world
-    *            frame.
+    *                                         frame.
     */
    public void setAngularMomentum(FrameVector3DReadOnly angularMomentum)
    {
@@ -169,7 +171,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * 
     * @param linearMomentum the desired linear momentum in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
-    *            frame.
+    *                                         frame.
     */
    public void setLinearMomentum(FrameVector3DReadOnly linearMomentum)
    {
@@ -185,7 +187,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * 
     * @param linearMomentum the desired linear momentum in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
-    *            frame.
+    *                                         frame.
     */
    public void setLinearMomentumXY(FrameVector2DReadOnly linearMomentum)
    {
@@ -291,7 +293,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param angular the weight to use for the angular part of this command. Not modified.
-    * @param linear the weight to use for the linear part of this command. Not modified.
+    * @param linear  the weight to use for the linear part of this command. Not modified.
     */
    public void setWeight(double angular, double linear)
    {
@@ -310,9 +312,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @param angularX the weight to use for the x-axis of the angular part of this command.
     * @param angularY the weight to use for the y-axis of the angular part of this command.
     * @param angularZ the weight to use for the z-axis of the angular part of this command.
-    * @param linearX the weight to use for the x-axis of the linear part of this command.
-    * @param linearY the weight to use for the y-axis of the linear part of this command.
-    * @param linearZ the weight to use for the z-axis of the linear part of this command.
+    * @param linearX  the weight to use for the x-axis of the linear part of this command.
+    * @param linearY  the weight to use for the y-axis of the linear part of this command.
+    * @param linearZ  the weight to use for the z-axis of the linear part of this command.
     */
    public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
    {
@@ -329,9 +331,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param weightMatrix dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY}, {@code linearZ}.
-    *           Not modified.
+    *                     acceleration. It is expected to be a 6-by-1 vector ordered as:
+    *                     {@code angularX}, {@code angularY}, {@code angularZ}, {@code linearX},
+    *                     {@code linearY}, {@code linearZ}. Not modified.
     */
    public void setWeights(WeightMatrix6D weightMatrix)
    {
@@ -377,7 +379,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param angular the weights to use for the angular part of this command. Not modified.
-    * @param linear the weights to use for the linear part of this command. Not modified.
+    * @param linear  the weights to use for the linear part of this command. Not modified.
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
@@ -448,9 +450,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * </p>
     * 
     * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
-    *           reshaped to ensure proper size. Modified.
+    *                           reshaped to ensure proper size. Modified.
     */
-   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
    {
       weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
       weightMatrix.getFullWeightMatrixInFrame(worldFrame, weightMatrixToPack);
@@ -470,11 +472,12 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with this
     * command.
     * 
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed in.
+    * @param destinationFrame      the reference frame in which the selection matrix should be
+    *                              expressed in.
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
-    *           stored in. Modified.
+    *                              stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
@@ -504,7 +507,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * 
     * @return the desired momentum.
     */
-   public DenseMatrix64F getMomentum()
+   public DMatrixRMaj getMomentum()
    {
       return momentum;
    }
@@ -513,8 +516,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * Packs the value of the desired momentum into two frame vectors.
     * 
     * @param angularPartToPack frame vector to pack the desired angular momentum at the center of mass.
-    *           Modified.
-    * @param linearPartToPack frame vector to pack the desired linear momentum. Modified.
+    *                          Modified.
+    * @param linearPartToPack  frame vector to pack the desired linear momentum. Modified.
     */
    public void getMomentumRate(FrameVector3DBasics angularPartToPack, FrameVector3DBasics linearPartToPack)
    {
@@ -534,6 +537,18 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -544,7 +559,9 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       {
          MomentumCommand other = (MomentumCommand) object;
 
-         if (!MatrixFeatures.isEquals(momentum, other.momentum))
+         if (commandId != other.commandId)
+            return false;
+         if (!MatrixFeatures_DDRM.isEquals(momentum, other.momentum))
             return false;
          if (!weightMatrix.equals(other.weightMatrix))
             return false;

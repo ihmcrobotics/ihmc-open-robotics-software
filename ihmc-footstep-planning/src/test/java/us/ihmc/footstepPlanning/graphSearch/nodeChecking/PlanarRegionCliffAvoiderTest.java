@@ -26,7 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
@@ -57,7 +57,7 @@ public class PlanarRegionCliffAvoiderTest
       generator.addRectangle(5.0, 5.0); // floor plane
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double epsilon = 1e-6;
@@ -79,7 +79,7 @@ public class PlanarRegionCliffAvoiderTest
       if (visualize)
       {
          scs = new SimulationConstructionSet(new Robot("TestRobot"));
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
          staticLinkGraphics.addCoordinateSystem(1.0);
@@ -113,7 +113,7 @@ public class PlanarRegionCliffAvoiderTest
    @Test
    public void testAvoidingRotatedAndElevatedCliff()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       double cliffHeightToAvoid = 0.2;
       double minimumDistanceFromCliffBottom = 0.1;
       double footLength = 0.2;
@@ -191,7 +191,7 @@ public class PlanarRegionCliffAvoiderTest
       generator.addCubeReferencedAtBottomMiddle(boxSize, boxSize, stepHeight);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double epsilon = 1e-6;
@@ -213,7 +213,7 @@ public class PlanarRegionCliffAvoiderTest
       if (visualize)
       {
          scs = new SimulationConstructionSet(new Robot("TestRobot"));
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
          staticLinkGraphics.addCoordinateSystem(1.0);

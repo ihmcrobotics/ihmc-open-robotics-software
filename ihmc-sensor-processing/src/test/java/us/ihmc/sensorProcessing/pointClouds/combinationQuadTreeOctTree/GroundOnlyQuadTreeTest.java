@@ -38,8 +38,8 @@ import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 {
@@ -1058,7 +1058,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          Robot robot = new Robot("TestQuadTree");
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
          scs.setGroundVisible(true);
-         YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+         YoRegistry registry = robot.getRobotsYoRegistry();
 
          YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 

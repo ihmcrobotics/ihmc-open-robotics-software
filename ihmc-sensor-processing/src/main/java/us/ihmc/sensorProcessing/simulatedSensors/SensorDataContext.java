@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.*;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
@@ -25,9 +25,9 @@ public class SensorDataContext implements Settable<SensorDataContext>
    private final transient Map<String, ImuData> imuMeasurementMap = new HashMap<>();
 
    private final List<String> forceSensorNames = new ArrayList<>();
-   private final List<DenseMatrix64F> forceSensorMeasurements = new ArrayList<>();
+   private final List<DMatrixRMaj> forceSensorMeasurements = new ArrayList<>();
    private final transient TLongSet forceSensorSet = new TLongHashSet();
-   private final transient Map<String, DenseMatrix64F> forceSensorMeasurementMap = new HashMap<>();
+   private final transient Map<String, DMatrixRMaj> forceSensorMeasurementMap = new HashMap<>();
 
    public SensorDataContext()
    {
@@ -88,7 +88,7 @@ public class SensorDataContext implements Settable<SensorDataContext>
       return imuData;
    }
 
-   public DenseMatrix64F registerForceSensor(String forceSensorName)
+   public DMatrixRMaj registerForceSensor(String forceSensorName)
    {
       // Check if an force sensor with the same name is already registered.
       // It is very unlikely but it could happen that two force sensor names produce the same hash code.
@@ -98,10 +98,10 @@ public class SensorDataContext implements Settable<SensorDataContext>
       }
 
       // If the force sensor was ever registered in the past reuse the existing data structure.
-      DenseMatrix64F forceSensorData = forceSensorMeasurementMap.get(forceSensorName);
+      DMatrixRMaj forceSensorData = forceSensorMeasurementMap.get(forceSensorName);
       if (forceSensorData == null)
       {
-         forceSensorData = new DenseMatrix64F(6, 1);
+         forceSensorData = new DMatrixRMaj(6, 1);
          forceSensorMeasurementMap.put(forceSensorName, forceSensorData);
       }
 
@@ -130,7 +130,7 @@ public class SensorDataContext implements Settable<SensorDataContext>
       return imuMeasurementMap.get(imuName);
    }
 
-   public DenseMatrix64F getForceSensorMeasurement(String forceSensorName)
+   public DMatrixRMaj getForceSensorMeasurement(String forceSensorName)
    {
       if (!isForceSensorRegistered(forceSensorName))
       {

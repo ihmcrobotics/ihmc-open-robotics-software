@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +48,8 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       super.testWalkingBackwardsSlow();
    }
 
+   // Flaky
+   @Disabled
    @Tag("quadruped-xgait-2")
    @Override
    @Test
@@ -55,6 +58,8 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       super.testWalkingInAForwardLeftCircle();
    }
 
+   // Flaky
+   @Disabled
    @Tag("quadruped-xgait-slow-2")
    @Override
    @Test

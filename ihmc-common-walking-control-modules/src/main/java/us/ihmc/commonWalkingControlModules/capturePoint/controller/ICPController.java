@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -20,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
@@ -27,14 +27,20 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 public class ICPController
 {
@@ -43,7 +49,7 @@ public class ICPController
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
@@ -58,21 +64,22 @@ public class ICPController
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
+   private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstraintFeedbackCMP", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
 
    final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
-   private final DenseMatrix64F feedbackCMPDeltaMatrix = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj feedbackCMPDeltaMatrix = new DMatrixRMaj(2, 1);
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
    private final YoFrameVector2D residualDynamicsErrorConservative = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsErrorConservative", worldFrame, registry);
-   private final DenseMatrix64F residualDynamicsErrorConservativeMatrix = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj residualDynamicsErrorConservativeMatrix = new DMatrixRMaj(2, 1);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
    private final DoubleProvider cmpFeedbackWeight;
-   private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
 
    private final DoubleProvider maxAllowedDistanceCMPSupport;
    private final DoubleProvider safeCoPDistanceToEdge;
@@ -84,8 +91,8 @@ public class ICPController
    private final AngularMomentumIntegrator integrator;
 
    private final ICPControlGainsReadOnly feedbackGains;
-   private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F inverseTransformedGains = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj inverseTransformedGains = new DMatrixRMaj(2, 2);
    private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
@@ -117,7 +124,7 @@ public class ICPController
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
-                        YoVariableRegistry parentRegistry,
+                        YoRegistry parentRegistry,
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters,
@@ -136,7 +143,7 @@ public class ICPController
                         ICPControlPolygons icpControlPolygons,
                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                         double controlDT,
-                        YoVariableRegistry parentRegistry,
+                        YoRegistry parentRegistry,
                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
@@ -203,7 +210,14 @@ public class ICPController
                                                             YoAppearance.Darkorange(),
                                                             YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
+      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCoP",
+                                                                         this.unconstrainedFeedbackCMP,
+                                                                         0.006,
+                                                                         Purple(),
+                                                                         GraphicType.BALL_WITH_CROSS);
+
       artifactList.add(feedbackCoP.createArtifact());
+      artifactList.add(unconstrainedFeedbackCMP.createArtifact());
 
       artifactList.setVisible(VISUALIZE);
 
@@ -335,9 +349,9 @@ public class ICPController
          solver.setCMPFeedbackConditions(cmpFeedbackWeight.getValue(), useAngularMomentum.getValue());
    }
 
-   private static void fastStaticInverse(DenseMatrix64F matrixToInvert, DenseMatrix64F invertedMatrixToPack)
+   private static void fastStaticInverse(DMatrixRMaj matrixToInvert, DMatrixRMaj invertedMatrixToPack)
    {
-      double determinate = CommonOps.det(matrixToInvert);
+      double determinate = CommonOps_DDRM.det(matrixToInvert);
       invertedMatrixToPack.set(0, 0,  matrixToInvert.get(1, 1) / determinate);
       invertedMatrixToPack.set(1, 1, matrixToInvert.get(0, 0) / determinate);
       invertedMatrixToPack.set(0, 1, -matrixToInvert.get(0, 1) / determinate);
@@ -374,13 +388,17 @@ public class ICPController
          solver.getResidualDynamicsError(residualDynamicsError);
 
          feedbackCoPDelta.get(feedbackCMPDeltaMatrix);
-         CommonOps.mult(-1.0, inverseTransformedGains, feedbackCMPDeltaMatrix, residualDynamicsErrorConservativeMatrix);
+         CommonOps_DDRM.mult(-1.0, inverseTransformedGains, feedbackCMPDeltaMatrix, residualDynamicsErrorConservativeMatrix);
          residualDynamicsErrorConservative.set(residualDynamicsErrorConservativeMatrix);
          residualDynamicsErrorConservative.add(icpError);
       }
 
       boolean checkIfStuck = !isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue();
       integrator.update(checkIfStuck, desiredICPVelocity, currentICPVelocity, icpError);
+
+      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
+      unconstrainedFeedbackCMP.addX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
+      unconstrainedFeedbackCMP.addY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
 
       feedbackCoP.add(perfectCoP, feedbackCoPDelta);
       feedbackCMP.add(feedbackCoP, perfectCMPOffset);
@@ -397,7 +415,7 @@ public class ICPController
          double parallel = feedbackGains.getKpParallelToMotion();
          double orthogonal = feedbackGains.getKpOrthogonalToMotion();
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
-         CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
+         CommonOps_DDRM.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
    }
 

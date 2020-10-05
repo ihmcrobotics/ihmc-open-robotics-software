@@ -40,24 +40,17 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -74,27 +67,20 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLidarPosition(), current_alignment);
 
-
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getLidarOrientation(), current_alignment);
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -107,22 +93,15 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       cdr.write_type_11(data.getRobotTimestamp());
 
-
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLidarPosition(), cdr);
-
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getLidarOrientation(), cdr);
-
       cdr.write_type_6(data.getSensorPoseConfidence());
 
-
       cdr.write_type_6(data.getPointCloudConfidence());
-
 
       if(data.getScan().size() <= 200000)
       cdr.write_type_e(data.getScan());else
@@ -132,23 +111,16 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(controller_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setRobotTimestamp(cdr.read_type_11());
       	
-
       geometry_msgs.msg.dds.PointPubSubType.read(data.getLidarPosition(), cdr);	
-
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getLidarOrientation(), cdr);	
-
       data.setSensorPoseConfidence(cdr.read_type_6());
       	
-
       data.setPointCloudConfidence(cdr.read_type_6());
       	
-
       cdr.read_type_e(data.getScan());	
 
    }
@@ -156,42 +128,28 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.LidarScanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_11("robot_timestamp", data.getRobotTimestamp());
-
       ser.write_type_a("lidar_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getLidarPosition());
-
 
       ser.write_type_a("lidar_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getLidarOrientation());
 
-
       ser.write_type_6("sensor_pose_confidence", data.getSensorPoseConfidence());
-
       ser.write_type_6("point_cloud_confidence", data.getPointCloudConfidence());
-
       ser.write_type_e("scan", data.getScan());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LidarScanMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setRobotTimestamp(ser.read_type_11("robot_timestamp"));
-
       ser.read_type_a("lidar_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getLidarPosition());
-
 
       ser.read_type_a("lidar_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getLidarOrientation());
 
-
       data.setSensorPoseConfidence(ser.read_type_6("sensor_pose_confidence"));
-
       data.setPointCloudConfidence(ser.read_type_6("point_cloud_confidence"));
-
       ser.read_type_e("scan", data.getScan());
    }
 

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.FilterModeEnum;
 import us.ihmc.codecs.generated.RC_MODES;
@@ -64,7 +64,7 @@ public class H264CompressedVideoDataServer implements ConnectionStateListener, C
 
    @Override
    public synchronized void onFrame(VideoSource videoSource, BufferedImage bufferedImage, final long timeStamp, final Point3DReadOnly cameraPosition,
-                                    final QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+                                    final QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
       {

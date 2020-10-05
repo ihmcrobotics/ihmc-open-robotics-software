@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Helper class to create a position trajectory using the quintic spline interpolator Not realtime
@@ -34,7 +34,7 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
    private final FramePoint3D tempPosition;
 
    public MultipleWaypointQuinticSplinePositionTrajectoryGenerator(String name, ReferenceFrame trajectoryFrame, int maximumNumberOfPoints,
-                                                                   YoVariableRegistry parentRegistry)
+                                                                   YoRegistry parentRegistry)
    {
       this.interpolator = new QuinticSplineInterpolator(name, maximumNumberOfPoints, 3, parentRegistry);
       this.trajectoryFrame = trajectoryFrame;

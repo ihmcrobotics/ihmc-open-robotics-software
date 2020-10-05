@@ -1,14 +1,7 @@
-
-
-
 #ifndef __controller_msgs__msg__WrenchTrajectoryPointMessage__idl__
 #define __controller_msgs__msg__WrenchTrajectoryPointMessage__idl__
 
-
-
 #include "geometry_msgs/msg/./Wrench_.idl"
-
-
 module controller_msgs
 {
   module msg
@@ -16,61 +9,27 @@ module controller_msgs
     module dds
     {
 
-   
-   /**
-   
-    * This message is part of the IHMC whole-body controller API.
-   
-    * This class is used to build a wrench (force & moment) profile over time.
-   
-    * It holds the necessary information for one trajectory point.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::WrenchTrajectoryPointMessage_")
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This class is used to build a wrench (force & moment) profile over time.
+       * It holds the necessary information for one trajectory point.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WrenchTrajectoryPointMessage_")
       struct WrenchTrajectoryPointMessage
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-    /**
-    
-     * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    
-     */
-    
-
-
-    double time;
-
-
-    
-    /**
-    
-     * Define the desired wrench (force & moment) to be achieved at this trajectory point.
-    
-     */
-    
-
-
-    geometry_msgs::msg::dds::Wrench wrench;
-
-
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+         */
+        double time;
+        /**
+         * Define the desired wrench (force & moment) to be achieved at this trajectory point.
+         */
+        geometry_msgs::msg::dds::Wrench wrench;
       };
-
     };
   };
 };

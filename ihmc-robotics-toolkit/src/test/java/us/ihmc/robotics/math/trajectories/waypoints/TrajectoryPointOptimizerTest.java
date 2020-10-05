@@ -12,7 +12,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TrajectoryPointOptimizerTest
@@ -24,7 +24,7 @@ public class TrajectoryPointOptimizerTest
    {
       Assertions.assertThrows(RuntimeException.class, () -> {
       int dimensions = 3;
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions, registry);
 
       TDoubleArrayList rightSize = new TDoubleArrayList(dimensions);
@@ -70,10 +70,10 @@ public class TrajectoryPointOptimizerTest
    public void testYoVariables()
    {
       int dimensions = 3;
-      YoVariableRegistry registry = new YoVariableRegistry("");
+      YoRegistry registry = new YoRegistry("Dummy");
       new TrajectoryPointOptimizer(dimensions, registry);
 
-      YoDouble timeGain = (YoDouble) registry.getVariable("TimeGain");
+      YoDouble timeGain = (YoDouble) registry.findVariable("TimeGain");
       assertTrue(timeGain.getDoubleValue() != 0.0);
 
    }

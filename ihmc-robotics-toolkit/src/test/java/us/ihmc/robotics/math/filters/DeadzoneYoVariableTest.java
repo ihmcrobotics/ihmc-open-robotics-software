@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DeadzoneYoVariableTest
@@ -16,7 +16,7 @@ public class DeadzoneYoVariableTest
    @Test
    public void testDeadzone()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble deadzoneSize = new YoDouble("deadzoneSize", registry);
       YoDouble input = new YoDouble("input", registry);
       double deadzone = 2.0;

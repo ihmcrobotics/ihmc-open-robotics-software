@@ -27,10 +27,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +40,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean controlPelvisHeightInsteadOfCoMHeight = new YoBoolean("controlPelvisHeightInsteadOfCoMHeight", registry);
 
@@ -78,7 +79,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters,
-                                         YoVariableRegistry parentRegistry)
+                                         YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -107,12 +108,20 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          RigidBodyTransform ankleToSole = new RigidBodyTransform();
          ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
          ankleToGround = Math.max(ankleToGround, Math.abs(ankleToSole.getTranslationZ()));
       }
+
+      FramePoint3D leftHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      FramePoint3D rightHipPitch = new FramePoint3D(controllerToolbox.getFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH).getFrameAfterJoint());
+      leftHipPitch.changeFrame(controllerToolbox.getPelvisZUpFrame());
+      rightHipPitch.changeFrame(controllerToolbox.getPelvisZUpFrame());
+
+      double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
 
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
@@ -127,7 +136,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                                              maximumHeightAboveGround,
                                                              defaultOffsetHeightAboveGround,
                                                              doubleSupportPercentageIn,
-                                                             0.2,
+                                                             hipWidth,
+                                                             centerOfMassFrame,
                                                              pelvisFrame,
                                                              referenceFrames.getSoleZUpFrames(),
                                                              controllerToolbox.getYoTime(),
@@ -203,11 +213,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
    private final FrameVector2D comXYVelocity = new FrameVector2D();
    private final FrameVector2D desiredComAcceleration = new FrameVector2D();
-   private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData("beforeSmoothing", registry);
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData("afterSmoothing", registry);
-   private final CoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new CoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
-   private final CoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new CoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
-   private final CoMHeightTimeDerivativesData finalComHeightData = new CoMHeightTimeDerivativesData("finalComHeightData", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new YoCoMHeightTimeDerivativesData("beforeSmoothing", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new YoCoMHeightTimeDerivativesData("afterSmoothing", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new YoCoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
+   private final YoCoMHeightTimeDerivativesData comHeightDataAfterUnreachableFootstep = new YoCoMHeightTimeDerivativesData("afterUnreachableFootstep", registry);
+   private final YoCoMHeightTimeDerivativesData finalComHeightData = new YoCoMHeightTimeDerivativesData("finalComHeightData", registry);
 
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D pelvisPosition = new FramePoint3D();
@@ -290,7 +300,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       if (feetManager != null)
       {
          comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
-         feetManager.correctCoMHeightForSupportSingularityAvoidance(desiredCoMVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
+         feetManager.correctCoMHeightForSupportSingularityAvoidance(zCurrent, comHeightDataAfterSingularityAvoidance);
 
          comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
          feetManager.correctCoMHeightForUnreachableFootstep(comHeightDataAfterUnreachableFootstep);

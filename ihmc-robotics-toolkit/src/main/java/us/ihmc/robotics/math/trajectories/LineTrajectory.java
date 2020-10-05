@@ -15,7 +15,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class LineTrajectory implements PoseTrajectoryGenerator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FramePoint3D position = new FramePoint3D();
    private final FrameVector3D linearVelocity = new FrameVector3D();
@@ -47,7 +47,7 @@ public class LineTrajectory implements PoseTrajectoryGenerator
    private final YoGraphicPosition pointAViz;
    private final YoGraphicPosition pointBViz;
 
-   public LineTrajectory(double controlDT, Tuple3DReadOnly initialPosition, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public LineTrajectory(double controlDT, Tuple3DReadOnly initialPosition, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.controlDT = controlDT;
 

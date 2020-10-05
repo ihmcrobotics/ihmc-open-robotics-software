@@ -124,12 +124,13 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final double depthOffsetX = 0.058611;
    private static final double depthOffsetZ = 0.01;
    private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
+   private static final double depthRollOffset = Math.toRadians(-0.5);
    private static final double depthThickness = 0.0245;
 
    private static final double trackingOffsetX = 0.0358;
    private static final double trackingOffsetZ = 0.0994;
    private static final double trackingPitchingAngle = 0.0 / 180.0 * Math.PI;
-   private static final double trackingThickness = 0.0125; 
+   private static final double trackingThickness = 0.0125;
 
    private static final double pelvisToMountOrigin = 0.19;
 
@@ -138,6 +139,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
       transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
+      transformPelvisToDepthCamera.appendRollRotation(depthRollOffset);
       transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
       transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
 
@@ -159,6 +161,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 
       transformDepthCameraToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
       transformDepthCameraToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendRollRotation(-depthRollOffset);
       transformDepthCameraToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
    }
 

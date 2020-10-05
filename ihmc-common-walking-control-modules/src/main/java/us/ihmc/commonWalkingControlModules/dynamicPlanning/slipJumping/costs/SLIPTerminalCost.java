@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
@@ -34,8 +34,8 @@ public class SLIPTerminalCost implements LQTrackingCostFunction<SLIPState>
    static double rYf = 1e5;
    static double rK = 0e0;
 
-   private final DenseMatrix64F Q = new DenseMatrix64F(stateVectorSize, stateVectorSize);
-   private final DenseMatrix64F R = new DenseMatrix64F(controlVectorSize, controlVectorSize);
+   private final DMatrixRMaj Q = new DMatrixRMaj(stateVectorSize, stateVectorSize);
+   private final DMatrixRMaj R = new DMatrixRMaj(controlVectorSize, controlVectorSize);
 
    public SLIPTerminalCost()
    {
@@ -63,70 +63,70 @@ public class SLIPTerminalCost implements LQTrackingCostFunction<SLIPState>
       R.set(k, k, rK);
    }
 
-   private DenseMatrix64F tempStateMatrix = new DenseMatrix64F(stateVectorSize, 1);
-   private DenseMatrix64F tempControlMatrix = new DenseMatrix64F(controlVectorSize, 1);
-   private DenseMatrix64F tempWX = new DenseMatrix64F(stateVectorSize, 1);
-   private DenseMatrix64F tempWU = new DenseMatrix64F(controlVectorSize, 1);
+   private DMatrixRMaj tempStateMatrix = new DMatrixRMaj(stateVectorSize, 1);
+   private DMatrixRMaj tempControlMatrix = new DMatrixRMaj(controlVectorSize, 1);
+   private DMatrixRMaj tempWX = new DMatrixRMaj(stateVectorSize, 1);
+   private DMatrixRMaj tempWU = new DMatrixRMaj(controlVectorSize, 1);
 
    @Override
-   public double getCost(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                         DenseMatrix64F desiredStateVector, DenseMatrix64F constants)
+   public double getCost(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj desiredControlVector,
+                         DMatrixRMaj desiredStateVector, DMatrixRMaj constants)
    {
-      CommonOps.subtract(controlVector, desiredControlVector, tempControlMatrix);
-      CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
+      CommonOps_DDRM.subtract(controlVector, desiredControlVector, tempControlMatrix);
+      CommonOps_DDRM.subtract(stateVector, desiredStateVector, tempStateMatrix);
 
       DiagonalMatrixTools.preMult(Q, tempStateMatrix, tempWX);
       DiagonalMatrixTools.preMult(R, tempControlMatrix, tempWU);
 
-      return CommonOps.dot(tempControlMatrix, tempWU) + CommonOps.dot(tempStateMatrix, tempWX);
+      return CommonOps_DDRM.dot(tempControlMatrix, tempWU) + CommonOps_DDRM.dot(tempStateMatrix, tempWX);
    }
 
    /** L_x(X_k, U_k) */
    @Override
-   public void getCostStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVector,
-                                    DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getCostStateGradient(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj desiredControlVector,
+                                    DMatrixRMaj desiredStateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
-      CommonOps.subtract(stateVector, desiredStateVector, tempStateMatrix);
+      CommonOps_DDRM.subtract(stateVector, desiredStateVector, tempStateMatrix);
       DiagonalMatrixTools.preMult(Q, tempStateMatrix, matrixToPack);
-      CommonOps.scale(2.0, matrixToPack);
+      CommonOps_DDRM.scale(2.0, matrixToPack);
    }
 
    /** L_u(X_k, U_k) */
    @Override
-   public void getCostControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F desiredControlVecotr,
-                                      DenseMatrix64F desiredStateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getCostControlGradient(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj desiredControlVecotr,
+                                      DMatrixRMaj desiredStateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
-      CommonOps.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
+      CommonOps_DDRM.subtract(controlVector, desiredControlVecotr, tempControlMatrix);
       DiagonalMatrixTools.preMult(R, tempControlMatrix, matrixToPack);
-      CommonOps.scale(2.0, matrixToPack);
+      CommonOps_DDRM.scale(2.0, matrixToPack);
    }
 
    /** L_xx(X_k, U_k) */
    @Override
-   public void getCostStateHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getCostStateHessian(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
-      CommonOps.scale(2.0, Q, matrixToPack);
+      CommonOps_DDRM.scale(2.0, Q, matrixToPack);
    }
 
    /** L_uu(X_k, U_k) */
    @Override
-   public void getCostControlHessian(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getCostControlHessian(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
-      CommonOps.scale(2.0, R, matrixToPack);
+      CommonOps_DDRM.scale(2.0, R, matrixToPack);
    }
 
    /** L_ux(X_k, U_k) */
    @Override
-   public void getCostStateGradientOfControlGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                                     DenseMatrix64F matrixToPack)
+   public void getCostStateGradientOfControlGradient(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                                     DMatrixRMaj matrixToPack)
    {
       matrixToPack.reshape(controlVectorSize, stateVectorSize);
    }
 
    /** L_xu(X_k, U_k) */
    @Override
-   public void getCostControlGradientOfStateGradient(SLIPState state, DenseMatrix64F controlVector, DenseMatrix64F stateVector, DenseMatrix64F constants,
-                                                     DenseMatrix64F matrixToPack)
+   public void getCostControlGradientOfStateGradient(SLIPState state, DMatrixRMaj controlVector, DMatrixRMaj stateVector, DMatrixRMaj constants,
+                                                     DMatrixRMaj matrixToPack)
    {
       matrixToPack.reshape(stateVectorSize, controlVectorSize);
    }

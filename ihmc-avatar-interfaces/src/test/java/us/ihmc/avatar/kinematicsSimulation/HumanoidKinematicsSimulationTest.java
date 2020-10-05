@@ -8,7 +8,7 @@ import us.ihmc.avatar.AvatarTestScripts;
 import us.ihmc.avatar.AvatarTestYoVariables;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -22,7 +22,7 @@ public abstract class HumanoidKinematicsSimulationTest
    private GoalOrientedTestConductor conductor;
    private DRCRobotModel robotModel;
    private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
-   private Ros2Node ros2Node;
+   private ROS2Node ros2Node;
 
    public void takeSomeSteps()
    {
@@ -33,11 +33,11 @@ public abstract class HumanoidKinematicsSimulationTest
 //   {
 //      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
 //
-//      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+//      ros2Node = new ROS2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 //
-//      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
+//      footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
 //                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-//                                                            ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+//                                                            ControllerAPIDefinition.getInputTopic(robotModel.getSimpleRobotName()));
 //
 //   }
 

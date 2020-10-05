@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -126,7 +126,7 @@ public class LinearMomentumRateControlModuleInput
     * {@link #finalTransferDuration} should always be set together. Note, that they will only be used if one of the
     * initialize flags is set to {@code true}
     */
-   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
+   private final RecyclingArrayList<SimpleFootstep> footsteps = new RecyclingArrayList<>(SimpleFootstep.class);
 
    /**
     * List of upcoming footstep swing durations that are being executed by the controller. This is of interest to the
@@ -306,7 +306,7 @@ public class LinearMomentumRateControlModuleInput
       }
    }
 
-   public void setFootsteps(List<SimpleAdjustableFootstep> footsteps)
+   public void setFootsteps(List<SimpleFootstep> footsteps)
    {
       this.footsteps.clear();
       for (int i = 0; i < footsteps.size(); i++)
@@ -315,7 +315,7 @@ public class LinearMomentumRateControlModuleInput
       }
    }
 
-   public RecyclingArrayList<SimpleAdjustableFootstep> getFootsteps()
+   public RecyclingArrayList<SimpleFootstep> getFootsteps()
    {
       return footsteps;
    }

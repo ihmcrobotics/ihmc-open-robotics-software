@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.trajectoryOptimization.DefaultDiscreteState;
 import us.ihmc.trajectoryOptimization.DiscreteHybridDynamics;
 
@@ -61,7 +61,7 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
     * @param matrixToPack f(X_k, U_k) in the above equation
     */
    @Override
-   public void getNextState(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constant, DenseMatrix64F matrixToPack)
+   public void getNextState(DefaultDiscreteState state, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constant, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -89,8 +89,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
    }
 
    @Override
-   public void getDynamicsStateGradient(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                                        DenseMatrix64F matrixToPack)
+   public void getDynamicsStateGradient(DefaultDiscreteState state, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                                        DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -116,8 +116,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
    }
 
    @Override
-   public void getDynamicsControlGradient(DefaultDiscreteState state, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                                          DenseMatrix64F matrixToPack)
+   public void getDynamicsControlGradient(DefaultDiscreteState state, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                                          DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -136,8 +136,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
    }
 
    @Override
-   public void getDynamicsStateHessian(DefaultDiscreteState state, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                       DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamicsStateHessian(DefaultDiscreteState state, int stateVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                       DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -150,8 +150,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
    }
 
    @Override
-   public void getDynamicsControlHessian(DefaultDiscreteState state, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                         DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamicsControlHessian(DefaultDiscreteState state, int controlVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                         DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -165,8 +165,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
 
    /** f_ux */
    @Override
-   public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState state, int stateVariable, DenseMatrix64F currentState,
-                                                         DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamicsStateGradientOfControlGradient(DefaultDiscreteState state, int stateVariable, DMatrixRMaj currentState,
+                                                         DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -180,8 +180,8 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
 
    /** f_xu */
    @Override
-   public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState state, int controlVariable, DenseMatrix64F currentState,
-                                                         DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamicsControlGradientOfStateGradient(DefaultDiscreteState state, int controlVariable, DMatrixRMaj currentState,
+                                                         DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -193,7 +193,7 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       matrixToPack.zero();
    }
 
-   public void getContinuousAMatrix(DenseMatrix64F matrixToPack)
+   public void getContinuousAMatrix(DMatrixRMaj matrixToPack)
    {
       matrixToPack.set(0, 2, 1.0);
       matrixToPack.set(1, 3, 1.0);
@@ -201,7 +201,7 @@ public class SimpleLIPMDynamics implements DiscreteHybridDynamics<DefaultDiscret
       matrixToPack.set(3, 1, gravityZ / pendulumHeight);
    }
 
-   public void getContinuousBMatrix(DenseMatrix64F matrixToPack)
+   public void getContinuousBMatrix(DMatrixRMaj matrixToPack)
    {
       matrixToPack.set(2, 0, -gravityZ / pendulumHeight);
       matrixToPack.set(3, 1, -gravityZ / pendulumHeight);

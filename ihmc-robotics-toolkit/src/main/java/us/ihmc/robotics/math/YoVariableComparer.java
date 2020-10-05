@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -15,7 +15,7 @@ public class YoVariableComparer
    private ThresholdType compareType;
 
    public YoVariableComparer(YoDouble variableA, YoDouble variableB, String name, ThresholdType thresholdType, YoDouble threshold,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       this.yoVariableA = variableA;
       this.yoVariableB = variableB;
@@ -27,7 +27,7 @@ public class YoVariableComparer
    }
    
    public YoVariableComparer(YoDouble variableA, YoDouble variableB, String name, ThresholdType thresholdType, double threshold,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       this.yoVariableA = variableA;
       this.yoVariableB = variableB;

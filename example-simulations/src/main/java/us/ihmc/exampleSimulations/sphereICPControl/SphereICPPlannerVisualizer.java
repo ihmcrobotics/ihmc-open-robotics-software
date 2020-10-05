@@ -19,12 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -57,14 +52,9 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SphereICPPlannerVisualizer
 {
@@ -111,7 +101,7 @@ public class SphereICPPlannerVisualizer
    private final YoDouble yoTime;
    private final double dt = 0.006;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("ICPViz");
+   private final YoRegistry registry = new YoRegistry("ICPViz");
    private final YoFramePoint3D eCMP = new YoFramePoint3D("eCMP", worldFrame, registry);
    private final YoFramePoint3D desiredICP = new YoFramePoint3D("desiredICP", worldFrame, registry);
    private final YoFrameVector3D desiredICPVelocity = new YoFrameVector3D("desiredICPVelocity", worldFrame, registry);
@@ -218,7 +208,7 @@ public class SphereICPPlannerVisualizer
       Robot robot = new Robot("Dummy");
       yoTime = robot.getYoTime();
       scs = new SimulationConstructionSet(robot, scsParameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.025);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -623,7 +613,7 @@ public class SphereICPPlannerVisualizer
       return footsteps;
    }
 
-   private SmoothCMPBasedICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   private SmoothCMPBasedICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -681,7 +671,8 @@ public class SphereICPPlannerVisualizer
 
       SmoothCMPPlannerParameters capturePointPlannerParameters = new SphereSmoothCMPPlannerParameters();
 
-      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleZUpFrames, contactableFeet, null, yoTime, registry,
+      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(),
+                                                                         soleFrames, soleZUpFrames, contactableFeet, null, yoTime, registry,
                                                                          yoGraphicsListRegistry, gravity, capturePointPlannerParameters);
       icpPlanner.setOmega0(omega0);
       icpPlanner.setFinalTransferDuration(1.0);

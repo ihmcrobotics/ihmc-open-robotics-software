@@ -12,14 +12,14 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.robotics.stateMachine.extra.EventState;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
 public class QuadrupedStepController implements EventState
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
@@ -37,7 +37,7 @@ public class QuadrupedStepController implements EventState
    private final QuadrupedBalanceBasedStepDelayer stepDelayer;
 
    public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                  QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
+                                  QuadrupedStepMessageHandler stepMessageHandler, YoRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.stepMessageHandler = stepMessageHandler;
@@ -150,7 +150,7 @@ public class QuadrupedStepController implements EventState
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

@@ -8,10 +8,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
@@ -36,15 +33,16 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 {
@@ -52,9 +50,9 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
@@ -122,7 +120,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
 
       FullHumanoidRobotModel fullRobotModel = robotModelFactory.createFullRobotModel();
 
@@ -133,11 +131,11 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    controllerOutputTopic,
                                            s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
@@ -156,9 +154,9 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                             yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    CapturabilityBasedStatus.class,
+                                                    controllerOutputTopic,
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
@@ -217,15 +215,15 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      MessageTopicNameGenerator behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
+      ROS2Topic behaviorInputTopic = getInputTopic(robotName);
       dispatcher.finalizeStateMachine();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           BehaviorControlModePacket.class,
-                                           behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    BehaviorControlModePacket.class,
+                                                    behaviorInputTopic,
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           HumanoidBehaviorTypePacket.class,
-                                           behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    HumanoidBehaviorTypePacket.class,
+                                                    behaviorInputTopic,
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)
@@ -257,7 +255,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    private void createAndRegisterBehaviors(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher, LogModelProvider logModelProvider,
                                            FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
-                                           YoDouble yoTime, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                           YoDouble yoTime, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
                                            CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters<?> wholeBodyControllerParameters,
                                            FootstepPlannerParametersBasics footstepPlannerParameters)
    {
@@ -489,7 +487,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private void createAndRegisterAutomaticDiagnostic(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
                                                      FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
-                                                     Ros2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
+                                                     ROS2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
                                                      WholeBodyControllerParameters wholeBodyControllerParameters,
                                                      FootstepPlannerParametersBasics footstepPlannerParameters, double timeToWait,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -537,29 +535,29 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return ihmcHumanoidBehaviorManager;
    }
 
-   public static String getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
+   public static ROS2Topic getBehaviorRosTopicPrefix(String robotName, String suffix)
    {
-      return ROS2Tools.IHMC_ROS_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(suffix);
    }
 
-   public static String getBehaviorOutputRosTopicPrefix(String robotName)
+   public static ROS2Topic getBehaviorOutputRosTopicPrefix(String robotName)
    {
-      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.OUTPUT);
+      return getBehaviorRosTopicPrefix(robotName, ROS2Tools.OUTPUT);
    }
 
-   public static String getBehaviorInputRosTopicPrefix(String robotName)
+   public static ROS2Topic getBehaviorInputRosTopicPrefix(String robotName)
    {
-      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.INPUT);
+      return getBehaviorRosTopicPrefix(robotName, ROS2Tools.INPUT);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_QUALIFIER, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_QUALIFIER, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }
 
    @Override

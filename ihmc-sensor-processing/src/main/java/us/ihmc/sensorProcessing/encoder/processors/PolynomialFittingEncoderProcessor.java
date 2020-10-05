@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -22,16 +22,16 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private final YoInteger[] positions;    // ordered from oldest to newest
    private final YoDouble[] timestamps;
 
-   private final DenseMatrix64F a;
-   private final DenseMatrix64F p;
-   private final DenseMatrix64F b;
-   private final LinearSolver<DenseMatrix64F> solver;
+   private final DMatrixRMaj a;
+   private final DMatrixRMaj p;
+   private final DMatrixRMaj b;
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
    private int skipIndex = 0;
    private double timespan = Double.NaN;
 
    public PolynomialFittingEncoderProcessor(String name, YoInteger rawPosition, YoDouble time, double distancePerTick, int nEncoderEvents,
-           int fitOrder, int skipFactor, YoVariableRegistry registry)
+           int fitOrder, int skipFactor, YoRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
 
@@ -51,10 +51,10 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
          timestamps[i] = new YoDouble(name + "Time" + i, registry);
       }
 
-      a = new DenseMatrix64F(nEncoderEvents, fitOrder + 1);
-      b = new DenseMatrix64F(a.getNumRows(), 1);
-      p = new DenseMatrix64F(a.getNumCols(), 1);
-      solver = LinearSolverFactory.leastSquares(a.getNumRows(), a.getNumCols());
+      a = new DMatrixRMaj(nEncoderEvents, fitOrder + 1);
+      b = new DMatrixRMaj(a.getNumRows(), 1);
+      p = new DMatrixRMaj(a.getNumCols(), 1);
+      solver = LinearSolverFactory_DDRM.leastSquares(a.getNumRows(), a.getNumCols());
    }
    
    /**

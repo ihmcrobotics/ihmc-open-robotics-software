@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,15 +10,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoPolynomial xPolynomial, yPolynomial, zPolynomial;
 
    private final YoDouble currentTime;
@@ -33,9 +33,9 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    private final YoFrameVector3D currentVelocity;
    private final YoFrameVector3D currentAcceleration;
 
-   public ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       
       initialPosition = new YoFramePoint3D(name + "InitialPosition", referenceFrame, registry);
       intermediateZPosition = new YoDouble(name + "IntermediateZPosition", registry);

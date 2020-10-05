@@ -12,12 +12,12 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StateChangeSmootherComponent implements OutputProcessorComponent
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final PairList<JointDesiredOutputBasics, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new PairList<>();
    private final YoDouble alphaJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);
@@ -28,7 +28,7 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
    private final YoDouble controlTimestamp;
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   public StateChangeSmootherComponent(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
+   public StateChangeSmootherComponent(QuadrupedRuntimeEnvironment runtimeEnvironment, YoRegistry parentRegistry)
    {
       this.controlTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();

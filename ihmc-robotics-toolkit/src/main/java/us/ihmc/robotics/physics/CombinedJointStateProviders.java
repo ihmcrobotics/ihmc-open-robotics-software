@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collector;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -16,7 +16,7 @@ public class CombinedJointStateProviders implements JointStateProvider
 {
    private final JointStateType state;
    private final List<JointStateProvider> jointStateProviders = new ArrayList<>();
-   private final DenseMatrix64F combinedJointState = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj combinedJointState = new DMatrixRMaj(6, 1);
 
    public CombinedJointStateProviders(JointStateType state)
    {
@@ -76,16 +76,16 @@ public class CombinedJointStateProviders implements JointStateProvider
    }
 
    @Override
-   public DenseMatrix64F getJointState(JointReadOnly joint)
+   public DMatrixRMaj getJointState(JointReadOnly joint)
    {
       combinedJointState.zero();
       combinedJointState.reshape(joint.getDegreesOfFreedom(), 1);
 
       for (JointStateProvider jointStateProvider : jointStateProviders)
       {
-         DenseMatrix64F jointState = jointStateProvider.getJointState(joint);
+         DMatrixRMaj jointState = jointStateProvider.getJointState(joint);
          if (jointState != null)
-            CommonOps.addEquals(combinedJointState, jointState);
+            CommonOps_DDRM.addEquals(combinedJointState, jointState);
       }
       return combinedJointState;
    }

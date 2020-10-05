@@ -27,27 +27,27 @@ import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.log.LogTools;
-import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
-import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferVariableEntryHolder;
+import us.ihmc.yoVariables.buffer.interfaces.YoTimeBufferHolder;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HeatmapWindow
 {
    private final String name;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final GraphIndicesHolder graphIndicesHolder;
    private final SelectedVariableHolder selectedVariableHolder;
-   private final DataEntryHolder dataEntryHolder;
-   private final TimeDataHolder dataBuffer;
+   private final YoBufferVariableEntryHolder dataEntryHolder;
+   private final YoTimeBufferHolder dataBuffer;
 
    private JFrame frame;
    private JPanel rootPanel;
 
    private final List<JavaFXHeatmapGraph> heatmapPanels;
 
-   public HeatmapWindow(String name, YoVariableRegistry registry, GraphIndicesHolder graphIndicesHolder, SelectedVariableHolder selectedVariableHolder,
-                        DataEntryHolder dataEntryHolder, TimeDataHolder dataBuffer)
+   public HeatmapWindow(String name, YoRegistry registry, GraphIndicesHolder graphIndicesHolder, SelectedVariableHolder selectedVariableHolder,
+                        YoBufferVariableEntryHolder dataEntryHolder, YoTimeBufferHolder dataBuffer)
    {
       this.name = name;
       this.registry = registry;

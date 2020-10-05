@@ -1,18 +1,16 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,7 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SmoothCapturePointToolboxTest
 {
@@ -31,7 +29,7 @@ public class SmoothCapturePointToolboxTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private Random random = new Random(5165415);
    
-   YoVariableRegistry registry = new YoVariableRegistry("");
+   YoRegistry registry = new YoRegistry("Dummy");
    String namePrefix = "SmoothCapturePointToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
@@ -144,7 +142,7 @@ public class SmoothCapturePointToolboxTest
    public void testMatricesPrime3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -160,8 +158,8 @@ public class SmoothCapturePointToolboxTest
          
          double time = t0 + random.nextDouble() * (tFinal - t0);
          
-         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj alphaPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj alphaPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
       
          icpToolbox.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, linear3D);
          calculateAlphaPrime3DByHandLinear(omega0 , time, tFinal, alphaPrimeManual);
@@ -177,8 +175,8 @@ public class SmoothCapturePointToolboxTest
             }
          }
          
-         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj betaPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj betaPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
       
          icpToolbox.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, linear3D);
          calculateBetaPrime3DByHandLinear(omega0 , time, tFinal, betaPrimeManual);
@@ -194,7 +192,7 @@ public class SmoothCapturePointToolboxTest
             }
          }
          
-         DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
+         DMatrixRMaj gammaPrimeManual = new DMatrixRMaj(1, 1);
       
          double gammaPrimeAutomatic = icpToolbox.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
          calculateGammaPrime3DByHandLinear(omega0 , time, tFinal, gammaPrimeManual);
@@ -210,7 +208,7 @@ public class SmoothCapturePointToolboxTest
    public void testMatricesPrime3DCubic()
    {
       // Cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       FrameTrajectory3D cubic3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -229,8 +227,8 @@ public class SmoothCapturePointToolboxTest
          
          double time = t0 + random.nextDouble() * (tFinal - t0);
          
-         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj alphaPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj alphaPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
       
          icpToolbox.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, alphaPrimeAutomatic, 0, cubic3D);
          calculateAlphaPrime3DByHandCubic(omega0 , time, tFinal, alphaPrimeManual);
@@ -246,8 +244,8 @@ public class SmoothCapturePointToolboxTest
             }
          }
          
-         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
+         DMatrixRMaj betaPrimeAutomatic = new DMatrixRMaj(3, 3 * numberOfCoefficients);
+         DMatrixRMaj betaPrimeManual = new DMatrixRMaj(3, 3 * numberOfCoefficients);
       
          icpToolbox.calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, betaPrimeAutomatic, 0, cubic3D);
          calculateBetaPrime3DByHandCubic(omega0 , time, tFinal, betaPrimeManual);
@@ -263,7 +261,7 @@ public class SmoothCapturePointToolboxTest
             }
          }
          
-         DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
+         DMatrixRMaj gammaPrimeManual = new DMatrixRMaj(1, 1);
       
          double gammaPrimeAutomatic = icpToolbox.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, 0, cubic3D);
          calculateGammaPrime3DByHandCubic(omega0 , time, tFinal, gammaPrimeManual);
@@ -279,7 +277,7 @@ public class SmoothCapturePointToolboxTest
    public void testCalculateICPPositionAndVelocityOnSegment3DLinear()
    {
    // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -337,7 +335,7 @@ public class SmoothCapturePointToolboxTest
    public void testCalculateICPPositionAndVelocityOnSegment3DCubic()
    {
       // Cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       FrameTrajectory3D cubic3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -521,7 +519,7 @@ public class SmoothCapturePointToolboxTest
    }
       
       
-   public static void calculateAlphaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public static void calculateAlphaPrime3DByHandLinear(double omega0, double time, double timeTotal, DMatrixRMaj alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
@@ -533,7 +531,7 @@ public class SmoothCapturePointToolboxTest
       alphaPrimeLinear.set(2, 5, time + 1.0/omega0);
    }
    
-   public static void calculateBetaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public static void calculateBetaPrime3DByHandLinear(double omega0, double time, double timeTotal, DMatrixRMaj betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
@@ -545,12 +543,12 @@ public class SmoothCapturePointToolboxTest
       betaPrimeLinear.set(2, 5, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
    }
    
-   public static void calculateGammaPrime3DByHandLinear(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public static void calculateGammaPrime3DByHandLinear(double omega0, double time, double timeTotal, DMatrixRMaj gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }
    
-   public static void calculateAlphaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F alphaPrimeLinear)
+   public static void calculateAlphaPrime3DByHandCubic(double omega0, double time, double timeTotal, DMatrixRMaj alphaPrimeLinear)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
@@ -568,7 +566,7 @@ public class SmoothCapturePointToolboxTest
       alphaPrimeLinear.set(2, 11, Math.pow(time, 3) + 3.0 * Math.pow(time, 2)/omega0 + 6.0 * time/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3));
    }
    
-   public static void calculateBetaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F betaPrimeLinear)
+   public static void calculateBetaPrime3DByHandCubic(double omega0, double time, double timeTotal, DMatrixRMaj betaPrimeLinear)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
@@ -586,7 +584,7 @@ public class SmoothCapturePointToolboxTest
       betaPrimeLinear.set(2, 11, Math.exp(omega0 * (time - timeTotal))*(Math.pow(timeTotal, 3) + 3.0 * Math.pow(timeTotal, 2)/omega0 + 6.0 * timeTotal/Math.pow(omega0, 2) + 6.0/Math.pow(omega0, 3)));
    }
    
-   public static void calculateGammaPrime3DByHandCubic(double omega0, double time, double timeTotal, DenseMatrix64F gammaPrimeLinear)
+   public static void calculateGammaPrime3DByHandCubic(double omega0, double time, double timeTotal, DMatrixRMaj gammaPrimeLinear)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }

@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -11,9 +11,10 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
@@ -22,8 +23,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,7 +58,7 @@ public class RemoteFootstepPlannerInterface
 
    private final HashMap<Integer, TypedNotification<RemoteFootstepPlannerResult>> resultNotifications = new HashMap<>();
 
-   public RemoteFootstepPlannerInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel, Messager messager)
+   public RemoteFootstepPlannerInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, Messager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)
@@ -76,22 +77,21 @@ public class RemoteFootstepPlannerInterface
       }
 
       toolboxStatePublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      ToolboxStateMessage.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                               ToolboxStateMessage.class,
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
       footstepPlanningRequestPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      FootstepPlanningRequestPacket.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                               FootstepPlanningRequestPacket.class,
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
       parametersPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      FootstepPlannerParametersPacket.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                               FootstepPlannerParametersPacket.class,
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,
-                         robotModel.getSimpleRobotName(),
-                         ROS2Tools.FOOTSTEP_PLANNER,
+                         ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotModel.getSimpleRobotName()).withOutput(),
                          this::acceptFootstepPlannerResult);
    }
 
@@ -108,11 +108,11 @@ public class RemoteFootstepPlannerInterface
          {
             boolean containsStepDown = false;
             int index = 0;
-            double lastStepZ = result.getFootstepPlan().getFootstep(index).getSoleFramePose().getZ();
+            double lastStepZ = result.getFootstepPlan().getFootstep(index).getFootstepPose().getZ();
             do
             {
                ++index;
-               double thisStepZ = result.getFootstepPlan().getFootstep(index).getSoleFramePose().getZ();
+               double thisStepZ = result.getFootstepPlan().getFootstep(index).getFootstepPose().getZ();
                double difference = thisStepZ - lastStepZ;
                if (difference <= -STEP_DOWN_DISTANCE_QUALIFIER)
                {
@@ -139,7 +139,7 @@ public class RemoteFootstepPlannerInterface
     */
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal)
    {
-      return requestPlan(start, goal, null, new DefaultFootstepPlannerParameters());
+      return requestPlan(start, goal, null, new DefaultFootstepPlannerParameters(), SwingPlannerType.NONE);
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal, PlanarRegionsList planarRegionsList)
@@ -147,13 +147,15 @@ public class RemoteFootstepPlannerInterface
       return requestPlan(start,
                          goal,
                          PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList),
-                         new DefaultFootstepPlannerParameters());
+                         new DefaultFootstepPlannerParameters(),
+                         SwingPlannerType.NONE);
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
                                                                      FramePose3DReadOnly goal,
                                                                      PlanarRegionsListMessage planarRegionsListMessage,
-                                                                     FootstepPlannerParametersBasics settableFootstepPlannerParameters)
+                                                                     FootstepPlannerParametersBasics settableFootstepPlannerParameters,
+                                                                     SwingPlannerType swingPlannerType)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
@@ -182,6 +184,7 @@ public class RemoteFootstepPlannerInterface
       packet.getStartRightFootPose().set(startSteps.get(RobotSide.RIGHT));
       packet.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
       packet.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
+      packet.setRequestedSwingPlanner(swingPlannerType.toByte());
 
       packet.setTimeout(timeout);
       int sentPlannerId = requestCounter.getAndIncrement();

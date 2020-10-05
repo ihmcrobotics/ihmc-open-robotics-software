@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -143,9 +143,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          }
       }
 
-      YoVariable<?> yoTime = drcSimulationTestHelper.getSimulationConstructionSet().getVariable("t");
+      YoVariable yoTime = drcSimulationTestHelper.getSimulationConstructionSet().findVariable("t");
       TimingChecker timingChecker1 = new TimingChecker(scs, footstepMessage1, footstepMessage2);
-      yoTime.addVariableChangedListener(timingChecker1);
+      yoTime.addListener(timingChecker1);
 
       drcSimulationTestHelper.publishToController(footstepMessage1);
 
@@ -161,7 +161,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
    }
 
-   private class TimingChecker implements VariableChangedListener
+   private class TimingChecker implements YoVariableChangedListener
    {
       private static final String failMessage = "Swing did not start at expected time.";
 
@@ -183,7 +183,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
 
       @Override
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          if (isDone)
          {
@@ -365,9 +365,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
                                               YoEnum.class).getEnumValue();
    }
 
-   private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
+   private static <T extends YoVariable> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
    {
-      YoVariable<?> uncheckedVariable = scs.getVariable(namespace, name);
+      YoVariable uncheckedVariable = scs.findVariable(namespace, name);
       if (uncheckedVariable == null)
          throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
       if (!clazz.isInstance(uncheckedVariable))

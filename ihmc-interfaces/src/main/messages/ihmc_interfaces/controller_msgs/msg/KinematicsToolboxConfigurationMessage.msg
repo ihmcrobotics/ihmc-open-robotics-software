@@ -4,30 +4,6 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-# Indicates whether the privileged_root_joint_position is to be used or not.
-bool use_privileged_root_joint_position false
-# Indicates whether the privileged_root_joint_orientation is to be used or not.
-bool use_privileged_root_joint_orientation false
-# When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-geometry_msgs/Point privileged_root_joint_position
-# When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-geometry_msgs/Quaternion privileged_root_joint_orientation
-# This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
-# See Joint.hashCode() for the computation of a joint hash code.
-int32[] privileged_joint_hash_codes
-# When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-float32[] privileged_joint_angles
-# The weight to use in the optimization for the privileged configuration.
-# When remaining close to the privileged configuration is important, raise this weight to a value higher than the 
-# weight of the main objectives.
-# Any value less than zero will be ignored.
-# A value of -1 will result in the solver using its default value.
-float64 privileged_weight -1
-# The feedback proportional gain to use for the privileged configuration.
-# It is coupled to some extent to the privileged_weight
-# A value of -1 will result in the solver using its default value.
-float64 privileged_gain -1
-
 # Specifies how much high joint velocity values should be penalized in the optimization problem.
 # A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
 # A value of -1 will result in the solver using its default value.
@@ -47,3 +23,20 @@ bool disable_joint_velocity_limits false
 bool disable_collision_avoidance false
 # In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
 bool enable_collision_avoidance false
+
+# By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
+# For instance, if the user sends a command for controlling a certain body, the command will persist even if the user stops sending it.
+# A command that persists is overridden if another is received for the same body.
+# Priviliged configuration inputs are not affected by this flag.
+# In case persistence of inputs is not desired, use this flag to disable it.
+# When persistence is disabled, it is strongly recommended to use KinematicsToolboxInputCollectionMessage to send inputs to the toolbox.
+bool disable_input_persistence false
+# In case input persistence has been disabled, use this flat to re-enable it while leaving disable_input_persistence to false.
+bool enable_input_persistence false
+
+# When true, the solver enforces the solution to have the projection of the center of mass contained
+# inside the current support polygon. The support polygon can be determined automatically using the controller's ouput if running.
+# The support polygon can also be defined by the user by sending a KinematicsToolboxContactStateMessage.
+bool enable_support_polygon_constraint
+# When true, this disables the support polygon constraint on the center of mass.
+bool disable_support_polygon_constraint

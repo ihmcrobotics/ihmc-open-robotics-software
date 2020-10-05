@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public class QuadrupedSwingSpeedUpCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DoubleProvider omega;
    private final DoubleProvider controllerTime;
@@ -44,7 +44,7 @@ public class QuadrupedSwingSpeedUpCalculator
    private final FrameConvexPolygon2D supportPolygonInWorldAfterChange = new FrameConvexPolygon2D();
 
 
-   public QuadrupedSwingSpeedUpCalculator(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedSwingSpeedUpCalculator(QuadrupedControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       this(controllerToolbox.getReferenceFrames().getSoleFrames(), controllerToolbox.getFootContactStates(),
            controllerToolbox.getLinearInvertedPendulumModel().getYoNaturalFrequency(),
@@ -53,7 +53,7 @@ public class QuadrupedSwingSpeedUpCalculator
 
    public QuadrupedSwingSpeedUpCalculator(QuadrantDependentList<MovingReferenceFrame> soleFrames,
                                           QuadrantDependentList<? extends PlaneContactState> contactStates, DoubleProvider omega, DoubleProvider controllerTime,
-                                          YoVariableRegistry parentRegistry)
+                                          YoRegistry parentRegistry)
    {
       this.soleFrames = soleFrames;
       this.contactStates = contactStates;

@@ -40,12 +40,9 @@ public class REAStateRequestMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -62,13 +59,10 @@ public class REAStateRequestMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -80,12 +74,9 @@ public class REAStateRequestMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.REAStateRequestMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_7(data.getRequestPause());
 
-
       cdr.write_type_7(data.getRequestResume());
-
 
       cdr.write_type_7(data.getRequestClear());
 
@@ -93,13 +84,10 @@ public class REAStateRequestMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.REAStateRequestMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setRequestPause(cdr.read_type_7());
       	
-
       data.setRequestResume(cdr.read_type_7());
       	
-
       data.setRequestClear(cdr.read_type_7());
       	
 
@@ -108,22 +96,16 @@ public class REAStateRequestMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.REAStateRequestMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_7("request_pause", data.getRequestPause());
-
       ser.write_type_7("request_resume", data.getRequestResume());
-
       ser.write_type_7("request_clear", data.getRequestClear());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.REAStateRequestMessage data)
    {
-
       data.setRequestPause(ser.read_type_7("request_pause"));
-
       data.setRequestResume(ser.read_type_7("request_resume"));
-
       data.setRequestClear(ser.read_type_7("request_clear"));
    }
 

@@ -3,10 +3,9 @@ package us.ihmc.robotics.kinematics;
 import java.util.Random;
 
 import org.ddogleg.optimization.FactoryOptimization;
-import org.ddogleg.optimization.RegionStepType;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.metric.UtilAngle;
@@ -43,12 +42,13 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
    private final Vector3D desiredT = new Vector3D();
    private final Vector3D desiredR = new Vector3D();
-   private final DenseMatrix64F m = new DenseMatrix64F(3, 3);
+   private final DMatrixRMaj m = new DMatrixRMaj(3, 3);
 
    private int numberOfIterations;
    private final boolean solveOrientation;
 
-   private final double orientationDiscount;
+   private final double positionCost;
+   private final double orientationCost;
 
    // convergence tolerance
    private final double convergeTolerance;
@@ -59,38 +59,39 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    // tolerances for it returning true or false
    private final double acceptTolLoc;
    private final double acceptTolAngle;
-   
+
    private final double parameterChangePenalty;
 
    private final double euler[] = new double[3];
 
    private InverseKinematicsStepListener stepListener = null;
-   
+
    /**
     * @param jacobian
-    * @param orientationDiscount How much it discounts orientation by.  0 to 1.0.  Try 0.2
+    * @param orientationCost How much it discounts orientation by. 0 to 1.0. Try 0.2
     * @param maxIterations
     * @param solveOrientation
-    * @param convergeTolerance Convergence tolerance.  Try 1e-12
-    * @param acceptTolLoc  Tolerance for location error.  Try 0.005
-    * @param acceptTolAngle Tolerance for angle error in radians.  Try 0.02
+    * @param convergeTolerance   Convergence tolerance. Try 1e-12
+    * @param acceptTolLoc        Tolerance for location error. Try 0.005
+    * @param acceptTolAngle      Tolerance for angle error in radians. Try 0.02
     */
-   public DdoglegInverseKinematicsCalculator(GeometricJacobian jacobian, double orientationDiscount, int maxIterations, boolean solveOrientation,
-           double convergeTolerance, double acceptTolLoc, double acceptTolAngle, double parameterChangePenalty)
+   public DdoglegInverseKinematicsCalculator(GeometricJacobian jacobian, double positionCost, double orientationCost, int maxIterations, boolean solveOrientation,
+                                             double convergeTolerance, double acceptTolLoc, double acceptTolAngle, double parameterChangePenalty)
    {
       if (jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame())
          throw new RuntimeException("jacobian.getJacobianFrame() != jacobian.getEndEffectorFrame()");
-      
+
       baseFrame = jacobian.getBaseFrame();
       endEffectorFrame = jacobian.getEndEffectorFrame();
-      
-      this.orientationDiscount = orientationDiscount;
+
+      this.positionCost = positionCost;
+      this.orientationCost = orientationCost;
       this.solveOrientation = solveOrientation;
-      
+
       this.oneDoFJoints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       if (oneDoFJoints.length != jacobian.getJointsInOrder().length)
          throw new RuntimeException("Can currently only handle OneDoFJoints");
-      
+
       this.maxIterations = maxIterations;
       this.acceptTolLoc = acceptTolLoc;
       this.acceptTolAngle = acceptTolAngle;
@@ -100,7 +101,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
    @Override
    public void attachInverseKinematicsStepListener(InverseKinematicsStepListener stepListener)
-   {      
+   {
       this.stepListener = stepListener;
    }
 
@@ -115,10 +116,10 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       originalParam = initParam.clone();
 
       extractTandR(desiredTransform, desiredT, desiredR);
-      
+
       FunctionNtoM func = new FunctionErrors(desiredTransform, parameterChangePenalty);
 
-      UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresTrustRegion(0.1, RegionStepType.DOG_LEG_F, false);
+      UnconstrainedLeastSquares<DMatrixRMaj> optimizer = FactoryOptimization.dogleg(null, true); 
 
       optimizer.setFunction(func, null);
 
@@ -136,16 +137,16 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
          {
             stepListener.didAnInverseKinemticsStep(errorScalar);
          }
-         
+
          boolean done;
 
          do
          {
             done = optimizer.iterate();
          }
-         while (!done &&!optimizer.isUpdated());
+         while (!done && !optimizer.isUpdated());
 
-         if( optimizer.isUpdated() ) 
+         if (optimizer.isUpdated())
          {
             double foundParam[] = optimizer.getParameters();
 
@@ -191,7 +192,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       updateState(bestParam);
 
       extractTandR(actualTransform, actualT, actualR);
-      
+
       if (Math.abs(actualT.getX() - desiredT.getX()) > acceptTolLoc)
          return false;
       if (Math.abs(actualT.getY() - desiredT.getY()) > acceptTolLoc)
@@ -219,7 +220,6 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       return errorScalar;
    }
 
-
    private void updateState(double[] parameters)
    {
       for (int i = 0; i < parameters.length; i++)
@@ -236,20 +236,18 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       }
    }
 
-
-
    /**
-    * Adds a pentially term for large changes in joint angle.  Designed to minimize the case where the arm makes a huge rotation
+    * Adds a pentially term for large changes in joint angle. Designed to minimize the case where the
+    * arm makes a huge rotation
     */
    public class FunctionErrors implements FunctionNtoM
    {
       RigidBodyTransform desiredTransform;
       double parameterChangePenalty;
 
-
       public FunctionErrors(RigidBodyTransform desiredTransform, double parameterChangePenalty)
       {
-         this.parameterChangePenalty=parameterChangePenalty;
+         this.parameterChangePenalty = parameterChangePenalty;
          this.desiredTransform = desiredTransform;
       }
 
@@ -267,30 +265,30 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       {
          updateState(parameters);
          int index = 0;
-         for( ; index < parameters.length; index++) {
-            if(index <3)
-               functions[index] = parameterChangePenalty*Math.abs(parameters[index]-originalParam[index]);
+         for (; index < parameters.length; index++)
+         {
+            if (index < 3)
+               functions[index] = parameterChangePenalty * Math.abs(parameters[index] - originalParam[index]);
             else
-               functions[index] = parameterChangePenalty*Math.abs(UtilAngle.minus(parameters[index],originalParam[index]));
+               functions[index] = parameterChangePenalty * Math.abs(UtilAngle.minus(parameters[index], originalParam[index]));
          }
 
          endEffectorFrame.getTransformToDesiredFrame(actualTransform, baseFrame);
 
          extractTandR(actualTransform, actualT, actualR);
 
-         functions[index+0] = actualT.getX() - desiredT.getX();
-         functions[index+1] = actualT.getY() - desiredT.getY();
-         functions[index+2] = actualT.getZ() - desiredT.getZ();
+         functions[index + 0] = positionCost * (actualT.getX() - desiredT.getX());
+         functions[index + 1] = positionCost * (actualT.getY() - desiredT.getY());
+         functions[index + 2] = positionCost * (actualT.getZ() - desiredT.getZ());
 
          if (solveOrientation)
          {
-            functions[index+3] = orientationDiscount * UtilAngle.minus(actualR.getX(), desiredR.getX());
-            functions[index+4] = orientationDiscount * UtilAngle.minus(actualR.getY(), desiredR.getY());
-            functions[index+5] = orientationDiscount * UtilAngle.minus(actualR.getZ(), desiredR.getZ());
+            functions[index + 3] = orientationCost * UtilAngle.minus(actualR.getX(), desiredR.getX());
+            functions[index + 4] = orientationCost * UtilAngle.minus(actualR.getY(), desiredR.getY());
+            functions[index + 5] = orientationCost * UtilAngle.minus(actualR.getZ(), desiredR.getZ());
          }
       }
    }
-
 
    private void extractTandR(RigidBodyTransform tran, Vector3D T, Vector3D R)
    {
@@ -308,8 +306,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    @Override
    public void setLimitJointAngles(boolean limitJointAngles)
    {
-      
-   }
 
+   }
 
 }

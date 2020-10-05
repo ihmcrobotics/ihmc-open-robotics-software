@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -35,6 +36,7 @@ import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,7 +81,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    private int currentInsertIndex; // TODO this should be in extracted functionality
 
    @Override
-   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 
@@ -491,5 +493,11 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    @FXML public void placeUpDownCenter()
    {
       upDownCenterPlacementActionMap.start();
+   }
+
+   @Override
+   public void destroy()
+   {
+
    }
 }

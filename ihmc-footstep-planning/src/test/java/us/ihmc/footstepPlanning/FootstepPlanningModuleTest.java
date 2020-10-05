@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -10,7 +9,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -165,7 +163,7 @@ public class FootstepPlanningModuleTest
       FootstepPlan footstepPlan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
-         boolean stepIsAtCorrectHeight = MathTools.epsilonEquals(footstepPlan.getFootstep(i).getSoleFramePose().getZ(), groundHeight, 1e-10);
+         boolean stepIsAtCorrectHeight = MathTools.epsilonEquals(footstepPlan.getFootstep(i).getFootstepPose().getZ(), groundHeight, 1e-10);
          Assertions.assertTrue(stepIsAtCorrectHeight);
       }
 
@@ -194,9 +192,9 @@ public class FootstepPlanningModuleTest
       int planSize = plannerOutput.getFootstepPlan().getNumberOfSteps();
       for (int i = 0; i < 2; i++)
       {
-         SimpleFootstep footstep = plannerOutput.getFootstepPlan().getFootstep(planSize - 1 - i);
+         PlannedFootstep footstep = plannerOutput.getFootstepPlan().getFootstep(planSize - 1 - i);
          RobotSide robotSide = footstep.getRobotSide();
-         boolean stepWasntAdjusted = footstep.getSoleFramePose().epsilonEquals(request.getGoalFootPoses().get(robotSide), 1e-10);
+         boolean stepWasntAdjusted = footstep.getFootstepPose().epsilonEquals(request.getGoalFootPoses().get(robotSide), 1e-10);
          Assertions.assertTrue(stepWasntAdjusted);
       }
    }
@@ -220,14 +218,14 @@ public class FootstepPlanningModuleTest
       // test shuffling left
       Pose3D goalMidFootPose = new Pose3D(0.0, 1.25, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setDesiredHeading(FootstepPlanHeading.LEFT);
+      request.setDesiredHeading( -0.5 * Math.PI);
       request.setRequestedInitialStanceSide(RobotSide.RIGHT);
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       FootstepPlan plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         double yaw = plan.getFootstep(i).getSoleFramePose().getYaw();
+         double yaw = plan.getFootstep(i).getFootstepPose().getYaw();
          double yawThreshold = Math.toRadians(25.0);
          Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
       }
@@ -235,14 +233,14 @@ public class FootstepPlanningModuleTest
       // test shuffling right
       goalMidFootPose.set(0.0, -1.25, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setDesiredHeading(FootstepPlanHeading.RIGHT);
+      request.setDesiredHeading(0.5 * Math.PI);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         double yaw = plan.getFootstep(i).getSoleFramePose().getYaw();
+         double yaw = plan.getFootstep(i).getFootstepPose().getYaw();
          double yawThreshold = Math.toRadians(25.0);
          Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
       }
@@ -250,13 +248,13 @@ public class FootstepPlanningModuleTest
       // test walking backward
       goalMidFootPose.set(-1.25, 0.0, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setDesiredHeading(FootstepPlanHeading.BACKWARD);
+      request.setDesiredHeading(Math.PI);
       plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         double yaw = plan.getFootstep(i).getSoleFramePose().getYaw();
+         double yaw = plan.getFootstep(i).getFootstepPose().getYaw();
          double yawThreshold = Math.toRadians(25.0);
          Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
       }
@@ -332,7 +330,7 @@ public class FootstepPlanningModuleTest
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
       FootstepPlan plan = output.getFootstepPlan();
 
-      double finalStepX = plan.getFootstep(plan.getNumberOfSteps() - 1).getSoleFramePose().getX();
+      double finalStepX = plan.getFootstep(plan.getNumberOfSteps() - 1).getFootstepPose().getX();
       Assertions.assertTrue(MathTools.intervalContains(finalStepX, xThreshold, xThreshold + planningModule.getFootstepPlannerParameters().getMaximumStepReach(), 1e-5));
    }
 }

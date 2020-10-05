@@ -3,7 +3,7 @@ package us.ihmc.atlas.commonWalkingControlModules;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +26,10 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -87,7 +87,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -131,7 +131,7 @@ public class WalkingControllerTest
    private static final double controlDT = robotModel.getControllerDT();
    private static final double velocityDecay = 0.98;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final YoDouble yoTime = new YoDouble("time", registry);
 
@@ -344,7 +344,7 @@ public class WalkingControllerTest
       }
 
       RootJointDesiredConfigurationDataReadOnly rootJointOutput = controllerCore.getOutputForRootJoint();
-      DenseMatrix64F desiredAcceleration = rootJointOutput.getDesiredAcceleration();
+      DMatrixRMaj desiredAcceleration = rootJointOutput.getDesiredAcceleration();
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
@@ -435,7 +435,7 @@ public class WalkingControllerTest
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
 
-      FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
+      FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
       controllerOutput = new JointDesiredOutputList(fullRobotModel.getControllableOneDoFJoints());
       controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, registry);
    }
@@ -545,15 +545,15 @@ public class WalkingControllerTest
       for (RobotSide robotSide : RobotSide.values)
       {
          String name = robotSide.getLowerCaseName() + "FootAssumeCopOnEdge";
-         YoBoolean variable = (YoBoolean) registry.getVariable(name);
+         YoBoolean variable = (YoBoolean) registry.findVariable(name);
          variable.set(true);
 
          name = robotSide.getLowerCaseName() + "FootAssumeFootBarelyLoaded";
-         variable = (YoBoolean) registry.getVariable(name);
+         variable = (YoBoolean) registry.findVariable(name);
          variable.set(true);
 
          name = robotSide.getCamelCaseNameForStartOfExpression() + "FootCurrentState";
-         YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.getVariable(name);
+         YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.findVariable(name);
          footStates.put(robotSide, footState);
       }
 
@@ -569,7 +569,7 @@ public class WalkingControllerTest
          plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
          plotterFactory.createOverheadPlotter();
          scs.setCameraTracking(true, true, true, true);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.setGroundVisible(false);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
          scs.setTime(0.0);
@@ -609,7 +609,7 @@ public class WalkingControllerTest
    {
       if (showSCS)
       {
-         scs.setIndex(1);
+         scs.setCurrentIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
          scs.play();

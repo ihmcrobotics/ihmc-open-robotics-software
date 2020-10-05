@@ -6,32 +6,27 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
@@ -39,19 +34,32 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -60,7 +68,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -73,16 +84,18 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -96,6 +109,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class KinematicsToolboxController extends ToolboxController
 {
+   private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
@@ -112,12 +127,12 @@ public class KinematicsToolboxController extends ToolboxController
    protected final RigidBodyBasics rootBody;
    /** Reference to the desired robot's floating joint. */
    protected final FloatingJointBasics rootJoint;
+   private final double totalRobotMass;
    /**
     * Array containing all the one degree-of-freedom joints of the desired robot except for the finger
     * joints that are not handled by this solver.
     */
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
    private final Collection<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
@@ -158,7 +173,7 @@ public class KinematicsToolboxController extends ToolboxController
     * {@link #feedbackControllerDataHolder} is used here to compute the solution quality every tick
     * from the tracking error for each end-effector being controlled.
     */
-   private final FeedbackControllerDataReadOnly feedbackControllerDataHolder;
+   private final FeedbackControllerDataHolderReadOnly feedbackControllerDataHolder;
 
    /**
     * This is the output of the {@code KinematicsToolboxController}. It is filled with the robot
@@ -167,7 +182,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
    /** Variable to keep track of when the last solution was published. */
-   private final YoDouble timeSinceLastSolutionPublished = new YoDouble("timeSinceLastSolutionPublished", registry);
+   private final YoDouble timeLastSolutionPublished = new YoDouble("timeLastSolutionPublished", registry);
    /** Specifies time interval for publishing the solution. */
    private final YoDouble publishSolutionPeriod = new YoDouble("publishSolutionPeriod", registry);
    /**
@@ -202,12 +217,13 @@ public class KinematicsToolboxController extends ToolboxController
     * configuration.
     */
    protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
+   private boolean submitPrivilegedConfigurationCommand = true;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
     * usually updated once right after the initialization phase.
     */
-   private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<>(null);
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    /**
     * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user input,
     * this manager automatically copies the data in the corresponding command that can then be used
@@ -233,10 +249,40 @@ public class KinematicsToolboxController extends ToolboxController
    private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
    protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
 
-   private boolean isUserControllingCenterOfMass = false;
-   private final CenterOfMassFeedbackControlCommand userCoMFeedbackControlCommand = new CenterOfMassFeedbackControlCommand();
-   private final RecyclingArrayList<SpatialFeedbackControlCommand> userRigidBodyFeedbackControlCommands = new RecyclingArrayList<>(SpatialFeedbackControlCommand.class);
-   private final RecyclingArrayList<OneDoFJointFeedbackControlCommand> userJointFeedbackControlCommands = new RecyclingArrayList<>(OneDoFJointFeedbackControlCommand::new);
+   /** Command buffer used to keep track of the current commands submitted by the user. */
+   private final FeedbackControlCommandBuffer userFBCommands = new FeedbackControlCommandBuffer();
+   /** Command buffer used to keep track of the commands previously submitted by the user. */
+   private final FeedbackControlCommandBuffer previousUserFBCommands = new FeedbackControlCommandBuffer();
+
+   private final YoBoolean isUserProvidingSupportPolygon = new YoBoolean("isUserProvidingSupportPolygon", registry);
+
+   /** Intermediate variable for garbage-free operation. */
+   private final List<FramePoint3DReadOnly> contactPointLocations = new ArrayList<>();
+   /** The active support polygon updated from the most recent robot configuration. */
+   private final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+   /**
+    * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
+    * the convex horizontal region that the center of mass is constrained to.
+    */
+   private final RecyclingArrayList<Point2D> shrunkSupportPolygonVertices = new RecyclingArrayList<>(Point2D.class);
+   /** Helper used for shrink the support polygon. */
+   private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
+   private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
+   private final ConvexPolygon2D shrunkConvexPolygon = new ConvexPolygon2D();
+   private final FramePoint2D centerOfMass = new FramePoint2D();
+   /** Distance to shrink the support polygon for safety purpose. */
+   private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
+                                                                "Describes the minimum distance away from the support polygon's edges.",
+                                                                registry);
+   /** The total mass of the robot. */
+   private final double robotMass;
+
+   /**
+    * Indicates whether the projection of the center of mass is to be contained inside the support
+    * polygon.It is {@code true} by default but can be disabled using the message
+    * {@link KinematicsToolboxConfigurationMessage}.
+    */
+   protected final YoBoolean enableSupportPolygonConstraint = new YoBoolean("enableSupportPolygonConstraint", registry);
 
    /**
     * This is mostly for visualization to be able to keep track of the number of commands that the user
@@ -257,16 +303,10 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
    private final RecyclingArrayList<CollisionResult> collisionResults = new RecyclingArrayList<>(CollisionResult::new);
-   private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(new Supplier<KinematicsCollisionFrame>()
+   private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(SupplierBuilder.indexedSupplier(collisionIndex ->
    {
-      int collisionIndex = 0;
-
-      @Override
-      public KinematicsCollisionFrame get()
-      {
-         return new KinematicsCollisionFrame("collisionFrame" + (collisionIndex++), worldFrame);
-      }
-   });
+      return new KinematicsCollisionFrame("collisionFrame" + collisionIndex, worldFrame);
+   }));
    /**
     * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
     * is less than this value, only then the solver handles it. This is for reducing computational
@@ -318,7 +358,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
                                       OneDoFJointBasics[] oneDoFJoints, Collection<? extends RigidBodyBasics> controllableRigidBodies, double updateDT,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.commandInputManager = commandInputManager;
@@ -330,10 +370,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(oneDoFJoints[0].getPredecessor());
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
-
-      Arrays.stream(oneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       controllerCore = createControllerCore(controllableRigidBodies);
@@ -342,12 +381,15 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      spatialGains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      centerOfMassSafeMargin.set(0.04); // Same as the walking controller.
+
+      spatialGains.setPositionProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
-      spatialGains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      spatialGains.setOrientationProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
-      jointGains.setKp(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      jointGains.setKp(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       jointGains.setMaximumFeedbackAndMaximumFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
       privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
@@ -544,8 +586,7 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
-      FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate(controllableRigidBodies);
-      controllerCoreTemplate.addCommand(new CenterOfMassFeedbackControlCommand());
+      FeedbackControllerTemplate controllerCoreTemplate = createFeedbackControllerTemplate(controllableRigidBodies, 1);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(oneDoFJoints);
       return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
    }
@@ -559,9 +600,12 @@ public class KinematicsToolboxController extends ToolboxController
     *                                the robot will be controllable.
     * @return the template for the controller core.
     */
-   private FeedbackControlCommandList createControllerCoreTemplate(Collection<? extends RigidBodyBasics> controllableRigidBodies)
+   private FeedbackControllerTemplate createFeedbackControllerTemplate(Collection<? extends RigidBodyBasics> controllableRigidBodies,
+                                                                       int numberOfControllersPerBody)
    {
-      FeedbackControlCommandList template = new FeedbackControlCommandList();
+      FeedbackControllerTemplate template = new FeedbackControllerTemplate();
+      template.setAllowDynamicControllerConstruction(true);
+      template.enableCenterOfMassFeedbackController();
       Collection<? extends RigidBodyBasics> rigidBodies;
 
       if (controllableRigidBodies != null)
@@ -569,32 +613,10 @@ public class KinematicsToolboxController extends ToolboxController
       else
          rigidBodies = rootBody.subtreeList();
 
-      rigidBodies.stream().map(this::createRigidBodyFeedbackControlCommand).forEach(template::addCommand);
+      rigidBodies.stream().forEach(rigidBody -> template.enableSpatialFeedbackController(rigidBody, numberOfControllersPerBody));
 
-      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).map(this::createJointFeedbackControlCommand).forEach(template::addCommand);
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).forEach(template::enableOneDoFJointFeedbackController);
       return template;
-   }
-
-   /**
-    * Convenience method for pure laziness. Should only be used for
-    * {@link #createControllerCoreTemplate()}.
-    */
-   private SpatialFeedbackControlCommand createRigidBodyFeedbackControlCommand(RigidBodyBasics endEffector)
-   {
-      SpatialFeedbackControlCommand command = new SpatialFeedbackControlCommand();
-      command.set(rootBody, endEffector);
-      return command;
-   }
-
-   /**
-    * Convenience method for pure laziness. Should only be used for
-    * {@link #createControllerCoreTemplate()}.
-    */
-   private OneDoFJointFeedbackControlCommand createJointFeedbackControlCommand(OneDoFJointBasics joint)
-   {
-      OneDoFJointFeedbackControlCommand command = new OneDoFJointFeedbackControlCommand();
-      command.setJoint(joint);
-      return command;
    }
 
    /**
@@ -626,7 +648,9 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected boolean initializeInternal()
    {
-      clearUserCommands();
+      userFBCommands.clear();
+      previousUserFBCommands.clear();
+      isUserProvidingSupportPolygon.set(false);
 
       RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
       boolean hasRobotConfigurationData = robotConfigurationData != null;
@@ -658,14 +682,10 @@ public class KinematicsToolboxController extends ToolboxController
          updateTools();
       }
 
-      return hasRobotConfigurationData;
-   }
+      // By default, always constrain the center of mass according to the current support polygon (if defined).
+      enableSupportPolygonConstraint.set(true);
 
-   public void clearUserCommands()
-   {
-      isUserControllingCenterOfMass = false;
-      userRigidBodyFeedbackControlCommands.clear();
-      userJointFeedbackControlCommands.clear();
+      return hasRobotConfigurationData;
    }
 
    /**
@@ -683,21 +703,17 @@ public class KinematicsToolboxController extends ToolboxController
       // Compiling all the commands to be submitted to the controller core.
       controllerCoreCommand.clear();
 
-      // Clear the map to forget the user commands previously submitted.
-      if (!preserveUserCommandHistory.getValue())
-         clearUserCommands();
-
       FeedbackControlCommandBuffer feedbackControlCommandBuffer = controllerCoreCommand.getFeedbackControlCommandList();
       InverseKinematicsCommandBuffer inverseKinematicsCommandBuffer = controllerCoreCommand.getInverseKinematicsCommandList();
-      consumeUserCommands(feedbackControlCommandBuffer);
-      numberOfActiveCommands.set(userRigidBodyFeedbackControlCommands.size() + userJointFeedbackControlCommands.size()
-            + (isUserControllingCenterOfMass ? 1 : 0));
+      consumeUserCommands(feedbackControlCommandBuffer, inverseKinematicsCommandBuffer);
       getAdditionalFeedbackControlCommands(feedbackControlCommandBuffer);
 
       inverseKinematicsCommandBuffer.addInverseKinematicsOptimizationSettingsCommand().set(activeOptimizationSettings);
-      PrivilegedConfigurationCommand privilegedConfigurationCommand = privilegedConfigurationCommandReference.getAndSet(null);
-      if (privilegedConfigurationCommand != null)
+      if (submitPrivilegedConfigurationCommand)
+      {
          inverseKinematicsCommandBuffer.addPrivilegedConfigurationCommand().set(privilegedConfigurationCommand);
+         submitPrivilegedConfigurationCommand = false;
+      }
       getAdditionalInverseKinematicsCommands(inverseKinematicsCommandBuffer);
       computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
 
@@ -719,8 +735,8 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
-      // Calculating the solution quality based on sum of all the commands' tracking error.
-      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(allFeedbackControlCommands, feedbackControllerDataHolder));
+      // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
+      solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
 
       // Updating the the robot state from the current solution, initializing the next control tick.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
@@ -738,12 +754,12 @@ public class KinematicsToolboxController extends ToolboxController
       updateTools();
       computeCollisions();
 
-      timeSinceLastSolutionPublished.add(updateDT);
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-      if (timeSinceLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
+      if (timeLastSolutionPublished.getValue() == 0.0 || currentTime - timeLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
       {
          reportMessage(inverseKinematicsSolution);
-         timeSinceLastSolutionPublished.set(0.0);
+         timeLastSolutionPublished.set(currentTime);
       }
       threadTimer.stop();
    }
@@ -761,33 +777,24 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Checking if there is any new command available, in which case they polled from the
     * {@link #commandInputManager} and processed to update the state of the current optimization run.
-    *
-    * @param the buffer used to stored the feedback control commands to be executed for this control
-    *            tick.
+    * 
+    * @param ikCommandBufferToPack the buffer used to store the inverse kinematics commands to be
+    *                              executed for this control tick.
+    * @param fbCommandBufferToPack the buffer used to store the feedback control commands to be
+    *                              executed for this control tick.
     */
-   private void consumeUserCommands(FeedbackControlCommandBuffer commandBufferToPack)
+   private void consumeUserCommands(FeedbackControlCommandBuffer fbCommandBufferToPack, InverseKinematicsCommandBuffer ikCommandBufferToPack)
+   {
+      consumeUserConfigurationCommands();
+      consumeUserMotionObjectiveCommands(fbCommandBufferToPack, ikCommandBufferToPack);
+      consumeUserContactStateCommands(ikCommandBufferToPack);
+   }
+
+   private void consumeUserConfigurationCommands()
    {
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
       {
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
-
-         /*
-          * If there is a new privileged configuration, the desired robot state is updated alongside with the
-          * privileged configuration and the initial center of mass position and foot poses.
-          */
-         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointHashCodeMap);
-         if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
-            robotConfigurationReinitialized();
-         if (command.hasPrivilegedJointAngles())
-            snapPrivilegedConfigurationToCurrent();
-         if (command.getPrivilegedWeight() < 0.0)
-            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-         else
-            privilegedWeight.set(command.getPrivilegedWeight());
-         if (command.getPrivilegedGain() < 0.0)
-            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-         else
-            privilegedConfigurationGain.set(command.getPrivilegedGain());
 
          if (command.getJointVelocityWeight() <= 0.0)
             activeOptimizationSettings.setJointVelocityWeight(optimizationSettings.getJointVelocityWeight());
@@ -806,87 +813,323 @@ public class KinematicsToolboxController extends ToolboxController
             activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.DISABLED);
          if (command.getEnableJointVelocityLimits())
             activeOptimizationSettings.setJointVelocityLimitMode(JointVelocityLimitMode.ENABLED);
+         if (command.getDisableInputPersistence())
+            setPreserveUserCommandHistory(false);
+         else if (command.getEnableInputPersistence())
+            setPreserveUserCommandHistory(true);
+         if (command.getEnableSupportPolygonConstraint())
+            enableSupportPolygonConstraint.set(true);
+         else if (command.getDisableSupportPolygonConstraint())
+            enableSupportPolygonConstraint.set(false);
       }
 
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxPrivilegedConfigurationCommand.class))
+      {
+         KinematicsToolboxPrivilegedConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxPrivilegedConfigurationCommand.class);
+
+         /*
+          * If there is a new privileged configuration, the desired robot state is updated alongside with the
+          * privileged configuration and the initial center of mass position and foot poses.
+          */
+         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint);
+
+         if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
+            robotConfigurationReinitialized();
+
+         if (command.getPrivilegedWeight() < 0.0)
+         {
+            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+         }
+         else
+         {
+            privilegedWeight.set(command.getPrivilegedWeight());
+            privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getValue());
+            submitPrivilegedConfigurationCommand = true;
+         }
+
+         if (command.getPrivilegedGain() < 0.0)
+         {
+            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         }
+         else
+         {
+            privilegedConfigurationGain.set(command.getPrivilegedGain());
+            privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getValue());
+            submitPrivilegedConfigurationCommand = true;
+         }
+
+         if (command.hasPrivilegedJointAngles())
+            snapPrivilegedConfigurationToCurrent();
+      }
+   }
+
+   private void consumeUserMotionObjectiveCommands(FeedbackControlCommandBuffer fbCommandBufferToPack, InverseKinematicsCommandBuffer ikCommandBufferToPack)
+   {
+      previousUserFBCommands.set(userFBCommands);
+      userFBCommands.clear();
+
+      // Keeping track of whether we received at least 1 command, if not we re-submit the previous commands regardless of preserveUserCommandHistory.
+      boolean noCommandReceived = true;
+
+      /***************************************
+       * Individual center of mass commands
+       ***************************************/
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
+         noCommandReceived = false;
+
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userCoMFeedbackControlCommand);
-         isUserControllingCenterOfMass = true;
+         KinematicsToolboxHelper.consumeCenterOfMassCommand(command, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
+
+         if (preserveUserCommandHistory.getValue())
+         {
+            // We override previous commands if any.
+            while (!previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty())
+            {
+               previousUserFBCommands.removeCommand(previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().get(0));
+            }
+         }
       }
 
+      /***************************************
+       * Individual rigid-body commands
+       ***************************************/
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxRigidBodyCommand.class))
       {
          List<KinematicsToolboxRigidBodyCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxRigidBodyCommand.class);
 
          for (int i = 0; i < commands.size(); i++)
          {
-            RigidBodyBasics endEffector = commands.get(i).getEndEffector();
-            SpatialFeedbackControlCommand rigidBodyCommand = null;
+            noCommandReceived = false;
+            KinematicsToolboxRigidBodyCommand command = commands.get(i);
+            RigidBodyBasics endEffector = command.getEndEffector();
+            SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
+            KinematicsToolboxHelper.consumeRigidBodyCommand(command, rootBody, spatialGains, rigidBodyCommand);
+            rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
 
-            for (int bufferIndex = 0; bufferIndex < userRigidBodyFeedbackControlCommands.size(); bufferIndex++)
+            if (preserveUserCommandHistory.getValue())
             {
-               SpatialFeedbackControlCommand candidate = userRigidBodyFeedbackControlCommands.get(bufferIndex);
-               if (candidate.getEndEffector() == endEffector)
+               // We override previous commands if any.
+               for (int j = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().size() - 1; j >= 0; j--)
                {
-                  rigidBodyCommand = candidate;
-                  break;
+                  SpatialFeedbackControlCommand previousCommand = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().get(j);
+                  if (previousCommand.getEndEffector() == endEffector)
+                     previousUserFBCommands.removeCommand(previousCommand);
                }
             }
-
-            if (rigidBodyCommand == null)
-               rigidBodyCommand = userRigidBodyFeedbackControlCommands.add();
-
-            KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), rootBody, spatialGains, rigidBodyCommand);
-            rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
          }
       }
 
+      /***************************************
+       * Individual 1 DoF joint commands
+       ***************************************/
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxOneDoFJointCommand.class))
       {
          List<KinematicsToolboxOneDoFJointCommand> commands = commandInputManager.pollNewCommands(KinematicsToolboxOneDoFJointCommand.class);
 
          for (int i = 0; i < commands.size(); i++)
          {
+            noCommandReceived = false;
             KinematicsToolboxOneDoFJointCommand command = commands.get(i);
-            int jointHashCode = command.getJointHashCode();
-            OneDoFJointBasics joint = jointHashCodeMap.get(jointHashCode);
-            OneDoFJointFeedbackControlCommand jointCommand = null;
+            OneDoFJointBasics joint = command.getJoint();
+            OneDoFJointFeedbackControlCommand jointCommand = userFBCommands.addOneDoFJointFeedbackControlCommand();
+            KinematicsToolboxHelper.consumeJointCommand(command, jointGains, jointCommand);
 
-            for (int bufferIndex = 0; bufferIndex < userJointFeedbackControlCommands.size(); bufferIndex++)
+            if (preserveUserCommandHistory.getValue())
             {
-               OneDoFJointFeedbackControlCommand candidate = userJointFeedbackControlCommands.get(bufferIndex);
-               if (candidate.getJoint() == joint)
+               // We override previous commands if any.
+               for (int j = 0; j < previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().size(); j++)
                {
-                  jointCommand = candidate;
-                  break;
+                  OneDoFJointFeedbackControlCommand previousCommand = previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().get(j);
+                  if (previousCommand.getJoint() == joint)
+                     previousUserFBCommands.removeCommand(previousCommand);
                }
             }
-
-            if (jointCommand == null)
-               jointCommand = userJointFeedbackControlCommands.add();
-
-            KinematicsToolboxHelper.consumeJointCommand(command, joint, jointGains, jointCommand);
          }
       }
 
-      // TODO fix the doc
-      /*
-       * By using the map, we ensure that there is only one command per end-effector (including the center
-       * of mass). The map is also useful for remembering commands received during the previous control
-       * ticks of the same run.
-       */
-      if (isUserControllingCenterOfMass)
-         commandBufferToPack.addCenterOfMassFeedbackControlCommand().set(userCoMFeedbackControlCommand);
-
-      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      /***************************************
+       * Command collection
+       ***************************************/
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInputCollectionCommand.class))
       {
-         commandBufferToPack.addSpatialFeedbackControlCommand().set(userRigidBodyFeedbackControlCommands.get(i));
+         KinematicsToolboxInputCollectionCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxInputCollectionCommand.class);
+
+         // CoM inputs
+         RecyclingArrayList<KinematicsToolboxCenterOfMassCommand> centerOfMassInputs = command.getCenterOfMassInputs();
+         for (int j = 0; j < centerOfMassInputs.size(); j++)
+         {
+            noCommandReceived = false;
+            KinematicsToolboxCenterOfMassCommand input = centerOfMassInputs.get(j);
+            KinematicsToolboxHelper.consumeCenterOfMassCommand(input, spatialGains.getPositionGains(), userFBCommands.addCenterOfMassFeedbackControlCommand());
+
+            if (preserveUserCommandHistory.getValue())
+            {
+               // We override previous commands if any.
+               while (!previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty())
+               {
+                  previousUserFBCommands.removeCommand(previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().get(0));
+               }
+            }
+         }
+
+         // Rigid-body inputs
+         RecyclingArrayList<KinematicsToolboxRigidBodyCommand> rigidBodyInputs = command.getRigidBodyInputs();
+         for (int j = 0; j < rigidBodyInputs.size(); j++)
+         {
+            noCommandReceived = false;
+            KinematicsToolboxRigidBodyCommand input = rigidBodyInputs.get(j);
+            RigidBodyBasics endEffector = input.getEndEffector();
+            SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
+            KinematicsToolboxHelper.consumeRigidBodyCommand(input, rootBody, spatialGains, rigidBodyCommand);
+            rigidBodyCommand.setPrimaryBase(getEndEffectorPrimaryBase(rigidBodyCommand.getEndEffector()));
+
+            if (preserveUserCommandHistory.getValue())
+            {
+               // We override previous commands if any.
+               for (int k = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().size() - 1; k >= 0; k--)
+               {
+                  SpatialFeedbackControlCommand previousCommand = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer().get(k);
+                  if (previousCommand.getEndEffector() == endEffector)
+                     previousUserFBCommands.removeCommand(previousCommand);
+               }
+            }
+         }
+
+         // 1-DoF joint inputs
+         RecyclingArrayList<KinematicsToolboxOneDoFJointCommand> jointInputs = command.getJointInputs();
+         for (int j = 0; j < jointInputs.size(); j++)
+         {
+            noCommandReceived = false;
+            KinematicsToolboxOneDoFJointCommand input = jointInputs.get(j);
+            OneDoFJointBasics joint = input.getJoint();
+            OneDoFJointFeedbackControlCommand jointCommand = userFBCommands.addOneDoFJointFeedbackControlCommand();
+            KinematicsToolboxHelper.consumeJointCommand(input, jointGains, jointCommand);
+
+            if (preserveUserCommandHistory.getValue())
+            {
+               // We override previous commands if any.
+               for (int k = 0; k < previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().size(); k++)
+               {
+                  OneDoFJointFeedbackControlCommand previousCommand = previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer().get(k);
+                  if (previousCommand.getJoint() == joint)
+                     previousUserFBCommands.removeCommand(previousCommand);
+               }
+            }
+         }
+
+         // Contact state
+         if (command.hasConstactStateInput())
+         {
+            KinematicsToolboxContactStateCommand contactStateInput = command.getContactStateInput();
+            processUserContactStateCommand(contactStateInput, ikCommandBufferToPack);
+         }
       }
 
-      for (int i = 0; i < userJointFeedbackControlCommands.size(); i++)
+      if (noCommandReceived)
       {
-         commandBufferToPack.addOneDoFJointFeedbackControlCommand().set(userJointFeedbackControlCommands.get(i));
+         fbCommandBufferToPack.addCommandList(previousUserFBCommands);
+         numberOfActiveCommands.set(previousUserFBCommands.getNumberOfCommands());
+         userFBCommands.set(previousUserFBCommands);
+         previousUserFBCommands.clear();
+      }
+      else
+      {
+         if (preserveUserCommandHistory.getValue())
+         { // We move the remaining previous commands to the current set of user commands.
+            userFBCommands.addCommandList(previousUserFBCommands);
+         }
+         previousUserFBCommands.clear();
+         // Add to the commandBufferToPack so it gets submitted to the controller core.
+         fbCommandBufferToPack.addCommandList(userFBCommands);
+         // Stats accessible from remote visualizer.
+         numberOfActiveCommands.set(userFBCommands.getNumberOfCommands());
+      }
+   }
+
+   private void consumeUserContactStateCommands(InverseKinematicsCommandBuffer bufferToPack)
+   {
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxContactStateCommand.class))
+      {
+         KinematicsToolboxContactStateCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxContactStateCommand.class);
+         processUserContactStateCommand(command, bufferToPack);
+      }
+   }
+
+   private void processUserContactStateCommand(KinematicsToolboxContactStateCommand command, InverseKinematicsCommandBuffer bufferToPack)
+   {
+      isUserProvidingSupportPolygon.set(command.getNumberOfContacts() > 0);
+      if (command.getCenterOfMassMargin() >= 0.0)
+         centerOfMassSafeMargin.set(command.getCenterOfMassMargin());
+
+      contactPointLocations.clear();
+
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         contactPointLocations.add(command.getContactPoint(i).getPosition());
+      }
+
+      if (!contactPointLocations.isEmpty())
+         updateSupportPolygonConstraint(contactPointLocations, bufferToPack);
+   }
+
+   protected void updateSupportPolygonConstraint(List<? extends FramePoint3DReadOnly> contactPoints, InverseKinematicsCommandBuffer bufferToPack)
+   {
+      if (!enableSupportPolygonConstraint.getValue())
+         return;
+
+      newSupportPolygon.clear(worldFrame);
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         newSupportPolygon.addVertexMatchingFrame(contactPoints.get(i));
+      }
+      newSupportPolygon.update();
+
+      // If the support polygon is empty or too small, we don't apply the constraint, it would likely cause the QP to fail.
+      if (newSupportPolygon.getNumberOfVertices() <= 2 || newSupportPolygon.getArea() < MathTools.square(0.01))
+         return;
+
+      if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
+      { // Update the polygon only if there is an actual update.
+         supportPolygon.set(newSupportPolygon);
+         convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkConvexPolygon);
+         shrunkSupportPolygonVertices.clear();
+         for (int i = 0; i < shrunkConvexPolygon.getNumberOfVertices(); i++)
+            shrunkSupportPolygonVertices.add().set(shrunkConvexPolygon.getVertex(i));
+
+         for (int i = shrunkSupportPolygonVertices.size() - 1; i >= 0; i--)
+         { // Filtering vertices that barely expand the polygon.
+            Point2DReadOnly vertex = shrunkSupportPolygonVertices.get(i);
+            Point2DReadOnly previousVertex = ListWrappingIndexTools.getPrevious(i, shrunkSupportPolygonVertices);
+            Point2DReadOnly nextVertex = ListWrappingIndexTools.getNext(i, shrunkSupportPolygonVertices);
+
+            if (EuclidGeometryTools.distanceFromPoint2DToLine2D(vertex, previousVertex, nextVertex) < 1.0e-3)
+               shrunkSupportPolygonVertices.remove(i);
+         }
+      }
+
+      centerOfMass.setToZero(centerOfMassFrame);
+      centerOfMass.changeFrame(worldFrame);
+
+      double distanceThreshold = 0.25 * centerOfMassSafeMargin.getValue();
+
+      for (int i = 0; i < shrunkSupportPolygonVertices.size(); i++)
+      { // Only adding constraints that are close to be violated.
+         Point2DReadOnly vertex = shrunkSupportPolygonVertices.get(i);
+         Point2DReadOnly nextVertex = ListWrappingIndexTools.getNext(i, shrunkSupportPolygonVertices);
+         double signedDistanceToEdge = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass, vertex, nextVertex);
+
+         if (signedDistanceToEdge > -distanceThreshold)
+         {
+            LinearMomentumConvexConstraint2DCommand command = bufferToPack.addLinearMomentumConvexConstraint2DCommand();
+            command.clear();
+            Vector2D h0 = command.addLinearMomentumConstraintVertex();
+            Vector2D h1 = command.addLinearMomentumConstraintVertex();
+            h0.sub(vertex, centerOfMass);
+            h1.sub(nextVertex, centerOfMass);
+            h0.scale(robotMass / updateDT);
+            h1.scale(robotMass / updateDT);
+         }
       }
    }
 
@@ -998,8 +1241,8 @@ public class KinematicsToolboxController extends ToolboxController
       return null;
    }
 
-   private final FramePoint3D rigidBodyPosition = new FramePoint3D();
-   private final FrameQuaternion rigidBodyOrientation = new FrameQuaternion();
+   private final List<FBPoint3D> rigidBodyPositions = new ArrayList<>();
+   private final List<FBQuaternion3D> rigidBodyOrientations = new ArrayList<>();
 
    /**
     * Updates the graphic coordinate systems for the end-effectors that are actively controlled during
@@ -1007,40 +1250,38 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private void updateVisualization()
    {
-      boolean hasData;
-
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = desiredCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.DESIRED);
-         if (!hasData)
+         feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.DESIRED);
+         if (rigidBodyPositions.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setPosition(rigidBodyPosition);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setPosition(rigidBodyPositions.get(0));
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.DESIRED);
-         if (!hasData)
+         feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.DESIRED);
+         if (rigidBodyOrientations.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setOrientation(rigidBodyOrientation);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
       }
 
       for (int i = 0; i < rigidBodiesWithVisualization.size(); i++)
       {
          RigidBodyBasics endEffector = rigidBodiesWithVisualization.get(i);
          YoGraphicCoordinateSystem coordinateSystem = currentCoodinateSystems.get(endEffector);
-         hasData = feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPosition, Type.CURRENT);
-         if (!hasData)
+         feedbackControllerDataHolder.getPositionData(endEffector, rigidBodyPositions, Type.CURRENT);
+         if (rigidBodyPositions.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setPosition(rigidBodyPosition);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setPosition(rigidBodyPositions.get(0));
 
-         hasData = feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientation, Type.CURRENT);
-         if (!hasData)
+         feedbackControllerDataHolder.getOrientationData(endEffector, rigidBodyOrientations, Type.CURRENT);
+         if (rigidBodyOrientations.isEmpty())
             coordinateSystem.hide();
-         else
-            coordinateSystem.setOrientation(rigidBodyOrientation);
+         else // TODO Handle the case there are more than 1 active controller.
+            coordinateSystem.setOrientation(rigidBodyOrientations.get(0));
       }
    }
 
@@ -1050,12 +1291,15 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private void snapPrivilegedConfigurationToCurrent()
    {
-      PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
+      privilegedConfigurationCommand.clear();
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         privilegedConfigurationCommand.addJoint(oneDoFJoints[i], oneDoFJoints[i].getQ());
+      }
       privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
       privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
       privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
-      privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
+      submitPrivilegedConfigurationCommand = true;
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
@@ -1066,27 +1310,55 @@ public class KinematicsToolboxController extends ToolboxController
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
    {
-      for (int i = 0; i < userRigidBodyFeedbackControlCommands.size(); i++)
+      RecyclingArrayList<SpatialFeedbackControlCommand> currentFBCommands = userFBCommands.getSpatialFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < currentFBCommands.size(); i++)
       {
-         if (userRigidBodyFeedbackControlCommands.get(i).getEndEffector() == rigidBody)
+         if (currentFBCommands.get(i).getEndEffector() == rigidBody)
             return true;
       }
+
+      RecyclingArrayList<SpatialFeedbackControlCommand> previousFBCommands = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < previousFBCommands.size(); i++)
+      {
+         if (previousFBCommands.get(i).getEndEffector() == rigidBody)
+            return true;
+      }
+
       return false;
    }
 
    public boolean isUserControllingJoint(OneDoFJointBasics joint)
    {
-      for (int i = 0; i < userJointFeedbackControlCommands.size(); i++)
+      RecyclingArrayList<OneDoFJointFeedbackControlCommand> currentFBCommands = userFBCommands.getOneDoFJointFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < currentFBCommands.size(); i++)
       {
-         if (userJointFeedbackControlCommands.get(i).getJoint() == joint)
+         if (currentFBCommands.get(i).getJoint() == joint)
             return true;
       }
+
+      RecyclingArrayList<OneDoFJointFeedbackControlCommand> previousFBCommands = previousUserFBCommands.getOneDoFJointFeedbackControlCommandBuffer();
+
+      for (int i = 0; i < previousFBCommands.size(); i++)
+      {
+         if (previousFBCommands.get(i).getJoint() == joint)
+            return true;
+      }
+
       return false;
    }
 
    public boolean isUserControllingCenterOfMass()
    {
-      return isUserControllingCenterOfMass;
+      return !userFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty()
+            || !previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty();
+   }
+
+   public boolean isUserProvidingSupportPolygon()
+   {
+      return isUserProvidingSupportPolygon.getValue();
    }
 
    public YoPIDSE3Gains getDefaultSpatialGains()
@@ -1134,7 +1406,7 @@ public class KinematicsToolboxController extends ToolboxController
       return inverseKinematicsSolution;
    }
 
-   public FeedbackControllerDataReadOnly getFeedbackControllerDataHolder()
+   public FeedbackControllerDataHolderReadOnly getFeedbackControllerDataHolder()
    {
       return feedbackControllerDataHolder;
    }
@@ -1157,6 +1429,11 @@ public class KinematicsToolboxController extends ToolboxController
    public double getUpdateDT()
    {
       return updateDT;
+   }
+
+   public YoDouble getCenterOfMassSafeMargin()
+   {
+      return centerOfMassSafeMargin;
    }
 
    public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()

@@ -1,8 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.tools;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
-
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -12,7 +9,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkPr
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import javax.swing.*;
 import java.io.File;
@@ -21,18 +18,21 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
+
 public class ConstantPlanarRegionsPublisher
 {
    private final PlanarRegionsList planarRegionsList;
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
    private final REAPlanarRegionPublicNetworkProvider publisher;
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
+   private final RegionFeaturesProvider featuresProvider = new ConstantPlanarRegionProvider();
 
    public ConstantPlanarRegionsPublisher(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      this.publisher = new REAPlanarRegionPublicNetworkProvider(null, new ConstantPlanarRegionProvider(), ros2Node, publisherTopicNameGenerator, subscriberTopicNameGenerator);
+      this.publisher = new REAPlanarRegionPublicNetworkProvider(ros2Node, outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
    }
 
    public void start()
@@ -44,7 +44,7 @@ public class ConstantPlanarRegionsPublisher
    {
       if(scheduled == null)
       {
-         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(true), 0, periodMillis, TimeUnit.MILLISECONDS);
+         scheduled = executorService.scheduleAtFixedRate(() -> publisher.update(featuresProvider, true), 0, periodMillis, TimeUnit.MILLISECONDS);
       }
    }
 

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.math.filters.DelayedYoDouble;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
@@ -21,7 +21,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
    {
       double epsilon = 1.0e-15;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
       double numberOfTicks = 10000;
       double dt = 0.001;
       YoDouble yoTime = new YoDouble("time", registry);
@@ -62,7 +62,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
    {
       double epsilon = 1.0e-15;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
       double numberOfTicks = 10000;
       double dt = 0.001;
       YoDouble yoTime = new YoDouble("time", registry);
@@ -105,7 +105,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
    {
       Random random = new Random(5616515L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
       double numberOfTicks = 10000;
       double dt = 0.001;
       YoDouble yoTime = new YoDouble("time", registry);

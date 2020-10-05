@@ -7,7 +7,11 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -24,24 +28,32 @@ import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldWithFiducialEnvironment.FiducialType;
+import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
 import us.ihmc.simulationConstructionSetTools.util.environments.MultiJointArticulatedContactable;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class ContactableDoorRobot extends Robot implements SelectableObject, SelectedListener, Contactable
 {
-   public static final Vector2D DEFAULT_HANDLE_OFFSET = new Vector2D(0.83, 0.98);
+   public static final Vector2D DEFAULT_HANDLE_OFFSET = new Vector2D(0.83, 1.05);
    public static final Vector3D DEFAULT_DOOR_DIMENSIONS = new Vector3D(0.9144, 0.045, 2.04);
    public static final double DEFAULT_MASS = 2.28; // 5lbs
    public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.06;
    public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.01;
    public static final double DEFAULT_HANDLE_RADIUS = 0.02;
    public static final double DEFAULT_HANDLE_LENGTH = 0.12;
-      
+   public static final double DEFAULT_YAW_IN_WORLD = 0.0;
+
    private static final AppearanceDefinition defaultColor = YoAppearance.Gray();
    
    private double widthX;
@@ -68,19 +80,42 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private final double handleDoorSeparation;
    private final double handleHingeRadius;
    private final double handleRadius, handleLength;
-      
+   
+   
+   private final boolean addFiducial = true;
+   
+   
    private final InternalMultiJointArticulatedContactable internalMultiJointArticulatedContactable;
+   
+   private Fiducial doorFiducialID;
    
    public ContactableDoorRobot(String name, Point3D positionInWorld)
    {
-      this(name, DEFAULT_DOOR_DIMENSIONS, DEFAULT_MASS, positionInWorld, DEFAULT_HANDLE_OFFSET, 
-            DEFAULT_HANDLE_RADIUS, DEFAULT_HANDLE_LENGTH, DEFAULT_HANDLE_DOOR_SEPARATION, DEFAULT_HANDLE_HINGE_RADIUS);
+      this(name, positionInWorld, DEFAULT_YAW_IN_WORLD, Fiducial.FIDUCIAL50);
    }
    
-   public ContactableDoorRobot(String name, Vector3D boxDimensions, double mass, Point3D positionInWorld, Vector2D handleOffset, 
-         double handleRadius, double handleLength, double handleDoorSeparation, double handleHingeRadius)
+   public ContactableDoorRobot(String name, Point3D positionInWorld, double yawInWorld, Fiducial fiducial)
+   {
+      this(name,
+           DEFAULT_DOOR_DIMENSIONS,
+           DEFAULT_MASS,
+           positionInWorld,
+           yawInWorld,
+           DEFAULT_HANDLE_OFFSET,
+           DEFAULT_HANDLE_RADIUS,
+           DEFAULT_HANDLE_LENGTH,
+           DEFAULT_HANDLE_DOOR_SEPARATION,
+           DEFAULT_HANDLE_HINGE_RADIUS,
+           fiducial);
+   }
+
+   public ContactableDoorRobot(String name, Vector3D boxDimensions, double mass, Point3D positionInWorld, double yawInWorld, Vector2D handleOffset,
+         double handleRadius, double handleLength, double handleDoorSeparation, double handleHingeRadius, Fiducial fiducial)
    {
       super(name);
+      
+      
+      this.doorFiducialID = fiducial;
       
       this.mass = mass;           
       
@@ -96,14 +131,15 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       this.handleRadius = handleRadius;
       this.handleLength = handleLength;
       
-      createDoor(new Vector3D(positionInWorld));
+      createDoor(new Vector3D(positionInWorld), yawInWorld);
       createDoorGraphics();
       createHandle();
       createHandleGraphics();
+
       
       // set up reference frames
-      originalDoorPose = new RigidBodyTransform(new AxisAngle(), new Vector3D(positionInWorld)); 
-      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle()));
+      originalDoorPose = new RigidBodyTransform(new AxisAngle(0.0, 0.0, 0.0), new Vector3D(positionInWorld));
+      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle(0.0, 0.0, 0.0)));
       doorBox = new FrameBox3D(doorFrame, widthX, depthY, heightZ);
       
       for(RobotSide robotSide : RobotSide.values())
@@ -116,16 +152,17 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       internalMultiJointArticulatedContactable = new InternalMultiJointArticulatedContactable(getName(), this);
    }
 
-   private void createDoor(Vector3D positionInWorld)
+   private void createDoor(Vector3D positionInWorld, double yawInWorld)
    {
       // creating the pinJoint, i.e. door hinge
       doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis3D.Z);
+      doorHingePinJoint.getOffsetTransform3D().getRotation().setYawPitchRoll(yawInWorld, 0.0, 0.0);
       
       // door link
       doorLink = new Link("doorLink");
       doorLink.setMass(mass);
       doorLink.setComOffset(0.5*widthX, 0.5*depthY, 0.5*heightZ);
-      
+
       inertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidBox(widthX, depthY, heightZ, mass);
       doorLink.setMomentOfInertia(inertiaMatrix);
       doorHingePinJoint.setLink(doorLink);
@@ -155,7 +192,32 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       doorPoints.add(new Point2D(widthX, 0.0));
       doorPoints.add(new Point2D(widthX, depthY));
       doorPoints.add(new Point2D(0.0,    depthY));
-      doorLinkGraphics.addExtrudedPolygon(doorPoints, heightZ, defaultColor);
+      doorLinkGraphics.addExtrudedPolygon(doorPoints, heightZ, YoAppearance.White());
+      
+      if(addFiducial)
+      {
+      
+    	  //      qrCodeLinkGraphics.addCoordinateSystem(2.0);
+    	  double cubeLength = 0.2032;
+    	  double fiducialHeight = 1.1414125;
+
+    	  doorLinkGraphics.translate(0.68183125,depthY/2, fiducialHeight);
+    	  AppearanceDefinition cubeAppearance = YoAppearance.Texture(doorFiducialID.getPathString());
+
+    	  boolean[] textureFaces = new boolean[] { false, false, true, true, false, false };
+    	 // doorLinkGraphics.translate(0.0, 0.0, -0.01 * cubeLength);
+    	  doorLinkGraphics.addCube(cubeLength, depthY*1.01, cubeLength, cubeAppearance, textureFaces);
+
+    
+      
+      
+      
+      }
+      
+      
+      
+      
+      
       doorLink.setLinkGraphics(doorLinkGraphics);
    }
    
@@ -183,6 +245,8 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       
       handleLink.setLinkGraphics(doorHandleGraphics);
    }
+   
+  
    
    @Override
    public boolean isClose(Point3D pointInWorldToCheck)

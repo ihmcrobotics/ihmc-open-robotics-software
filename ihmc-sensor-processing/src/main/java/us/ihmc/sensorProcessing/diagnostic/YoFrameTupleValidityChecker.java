@@ -4,29 +4,29 @@ import java.util.EnumMap;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameTuple3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameTuple3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameTupleValidityChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoFrameTuple3D input;
 
    private final EnumMap<Axis3D, DoubleYoVariableValidityChecker> validityCheckers = new EnumMap<>(Axis3D.class);
 
-   public YoFrameTupleValidityChecker(String inputName, YoVariableRegistry parentRegistry)
+   public YoFrameTupleValidityChecker(String inputName, YoRegistry parentRegistry)
    {
       this(inputName, null, parentRegistry);
    }
    
-   public YoFrameTupleValidityChecker(YoFrameTuple3D input, YoVariableRegistry parentRegistry)
+   public YoFrameTupleValidityChecker(YoFrameTuple3D input, YoRegistry parentRegistry)
    {
       this(input.getNamePrefix() + input.getNameSuffix(), input, parentRegistry);
    }
 
-   private YoFrameTupleValidityChecker(String inputName, YoFrameTuple3D input, YoVariableRegistry parentRegistry)
+   private YoFrameTupleValidityChecker(String inputName, YoFrameTuple3D input, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(inputName + "ValidityChecker");
+      registry = new YoRegistry(inputName + "ValidityChecker");
       parentRegistry.addChild(registry);
       this.input = input;
 

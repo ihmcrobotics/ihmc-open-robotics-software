@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.matrixlib.MatrixTools;
@@ -25,21 +25,21 @@ public class DynamicsMatrixCalculator
 
    private final DynamicsMatrixCalculatorHelper helper;
 
-   private final DenseMatrix64F coriolisMatrix;
-   private final DenseMatrix64F contactForceJacobian;
+   private final DMatrixRMaj coriolisMatrix;
+   private final DMatrixRMaj contactForceJacobian;
 
-   private final DenseMatrix64F floatingBaseMassMatrix;
-   private final DenseMatrix64F floatingBaseCoriolisMatrix;
-   private final DenseMatrix64F floatingBaseContactForceJacobian;
+   private final DMatrixRMaj floatingBaseMassMatrix;
+   private final DMatrixRMaj floatingBaseCoriolisMatrix;
+   private final DMatrixRMaj floatingBaseContactForceJacobian;
 
-   private final DenseMatrix64F bodyMassMatrix;
-   private final DenseMatrix64F bodyCoriolisMatrix;
-   private final DenseMatrix64F bodyContactForceJacobian;
-   private final DenseMatrix64F bodyContactForceJacobianTranspose;
+   private final DMatrixRMaj bodyMassMatrix;
+   private final DMatrixRMaj bodyCoriolisMatrix;
+   private final DMatrixRMaj bodyContactForceJacobian;
+   private final DMatrixRMaj bodyContactForceJacobianTranspose;
 
-   private final DenseMatrix64F jointTorques;
+   private final DMatrixRMaj jointTorques;
 
-   private final DenseMatrix64F torqueMinimizationObjective;
+   private final DMatrixRMaj torqueMinimizationObjective;
 
    private final int bodyDoFs;
 
@@ -61,21 +61,21 @@ public class DynamicsMatrixCalculator
       int floatingBaseDoFs = rootJoint != null ? rootJoint.getDegreesOfFreedom() : 0;
       bodyDoFs = numberOfDoFs - floatingBaseDoFs;
 
-      jointTorques = new DenseMatrix64F(bodyDoFs, 1);
+      jointTorques = new DMatrixRMaj(bodyDoFs, 1);
 
-      coriolisMatrix = new DenseMatrix64F(numberOfDoFs, 1);
-      contactForceJacobian = new DenseMatrix64F(rhoSize, numberOfDoFs);
+      coriolisMatrix = new DMatrixRMaj(numberOfDoFs, 1);
+      contactForceJacobian = new DMatrixRMaj(rhoSize, numberOfDoFs);
 
-      floatingBaseMassMatrix = new DenseMatrix64F(floatingBaseDoFs, numberOfDoFs);
-      floatingBaseCoriolisMatrix = new DenseMatrix64F(floatingBaseDoFs, 1);
-      floatingBaseContactForceJacobian = new DenseMatrix64F(rhoSize, floatingBaseDoFs);
+      floatingBaseMassMatrix = new DMatrixRMaj(floatingBaseDoFs, numberOfDoFs);
+      floatingBaseCoriolisMatrix = new DMatrixRMaj(floatingBaseDoFs, 1);
+      floatingBaseContactForceJacobian = new DMatrixRMaj(rhoSize, floatingBaseDoFs);
 
-      bodyMassMatrix = new DenseMatrix64F(bodyDoFs, numberOfDoFs);
-      bodyCoriolisMatrix = new DenseMatrix64F(bodyDoFs, 1);
-      bodyContactForceJacobian = new DenseMatrix64F(rhoSize, bodyDoFs);
-      bodyContactForceJacobianTranspose = new DenseMatrix64F(bodyDoFs, rhoSize);
+      bodyMassMatrix = new DMatrixRMaj(bodyDoFs, numberOfDoFs);
+      bodyCoriolisMatrix = new DMatrixRMaj(bodyDoFs, 1);
+      bodyContactForceJacobian = new DMatrixRMaj(rhoSize, bodyDoFs);
+      bodyContactForceJacobianTranspose = new DMatrixRMaj(bodyDoFs, rhoSize);
 
-      torqueMinimizationObjective = new DenseMatrix64F(bodyDoFs, 1);
+      torqueMinimizationObjective = new DMatrixRMaj(bodyDoFs, 1);
    }
 
    public void reset()
@@ -107,7 +107,7 @@ public class DynamicsMatrixCalculator
 
    private void computeMatrices()
    {
-      DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
+      DMatrixRMaj massMatrix = massMatrixCalculator.getMassMatrix();
       helper.extractFloatingBaseMassMatrix(massMatrix, floatingBaseMassMatrix);
       helper.extractBodyMassMatrix(massMatrix, bodyMassMatrix);
 
@@ -122,43 +122,43 @@ public class DynamicsMatrixCalculator
 
    private void computeTorqueMinimizationTaskMatrices()
    {
-      CommonOps.transpose(bodyContactForceJacobian, bodyContactForceJacobianTranspose);
+      CommonOps_DDRM.transpose(bodyContactForceJacobian, bodyContactForceJacobianTranspose);
 
       torqueMinimizationObjective.set(bodyCoriolisMatrix);
-      CommonOps.scale(-1.0, torqueMinimizationObjective);
+      CommonOps_DDRM.scale(-1.0, torqueMinimizationObjective);
    }
 
-   public void getFloatingBaseMassMatrix(DenseMatrix64F floatingBaseMassMatrixToPack)
+   public void getFloatingBaseMassMatrix(DMatrixRMaj floatingBaseMassMatrixToPack)
    {
       floatingBaseMassMatrixToPack.set(floatingBaseMassMatrix);
    }
 
-   public void getFloatingBaseCoriolisMatrix(DenseMatrix64F floatingBaseCoriolisMatrixToPack)
+   public void getFloatingBaseCoriolisMatrix(DMatrixRMaj floatingBaseCoriolisMatrixToPack)
    {
       floatingBaseCoriolisMatrixToPack.set(floatingBaseCoriolisMatrix);
    }
 
-   public void getFloatingBaseContactForceJacobian(DenseMatrix64F floatingBaseContactForceJacobianToPack)
+   public void getFloatingBaseContactForceJacobian(DMatrixRMaj floatingBaseContactForceJacobianToPack)
    {
       floatingBaseContactForceJacobianToPack.set(floatingBaseContactForceJacobian);
    }
 
-   public void getBodyMassMatrix(DenseMatrix64F bodyMassMatrixToPack)
+   public void getBodyMassMatrix(DMatrixRMaj bodyMassMatrixToPack)
    {
       bodyMassMatrixToPack.set(bodyMassMatrix);
    }
 
-   public void getBodyCoriolisMatrix(DenseMatrix64F bodyCoriolisMatrixToPack)
+   public void getBodyCoriolisMatrix(DMatrixRMaj bodyCoriolisMatrixToPack)
    {
       bodyCoriolisMatrixToPack.set(bodyCoriolisMatrix);
    }
 
-   public void getBodyContactForceJacobian(DenseMatrix64F bodyContactForceJacobianToPack)
+   public void getBodyContactForceJacobian(DMatrixRMaj bodyContactForceJacobianToPack)
    {
       bodyContactForceJacobianToPack.set(bodyContactForceJacobian);
    }
 
-   public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+   public void getMassMatrix(DMatrixRMaj massMatrixToPack)
    {
       MatrixTools.setMatrixBlock(massMatrixToPack,
                                  0,
@@ -180,7 +180,7 @@ public class DynamicsMatrixCalculator
                                  1.0);
    }
 
-   public void getCoriolisMatrix(DenseMatrix64F coriolisMatrixToPack)
+   public void getCoriolisMatrix(DMatrixRMaj coriolisMatrixToPack)
    {
       MatrixTools.setMatrixBlock(coriolisMatrixToPack,
                                  0,
@@ -202,39 +202,39 @@ public class DynamicsMatrixCalculator
                                  1.0);
    }
 
-   public DenseMatrix64F computeJointTorques(DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
+   public DMatrixRMaj computeJointTorques(DMatrixRMaj jointAccelerationSolution, DMatrixRMaj contactForceSolution)
    {
       computeJointTorques(jointTorques, jointAccelerationSolution, contactForceSolution);
 
       return jointTorques;
    }
 
-   public DenseMatrix64F getTorqueMinimizationAccelerationJacobian()
+   public DMatrixRMaj getTorqueMinimizationAccelerationJacobian()
    {
       return bodyMassMatrix;
    }
 
-   public DenseMatrix64F getTorqueMinimizationRhoJacobian()
+   public DMatrixRMaj getTorqueMinimizationRhoJacobian()
    {
       return bodyContactForceJacobianTranspose;
    }
 
-   public DenseMatrix64F getTorqueMinimizationObjective()
+   public DMatrixRMaj getTorqueMinimizationObjective()
    {
       return torqueMinimizationObjective;
    }
 
    private static final int large = 1000;
 
-   private final DenseMatrix64F localBodyMassMatrix = new DenseMatrix64F(large, large);
-   private final DenseMatrix64F localBodyCoriolisMatrix = new DenseMatrix64F(large, large);
-   private final DenseMatrix64F localBodyContactJacobian = new DenseMatrix64F(large, large);
+   private final DMatrixRMaj localBodyMassMatrix = new DMatrixRMaj(large, large);
+   private final DMatrixRMaj localBodyCoriolisMatrix = new DMatrixRMaj(large, large);
+   private final DMatrixRMaj localBodyContactJacobian = new DMatrixRMaj(large, large);
 
-   private final DenseMatrix64F localFloatingMassMatrix = new DenseMatrix64F(large, large);
-   private final DenseMatrix64F localFloatingCoriolisMatrix = new DenseMatrix64F(large, large);
-   private final DenseMatrix64F localFloatingContactJacobian = new DenseMatrix64F(large, large);
+   private final DMatrixRMaj localFloatingMassMatrix = new DMatrixRMaj(large, large);
+   private final DMatrixRMaj localFloatingCoriolisMatrix = new DMatrixRMaj(large, large);
+   private final DMatrixRMaj localFloatingContactJacobian = new DMatrixRMaj(large, large);
 
-   private final DenseMatrix64F tmpMatrix = new DenseMatrix64F(SpatialForce.SIZE);
+   private final DMatrixRMaj tmpMatrix = new DMatrixRMaj(SpatialForce.SIZE);
 
    private final FloatingBaseRigidBodyDynamicsCalculator rbdCalculator = new FloatingBaseRigidBodyDynamicsCalculator();
 
@@ -248,7 +248,7 @@ public class DynamicsMatrixCalculator
     * @param jointAccelerationSolution
     * @param contactForceSolution
     */
-   public void computeJointTorques(DenseMatrix64F jointTorquesToPack, DenseMatrix64F jointAccelerationSolution, DenseMatrix64F contactForceSolution)
+   public void computeJointTorques(DMatrixRMaj jointTorquesToPack, DMatrixRMaj jointAccelerationSolution, DMatrixRMaj contactForceSolution)
    {
       rbdCalculator.computeTauGivenRhoAndQddot(bodyMassMatrix,
                                                bodyCoriolisMatrix,
@@ -268,7 +268,7 @@ public class DynamicsMatrixCalculator
     * @param qddotToPack
     * @param rho
     */
-   public boolean computeQddotGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddotToPack, DenseMatrix64F rho)
+   public boolean computeQddotGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddotToPack, DMatrixRMaj rho)
    {
       if (checkFloatingBaseDynamicsSatisfied(dynamicsMatrixCalculator, qddotToPack, rho))
          return false;
@@ -289,7 +289,7 @@ public class DynamicsMatrixCalculator
     * @param qddot
     * @param rhoToPack
     */
-   public boolean computeRhoGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F rhoToPack)
+   public boolean computeRhoGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddot, DMatrixRMaj rhoToPack)
    {
       if (checkFloatingBaseDynamicsSatisfied(dynamicsMatrixCalculator, qddot, rhoToPack))
          return false;
@@ -300,13 +300,13 @@ public class DynamicsMatrixCalculator
       return true;
    }
 
-   public void computeTauGivenRhoAndQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F rho, DenseMatrix64F tauToPack)
+   public void computeTauGivenRhoAndQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddot, DMatrixRMaj rho, DMatrixRMaj tauToPack)
    {
       getBodyMatrices(dynamicsMatrixCalculator);
       rbdCalculator.computeTauGivenRhoAndQddot(localBodyMassMatrix, localBodyCoriolisMatrix, localBodyContactJacobian, qddot, rho, tauToPack);
    }
 
-   public void computeTauGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F rho, DenseMatrix64F tauToPack)
+   public void computeTauGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj rho, DMatrixRMaj tauToPack)
    {
       getBodyMatrices(dynamicsMatrixCalculator);
       getFloatingBaseMatrices(dynamicsMatrixCalculator);
@@ -320,7 +320,7 @@ public class DynamicsMatrixCalculator
                                        tauToPack);
    }
 
-   public void computeTauGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F tauToPack)
+   public void computeTauGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddot, DMatrixRMaj tauToPack)
    {
       getBodyMatrices(dynamicsMatrixCalculator);
       getFloatingBaseMatrices(dynamicsMatrixCalculator);
@@ -344,14 +344,14 @@ public class DynamicsMatrixCalculator
     * @param qddotAchievableToPack
     * @param rhoToPack
     */
-   public boolean computeRequiredRhoAndAchievableQddotGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddotAchievableToPack,
-                                                               DenseMatrix64F rhoToPack)
+   public boolean computeRequiredRhoAndAchievableQddotGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddotAchievableToPack,
+                                                               DMatrixRMaj rhoToPack)
    {
       return computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotAchievableToPack, rhoToPack, 0);
    }
 
-   private boolean computeRequiredRhoAndAchievableQddotGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddotAchievableToPack,
-                                                                DenseMatrix64F rhoToPack, int iter)
+   private boolean computeRequiredRhoAndAchievableQddotGivenRho(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddotAchievableToPack,
+                                                                DMatrixRMaj rhoToPack, int iter)
    {
       if (checkFloatingBaseDynamicsSatisfied(dynamicsMatrixCalculator, qddotAchievableToPack, rhoToPack))
          return false;
@@ -379,14 +379,14 @@ public class DynamicsMatrixCalculator
     * @param qddotAchievableToPack
     * @param rhoToPack
     */
-   public boolean computeRequiredRhoAndAchievableQddotGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddotAchievableToPack,
-                                                                 DenseMatrix64F rhoToPack)
+   public boolean computeRequiredRhoAndAchievableQddotGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddotAchievableToPack,
+                                                                 DMatrixRMaj rhoToPack)
    {
       return computeRequiredRhoAndAchievableQddotGivenQddot(dynamicsMatrixCalculator, qddotAchievableToPack, rhoToPack, 0);
    }
 
-   private boolean computeRequiredRhoAndAchievableQddotGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddotAchievableToPack,
-                                                                  DenseMatrix64F rhoToPack, int iter)
+   private boolean computeRequiredRhoAndAchievableQddotGivenQddot(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddotAchievableToPack,
+                                                                  DMatrixRMaj rhoToPack, int iter)
    {
       if (checkFloatingBaseDynamicsSatisfied(dynamicsMatrixCalculator, qddotAchievableToPack, rhoToPack))
          return false;
@@ -410,8 +410,8 @@ public class DynamicsMatrixCalculator
       return massMatrixCalculator;
    }
 
-   public boolean checkFloatingBaseRigidBodyDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F tau,
-                                                              DenseMatrix64F rho)
+   public boolean checkFloatingBaseRigidBodyDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddot, DMatrixRMaj tau,
+                                                              DMatrixRMaj rho)
    {
       getBodyMatrices(dynamicsMatrixCalculator);
       getFloatingBaseMatrices(dynamicsMatrixCalculator);
@@ -427,7 +427,7 @@ public class DynamicsMatrixCalculator
                                                                      rho);
    }
 
-   public void extractTorqueMatrix(JointBasics[] joints, DenseMatrix64F torqueMatrixToPack)
+   public void extractTorqueMatrix(JointBasics[] joints, DMatrixRMaj torqueMatrixToPack)
    {
       OneDoFJointBasics[] filteredJoints = MultiBodySystemTools.filterJoints(joints, RevoluteJoint.class);
       int bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(filteredJoints);
@@ -461,7 +461,7 @@ public class DynamicsMatrixCalculator
     * @param rho
     * @return
     */
-   public boolean checkFloatingBaseDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F rho)
+   public boolean checkFloatingBaseDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddot, DMatrixRMaj rho)
    {
       getFloatingBaseMatrices(dynamicsMatrixCalculator);
       return rbdCalculator.areFloatingBaseDynamicsSatisfied(localFloatingMassMatrix, localFloatingCoriolisMatrix, localFloatingContactJacobian, qddot, rho);
@@ -481,8 +481,8 @@ public class DynamicsMatrixCalculator
     * @param rho
     * @return
     */
-   public boolean checkRigidBodyDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DenseMatrix64F qddot, DenseMatrix64F tau,
-                                                  DenseMatrix64F rho)
+   public boolean checkRigidBodyDynamicsSatisfied(DynamicsMatrixCalculator dynamicsMatrixCalculator, DMatrixRMaj qddot, DMatrixRMaj tau,
+                                                  DMatrixRMaj rho)
    {
       getBodyMatrices(dynamicsMatrixCalculator);
       return rbdCalculator.areRigidBodyDynamicsSatisfied(localBodyMassMatrix, localBodyCoriolisMatrix, localBodyContactJacobian, qddot, tau, rho);

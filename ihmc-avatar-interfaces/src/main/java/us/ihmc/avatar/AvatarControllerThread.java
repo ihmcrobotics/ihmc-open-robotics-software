@@ -5,13 +5,13 @@ import java.util.Arrays;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commons.Conversions;
@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -47,7 +47,7 @@ import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -62,7 +62,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
    private static final boolean ALLOW_MODEL_CORRUPTION = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
+   private final YoRegistry registry = new YoRegistry("DRCControllerThread");
 
    private final YoDouble controllerTime = new YoDouble("ControllerTime", registry);
    private final YoLong timestampOffset = new YoLong("TimestampOffsetController", registry);
@@ -81,11 +81,22 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
-   public AvatarControllerThread(String robotName, DRCRobotModel robotModel, HumanoidRobotSensorInformation sensorInformation,
-                                 HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
-                                 DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, double gravity, double estimatorDT)
+   public AvatarControllerThread(String robotName,
+                                 DRCRobotModel robotModel,
+                                 DRCRobotInitialSetup robotInitialSetup,
+                                 HumanoidRobotSensorInformation sensorInformation,
+                                 HighLevelHumanoidControllerFactory controllerFactory,
+                                 HumanoidRobotContextDataFactory contextDataFactory,
+                                 DRCOutputProcessor outputProcessor,
+                                 RealtimeROS2Node realtimeROS2Node,
+                                 double gravity,
+                                 double estimatorDT)
    {
-      this.controllerFullRobotModel = robotModel.createFullRobotModel();
+      controllerFullRobotModel = robotModel.createFullRobotModel();
+      if (robotInitialSetup != null)
+      {
+         robotInitialSetup.initializeFullRobotModel(controllerFullRobotModel);
+      }
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
@@ -100,8 +111,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
-                                                             ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, ControllerCrashNotificationPacket.class,
+                                                                      ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -122,7 +133,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
 
       firstTick.set(true);
-      registry.addChild(robotController.getYoVariableRegistry());
+      registry.addChild(robotController.getYoRegistry());
       if (outputProcessor != null)
       {
          outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
@@ -182,7 +193,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
+                                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
@@ -293,7 +304,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

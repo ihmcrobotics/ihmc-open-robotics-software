@@ -35,11 +35,11 @@ public abstract class SingleJointArticulatedContactable implements Contactable
 
       for (int i = 0; i < totalContactPointsAvailable; i++)
       {
-         GroundContactPoint contactPoint = new GroundContactPoint("contact_" + name + "_" + i, robot.getRobotsYoVariableRegistry());
+         GroundContactPoint contactPoint = new GroundContactPoint("contact_" + name + "_" + i, robot.getRobotsYoRegistry());
          getJoint().addGroundContactPoint(groupIdentifier, contactPoint);
          allGroundContactPoints.add(contactPoint);
 
-         YoBoolean contactAvailable = new YoBoolean("contact_" + name + "_" + i + "_avail", robot.getRobotsYoVariableRegistry());
+         YoBoolean contactAvailable = new YoBoolean("contact_" + name + "_" + i + "_avail", robot.getRobotsYoRegistry());
          contactAvailable.set(true);
          contactsAvailable.add(contactAvailable);
 

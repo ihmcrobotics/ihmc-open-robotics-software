@@ -49,9 +49,14 @@ public interface FootstepNodeSnapDataReadOnly
    ConvexPolygon2DReadOnly getCroppedFoothold();
 
    /**
-    * Planar region ID that the step is snapped to
+    * Planar region index that the step is snapped to
     */
-   int getPlanarRegionId();
+   int getRegionIndex();
+
+   /**
+    * If wiggle was performed, this gives the achieved distance inside the region. If wiggle hasn't been performed, returns {@link Double#NaN}
+    */
+   double getAchievedInsideDelta();
 
    default void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
    {

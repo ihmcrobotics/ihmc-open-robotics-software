@@ -24,11 +24,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class RigidBodyOrientationControlHelper
 {
@@ -79,7 +79,7 @@ public class RigidBodyOrientationControlHelper
 
    public RigidBodyOrientationControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                             ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                            BooleanProvider useWeightFromMessage, DoubleProvider time, YoVariableRegistry registry)
+                                            BooleanProvider useWeightFromMessage, DoubleProvider time, YoRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;

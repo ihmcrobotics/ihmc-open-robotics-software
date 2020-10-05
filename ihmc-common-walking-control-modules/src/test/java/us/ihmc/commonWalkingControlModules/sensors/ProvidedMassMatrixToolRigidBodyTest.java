@@ -14,11 +14,11 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class ProvidedMassMatrixToolRigidBodyTest
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("ProvidedMassMatrixToolRigidBodyTest");
+   private final YoRegistry registry = new YoRegistry("ProvidedMassMatrixToolRigidBodyTest");
    private final RobotSide robotSide = RobotSide.LEFT;
    private final double gravity = 9.81;
    private final double mass = 2.0;

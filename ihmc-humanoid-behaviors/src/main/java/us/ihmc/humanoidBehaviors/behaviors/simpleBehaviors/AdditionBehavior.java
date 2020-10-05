@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class AdditionBehavior extends AbstractBehavior
 {
@@ -12,12 +12,12 @@ public class AdditionBehavior extends AbstractBehavior
    double value2;
    double result;
 
-   public AdditionBehavior(String robotName, Ros2Node ros2Node)
+   public AdditionBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
    }
 
-   public AdditionBehavior(String robotName, Ros2Node ros2Node, double value1, double value2)
+   public AdditionBehavior(String robotName, ROS2Node ros2Node, double value1, double value2)
    {
       super(robotName, ros2Node);
 

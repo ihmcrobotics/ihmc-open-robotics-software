@@ -37,6 +37,7 @@ public class REAMeshViewer
    private final List<ScheduledFuture<?>> meshBuilderScheduledFutures = new ArrayList<>();
    private final MeshView lidarBufferOcTreeMeshView = new MeshView();
    private final MeshView stereoVisionBufferOcTreeMeshView = new MeshView();
+   private final MeshView depthCloudBufferOcTreeMeshView = new MeshView();
    private final MeshView planarRegionMeshView = new MeshView();
    private final MeshView intersectionsMeshView = new MeshView();
 
@@ -47,7 +48,7 @@ public class REAMeshViewer
    private final LidarScanViewer lidarScanViewer;
    private final StereoVisionPointCloudViewer stereoVisionPointCloudViewer;
    private final StereoVisionPointCloudViewer depthPointCloudViewer;
-   private final BufferOctreeMeshBuilder lidarBufferOctreeMeshBuilder, stereoVisionBufferOctreeMeshBuilder;
+   private final BufferOctreeMeshBuilder lidarBufferOctreeMeshBuilder, stereoVisionBufferOctreeMeshBuilder, depthCloudBufferOctreeMeshBuilder;
    private final OcTreeMeshBuilder ocTreeViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
    private final PlanarRegionsIntersectionsMeshBuilder intersectionsMeshBuilder;
@@ -57,15 +58,20 @@ public class REAMeshViewer
    {
       lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager, REAModuleAPI.UILidarScanShow, REAModuleAPI.UILidarScanClear);
       stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager, REAModuleAPI.UIStereoVisionShow,
-                                                                      REAModuleAPI.UIStereoVisionClear);
+                                                                      REAModuleAPI.UIStereoVisionClear, REAModuleAPI.UIStereoVisionSize);
       depthPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.DepthPointCloudState, uiMessager, REAModuleAPI.UIDepthCloudShow,
-                                                               REAModuleAPI.UIDepthCloudClear);
+                                                               REAModuleAPI.UIDepthCloudClear, REAModuleAPI.UIDepthCloudSize);
       lidarBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowLidarBuffer, REAModuleAPI.RequestLidarBuffer,
                                                                  REAModuleAPI.LidarBufferState, Color.DARKRED);
       stereoVisionBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowStereoVisionBuffer,
                                                                         REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState,
                                                                         Color.DARKORANGE);
-      ocTreeViewer = new OcTreeMeshBuilder(uiMessager);
+      depthCloudBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowDepthCloudBuffer,
+                                                                        REAModuleAPI.RequestDepthCloudBuffer, REAModuleAPI.DepthCloudBufferState,
+                                                                        Color.DARKBLUE);
+      ocTreeViewer = new OcTreeMeshBuilder(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeClear, REAModuleAPI.RequestOctree,
+                                           REAModuleAPI.RequestPlanarRegionSegmentation, REAModuleAPI.UIOcTreeDepth, REAModuleAPI.UIOcTreeColoringMode,
+                                           REAModuleAPI.UIOcTreeDisplayType, REAModuleAPI.UIPlanarRegionHideNodes, REAModuleAPI.OcTreeState, REAModuleAPI.PlanarRegionsSegmentationState);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager, REAModuleAPI.PlanarRegionsState);
       intersectionsMeshBuilder = new PlanarRegionsIntersectionsMeshBuilder(uiMessager);
       boundingBoxMeshView = new BoundingBoxMeshView(uiMessager);
@@ -78,10 +84,12 @@ public class REAMeshViewer
       depthPointCloudRootNode.setMouseTransparent(true);
       lidarBufferOcTreeMeshView.setMouseTransparent(true);
       stereoVisionBufferOcTreeMeshView.setMouseTransparent(true);
+      depthCloudBufferOcTreeMeshView.setMouseTransparent(true);
       ocTreeViewer.getRoot().setMouseTransparent(true);
       boundingBoxMeshView.setMouseTransparent(true);
       root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, depthPointCloudRootNode, lidarBufferOcTreeMeshView,
-                                stereoVisionBufferOcTreeMeshView, ocTreeViewer.getRoot(), planarRegionMeshView, intersectionsMeshView, boundingBoxMeshView);
+                                stereoVisionBufferOcTreeMeshView, depthCloudBufferOcTreeMeshView, ocTreeViewer.getRoot(), planarRegionMeshView,
+                                intersectionsMeshView, boundingBoxMeshView);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -98,6 +106,9 @@ public class REAMeshViewer
 
             if (stereoVisionBufferOctreeMeshBuilder.hasNewMeshAndMaterial())
                updateMeshView(stereoVisionBufferOcTreeMeshView, stereoVisionBufferOctreeMeshBuilder.pollMeshAndMaterial());
+
+            if (depthCloudBufferOctreeMeshBuilder.hasNewMeshAndMaterial())
+               updateMeshView(depthCloudBufferOcTreeMeshView, depthCloudBufferOctreeMeshBuilder.pollMeshAndMaterial());
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
                updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());
@@ -125,6 +136,8 @@ public class REAMeshViewer
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(depthPointCloudViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(lidarBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(stereoVisionBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD,
+                                                                          TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(depthCloudBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD,
                                                                           TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));

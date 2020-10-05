@@ -3,7 +3,7 @@ package us.ihmc.robotics.occupancyGrid;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -14,7 +14,7 @@ public class OccupancyGridTest
    @Test
    public void testDuplicatePoints()
    {
-      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
+      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoRegistry("test"));
       assertEquals(1, occupancyGrid.registerPoint(new FramePoint2D()));
       assertEquals(1, occupancyGrid.registerPoint(new FramePoint2D()));
 
@@ -42,7 +42,7 @@ public class OccupancyGridTest
    @Test
    public void testRegisteringFourPoints()
    {
-      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
+      OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoRegistry("test"));
       occupancyGrid.registerPoint(new FramePoint2D(worldFrame, 1.0, 1.0));
       occupancyGrid.registerPoint(new FramePoint2D(worldFrame, -1.0, 1.0));
       occupancyGrid.registerPoint(new FramePoint2D(worldFrame, -1.0, -1.0));

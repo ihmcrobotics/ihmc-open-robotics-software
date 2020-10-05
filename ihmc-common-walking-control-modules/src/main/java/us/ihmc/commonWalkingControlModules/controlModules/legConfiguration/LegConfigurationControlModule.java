@@ -16,7 +16,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -38,7 +38,7 @@ public class LegConfigurationControlModule
 
    private static final boolean ONLY_MOVE_PRIV_POS_IF_NOT_BENDING = true;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final PrivilegedJointSpaceCommand privilegedAccelerationCommand = new PrivilegedJointSpaceCommand();
 
@@ -112,11 +112,11 @@ public class LegConfigurationControlModule
    private final double shinLength;
 
    public LegConfigurationControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                        LegConfigurationParameters legConfigurationParameters, YoVariableRegistry parentRegistry)
+                                        LegConfigurationParameters legConfigurationParameters, YoRegistry parentRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Leg";
-      registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(sidePrefix + getClass().getSimpleName());
 
       kneePitchJoint = controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH);
       double kneeLimitUpper = kneePitchJoint.getJointLimitUpper();
@@ -210,9 +210,9 @@ public class LegConfigurationControlModule
 
       // set up states and state machine
       YoDouble time = controllerToolbox.getYoTime();
-      requestedState = YoEnum.create(namePrefix + "RequestedState", "", LegConfigurationType.class, registry, true);
+      requestedState = new YoEnum<>(namePrefix + "RequestedState", "", registry, LegConfigurationType.class, true);
       requestedState.set(null);
-      legControlWeight = YoEnum.create(namePrefix + "LegControlWeight", "", LegControlWeight.class, registry, false);
+      legControlWeight = new YoEnum<>(namePrefix + "LegControlWeight", "", registry, LegControlWeight.class, false);
 
       // compute leg segment lengths
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();

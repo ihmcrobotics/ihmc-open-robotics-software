@@ -1,21 +1,21 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class IMUSensorValidityChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoFrameQuaternionValidityChecker orientationChecker;
    private final YoFrameTupleValidityChecker angularVelocityChecker;
    private final YoFrameTupleValidityChecker linearAccelerationChecker;
 
-   public IMUSensorValidityChecker(IMUDefinition imuDefinition, YoFrameQuaternion orientation, YoFrameVector3D angularVelocity, YoFrameVector3D linearAcceleration, YoVariableRegistry parentRegistry)
+   public IMUSensorValidityChecker(IMUDefinition imuDefinition, YoFrameQuaternion orientation, YoFrameVector3D angularVelocity, YoFrameVector3D linearAcceleration, YoRegistry parentRegistry)
    {
       String imuName = imuDefinition.getName();
-      registry = new YoVariableRegistry(imuName + "IMUSensorValidityChecker");
+      registry = new YoRegistry(imuName + "IMUSensorValidityChecker");
       parentRegistry.addChild(registry);
 
       verifyYovariableNames(imuName, orientation, angularVelocity, linearAcceleration);

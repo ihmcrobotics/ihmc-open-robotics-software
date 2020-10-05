@@ -24,11 +24,11 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.tools.lists.ListSorter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown
@@ -44,7 +44,7 @@ public class TouchDownState extends AbstractFootControlState
    };
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialAccelerationCommand zeroAccelerationCommand = new SpatialAccelerationCommand();
 
@@ -96,7 +96,7 @@ public class TouchDownState extends AbstractFootControlState
     * @param swingFootControlGains
     * @param parentRegistry
     */
-   public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoVariableRegistry parentRegistry)
+   public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoRegistry parentRegistry)
    {
       super(footControlHelper);
 
@@ -109,7 +109,7 @@ public class TouchDownState extends AbstractFootControlState
       soleFrame = contactableFoot.getSoleFrame();
 
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression();
-      registry = new YoVariableRegistry(namePrefix + name);
+      registry = new YoRegistry(namePrefix + name);
 
       double rhoWeight = momentumOptimizationSettings.getRhoWeight();
 

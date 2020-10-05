@@ -11,7 +11,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class OnlineLine2DLinearRegressionTest
       Random random = new Random(1738L);
 
       int pointsInEstimate = 10;
-      OnlineLine2DLinearRegression linearRegression = new OnlineLine2DLinearRegression("", new YoVariableRegistry("test"));
+      OnlineLine2DLinearRegression linearRegression = new OnlineLine2DLinearRegression("", new YoRegistry("test"));
 
       for (int i = 0; i < iters; i++)
       {
@@ -80,7 +80,7 @@ public class OnlineLine2DLinearRegressionTest
       Random random = new Random(1738L);
 
       int pointsInEstimate = 10000;
-      OnlineLine2DLinearRegression linearRegression = new OnlineLine2DLinearRegression("", new YoVariableRegistry("test"));
+      OnlineLine2DLinearRegression linearRegression = new OnlineLine2DLinearRegression("", new YoRegistry("test"));
 
       for (int i = 0; i < 10; i++)
       {

@@ -5,8 +5,8 @@ import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
@@ -29,7 +29,7 @@ import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -58,11 +58,11 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
 
-   private final DenseMatrix64F controllerDesiredQdd;
-   private final DenseMatrix64F controllerDesiredTau;
+   private final DMatrixRMaj controllerDesiredQdd;
+   private final DMatrixRMaj controllerDesiredTau;
 
-   private final DenseMatrix64F massMatrix;
-   private final DenseMatrix64F coriolisMatrix;
+   private final DMatrixRMaj massMatrix;
+   private final DMatrixRMaj coriolisMatrix;
 
    private final CommandInputManager commandInputManager;
    private ExternalWrenchEstimator externalWrenchEstimator;
@@ -74,7 +74,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
                                                    StatusMessageOutputManager statusOutputManager,
                                                    YoGraphicsListRegistry graphicsListRegistry,
                                                    int updateRateMillis,
-                                                   YoVariableRegistry parentRegistry)
+                                                   YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -111,18 +111,18 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(controlCoreToolbox);
       int degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
-      this.controllerDesiredQdd = new DenseMatrix64F(degreesOfFreedom, 1);
-      this.controllerDesiredTau = new DenseMatrix64F(degreesOfFreedom, 1);
+      this.controllerDesiredQdd = new DMatrixRMaj(degreesOfFreedom, 1);
+      this.controllerDesiredTau = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      this.massMatrix = new DenseMatrix64F(degreesOfFreedom, degreesOfFreedom);
-      this.coriolisMatrix = new DenseMatrix64F(degreesOfFreedom, 1);
+      this.massMatrix = new DMatrixRMaj(degreesOfFreedom, degreesOfFreedom);
+      this.coriolisMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter = (massMatrix, coriolisMatrix) ->
+      BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter = (massMatrix, coriolisMatrix) ->
       {
          massMatrix.set(this.massMatrix);
          coriolisMatrix.set(this.coriolisMatrix);
       };
-      Consumer<DenseMatrix64F> tauSetter = tau -> tau.set(controllerDesiredTau);
+      Consumer<DMatrixRMaj> tauSetter = tau -> tau.set(controllerDesiredTau);
 
       externalWrenchEstimator = new ExternalWrenchEstimator(joints, updateDT, dynamicMatrixSetter, tauSetter, graphicsListRegistry, registry);
 
@@ -195,8 +195,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       dynamicsMatrixCalculator.getMassMatrix(massMatrix);
       dynamicsMatrixCalculator.getCoriolisMatrix(coriolisMatrix);
 
-      CommonOps.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
-      CommonOps.addEquals(controllerDesiredTau, coriolisMatrix);
+      CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
+      CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisMatrix);
 
       externalWrenchEstimator.doControl();
 
@@ -276,9 +276,9 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       rootJoint.updateFramesRecursively();
    }
 
-   private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DenseMatrix64F controllerDesiredQdd, ToIntFunction<String> jointNameToMatrixIndex)
+   private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DMatrixRMaj controllerDesiredQdd, ToIntFunction<String> jointNameToMatrixIndex)
    {
-      CommonOps.fill(controllerDesiredQdd, 0.0);
+      CommonOps_DDRM.fill(controllerDesiredQdd, 0.0);
       desiredConfigurationData.getDesiredRootJointAngularAcceleration().get(0, controllerDesiredQdd);
       desiredConfigurationData.getDesiredRootJointLinearAcceleration().get(3, controllerDesiredQdd);
 

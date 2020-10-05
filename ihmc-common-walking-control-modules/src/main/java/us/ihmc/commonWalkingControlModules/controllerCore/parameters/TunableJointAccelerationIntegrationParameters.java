@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This is a parameterized implementation of the {@link JointAccelerationIntegrationParametersReadOnly} interface.
@@ -37,7 +37,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
     * @param namePrefix the {@code String} to be prepended to each {@code YoVariable} of this class.
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     */
-   public TunableJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry)
+   public TunableJointAccelerationIntegrationParameters(String namePrefix, YoRegistry registry)
    {
       positionBreakFrequency = new DoubleParameter(namePrefix + POSITION_BREAK_FREQUENCY_NAME, registry, JointAccelerationIntegrationCalculator.DEFAULT_POSITION_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
       velocityBreakFrequency = new DoubleParameter(namePrefix + VELOCITY_BREAK_FREQUENCY_NAME, registry, JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_BREAK_FREQUENCY, 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
@@ -55,7 +55,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     * @param defaults the default values to be used if the parameters can not be loaded from file.
     */
-   public TunableJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry, JointAccelerationIntegrationParametersReadOnly defaults)
+   public TunableJointAccelerationIntegrationParameters(String namePrefix, YoRegistry registry, JointAccelerationIntegrationParametersReadOnly defaults)
    {
       positionBreakFrequency = new DoubleParameter(namePrefix + POSITION_BREAK_FREQUENCY_NAME, registry, defaults.getPositionBreakFrequency(), 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
       velocityBreakFrequency = new DoubleParameter(namePrefix + VELOCITY_BREAK_FREQUENCY_NAME, registry, defaults.getVelocityBreakFrequency(), 0.0, SUGGESTED_MAXIMUM_FREQUENCY);
@@ -77,7 +77,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     */
    public TunableJointAccelerationIntegrationParameters(String namePrefix, double positionBreakFrequency, double velocityBreakFrequency,
-                                                        double maxPositionError, double maxVelocity, YoVariableRegistry registry)
+                                                        double maxPositionError, double maxVelocity, YoRegistry registry)
    {
       this.positionBreakFrequency = new DoubleParameter(namePrefix + POSITION_BREAK_FREQUENCY_NAME, registry, positionBreakFrequency, 0.0, 1.0);
       this.velocityBreakFrequency = new DoubleParameter(namePrefix + VELOCITY_BREAK_FREQUENCY_NAME, registry, velocityBreakFrequency, 0.0, 1.0);

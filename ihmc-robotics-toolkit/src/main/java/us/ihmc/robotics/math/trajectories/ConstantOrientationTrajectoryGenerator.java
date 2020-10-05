@@ -1,28 +1,28 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ConstantOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble finalTime;
    private final YoDouble time;
    private final OrientationProvider orientationProvider;
    private final YoFrameQuaternion orientation;
 
    public ConstantOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, OrientationProvider orientationProvider, double finalTime,
-                                                 YoVariableRegistry parentRegistry)
+                                                 YoRegistry parentRegistry)
    {
       MathTools.checkIntervalContains(finalTime, 0.0, Double.POSITIVE_INFINITY);
 
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.orientationProvider = orientationProvider;
       this.orientation = new YoFrameQuaternion("orientation", referenceFrame, registry);
       this.finalTime = new YoDouble("finalTime", registry);

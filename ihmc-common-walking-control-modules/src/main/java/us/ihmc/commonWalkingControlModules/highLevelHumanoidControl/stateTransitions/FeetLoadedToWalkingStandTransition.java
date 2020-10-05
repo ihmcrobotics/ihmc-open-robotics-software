@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -21,7 +21,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
    public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors, double controlDT,
                                              double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
-                                             YoVariableRegistry parentRegistry)
+                                             YoRegistry parentRegistry)
    {
       super(forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);
 

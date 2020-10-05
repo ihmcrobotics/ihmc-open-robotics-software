@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInterface
 {
@@ -150,7 +150,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          waypointPositions.add(waypoint.getPosition());
       }
 
-      PositionOptimizedTrajectoryGenerator generator = new PositionOptimizedTrajectoryGenerator("", new YoVariableRegistry(""), null, 100, waypoints);
+      PositionOptimizedTrajectoryGenerator generator = new PositionOptimizedTrajectoryGenerator("", new YoRegistry("Dummy"), null, 100, waypoints);
       generator.setEndpointConditions(initialPose.getPosition(), new FrameVector3D(), footstepPose.getPosition(), new FrameVector3D());
       generator.setWaypoints(waypointPositions);
       generator.initialize();

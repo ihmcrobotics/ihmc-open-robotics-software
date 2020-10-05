@@ -7,7 +7,7 @@ import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 
 public class BCF2000Receiver implements Receiver
 {
@@ -17,12 +17,12 @@ public class BCF2000Receiver implements Receiver
 
    protected Hashtable<Integer, MidiControl> controlsHashTable;
    protected ArrayList<MidiSliderBoard.SliderListener> internalListeners;
-   private ArrayList<VariableChangedListener> variableChangedListeners;
+   private ArrayList<YoVariableChangedListener> variableChangedListeners;
    private boolean debug = false;
    private MidiSliderBoard board;
 
    public BCF2000Receiver(Hashtable<Integer, MidiControl> controlsHashTable, ArrayList<MidiSliderBoard.SliderListener> internalListeners,
-         ArrayList<VariableChangedListener> variableChangedListeners, int SliderBoardMax, MidiSliderBoard board)
+         ArrayList<YoVariableChangedListener> variableChangedListeners, int SliderBoardMax, MidiSliderBoard board)
    {
       this.board = board;
       this.SLIDERBOARDMAX = SliderBoardMax;
@@ -93,8 +93,8 @@ public class BCF2000Receiver implements Receiver
             {
                for (int i = 0; i < variableChangedListeners.size(); i++)
                {
-                  VariableChangedListener listener = variableChangedListeners.get(i);
-                  listener.notifyOfVariableChange(ctrl.var);
+                  YoVariableChangedListener listener = variableChangedListeners.get(i);
+                  listener.changed(ctrl.var);
                }
             }
 

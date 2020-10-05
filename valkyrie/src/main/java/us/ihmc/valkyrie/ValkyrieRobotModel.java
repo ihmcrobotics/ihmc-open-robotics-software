@@ -16,9 +16,13 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.*;
@@ -34,7 +38,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -426,7 +430,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
       if (!robotVersion.hasFingers())
          return null;
@@ -441,10 +445,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (hasFingers)
       {
          return new SimulatedValkyrieFingerController(simulatedRobot,
-                                                      realtimeRos2Node,
+                                                      realtimeROS2Node,
                                                       this,
-                                                      ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                      ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+                                                      ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                      ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
       }
       else
       {
@@ -516,6 +520,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
+   {
+      return new DefaultSplitFractionCalculatorParameters();
    }
 
    @Override
@@ -606,7 +622,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public UIParameters getUIParameters()
    {
-      return new ValkyrieUIParameters(getRobotPhysicalProperties());
+      return new ValkyrieUIParameters(getRobotPhysicalProperties(), getJointMap());
    }
 
    @Override

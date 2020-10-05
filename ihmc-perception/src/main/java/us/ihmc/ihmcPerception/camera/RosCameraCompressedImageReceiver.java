@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.camera;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,7 +36,7 @@ public class RosCameraCompressedImageReceiver extends RosCameraReceiver
             {
                logger.log(image, timeStamp);
             }
-            IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
+            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
             if (DEBUG)
             {
                LogTools.debug("Sending intrinsicParameters");

@@ -3,12 +3,12 @@ package us.ihmc.exampleSimulations.cart;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TriWheelCartController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("WheelCartRobotController");
+   private final YoRegistry registry = new YoRegistry("WheelCartRobotController");
    
    private final PinJoint leftWheelJoint, rightWheelJoint, casterAxisJoint;
 
@@ -32,7 +32,7 @@ public class TriWheelCartController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

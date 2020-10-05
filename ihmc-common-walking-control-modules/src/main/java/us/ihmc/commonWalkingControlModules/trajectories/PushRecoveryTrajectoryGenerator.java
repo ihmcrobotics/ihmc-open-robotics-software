@@ -9,12 +9,12 @@ import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  *
@@ -28,7 +28,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
    private static final boolean VISUALIZE = true;
 
    private final String namePostFix = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoBoolean visualize;
 
    private final int numberOfBallsInBag = 30;
@@ -58,10 +58,10 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
    public PushRecoveryTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider,
          DoubleProvider swingTimeRemainingProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
-         PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
+         PositionProvider finalPositionProvider, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
          PositionTrajectoryGenerator nominalTrajectoryGenerator)
    {
-      registry = new YoVariableRegistry(namePrefix + namePostFix);
+      registry = new YoRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
       this.swingTimeRemainingProvider = swingTimeRemainingProvider;

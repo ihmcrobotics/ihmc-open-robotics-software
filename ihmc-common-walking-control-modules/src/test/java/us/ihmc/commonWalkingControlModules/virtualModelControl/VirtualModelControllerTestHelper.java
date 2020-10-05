@@ -1,14 +1,8 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -53,18 +47,13 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class VirtualModelControllerTestHelper
 {
@@ -109,12 +98,12 @@ public class VirtualModelControllerTestHelper
    private static final Random random = new Random(100L);
 
    static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
-         List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, DenseMatrix64F selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
+         List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, DMatrixRMaj selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(),
                                                                                  centerOfMassFrame, registry, yoGraphicsListRegistry);
@@ -506,15 +495,15 @@ public class VirtualModelControllerTestHelper
       return new RigidBody(bodyName, currentInverseDynamicsJoint, momentOfInertia, link.getMass(), comOffset);
    }
 
-   static void compareWrenches(WrenchReadOnly inputWrench, Wrench outputWrench, DenseMatrix64F selectionMatrix)
+   static void compareWrenches(WrenchReadOnly inputWrench, Wrench outputWrench, DMatrixRMaj selectionMatrix)
    {
       inputWrench.getBodyFrame().checkReferenceFrameMatch(outputWrench.getBodyFrame());
       outputWrench.changeFrame(inputWrench.getReferenceFrame());
       inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
-      DenseMatrix64F inputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      DenseMatrix64F outputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      DenseMatrix64F selectedValues = new DenseMatrix64F(Wrench.SIZE, 1);
+      DMatrixRMaj inputWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      DMatrixRMaj outputWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      DMatrixRMaj selectedValues = new DMatrixRMaj(Wrench.SIZE, 1);
 
       inputWrench.get(inputWrenchMatrix);
       outputWrench.get(outputWrenchMatrix);
@@ -541,8 +530,8 @@ public class VirtualModelControllerTestHelper
       outputWrench.changeFrame(inputWrench.getReferenceFrame());
       inputWrench.getReferenceFrame().checkReferenceFrameMatch(outputWrench.getReferenceFrame());
 
-      DenseMatrix64F inputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      DenseMatrix64F outputWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      DMatrixRMaj inputWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      DMatrixRMaj outputWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
 
       inputWrench.get(inputWrenchMatrix);
       outputWrench.get(outputWrenchMatrix);
@@ -2172,7 +2161,7 @@ public class VirtualModelControllerTestHelper
       private static final double linearMaxIntegral = 50.0;
       private static final double angularMaxIntegral = 50.0;
 
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -2227,7 +2216,7 @@ public class VirtualModelControllerTestHelper
          desiredPosition.set(desiredPose.getPosition());
          desiredOrientation.set(desiredPose.getOrientation());
 
-         registry = new YoVariableRegistry("forcePointController" + suffix);
+         registry = new YoRegistry("forcePointController" + suffix);
 
          desiredLinearX = new YoDouble("desiredLinearX" + suffix, registry);
          desiredLinearY = new YoDouble("desiredLinearY" + suffix, registry);
@@ -2415,7 +2404,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }
@@ -2423,7 +2412,7 @@ public class VirtualModelControllerTestHelper
 
    private static class DummyArmController implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry("controller");
+      private final YoRegistry registry = new YoRegistry("controller");
 
       private final Map<JointBasics, YoDouble> yoJointTorques = new HashMap<>();
 
@@ -2438,11 +2427,11 @@ public class VirtualModelControllerTestHelper
       private List<ForcePointController> forcePointControllers = new ArrayList<>();
       private List<YoFixedFrameWrench> yoDesiredWrenches = new ArrayList<>();
       private List<RigidBodyBasics> endEffectors = new ArrayList<>();
-      private final DenseMatrix64F selectionMatrix;
+      private final DMatrixRMaj selectionMatrix;
 
       DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJointBasics[] controlledJoints,
             List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, List<RigidBodyBasics> endEffectors,
-            List<YoFixedFrameWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
+            List<YoFixedFrameWrench> yoDesiredWrenches, DMatrixRMaj selectionMatrix)
       {
          this.scsRobot = scsRobot;
          this.controllerModel = controllerModel;
@@ -2457,7 +2446,7 @@ public class VirtualModelControllerTestHelper
             yoJointTorques.put(joint, new YoDouble(joint.getName() + "solutionTorque", registry));
 
          for (ForcePointController forcePointController : forcePointControllers)
-            registry.addChild(forcePointController.getYoVariableRegistry());
+            registry.addChild(forcePointController.getYoRegistry());
       }
 
       @Override
@@ -2490,7 +2479,7 @@ public class VirtualModelControllerTestHelper
          }
          virtualModelController.compute(virtualModelControlSolution);
 
-         DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
+         DMatrixRMaj jointTorques = virtualModelControlSolution.getJointTorques();
          for (int i = 0; i < controlledJoints.length; i++)
          {
             OneDoFJointBasics joint = controlledJoints[i];
@@ -2548,7 +2537,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

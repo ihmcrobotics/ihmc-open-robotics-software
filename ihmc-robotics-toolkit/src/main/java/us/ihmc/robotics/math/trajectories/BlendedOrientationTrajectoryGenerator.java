@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BlendedOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
@@ -38,11 +38,11 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    private final FrameVector3D finalConstraintAngularVelocityOffset = new FrameVector3D();
    private final FrameVector3D finalConstraintAngularAccelerationOffset = new FrameVector3D();
 
-   private final DenseMatrix64F rotationMatrix = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F rotationMatrixDerivative = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F relativeConstraintAngularVelocityOffset = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F constraintAngularAccelerationOffsetDueToVelocity = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj rotationMatrixDerivative = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj relativeConstraintAngularVelocityOffset = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj constraintAngularAccelerationOffsetDueToVelocity = new DMatrixRMaj(3, 1);
 
    private final FrameQuaternion orientation = new FrameQuaternion();
    private final FrameVector3D angularVelocity = new FrameVector3D();
@@ -52,7 +52,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public BlendedOrientationTrajectoryGenerator(String prefix, OrientationTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;
@@ -172,7 +172,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       tempTransform.getRotation().set(orientation);
       tempTransform.getRotation().get(rotationMatrix);
       MatrixTools.vectorToSkewSymmetricMatrix(relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix, angularVelocity);
-      CommonOps.mult(relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix, rotationMatrix, rotationMatrixDerivative);
+      CommonOps_DDRM.mult(relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix, rotationMatrix, rotationMatrixDerivative);
 
       computeInitialConstraintOffset(time, rotationMatrix, rotationMatrixDerivative);
       orientation.multiply(initialConstraintOrientationOffset);
@@ -275,7 +275,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       finalConstraintTrajectory.initialize();
    }
 
-   private void computeInitialConstraintOffset(double time, DenseMatrix64F rotationMatrix, DenseMatrix64F rotationMatrixDerivative)
+   private void computeInitialConstraintOffset(double time, DMatrixRMaj rotationMatrix, DMatrixRMaj rotationMatrixDerivative)
    {
       double startTime = initialBlendStartTime.getDoubleValue();
       initialConstraintTrajectory.compute(time - startTime);
@@ -291,7 +291,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       initialConstraintAngularVelocityOffset.get(relativeConstraintAngularVelocityOffset);
       initialConstraintAngularVelocityOffset.applyTransform(tempTransform);
 
-      CommonOps.mult(rotationMatrixDerivative, relativeConstraintAngularVelocityOffset, constraintAngularAccelerationOffsetDueToVelocity);
+      CommonOps_DDRM.mult(rotationMatrixDerivative, relativeConstraintAngularVelocityOffset, constraintAngularAccelerationOffsetDueToVelocity);
       initialConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
       initialConstraintAngularAccelerationOffset.applyTransform(tempTransform);
       initialConstraintAngularAccelerationOffset.addX(constraintAngularAccelerationOffsetDueToVelocity.get(0, 0));
@@ -299,7 +299,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       initialConstraintAngularAccelerationOffset.addZ(constraintAngularAccelerationOffsetDueToVelocity.get(2, 0));
    }
 
-   private void computeFinalConstraintOffset(double time, DenseMatrix64F rotationMatrix, DenseMatrix64F rotationMatrixDerivative)
+   private void computeFinalConstraintOffset(double time, DMatrixRMaj rotationMatrix, DMatrixRMaj rotationMatrixDerivative)
    {
       double startTime = finalBlendStartTime.getDoubleValue();
       finalConstraintTrajectory.compute(time - startTime);
@@ -315,7 +315,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       finalConstraintAngularVelocityOffset.get(relativeConstraintAngularVelocityOffset);
       finalConstraintAngularVelocityOffset.applyTransform(tempTransform);
 
-      CommonOps.mult(rotationMatrixDerivative, relativeConstraintAngularVelocityOffset, constraintAngularAccelerationOffsetDueToVelocity);
+      CommonOps_DDRM.mult(rotationMatrixDerivative, relativeConstraintAngularVelocityOffset, constraintAngularAccelerationOffsetDueToVelocity);
       finalConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
       finalConstraintAngularAccelerationOffset.applyTransform(tempTransform);
       finalConstraintAngularAccelerationOffset.addX(constraintAngularAccelerationOffsetDueToVelocity.get(0, 0));

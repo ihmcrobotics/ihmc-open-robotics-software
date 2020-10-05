@@ -40,7 +40,6 @@ public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -56,7 +55,6 @@ public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getVelocity(), current_alignment);
 
 
@@ -65,13 +63,10 @@ public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.ComVelocityPacket data, us.ihmc.idl.CDR cdr)
    {
-
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getVelocity(), cdr);
-   }
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getVelocity(), cdr);   }
 
    public static void read(controller_msgs.msg.dds.ComVelocityPacket data, us.ihmc.idl.CDR cdr)
    {
-
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getVelocity(), cdr);	
 
    }
@@ -79,7 +74,6 @@ public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.ComVelocityPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_a("velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getVelocity());
 
    }
@@ -87,9 +81,7 @@ public class ComVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ComVelocityPacket data)
    {
-
       ser.read_type_a("velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getVelocity());
-
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ComVelocityPacket src, controller_msgs.msg.dds.ComVelocityPacket dest)

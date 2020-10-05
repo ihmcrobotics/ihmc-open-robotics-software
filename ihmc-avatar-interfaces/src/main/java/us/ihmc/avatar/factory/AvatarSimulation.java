@@ -5,6 +5,7 @@ import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
@@ -20,6 +21,7 @@ public class AvatarSimulation
    private SimulationConstructionSet simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
+   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
    private AvatarEstimatorThread stateEstimationThread;
    private AvatarControllerThread controllerThread;
@@ -31,6 +33,10 @@ public class AvatarSimulation
 
    public void start()
    {
+      if (intraprocessYoVariableLogger != null)
+      {
+         intraprocessYoVariableLogger.start();
+      }
       if (yoVariableServer != null)
       {
          yoVariableServer.start();
@@ -48,6 +54,15 @@ public class AvatarSimulation
    {
       robotController.dispose();
       robotController = null;
+   }
+
+   public void destroy()
+   {
+      dispose();
+      if (yoVariableServer != null)
+         yoVariableServer.close();
+      ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
+      simulationConstructionSet.closeAndDispose();
    }
 
    public void resetRobot()
@@ -134,6 +149,11 @@ public class AvatarSimulation
    public void setYoVariableServer(YoVariableServer yoVariableServer)
    {
       this.yoVariableServer = yoVariableServer;
+   }
+
+   public void setIntraprocessYoVariableLogger(IntraprocessYoVariableLogger intraprocessYoVariableLogger)
+   {
+      this.intraprocessYoVariableLogger = intraprocessYoVariableLogger;
    }
 
    public void setRobotController(DisposableRobotController robotController)

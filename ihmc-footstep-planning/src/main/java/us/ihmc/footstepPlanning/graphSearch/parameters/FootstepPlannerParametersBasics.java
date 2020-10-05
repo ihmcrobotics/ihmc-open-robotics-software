@@ -62,9 +62,20 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepYaw, yaw);
    }
 
+   default void setMaximumLeftStepZ(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.maxLeftStepZ, stepZ);
+   }
+
+   default void setMaximumRightStepZ(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.maxRightStepZ, stepZ);
+   }
+
    default void setMaximumStepZ(double stepZ)
    {
-      set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
+      setMaximumLeftStepZ(stepZ);
+      setMaximumRightStepZ(stepZ);
    }
 
    default void setMinimumStepZWhenFullyPitched(double stepZ)
@@ -112,19 +123,19 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minSurfaceIncline, surfaceInclineRadians);
    }
 
-   default void setMinXClearanceFromStance(double clearance)
+   default void setMinClearanceFromStance(double clearance)
    {
-      set(FootstepPlannerParameterKeys.minXClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.minClearanceFromStance, clearance);
    }
 
-   default void setMinYClearanceFromStance(double clearance)
+   default void setWiggleInsideDeltaTarget(double wiggleInsideDeltaTarget)
    {
-      set(FootstepPlannerParameterKeys.minYClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaTarget, wiggleInsideDeltaTarget);
    }
 
-   default void setWiggleInsideDelta(double wiggleInsideDelta)
+   default void setWiggleInsideDeltaMinimum(double wiggleInsideDeltaMinimum)
    {
-      set(FootstepPlannerParameterKeys.wiggleInsideDelta, wiggleInsideDelta);
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaMinimum, wiggleInsideDeltaMinimum);
    }
 
    default void setMaximumStepZWhenSteppingUp(double maxStepZ)
@@ -322,9 +333,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.enableShinCollisionCheck, enableShinCollisionCheck);
    }
 
-   default void setShinRadius(double shinRadius)
+   default void setShinToeClearance(double shinToeClearance)
    {
-      set(FootstepPlannerParameterKeys.shinRadius, shinRadius);
+      set(FootstepPlannerParameterKeys.shinToeClearance, shinToeClearance);
+   }
+
+   default void setShinHeelClearance(double shinHeelClearance)
+   {
+      set(FootstepPlannerParameterKeys.shinHeelClearance, shinHeelClearance);
    }
 
    default void setShinLength(double shinLength)
@@ -332,14 +348,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinLength, shinLength);
    }
 
-   default void setShinPitch(double shinPitch)
-   {
-      set(FootstepPlannerParameterKeys.shinPitch, shinPitch);
-   }
-
    default void setShinHeightOffset(double shinHeightOffet)
    {
       set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
+   }
+
+   default void setStepOnlyWithRequestedSide(byte side)
+   {
+      set(stepOnlyWithRequestedSide, side);
    }
 
    default void set(FootstepPlannerParametersPacket parametersPacket)
@@ -356,8 +372,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
       if (parametersPacket.getIdealBackStepLength() != noValue)
          setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
-      if (parametersPacket.getWiggleInsideDelta() != noValue)
-         setWiggleInsideDelta(parametersPacket.getWiggleInsideDelta());
+      if (parametersPacket.getWiggleInsideDeltaTarget() != noValue)
+         setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
+      if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
+         setWiggleInsideDeltaMinimum(parametersPacket.getWiggleInsideDeltaMinimum());
       if (parametersPacket.getMaximumStepReach() != noValue)
          setMaximumStepReach(parametersPacket.getMaximumStepReach());
       if (parametersPacket.getMaximumStepYaw() != noValue)
@@ -382,8 +400,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
       if (parametersPacket.getTranslationScaleFromGrandparentNode() != noValue)
          setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
-      if (parametersPacket.getMaximumStepZ() != noValue)
-         setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getMaximumLeftStepZ() != noValue)
+         setMaximumLeftStepZ(parametersPacket.getMaximumLeftStepZ());
+      if (parametersPacket.getMaximumRightStepZ() != noValue)
+         setMaximumRightStepZ(parametersPacket.getMaximumRightStepZ());
       if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
          setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
       if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
@@ -426,10 +446,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
       if (parametersPacket.getMaximumSnapHeight() != noValue)
          setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
-      if (parametersPacket.getMinXClearanceFromStance() != noValue)
-         setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
-      if (parametersPacket.getMinYClearanceFromStance() != noValue)
-         setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+      if (parametersPacket.getMinClearanceFromStance() != noValue)
+         setMinClearanceFromStance(parametersPacket.getMinClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
       setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
@@ -466,11 +484,12 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setEnableShinCollisionCheck(parametersPacket.getEnableShinCollisionCheck());
       if (parametersPacket.getShinLength() != noValue)
          setShinLength(parametersPacket.getShinLength());
-      if (parametersPacket.getShinRadius() != noValue)
-         setShinRadius(parametersPacket.getShinRadius());
+      if (parametersPacket.getShinToeClearance() != noValue)
+         setShinToeClearance(parametersPacket.getShinToeClearance());
+      if (parametersPacket.getShinHeelClearance() != noValue)
+         setShinHeelClearance(parametersPacket.getShinHeelClearance());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
-      if (parametersPacket.getShinPitch() != noValue)
-         setShinPitch(parametersPacket.getShinPitch());
+      setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

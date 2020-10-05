@@ -1,5 +1,6 @@
 package us.ihmc.gui;
 
+import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.codecs.generated.RGBPicture;
 import us.ihmc.codecs.generated.YUVPicture;
@@ -7,58 +8,87 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 // records rectangle of Linux X server and saves to file
 public class LinuxGUIRecorder
 {
    public static final int MAXIMUM_IMAGE_DATA_SIZE = 1024 * 1024;
+   public static final String LOG_MP4_POSTFIX = "Log.mp4";
    private final Supplier<Rectangle> windowBoundsProvider;
    private final int fps;
+   private final int quality;
+   private final String guiName;
    private String filename;
 
    private final ScreenCapture screenCapture = ScreenCaptureFactory.getScreenCapture();
 
-   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GUICaptureStreamer"));
+   private final PausablePeriodicThread scheduler;
    private final CaptureRunner captureRunner = new CaptureRunner();
    private final Dimension size = new Dimension();
 
    private JPEGEncoder encoder = new JPEGEncoder();
-
-   private ScheduledFuture<?> future = null;
-
    private MP4MJPEGMovieBuilder builder;
 
-   public LinuxGUIRecorder(Supplier<Rectangle> windowBoundsProvider, int fps, float quality, String filename)
+   public LinuxGUIRecorder(Supplier<Rectangle> windowBoundsProvider, int fps, double quality, String guiName)
    {
       this.windowBoundsProvider = windowBoundsProvider;
       this.fps = fps;
-      this.filename = filename;
+      this.quality = (int) (100.0 * quality);
+      this.guiName = guiName;
+
+      scheduler = new PausablePeriodicThread("LinuxGUIRecorder", 1.0 / fps, captureRunner);
+   }
+
+   public void deleteOldLogs(int numberOflogsToKeep)
+   {
+      String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
+         if (type == BasicPathVisitor.PathType.FILE && path.getFileName().toString().endsWith(guiName + LOG_MP4_POSTFIX))
+            sortedSet.add(path);
+         return FileVisitResult.CONTINUE;
+      });
+
+      while (sortedSet.size() > numberOflogsToKeep)
+      {
+         Path earliestLogDirectory = sortedSet.first();
+         LogTools.warn("Deleting old log {}", earliestLogDirectory);
+         FileTools.deleteQuietly(earliestLogDirectory);
+         sortedSet.remove(earliestLogDirectory);
+      }
    }
 
    public synchronized void start()
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
 
-      filename = System.getProperty("user.home") + "/robotLogs/" + timestamp + "_UILog";
+      filename = System.getProperty("user.home") + "/.ihmc/logs/" + timestamp + "_" + guiName + LOG_MP4_POSTFIX;
+
+      LogTools.info("Starting recording to {}", filename);
 
       try
       {
@@ -73,20 +103,15 @@ public class LinuxGUIRecorder
       }
       builder = null;
 
-      if (future != null)
-      {
-         future.cancel(false);
-      }
-
-      scheduler.scheduleAtFixedRate(captureRunner, 10, 1000000000 / fps, TimeUnit.NANOSECONDS);
+      scheduler.start();
    }
 
    public synchronized void stop()
    {
-      if (future != null)
-      {
-         future.cancel(false);
-      }
+      if (filename != null)
+         LogTools.info("Stopping recording to {}", filename);
+
+      scheduler.stop();
 
       try
       {
@@ -119,12 +144,12 @@ public class LinuxGUIRecorder
 
          try
          {
-            RGBPicture img = screenCapture.createScreenCapture(captureRectangle);
+            RGBPicture screenCapture = LinuxGUIRecorder.this.screenCapture.createScreenCapture(captureRectangle);
 
-            if (img != null)
+            if (screenCapture != null)
             {
-               YUVPicture yuv = img.toYUV(YUVSubsamplingType.YUV420);
-               ByteBuffer buffer = encoder.encode(yuv, 90);
+               YUVPicture yuv = screenCapture.toYUV(YUVSubsamplingType.YUV420);
+               ByteBuffer buffer = encoder.encode(yuv, quality);
                if (buffer.remaining() <= MAXIMUM_IMAGE_DATA_SIZE)
                {
                   // write buffer to file
@@ -133,15 +158,15 @@ public class LinuxGUIRecorder
                      try
                      {
                         // Decode the first image using ImageIO, to get the dimensions
-                        ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer.array());
+                        ByteBufferInputStream inputStream = new ByteBufferInputStream(buffer);
                         BufferedImage readImg = ImageIO.read(inputStream);
                         if (readImg == null)
                         {
-                           System.err.println("Cannot decode image");
+                           LogTools.error("Cannot decode image");
                            return;
                         }
                         File videoFileFile = new File(filename);
-                        builder = new MP4MJPEGMovieBuilder(videoFileFile, readImg.getWidth(), readImg.getHeight(), 10, 90);
+                        builder = new MP4MJPEGMovieBuilder(videoFileFile, readImg.getWidth(), readImg.getHeight(), fps, quality);
                         buffer.clear();
                      }
                      catch (IOException e)
@@ -149,7 +174,6 @@ public class LinuxGUIRecorder
                         e.printStackTrace();
                         return;
                      }
-
                   }
                   try
                   {
@@ -157,7 +181,6 @@ public class LinuxGUIRecorder
                   }
                   catch (IOException e)
                   {
-                     // TODO Auto-generated catch block
                      e.printStackTrace();
                   }
                }
@@ -166,7 +189,7 @@ public class LinuxGUIRecorder
                   System.err.println("Not sending screen capture, image size exceeds " + MAXIMUM_IMAGE_DATA_SIZE);
                }
                yuv.delete();
-               img.delete();
+               screenCapture.delete();
             }
          }
          catch (IOException e)
@@ -174,11 +197,10 @@ public class LinuxGUIRecorder
             e.printStackTrace();
          }
       }
-
    }
 
    public void destroy()
    {
-      scheduler.shutdownNow();
+      scheduler.stop();
    }
 }

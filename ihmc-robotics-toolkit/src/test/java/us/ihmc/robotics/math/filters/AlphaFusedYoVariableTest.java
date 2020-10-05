@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFusedYoVariableTest
@@ -21,7 +21,7 @@ public class AlphaFusedYoVariableTest
    {
       double alpha = 0.3, slowSignalNoise = 0, fastSignalNoise = 0;
 
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble slowSignal = new YoDouble("slowFrequency", registry);
       YoDouble fastSignal = new YoDouble("fastFrequency", registry);
 
