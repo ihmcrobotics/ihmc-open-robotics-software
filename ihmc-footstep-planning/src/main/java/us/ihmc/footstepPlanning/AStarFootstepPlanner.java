@@ -104,7 +104,6 @@ public class AStarFootstepPlanner
 
                                                               edgeDataMap.put(edge, edgeData.getCopyAndClear());
                                                               stepCostCalculator.resetLoggedVariables();
-                                                              distanceAndYawHeuristics.resetLoggedVariables();
                                                            });
    }
 

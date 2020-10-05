@@ -29,6 +29,8 @@ public class FootstepCostCalculator
    private final RigidBodyTransform candidateNodeTransform = new RigidBodyTransform();
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
+   private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
+   private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepNodeSnapperReadOnly snapper,
@@ -78,8 +80,10 @@ public class FootstepCostCalculator
       edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
-      double heuristicCost = heuristics.applyAsDouble(candidateNode);
-      double deltaHeuristics = heuristics.applyAsDouble(idealStep) - heuristicCost;
+      idealStepHeuristicCost.set(heuristics.applyAsDouble(idealStep));
+      heuristicCost.set(heuristics.applyAsDouble(candidateNode));
+      double deltaHeuristics = idealStepHeuristicCost.getDoubleValue() - heuristicCost.getDoubleValue();
+
       if(deltaHeuristics > 0.0)
       {
          edgeCost.add(deltaHeuristics);
@@ -90,7 +94,7 @@ public class FootstepCostCalculator
          edgeCost.set(Math.max(0.0, edgeCost.getValue() - deltaHeuristics));
       }
 
-      totalCost.set(edgeCost.getDoubleValue() + heuristicCost);
+      totalCost.set(edgeCost.getDoubleValue() + heuristicCost.getDoubleValue());
       return edgeCost.getValue();
    }
 
@@ -122,7 +126,8 @@ public class FootstepCostCalculator
 
    public void resetLoggedVariables()
    {
-      edgeCost.set(Double.NaN);
-      totalCost.set(Double.NaN);
+      edgeCost.setToNaN();
+      totalCost.setToNaN();
+      heuristicCost.setToNaN();
    }
 }
