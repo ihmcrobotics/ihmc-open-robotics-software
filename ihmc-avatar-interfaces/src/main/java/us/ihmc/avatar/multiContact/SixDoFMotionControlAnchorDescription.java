@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class SixDoFMotionControlAnchorDescription
@@ -123,6 +124,12 @@ public class SixDoFMotionControlAnchorDescription
    public void setInputMessage(KinematicsToolboxRigidBodyMessage inputMessage)
    {
       this.inputMessage = inputMessage;
+   }
+
+   public void applyTransform(Transform transform)
+   {
+      inputMessage.getDesiredPositionInWorld().applyTransform(transform);
+      inputMessage.getDesiredOrientationInWorld().applyTransform(transform);
    }
 
    @Override

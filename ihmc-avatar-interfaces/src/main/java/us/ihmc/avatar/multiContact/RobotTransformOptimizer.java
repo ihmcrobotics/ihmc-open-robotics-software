@@ -28,13 +28,21 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
+/**
+ * This class provides a generic solver to optimize the pose of a robot to match as closely as
+ * possible another robot and this without changing the joint angles but the root joint pose.
+ * <p>
+ * Typical use case is when 2 robots are in similar configurations to estimate the best transform to
+ * go from one to the other.
+ * </p>
+ */
 public class RobotTransformOptimizer
 {
    private final RigidBodyReadOnly heaviestBodyA;
    private final RigidBodyReadOnly heaviestBodyB;
    private final RigidBodyReadOnly[] rigidBodiesA;
    private final RigidBodyReadOnly[] rigidBodiesB;
-   private final List<RigidBodyPairSpatialErrorCalculator> rigidBodyPairs = new ArrayList<>();
+   private final List<RigidBodyPairErrorCalculator> rigidBodyErrorCalculators = new ArrayList<>();
    private final Map<String, Pair<RigidBodyReadOnly, RigidBodyReadOnly>> nameAToBodyMap = new HashMap<>();
    private final Map<String, Pair<RigidBodyReadOnly, RigidBodyReadOnly>> nameBToBodyMap = new HashMap<>();
 
@@ -42,11 +50,35 @@ public class RobotTransformOptimizer
    private int maxIterations = 100;
    private double convergenceThreshold = 1.0e-7;
 
-   private final DMatrixRMaj perturbationVector = new DMatrixRMaj(6, 1);
-   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
-   private final ErrorCalculator errorCalculator = new ErrorCalculator();
    private final RigidBodyTransform transformFromBToA = new RigidBodyTransform();
+   private final DMatrixRMaj perturbationVector = new DMatrixRMaj(6, 1);
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = input ->
+   {
+      transformFromBToA.getRotation().setYawPitchRoll(input.get(5), input.get(4), input.get(3));
+      transformFromBToA.getTranslation().set(input.get(0), input.get(1), input.get(2));
+      return transformFromBToA;
+   };
+   private final DMatrixRMaj errorSpace = new DMatrixRMaj(50, 1);
+   private final OutputCalculator errorCalculator = inputParameter ->
+   {
+      errorSpace.reshape(rigidBodyErrorCalculators.size(), 1);
+      RigidBodyTransform correction = inputFunction.apply(inputParameter);
+      for (int i = 0; i < rigidBodyErrorCalculators.size(); i++)
+         errorSpace.set(i, rigidBodyErrorCalculators.get(i).computeError(correction).length());
+      return errorSpace;
+   };
 
+   private LevenbergMarquardtParameterOptimizer optimizer;
+
+   /**
+    * Creates a new solver given the root body of the two robots that are to be matched.
+    * <p>
+    * It is assumed that the configuration of each robot is updated outside this class.
+    * </p>
+    * 
+    * @param rootBodyA the root body of the first robot.
+    * @param rootBodyB the root body of the second robot.
+    */
    public RobotTransformOptimizer(RigidBodyReadOnly rootBodyA, RigidBodyReadOnly rootBodyB)
    {
       rigidBodiesA = rootBodyA.subtreeArray();
@@ -89,9 +121,14 @@ public class RobotTransformOptimizer
       this.initializeWithHeaviestBody = initializeWithHeaviestBody;
    }
 
-   public void addDefaultRigidBodyErrorCalculators(BiPredicate<RigidBodyReadOnly, RigidBodyReadOnly> bodySelector)
+   public void clearErrorCalculators()
    {
-      rigidBodyPairs.clear();
+      rigidBodyErrorCalculators.clear();
+   }
+
+   public void addDefaultRigidBodySpatialErrorCalculators(BiPredicate<RigidBodyReadOnly, RigidBodyReadOnly> bodySelector)
+   {
+      rigidBodyErrorCalculators.clear();
 
       for (int i = 0; i < rigidBodiesA.length; i++)
       {
@@ -100,7 +137,39 @@ public class RobotTransformOptimizer
 
          if (bodySelector.test(bodyA, bodyB))
          {
-            rigidBodyPairs.add(new RigidBodyPairSpatialErrorCalculator(bodyA, bodyB));
+            rigidBodyErrorCalculators.add(new RigidBodyPairSpatialErrorCalculator(bodyA, bodyB));
+         }
+      }
+   }
+
+   public void addDefaultRigidBodyLinearErrorCalculators(BiPredicate<RigidBodyReadOnly, RigidBodyReadOnly> bodySelector)
+   {
+      rigidBodyErrorCalculators.clear();
+
+      for (int i = 0; i < rigidBodiesA.length; i++)
+      {
+         RigidBodyReadOnly bodyA = rigidBodiesA[i];
+         RigidBodyReadOnly bodyB = rigidBodiesB[i];
+
+         if (bodySelector.test(bodyA, bodyB))
+         {
+            rigidBodyErrorCalculators.add(new RigidBodyPairLinearErrorCalculator(bodyA, bodyB));
+         }
+      }
+   }
+
+   public void addDefaultRigidBodyAngularErrorCalculators(BiPredicate<RigidBodyReadOnly, RigidBodyReadOnly> bodySelector)
+   {
+      rigidBodyErrorCalculators.clear();
+
+      for (int i = 0; i < rigidBodiesA.length; i++)
+      {
+         RigidBodyReadOnly bodyA = rigidBodiesA[i];
+         RigidBodyReadOnly bodyB = rigidBodiesB[i];
+
+         if (bodySelector.test(bodyA, bodyB))
+         {
+            rigidBodyErrorCalculators.add(new RigidBodyPairAngularErrorCalculator(bodyA, bodyB));
          }
       }
    }
@@ -115,7 +184,9 @@ public class RobotTransformOptimizer
       if (bodyPair == null)
          return null;
 
-      return new RigidBodyPairSpatialErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+      RigidBodyPairSpatialErrorCalculator calculator = new RigidBodyPairSpatialErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+      rigidBodyErrorCalculators.add(calculator);
+      return calculator;
    }
 
    public RigidBodyPairLinearErrorCalculator addLinearRigidBodyErrorCalculator(String bodyName)
@@ -128,7 +199,9 @@ public class RobotTransformOptimizer
       if (bodyPair == null)
          return null;
 
-      return new RigidBodyPairLinearErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+      RigidBodyPairLinearErrorCalculator calculator = new RigidBodyPairLinearErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+      rigidBodyErrorCalculators.add(calculator);
+      return calculator;
    }
 
    public RigidBodyPairAngularErrorCalculator addAngularRigidBodyErrorCalculator(String bodyName)
@@ -141,19 +214,20 @@ public class RobotTransformOptimizer
       if (bodyPair == null)
          return null;
 
-      return new RigidBodyPairAngularErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+      RigidBodyPairAngularErrorCalculator calculator = new RigidBodyPairAngularErrorCalculator(bodyPair.getLeft(), bodyPair.getRight());
+      rigidBodyErrorCalculators.add(calculator);
+      return calculator;
    }
 
    public void compute()
    {
       DMatrixRMaj initialGuess = new DMatrixRMaj(6, 1);
-      rigidBodyPairs.forEach(bodyPair -> bodyPair.initialize());
+      rigidBodyErrorCalculators.forEach(bodyPair -> bodyPair.initialize());
 
       if (initializeWithHeaviestBody)
       {
          RigidBodyTransform initialTransform = new RigidBodyTransform(heaviestBodyB.getBodyFixedFrame().getTransformToRoot());
          initialTransform.preMultiplyInvertThis(heaviestBodyA.getBodyFixedFrame().getTransformToRoot());
-         System.out.println(initialTransform);
          initialGuess.set(0, initialTransform.getTranslationX());
          initialGuess.set(1, initialTransform.getTranslationY());
          initialGuess.set(2, initialTransform.getTranslationZ());
@@ -164,17 +238,14 @@ public class RobotTransformOptimizer
       else
       {
          Vector3D average = new Vector3D();
-         rigidBodyPairs.forEach(bodyPair -> average.add(bodyPair.computeError().getLinearPart()));
-         average.scale(1.0 / rigidBodyPairs.size());
+         rigidBodyErrorCalculators.forEach(bodyPair -> average.add(bodyPair.computeError().getLinearPart()));
+         average.scale(1.0 / rigidBodyErrorCalculators.size());
          average.get(initialGuess);
       }
 
       int inputParameterDimension = 6;
-      int outputDimension = rigidBodyPairs.size();
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction,
-                                                                                                errorCalculator,
-                                                                                                inputParameterDimension,
-                                                                                                outputDimension);
+      int outputDimension = rigidBodyErrorCalculators.size();
+      optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction, errorCalculator, inputParameterDimension, outputDimension);
       optimizer.setInitialOptimalGuess(initialGuess);
       optimizer.setPerturbationVector(perturbationVector);
       optimizer.setCorrespondenceThreshold(Double.POSITIVE_INFINITY);
@@ -183,8 +254,6 @@ public class RobotTransformOptimizer
       for (int i = 0; i < maxIterations; i++)
       {
          double quality = optimizer.iterate();
-         System.out.println("Quality: " + quality);
-         System.out.println("-----------------------------------------");
 
          if (quality <= convergenceThreshold)
             break;
@@ -196,6 +265,14 @@ public class RobotTransformOptimizer
    public RigidBodyTransform getTransformFromBToA()
    {
       return transformFromBToA;
+   }
+
+   public double getSolutionQuality()
+   {
+      if (optimizer != null)
+         return optimizer.getQuality();
+      else
+         return Double.NaN;
    }
 
    public static abstract class RigidBodyPairErrorCalculator
@@ -465,23 +542,6 @@ public class RobotTransformOptimizer
       public WeightMatrix3D getWeightMatrix()
       {
          return weightMatrix;
-      }
-   }
-
-   private class ErrorCalculator implements OutputCalculator
-   {
-      @Override
-      public DMatrixRMaj apply(DMatrixRMaj inputParameter)
-      {
-         RigidBodyTransform correction = inputFunction.apply(inputParameter);
-         DMatrixRMaj errorSpace = new DMatrixRMaj(rigidBodyPairs.size(), 1);
-
-         for (int i = 0; i < rigidBodyPairs.size(); i++)
-         {
-            RigidBodyPairSpatialErrorCalculator bodyPair = rigidBodyPairs.get(i);
-            errorSpace.set(i, bodyPair.computeError(correction).length());
-         }
-         return errorSpace;
       }
    }
 }

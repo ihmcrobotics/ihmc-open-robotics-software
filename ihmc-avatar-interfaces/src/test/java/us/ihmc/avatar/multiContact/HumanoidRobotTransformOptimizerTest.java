@@ -75,7 +75,7 @@ public abstract class HumanoidRobotTransformOptimizerTest
       copyRobotState(scsRobotB, idRobotB);
 
       RobotTransformOptimizer robotTransformOptimizer = new RobotTransformOptimizer(idRobotA.getElevator(), idRobotB.getElevator());
-      robotTransformOptimizer.addDefaultRigidBodyErrorCalculators((bodyA, bodyB) -> !bodyA.isRootBody());
+      robotTransformOptimizer.addDefaultRigidBodyLinearErrorCalculators((bodyA, bodyB) -> !bodyA.isRootBody());
       robotTransformOptimizer.setInitializeWithHeaviestBody(true);
       robotTransformOptimizer.compute();
 

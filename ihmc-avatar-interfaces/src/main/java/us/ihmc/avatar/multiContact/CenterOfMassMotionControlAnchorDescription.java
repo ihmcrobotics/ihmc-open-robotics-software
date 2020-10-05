@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class CenterOfMassMotionControlAnchorDescription
@@ -96,6 +97,11 @@ public class CenterOfMassMotionControlAnchorDescription
    public void setInputMessage(KinematicsToolboxCenterOfMassMessage inputMessage)
    {
       this.inputMessage = inputMessage;
+   }
+
+   public void applyTransform(Transform transform)
+   {
+      inputMessage.getDesiredPositionInWorld().applyTransform(transform);
    }
 
    @Override

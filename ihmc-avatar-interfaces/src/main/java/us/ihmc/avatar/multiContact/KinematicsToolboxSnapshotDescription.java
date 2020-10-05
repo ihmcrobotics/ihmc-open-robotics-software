@@ -18,6 +18,7 @@ import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessagePubSubType;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class KinematicsToolboxSnapshotDescription
@@ -167,6 +168,11 @@ public class KinematicsToolboxSnapshotDescription
       this.ikSolution = ikSolution;
    }
 
+   public void setIkPrivilegedConfiguration(KinematicsToolboxPrivilegedConfigurationMessage ikPrivilegedConfiguration)
+   {
+      this.ikPrivilegedConfiguration = ikPrivilegedConfiguration;
+   }
+
    public void setCenterOfMassAnchor(CenterOfMassMotionControlAnchorDescription centerOfMassAnchor)
    {
       this.centerOfMassAnchor = centerOfMassAnchor;
@@ -182,9 +188,17 @@ public class KinematicsToolboxSnapshotDescription
       this.oneDoFAnchors = oneDoFAnchors;
    }
 
-   public void setIkPrivilegedConfiguration(KinematicsToolboxPrivilegedConfigurationMessage ikPrivilegedConfiguration)
+   public void applyTransform(Transform transform)
    {
-      this.ikPrivilegedConfiguration = ikPrivilegedConfiguration;
+      controllerConfiguration.getRootTranslation().applyTransform(transform);
+      controllerConfiguration.getRootOrientation().applyTransform(transform);
+      ikSolution.getDesiredRootTranslation().applyTransform(transform);
+      ikSolution.getDesiredRootOrientation().applyTransform(transform);
+      ikPrivilegedConfiguration.getPrivilegedRootJointPosition().applyTransform(transform);
+      ikPrivilegedConfiguration.getPrivilegedRootJointOrientation().applyTransform(transform);
+      if (centerOfMassAnchor != null)
+         centerOfMassAnchor.applyTransform(transform);
+      sixDoFAnchors.forEach(anchor -> anchor.applyTransform(transform));
    }
 
    @Override

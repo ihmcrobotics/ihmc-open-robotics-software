@@ -9,6 +9,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.log.LogTools;
 
 public class MultiContactScriptReader
@@ -77,6 +78,14 @@ public class MultiContactScriptReader
       return getCurrent();
    }
 
+   public KinematicsToolboxSnapshotDescription getFirst()
+   {
+      if (loadedMessages.isEmpty())
+         return null;
+      else
+         return loadedMessages.get(0);
+   }
+
    public KinematicsToolboxSnapshotDescription next()
    {
       currentMessageIndex++;
@@ -99,5 +108,13 @@ public class MultiContactScriptReader
          return null;
       else
          return loadedMessages.get(currentMessageIndex);
+   }
+
+   public void applyTransform(Transform transform)
+   {
+      for (KinematicsToolboxSnapshotDescription description : loadedMessages)
+      {
+         description.applyTransform(transform);
+      }
    }
 }
