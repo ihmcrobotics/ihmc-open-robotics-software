@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.*;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
