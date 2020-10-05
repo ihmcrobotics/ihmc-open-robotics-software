@@ -139,9 +139,16 @@ public class AtlasSLAMBasedREAStandaloneLauncher
          }
 
          Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-         segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/atlas/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+         if (segmentationConfigurationFilePath != null)
+         {
+            segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(),
+                                                          "/atlas/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+         }
 
-         segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath, ros2Node, segmentationMessager);
+         segmentationModule
+               = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath == null ? null : segmentationConfigurationFilePath.toFile(),
+                                                                   ros2Node,
+                                                                   segmentationMessager);
          module.attachOcTreeConsumer(segmentationModule);
       }
 
