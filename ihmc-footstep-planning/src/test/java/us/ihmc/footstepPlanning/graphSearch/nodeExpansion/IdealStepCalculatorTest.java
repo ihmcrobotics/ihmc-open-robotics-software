@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -36,7 +37,10 @@ public class IdealStepCalculatorTest
       Pose3D goalPose = new Pose3D(0.5 * pathLength, 0.0, 0.0, 0.0, 0.0, 0.0);
       bodyPathPlanHolder.setPoseWaypoints(Arrays.asList(startPose, goalPose));
 
-      IdealStepCalculator idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder);
+      IdealStepCalculator idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters,
+                                                                        checker,
+                                                                        bodyPathPlanHolder,
+                                                                        new YoRegistry("testRegistry"));
 
       SideDependentList<Pose3D> goalStepPoses = PlannerTools.createSquaredUpFootsteps(goalPose, footstepPlannerParameters.getIdealFootstepWidth());
       SideDependentList<FootstepNode> goalPoses = new SideDependentList<>(side ->

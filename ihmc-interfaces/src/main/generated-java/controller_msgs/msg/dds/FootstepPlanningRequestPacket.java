@@ -13,10 +13,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte FOOTSTEP_PLAN_HEADING_FORWARD = (byte) 0;
-   public static final byte FOOTSTEP_PLAN_HEADING_BACKWARD = (byte) 1;
-   public static final byte FOOTSTEP_PLAN_HEADING_LEFT = (byte) 2;
-   public static final byte FOOTSTEP_PLAN_HEADING_RIGHT = (byte) 3;
    public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
    public static final byte SWING_PLANNER_TYPE_POSITION = (byte) 1;
    public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
@@ -86,9 +82,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public double goal_yaw_proximity_ = -1.0;
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public byte requested_path_heading_ = (byte) 255;
+   public double requested_path_heading_;
    /**
             * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
@@ -405,16 +402,18 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public void setRequestedPathHeading(byte requested_path_heading)
+   public void setRequestedPathHeading(double requested_path_heading)
    {
       requested_path_heading_ = requested_path_heading;
    }
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public byte getRequestedPathHeading()
+   public double getRequestedPathHeading()
    {
       return requested_path_heading_;
    }
