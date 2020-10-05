@@ -51,7 +51,7 @@ public class IdealStepCalculatorTest
                                                                                                      goalStepPose.getYaw(),
                                                                                                      side);
                                                                           });
-      idealStepCalculator.initialize(goalPoses, FootstepPlanHeading.FORWARD);
+      idealStepCalculator.initialize(goalPoses, 0.0);
 
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
       double idealStepWidth = footstepPlannerParameters.getIdealFootstepWidth();
