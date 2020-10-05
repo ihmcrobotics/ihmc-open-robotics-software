@@ -479,7 +479,7 @@ public class FootstepPlannerLogVisualizerController
          case DOUBLE:
             TableColumn<ChildStepProperty, Double> doubleColumn = new TableColumn<>(variableDescriptor.getName());
             doubleColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(Double.longBitsToDouble(c.getValue().edgeData.getDataBuffer()[variableIndex])));
-            doubleColumn.setCellFactory(c -> new TableCell<>()
+            doubleColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Double>()
             {
                @Override
                public void updateItem(final Double value, boolean empty)
@@ -493,7 +493,7 @@ public class FootstepPlannerLogVisualizerController
          case BOOLEAN:
             TableColumn<ChildStepProperty, Boolean> booleanColumn = new TableColumn<>(variableDescriptor.getName());
             booleanColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().edgeData.getDataBuffer()[variableIndex] == 1));
-            booleanColumn.setCellFactory(c -> new TableCell<>()
+            booleanColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Boolean>()
             {
                @Override
                public void updateItem(final Boolean value, boolean empty)
@@ -507,7 +507,7 @@ public class FootstepPlannerLogVisualizerController
          case ENUM:
             TableColumn<ChildStepProperty, Long> enumColumn = new TableColumn<>(variableDescriptor.getName());
             enumColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().edgeData.getDataBuffer()[variableIndex]));
-            enumColumn.setCellFactory(c -> new TableCell<>()
+            enumColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Long>()
             {
                @Override
                public void updateItem(final Long value, boolean empty)
@@ -523,7 +523,7 @@ public class FootstepPlannerLogVisualizerController
          default:
             TableColumn<ChildStepProperty, Long> longColumn = new TableColumn<>(variableDescriptor.getName());
             longColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().edgeData.getDataBuffer()[variableIndex]));
-            longColumn.setCellFactory(c -> new TableCell<>()
+            longColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Long>()
             {
                @Override
                public void updateItem(final Long value, boolean empty)
