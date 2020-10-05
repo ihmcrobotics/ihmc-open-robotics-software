@@ -45,7 +45,7 @@ public class RobotTransformOptimizerTest
       rootBodyB.updateFramesRecursively();
 
       RobotTransformOptimizer matcher = new RobotTransformOptimizer(rootBodyA, rootBodyB);
-      matcher.addDefaultRigidBodyErrorCalculators((bodyA, bodyB) -> !bodyA.isRootBody());
+      matcher.addDefaultRigidBodySpatialErrorCalculators((bodyA, bodyB) -> !bodyA.isRootBody());
       matcher.compute();
 
       RigidBodyTransform actualTransform = matcher.getTransformFromBToA();
