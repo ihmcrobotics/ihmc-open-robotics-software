@@ -45,6 +45,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean USE_INTERPROCESS_ROS2 = Boolean.parseBoolean(System.getProperty("use.interprocess.ros2"));
    private static boolean USE_INTERPROCESS_KRYO = Boolean.parseBoolean(System.getProperty("use.interprocess.kryo"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam", "true"));
+   private static boolean RUN_LIDAR_REA = Boolean.parseBoolean(System.getProperty("run.lidar.rea", "true"));
    private static boolean SHOW_REALSENSE_SLAM_UIS = Boolean.parseBoolean(System.getProperty("show.realsense.slam.uis"));
    private static boolean USE_ADDITIONAL_CONTACT_POINTS = Boolean.parseBoolean(System.getProperty("use.additional.contact.points"));
    private static int ENVIRONMENT = Integer.parseInt(System.getProperty("environment", "-1"));
@@ -97,6 +98,7 @@ public class AtlasLookAndStepBehaviorDemo
                                                                                       environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                                       RUN_REALSENSE_SLAM,
                                                                                       SHOW_REALSENSE_SLAM_UIS,
+                                                                                      RUN_LIDAR_REA,
                                                                                       createRobotModel()),
                                 "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
