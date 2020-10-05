@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.ButterworthFilteredYoVariable.ButterworthFilterType;
 
@@ -29,7 +29,7 @@ public class ButterworthFusedYoVariable extends YoDouble
 {
    private final ButterworthFilteredYoVariable lowPassFilteredSlowVariable, highPassFilteredFastVariable;
 
-   public ButterworthFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha)
+   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, double alpha)
    {
       super(name, yoVariableRegistry);
 
@@ -37,7 +37,7 @@ public class ButterworthFusedYoVariable extends YoDouble
       highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "highPass", yoVariableRegistry, alpha, ButterworthFilterType.HIGH_PASS);
    }
 
-   public ButterworthFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha, YoDouble slowSignal, YoDouble fastSignal)
+   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, double alpha, YoDouble slowSignal, YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);
 
@@ -48,7 +48,7 @@ public class ButterworthFusedYoVariable extends YoDouble
       reset();
    }
 
-   public ButterworthFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, YoDouble alphaVariable, YoDouble slowSignal,
+   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, YoDouble alphaVariable, YoDouble slowSignal,
          YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);

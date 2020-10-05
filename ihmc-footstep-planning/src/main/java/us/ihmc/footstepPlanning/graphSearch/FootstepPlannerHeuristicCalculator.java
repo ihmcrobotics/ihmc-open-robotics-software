@@ -8,23 +8,23 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootstepPlannerHeuristicCalculator
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepNodeSnapperReadOnly snapper;
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private final FootstepPlannerEdgeData edgeData;
-   private FootstepPlanHeading desiredHeading = FootstepPlanHeading.FORWARD;
+   private double desiredHeading;
 
    private final FramePose3D midFootPose = new FramePose3D();
    private final Point2D midFootPoint = new Point2D();
@@ -35,16 +35,16 @@ public class FootstepPlannerHeuristicCalculator
    public FootstepPlannerHeuristicCalculator(FootstepNodeSnapperReadOnly snapper,
                                              FootstepPlannerParametersReadOnly parameters,
                                              WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
-                                             FootstepPlannerEdgeData edgeData)
+                                             YoRegistry parentRegistry)
    {
       this.snapper = snapper;
 
       this.parameters = parameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
-      this.edgeData = edgeData;
+      parentRegistry.addChild(registry);
    }
 
-   public void initialize(FramePose3DReadOnly goalPose, FootstepPlanHeading desiredHeading)
+   public void initialize(FramePose3DReadOnly goalPose, double desiredHeading)
    {
       this.goalPose.set(goalPose);
       this.desiredHeading = desiredHeading;
@@ -56,7 +56,9 @@ public class FootstepPlannerHeuristicCalculator
 
       FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node);
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
+      {
          snapData.getSnapTransform().transform(midfootPoint);
+      }
 
       midFootPose.getPosition().set(midfootPoint);
       midFootPose.getOrientation().setYawPitchRoll(node.getYaw(), 0.0, 0.0);
@@ -76,19 +78,20 @@ public class FootstepPlannerHeuristicCalculator
          midFootPoint.set(midFootPose.getPosition());
          double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
          int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
-         double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading.getYawOffset());
+         double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
 
          initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;
+
+         /** TODO remove when {@link FootstepPlannerParametersReadOnly#getStepOnlyWithRequestedSide()} is removed */
+         if (node.getRobotSide() == parameters.getStepOnlyWithRequestedSide())
+         {
+            walkDistance += 0.5 * parameters.getIdealFootstepLength();
+         }
+
          finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pathHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
-      double heuristicCost = parameters.getAStarHeuristicsWeight().getValue() * (initialTurnDistance + walkDistance + finalTurnDistance);
-      if (edgeData != null)
-      {
-         edgeData.setHeuristicCost(heuristicCost);
-      }
-
-      return heuristicCost;
+      return parameters.getAStarHeuristicsWeight().getValue() * (initialTurnDistance + walkDistance + finalTurnDistance);
    }
 }

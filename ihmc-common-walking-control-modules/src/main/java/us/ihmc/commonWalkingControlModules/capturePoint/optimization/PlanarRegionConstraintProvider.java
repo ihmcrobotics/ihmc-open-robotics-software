@@ -11,11 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -30,12 +26,12 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PlanarRegionConstraintProvider
@@ -89,7 +85,7 @@ public class PlanarRegionConstraintProvider
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters walkingParameters,
                                          ICPOptimizationParameters optimizationParameters, BipedSupportPolygons bipedSupportPolygons,
                                          SideDependentList<ReferenceFrame> soleZUpFrames, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                         String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                         String yoNamePrefix, boolean visualize, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
@@ -312,7 +308,7 @@ public class PlanarRegionConstraintProvider
          footstepPolygon.update();
       }
       scaler.scaleConvexPolygonToContainInteriorPolygon(activePlanarRegion.getConvexHull(), footstepPolygon, distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-      icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
+      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
 
       yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
@@ -355,7 +351,7 @@ public class PlanarRegionConstraintProvider
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-      icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
+      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
       double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
@@ -391,7 +387,7 @@ public class PlanarRegionConstraintProvider
          PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
 
          scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-         icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
+         icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
          double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 

@@ -7,37 +7,24 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the Quix controller API.
-   
- * This message is used to allow the crutch to communicate a desired change in behavior.
-   
- */
+       * This message is part of the Quix controller API.
+       * This message is used to allow the crutch to communicate a desired change in behavior.
+       */
 public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Settable<QuixCrutchMessage>, EpsilonComparable<QuixCrutchMessage>
 {
-
    public long sequence_id_;
-
    public boolean user_enable_;
-
    public boolean rewiggle_;
-
    public boolean start_behavior_;
-
    public controller_msgs.msg.dds.QuixMotionStateMessage requested_motion_state_;
-
    public boolean execute_behavior_;
+   public boolean continuous_walking_;
+   public controller_msgs.msg.dds.FlatStepTypeMessage flat_step_type_;
 
    public QuixCrutchMessage()
    {
-
-
-
-
-
       requested_motion_state_ = new controller_msgs.msg.dds.QuixMotionStateMessage();
-
-
+      flat_step_type_ = new controller_msgs.msg.dds.FlatStepTypeMessage();
    }
 
    public QuixCrutchMessage(QuixCrutchMessage other)
@@ -48,25 +35,21 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
 
    public void set(QuixCrutchMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       user_enable_ = other.user_enable_;
 
-
       rewiggle_ = other.rewiggle_;
-
 
       start_behavior_ = other.start_behavior_;
 
-
       controller_msgs.msg.dds.QuixMotionStateMessagePubSubType.staticCopy(other.requested_motion_state_, requested_motion_state_);
-
       execute_behavior_ = other.execute_behavior_;
 
-   }
+      continuous_walking_ = other.continuous_walking_;
 
+      controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.staticCopy(other.flat_step_type_, flat_step_type_);
+   }
 
    public void setSequenceId(long sequence_id)
    {
@@ -77,7 +60,6 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       return sequence_id_;
    }
 
-
    public void setUserEnable(boolean user_enable)
    {
       user_enable_ = user_enable;
@@ -87,7 +69,6 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       return user_enable_;
    }
 
-
    public void setRewiggle(boolean rewiggle)
    {
       rewiggle_ = rewiggle;
@@ -96,7 +77,6 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    {
       return rewiggle_;
    }
-
 
    public void setStartBehavior(boolean start_behavior)
    {
@@ -108,12 +88,10 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    }
 
 
-
    public controller_msgs.msg.dds.QuixMotionStateMessage getRequestedMotionState()
    {
       return requested_motion_state_;
    }
-
 
    public void setExecuteBehavior(boolean execute_behavior)
    {
@@ -122,6 +100,21 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    public boolean getExecuteBehavior()
    {
       return execute_behavior_;
+   }
+
+   public void setContinuousWalking(boolean continuous_walking)
+   {
+      continuous_walking_ = continuous_walking;
+   }
+   public boolean getContinuousWalking()
+   {
+      return continuous_walking_;
+   }
+
+
+   public controller_msgs.msg.dds.FlatStepTypeMessage getFlatStepType()
+   {
+      return flat_step_type_;
    }
 
 
@@ -142,23 +135,20 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.user_enable_, other.user_enable_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.rewiggle_, other.rewiggle_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.start_behavior_, other.start_behavior_, epsilon)) return false;
 
-
       if (!this.requested_motion_state_.epsilonEquals(other.requested_motion_state_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_behavior_, other.execute_behavior_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.continuous_walking_, other.continuous_walking_, epsilon)) return false;
+
+      if (!this.flat_step_type_.epsilonEquals(other.flat_step_type_, epsilon)) return false;
 
       return true;
    }
@@ -172,23 +162,20 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
 
       QuixCrutchMessage otherMyClass = (QuixCrutchMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.user_enable_ != otherMyClass.user_enable_) return false;
 
-
       if(this.rewiggle_ != otherMyClass.rewiggle_) return false;
-
 
       if(this.start_behavior_ != otherMyClass.start_behavior_) return false;
 
-
       if (!this.requested_motion_state_.equals(otherMyClass.requested_motion_state_)) return false;
-
       if(this.execute_behavior_ != otherMyClass.execute_behavior_) return false;
 
+      if(this.continuous_walking_ != otherMyClass.continuous_walking_) return false;
+
+      if (!this.flat_step_type_.equals(otherMyClass.flat_step_type_)) return false;
 
       return true;
    }
@@ -199,24 +186,22 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuixCrutchMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("user_enable=");
       builder.append(this.user_enable_);      builder.append(", ");
-
       builder.append("rewiggle=");
       builder.append(this.rewiggle_);      builder.append(", ");
-
       builder.append("start_behavior=");
       builder.append(this.start_behavior_);      builder.append(", ");
-
       builder.append("requested_motion_state=");
       builder.append(this.requested_motion_state_);      builder.append(", ");
-
       builder.append("execute_behavior=");
-      builder.append(this.execute_behavior_);
+      builder.append(this.execute_behavior_);      builder.append(", ");
+      builder.append("continuous_walking=");
+      builder.append(this.continuous_walking_);      builder.append(", ");
+      builder.append("flat_step_type=");
+      builder.append(this.flat_step_type_);
       builder.append("}");
       return builder.toString();
    }

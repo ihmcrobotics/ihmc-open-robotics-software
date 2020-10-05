@@ -3,21 +3,21 @@ package us.ihmc.simulationConstructionSetTools.util.perturbance;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.simulationconstructionset.scripts.DisturbanceScriptEntry;
 import us.ihmc.simulationconstructionset.scripts.Script;
 
 public class DisturbanceScript implements Script
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final ForcePerturbable forcePerturbable;
    private ArrayList<DisturbanceScriptEntry> sortedDisturbanceScriptEntryList = new ArrayList<DisturbanceScriptEntry>();
    private final YoInteger nextDisturbanceScriptIndex;
    
-   public DisturbanceScript(String name, ForcePerturbable forcePerturbable, YoVariableRegistry parentRegistry)
+   public DisturbanceScript(String name, ForcePerturbable forcePerturbable, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
       this.forcePerturbable = forcePerturbable;
       this.nextDisturbanceScriptIndex = new YoInteger("nextDisturbanceScriptIndex", registry);
       parentRegistry.addChild(registry);

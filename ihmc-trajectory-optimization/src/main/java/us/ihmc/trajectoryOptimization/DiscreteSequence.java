@@ -1,9 +1,10 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.lists.RecyclingArrayList;
 
-public class DiscreteSequence extends RecyclingArrayList<DenseMatrix64F> implements DiscreteData
+public class DiscreteSequence extends RecyclingArrayList<DMatrixRMaj> implements DiscreteData
 {
    public DiscreteSequence(int dimensionality)
    {

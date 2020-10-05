@@ -1,15 +1,15 @@
 package us.ihmc.exampleSimulations.unicycle;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class UnicycleController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("UnicycleController");
+   private final YoRegistry registry = new YoRegistry("UnicycleController");
    private final String name;
 
    // used for control
@@ -23,12 +23,12 @@ public class UnicycleController implements RobotController
    // control variables
    private final YoDouble x_d = new YoDouble("x_desired", registry);
    // F_lqr is a state feedback controller computed in Octave after modeling the system
-   private static final DenseMatrix64F F_lqr = new DenseMatrix64F(new double[][] {
+   private static final DMatrixRMaj F_lqr = new DMatrixRMaj(new double[][] {
       {-11.50472, 3.80286, 0.11255, -2.32854, -0.23139, 0.17381},
       {23.17410, 47.00831, 0.42755, 6.15708, 10.47226, 0.85362}});
 
-   private final DenseMatrix64F x = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F u = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj x = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj u = new DMatrixRMaj(2, 1);
    private final double radius;
 
    public UnicycleController(UnicycleRobot robot, String name)
@@ -36,19 +36,19 @@ public class UnicycleController implements RobotController
       this.name = name;
       this.radius = robot.getWheelRadius();
 
-      back_tau = (YoDouble) robot.getVariable("tau_backJoint");
-      wheel_tau = (YoDouble) robot.getVariable("tau_wheelJoint");
+      back_tau = (YoDouble) robot.findVariable("tau_backJoint");
+      wheel_tau = (YoDouble) robot.findVariable("tau_wheelJoint");
 
-      pitch = (YoDouble) robot.getVariable("q_pitch");
-      pitch_rate = (YoDouble) robot.getVariable("qd_pitch");
+      pitch = (YoDouble) robot.findVariable("q_pitch");
+      pitch_rate = (YoDouble) robot.findVariable("qd_pitch");
 
-      q_back = (YoDouble) robot.getVariable("q_backJoint");
-      qd_back = (YoDouble) robot.getVariable("qd_backJoint");
+      q_back = (YoDouble) robot.findVariable("q_backJoint");
+      qd_back = (YoDouble) robot.findVariable("qd_backJoint");
 
-      q_wheel = (YoDouble) robot.getVariable("q_wheelJoint");
-      qd_wheel = (YoDouble) robot.getVariable("qd_wheelJoint");
+      q_wheel = (YoDouble) robot.findVariable("q_wheelJoint");
+      qd_wheel = (YoDouble) robot.findVariable("qd_wheelJoint");
 
-      body_x = (YoDouble) robot.getVariable("q_x");
+      body_x = (YoDouble) robot.findVariable("q_x");
    }
 
    @Override
@@ -74,7 +74,7 @@ public class UnicycleController implements RobotController
       x.set(5, q3d);
 
       // do some control here
-      CommonOps.mult(F_lqr, x, u);
+      CommonOps_DDRM.mult(F_lqr, x, u);
       back_tau.set(-u.get(0));
       wheel_tau.set(u.get(1));
    }
@@ -86,7 +86,7 @@ public class UnicycleController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -1,21 +1,17 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -24,6 +20,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReflectionSimulationComparerTest
 {
@@ -44,7 +42,6 @@ public class ReflectionSimulationComparerTest
    public void testTwoEmptySimulations()
    {
       ReflectionSimulationComparer comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
-      comparer.addFieldToIgnore(getStackTraceAtInitializationField());
 
       
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
@@ -70,24 +67,10 @@ public class ReflectionSimulationComparerTest
       comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
       
       comparer.addFieldsToIgnore(differingFields);
-      comparer.addFieldToIgnore(getStackTraceAtInitializationField());
       
       simulationsAreTheSame = comparer.compare(scs0, scs1);
      
       assertTrue(simulationsAreTheSame);
-   }
-   
-   public Field getStackTraceAtInitializationField()
-   {
-      try
-      {
-         return YoVariable.class.getDeclaredField("stackTraceAtInitialization");
-      }
-      catch (NoSuchFieldException | SecurityException e)
-      {
-         Assert.fail("StackTraceAtInitialization has been renamed.");
-         return null;
-      }
    }
 
 	@Test
@@ -160,7 +143,7 @@ public class ReflectionSimulationComparerTest
    
    private class RewindableOrNotRewindableController implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry("RewindableObject");
+      private final YoRegistry registry = new YoRegistry("RewindableObject");
       
       private final YoInteger counter = new YoInteger("counter", registry);
       private int counter2;
@@ -178,7 +161,7 @@ public class ReflectionSimulationComparerTest
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

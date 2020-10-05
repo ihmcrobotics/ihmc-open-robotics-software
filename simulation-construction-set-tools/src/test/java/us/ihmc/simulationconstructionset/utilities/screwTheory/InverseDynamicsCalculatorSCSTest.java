@@ -104,7 +104,7 @@ public class InverseDynamicsCalculatorSCSTest
       
       Vector3D externalForcePointOffset = new Vector3D(comOffset);
       externalForcePointOffset.add(translationFromCoM);
-      ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", externalForcePointOffset, robot.getRobotsYoVariableRegistry());
+      ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", externalForcePointOffset, robot.getRobotsYoRegistry());
       rootJoint.addExternalForcePoint(externalForcePoint);
       externalForcePoint.setForce(random.nextDouble(), random.nextDouble(), random.nextDouble());
 

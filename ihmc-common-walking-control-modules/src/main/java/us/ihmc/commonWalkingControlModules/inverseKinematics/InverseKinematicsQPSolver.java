@@ -1,40 +1,44 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPVariableSubstitution;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class InverseKinematicsQPSolver
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
-   private final DenseMatrix64F solverInput_H;
-   private final DenseMatrix64F solverInput_f;
+   private final QPVariableSubstitution variableSubstitution = new QPVariableSubstitution();
 
-   private final DenseMatrix64F solverInput_Aeq;
-   private final DenseMatrix64F solverInput_beq;
-   private final DenseMatrix64F solverInput_Ain;
-   private final DenseMatrix64F solverInput_bin;
+   private final DMatrixRMaj solverInput_H;
+   private final DMatrixRMaj solverInput_f;
 
-   private final DenseMatrix64F solverInput_lb;
-   private final DenseMatrix64F solverInput_ub;
+   private final DMatrixRMaj solverInput_Aeq;
+   private final DMatrixRMaj solverInput_beq;
+   private final DMatrixRMaj solverInput_Ain;
+   private final DMatrixRMaj solverInput_bin;
 
-   private final DenseMatrix64F solverOutput;
-   private final DenseMatrix64F desiredJointVelocities;
+   private final DMatrixRMaj solverInput_lb;
+   private final DMatrixRMaj solverInput_ub;
+
+   private final DMatrixRMaj solverOutput;
+   private final DMatrixRMaj desiredJointVelocities;
 
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
@@ -51,7 +55,7 @@ public class InverseKinematicsQPSolver
 
    private final double dt;
 
-   public InverseKinematicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, double dt, YoVariableRegistry parentRegistry)
+   public InverseKinematicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, double dt, YoRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -59,24 +63,26 @@ public class InverseKinematicsQPSolver
 
       firstCall.set(true);
 
-      solverInput_H = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-      solverInput_f = new DenseMatrix64F(numberOfDoFs, 1);
-      solverInput_lb = new DenseMatrix64F(numberOfDoFs, 1);
-      solverInput_ub = new DenseMatrix64F(numberOfDoFs, 1);
+      solverInput_H = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
+      solverInput_f = new DMatrixRMaj(numberOfDoFs, 1);
+      solverInput_lb = new DMatrixRMaj(numberOfDoFs, 1);
+      solverInput_ub = new DMatrixRMaj(numberOfDoFs, 1);
 
-      solverInput_Aeq = new DenseMatrix64F(0, numberOfDoFs);
-      solverInput_beq = new DenseMatrix64F(0, 1);
-      solverInput_Ain = new DenseMatrix64F(0, numberOfDoFs);
-      solverInput_bin = new DenseMatrix64F(0, 1);
+      solverInput_Aeq = new DMatrixRMaj(0, numberOfDoFs);
+      solverInput_beq = new DMatrixRMaj(0, 1);
+      solverInput_Ain = new DMatrixRMaj(0, numberOfDoFs);
+      solverInput_bin = new DMatrixRMaj(0, 1);
 
-      CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
-      CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+      CommonOps_DDRM.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
+      CommonOps_DDRM.fill(solverInput_ub, Double.POSITIVE_INFINITY);
 
-      solverOutput = new DenseMatrix64F(numberOfDoFs, 1);
+      solverOutput = new DMatrixRMaj(numberOfDoFs, 1);
       jointVelocityRegularization.set(0.5);
       jointAccelerationRegularization.set(10.0);
 
-      desiredJointVelocities = new DenseMatrix64F(numberOfDoFs, 1);
+      desiredJointVelocities = new DMatrixRMaj(numberOfDoFs, 1);
+
+      variableSubstitution.setIgnoreBias(true);
 
       parentRegistry.addChild(registry);
    }
@@ -105,6 +111,8 @@ public class InverseKinematicsQPSolver
 
    public void reset()
    {
+      variableSubstitution.reset();
+
       solverInput_H.zero();
       for (int i = 0; i < numberOfDoFs; i++)
          solverInput_H.set(i, i, jointVelocityRegularization.getDoubleValue());
@@ -132,35 +140,35 @@ public class InverseKinematicsQPSolver
       }
    }
 
-   private final DenseMatrix64F tempJtW = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F tempTask_H = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F tempTask_f = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj tempJtW = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj tempTask_H = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj tempTask_f = new DMatrixRMaj(1, 1);
 
    public void addMotionInput(QPInput input)
    {
       switch (input.getConstraintType())
       {
-      case OBJECTIVE:
-         if (input.useWeightScalar())
-            addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
-         else
-            addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
-         break;
-      case EQUALITY:
-         addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
-         break;
-      case LEQ_INEQUALITY:
-         addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
-         break;
-      case GEQ_INEQUALITY:
-         addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
-         break;
-      default:
-         throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+         case OBJECTIVE:
+            if (input.useWeightScalar())
+               addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+            else
+               addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+            break;
+         case EQUALITY:
+            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         case LEQ_INEQUALITY:
+            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         case GEQ_INEQUALITY:
+            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         default:
+            throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
    }
 
-   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight)
+   public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
 
@@ -171,31 +179,31 @@ public class InverseKinematicsQPSolver
       addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
-   public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
+   public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
 
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
-      CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
+      CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
 
       addMotionTaskInternal(tempJtW, taskJacobian, taskObjective);
    }
 
-   private void addMotionTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   private void addMotionTaskInternal(DMatrixRMaj taskJtW, DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       // Compute: H += J^T W J
       tempTask_H.reshape(numberOfDoFs, numberOfDoFs);
-      CommonOps.mult(taskJtW, taskJacobian, tempTask_H);
-      CommonOps.addEquals(solverInput_H, tempTask_H);
+      CommonOps_DDRM.mult(taskJtW, taskJacobian, tempTask_H);
+      CommonOps_DDRM.addEquals(solverInput_H, tempTask_H);
 
       // Compute: f += - J^T W xDot
       tempTask_f.reshape(numberOfDoFs, 1);
-      CommonOps.mult(taskJtW, taskObjective, tempTask_f);
-      CommonOps.subtractEquals(solverInput_f, tempTask_f);
+      CommonOps_DDRM.mult(taskJtW, taskObjective, tempTask_f);
+      CommonOps_DDRM.subtractEquals(solverInput_f, tempTask_f);
    }
 
-   public void addMotionEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_beq.getNumRows();
@@ -204,21 +212,21 @@ public class InverseKinematicsQPSolver
       solverInput_Aeq.reshape(previousSize + taskSize, numberOfDoFs, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
-      CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
-      CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
+      CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
    }
 
-   public void addMotionLesserOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       addMotionInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
    }
 
-   public void addMotionGreaterOrEqualInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       addMotionInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
    }
 
-   private void addMotionInequalityConstraintInternal(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double sign)
+   private void addMotionInequalityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double sign)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_bin.getNumRows();
@@ -229,6 +237,11 @@ public class InverseKinematicsQPSolver
 
       MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, numberOfDoFs, sign);
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
+   }
+
+   public void addVariableSubstitution(QPVariableSubstitution substitution)
+   {
+      this.variableSubstitution.concatenate(substitution);
    }
 
    public void solve() throws NoConvergenceException
@@ -244,14 +257,24 @@ public class InverseKinematicsQPSolver
       qpSolver.setUseWarmStart(useWarmStart);
       qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
       if (useWarmStart && pollResetActiveSet())
-         qpSolver.resetActiveConstraints();
+         qpSolver.resetActiveSet();
 
+      TIntArrayList inactiveIndices = applySubstitution(); // This needs to be done right before configuring the QP and solving.
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
+      if (inactiveIndices != null)
+      {
+         for (int i = 0; i < inactiveIndices.size(); i++)
+         {
+            qpSolver.setVariableInactive(inactiveIndices.get(i));
+         }
+      }
+
       numberOfIterations.set(qpSolver.solve(solverOutput));
+      removeSubstitution(); // This needs to be done right after solving.
 
       qpSolverTimer.stopMeasurement();
 
@@ -262,7 +285,27 @@ public class InverseKinematicsQPSolver
       firstCall.set(false);
    }
 
-   public DenseMatrix64F getJointVelocities()
+   private TIntArrayList applySubstitution()
+   {
+      if (variableSubstitution.isEmpty())
+         return null;
+
+      variableSubstitution.applySubstitutionToObjectiveFunction(solverInput_H, solverInput_f);
+      variableSubstitution.applySubstitutionToLinearConstraint(solverInput_Aeq, solverInput_beq);
+      variableSubstitution.applySubstitutionToLinearConstraint(solverInput_Ain, solverInput_bin);
+      variableSubstitution.applySubstitutionToBounds(solverInput_lb, solverInput_ub, solverInput_Ain, solverInput_bin);
+      return variableSubstitution.getInactiveIndices();
+   }
+
+   private void removeSubstitution()
+   {
+      if (variableSubstitution.isEmpty())
+         return;
+
+      variableSubstitution.removeSubstitutionToSolution(solverOutput);
+   }
+
+   public DMatrixRMaj getJointVelocities()
    {
       return desiredJointVelocities;
    }
@@ -277,12 +320,12 @@ public class InverseKinematicsQPSolver
       jointAccelerationRegularization.set(weight);
    }
 
-   public void setMinJointVelocities(DenseMatrix64F qDotMin)
+   public void setMinJointVelocities(DMatrixRMaj qDotMin)
    {
       solverInput_lb.set(qDotMin);
    }
 
-   public void setMaxJointVelocities(DenseMatrix64F qDotMax)
+   public void setMaxJointVelocities(DMatrixRMaj qDotMax)
    {
       solverInput_ub.set(qDotMax);
    }

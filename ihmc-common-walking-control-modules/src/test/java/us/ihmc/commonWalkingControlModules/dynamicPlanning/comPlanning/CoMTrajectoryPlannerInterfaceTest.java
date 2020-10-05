@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.time.TimeInterval;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
 {
    private static final double epsilon = 1e-4;
 
-   protected YoVariableRegistry registry;
+   protected YoRegistry registry;
    protected YoDouble omega;
    protected List<ContactStateProvider> contactSequence;
    protected double gravityZ;
@@ -40,7 +40,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
    @BeforeEach
    private void setupTest()
    {
-      registry = new YoVariableRegistry("testJacobian");
+      registry = new YoRegistry("testJacobian");
       omega = new YoDouble("omega", registry);
       omega.set(3.0);
       gravityZ = 9.81;

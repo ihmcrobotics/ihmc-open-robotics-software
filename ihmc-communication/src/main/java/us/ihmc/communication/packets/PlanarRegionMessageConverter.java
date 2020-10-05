@@ -98,6 +98,13 @@ public class PlanarRegionMessageConverter
       return planarRegion;
    }
 
+   public static PlanarRegionsListMessage convertToPlanarRegionsListMessage(PlanarRegion planarRegion)
+   {
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      planarRegionsList.addPlanarRegion(planarRegion);
+      return convertToPlanarRegionsListMessage(planarRegionsList);
+   }
+
    public static PlanarRegionsListMessage convertToPlanarRegionsListMessage(PlanarRegionsList planarRegionsList)
    {
       PlanarRegionsListMessage message = new PlanarRegionsListMessage();

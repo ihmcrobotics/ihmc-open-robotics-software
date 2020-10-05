@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry.shapes;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.fail;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ public class BestFitPlaneCalculatorTest
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
       FramePoint2D footCenterPoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      DMatrixRMaj matrix = new DMatrixRMaj(7, 7);
       matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
                                   0, 0, 8, 8, 0, 0, 0,
                                   0, 0, 0, 0, 0, 1, 0,
@@ -67,7 +67,7 @@ public class BestFitPlaneCalculatorTest
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
       double n = Double.NaN;
-      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      DMatrixRMaj matrix = new DMatrixRMaj(7, 7);
       matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
                                   0, 0, 0, 0, 0, 0, 0,
                                   0, 0, 0, n, 0, 1, 0,

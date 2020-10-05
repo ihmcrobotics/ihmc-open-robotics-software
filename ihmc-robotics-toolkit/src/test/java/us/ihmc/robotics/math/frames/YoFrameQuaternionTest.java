@@ -21,8 +21,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameQuaternionTest
 {
@@ -39,7 +39,7 @@ public class YoFrameQuaternionTest
    @Test
    public void testInitialization()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       yoFrameQuaternion.checkReferenceFrameMatch(worldFrame);
@@ -71,7 +71,7 @@ public class YoFrameQuaternionTest
    {
       Random random = new Random(1972L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       RotationMatrix matrix3dExpected = new RotationMatrix();
@@ -115,7 +115,7 @@ public class YoFrameQuaternionTest
       Random random = new Random(1984L);
       ReferenceFrame testFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       FrameQuaternion frameOrientation = new FrameQuaternion(testFrame);
@@ -148,7 +148,7 @@ public class YoFrameQuaternionTest
    {
       Random random = new Random(1776L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       Quaternion quat4dActual = new Quaternion(), quat4dExpected = new Quaternion();
@@ -181,7 +181,7 @@ public class YoFrameQuaternionTest
    {
       Random random = new Random(1776L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
 
       FrameQuaternion initialFrameOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       FrameQuaternion finalFrameOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);

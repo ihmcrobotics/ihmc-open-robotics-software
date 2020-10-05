@@ -16,7 +16,7 @@ import us.ihmc.sensorProcessing.outputData.LowLevelStateList;
 import us.ihmc.simulationToolkit.controllers.LowLevelActuatorSimulator;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedQuadrupedOutputWriter implements OutputWriter
 {
@@ -36,7 +36,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
       controllerJoints = fullRobotModel.getOneDoFJoints();
       lowLevelStateList = new LowLevelStateList(controllerJoints);
 
-      YoVariableRegistry registry = new YoVariableRegistry("quadrupedOutputWriter");
+      YoRegistry registry = new YoRegistry("quadrupedOutputWriter");
       for (OneDoFJointBasics controllerJoint : controllerJoints)
       {
          String name = controllerJoint.getName();
@@ -49,7 +49,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
          quadrupedJoints.add(new QuadrupedJointController(controllerJoint, jointDesiredOutputList.getJointDesiredOutput(controllerJoint), registry));
       }
 
-      robot.getRobotsYoVariableRegistry().addChild(registry);
+      robot.getRobotsYoRegistry().addChild(registry);
    }
 
    @Override

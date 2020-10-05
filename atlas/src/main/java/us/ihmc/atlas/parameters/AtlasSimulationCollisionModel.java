@@ -8,14 +8,13 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
-import us.ihmc.euclid.referenceFrame.FramePointShape3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
@@ -145,22 +144,11 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
             RigidBodyBasics foot = ankleRoll.getSuccessor();
 
-            FrameBox3D footCoreShape = new FrameBox3D(ankleRollFrame, 0.2, 0.14, 0.055);
-            footCoreShape.getPosition().set(0.015, 0.0, -0.05);
-            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footCoreShape));
-
-            FrameBox3D footFrontShape = new FrameBox3D(ankleRollFrame, 0.06, 0.1, 0.055);
-            footFrontShape.getPosition().set(0.145, 0.0, -0.05);
-            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footFrontShape));
-
-            for (RobotSide footSide : RobotSide.values)
-            {
-               FramePointShape3D footFrontCorner = new FramePointShape3D(ankleRollFrame, new Point3D(0.17, footSide.negateIfRightSide(0.035), -0.077));
-               collidables.add(new Collidable(foot, collisionMask, collisionGroup, footFrontCorner));
-
-               FramePointShape3D footBackCorner = new FramePointShape3D(ankleRollFrame, new Point3D(-0.07, footSide.negateIfRightSide(0.06), -0.077));
-               collidables.add(new Collidable(foot, collisionMask, collisionGroup, footBackCorner));
-            }
+            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+            FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.26, 0.14, 0.055);
+            footShape.getPosition().set(0.045, 0.0, -0.05);
+            footShape.setMargins(1.0e-5, 4.0e-4);
+            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
          }
       }
 

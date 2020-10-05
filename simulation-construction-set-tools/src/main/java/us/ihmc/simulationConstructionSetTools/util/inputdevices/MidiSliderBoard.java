@@ -17,8 +17,8 @@ import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -39,7 +39,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    protected Hashtable<Integer, MidiControl> controlsHashTable = new Hashtable<Integer, MidiControl>(40);
    protected ArrayList<SliderListener> internalListeners = new ArrayList<SliderListener>();
-   private ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
+   private ArrayList<YoVariableChangedListener> variableChangedListeners = new ArrayList<>();
 
    private ArrayList<SliderBoardControlAddedListener> controlAddedListeners = new ArrayList<SliderBoardControlAddedListener>();
 
@@ -53,9 +53,9 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    private SliderBoardTransmitterInterface transmitter = null;
    private VirtualSliderBoardGui virtualSliderBoard;
    private MidiSliderBoardConfigurationVisualizer visualizer;
-   private VariableChangedListener listener;
+   private YoVariableChangedListener listener;
    private YoVariableHolder holder;
-   
+
    private MidiChannelMapper channelMapper = new GenericChannelMapper();
 
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
@@ -76,7 +76,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       boolean showSCSWindows = scs != null && scs.getSimulationConstructionSetParameters().getShowWindows();
       if ((showSCSWindows && preferedDevice.equals(Devices.VIRTUAL)) || (showVirtualSliderBoard || alwaysShowVirtualSliderBoard))
       {
-         
+
          if ((scs == null) || (scs.getStandardSimulationGUI() != null))
          {
             PrintTools.info(this, "Setting Up Virtual Slider Board");
@@ -136,10 +136,10 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             }
 
             final Object self = this;
-            listener = new VariableChangedListener()
+            listener = new YoVariableChangedListener()
             {
                @Override
-               public void notifyOfVariableChange(YoVariable<?> v)
+               public void changed(YoVariable v)
                {
                   synchronized (self)
                   {
@@ -192,7 +192,8 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
             try
             {
-               inDevice.getTransmitter().setReceiver(new XTouchCompactReceiver(controlsHashTable, internalListeners, variableChangedListeners, sliderBoardMax, this));
+               inDevice.getTransmitter()
+                       .setReceiver(new XTouchCompactReceiver(controlsHashTable, internalListeners, variableChangedListeners, sliderBoardMax, this));
 
                transmitter = new XTouchCompactTransmitter(midiOut, sliderBoardMax);
             }
@@ -201,15 +202,15 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
                if (DEBUG)
                {
                   System.err.println("Exception when trying to get MIDI transmitter 1: " + e);
-                 e.printStackTrace();
+                  e.printStackTrace();
                }
             }
 
             final Object self = this;
-            listener = new VariableChangedListener()
+            listener = new YoVariableChangedListener()
             {
                @Override
-               public void notifyOfVariableChange(YoVariable<?> v)
+               public void changed(YoVariable v)
                {
                   synchronized (self)
                   {
@@ -635,7 +636,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
                rc += 1;
             }
-         }         
+         }
       }
 
       return rc;
@@ -643,51 +644,51 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setButton(int channel, String name, YoVariableHolder holder)
    {
-      setButton(channel, holder.getVariable(name));
+      setButton(channel, holder.findVariable(name));
    }
 
    public void setButtonEnum(int channel, String name, YoVariableHolder holder, Enum<?> enumValue)
    {
-      setButtonEnum(channel, (YoEnum<?>) holder.getVariable(name), enumValue);
+      setButtonEnum(channel, (YoEnum<?>) holder.findVariable(name), enumValue);
    }
 
    public void setButton(int channel, String varName, String buttonName, YoVariableHolder holder)
    {
-      setButton(channel, holder.getVariable(varName), buttonName);
+      setButton(channel, holder.findVariable(varName), buttonName);
    }
 
-   public void setButton(int channel, YoVariable<?> var)
+   public void setButton(int channel, YoVariable var)
    {
- 
+
       setControl(channelMapper.getButtonChannel(channel), var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
    public void setButtonEnum(int channel, YoEnum<?> yoEnum, Enum<?> enumValue)
    {
-       setControl(channelMapper.getButtonChannel(channel), yoEnum, 0.0, enumValue.ordinal(), 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.BUTTON);
+      setControl(channelMapper.getButtonChannel(channel), yoEnum, 0.0, enumValue.ordinal(), 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.BUTTON);
    }
 
-   public void setButton(int channel, YoVariable<?> var, String name)
+   public void setButton(int channel, YoVariable var, String name)
    {
       setControl(channelMapper.getButtonChannel(channel), var, name, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
    public void setKnobButton(int channel, String name, YoVariableHolder holder)
    {
-      setKnobButton(channel, holder.getVariable(name));
+      setKnobButton(channel, holder.findVariable(name));
    }
 
    public void setKnobButton(int channel, String varName, String buttonName, YoVariableHolder holder)
    {
-      setKnobButton(channel, holder.getVariable(varName), buttonName);
+      setKnobButton(channel, holder.findVariable(varName), buttonName);
    }
 
-   public void setKnobButton(int channel, YoVariable<?> var)
+   public void setKnobButton(int channel, YoVariable var)
    {
       setControl(channelMapper.getKnobButtonChannel(channel), var, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
 
-   public void setKnobButton(int channel, YoVariable<?> var, String name)
+   public void setKnobButton(int channel, YoVariable var, String name)
    {
       setControl(channelMapper.getKnobButtonChannel(channel), var, name, 0, 1, 1, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.BUTTON);
    }
@@ -709,7 +710,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
       }
 
-      YoVariable<?> variable = holder.getVariable(name);
+      YoVariable variable = holder.findVariable(name);
       if (variable == null)
       {
          PrintTools.error("Ahhhhhhhhh, yoVariable name " + name + " was not found in the registry. It's not getting added to the sliderboard");
@@ -725,14 +726,14 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + varName);
       }
 
-      YoVariable<?> variable = holder.getVariable(varName);
+      YoVariable variable = holder.findVariable(varName);
       if (variable == null)
       {
          PrintTools.error("Ahhhhhhhhh, yoVariable name " + varName + " was not found in the registry. It's not getting added to the sliderboard");
          return;
       }
 
-      setSlider(channel, holder.getVariable(varName), sliderName, min, max, exponent);
+      setSlider(channel, holder.findVariable(varName), sliderName, min, max, exponent);
    }
 
    public void setSlider(int channel, String name, double min, double max, double exponent, double hires)
@@ -752,7 +753,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + name);
       }
 
-      setSlider(channel, holder.getVariable(name), min, max, exponent, hires);
+      setSlider(channel, holder.findVariable(name), min, max, exponent, hires);
    }
 
    public void setSlider(int channel, String varName, String sliderName, YoVariableHolder holder, double min, double max, double exponent, double hires)
@@ -762,15 +763,15 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to slider, but it does not exist, or more than 1 exists: " + varName);
       }
 
-      setSlider(channel, holder.getVariable(varName), sliderName, min, max, exponent, hires);
+      setSlider(channel, holder.findVariable(varName), sliderName, min, max, exponent, hires);
    }
 
-   public void setSlider(int channel, YoVariable<?> var, double min, double max)
+   public void setSlider(int channel, YoVariable var, double min, double max)
    {
       setSlider(channel, var, min, max, 1.0);
    }
 
-   public void setSlider(int channel, YoVariable<?> var, String name, double min, double max)
+   public void setSlider(int channel, YoVariable var, String name, double min, double max)
    {
       setSlider(channel, var, name, min, max, 1.0);
    }
@@ -792,7 +793,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
       }
 
-      setKnob(channel, holder.getVariable(name), min, max, exponent);
+      setKnob(channel, holder.findVariable(name), min, max, exponent);
    }
 
    public void setKnob(int channel, String varName, String knobName, YoVariableHolder holder, double min, double max, double exponent)
@@ -802,7 +803,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + varName);
       }
 
-      setKnob(channel, holder.getVariable(varName), knobName, min, max, exponent);
+      setKnob(channel, holder.findVariable(varName), knobName, min, max, exponent);
    }
 
    public void setKnob(int channel, String name, YoVariableHolder holder, double min, double max, double exponent, double hires)
@@ -812,7 +813,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + name);
       }
 
-      setKnob(channel, holder.getVariable(name), min, max, exponent, hires);
+      setKnob(channel, holder.findVariable(name), min, max, exponent, hires);
    }
 
    public void setKnob(int channel, String varName, String knobName, YoVariableHolder holder, double min, double max, double exponent, double hires)
@@ -822,120 +823,157 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
          PrintTools.warn("Trying to add yovariable to knob, but it does not exist, or more than 1 exists: " + varName);
       }
 
-      setKnob(channel, holder.getVariable(varName), knobName, min, max, exponent, hires);
+      setKnob(channel, holder.findVariable(varName), knobName, min, max, exponent, hires);
    }
 
-   public void setKnob(int channel, YoVariable<?> var, double min, double max)
+   public void setKnob(int channel, YoVariable var, double min, double max)
    {
       setKnob(channel, var, min, max, 1.0);
    }
 
-   public void setKnob(int channel, YoVariable<?> var, String name, double min, double max)
+   public void setKnob(int channel, YoVariable var, String name, double min, double max)
    {
       setKnob(channel, var, name, min, max, 1.0);
    }
 
    public void setKnobEnum(int channel, YoEnum<?> var)
    {
-      setControl(channelMapper.getKnobChannel(channel), var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel),
+                 var,
+                 0.0,
+                 var.getEnumValues().length - 1,
+                 1.0,
+                 MidiControl.SliderType.ENUM,
+                 MidiControl.ControlType.KNOB);
    }
 
    public void setSliderEnum(int channel, String name, YoVariableHolder holder)
    {
-      setSliderEnum(channel, (YoEnum<?>) holder.getVariable(name));
+      setSliderEnum(channel, (YoEnum<?>) holder.findVariable(name));
    }
 
    public void setSliderEnum(int channel, String varName, String sliderName, YoVariableHolder holder)
    {
-      setSliderEnum(channel, (YoEnum<?>) holder.getVariable(varName), sliderName);
+      setSliderEnum(channel, (YoEnum<?>) holder.findVariable(varName), sliderName);
    }
 
    public void setSliderEnum(int channel, YoEnum<?> var)
    {
-      setControl(channelMapper.getSliderChannel(channel), var, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel),
+                 var,
+                 0.0,
+                 var.getEnumValues().length - 1,
+                 1.0,
+                 MidiControl.SliderType.ENUM,
+                 MidiControl.ControlType.SLIDER);
    }
 
    public void setSliderEnum(int channel, YoEnum<?> var, String name)
    {
-      setControl(channelMapper.getSliderChannel(channel), var, name, 0.0, var.getEnumValues().length - 1, 1.0, MidiControl.SliderType.ENUM, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel),
+                 var,
+                 name,
+                 0.0,
+                 var.getEnumValues().length - 1,
+                 1.0,
+                 MidiControl.SliderType.ENUM,
+                 MidiControl.ControlType.SLIDER);
    }
 
    public void setSliderBoolean(int channel, String name, YoVariableHolder holder)
    {
-      setSliderBoolean(channel, holder.getVariable(name));
+      setSliderBoolean(channel, holder.findVariable(name));
    }
 
    public void setSliderBoolean(int channel, String varName, String sliderName, YoVariableHolder holder)
    {
-      setSliderBoolean(channel, holder.getVariable(varName), sliderName);
+      setSliderBoolean(channel, holder.findVariable(varName), sliderName);
    }
 
-   public void setSliderBoolean(int channel, YoVariable<?> var)
+   public void setSliderBoolean(int channel, YoVariable var)
    {
       setControl(channelMapper.getSliderChannel(channel), var, 0.0, 1.0, 1.0, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.SLIDER);
    }
 
-   public void setSliderBoolean(int channel, YoVariable<?> var, String name)
+   public void setSliderBoolean(int channel, YoVariable var, String name)
    {
       setControl(channelMapper.getSliderChannel(channel), var, name, 0.0, 1.0, 1.0, MidiControl.SliderType.BOOLEAN, MidiControl.ControlType.SLIDER);
    }
 
-   public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent)
+   public void setSlider(int channel, YoVariable var, double min, double max, double exponent)
    {
       setControl(channelMapper.getSliderChannel(channel), var, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
-   public void setSlider(int channel, YoVariable<?> var, String name, double min, double max, double exponent)
+   public void setSlider(int channel, YoVariable var, String name, double min, double max, double exponent)
    {
       setControl(channelMapper.getSliderChannel(channel), var, name, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
-   public void setSlider(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
+   public void setSlider(int channel, YoVariable var, double min, double max, double exponent, double hires)
    {
       if (var == null)
       {
          PrintTools.error(this, "YoVariable was null. It's not getting added to the sliderboard");
          return;
       }
-      setControl(channelMapper.getSliderChannel(channel), var, var.getName(), min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
+      setControl(channelMapper.getSliderChannel(channel),
+                 var,
+                 var.getName(),
+                 min,
+                 max,
+                 exponent,
+                 hires,
+                 MidiControl.SliderType.NUMBER,
+                 MidiControl.ControlType.SLIDER);
    }
 
-   public void setSlider(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires)
+   public void setSlider(int channel, YoVariable var, String name, double min, double max, double exponent, double hires)
    {
       setControl(channelMapper.getSliderChannel(channel), var, name, min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.SLIDER);
    }
 
-   public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent)
+   public void setKnob(int channel, YoVariable var, double min, double max, double exponent)
    {
       setControl(channelMapper.getKnobChannel(channel), var, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
-   public void setKnob(int channel, YoVariable<?> var, String name, double min, double max, double exponent)
+   public void setKnob(int channel, YoVariable var, String name, double min, double max, double exponent)
    {
       setControl(channelMapper.getKnobChannel(channel), var, name, min, max, exponent, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
-   public void setKnob(int channel, YoVariable<?> var, double min, double max, double exponent, double hires)
+   public void setKnob(int channel, YoVariable var, double min, double max, double exponent, double hires)
    {
       if (var == null)
       {
          PrintTools.error(this, "YoVariable was null. It's not getting added to the sliderboard");
          return;
       }
-      setControl(channelMapper.getKnobChannel(channel), var, var.getName(), min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
+      setControl(channelMapper.getKnobChannel(channel),
+                 var,
+                 var.getName(),
+                 min,
+                 max,
+                 exponent,
+                 hires,
+                 MidiControl.SliderType.NUMBER,
+                 MidiControl.ControlType.KNOB);
    }
 
-   public void setKnob(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires)
+   public void setKnob(int channel, YoVariable var, String name, double min, double max, double exponent, double hires)
    {
       setControl(channelMapper.getKnobChannel(channel), var, name, min, max, exponent, hires, MidiControl.SliderType.NUMBER, MidiControl.ControlType.KNOB);
    }
 
-   private void setControl(int channel, YoVariable<?> var, String name, double min, double max, double exponent, MidiControl.SliderType sliderType, MidiControl.ControlType controlType)
+   private void setControl(int channel, YoVariable var, String name, double min, double max, double exponent, MidiControl.SliderType sliderType,
+                           MidiControl.ControlType controlType)
    {
       setControl(channel, var, name, min, max, exponent, (min + max) / 2.0, sliderType, controlType);
    }
 
-   private void setControl(int channel, YoVariable<?> var, double min, double max, double exponent, MidiControl.SliderType sliderType, MidiControl.ControlType controlType)
+   private void setControl(int channel, YoVariable var, double min, double max, double exponent, MidiControl.SliderType sliderType,
+                           MidiControl.ControlType controlType)
    {
 
       if (var == null)
@@ -946,7 +984,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       setControl(channel, var, var.getName(), min, max, exponent, (min + max) / 2.0, sliderType, controlType);
    }
 
-   private synchronized void setControl(int channel, YoVariable<?> var, String name, double min, double max, double exponent, double hires,
+   private synchronized void setControl(int channel, YoVariable var, String name, double min, double max, double exponent, double hires,
                                         MidiControl.SliderType sliderType, MidiControl.ControlType controlType)
    {
       if (var != null)
@@ -963,7 +1001,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
          if (listener != null)
          {
-            var.addVariableChangedListener(listener);
+            var.addListener(listener);
          }
 
          setControl(midiControl);
@@ -1143,14 +1181,14 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       controlAddedListeners.remove(listener);
    }
 
-   public void attachVariableChangedListener(VariableChangedListener listener)
+   public void attachVariableChangedListener(YoVariableChangedListener listener)
    {
       variableChangedListeners.add(listener);
    }
 
-   public ArrayList<VariableChangedListener> getVariableChangedListeners()
+   public ArrayList<YoVariableChangedListener> getVariableChangedListeners()
    {
-      return new ArrayList<VariableChangedListener>(variableChangedListeners);
+      return new ArrayList<YoVariableChangedListener>(variableChangedListeners);
    }
 
    @Override

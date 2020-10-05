@@ -60,7 +60,7 @@ public class GUISideProtocolListenerThread implements Runnable
          guiSideProtocolListener = new GUISideProtocolListener(dataIn, commandListener, newDataListeners);
 
          System.out.println("Creating and Starting RobotProtocolListenerThread");
-         anim = new Thread(this);
+         anim = new Thread(this, getClass().getSimpleName());
 
          // anim.setPriority(anim.getPriority()+1);
          anim.start();

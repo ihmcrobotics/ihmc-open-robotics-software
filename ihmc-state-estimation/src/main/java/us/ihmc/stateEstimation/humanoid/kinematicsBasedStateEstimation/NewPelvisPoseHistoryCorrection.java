@@ -19,10 +19,10 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
@@ -33,7 +33,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
 
@@ -92,7 +92,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final YoBoolean isErrorTooBig;
    private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
 
-   public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
+   public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoRegistry parentRegistry,
                                          YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
                                          ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
@@ -101,13 +101,13 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
                                          PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt,
-                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
+                                         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
                                          ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber, parameters);
    }
 
-   public NewPelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public NewPelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoRegistry parentRegistry, int pelvisBufferSize,
                                          YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber,
                                          ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
@@ -116,7 +116,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.rootJoint = sixDofJoint;
       this.pelvisReferenceFrame = rootJoint.getFrameAfterJoint();
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
-      this.registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
+      this.registry = new YoRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
 
       enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
@@ -175,6 +175,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       }
    }
 
+   @Override
    public void doControl(long timestamp)
    {
       if (pelvisPoseCorrectionCommunicator != null)

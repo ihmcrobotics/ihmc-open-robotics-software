@@ -67,7 +67,7 @@ public class AtlasPushRecoveryTrack
       
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       
-      YoBoolean enable = (YoBoolean) scs.getVariable("enablePushRecovery");
+      YoBoolean enable = (YoBoolean) scs.findVariable("enablePushRecovery");
       // enable push recovery
       enable.set(true);
       

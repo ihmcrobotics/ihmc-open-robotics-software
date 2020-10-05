@@ -71,11 +71,13 @@ public class FootstepPlannerCompletionChecker
       goalMidFootPose.setYaw(AngleTools.interpolateAngle(goalNodes.get(RobotSide.LEFT).getYaw(), goalNodes.get(RobotSide.RIGHT).getYaw(), 0.5));
    }
 
-   public boolean checkIfGoalIsReached(AStarIterationData<FootstepNode> iterationData)
+   /**
+    * Checks if goal is reachable. If it is, the goal step is appended by a goal step on the opposite side and the expanded step is returned.
+    * If the goal is not reached this returns null
+    */
+   public FootstepNode checkIfGoalIsReached(AStarIterationData<FootstepNode> iterationData)
    {
-      boolean proximityMode = goalDistanceProximity > 0.0 || goalYawProximity > 0.0;
-
-      if (proximityMode)
+      if (isProximityModeEnabled())
       {
          iterationData.getValidChildNodes().sort(goalProximityComparator);
          for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
@@ -88,7 +90,7 @@ public class FootstepPlannerCompletionChecker
 
             if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))
             {
-               return true;
+               return childNode;
             }
          }
       }
@@ -102,7 +104,7 @@ public class FootstepPlannerCompletionChecker
             {
                endNode = goalNodes.get(childNode.getRobotSide().getOppositeSide());
                iterationConductor.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
-               return true;
+               return childNode;
             }
          }
       }
@@ -111,7 +113,7 @@ public class FootstepPlannerCompletionChecker
       {
          FootstepNode childNode = iterationData.getValidChildNodes().get(i);
 
-         double cost = iterationConductor.getGraph().getCostFromStart(childNode) + heuristics.compute(childNode);
+         double cost = heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;
@@ -120,7 +122,7 @@ public class FootstepPlannerCompletionChecker
          }
       }
 
-      return false;
+      return null;
    }
 
    /**
@@ -169,6 +171,11 @@ public class FootstepPlannerCompletionChecker
       }
 
       return false;
+   }
+
+   public boolean isProximityModeEnabled()
+   {
+      return goalDistanceProximity > 0.0 || goalYawProximity > 0.0;
    }
 
    public FootstepNode getEndNode()

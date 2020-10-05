@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Output writer running in the estimator thread. 
@@ -39,7 +39,7 @@ public interface JointDesiredOutputWriter
    /**
     * Get the yoVariableRegistry for this output writer
     *  
-    * @return The YoVariableRegistry for this output writer.
+    * @return The YoRegistry for this output writer.
     */
-   YoVariableRegistry getYoVariableRegistry();
+   YoRegistry getYoVariableRegistry();
 }

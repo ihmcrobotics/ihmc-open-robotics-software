@@ -1,24 +1,24 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TimestampedVelocityYoFrameVector extends YoFrameVector3D
 {
    private final TimestampedVelocityYoVariable xDot, yDot, zDot;
 
    public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble timestamp,
-           double dt, YoVariableRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate, double epsilonChange)
+           double dt, YoRegistry registry, YoFrameVector3D yoFrameVectorToDifferentiate, double epsilonChange)
    {
-      TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoX(),
+      TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoX(),
                                               timestamp, registry, epsilonChange);
-      TimestampedVelocityYoVariable yDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoY(),
+      TimestampedVelocityYoVariable yDot = new TimestampedVelocityYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoY(),
                                               timestamp, registry, epsilonChange);
-      TimestampedVelocityYoVariable zDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoZ(),
+      TimestampedVelocityYoVariable zDot = new TimestampedVelocityYoVariable(YoGeometryNameTools.createZName(namePrefix, nameSuffix), "", yoFrameVectorToDifferentiate.getYoZ(),
                                               timestamp, registry, epsilonChange);
 
       TimestampedVelocityYoFrameVector ret = new TimestampedVelocityYoFrameVector(xDot, yDot, zDot, yoFrameVectorToDifferentiate.getReferenceFrame());
@@ -27,13 +27,13 @@ public class TimestampedVelocityYoFrameVector extends YoFrameVector3D
    }
 
    public static TimestampedVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, YoDouble timestamp,
-           double dt, YoVariableRegistry registry, YoFramePoint3D yoFramePointToDifferentiate, double epsilonChange)
+           double dt, YoRegistry registry, YoFramePoint3D yoFramePointToDifferentiate, double epsilonChange)
    {
-      TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createXName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoX(),
+      TimestampedVelocityYoVariable xDot = new TimestampedVelocityYoVariable(YoGeometryNameTools.createXName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoX(),
                                               timestamp, registry, epsilonChange);
-      TimestampedVelocityYoVariable yDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createYName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoY(),
+      TimestampedVelocityYoVariable yDot = new TimestampedVelocityYoVariable(YoGeometryNameTools.createYName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoY(),
                                               timestamp, registry, epsilonChange);
-      TimestampedVelocityYoVariable zDot = new TimestampedVelocityYoVariable(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoZ(),
+      TimestampedVelocityYoVariable zDot = new TimestampedVelocityYoVariable(YoGeometryNameTools.createZName(namePrefix, nameSuffix), "", yoFramePointToDifferentiate.getYoZ(),
                                               timestamp, registry, epsilonChange);
 
       TimestampedVelocityYoFrameVector ret = new TimestampedVelocityYoFrameVector(xDot, yDot, zDot, yoFramePointToDifferentiate.getReferenceFrame());

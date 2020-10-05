@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +40,10 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       super.testWalkingUpSlope();
    }
 
+   // Flaky
    @Tag("quadruped-xgait-3")
    @Test
+   @Disabled
    @Override
    public void testWalkingDownSlope() throws IOException
    {

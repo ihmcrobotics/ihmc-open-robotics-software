@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -28,13 +28,13 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
 {
@@ -54,7 +54,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final ReferenceFrame endEffectorFrame;
    private final ReferenceFrame virtualLegTangentialFrameHipCentered, virtualLegTangentialFrameAnkleCentered;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoBoolean checkVelocityForSwingSingularityAvoidance;
 
@@ -157,9 +157,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final OneDoFJointBasics hipPitchJoint;
 
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
-         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       unachievedSwingTranslation = new YoFrameVector3D("unachievedSwingTranslation", ReferenceFrame.getWorldFrame(), registry);
@@ -662,8 +662,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-         ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForSupportLeg(FrameVector2D comXYVelocity, YoCoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+                                                       ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent, pelvisZUpFrame, constraintType);
 
@@ -673,7 +673,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
    private final FrameVector2D comVelocity = new FrameVector2D();
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2DReadOnly comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
+   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2DReadOnly comXYVelocity, YoCoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                  double zCurrent, ReferenceFrame pelvisZUpFrame, ConstraintType constraintType)
    {
       if (!useSingularityAvoidanceInSupport.getValue())
@@ -829,8 +829,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-         ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, YoCoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
+                                                              ReferenceFrame pelvisZUpFrame, double footLoadPercentage, ConstraintType constraintType)
    {
       if (!USE_COLLAPSE_AVOIDANCE)
       {
@@ -987,7 +987,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
+   public void correctCoMHeightTrajectoryForUnreachableFootStep(YoCoMHeightTimeDerivativesData comHeightDataToCorrect, ConstraintType constraintType)
    {
       isUnreachableFootstepCompensated.set(false);
 

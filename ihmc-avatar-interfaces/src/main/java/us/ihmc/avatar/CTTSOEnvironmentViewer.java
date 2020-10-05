@@ -40,7 +40,7 @@ public class CTTSOEnvironmentViewer
       double groundBxy = 2000.0;
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
-                                                                                 robot.getRobotsYoVariableRegistry());
+                                                                                 robot.getRobotsYoRegistry());
 
       groundContactModel.setGroundProfile3D(groundProfile3D);
 

@@ -7,9 +7,9 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.yoVariables.listener.ParameterChangedListener;
+import us.ihmc.yoVariables.listener.YoParameterChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -42,17 +42,17 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    private final double[] tempDerivativeGains = new double[3];
    private final double[] tempIntegralGains = new double[3];
 
-   public ParameterizedPID3DGains(String suffix, PID3DConfiguration configuration, YoVariableRegistry registry)
+   public ParameterizedPID3DGains(String suffix, PID3DConfiguration configuration, YoRegistry registry)
    {
       this(suffix, configuration.getGainCoupling(), configuration.isUseIntegrator(), configuration.getGains(), registry);
    }
 
-   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
+   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoRegistry registry)
    {
       this(suffix, gainCoupling, useIntegrator, null, registry);
    }
 
-   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, PID3DGainsReadOnly defaults, YoVariableRegistry registry)
+   public ParameterizedPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, PID3DGainsReadOnly defaults, YoRegistry registry)
    {
       this.usingIntegrator = useIntegrator;
 
@@ -122,7 +122,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       }
    }
 
-   private static void populateMap(Map<Axis3D, DoubleParameter> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
+   private static void populateMap(Map<Axis3D, DoubleParameter> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoRegistry registry)
    {
       switch (gainCoupling)
       {
@@ -155,7 +155,7 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
    }
 
    private static void populateMap(Map<Axis3D, DoubleParameter> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, double[] defaults,
-                                   YoVariableRegistry registry)
+                                   YoRegistry registry)
    {
       switch (gainCoupling)
       {
@@ -221,16 +221,16 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       YoDouble kd = kdMap.get(axis);
       DoubleParameter zeta = zetaMap.get(axis);
 
-      ParameterChangedListener updater = (parameter) -> {
+      YoParameterChangedListener updater = (parameter) -> {
          if (kp.isLoaded() && zeta.isLoaded())
          {
             kd.set(GainCalculator.computeDerivativeGain(kp.getValue(), zeta.getValue()));
          }
       };
 
-      updater.notifyOfParameterChange(null);
-      kp.addParameterChangedListener(updater);
-      zeta.addParameterChangedListener(updater);
+      updater.changed(null);
+      kp.addListener(updater);
+      zeta.addListener(updater);
    }
 
    @Override

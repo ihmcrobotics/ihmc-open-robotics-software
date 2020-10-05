@@ -1,0 +1,29 @@
+#ifndef __controller_msgs__msg__StepConstraintMessage__idl__
+#define __controller_msgs__msg__StepConstraintMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::StepConstraintMessage_")
+      struct StepConstraintMessage
+      {
+        geometry_msgs::msg::dds::Point region_origin;
+        geometry_msgs::msg::dds::Quaternion region_orientation;
+        geometry_msgs::msg::dds::Vector3 region_normal;
+        sequence<geometry_msgs::msg::dds::Point, 1000> vertex_buffer;
+        long concave_hull_size;
+        long number_of_holes_in_region;
+        sequence<long, 20> hole_polygons_size;
+      };
+    };
+  };
+};
+
+#endif

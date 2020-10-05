@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HysteresisFilteredYoVariableTest
 {
-   YoVariableRegistry registry = new YoVariableRegistry("TestHysteresisFilteredYoVariable");
+   YoRegistry registry = new YoRegistry("TestHysteresisFilteredYoVariable");
    private YoDouble guideLineHysteresis = new YoDouble("guideLineHyst", registry);
    private HysteresisFilteredYoVariable filteredYoVariable = new HysteresisFilteredYoVariable("test", registry, guideLineHysteresis);
    private double epsilon = 1e-7;

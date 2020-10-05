@@ -2,13 +2,13 @@ package us.ihmc.quadrupedRobotics.output;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedJointController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final OneDoFJointBasics controllerJoint;
    private final JointDesiredOutputBasics jointDesiredSetpoints;
@@ -17,9 +17,9 @@ public class QuadrupedJointController
    private final YoDouble jointEffort;
    private final YoDouble jointDampingFeedback;
 
-   public QuadrupedJointController(OneDoFJointBasics controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, YoVariableRegistry parentRegistry)
+   public QuadrupedJointController(OneDoFJointBasics controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(controllerJoint.getName() + name);
+      registry = new YoRegistry(controllerJoint.getName() + name);
 
       this.controllerJoint = controllerJoint;
       this.jointDesiredSetpoints = jointDesiredSetpoints;

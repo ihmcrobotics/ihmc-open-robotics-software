@@ -1,26 +1,26 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
-   private final OneDoFJointBasics[] jointsWithDesiredData;
+   private final OneDoFJointReadOnly[] jointsWithDesiredData;
    private final YoJointDesiredOutput[] lowLevelJointDataList;
    private final TLongObjectHashMap<YoJointDesiredOutput> lowLevelJointDataMap;
 
-   public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJointBasics[] controlledJoints, YoVariableRegistry parentRegistry)
+   public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJointReadOnly[] controlledJoints, YoRegistry parentRegistry)
    {
       this("", controlledJoints, parentRegistry);
    }
 
-   public YoLowLevelOneDoFJointDesiredDataHolder(String prefix, OneDoFJointBasics[] controlledJoints, YoVariableRegistry parentRegistry)
+   public YoLowLevelOneDoFJointDesiredDataHolder(String prefix, OneDoFJointReadOnly[] controlledJoints, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + "LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
+      YoRegistry registry = new YoRegistry(prefix + "LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
       parentRegistry.addChild(registry);
 
       int capacity = controlledJoints.length;
@@ -34,7 +34,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
 
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         OneDoFJointBasics joint = controlledJoints[i];
+         OneDoFJointReadOnly joint = controlledJoints[i];
          YoJointDesiredOutput jointData = new YoJointDesiredOutput(joint.getName(), registry, StringTools.getEveryUppercaseLetter(parentRegistry.getName()));
          lowLevelJointDataList[i] = jointData;
          lowLevelJointDataMap.put(joint.hashCode(), jointData);
@@ -42,13 +42,13 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public boolean hasDataForJoint(OneDoFJointBasics joint)
+   public boolean hasDataForJoint(OneDoFJointReadOnly joint)
    {
       return lowLevelJointDataMap.containsKey(joint.hashCode());
    }
 
    @Override
-   public OneDoFJointBasics getOneDoFJoint(int index)
+   public OneDoFJointReadOnly getOneDoFJoint(int index)
    {
       return jointsWithDesiredData[index];
    }
@@ -60,7 +60,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointBasics joint)
+   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointReadOnly joint)
    {
       return getJointDesiredOutputFromHash(joint.hashCode());
    }

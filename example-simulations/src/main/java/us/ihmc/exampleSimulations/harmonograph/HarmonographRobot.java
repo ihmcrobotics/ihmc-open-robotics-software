@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.UniversalJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -103,7 +103,7 @@ public class HarmonographRobot extends Robot
       super("Harmonograph");
       
       harmonographPaperJPanel = new HarmonographPaperJPanel();
-      YoVariableRegistry registry = this.getRobotsYoVariableRegistry();
+      YoRegistry registry = this.getRobotsYoRegistry();
       
       kpArmWeld = new YoDouble("kpArmWeld", registry);
       kdArmWeld = new YoDouble("kdArmWeld", registry);

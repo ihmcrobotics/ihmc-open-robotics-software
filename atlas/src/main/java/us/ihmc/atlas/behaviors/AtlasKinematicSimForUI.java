@@ -6,13 +6,14 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
@@ -36,18 +37,18 @@ public class AtlasKinematicSimForUI
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
       AtlasKinematicSimulation.create(robotModel, kinematicsSimulationParameters);
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
 
       if (SHOW_ROBOT_VIEWER)
       {
-         new Thread(() ->
+         ThreadTools.startAThread(() ->
          {
             LogTools.info("Creating robot and map viewer");
             new RobotAndMapViewer(createRobotModel(), ros2Node);
-         }).start();
+         }, "RobotAndMapViewer");
       }
 
-      new SCSLidarAndCameraSimulator(ros2Node, environment, createRobotModel());
+      new SCSLidarAndCameraSimulator(PubSubImplementation.FAST_RTPS, environment, createRobotModel());
    }
 
    private AtlasRobotModel createRobotModel()

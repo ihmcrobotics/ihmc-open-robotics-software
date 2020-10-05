@@ -1,28 +1,33 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.turnWalkTurn;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import java.util.List;
+
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.pawPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForPawStepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.BodyPathAndPawPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlan;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.List;
 
 public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAndPawPlanner
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
 
 
@@ -38,7 +43,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    public QuadrupedPathWithTurnWalkTurnPlanner(WaypointsForPawStepPlanner waypointPathPlanner, QuadrupedXGaitSettingsBasics xGaitSettings,
                                                YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
-                                               YoVariableRegistry parentRegistry)
+                                               YoRegistry parentRegistry)
    {
       this.waypointPathPlanner = waypointPathPlanner;
       YoDouble firstStepDelay = new YoDouble("firstStepDelay", registry);
@@ -85,7 +90,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements BodyPathAn
    }
 
    @Override
-   public void setGroundPlane(QuadrupedGroundPlaneMessage message)
+   public void setGroundPlane(GroundPlaneMessage message)
    {
       groundPlaneSnapper.submitGroundPlane(message);
    }

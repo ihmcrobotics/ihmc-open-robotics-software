@@ -24,16 +24,16 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class HexapodStepController
 {
    private final double controllerDt;
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final RobotSextant[] leftTriple = {RobotSextant.FRONT_LEFT, RobotSextant.MIDDLE_RIGHT, RobotSextant.HIND_LEFT};
@@ -74,7 +74,7 @@ public class HexapodStepController
 
    public HexapodStepController(String prefix, FullRobotModel fullRobotModel,
          SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters, YoGraphicsListRegistry yoGraphicsListRegistry,
-         double controllerDt, YoVariableRegistry parentRegistry, HexapodReferenceFrames referenceFrames)
+         double controllerDt, YoRegistry parentRegistry, HexapodReferenceFrames referenceFrames)
    {
       this.fullRobotModel = fullRobotModel;
       this.contactStateUpdaters = contactStateUpdaters;

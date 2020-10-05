@@ -73,7 +73,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -92,7 +92,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
    private CommandInputManager toolboxInputManager;
    private StatusMessageOutputManager toolboxOutputManager;
-   private YoVariableRegistry toolboxMainRegistry;
+   private YoRegistry toolboxMainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private WalkingControllerPreviewToolboxController toolboxController;
 
@@ -113,7 +113,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      toolboxMainRegistry = new YoVariableRegistry("toolboxMain");
+      toolboxMainRegistry = new YoRegistry("toolboxMain");
       enableToolboxUpdater = new YoBoolean("enableToolboxUpdater", toolboxMainRegistry);
       pauseToolboxUpdater = new YoBoolean("pauseToolboxUpdater", toolboxMainRegistry);
       initializationSucceeded = new YoBoolean("initializationSucceeded", toolboxMainRegistry);
@@ -266,8 +266,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.toolboxMain.WalkingControllerPreviewToolboxController.WalkingHighLevelHumanoidController.walkingCurrentState
       YoEnum<WalkingStateEnum> controllerWalkingState = (YoEnum<WalkingStateEnum>) drcSimulationTestHelper.getYoVariableRegistry()
-                                                                                                          .getVariable("walkingCurrentState");
-      YoEnum<WalkingStateEnum> previewWalkingState = (YoEnum<WalkingStateEnum>) toolboxUpdater.getYoVariableRegistry().getVariable("walkingCurrentState");
+                                                                                                          .findVariable("walkingCurrentState");
+      YoEnum<WalkingStateEnum> previewWalkingState = (YoEnum<WalkingStateEnum>) toolboxUpdater.getYoRegistry().findVariable("walkingCurrentState");
 
       assertNotNull(controllerWalkingState);
       assertNotNull(previewWalkingState);
@@ -275,7 +275,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       FullHumanoidRobotModel previewFullRobotModel = toolboxController.getFullRobotModel();
       drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
-      drcSimulationTestHelper.getSimulationConstructionSet().addYoVariableRegistry(toolboxMainRegistry);
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoRegistry(toolboxMainRegistry);
       drcSimulationTestHelper.addRobotControllerOnControllerThread(new Synchronizer(controllerWalkingState, previewWalkingState));
 
       SideDependentList<RigidBodyTrackingWatcher> footTrackingWatchers = new SideDependentList<>();
@@ -381,8 +381,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WalkingHighLevelHumanoidController.walkingCurrentState
       //root.valkyrie.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.toolboxMain.WalkingControllerPreviewToolboxController.WalkingHighLevelHumanoidController.walkingCurrentState
       YoEnum<WalkingStateEnum> controllerWalkingState = (YoEnum<WalkingStateEnum>) drcSimulationTestHelper.getYoVariableRegistry()
-                                                                                                          .getVariable("walkingCurrentState");
-      YoEnum<WalkingStateEnum> previewWalkingState = (YoEnum<WalkingStateEnum>) toolboxUpdater.getYoVariableRegistry().getVariable("walkingCurrentState");
+                                                                                                          .findVariable("walkingCurrentState");
+      YoEnum<WalkingStateEnum> previewWalkingState = (YoEnum<WalkingStateEnum>) toolboxUpdater.getYoRegistry().findVariable("walkingCurrentState");
 
       assertNotNull(controllerWalkingState);
       assertNotNull(previewWalkingState);
@@ -390,7 +390,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       FullHumanoidRobotModel previewFullRobotModel = toolboxController.getFullRobotModel();
       drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().addUpdatable(t -> toolboxUpdater.doControl());
-      drcSimulationTestHelper.getSimulationConstructionSet().addYoVariableRegistry(toolboxMainRegistry);
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoRegistry(toolboxMainRegistry);
       Synchronizer synchronizer = new Synchronizer(controllerWalkingState, previewWalkingState);
       synchronizer.synchronize.set(false);
       drcSimulationTestHelper.addRobotControllerOnControllerThread(synchronizer);
@@ -529,7 +529,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       for (RobotSide robotSide : RobotSide.values)
       {
          assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.04, 0.06, 0.20);
-         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.08, 0.15); // I wonder if the tracking is off because the control is in joint-space.
+         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.1, 0.15); // I wonder if the tracking is off because the control is in joint-space.
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -601,7 +601,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return toolboxMainRegistry;
          }
@@ -632,7 +632,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
    private class RigidBodyTrackingWatcher implements RobotController
    {
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
       private final RigidBodyReadOnly controllerBody;
       private final RigidBodyReadOnly previewBody;
 
@@ -656,7 +656,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          this.controllerBody = controllerBody;
          this.previewBody = previewBody;
 
-         registry = new YoVariableRegistry(controllerBody.getName() + "TrackingWatcher");
+         registry = new YoRegistry(controllerBody.getName() + "TrackingWatcher");
 
          positionTrackingErrorMagnitude = new YoDouble(controllerBody.getName() + "PositionTrackingErrorMagnitude", registry);
          orientationTrackingErrorMagnitude = new YoDouble(controllerBody.getName() + "OrientationTrackingErrorMagnitude", registry);
@@ -718,7 +718,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }
@@ -737,7 +737,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
     */
    private class Synchronizer implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry(getName());
+      private final YoRegistry registry = new YoRegistry(getName());
 
       private final YoBoolean synchronize = new YoBoolean("synchronize", registry);
       private final YoBoolean isControllerLeadingPreview = new YoBoolean("isControllerLeadingPreview", registry);
@@ -748,10 +748,10 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       public Synchronizer(YoEnum<WalkingStateEnum> controllerState, YoEnum<WalkingStateEnum> previewState)
       {
          synchronize.set(true);
-         controllerState.addVariableChangedListener(v -> controllerStateChangeCount.increment());
-         previewState.addVariableChangedListener(v -> previewStateChangeCount.increment());
-         controllerStateChangeCount.addVariableChangedListener(v -> processStateChanges());
-         previewStateChangeCount.addVariableChangedListener(v -> processStateChanges());
+         controllerState.addListener(v -> controllerStateChangeCount.increment());
+         previewState.addListener(v -> previewStateChangeCount.increment());
+         controllerStateChangeCount.addListener(v -> processStateChanges());
+         previewStateChangeCount.addListener(v -> processStateChanges());
       }
 
       @Override
@@ -814,7 +814,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

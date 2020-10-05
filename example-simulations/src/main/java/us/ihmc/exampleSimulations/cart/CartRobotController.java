@@ -3,11 +3,11 @@ package us.ihmc.exampleSimulations.cart;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CartRobotController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("CartRobotController");
+   private final YoRegistry registry = new YoRegistry("CartRobotController");
 
    private final PinJoint frontWheelJoint;
 
@@ -22,7 +22,7 @@ public class CartRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

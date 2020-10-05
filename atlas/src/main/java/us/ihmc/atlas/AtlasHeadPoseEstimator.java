@@ -1,5 +1,7 @@
 package us.ihmc.atlas;
 
+import java.io.IOException;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -8,9 +10,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.stateEstimation.head.carnegie.multisense.MultisenseSLWithMicroStrainHeadPoseEstimator;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-
-import java.io.IOException;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -47,11 +47,11 @@ public class AtlasHeadPoseEstimator extends MultisenseSLWithMicroStrainHeadPoseE
       if (DEBUG)
       {
          YoGraphicsList graphicsList = new YoGraphicsList("AtlasHeadPoseEstimator");
-         estimatedHeadPoseFramePoint = new YoFramePose3D("EstimatedHeadPoseFramePoint", ReferenceFrame.getWorldFrame(), getYoVariableRegistry());
+         estimatedHeadPoseFramePoint = new YoFramePose3D("EstimatedHeadPoseFramePoint", ReferenceFrame.getWorldFrame(), getYoRegistry());
 
          estimatedHeadPoseViz = new YoGraphicCoordinateSystem("EstimatedHeadPoseVizualizer", estimatedHeadPoseFramePoint, 0.2, YoAppearance.DarkGray());
 
-         imuFrame = new YoGraphicCoordinateSystem("HeadIMUFrame", new YoFramePose3D("HeadIMUPose", ReferenceFrame.getWorldFrame(), getYoVariableRegistry()), 0.2);
+         imuFrame = new YoGraphicCoordinateSystem("HeadIMUFrame", new YoFramePose3D("HeadIMUPose", ReferenceFrame.getWorldFrame(), getYoRegistry()), 0.2);
 
          graphicsList.add(estimatedHeadPoseViz);
          graphicsList.add(imuFrame);

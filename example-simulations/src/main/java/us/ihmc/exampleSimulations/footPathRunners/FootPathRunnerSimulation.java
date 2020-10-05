@@ -38,7 +38,7 @@ public class FootPathRunnerSimulation
       robot.setDesiredFootLocation(RobotSide.RIGHT, desiredFootPoseInBodyFrame);
       robot.setActualFootLocation(RobotSide.RIGHT, desiredFootPoseInBodyFrame);
 
-      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoVariableRegistry());
+      LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, robot.getRobotsYoRegistry());
       //      groundContactModel.setXYStiffness(xyStiffness);
       robot.setGroundContactModel(groundContactModel);
 

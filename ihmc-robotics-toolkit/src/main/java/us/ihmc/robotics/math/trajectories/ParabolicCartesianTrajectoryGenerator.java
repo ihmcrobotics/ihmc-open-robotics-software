@@ -7,13 +7,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoMinimumJerkTrajectory minimumJerkTrajectory;
    private final YoParabolicTrajectoryGenerator parabolicTrajectoryGenerator;
    protected final YoDouble groundClearance;
@@ -23,9 +23,9 @@ public class ParabolicCartesianTrajectoryGenerator implements CartesianTrajector
    private final FrameVector3D tempVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    public ParabolicCartesianTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider, double groundClearance,
-                                                YoVariableRegistry parentRegistry)
+                                                YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + namePostFix);
+      this.registry = new YoRegistry(namePrefix + namePostFix);
       this.minimumJerkTrajectory = new YoMinimumJerkTrajectory(namePrefix, registry);
       this.parabolicTrajectoryGenerator = new YoParabolicTrajectoryGenerator(namePrefix, referenceFrame, registry);
       this.groundClearance = new YoDouble("groundClearance", registry);

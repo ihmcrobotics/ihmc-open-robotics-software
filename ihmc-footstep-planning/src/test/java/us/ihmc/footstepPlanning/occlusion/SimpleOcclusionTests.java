@@ -31,7 +31,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.Assert;
@@ -43,8 +42,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleOcclusionTests
 {
@@ -87,7 +90,7 @@ public class SimpleOcclusionTests
    private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
                         VisibilityGraphsParametersReadOnly visibilityGraphsParameters, double maxAllowedSolveTime)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
+      YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
@@ -303,9 +306,9 @@ public class SimpleOcclusionTests
             int stepsToShow = Math.min(plan.getNumberOfSteps(), 2 * stepsPerSideToVisualize);
             for (int stepIdx = 0; stepIdx < stepsToShow; stepIdx++)
             {
-               SimpleFootstep footstep = plan.getFootstep(stepIdx);
+               PlannedFootstep footstep = plan.getFootstep(stepIdx);
                FramePose3D footstepPose = new FramePose3D();
-               footstep.getSoleFramePose(footstepPose);
+               footstep.getFootstepPose(footstepPose);
 
                List<YoFramePoseUsingYawPitchRoll> listOfPoses = solePosesForVisualization.get(footstep.getRobotSide());
                YoFramePoseUsingYawPitchRoll yoSolePose = listOfPoses.get(stepIdx / 2);
@@ -318,8 +321,8 @@ public class SimpleOcclusionTests
             stepPosesTaken.get(i).set(stancePose);
          }
 
-         SimpleFootstep firstStep = plan.getFootstep(0);
-         firstStep.getSoleFramePose(stancePose);
+         PlannedFootstep firstStep = plan.getFootstep(0);
+         firstStep.getFootstepPose(stancePose);
          stanceSide = firstStep.getRobotSide();
 
          Point3D bodyPoint = computeBodyPoint(stancePose, stanceSide, parameters, 0.0);
@@ -353,11 +356,11 @@ public class SimpleOcclusionTests
       }
    }
 
-   private static SimulationConstructionSet setupSCS(String testName, YoVariableRegistry testRegistry, PlanarRegionsList regions, FramePose3D startPose,
+   private static SimulationConstructionSet setupSCS(String testName, YoRegistry testRegistry, PlanarRegionsList regions, FramePose3D startPose,
                                                      FramePose3D goalPose)
    {
       Robot robot = new Robot(SimpleOcclusionTests.class.getSimpleName());
-      robot.addYoVariableRegistry(testRegistry);
+      robot.addYoRegistry(testRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();

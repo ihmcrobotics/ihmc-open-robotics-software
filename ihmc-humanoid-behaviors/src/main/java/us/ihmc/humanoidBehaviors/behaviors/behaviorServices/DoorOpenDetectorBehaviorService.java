@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.kinematics.AverageQuaternionCalculator;
+import us.ihmc.ros2.ROS2Node;
 
 public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//FiducialDetectorBehaviorService
 {
 
-   private int numberToAverage = 10;
+   private int numberToAverage = 5;
    private ArrayList<FramePose3D> originPoses;
    private ArrayList<FramePose3D> doorPoses;
 
@@ -24,16 +29,23 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
    private DoorLocationPacket latestDoorLocationPacketRecieved;
    private boolean doorOpen = false;
-   private float openDistance = 0.0308f;
+   private float openAngle = 0.15f;
+   private float closeAngle = 0.07f;
    private boolean run = false;
+   
+   private long lastUpdateTime = -1;
 
-   protected final AtomicReference<DoorLocationPacket> doorLocationQueue = new AtomicReference<DoorLocationPacket>();
+   private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
-   public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   
+   protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();
+
+   public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
+      super(robotName, ThreadName, ros2Node);
+      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName), doorLocationQueue::set);
+      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
 
       initialize();
    }
@@ -41,6 +53,11 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    public void run(boolean run)
    {
       this.run = run;
+      lastUpdateTime = -1;
+      LogTools.info(1, "Start door open detector service = "+run);
+
+      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket("Start door open detector service = "+run));
+
    }
 
    @Override
@@ -70,22 +87,30 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
       originPoses.clear();
       doorOpen = false;
       averageOrigin = null;
+      lastUpdateTime = -1;
       run = false;
       doorPoses.clear();
-
    }
 
    @Override
    public void doThreadAction()
    {
-
-      //super.doThreadAction();
-      if (true)
+	//TODO, dont know why this has to be here... but without it, the loop freezes.. looking into it next iteration. 20/07/08
+      try
       {
-         latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
+         Thread.sleep(100);
+      }
+      catch (InterruptedException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      if (run)
+      {
+         latestDoorLocationPacketRecieved = doorLocationLatest.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
          {
-            System.out.println("recieved pose");
+
             newPose = new FramePose3D(ReferenceFrame.getWorldFrame(), latestDoorLocationPacketRecieved.getDoorTransformToWorld());
             // getReportedGoalPoseWorldFrame(newPose);
 
@@ -125,15 +150,22 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                   {
                      averageCurrentDoorLocation = averageFramePoses(doorPoses);
                   }
-                     if (averageCurrentDoorLocation != null && averageOrigin.getPositionDistance(averageCurrentDoorLocation) > openDistance)
+
+                  if (averageCurrentDoorLocation != null)
+                  {
+                     if (!doorOpen && Math.abs(averageOrigin.getYaw() - averageCurrentDoorLocation.getYaw()) > openAngle)
                      {
                         doorOpen = true;
                      }
-                     else
+                     else if (doorOpen && Math.abs(averageOrigin.getYaw() - averageCurrentDoorLocation.getYaw()) < closeAngle)
                      {
                         doorOpen = false;
                      }
+                     lastUpdateTime = System.currentTimeMillis();
+
+                  }
                   
+
                }
             }
 
@@ -142,21 +174,39 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
       }
    }
 
+   public long getLastupdateTime()
+   {
+      return lastUpdateTime;
+   }
+   
    private FramePose3D averageFramePoses(ArrayList<FramePose3D> poses)
    {
       if (poses.size() > 0)
       {
+         AverageQuaternionCalculator averageQuaternionCalculator = new AverageQuaternionCalculator();
+
+         averageQuaternionCalculator.reset();
+
          float numberOfPoses = poses.size();
          FramePose3D aveagedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
          for (FramePose3D pose : poses)
          {
+
             aveagedPose.setX(aveagedPose.getX() + pose.getX());
             aveagedPose.setY(aveagedPose.getY() + pose.getY());
             aveagedPose.setZ(aveagedPose.getZ() + pose.getZ());
+            averageQuaternionCalculator.queueQuaternion(new Quaternion(pose.getOrientation()));
+
          }
+
          aveagedPose.setX(aveagedPose.getX() / numberOfPoses);
          aveagedPose.setY(aveagedPose.getY() / numberOfPoses);
          aveagedPose.setZ(aveagedPose.getZ() / numberOfPoses);
+
+         averageQuaternionCalculator.compute();
+         Quaternion actualAverageQuat = new Quaternion();
+         averageQuaternionCalculator.getAverageQuaternion(actualAverageQuat);
+         aveagedPose.setOrientation(actualAverageQuat);
          return aveagedPose;
       }
       else

@@ -13,7 +13,6 @@ public class UnicycleSimulation
 
       scs = new SimulationConstructionSet(unicycleRobot);
       scs.setDT(0.001, 10);
-      scs.setMaxBufferSize(16384*4);
 
       Thread myThread = new Thread(scs);
       myThread.start();

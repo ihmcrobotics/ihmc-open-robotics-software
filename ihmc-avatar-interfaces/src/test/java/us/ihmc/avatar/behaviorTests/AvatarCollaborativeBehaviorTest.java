@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -58,7 +58,7 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      Ros2Node ros2Node = drcBehaviorTestHelper.getRos2Node();
+      ROS2Node ros2Node = drcBehaviorTestHelper.getROS2Node();
       CollaborativeBehavior collaborativeBehavior = new CollaborativeBehavior(robotModel.getSimpleRobotName(),
                                                                               ros2Node,
                                                                               referenceFrames,
@@ -66,7 +66,7 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
                                                                               robotSensorInfo,
                                                                               walkingControllerParameters,
                                                                               null);
-      scs.addYoVariableRegistry(collaborativeBehavior.getYoVariableRegistry());
+      scs.addYoRegistry(collaborativeBehavior.getYoRegistry());
 
       drcBehaviorTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 1.0), new Point3D(10.0, 10.0, 3.0));
       ThreadTools.sleep(1000);

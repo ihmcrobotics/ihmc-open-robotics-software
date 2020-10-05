@@ -14,7 +14,8 @@ public class FootstepNodeSnapData implements FootstepNodeSnapDataReadOnly
    private final RigidBodyTransform wiggleTransformInWorld = new RigidBodyTransform();
    private final RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
    private final ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
-   private int planarRegionId = PlanarRegion.NO_REGION_ID;
+   private int regionIndex = -1;
+   private double achievedInsideDelta = Double.NaN;
    private boolean snappedNodeTransformIncludesWiggleTransform = false;
 
    public FootstepNodeSnapData()
@@ -70,9 +71,9 @@ public class FootstepNodeSnapData implements FootstepNodeSnapDataReadOnly
 
    /** {@inheritDoc} */
    @Override
-   public int getPlanarRegionId()
+   public int getRegionIndex()
    {
-      return planarRegionId;
+      return regionIndex;
    }
 
    /** {@inheritDoc} */
@@ -83,9 +84,20 @@ public class FootstepNodeSnapData implements FootstepNodeSnapDataReadOnly
       return snappedNodeTransform;
    }
 
-   public void setPlanarRegionId(int planarRegionId)
+   @Override
+   public double getAchievedInsideDelta()
    {
-      this.planarRegionId = planarRegionId;
+      return achievedInsideDelta;
+   }
+
+   public void setRegionIndex(int regionIndex)
+   {
+      this.regionIndex = regionIndex;
+   }
+
+   public void setAchievedInsideDelta(double achievedInsideDelta)
+   {
+      this.achievedInsideDelta = achievedInsideDelta;
    }
 
    private void updateSnappedNodeTransform(FootstepNode node)
@@ -108,7 +120,8 @@ public class FootstepNodeSnapData implements FootstepNodeSnapDataReadOnly
       this.croppedFoothold.set(other.croppedFoothold);
       this.wiggleTransformInWorld.set(other.wiggleTransformInWorld);
       this.snappedNodeTransform.set(other.snappedNodeTransform);
-      this.planarRegionId = other.planarRegionId;
+      this.regionIndex = other.regionIndex;
+      this.achievedInsideDelta = other.achievedInsideDelta;
       this.snappedNodeTransformIncludesWiggleTransform = other.snappedNodeTransformIncludesWiggleTransform;
    }
 
@@ -118,7 +131,8 @@ public class FootstepNodeSnapData implements FootstepNodeSnapDataReadOnly
       this.wiggleTransformInWorld.setToNaN();
       this.snappedNodeTransform.setToNaN();
       this.croppedFoothold.clearAndUpdate();
-      this.planarRegionId = PlanarRegion.NO_REGION_ID;
+      this.regionIndex = PlanarRegion.NO_REGION_ID;
+      this.achievedInsideDelta = Double.NaN;
       this.snappedNodeTransformIncludesWiggleTransform = false;
    }
 

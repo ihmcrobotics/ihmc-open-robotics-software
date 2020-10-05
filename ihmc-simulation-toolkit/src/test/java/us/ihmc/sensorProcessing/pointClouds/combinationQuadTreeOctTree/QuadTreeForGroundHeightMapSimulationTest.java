@@ -35,8 +35,8 @@ import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadTreeForGroundHeightMapSimulationTest
 {
@@ -306,7 +306,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
    private static class QuadTreeTestHelper
    {
       private final boolean visualize;
-      private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       private final Robot robot;
       private final SimulationConstructionSet scs;
@@ -339,7 +339,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          if (visualize)
          {
             robot = new Robot("TestQuadTree");
-            robot.getRobotsYoVariableRegistry().addChild(registry);
+            robot.getRobotsYoRegistry().addChild(registry);
             scs = new SimulationConstructionSet(robot);
             
             scs.setGroundVisible(false);

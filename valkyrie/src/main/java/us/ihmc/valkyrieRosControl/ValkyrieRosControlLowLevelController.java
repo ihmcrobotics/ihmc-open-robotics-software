@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
@@ -23,12 +23,12 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieRosControlLowLevelController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final TimestampProvider monotonicTimeProvider;
 
@@ -50,7 +50,7 @@ public class ValkyrieRosControlLowLevelController
                                                ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                                List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
-                                               YoVariableRegistry parentRegistry)
+                                               YoRegistry parentRegistry)
    {
       this.monotonicTimeProvider = monotonicTimeProvider;
 
@@ -167,10 +167,10 @@ public class ValkyrieRosControlLowLevelController
       this.jointTorqueOffsetEstimator = jointTorqueOffsetEstimator;
    }
 
-   public void setupLowLevelControlCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void setupLowLevelControlCommunication(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
-         fingerController.setupCommunication(robotName, realtimeRos2Node);
+         fingerController.setupCommunication(robotName, realtimeROS2Node);
    }
 
    /**

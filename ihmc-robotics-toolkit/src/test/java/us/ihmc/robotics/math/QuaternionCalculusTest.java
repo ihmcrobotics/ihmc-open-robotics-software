@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuaternionCalculusTest
 {
@@ -77,7 +77,7 @@ public class QuaternionCalculusTest
          Vector3D actualAngularVelocity = new Vector3D();
          Vector4D qDot = new Vector4D();
 
-         quaternionCalculus.computeQDot(q, expectedAngularVelocity, qDot);
+         quaternionCalculus.computeQDotInWorldFrame(q, expectedAngularVelocity, qDot);
          quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
          assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, EPSILON));
@@ -104,22 +104,22 @@ public class QuaternionCalculusTest
          Vector4D qDot = new Vector4D();
          Vector4D qDDot = new Vector4D();
 
-         quaternionCalculus.computeQDot(q, angularVelocity, qDot);
+         quaternionCalculus.computeQDotInWorldFrame(q, angularVelocity, qDot);
 
-         quaternionCalculus.computeQDDot(q, qDot, expectedAngularAcceleration, qDDot);
+         quaternionCalculus.computeQDDotInWorldFrame(q, qDot, expectedAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
          assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
 
-         quaternionCalculus.computeQDDot(q, angularVelocity, actualAngularAcceleration, qDDot);
+         quaternionCalculus.computeQDDotInWorldFrame(q, angularVelocity, actualAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
          assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
 
-         quaternionCalculus.computeQDDot(q, qDot, angularVelocity, actualAngularAcceleration, qDDot);
+         quaternionCalculus.computeQDDotInWorldFrame(q, qDot, angularVelocity, actualAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
          assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
 
-         quaternionCalculus.computeQDDot(q, qDot, expectedAngularAcceleration, qDDot);
-         quaternionCalculus.computeAngularAcceleration(q, qDDot, angularVelocity, actualAngularAcceleration);
+         quaternionCalculus.computeQDDotInWorldFrame(q, qDot, expectedAngularAcceleration, qDDot);
+         quaternionCalculus.computeAngularAccelerationInWorldFrame(q, qDDot, angularVelocity, actualAngularAcceleration);
          assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
       }
    }
@@ -128,7 +128,7 @@ public class QuaternionCalculusTest
    public void testVelocityFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoVariableRegistry("null"));
+      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoRegistry("null"));
       double trajectoryTime = 1.0;
       traj.setTrajectoryTime(trajectoryTime);
       Random random = new Random(65265L);
@@ -221,7 +221,7 @@ public class QuaternionCalculusTest
    public void testAccelerationFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoVariableRegistry("null"));
+      SimpleOrientationTrajectoryGenerator traj = new SimpleOrientationTrajectoryGenerator("traj", ReferenceFrame.getWorldFrame(), new YoRegistry("null"));
       double trajectoryTime = 1.0;
       traj.setTrajectoryTime(trajectoryTime);
       Random random = new Random(65265L);

@@ -11,7 +11,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StateMachineExampleOneTest
@@ -22,7 +22,7 @@ public class StateMachineExampleOneTest
       // This shows a quick and easy way to make a simple state machine without using the complex machinery for a more complex state machine.
       // This one goes through states Start, StateOne, StateTwo, and Stop.
       // It transitions based on time.
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble time = new YoDouble("time", registry);
       StateMachineFactory<ExampleStateName, State> factory = new StateMachineFactory<>(ExampleStateName.class);
       factory.setNamePrefix("blah");
@@ -107,7 +107,7 @@ public class StateMachineExampleOneTest
       // This one goes through states Start, StateOne, StateTwo, and Stop.
       // It transitions based on calling the transitionToDefaultNextState() method in the State...
 
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble time = new YoDouble("time", registry);
       StateMachineFactory<ExampleStateName, SimpleExampleState> factory = new StateMachineFactory<>(ExampleStateName.class);
       factory.setNamePrefix("bop");

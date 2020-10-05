@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.imu;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -18,11 +18,11 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class FusedIMUSensor implements IMUSensorReadOnly
 {
@@ -34,7 +34,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final IMUSensorReadOnly firstIMU;
    private final IMUSensorReadOnly secondIMU;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoFrameQuaternion quaternion;
    private final YoFrameYawPitchRoll orientation;
    private final YoFrameVector3D angularVelocity;
@@ -76,7 +76,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final YawPitchRoll tempYawPitchRoll = new YawPitchRoll();
 
    public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT,
-                         YoVariableRegistry parentRegistry)
+                         YoRegistry parentRegistry)
    {
       this.firstIMU = firstIMU;
       this.secondIMU = secondIMU;
@@ -92,7 +92,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
       fusedMeasurementFrame = createFusedMeasurementFrame();
 
-      registry = new YoVariableRegistry(sensorName);
+      registry = new YoRegistry(sensorName);
       quaternion = new YoFrameQuaternion(sensorName, fusedMeasurementFrame, registry);
       orientation = new YoFrameYawPitchRoll(sensorName, fusedMeasurementFrame, registry);
       angularVelocity = new YoFrameVector3D("qd_w", sensorName, fusedMeasurementFrame, registry);
@@ -331,35 +331,35 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getOrientationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getOrientationNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getAngularVelocityNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getAngularVelocityBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getAngularVelocityBiasProcessNoiseCovariance(biasProcessNoiseCovarianceToPack);
    }
 
    @Override
-   public void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getLinearAccelerationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getLinearAccelerationNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getLinearAccelerationBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getLinearAccelerationBiasProcessNoiseCovariance(biasProcessNoiseCovarianceToPack);

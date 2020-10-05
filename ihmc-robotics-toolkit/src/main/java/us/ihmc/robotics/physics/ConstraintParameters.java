@@ -3,18 +3,17 @@ package us.ihmc.robotics.physics;
 public class ConstraintParameters implements ConstraintParametersBasics
 {
    private double coefficientOfRestitution;
+   private double restitutionThreshold;
    private double errorReductionParameter;
-   private double constraintForceMixing;
 
    public ConstraintParameters()
    {
    }
 
-   public ConstraintParameters(double coefficientOfRestitution, double errorReductionParameter, double constraintForceMixing)
+   public ConstraintParameters(double coefficientOfRestitution, double restitutionThreshold, double errorReductionParameter)
    {
       this.coefficientOfRestitution = coefficientOfRestitution;
       this.errorReductionParameter = errorReductionParameter;
-      this.constraintForceMixing = constraintForceMixing;
    }
 
    @Override
@@ -24,15 +23,15 @@ public class ConstraintParameters implements ConstraintParametersBasics
    }
 
    @Override
-   public void setErrorReductionParameter(double errorReductionParameter)
+   public void setRestitutionThreshold(double restitutionThreshold)
    {
-      this.errorReductionParameter = errorReductionParameter;
+      this.restitutionThreshold = restitutionThreshold;
    }
 
    @Override
-   public void setConstraintForceMixing(double constraintForceMixing)
+   public void setErrorReductionParameter(double errorReductionParameter)
    {
-      this.constraintForceMixing = constraintForceMixing;
+      this.errorReductionParameter = errorReductionParameter;
    }
 
    @Override
@@ -42,14 +41,14 @@ public class ConstraintParameters implements ConstraintParametersBasics
    }
 
    @Override
-   public double getErrorReductionParameter()
+   public double getRestitutionThreshold()
    {
-      return errorReductionParameter;
+      return restitutionThreshold;
    }
 
    @Override
-   public double getConstraintForceMixing()
+   public double getErrorReductionParameter()
    {
-      return constraintForceMixing;
+      return errorReductionParameter;
    }
 }

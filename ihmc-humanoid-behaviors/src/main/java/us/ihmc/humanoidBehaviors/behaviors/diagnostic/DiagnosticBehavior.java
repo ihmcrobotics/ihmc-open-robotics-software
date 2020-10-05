@@ -4,32 +4,16 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,32 +22,12 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.*;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.PelvisHeightTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.PelvisOrientationTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.PelvisTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.SleepTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.*;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
@@ -90,18 +54,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.taskExecutor.NullState;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.variable.*;
 
 public class DiagnosticBehavior extends AbstractBehavior
 {
@@ -255,7 +215,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
+                             YoDouble yoTime, YoBoolean yoDoubleSupport, ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
                              YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
@@ -284,10 +244,10 @@ public class DiagnosticBehavior extends AbstractBehavior
       //icp variables
       isIcpOffsetSenderEnabled = new YoBoolean("DiagnosticBehaviorIcpOffsetSenderEnabled", registry);
       isIcpOffsetSenderEnabled.set(false);
-      isIcpOffsetSenderEnabled.addVariableChangedListener(new VariableChangedListener()
+      isIcpOffsetSenderEnabled.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             DiagnosticBehavior.this.previousIcpPacketSentTime.set(DiagnosticBehavior.this.yoTime.getDoubleValue());
 
@@ -335,48 +295,48 @@ public class DiagnosticBehavior extends AbstractBehavior
       bootyShakeTime.set(1.0);
 
       walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
-      registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
+      registry.addChild(walkToLocationBehavior.getYoRegistry());
 
       chestTrajectoryBehavior = new ChestTrajectoryBehavior(robotName, ros2Node, yoTime);
-      registry.addChild(chestTrajectoryBehavior.getYoVariableRegistry());
+      registry.addChild(chestTrajectoryBehavior.getYoRegistry());
 
       chestGoHomeBehavior = new GoHomeBehavior(robotName, "chest", ros2Node, yoTime);
-      registry.addChild(chestGoHomeBehavior.getYoVariableRegistry());
+      registry.addChild(chestGoHomeBehavior.getYoRegistry());
 
       pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(robotName, ros2Node, yoTime);
-      registry.addChild(pelvisTrajectoryBehavior.getYoVariableRegistry());
+      registry.addChild(pelvisTrajectoryBehavior.getYoRegistry());
 
       pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(robotName, ros2Node, yoTime);
-      registry.addChild(pelvisOrientationTrajectoryBehavior.getYoVariableRegistry());
+      registry.addChild(pelvisOrientationTrajectoryBehavior.getYoRegistry());
 
       pelvisGoHomeBehavior = new GoHomeBehavior(robotName, "pelvis", ros2Node, yoTime);
-      registry.addChild(pelvisGoHomeBehavior.getYoVariableRegistry());
+      registry.addChild(pelvisGoHomeBehavior.getYoRegistry());
 
       footPoseBehavior = new FootTrajectoryBehavior(robotName, ros2Node, yoTime, yoDoubleSupport);
-      registry.addChild(footPoseBehavior.getYoVariableRegistry());
+      registry.addChild(footPoseBehavior.getYoRegistry());
 
       footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
-      registry.addChild(footstepListBehavior.getYoVariableRegistry());
+      registry.addChild(footstepListBehavior.getYoRegistry());
 
       pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(robotName, ros2Node, yoTime);
-      registry.addChild(pelvisHeightTrajectoryBehavior.getYoVariableRegistry());
+      registry.addChild(pelvisHeightTrajectoryBehavior.getYoRegistry());
 
       turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters,footstepPlannerParameters, yoTime);
-      registry.addChild(turnInPlaceBehavior.getYoVariableRegistry());
+      registry.addChild(turnInPlaceBehavior.getYoRegistry());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
          ArmTrajectoryBehavior armTrajectoryBehavior = new ArmTrajectoryBehavior(robotName, namePrefix, ros2Node, yoTime);
-         registry.addChild(armTrajectoryBehavior.getYoVariableRegistry());
+         registry.addChild(armTrajectoryBehavior.getYoRegistry());
          armTrajectoryBehaviors.put(robotSide, armTrajectoryBehavior);
 
          HandTrajectoryBehavior handTrajectoryBehavior = new HandTrajectoryBehavior(robotName, namePrefix, ros2Node, yoTime);
-         registry.addChild(handTrajectoryBehavior.getYoVariableRegistry());
+         registry.addChild(handTrajectoryBehavior.getYoRegistry());
          handTrajectoryBehaviors.put(robotSide, handTrajectoryBehavior);
 
          GoHomeBehavior armGoHomeBehavior = new GoHomeBehavior(robotName, namePrefix + "Arm", ros2Node, yoTime);
-         registry.addChild(armGoHomeBehavior.getYoVariableRegistry());
+         registry.addChild(armGoHomeBehavior.getYoRegistry());
          armGoHomeBehaviors.put(robotSide, armGoHomeBehavior);
       }
 
@@ -439,7 +399,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       double minRandomSearchScalar = 0.01;
       double maxRandomSearchScalar = 0.8;
 
-      DenseMatrix64F angularSelectionMatrix = new DenseMatrix64F(3, SpatialVector.SIZE);
+      DMatrixRMaj angularSelectionMatrix = new DMatrixRMaj(3, SpatialVector.SIZE);
       angularSelectionMatrix.set(0, 0, 1.0);
       angularSelectionMatrix.set(1, 1, 1.0);
       angularSelectionMatrix.set(2, 2, 1.0);

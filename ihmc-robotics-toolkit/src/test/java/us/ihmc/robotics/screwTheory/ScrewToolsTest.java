@@ -1,6 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,14 +12,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -395,13 +396,13 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F originalVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj originalVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < originalVelocities.getNumRows() * originalVelocities.getNumCols(); i++)
       {       //create original matrix
          originalVelocities.set(i, random.nextDouble());
       }
       MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, originalVelocities); //set velocities from matrix
-      DenseMatrix64F newVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj newVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
 
       MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
@@ -422,13 +423,13 @@ public class ScrewToolsTest
          jointsList.add(jointsArray[i]);
       }
 
-      DenseMatrix64F originalVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj originalVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < originalVelocities.getNumRows() * originalVelocities.getNumCols(); i++)
       {       //create original matrix
          originalVelocities.set(i, random.nextDouble());
       }
       MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, originalVelocities); //set velocities from matrix
-      DenseMatrix64F newVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj newVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
 
       MultiBodySystemTools.extractJointsState(jointsList, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
@@ -444,13 +445,13 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F originalAccel = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj originalAccel = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < originalAccel.getNumRows() * originalAccel.getNumCols(); i++)
       {       //create original matrix
          originalAccel.set(i, random.nextDouble());
       }
       MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.ACCELERATION, originalAccel); //set velocities from matrix
-      DenseMatrix64F newAccelerations = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj newAccelerations = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
 
       MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.ACCELERATION, newAccelerations);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
@@ -530,7 +531,7 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F jointAccelerations = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj jointAccelerations = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < jointAccelerations.getNumRows() * jointAccelerations.getNumCols(); i++)
       {
          jointAccelerations.set(i, random.nextDouble());
@@ -538,7 +539,7 @@ public class ScrewToolsTest
 
       MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.ACCELERATION, jointAccelerations);
 
-      DenseMatrix64F sixDoFAccel = new DenseMatrix64F(6, 1);
+      DMatrixRMaj sixDoFAccel = new DMatrixRMaj(6, 1);
       jointsArray[0].getJointAcceleration(0, sixDoFAccel);
       for(int i = 0; i < 6; i++)
       {
@@ -561,7 +562,7 @@ public class ScrewToolsTest
       RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       JointBasics[] jointsArray = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
 
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       for(int i = 0; i < jointVelocities.getNumRows() * jointVelocities.getNumCols(); i++)
       {
          jointVelocities.set(i, random.nextDouble());
@@ -569,7 +570,7 @@ public class ScrewToolsTest
 
       MultiBodySystemTools.insertJointsState(jointsArray, JointStateType.VELOCITY, jointVelocities);
 
-      DenseMatrix64F sixDoFVeloc = new DenseMatrix64F(6, 1);
+      DMatrixRMaj sixDoFVeloc = new DMatrixRMaj(6, 1);
       jointsArray[0].getJointVelocity(0, sixDoFVeloc);
       for(int i = 0; i < 6; i++)
       {

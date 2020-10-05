@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -11,9 +11,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly, RootJointDesiredConfigurationDataBasics
 {
-   private final DenseMatrix64F desiredConfiguration = new DenseMatrix64F(7, 0);
-   private final DenseMatrix64F desiredVelocity = new DenseMatrix64F(6, 0);
-   private final DenseMatrix64F desiredAcceleration = new DenseMatrix64F(6, 0);
+   private final DMatrixRMaj desiredConfiguration = new DMatrixRMaj(7, 0);
+   private final DMatrixRMaj desiredVelocity = new DMatrixRMaj(6, 0);
+   private final DMatrixRMaj desiredAcceleration = new DMatrixRMaj(6, 0);
 
    public RootJointDesiredConfigurationData()
    {
@@ -80,24 +80,24 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    }
 
    @Override
-   public void setDesiredConfiguration(DenseMatrix64F q, int startIndex)
+   public void setDesiredConfiguration(DMatrixRMaj q, int startIndex)
    {
       desiredConfiguration.reshape(7, 1);
-      CommonOps.extract(q, startIndex, startIndex + 7, 0, 1, desiredConfiguration, 0, 0);
+      CommonOps_DDRM.extract(q, startIndex, startIndex + 7, 0, 1, desiredConfiguration, 0, 0);
    }
 
    @Override
-   public void setDesiredVelocity(DenseMatrix64F qd, int startIndex)
+   public void setDesiredVelocity(DMatrixRMaj qd, int startIndex)
    {
       desiredVelocity.reshape(6, 1);
-      CommonOps.extract(qd, startIndex, startIndex + 6, 0, 1, desiredVelocity, 0, 0);
+      CommonOps_DDRM.extract(qd, startIndex, startIndex + 6, 0, 1, desiredVelocity, 0, 0);
    }
 
    @Override
-   public void setDesiredAcceleration(DenseMatrix64F qdd, int startIndex)
+   public void setDesiredAcceleration(DMatrixRMaj qdd, int startIndex)
    {
       desiredAcceleration.reshape(6, 1);
-      CommonOps.extract(qdd, startIndex, startIndex + 6, 0, 1, desiredAcceleration, 0, 0);
+      CommonOps_DDRM.extract(qdd, startIndex, startIndex + 6, 0, 1, desiredAcceleration, 0, 0);
    }
 
    @Override
@@ -119,19 +119,19 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    }
 
    @Override
-   public DenseMatrix64F getDesiredConfiguration()
+   public DMatrixRMaj getDesiredConfiguration()
    {
       return desiredConfiguration;
    }
 
    @Override
-   public DenseMatrix64F getDesiredVelocity()
+   public DMatrixRMaj getDesiredVelocity()
    {
       return desiredVelocity;
    }
 
    @Override
-   public DenseMatrix64F getDesiredAcceleration()
+   public DMatrixRMaj getDesiredAcceleration()
    {
       return desiredAcceleration;
    }

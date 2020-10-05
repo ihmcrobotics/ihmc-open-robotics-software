@@ -15,4 +15,19 @@ public interface InverseKinematicsCommand<T extends InverseKinematicsCommand<T>>
     * @return the type of this command.
     */
    public abstract ControllerCoreCommandType getCommandType();
+
+   /**
+    * Sets an id for this command, it will be passed over when copied in the the controller core and
+    * can be used to track control elements that are using this command.
+    * 
+    * @param id the new id for this command.
+    */
+   void setCommandId(int id);
+
+   /**
+    * Returns the id for this command.
+    * 
+    * @return this command's id.
+    */
+   int getCommandId();
 }

@@ -11,7 +11,7 @@ import us.ihmc.robotics.linearDynamicSystems.LinearDynamicSystem;
 import us.ihmc.robotics.linearDynamicSystems.MatlabChart;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunctionToStateSpaceConverter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 class YoLinearDynamicSystemTest
@@ -22,7 +22,7 @@ class YoLinearDynamicSystemTest
    {
       boolean displayChart = false;
 
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       double zeta = 0.5;
       double wn = 2.0 * Math.PI * 1.0;

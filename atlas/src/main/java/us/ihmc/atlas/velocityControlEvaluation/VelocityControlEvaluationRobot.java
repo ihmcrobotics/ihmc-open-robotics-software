@@ -32,7 +32,7 @@ public class VelocityControlEvaluationRobot extends Robot
       linkGraphics.addSphere(0.03);
       pointMass.setLinkGraphics(linkGraphics);
       
-      ExternalForcePoint externalForce = new ExternalForcePoint("externalForce", this.getRobotsYoVariableRegistry());
+      ExternalForcePoint externalForce = new ExternalForcePoint("externalForce", this.getRobotsYoRegistry());
       rootJoint.addExternalForcePoint(externalForce);
       
       rootJoint.setLink(pointMass);

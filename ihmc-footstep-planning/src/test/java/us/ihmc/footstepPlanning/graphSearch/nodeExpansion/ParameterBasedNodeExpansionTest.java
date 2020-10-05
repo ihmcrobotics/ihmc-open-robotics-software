@@ -3,11 +3,17 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.*;
 import java.util.function.ToDoubleFunction;
@@ -23,7 +29,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOriginDefaultParametersWithRight()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
       double maxYaw = parameters.getMaximumStepYaw();
@@ -63,7 +69,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOriginDefaultParametersWithLeft()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
       double maxYaw = parameters.getMaximumStepYaw();
@@ -103,7 +109,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOrigin()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
       double maxYaw = 1.2;
@@ -184,7 +190,7 @@ public class ParameterBasedNodeExpansionTest
       parameters.setMaximumBranchFactor(branchFactor);
 
       UnaryOperator<FootstepNode> idealStepSupplier = step -> new FootstepNode(step.getX(), step.getY(), step.getYaw(), step.getRobotSide().getOppositeSide());
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
 
       expansion.initialize();
 
@@ -228,7 +234,7 @@ public class ParameterBasedNodeExpansionTest
          {
             FootstepNode randomIdealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
             UnaryOperator<FootstepNode> idealStepSupplier = step -> randomIdealStep;
-            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier);
+            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
             List<FootstepNode> fullExpansion = new ArrayList<>();
@@ -265,7 +271,7 @@ public class ParameterBasedNodeExpansionTest
          {
             FootstepNode randomIdealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
             UnaryOperator<FootstepNode> idealStepSupplier = step -> randomIdealStep;
-            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier);
+            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
             List<FootstepNode> fullExpansion = new ArrayList<>();
@@ -285,6 +291,50 @@ public class ParameterBasedNodeExpansionTest
                }
             }
          }
+      }
+   }
+
+   @Test
+   public void testSelfIntersection()
+   {
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      double clearance = 0.01;
+
+      // set width so expansion will step on stance foot if not prevented
+      parameters.setMinimumStepWidth(0.0);
+      parameters.setMinimumStepLength(-0.2);
+      parameters.setEnableExpansionMask(false);
+      parameters.setMinClearanceFromStance(clearance);
+      parameters.setMaximumBranchFactor(Integer.MAX_VALUE);
+
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, footPolygons);
+      expansion.initialize();
+
+      List<FootstepNode> expansionList = new ArrayList<>();
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+      ConvexPolygon2D intersectionPolygon = new ConvexPolygon2D();
+      Point2D pointA = new Point2D();
+      Point2D pointB = new Point2D();
+
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      expansion.doFullExpansion(stanceNode, expansionList);
+
+      ConvexPolygon2D stanceNodePolygon = new ConvexPolygon2D();
+      FootstepNodeTools.getFootPolygon(stanceNode, footPolygons.get(stanceNode.getRobotSide()), stanceNodePolygon);
+
+      for (int i = 0; i < expansionList.size(); i++)
+      {
+         FootstepNode childNode = expansionList.get(i);
+         ConvexPolygon2D childNodePolygon = new ConvexPolygon2D();
+         FootstepNodeTools.getFootPolygon(childNode, footPolygons.get(childNode.getRobotSide()), childNodePolygon);
+
+         boolean intersectionDetected = convexPolygonTools.computeIntersectionOfPolygons(stanceNodePolygon, childNodePolygon, intersectionPolygon);
+         Assertions.assertFalse(intersectionDetected, "Intersection detected in footstep node expansion");
+
+         convexPolygonTools.computeMinimumDistancePoints(stanceNodePolygon, childNodePolygon, 1e-3, pointA, pointB);
+         double distance = pointA.distance(pointB);
+         Assertions.assertTrue(distance >= clearance, "Intersection detected in footstep node expansion");
       }
    }
 }

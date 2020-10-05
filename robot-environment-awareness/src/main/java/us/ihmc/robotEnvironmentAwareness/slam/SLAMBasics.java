@@ -1,66 +1,131 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.jOctoMap.boundingBox.OcTreeBoundingBoxWithCenterAndYaw;
+import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
+import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.jOctoMap.pointCloud.Scan;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SLAMBasics implements SLAMInterface
 {
    private final AtomicReference<SLAMFrame> latestSlamFrame = new AtomicReference<>(null);
-   protected final NormalOcTree octree;
-   private final List<RigidBodyTransformReadOnly> sensorPoses = new ArrayList<>();
+   protected Point3DBasics[] correctedCorrespondingPointLocation;
+   protected final NormalOcTree mapOcTree;
+   private final AtomicInteger mapSize = new AtomicInteger();
 
-   protected PlanarRegionsList planarRegionsMap;
-   protected final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-   protected final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   protected final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
-   protected final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+   private final AtomicDouble latestComputationTime = new AtomicDouble();
+
+   protected final DriftCorrectionResult driftCorrectionResult = new DriftCorrectionResult();
+   private final RigidBodyTransformReadOnly transformFromLocalToSensor;
+
+   private final NormalEstimationParameters frameNormalEstimationParameters = new NormalEstimationParameters();
+
+   private boolean computeInParallel = false;
 
    public SLAMBasics(double octreeResolution)
    {
-      octree = new NormalOcTree(octreeResolution);
+      this(octreeResolution, new RigidBodyTransform());
+   }
 
-      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
-      planarRegionSegmentationParameters.setMinRegionSize(150);
+   public SLAMBasics(double octreeResolution, RigidBodyTransformReadOnly transformFromLocalFrameToSensor)
+   {
+      this.transformFromLocalToSensor = transformFromLocalFrameToSensor;
+      mapOcTree = new NormalOcTree(octreeResolution);
+
+      frameNormalEstimationParameters.setNumberOfIterations(10);
+   }
+
+   protected void insertNewPointCloud(SLAMFrame frame, boolean insertMiss)
+   {
+      List<? extends Point3DReadOnly> pointCloud = frame.getCorrectedPointCloudInWorld();
+      RigidBodyTransformReadOnly sensorPose = frame.getCorrectedSensorPoseInWorld();
+
+      Scan scan = SLAMTools.toScan(pointCloud, sensorPose.getTranslation());
+      scan.getPointCloud().setTimestamp(frame.getTimeStamp());
+
+      try
+      {
+         mapOcTree.insertScan(scan, insertMiss); // inserting the miss here is pretty dang expensive.
+      }
+      catch (RuntimeException e)
+      {
+         if (e.getMessage().equals("The given node is null."))
+         {
+            LogTools.warn("Failed to insert scan. null node in jOctoMap");
+         }
+         else
+         {
+            throw e;
+         }
+      }
+      mapOcTree.enableParallelComputationForNormals(true);
+   }
+
+   public void updateSurfaceNormals()
+   {
+      mapOcTree.updateNormals();
+   }
+
+   public void updateSurfaceNormalsInBoundingBox(NormalEstimationParameters normalEstimationParameters)
+   {
+      List<NormalOcTreeNode> leafNodesToUpdate = OcTreeIteratorFactory.createLeafBoundingBoxIteratable(mapOcTree.getRoot(), mapOcTree.getBoundingBox()).toList();
+      mapOcTree.updateNodesNormals(leafNodesToUpdate, normalEstimationParameters);
+   }
+
+   public void setComputeInParallel(boolean computeInParallel)
+   {
+      this.computeInParallel = computeInParallel;
    }
 
    @Override
-   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(pointCloudMessage);
-      latestSlamFrame.set(frame);
+      SLAMFrame frame = new SLAMFrame(transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters, computeInParallel);
+      setLatestFrame(frame);
+      insertNewPointCloud(frame, insertMiss);
 
-      sensorPoses.add(frame.getSensorPose());
+      driftCorrectionResult.setDefault();
    }
 
    @Override
-   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss)
    {
-      SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
+      SLAMFrame frame = new SLAMFrame(getLatestFrame(), transformFromLocalToSensor, pointCloudMessage, frameNormalEstimationParameters, computeInParallel);
 
-      RigidBodyTransformReadOnly optimizedMultiplier = computeFrameCorrectionTransformer(frame);
+      long startTime = System.nanoTime();
+      RigidBodyTransformReadOnly driftCorrectionTransformer = computeFrameCorrectionTransformer(frame);
+      latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
 
-      if (optimizedMultiplier == null)
+      driftCorrectionResult.setComputationTime(latestComputationTime.get());
+      if (driftCorrectionTransformer == null)
       {
          return false;
       }
       else
       {
-         frame.updateOptimizedCorrection(optimizedMultiplier);
-
-         latestSlamFrame.set(frame);
-
-         sensorPoses.add(frame.getSensorPose());
-
+         frame.updateOptimizedCorrection(driftCorrectionTransformer);
+         setLatestFrame(frame);
+         insertNewPointCloud(frame, insertMiss);
          return true;
       }
    }
@@ -69,26 +134,64 @@ public class SLAMBasics implements SLAMInterface
    public void clear()
    {
       latestSlamFrame.set(null);
-      sensorPoses.clear();
-      octree.clear();
+      mapSize.set(0);
+      mapOcTree.clear();
+   }
+
+   public Point3DReadOnly[] getSourcePoints()
+   {
+      return correctedCorrespondingPointLocation;
    }
 
    public boolean isEmpty()
    {
-      if (latestSlamFrame.get() == null)
+      if (mapSize.get() == 0)
          return true;
       else
          return false;
    }
 
-   public List<RigidBodyTransformReadOnly> getSensorPoses()
+   public int getMapSize()
    {
-      return sensorPoses;
+      return mapSize.get();
    }
 
-   public PlanarRegionsList getPlanarRegionsMap()
+   public void setLatestFrame(SLAMFrame frameToSet)
    {
-      return planarRegionsMap;
+      latestSlamFrame.set(frameToSet);
+      mapSize.incrementAndGet();
+   }
+
+   public void handleBoundingBox(Pose3DReadOnly sensorPose, BoundingBoxParametersMessage boundingBoxParameters, boolean useBoundingBox)
+   {
+      handleBoundingBox(sensorPose.getPosition(), sensorPose.getOrientation(), boundingBoxParameters, useBoundingBox);
+   }
+
+   public void handleBoundingBox(Tuple3DReadOnly sensorPosition,
+                                 Orientation3DReadOnly sensorOrientation,
+                                 BoundingBoxParametersMessage boundingBoxParameters,
+                                 boolean useBoundingBox)
+   {
+      if (!useBoundingBox)
+      {
+         mapOcTree.disableBoundingBox();
+         return;
+      }
+
+      OcTreeBoundingBoxWithCenterAndYaw boundingBox = new OcTreeBoundingBoxWithCenterAndYaw();
+
+      Point3D min = boundingBoxParameters.getMin();
+      Point3D max = boundingBoxParameters.getMax();
+      boundingBox.setLocalMinMaxCoordinates(min, max);
+
+      if (sensorPosition != null && sensorOrientation != null)
+      {
+         boundingBox.setOffset(sensorPosition);
+         boundingBox.setYawFromQuaternion(new Quaternion(sensorOrientation));
+      }
+
+      boundingBox.update(mapOcTree.getResolution(), mapOcTree.getTreeDepth());
+      mapOcTree.setBoundingBox(boundingBox);
    }
 
    public SLAMFrame getLatestFrame()
@@ -98,11 +201,36 @@ public class SLAMBasics implements SLAMInterface
 
    public double getOctreeResolution()
    {
-      return octree.getResolution();
+      return mapOcTree.getResolution();
    }
 
-   public NormalOcTree getOctree()
+   public NormalOcTree getMapOcTree()
    {
-      return octree;
+      return mapOcTree;
+   }
+
+   public void clearNormals()
+   {
+      mapOcTree.clearNormals();
+   }
+
+   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      mapOcTree.setNormalEstimationParameters(normalEstimationParameters);
+   }
+
+   public void setFrameNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      this.frameNormalEstimationParameters.set(normalEstimationParameters);
+   }
+
+   public double getComputationTimeForLatestFrame()
+   {
+      return latestComputationTime.get();
+   }
+   
+   public DriftCorrectionResult getDriftCorrectionResult()
+   {
+      return driftCorrectionResult;
    }
 }

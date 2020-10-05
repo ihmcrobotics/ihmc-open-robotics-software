@@ -15,17 +15,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -34,11 +30,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -47,16 +42,16 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class LinearMomentumRateControlModule
 {
@@ -64,7 +59,7 @@ public class LinearMomentumRateControlModule
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final Vector3DReadOnly linearMomentumRateWeight;
    private final Vector3DReadOnly recoveryLinearMomentumRateWeight;
@@ -149,7 +144,7 @@ public class LinearMomentumRateControlModule
    private boolean keepCoPInsideSupportPolygon;
    private double finalTransferDuration;
    private double remainingTimeInSwingUnderDisturbance;
-   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
+   private final RecyclingArrayList<SimpleFootstep> footsteps = new RecyclingArrayList<>(SimpleFootstep.class);
    private final TDoubleArrayList swingDurations = new TDoubleArrayList();
    private final TDoubleArrayList transferDurations = new TDoubleArrayList();
 
@@ -159,7 +154,7 @@ public class LinearMomentumRateControlModule
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
    private PlanarRegionsListHandler planarRegionsListHandler;
-   private PlanarRegionHandler planarRegionStepConstraintHandler;
+   private StepConstraintRegionHandler stepConstraintRegionHandler;
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
@@ -168,7 +163,7 @@ public class LinearMomentumRateControlModule
                                           YoDouble yoTime,
                                           double gravityZ,
                                           double controlDT,
-                                          YoVariableRegistry parentRegistry,
+                                          YoRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -274,9 +269,9 @@ public class LinearMomentumRateControlModule
       yoCapturePoint.setToNaN();
    }
 
-   public void setPlanarRegionStepConstraintHandler(PlanarRegionHandler planarRegionStepConstraint)
+   public void setPlanarRegionStepConstraintHandler(StepConstraintRegionHandler planarRegionStepConstraint)
    {
-      this.planarRegionStepConstraintHandler = planarRegionStepConstraint;
+      this.stepConstraintRegionHandler = planarRegionStepConstraint;
    }
 
    public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)
@@ -510,6 +505,7 @@ public class LinearMomentumRateControlModule
          }
          if (initializeForSingleSupport)
          {
+            stepAdjustmentController.reset();
             icpController.initializeForSingleSupport(supportSide);
 
             double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
@@ -525,10 +521,8 @@ public class LinearMomentumRateControlModule
          icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
          if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
             stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-         if (planarRegionStepConstraintHandler != null && planarRegionStepConstraintHandler.hasNewPlanarRegion())
-            stepAdjustmentController.setPlanarRegionConstraint(planarRegionStepConstraintHandler.pollHasNewPlanarRegion());
-         if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
-            stepAdjustmentController.setPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
+         if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
+            stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
       }
    }
 

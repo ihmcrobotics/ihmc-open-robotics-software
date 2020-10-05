@@ -24,7 +24,7 @@ import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
 {
@@ -44,11 +44,11 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private static final Scalar circleColor = new Scalar(160, 0, 0);
    private final IHMCROS2Publisher<VideoPacket> videoPublisher;
 
-   public ColoredCircularBlobDetectorBehaviorService(String robotName, Ros2Node ros2Node)
+   public ColoredCircularBlobDetectorBehaviorService(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
       createSubscriberFromController(RobotConfigurationData.class, robotConfigurationDataQueue::put);
 
       videoPublisher = createBehaviorOutputPublisher(VideoPacket.class, "/video");

@@ -26,7 +26,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
@@ -62,10 +62,10 @@ public class SphereDetectionBehavior extends AbstractBehavior
 
    private IHMCROS2Publisher<DetectedObjectPacket> detectedObjectPublisher;
 
-   public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   public SphereDetectionBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
-      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.IHMC_ROOT, pointCloudQueue::put);
       detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class);
 
       this.humanoidReferenceFrames = referenceFrames;

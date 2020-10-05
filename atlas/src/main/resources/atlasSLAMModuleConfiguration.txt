@@ -1,0 +1,9 @@
+#
+#Mon Sep 07 14:06:55 CDT 2020
+SLAM/Module/Enable=true
+SLAM/Module/Parameters=surfaceElementResolution\: 0.04, windowMargin\: 0.0, minimumNumberOfHit\: 1, boundRatio\: 1.1, minimumCorrespondingDistance\: 0.06, steadStateDetectorIterationThreshold\: 3, qualityConvergenceThreshold\: 0.002, translationalEffortConvergenceThreshold\: 0.001, rotationalEffortConvergenceThreshold\: 0.002, enableInitialQualityFilter\: false, initialQualityThreshold\: 0.1, maxOptimizationIterations\: 30 computeSurfaceNormalsInPlane\: true, insertMissInOcTree\: true, includePitchAndRoll\: false, translationPerturbation\: 0.002, rotationPerturbation\: 1.0E-5, maximumQueueSize\: 2147483647, maximumTimeBetweenFrames\: 1.0, longestTimeToLag\: 1000.0, maximumNumberOfSurfaceElements\: 437, maxNumberOfCorrespondences\: 393, computeFramesInParallel\: true, stationaryVelocity\: 0.003, maxVelocity\: 0.01
+SLAM/Normal/Enable=true
+SLAM/SLAMModule/FrameNormalEstimationParameters=search radius\: 0.08, max distance from plane\: 0.02, min consensus ratio\: 0.5, max average deviation ratio\: 0.75, number of iterations\: 10, least squares estimation\: true, weight by number of hits\: true
+SLAM/SLAMModule/NormalEstimationParameters=search radius\: 0.08, max distance from plane\: 0.02, min consensus ratio\: 0.5, max average deviation ratio\: 0.75, number of iterations\: 1, least squares estimation\: true, weight by number of hits\: true
+SLAM/SLAMModule/OcTreeBoundingBoxEnable=true
+SLAM/SLAMModule/OcTreeBoundingBoxParameters=min\: (-1.0, -1.5, -1.5), max\: (2.0, 1.5, 0.5)

@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.net.ConnectionStateListener;
@@ -13,13 +13,13 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {
    private final CompressedVideoDataServer videoDataServer;
 
-   public ImageProcessingBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
+   public ImageProcessingBehavior(String robotName, String namePrefix, ROS2Node ros2Node)
    {
       super(robotName, namePrefix, ros2Node);
 
@@ -28,11 +28,11 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    }
 
    public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack,
-                                           IntrinsicParameters intrinsicParametersToPack);
+                                           CameraPinholeBrown intrinsicParametersToPack);
 
    @Override
    public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition,
-                       QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+                       QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
@@ -50,7 +50,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                          IntrinsicParameters intrinsicParameters)
+                          CameraPinholeBrown intrinsicParameters)
       {
          publisher.publish(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       }

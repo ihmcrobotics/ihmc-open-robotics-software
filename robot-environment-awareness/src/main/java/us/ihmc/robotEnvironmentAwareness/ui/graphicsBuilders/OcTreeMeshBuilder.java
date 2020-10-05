@@ -34,7 +34,7 @@ import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
@@ -89,24 +89,39 @@ public class OcTreeMeshBuilder implements Runnable
    private final REAUIMessager uiMessager;
    private final AtomicReference<UIOcTree> uiOcTree = new AtomicReference<UIOcTree>(null);
 
-   public OcTreeMeshBuilder(REAUIMessager uiMessager)
+   private final Topic<Boolean> requestOcTreeTopic;
+   private final Topic<Boolean> requestPlanarRegionSegmentationTopic;
+
+   public OcTreeMeshBuilder(REAUIMessager uiMessager,
+                            Topic<Boolean> ocTreeEnableTopic,
+                            Topic<Boolean> ocTreeClearTopic,
+                            Topic<Boolean> requestOcTreeTopic,
+                            Topic<Boolean> requestPlanarRegionSegmentationTopic,
+                            Topic<Integer> uiOcTreeDepthTopic,
+                            Topic<ColoringType> uiOcTreeColoringModeTopic,
+                            Topic<OcTreeMeshBuilder.DisplayType> uiOcTreeDisplayTypeTopic,
+                            Topic<Boolean> uiPlanarRegionHideNodesTopic,
+                            Topic<NormalOcTreeMessage> ocTreeStateTopic,
+                            Topic<PlanarRegionSegmentationMessage[]> planarRegionsSegmentationStateTopic)
    {
       this.uiMessager = uiMessager;
-      enable = uiMessager.createInput(REAModuleAPI.OcTreeEnable, false);
-      clear = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
+      this.requestOcTreeTopic = requestOcTreeTopic;
+      this.requestPlanarRegionSegmentationTopic = requestPlanarRegionSegmentationTopic;
+      enable = uiMessager.createInput(ocTreeEnableTopic, false);
+      clear = uiMessager.createInput(ocTreeClearTopic, false);
 
-      treeDepthForDisplay = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeDepth, Integer.MAX_VALUE);
+      treeDepthForDisplay = uiMessager.createPropertyInput(uiOcTreeDepthTopic, Integer.MAX_VALUE);
       treeDepthForDisplay.addListener(this::setProcessChange);
-      coloringType = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeColoringMode, ColoringType.DEFAULT);
+      coloringType = uiMessager.createPropertyInput(uiOcTreeColoringModeTopic, ColoringType.DEFAULT);
       coloringType.addListener(this::setProcessChange);
 
-      displayType = uiMessager.createPropertyInput(REAModuleAPI.UIOcTreeDisplayType, DisplayType.PLANE);
+      displayType = uiMessager.createPropertyInput(uiOcTreeDisplayTypeTopic, DisplayType.PLANE);
       displayType.addListener(this::setProcessChange);
-      hidePlanarRegionNodes = uiMessager.createPropertyInput(REAModuleAPI.UIPlanarRegionHideNodes, false);
+      hidePlanarRegionNodes = uiMessager.createPropertyInput(uiPlanarRegionHideNodesTopic, false);
       hidePlanarRegionNodes.addListener(this::setProcessChange);
 
-      ocTreeState = uiMessager.createInput(REAModuleAPI.OcTreeState);
-      planarRegionSegmentationState = uiMessager.createInput(REAModuleAPI.PlanarRegionsSegmentationState);
+      ocTreeState = uiMessager.createInput(ocTreeStateTopic);
+      planarRegionSegmentationState = uiMessager.createInput(planarRegionsSegmentationStateTopic);
 
       normalBasedColorPalette1D.setHueBased(0.9, 0.8);
       meshBuilder = new JavaFXMultiColorMeshBuilder(normalBasedColorPalette1D);
@@ -138,9 +153,7 @@ public class OcTreeMeshBuilder implements Runnable
 
       if (newMeshViews != null)
       {
-         List<Node> newChildren = children.stream()
-                                          .filter(newMeshViews::contains)
-                                          .collect(Collectors.toList());
+         List<Node> newChildren = children.stream().filter(newMeshViews::contains).collect(Collectors.toList());
 
          children.clear();
          children.addAll(newChildren);
@@ -171,8 +184,8 @@ public class OcTreeMeshBuilder implements Runnable
 
       if (enable.get())
       {
-         uiMessager.submitStateRequestToModule(REAModuleAPI.RequestOctree);
-         uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegionSegmentation);
+         uiMessager.submitStateRequestToModule(requestOcTreeTopic);
+         uiMessager.submitStateRequestToModule(requestPlanarRegionSegmentationTopic);
 
          NormalOcTreeMessage newMessage = ocTreeState.get();
          Map<OcTreeKey, Integer> nodeKeyToRegionIdMap = createNodeKeyToRegionIdMap(planarRegionSegmentationState.getAndSet(null));
@@ -229,57 +242,57 @@ public class OcTreeMeshBuilder implements Runnable
 
       switch (displayType)
       {
-      case CELL:
-         meshBuilder.addCube(size, node.getX(), node.getY(), node.getZ(), color);
-         break;
-      case PLANE:
-         if (node.isNormalSet())
-            meshBuilder.addMesh(createNormalBasedPlane(node), color);
-         break;
-      case HIT_LOCATION:
-         if (node.isHitLocationSet())
-         {
-            Point3D hitLocation = new Point3D();
-            node.getHitLocation(hitLocation);
-            meshBuilder.addTetrahedron(0.0075, hitLocation, color);
-         }
-         break;
-      default:
-         throw new RuntimeException("Unexpected value for display type: " + displayType);
-      }      
+         case CELL:
+            meshBuilder.addCube(size, node.getX(), node.getY(), node.getZ(), color);
+            break;
+         case PLANE:
+            if (node.isNormalSet())
+               meshBuilder.addMesh(createNormalBasedPlane(node), color);
+            break;
+         case HIT_LOCATION:
+            if (node.isHitLocationSet())
+            {
+               Point3D hitLocation = new Point3D();
+               node.getHitLocation(hitLocation);
+               meshBuilder.addTetrahedron(0.0075, hitLocation, color);
+            }
+            break;
+         default:
+            throw new RuntimeException("Unexpected value for display type: " + displayType);
+      }
    }
 
    private Color getNodeColor(ColoringType coloringType, UIOcTreeNode node)
    {
       switch (coloringType)
       {
-      case REGION:
-         if (node.isPartOfRegion())
-         {
-            return getRegionColor(node.getRegionId());
-         }
-         else
-         {
+         case REGION:
+            if (node.isPartOfRegion())
+            {
+               return getRegionColor(node.getRegionId());
+            }
+            else
+            {
+               return DEFAULT_COLOR;
+            }
+         case HAS_CENTER:
+            return node.isHitLocationSet() ? Color.DARKGREEN : Color.RED;
+         case NORMAL:
+            if (node.isNormalSet())
+            {
+               Vector3D normal = new Vector3D();
+               node.getNormal(normal);
+               Vector3D zUp = new Vector3D(0.0, 0.0, 1.0);
+               normal.normalize();
+               double angle = Math.abs(zUp.dot(normal));
+               double hue = 120.0 * angle;
+               return Color.hsb(hue, 1.0, 1.0);
+            }
+            else
+               return DEFAULT_COLOR;
+         case DEFAULT:
+         default:
             return DEFAULT_COLOR;
-         }
-      case HAS_CENTER:
-         return node.isHitLocationSet() ? Color.DARKGREEN : Color.RED;
-      case NORMAL:
-         if (node.isNormalSet())
-         {
-            Vector3D normal = new Vector3D();
-            node.getNormal(normal);
-            Vector3D zUp = new Vector3D(0.0, 0.0, 1.0);
-            normal.normalize();
-            double angle = Math.abs(zUp.dot(normal));
-            double hue = 120.0 * angle;
-            return Color.hsb(hue, 1.0, 1.0);
-         }
-         else
-            return DEFAULT_COLOR;
-      case DEFAULT:
-      default:
-         return DEFAULT_COLOR;
       }
    }
 

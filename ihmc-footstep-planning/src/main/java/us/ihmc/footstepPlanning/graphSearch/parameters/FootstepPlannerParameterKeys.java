@@ -15,20 +15,22 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  idealFootstepWidth                           = keys.addDoubleKey ("Ideal footstep width", 0.22);
    public static final DoubleStoredPropertyKey  idealFootstepLength                          = keys.addDoubleKey ("Ideal footstep length", 0.3);
    public static final DoubleStoredPropertyKey  idealSideStepWidth                           = keys.addDoubleKey ("Ideal side step width", 0.35);
-   public static final DoubleStoredPropertyKey  idealBackStepLength                          = keys.addDoubleKey ("Ideal back step length", -0.2);
+   public static final DoubleStoredPropertyKey  idealBackStepLength                          = keys.addDoubleKey ("Ideal back step length", 0.2);
    public static final DoubleStoredPropertyKey  maxStepReach                                 = keys.addDoubleKey ("Max step reach", 0.45);
    public static final DoubleStoredPropertyKey  minStepLength                                = keys.addDoubleKey ("Min step length", -0.25);
    public static final DoubleStoredPropertyKey  minStepYaw                                   = keys.addDoubleKey ("Min step yaw", -0.3);
    public static final DoubleStoredPropertyKey  maxStepYaw                                   = keys.addDoubleKey ("Max step yaw", 0.6);
    public static final DoubleStoredPropertyKey  minStepWidth                                 = keys.addDoubleKey ("Min step width", 0.15);
    public static final DoubleStoredPropertyKey  maxStepWidth                                 = keys.addDoubleKey ("Max step width", 0.4);
-   public static final DoubleStoredPropertyKey  maxStepZ                                     = keys.addDoubleKey ("Max step Z", 0.28);
+   public static final DoubleStoredPropertyKey  maxLeftStepZ                                 = keys.addDoubleKey ("Max left step Z", 0.28);
+   public static final DoubleStoredPropertyKey  maxRightStepZ                                = keys.addDoubleKey ("Max right step Z", 0.28);
    public static final DoubleStoredPropertyKey  minStepZWhenFullyPitched                     = keys.addDoubleKey ("Min step Z when fully pitched", 0.35);
    public static final DoubleStoredPropertyKey  maxStepXWhenFullyPitched                     = keys.addDoubleKey ("Max step X when fully pitched", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepXWhenForwardAndDown               = keys.addDoubleKey ("Max step X when forward and down", 0.35);
    public static final DoubleStoredPropertyKey  maximumStepYWhenForwardAndDown               = keys.addDoubleKey ("Max step Y when forward and down", 0.4);
    public static final DoubleStoredPropertyKey  maximumStepZWhenForwardAndDown               = keys.addDoubleKey ("Max step Z when forward and down", 0.1);
-   public static final DoubleStoredPropertyKey  wiggleInsideDelta                            = keys.addDoubleKey ("Wiggle inside delta", 0.01);
+   public static final DoubleStoredPropertyKey  wiggleInsideDeltaTarget                      = keys.addDoubleKey ("Wiggle inside delta target", 0.01);
+   public static final DoubleStoredPropertyKey  wiggleInsideDeltaMinimum                     = keys.addDoubleKey ("Wiggle inside delta minimum", 0.0);
    public static final DoubleStoredPropertyKey  maximumStepReachWhenSteppingUp               = keys.addDoubleKey ("Max step reach when stepping up", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepWidthWhenSteppingUp               = keys.addDoubleKey ("Max step width when stepping up", 0.4);
    public static final DoubleStoredPropertyKey  maximumStepZWhenSteppingUp                   = keys.addDoubleKey ("Max step Z when stepping up", Double.POSITIVE_INFINITY);
@@ -45,8 +47,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms              = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
    public static final DoubleStoredPropertyKey  cliffTopHeightToAvoid                        = keys.addDoubleKey ("Cliff top height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffTops                 = keys.addDoubleKey ("Min distance from cliff tops", 0.0);
-   public static final DoubleStoredPropertyKey  minXClearanceFromStance                      = keys.addDoubleKey ("Min X clearance from stance", 0.0);
-   public static final DoubleStoredPropertyKey  minYClearanceFromStance                      = keys.addDoubleKey ("Min Y clearance from stance", 0.0);
+   public static final DoubleStoredPropertyKey  minClearanceFromStance                       = keys.addDoubleKey ("Min clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxWidth                                 = keys.addDoubleKey ("Body box width", 0.7);
    public static final DoubleStoredPropertyKey  bodyBoxHeight                                = keys.addDoubleKey ("Body box height", 1.5);
    public static final DoubleStoredPropertyKey  bodyBoxDepth                                 = keys.addDoubleKey ("Body box depth", 0.3);
@@ -61,10 +62,11 @@ public class FootstepPlannerParameterKeys
    public static final IntegerStoredPropertyKey maximumBranchFactor                          = keys.addIntegerKey ("Max branch factor", -1);
    public static final BooleanStoredPropertyKey enableExpansionMask                          = keys.addBooleanKey("Enable expansion mask", true);
    public static final BooleanStoredPropertyKey enableShinCollisionCheck                     = keys.addBooleanKey("Enable shin collision check", false);
-   public static final DoubleStoredPropertyKey  shinRadius                                   = keys.addDoubleKey("Shin radius", 0.12);
    public static final DoubleStoredPropertyKey  shinLength                                   = keys.addDoubleKey("Shin length", 0.45);
-   public static final DoubleStoredPropertyKey  shinPitch                                    = keys.addDoubleKey("Shin pitch", 0.0);
+   public static final DoubleStoredPropertyKey  shinToeClearance                             = keys.addDoubleKey("Shin toe clearance", 0.0);
+   public static final DoubleStoredPropertyKey  shinHeelClearance                            = keys.addDoubleKey("Shin heel clearance", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
+   public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);
 
    // cost parameters
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                        = keys.addDoubleKey ("AStar heuristics weight", 1.5);

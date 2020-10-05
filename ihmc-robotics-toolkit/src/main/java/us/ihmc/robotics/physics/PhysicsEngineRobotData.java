@@ -1,56 +1,56 @@
 package us.ihmc.robotics.physics;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PhysicsEngineRobotData implements CollidableHolder
 {
-   private final RigidBodyBasics rootBody;
-   private final MultiBodySystemStateWriter robotInitialStateWriter;
+   private static final String ContactCalculatorNameSuffix = SingleContactImpulseCalculator.class.getSimpleName();
 
-   private final YoVariableRegistry robotRegistry;
-   private final YoVariableRegistry environmentContactCalculatorRegistry = new YoVariableRegistry("Environment"
-         + SingleContactImpulseCalculator.class.getSimpleName());
-   private final YoVariableRegistry interRobotContactCalculatorRegistry = new YoVariableRegistry("InterRobot"
-         + SingleContactImpulseCalculator.class.getSimpleName());
-   private final YoVariableRegistry selfContactCalculatorRegistry = new YoVariableRegistry("Self" + SingleContactImpulseCalculator.class.getSimpleName());
+   private final String robotName;
+   private final RigidBodyBasics rootBody;
+   private MultiBodySystemStateWriter robotInitialStateWriter;
+   private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
+
+   private final YoRegistry robotRegistry;
+   private final YoRegistry environmentContactCalculatorRegistry = new YoRegistry("Environment" + ContactCalculatorNameSuffix);
+   private final YoRegistry interRobotContactCalculatorRegistry = new YoRegistry("InterRobot" + ContactCalculatorNameSuffix);
+   private final YoRegistry selfContactCalculatorRegistry = new YoRegistry("Self" + ContactCalculatorNameSuffix);
    private final MultiBodySystemBasics multiBodySystem;
    private final List<Collidable> collidables;
 
    // TODO Following fields are specific to the type of engine used, they need interfacing.
    private final SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin;
    private final RobotJointLimitImpulseBasedCalculator jointLimitConstraintCalculator;
-   private final RecyclingArrayList<YoSingleContactImpulseCalculator> environmentContactConstraintCalculatorPool;
-   private final RecyclingArrayList<YoSingleContactImpulseCalculator> selfContactConstraintCalculatorPool;
-   private final Map<RigidBodyBasics, RecyclingArrayList<YoSingleContactImpulseCalculator>> interRobotContactConstraintCalculatorPools = new HashMap<>();
+   private final YoSingleContactImpulseCalculatorPool environmentContactConstraintCalculatorPool;
+   private final YoSingleContactImpulseCalculatorPool selfContactConstraintCalculatorPool;
+   private final Map<RigidBodyBasics, YoSingleContactImpulseCalculatorPool> interRobotContactConstraintCalculatorPools = new HashMap<>();
 
-   public PhysicsEngineRobotData(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter robotInitialStateWriter,
-                                 MultiBodySystemStateWriter controllerOutputWriter, RobotCollisionModel robotCollisionModel,
+   private final SingleRobotFirstOrderIntegrator integrator;
+
+   public PhysicsEngineRobotData(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.robotName = robotName;
       this.rootBody = rootBody;
-      this.robotInitialStateWriter = robotInitialStateWriter;
-      robotRegistry = new YoVariableRegistry(robotName);
+      robotRegistry = new YoRegistry(robotName);
       multiBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);
-      if (robotInitialStateWriter != null)
-         robotInitialStateWriter.setMultiBodySystem(multiBodySystem);
-      if (controllerOutputWriter != null)
-         controllerOutputWriter.setMultiBodySystem(multiBodySystem);
 
       collidables = robotCollisionModel != null ? robotCollisionModel.getRobotCollidables(multiBodySystem) : Collections.emptyList();
 
-      forwardDynamicsPlugin = new SingleRobotForwardDynamicsPlugin(multiBodySystem, controllerOutputWriter);
+      forwardDynamicsPlugin = new SingleRobotForwardDynamicsPlugin(multiBodySystem);
+      FrameShapePosePredictor frameShapePosePredictor = new FrameShapePosePredictor(forwardDynamicsPlugin.getForwardDynamicsCalculator());
+      collidables.forEach(collidable -> collidable.setFrameShapePosePredictor(frameShapePosePredictor));
 
-      YoVariableRegistry jointLimitConstraintCalculatorRegistry = new YoVariableRegistry(RobotJointLimitImpulseBasedCalculator.class.getSimpleName());
+      YoRegistry jointLimitConstraintCalculatorRegistry = new YoRegistry(RobotJointLimitImpulseBasedCalculator.class.getSimpleName());
       robotRegistry.addChild(jointLimitConstraintCalculatorRegistry);
 
       jointLimitConstraintCalculator = new YoRobotJointLimitImpulseBasedCalculator(rootBody,
@@ -61,43 +61,59 @@ public class PhysicsEngineRobotData implements CollidableHolder
       robotRegistry.addChild(interRobotContactCalculatorRegistry);
       robotRegistry.addChild(selfContactCalculatorRegistry);
 
-      environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(identifier ->
-      {
-         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
-                                                                                            identifier,
+      environmentContactConstraintCalculatorPool = new YoSingleContactImpulseCalculatorPool(20,
+                                                                                            robotName + "Single",
                                                                                             multiBodySystem.getInertialFrame(),
                                                                                             rootBody,
                                                                                             forwardDynamicsPlugin.getForwardDynamicsCalculator(),
                                                                                             null,
                                                                                             null,
+                                                                                            yoGraphicsListRegistry,
                                                                                             environmentContactCalculatorRegistry);
-         if (yoGraphicsListRegistry != null)
-            calculator.setupGraphics(yoGraphicsListRegistry);
-         return calculator;
-      }));
 
-      selfContactConstraintCalculatorPool = new RecyclingArrayList<>(8, SupplierBuilder.indexedSupplier(identifier ->
-      {
-         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Self",
-                                                                                            identifier,
-                                                                                            multiBodySystem.getInertialFrame(),
-                                                                                            rootBody,
-                                                                                            forwardDynamicsPlugin.getForwardDynamicsCalculator(),
-                                                                                            rootBody,
-                                                                                            forwardDynamicsPlugin.getForwardDynamicsCalculator(),
-                                                                                            selfContactCalculatorRegistry);
-         if (yoGraphicsListRegistry != null)
-            calculator.setupGraphics(yoGraphicsListRegistry);
-         return calculator;
-      }));
+      selfContactConstraintCalculatorPool = new YoSingleContactImpulseCalculatorPool(8,
+                                                                                     robotName + "Self",
+                                                                                     multiBodySystem.getInertialFrame(),
+                                                                                     rootBody,
+                                                                                     forwardDynamicsPlugin.getForwardDynamicsCalculator(),
+                                                                                     rootBody,
+                                                                                     forwardDynamicsPlugin.getForwardDynamicsCalculator(),
+                                                                                     yoGraphicsListRegistry,
+                                                                                     selfContactCalculatorRegistry);
 
-      resetCalculators();
+      integrator = new SingleRobotFirstOrderIntegrator(multiBodySystem);
+   }
+
+   public void setControllerOutputWriter(MultiBodySystemStateWriter controllerOutputWriter)
+   {
+      if (controllerOutputWriter != null)
+         controllerOutputWriter.setMultiBodySystem(multiBodySystem);
+      forwardDynamicsPlugin.setControllerOutputWriter(controllerOutputWriter);
+   }
+
+   public void setRobotInitialStateWriter(MultiBodySystemStateWriter robotInitialStateWriter)
+   {
+      this.robotInitialStateWriter = robotInitialStateWriter;
+      setControllerOutputWriter(robotInitialStateWriter);
+   }
+
+   public void addPhysicsOutputReader(MultiBodySystemStateReader physicsOutputReader)
+   {
+      if (physicsOutputReader == null)
+         return;
+      physicsOutputReader.setMultiBodySystem(multiBodySystem);
+      physicsOutputReaders.add(physicsOutputReader);
    }
 
    public void initialize()
    {
       robotInitialStateWriter.write();
       updateFrames();
+   }
+
+   public void notifyPhysicsOutputReaders()
+   {
+      physicsOutputReaders.forEach(MultiBodySystemStateReader::read);
    }
 
    public void updateCollidableBoundingBoxes()
@@ -116,6 +132,11 @@ public class PhysicsEngineRobotData implements CollidableHolder
       return collidables;
    }
 
+   public String getRobotName()
+   {
+      return robotName;
+   }
+
    public RigidBodyBasics getRootBody()
    {
       return rootBody;
@@ -131,13 +152,17 @@ public class PhysicsEngineRobotData implements CollidableHolder
       return forwardDynamicsPlugin;
    }
 
+   public SingleRobotFirstOrderIntegrator getIntegrator()
+   {
+      return integrator;
+   }
+
    public void resetCalculators()
    {
-      environmentContactConstraintCalculatorPool.forEach(calculator -> calculator.clear());
       environmentContactConstraintCalculatorPool.clear();
-      selfContactConstraintCalculatorPool.forEach(calculator -> calculator.clear());
       selfContactConstraintCalculatorPool.clear();
       interRobotContactConstraintCalculatorPools.forEach((rigidBodyBasics, calculators) -> calculators.clear());
+      integrator.reset();
    }
 
    public RobotJointLimitImpulseBasedCalculator getJointLimitConstraintCalculator()
@@ -147,12 +172,12 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
    public SingleContactImpulseCalculator getOrCreateEnvironmentContactConstraintCalculator()
    {
-      return environmentContactConstraintCalculatorPool.add();
+      return environmentContactConstraintCalculatorPool.nextAvailable();
    }
 
    public SingleContactImpulseCalculator getOrCreateSelfContactConstraintCalculator()
    {
-      return selfContactConstraintCalculatorPool.add();
+      return selfContactConstraintCalculatorPool.nextAvailable();
    }
 
    public SingleContactImpulseCalculator getOrCreateInterRobotContactConstraintCalculator(PhysicsEngineRobotData otherRobot)
@@ -162,28 +187,26 @@ public class PhysicsEngineRobotData implements CollidableHolder
       if (otherRobot == this)
          return getOrCreateSelfContactConstraintCalculator();
 
-      RecyclingArrayList<YoSingleContactImpulseCalculator> calculators = interRobotContactConstraintCalculatorPools.get(otherRobot.getRootBody());
+      YoSingleContactImpulseCalculatorPool calculators = interRobotContactConstraintCalculatorPools.get(otherRobot.getRootBody());
 
       if (calculators == null)
       {
-         calculators = new RecyclingArrayList<>(8, SupplierBuilder.indexedSupplier(identifier ->
-         {
-            return new YoSingleContactImpulseCalculator("Dual",
-                                                        identifier,
-                                                        multiBodySystem.getInertialFrame(),
-                                                        rootBody,
-                                                        forwardDynamicsPlugin.getForwardDynamicsCalculator(),
-                                                        otherRobot.getRootBody(),
-                                                        otherRobot.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
-                                                        interRobotContactCalculatorRegistry);
-         }));
+         calculators = new YoSingleContactImpulseCalculatorPool(8,
+                                                                robotName + otherRobot.getRobotName() + "Dual",
+                                                                multiBodySystem.getInertialFrame(),
+                                                                rootBody,
+                                                                forwardDynamicsPlugin.getForwardDynamicsCalculator(),
+                                                                otherRobot.getRootBody(),
+                                                                otherRobot.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
+                                                                null,
+                                                                interRobotContactCalculatorRegistry);
          interRobotContactConstraintCalculatorPools.put(otherRobot.getRootBody(), calculators);
       }
 
-      return calculators.add();
+      return calculators.nextAvailable();
    }
 
-   public YoVariableRegistry getRobotRegistry()
+   public YoRegistry getRobotRegistry()
    {
       return robotRegistry;
    }

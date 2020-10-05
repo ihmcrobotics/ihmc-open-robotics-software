@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -29,14 +30,18 @@ public class FootstepNodeSnappingTools
 
       for (int i = 0; i < initialPolygon.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly vertex = initialPolygon.getVertex(i);
-         transformedVertex.set(vertex.getX(), vertex.getY(), 0.0, 1.0);
-         transform.transform(transformedVertex);
+         transformPolygonVertex(initialPolygon.getVertex(i), transformedVertex, transform);
          footPolygonInRegionFrame.addVertex(transformedVertex.getX() + 1e-10, transformedVertex.getY() + 1e-10);
       }
 
       footPolygonInRegionFrame.update();
       return footPolygonInRegionFrame;
+   }
+
+   public static void transformPolygonVertex(Point2DReadOnly vertex, Vector4D transformedVertexToPack, RigidBodyTransformReadOnly transform)
+   {
+      transformedVertexToPack.set(vertex.getX(), vertex.getY(), 0.0, 1.0);
+      transform.transform(transformedVertexToPack);
    }
 
    /**

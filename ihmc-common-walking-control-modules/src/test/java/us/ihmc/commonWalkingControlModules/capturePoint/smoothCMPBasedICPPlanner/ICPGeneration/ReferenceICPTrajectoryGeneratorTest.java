@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 
 import static us.ihmc.robotics.Assert.*;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ReferenceICPTrajectoryGeneratorTest
 {
@@ -22,7 +22,7 @@ public class ReferenceICPTrajectoryGeneratorTest
    public void testCalculateICPOnSegmentScalar()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoTrajectory linear = new YoTrajectory(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -39,18 +39,18 @@ public class ReferenceICPTrajectoryGeneratorTest
          
          double x = x0 + Math.random() * (xf - x0);
          
-         DenseMatrix64F alphaPrime = new DenseMatrix64F(1, numberOfCoefficients);
-         DenseMatrix64F betaPrime = new DenseMatrix64F(1, numberOfCoefficients);
-         DenseMatrix64F gammaPrime = new DenseMatrix64F(1, 1);
-         DenseMatrix64F alphaBetaPrime = new DenseMatrix64F(1, numberOfCoefficients);
+         DMatrixRMaj alphaPrime = new DMatrixRMaj(1, numberOfCoefficients);
+         DMatrixRMaj betaPrime = new DMatrixRMaj(1, numberOfCoefficients);
+         DMatrixRMaj gammaPrime = new DMatrixRMaj(1, 1);
+         DMatrixRMaj alphaBetaPrime = new DMatrixRMaj(1, numberOfCoefficients);
          
          calculateGeneralizedAlphaPrimeOnCMPSegment(alphaPrime, 0, linear, x, omega0);
          calculateGeneralizedBetaPrimeOnCMPSegment(betaPrime, 0, linear, x, omega0);
          calculateGeneralizedGammaPrimeOnCMPSegment(gammaPrime, 0, linear, x, omega0);
          
-         CommonOps.subtract(alphaPrime, betaPrime, alphaBetaPrime);
+         CommonOps_DDRM.subtract(alphaPrime, betaPrime, alphaBetaPrime);
          
-         DenseMatrix64F polynomialCoefficientVector =  linear.getCoefficientsVector();
+         DMatrixRMaj polynomialCoefficientVector =  linear.getCoefficientsVector();
          
          linear.compute(linear.getFinalTime());
          double icpPositionDesiredFinal = linear.getPosition();
@@ -71,7 +71,7 @@ public class ReferenceICPTrajectoryGeneratorTest
    public void testMatricesPrimeLinear()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoTrajectory linear = new YoTrajectory(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -88,8 +88,8 @@ public class ReferenceICPTrajectoryGeneratorTest
          
          double x = x0 + Math.random() * (xf - x0);
       
-         DenseMatrix64F alphaPrimeAutomatic = new DenseMatrix64F(1, numberOfCoefficients);
-         DenseMatrix64F alphaPrimeManual = new DenseMatrix64F(1, numberOfCoefficients);
+         DMatrixRMaj alphaPrimeAutomatic = new DMatrixRMaj(1, numberOfCoefficients);
+         DMatrixRMaj alphaPrimeManual = new DMatrixRMaj(1, numberOfCoefficients);
       
          calculateGeneralizedAlphaPrimeOnCMPSegment(alphaPrimeAutomatic, 0, linear, x, omega0);
          calculateAlphaPrimeLinear(alphaPrimeManual, x, xf, omega0);
@@ -99,8 +99,8 @@ public class ReferenceICPTrajectoryGeneratorTest
             assertEquals(alphaPrimeAutomatic.get(j), alphaPrimeManual.get(j), EPSILON);
          }
          
-         DenseMatrix64F betaPrimeAutomatic = new DenseMatrix64F(1, numberOfCoefficients);
-         DenseMatrix64F betaPrimeManual = new DenseMatrix64F(1, numberOfCoefficients);
+         DMatrixRMaj betaPrimeAutomatic = new DMatrixRMaj(1, numberOfCoefficients);
+         DMatrixRMaj betaPrimeManual = new DMatrixRMaj(1, numberOfCoefficients);
       
          calculateGeneralizedBetaPrimeOnCMPSegment(betaPrimeAutomatic, 0, linear, x, omega0);
          calculateBetaPrimeLinear(betaPrimeManual, x, xf, omega0);
@@ -110,8 +110,8 @@ public class ReferenceICPTrajectoryGeneratorTest
             assertEquals(betaPrimeAutomatic.get(j), betaPrimeManual.get(j), EPSILON);
          }
          
-         DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
-         DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
+         DMatrixRMaj gammaPrimeAutomatic = new DMatrixRMaj(1, 1);
+         DMatrixRMaj gammaPrimeManual = new DMatrixRMaj(1, 1);
       
          calculateGeneralizedGammaPrimeOnCMPSegment(gammaPrimeAutomatic, 0, linear, x, omega0);
          calculateGammaPrimeLinear(gammaPrimeManual, x, xf, omega0);
@@ -148,12 +148,12 @@ public class ReferenceICPTrajectoryGeneratorTest
       return sigmaLinear;
    }
    
-   private void calculateGeneralizedAlphaPrimeOnCMPSegment(DenseMatrix64F generalizedAlphaPrime, int alphaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
+   private void calculateGeneralizedAlphaPrimeOnCMPSegment(DMatrixRMaj generalizedAlphaPrime, int alphaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       
-      DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(numberOfCoefficients, 1);
-      DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(1, numberOfCoefficients);
+      DMatrixRMaj tPowersDerivativeVector = new DMatrixRMaj(numberOfCoefficients, 1);
+      DMatrixRMaj tPowersDerivativeVectorTranspose = new DMatrixRMaj(1, numberOfCoefficients);
       
       for(int i = 0; i < numberOfCoefficients; i++)
       {
@@ -161,20 +161,20 @@ public class ReferenceICPTrajectoryGeneratorTest
          tPowersDerivativeVectorTranspose.zero();
          
          tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+         CommonOps_DDRM.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
                   
          double scalar = Math.pow(omega0, -i);
-         CommonOps.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVectorTranspose);
+         CommonOps_DDRM.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVectorTranspose);
       }
    }
    
-   private void calculateGeneralizedBetaPrimeOnCMPSegment(DenseMatrix64F generalizedBetaPrime, int betaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
+   private void calculateGeneralizedBetaPrimeOnCMPSegment(DMatrixRMaj generalizedBetaPrime, int betaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
    {            
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       double timeSegmentTotal = cmpPolynomial.getFinalTime() - cmpPolynomial.getInitialTime();
       
-      DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(numberOfCoefficients, 1);
-      DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(1, numberOfCoefficients);
+      DMatrixRMaj tPowersDerivativeVector = new DMatrixRMaj(numberOfCoefficients, 1);
+      DMatrixRMaj tPowersDerivativeVectorTranspose = new DMatrixRMaj(1, numberOfCoefficients);
 
       for(int i = 0; i < numberOfCoefficients; i++)
       {
@@ -182,14 +182,14 @@ public class ReferenceICPTrajectoryGeneratorTest
          tPowersDerivativeVectorTranspose.zero();
 
          tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+         CommonOps_DDRM.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
                   
          double scalar = Math.pow(omega0, betaDerivativeOrder-i) * Math.exp(omega0*(time-timeSegmentTotal));
-         CommonOps.addEquals(generalizedBetaPrime, scalar, tPowersDerivativeVectorTranspose);
+         CommonOps_DDRM.addEquals(generalizedBetaPrime, scalar, tPowersDerivativeVectorTranspose);
       }
    }
    
-   private void calculateGeneralizedGammaPrimeOnCMPSegment(DenseMatrix64F generalizedGammaPrime, int gammaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
+   private void calculateGeneralizedGammaPrimeOnCMPSegment(DMatrixRMaj generalizedGammaPrime, int gammaDerivativeOrder, YoTrajectory cmpPolynomial, double time, double omega0)
    {      
       double timeSegmentTotal = cmpPolynomial.getFinalTime() - cmpPolynomial.getInitialTime();
       
@@ -197,35 +197,35 @@ public class ReferenceICPTrajectoryGeneratorTest
       generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
    } 
    
-   private double calculateICPQuantityScalar(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
-                                             DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
+   private double calculateICPQuantityScalar(DMatrixRMaj generalizedAlphaBetaPrimeMatrix, DMatrixRMaj generalizedGammaPrimeMatrix,
+                                             DMatrixRMaj polynomialCoefficientVector, double icpPositionDesiredFinal)
    {
-      DenseMatrix64F M1 = new DenseMatrix64F(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
+      DMatrixRMaj M1 = new DMatrixRMaj(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
       M1.zero();
 
-      CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
+      CommonOps_DDRM.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
 
-      DenseMatrix64F M2 = new DenseMatrix64F(generalizedGammaPrimeMatrix);
-      CommonOps.scale(icpPositionDesiredFinal, M2);
+      DMatrixRMaj M2 = new DMatrixRMaj(generalizedGammaPrimeMatrix);
+      CommonOps_DDRM.scale(icpPositionDesiredFinal, M2);
       
-      CommonOps.addEquals(M1, M2);
+      CommonOps_DDRM.addEquals(M1, M2);
       
       return M1.get(0, 0);
    }
    
-   public void calculateAlphaPrimeLinear(DenseMatrix64F alphaPrimeLinear, double time, double timeTotal, double omega0)
+   public void calculateAlphaPrimeLinear(DMatrixRMaj alphaPrimeLinear, double time, double timeTotal, double omega0)
    {
       alphaPrimeLinear.set(0, 0, 1);
       alphaPrimeLinear.set(0, 1, time + 1.0/omega0);
    }
    
-   public void calculateBetaPrimeLinear(DenseMatrix64F betaPrimeLinear, double time, double timeTotal, double omega0)
+   public void calculateBetaPrimeLinear(DMatrixRMaj betaPrimeLinear, double time, double timeTotal, double omega0)
    {
       betaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal))*1);
       betaPrimeLinear.set(0, 1, Math.exp(omega0 * (time - timeTotal))*(timeTotal + 1.0/omega0));
    }
    
-   public void calculateGammaPrimeLinear(DenseMatrix64F gammaPrimeLinear, double time, double timeTotal, double omega0)
+   public void calculateGammaPrimeLinear(DMatrixRMaj gammaPrimeLinear, double time, double timeTotal, double omega0)
    {
       gammaPrimeLinear.set(0, 0, Math.exp(omega0 * (time - timeTotal)));
    }

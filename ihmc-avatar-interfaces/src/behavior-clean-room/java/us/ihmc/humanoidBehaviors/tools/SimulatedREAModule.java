@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.tools;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -12,7 +12,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import static us.ihmc.humanoidBehaviors.tools.SimulatedREAModule.SimulatedREAMod
 
 /**
  * Acts as REA, reporting currently visible area as planar regions.
+ * @deprecated Older class. not sure about this abstraction
  */
 public class SimulatedREAModule
 {
@@ -32,7 +33,7 @@ public class SimulatedREAModule
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> realsenseSLAMPublisher;
-   private RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
+   private RemoteSyncedRobotModel syncedRobot;
 
    private final HashMap<Integer, PlanarRegion> supportRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
@@ -48,27 +49,23 @@ public class SimulatedREAModule
    {
       this.map = map;
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA.getNodeName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
-      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput());
+      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MODULE.withOutput());
 
       mode = robotModel == null ? REPUBLISH_FULL_MAP : REDUCE_TO_VIEWABLE_AREA;
 
       if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
-         remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
-         neckFrame = remoteSyncedHumanoidRobotState.getHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
+         syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+         neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
          double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = 180.0;
-         simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
+         simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, neckFrame);
       }
 
-      new ROS2Callback<>(ros2Node,
-                         PlanarRegionsListMessage.class,
-                         null,
-                         ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
-                         this::acceptSupportRegionsList);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withInput(), this::acceptSupportRegionsList);
 
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
@@ -90,13 +87,13 @@ public class SimulatedREAModule
 
    private void process()
    {
-      remoteSyncedHumanoidRobotState.pollHumanoidRobotState();
+      syncedRobot.update();
       ArrayList<PlanarRegion> combinedRegionsList = new ArrayList<>();
       if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
-         if (remoteSyncedHumanoidRobotState.hasReceivedFirstMessage())
+         if (syncedRobot.hasReceivedFirstMessage())
          {
-            combinedRegionsList.addAll(simulatedDepthCamera.filterMapToVisible(map).getPlanarRegionsAsList());
+            combinedRegionsList.addAll(simulatedDepthCamera.computeAndPolygonize(map).getPlanarRegionsAsList());
          }
          else
          {

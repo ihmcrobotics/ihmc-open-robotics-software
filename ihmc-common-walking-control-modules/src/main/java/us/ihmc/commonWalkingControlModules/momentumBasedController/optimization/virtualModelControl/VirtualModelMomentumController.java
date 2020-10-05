@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
@@ -30,14 +30,14 @@ public class VirtualModelMomentumController
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final JointIndexHandler jointIndexHandler;
 
-   private final DenseMatrix64F tempFullJacobian;
-   private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(Wrench.SIZE, 12);
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+   private final DMatrixRMaj tempFullJacobian;
+   private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(Wrench.SIZE, 12);
+   private final DMatrixRMaj tempSelectionMatrix = new DMatrixRMaj(Wrench.SIZE, Wrench.SIZE);
 
-   private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F tempFullObjective = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj tempFullObjective = new DMatrixRMaj(Wrench.SIZE, 1);
 
-   private final DenseMatrix64F fullEffortMatrix;
+   private final DMatrixRMaj fullEffortMatrix;
 
    private final SelectionMatrix6D defaultSelectionMatrix = new SelectionMatrix6D();
 
@@ -45,8 +45,8 @@ public class VirtualModelMomentumController
    {
       this.jointIndexHandler = jointIndexHandler;
 
-      fullEffortMatrix = new DenseMatrix64F(jointIndexHandler.getNumberOfDoFs(), 1);
-      tempFullJacobian = new DenseMatrix64F(Wrench.SIZE, jointIndexHandler.getNumberOfDoFs());
+      fullEffortMatrix = new DMatrixRMaj(jointIndexHandler.getNumberOfDoFs(), 1);
+      tempFullJacobian = new DMatrixRMaj(Wrench.SIZE, jointIndexHandler.getNumberOfDoFs());
    }
 
    public void reset()
@@ -87,7 +87,7 @@ public class VirtualModelMomentumController
       // Step 1, let's get the 'small' Jacobian matrix, j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
       tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
+      CommonOps_DDRM.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
@@ -102,10 +102,10 @@ public class VirtualModelMomentumController
        */
       tempTaskObjective.reshape(taskSize, 1);
       commandToAdd.getDesiredEffort(tempFullObjective);
-      CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
-      CommonOps.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
+      CommonOps_DDRM.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
 
       return true;
    }
@@ -174,7 +174,7 @@ public class VirtualModelMomentumController
       // Step 1, let's get the 'small' Jacobian matrix, j.
       // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
       tempTaskJacobian.reshape(taskSize, jacobianCalculator.getNumberOfDegreesOfFreedom());
-      CommonOps.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
+      CommonOps_DDRM.mult(tempSelectionMatrix, jacobianCalculator.getJacobianMatrix(), tempTaskJacobian);
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
@@ -189,10 +189,10 @@ public class VirtualModelMomentumController
        */
       tempTaskObjective.reshape(taskSize, 1);
       wrench.get(tempFullObjective);
-      CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
-      CommonOps.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
+      CommonOps_DDRM.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
 
       return true;
    }

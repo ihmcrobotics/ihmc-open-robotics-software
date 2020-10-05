@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class YoPawNode
 {
@@ -18,9 +18,9 @@ public class YoPawNode
    private final YoDouble nominalStanceWidth;
    private final YoDouble nodeYaw;
 
-   public YoPawNode(YoVariableRegistry registry)
+   public YoPawNode(YoRegistry registry)
    {
-      movingQuadrant = YoEnum.create("movingQuadrant", RobotQuadrant.class, registry);
+      movingQuadrant = new YoEnum<>("movingQuadrant", registry, RobotQuadrant.class);
       movingNodePosition = new YoFramePoint2D("movingNodePosition", ReferenceFrame.getWorldFrame(), registry);
       nodeYaw = new YoDouble("nodeYaw", registry);
       movingNodePosition.setToNaN();

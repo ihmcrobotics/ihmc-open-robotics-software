@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ExecutionTimerTest
 {
@@ -18,7 +18,7 @@ public class ExecutionTimerTest
    @Test
    public void test()
    {
-      ExecutionTimer executionTimer = new ExecutionTimer("executionTimer", 0.0, new YoVariableRegistry("testRegistry"));
+      ExecutionTimer executionTimer = new ExecutionTimer("executionTimer", 0.0, new YoRegistry("testRegistry"));
       
       long max = 0;
       

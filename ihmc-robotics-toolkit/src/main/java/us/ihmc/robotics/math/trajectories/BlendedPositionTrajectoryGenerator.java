@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -43,7 +43,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    private final FrameVector3D tempAcceleration = new FrameVector3D();
 
    public BlendedPositionTrajectoryGenerator(String prefix, PositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;

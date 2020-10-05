@@ -68,4 +68,16 @@ public class DistanceSphereToPointVectorNN implements DistanceFromModel<Sphere3D
 			distance[i] = computeDistance(points.get(i));
 		}
 	}
+
+   @Override
+   public Class<PointVectorNN> getPointType()
+   {
+      return PointVectorNN.class;
+   }
+
+   @Override
+   public Class<Sphere3D_F64> getModelType()
+   {
+      return Sphere3D_F64.class;
+   }
 }

@@ -25,7 +25,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTr
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -37,7 +37,7 @@ public class QuadrupedCenterOfMassHeightManager
    private static final double minimumTimeRemaining = 0.01;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble controllerTime;
 
@@ -83,7 +83,7 @@ public class QuadrupedCenterOfMassHeightManager
    private final GroundPlaneEstimator upcomingGroundPlaneEstimator;
 
    public QuadrupedCenterOfMassHeightManager(QuadrupedControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
-                                             YoVariableRegistry parentRegistry)
+                                             YoRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.controllerTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();

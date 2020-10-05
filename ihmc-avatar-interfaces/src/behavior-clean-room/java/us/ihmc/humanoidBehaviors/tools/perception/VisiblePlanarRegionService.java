@@ -7,13 +7,13 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.function.Supplier;
 
 /**
- * Assembles and publishes currently visible planar regions on the REA output topic.
+ * Combines and publishes planar regions from suppliers.
  */
 public class VisiblePlanarRegionService
 {
@@ -23,10 +23,15 @@ public class VisiblePlanarRegionService
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
 
-   public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   public VisiblePlanarRegionService(ROS2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   {
+      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS.getName(), planarRegionSuppliers);
+   }
+
+   public VisiblePlanarRegionService(ROS2NodeInterface ros2Node, String topicName, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, topicName); // TODO add name "visible"
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

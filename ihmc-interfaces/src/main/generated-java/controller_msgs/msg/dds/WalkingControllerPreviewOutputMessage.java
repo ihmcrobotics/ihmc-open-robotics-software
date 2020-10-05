@@ -7,39 +7,25 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
-   
- */
+       * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
+       */
 public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControllerPreviewOutputMessage> implements Settable<WalkingControllerPreviewOutputMessage>, EpsilonComparable<WalkingControllerPreviewOutputMessage>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    /**
-       
-    * Interval in time between two frames.
-       
-    */
+            * Interval in time between two frames.
+            */
    public double frame_dt_;
-
    /**
-       
-    * List of configurations for each key frames.
-       
-    */
+            * List of configurations for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
 
    public WalkingControllerPreviewOutputMessage()
    {
-
-
-
       robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> (1000, new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
 
    }
@@ -52,63 +38,47 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
 
    public void set(WalkingControllerPreviewOutputMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       frame_dt_ = other.frame_dt_;
-
 
       robot_configurations_.set(other.robot_configurations_);
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
-
    /**
-       
-    * Interval in time between two frames.
-       
-    */
+            * Interval in time between two frames.
+            */
    public void setFrameDt(double frame_dt)
    {
       frame_dt_ = frame_dt;
    }
    /**
-       
-    * Interval in time between two frames.
-       
-    */
+            * Interval in time between two frames.
+            */
    public double getFrameDt()
    {
       return frame_dt_;
    }
 
 
-
    /**
-       
-    * List of configurations for each key frames.
-       
-    */
+            * List of configurations for each key frames.
+            */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  getRobotConfigurations()
    {
       return robot_configurations_;
@@ -132,12 +102,9 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.frame_dt_, other.frame_dt_, epsilon)) return false;
-
 
       if (this.robot_configurations_.size() != other.robot_configurations_.size()) { return false; }
       else
@@ -159,12 +126,9 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
 
       WalkingControllerPreviewOutputMessage otherMyClass = (WalkingControllerPreviewOutputMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.frame_dt_ != otherMyClass.frame_dt_) return false;
-
 
       if (!this.robot_configurations_.equals(otherMyClass.robot_configurations_)) return false;
 
@@ -177,13 +141,10 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkingControllerPreviewOutputMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("frame_dt=");
       builder.append(this.frame_dt_);      builder.append(", ");
-
       builder.append("robot_configurations=");
       builder.append(this.robot_configurations_);
       builder.append("}");

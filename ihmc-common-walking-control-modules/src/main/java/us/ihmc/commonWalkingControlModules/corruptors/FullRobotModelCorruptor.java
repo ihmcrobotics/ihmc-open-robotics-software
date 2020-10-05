@@ -13,23 +13,23 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class FullRobotModelCorruptor
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final ArrayList<YoVariableChangedListener> variableChangedListeners = new ArrayList<YoVariableChangedListener>();
 
-   public FullRobotModelCorruptor(final FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public FullRobotModelCorruptor(final FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
    {
       this("", fullRobotModel, parentRegistry);
    }
 
-   public FullRobotModelCorruptor(String namePrefix, final FullHumanoidRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
+   public FullRobotModelCorruptor(String namePrefix, final FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
    {
       RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
       LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
@@ -78,7 +78,7 @@ public class FullRobotModelCorruptor
 //      VariableChangedListener hipYawOffsetChangedListener = new VariableChangedListener()
 //      {
 //         @Override
-//         public void notifyOfVariableChange(YoVariable<?> v)
+//         public void notifyOfVariableChange(YoVariable v)
 //         {
 //            for (RobotSide robotSide : RobotSide.values)
 //            {
@@ -134,7 +134,7 @@ public class FullRobotModelCorruptor
 //      VariableChangedListener jointOffsetChangedListener = new VariableChangedListener()
 //      {
 //         @Override
-//         public void notifyOfVariableChange(YoVariable<?> v)
+//         public void notifyOfVariableChange(YoVariable v)
 //         {
 //            AxisAngle axisAngle = new AxisAngle(jointAxis, offset.getDoubleValue());
 //            preCorruptionTransform.setRotationAndZeroTranslation(axisAngle);
@@ -156,15 +156,15 @@ public class FullRobotModelCorruptor
       final YoDouble massVariable = new YoDouble(name + "Mass", registry);
       massVariable.set(rigidBody.getInertia().getMass());
 
-      VariableChangedListener massVariableChangedListener = new VariableChangedListener()
+      YoVariableChangedListener massVariableChangedListener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             rigidBody.getInertia().setMass(massVariable.getDoubleValue());
          }
       };
-      massVariable.addVariableChangedListener(massVariableChangedListener);
+      massVariable.addListener(massVariableChangedListener);
       variableChangedListeners.add(massVariableChangedListener);
 
       FramePoint3D originalCoMOffset = new FramePoint3D();
@@ -172,12 +172,12 @@ public class FullRobotModelCorruptor
       final YoFramePoint3D rigidBodyCoMOffset = new YoFramePoint3D(name + "CoMOffset", rigidBody.getParentJoint().getFrameAfterJoint(), registry);
       rigidBodyCoMOffset.setMatchingFrame(originalCoMOffset);
 
-      VariableChangedListener rigidBodyCoMOffsetChangedListener = new VariableChangedListener()
+      YoVariableChangedListener rigidBodyCoMOffsetChangedListener = new YoVariableChangedListener()
       {
          private final FramePoint3D tempFramePoint = new FramePoint3D();
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             tempFramePoint.setIncludingFrame(rigidBodyCoMOffset);
             tempFramePoint.changeFrame(rigidBody.getBodyFixedFrame());
@@ -190,13 +190,13 @@ public class FullRobotModelCorruptor
 
    public void corruptFullRobotModel()
    {
-      for (VariableChangedListener variableChangedListener : variableChangedListeners)
+      for (YoVariableChangedListener variableChangedListener : variableChangedListeners)
       {
-         variableChangedListener.notifyOfVariableChange(null);
+         variableChangedListener.changed(null);
       }
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

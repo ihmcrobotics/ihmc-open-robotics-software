@@ -3,14 +3,14 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.SensorProcessor;
 
 public class ModularSensorProcessor implements SensorProcessor
 {
    private final ArrayList<SensorProcessor> sensorProcessors = new ArrayList<SensorProcessor>();
    private final String description;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    public ModularSensorProcessor(String name, String description, SensorProcessor sensorProcessor)
    {
@@ -41,13 +41,13 @@ public class ModularSensorProcessor implements SensorProcessor
    public ModularSensorProcessor(String name, String description)
    {
       this.description = description;
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
    }
 
    public void addSensorProcessor(SensorProcessor sensorProcessor)
    {
       this.sensorProcessors.add(sensorProcessor);
-      this.registry.addChild(sensorProcessor.getYoVariableRegistry());
+      this.registry.addChild(sensorProcessor.getYoRegistry());
    }
 
    @Override
@@ -69,7 +69,7 @@ public class ModularSensorProcessor implements SensorProcessor
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

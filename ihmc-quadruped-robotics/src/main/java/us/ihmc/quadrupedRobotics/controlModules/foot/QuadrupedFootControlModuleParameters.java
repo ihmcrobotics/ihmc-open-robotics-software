@@ -14,12 +14,12 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedFootControlModuleParameters
 {
    // final registry
-   private final YoVariableRegistry finalRegistry = new YoVariableRegistry("QuadrupedFootControlModule");
+   private final YoRegistry finalRegistry = new YoRegistry("QuadrupedFootControlModule");
 
    private static final int defaultTouchdownTriggerWindow = 1;
 
@@ -89,7 +89,7 @@ public class QuadrupedFootControlModuleParameters
    }
 
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return finalRegistry;
    }

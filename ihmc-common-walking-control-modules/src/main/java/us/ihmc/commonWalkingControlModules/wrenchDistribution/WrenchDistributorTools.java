@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -88,7 +88,7 @@ public class WrenchDistributorTools
       normalizedSupportVectorToPack.normalize();
    }
 
-   public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector3D> normalizedSupportVectors,
+   public static void computeSupportVectorMatrixBlock(DMatrixRMaj supportVectorMatrixBlock, ArrayList<FrameVector3D> normalizedSupportVectors,
          ReferenceFrame referenceFrame)
    {
       for (int i = 0; i < normalizedSupportVectors.size(); i++)

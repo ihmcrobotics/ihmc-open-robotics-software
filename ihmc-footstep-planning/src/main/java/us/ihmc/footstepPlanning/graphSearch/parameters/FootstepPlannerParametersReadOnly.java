@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepPoseChecker;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -53,7 +53,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Returns the ideal length when walking backwards. This value is negative.
+    * Returns the ideal length when walking backwards. This value is positive.
     */
    default double getIdealBackStepLength()
    {
@@ -61,23 +61,21 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
-    * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-    * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-    * to allowing footsteps that partially intersect planar regions.
-    *
-    * <p>
-    * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-    * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-    * <ul>
-    *    <li>The smallest acceptable distance to the edge of a cliff</li>
-    *    <li>The maximum error between desired and actual foot placement</li>
-    * </ul>
-    * </p>
+    * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+    * to the edge. A negative value means the footstep can overhang a region.
     */
-   default double getWiggleInsideDelta()
+   default double getWiggleInsideDeltaTarget()
    {
-      return get(wiggleInsideDelta);
+      return get(wiggleInsideDeltaTarget);
+   }
+
+   /**
+    * This parameter only is used if {@link #getWiggleWhilePlanning} is true. If a step cannot be wiggled inside by this amount or more,
+    * it will be rejected. Note that if {@link #getWiggleWhilePlanning} if false, it's always best effort on the final plan.
+    */
+   default double getWiggleInsideDeltaMinimum()
+   {
+      return get(wiggleInsideDeltaMinimum);
    }
 
    /**
@@ -129,7 +127,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
+    *    The {@link FootstepPoseChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
    default double getMinimumStepWidth()
@@ -334,16 +332,38 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * z-up sole frame.
     * </p>
     */
-   default double getMaximumStepZ()
+   default double getMaximumLeftStepZ()
    {
-      return get(maxStepZ);
+      return get(maxLeftStepZ);
+   }
+
+   /**
+    * Maximum vertical distance between consecutive footsteps
+    *
+    * <p>
+    * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+    * z-up sole frame.
+    * </p>
+    */
+   default double getMaximumRightStepZ()
+   {
+      return get(maxRightStepZ);
+   }
+
+   /**
+    * Returns nominal maximum step z
+    * @return
+    */
+   default double getMaximumAverageStepZ()
+   {
+      return EuclidCoreTools.interpolate(getMaximumLeftStepZ(), getMaximumRightStepZ(), 0.5);
    }
 
    /**
     * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
     *
     * <p>
-    *    The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+    *    The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     * </p>
     */
@@ -356,7 +376,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
     *
     * <p>
-    *    The maximum depdistanceth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
+    *    The maximum depdistanceth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     * </p>
     */
@@ -465,7 +485,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
+    *   The {@link FootstepPoseChecker} will reject a node if it is too wide using this parameter.
     * </p>
     */
    default double getMaximumStepWidth()
@@ -612,19 +632,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   default double getMinXClearanceFromStance()
+   default double getMinClearanceFromStance()
    {
-      return get(minXClearanceFromStance);
-   }
-
-   /**
-    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-    * this parameter.
-    */
-   default double getMinYClearanceFromStance()
-   {
-      return get(minYClearanceFromStance);
+      return get(minClearanceFromStance);
    }
 
    /**
@@ -727,7 +737,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-    * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */
    default double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
@@ -798,11 +807,19 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Radius of the shin collidable cylinder
+    * How far the shin collision cylinder extends from the toe
     */
-   default double getShinRadius()
+   default double getShinToeClearance()
    {
-      return get(shinRadius);
+      return get(shinToeClearance);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the heel
+    */
+   default double getShinHeelClearance()
+   {
+      return get(shinHeelClearance);
    }
 
    /**
@@ -814,18 +831,18 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Pitch of the shin collidable cylinder
-    */
-   default double getShinPitch()
-   {
-      return get(shinPitch);
-   }
-
-   /**
     * Height offset of shin collidable cylinder
     */
    default double getShinHeightOffset()
    {
       return get(shinHeightOffet);
+   }
+
+   /**
+    * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+    */
+   default RobotSide getStepOnlyWithRequestedSide()
+   {
+      return RobotSide.fromByte((byte) get(stepOnlyWithRequestedSide));
    }
 }

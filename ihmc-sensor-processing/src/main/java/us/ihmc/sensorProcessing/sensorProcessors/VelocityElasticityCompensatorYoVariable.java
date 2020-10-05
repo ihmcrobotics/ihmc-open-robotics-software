@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class VelocityElasticityCompensatorYoVariable extends YoDouble implements ProcessingYoVariable
@@ -19,13 +19,13 @@ public class VelocityElasticityCompensatorYoVariable extends YoDouble implements
    private final double updateDT;
 
    public VelocityElasticityCompensatorYoVariable(String name, YoDouble stiffness, DoubleProvider maximumDeflection, double updateDT,
-                                                  YoVariableRegistry registry)
+                                                  YoRegistry registry)
    {
       this(name, stiffness, maximumDeflection, null, null, updateDT, registry);
    }
 
    public VelocityElasticityCompensatorYoVariable(String name, DoubleProvider stiffness, DoubleProvider maximumDeflection, DoubleProvider rawJointVelocity,
-                                                  DoubleProvider jointTau, double updateDT, YoVariableRegistry registry)
+                                                  DoubleProvider jointTau, double updateDT, YoRegistry registry)
    {
       super(name, registry);
 

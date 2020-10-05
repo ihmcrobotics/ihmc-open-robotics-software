@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -18,6 +19,14 @@ import java.io.File;
 
 public class FootstepPlannerLoggerTest
 {
+   private static final String logDirectory = System.getProperty("user.home") + File.separator + "testLog" + File.separator;
+
+   @AfterAll
+   public static void cleanTestDirectory()
+   {
+      FootstepPlannerLogger.deleteOldLogs(0, logDirectory);
+   }
+
    @Test
    public void testLogger()
    {
@@ -42,15 +51,14 @@ public class FootstepPlannerLoggerTest
       planningModule.getVisibilityGraphParameters().setExplorationDistanceFromStartGoal(50.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      String logDirectory = System.getProperty("user.home") + File.separator + "testLog" + File.separator;
 
       FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
       boolean success = logger.logSession(logDirectory);
       Assertions.assertTrue(success, "Error generating footstep planner log");
 
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      success = logLoader.load(new File(logger.getLatestLogDirectory()));
-      Assertions.assertTrue(success, "Error loading footstep planner log");
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load(new File(logger.getLatestLogDirectory()));
+      Assertions.assertSame(loadResult, FootstepPlannerLogLoader.LoadResult.LOADED, "Error loading footstep planner log");
 
       FootstepPlannerLog log = logLoader.getLog();
 

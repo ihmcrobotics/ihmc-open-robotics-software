@@ -1,13 +1,13 @@
 package us.ihmc.atlas;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 
 public class JointAngleOffsetSliderBoard
 {
 
-   public JointAngleOffsetSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry)
+   public JointAngleOffsetSliderBoard(SimulationConstructionSet scs, YoRegistry registry)
    {
 
         final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);

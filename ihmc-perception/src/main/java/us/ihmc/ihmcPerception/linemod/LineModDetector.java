@@ -349,7 +349,7 @@ public class LineModDetector
             
             BufferedImage image = testCloud.getRGBImage();
             detector.drawDetectionOnImage(bestDetection, image);
-            imagePanel.setBufferedImageSafe(image);
+            imagePanel.setImageUI(image);
          }
          else
          {

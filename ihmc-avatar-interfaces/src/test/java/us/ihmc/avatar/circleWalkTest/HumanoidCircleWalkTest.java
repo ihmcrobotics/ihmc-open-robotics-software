@@ -35,7 +35,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -273,7 +273,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       private ArrayList<OneDoFJointTrajectoryMessage> rightArmMessages;
       private int armJointCheckPointIndex;
       private ArmJointName[] armJoint = getArmJointNames();
-      private YoVariableRegistry circleWalkRegistry;
+      private YoRegistry circleWalkRegistry;
       private final double EPSILON = 1e-2;
       private FullHumanoidRobotModel fullRobotModel;
 
@@ -288,7 +288,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
          armCheckPointFlag = new ArrayList<>();
          armJointCheckPointIndex = 0;
-         circleWalkRegistry = new YoVariableRegistry("CircleWalkTest");
+         circleWalkRegistry = new YoRegistry("CircleWalkTest");
       }
 
       @Override
@@ -399,13 +399,13 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJointBasics joint)
       {
          String variable = "q_d_" + joint.getName();
-         return (YoDouble) humanoidRobotModel.getVariable(variable);
+         return (YoDouble) humanoidRobotModel.findVariable(variable);
       }
 
       public YoDouble getJointDesiredPosition(RobotSide side, ArmJointName jointName)
       {
          String variable = "q_d_" + fullRobotModel.getArmJoint(side, jointName).getName();
-         return (YoDouble) humanoidRobotModel.getVariable(variable);
+         return (YoDouble) humanoidRobotModel.findVariable(variable);
       }
 
       public boolean getFootCheckPointFlag(int index)

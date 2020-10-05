@@ -1,6 +1,16 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 
-import controller_msgs.msg.dds.*;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.AbortWalkingMessage;
+import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
@@ -8,9 +18,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiv
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedStepTeleopController extends QuadrupedToolboxController
 {
@@ -20,7 +28,7 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
 
    public QuadrupedStepTeleopController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                        OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver, YoVariableRegistry parentRegistry,
+                                        OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver, YoRegistry parentRegistry,
                                         YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
@@ -64,7 +72,7 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
       teleopManager.processPlanarRegionsListMessage(message);
    }
 
-   public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   public void processGroundPlaneMessage(GroundPlaneMessage message)
    {
       teleopManager.processGroundPlaneMessage(message);
    }

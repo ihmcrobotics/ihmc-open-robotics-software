@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,23 +10,16 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantVectorProvider;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
-import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
-import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.robotics.trajectories.providers.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class TwoWaypointPositionTrajectoryGeneratorTest
 {
@@ -52,7 +47,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
 
    private void testSimpleTrajectory(int numDesiredSplines)
    {
-      YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoVariableRegistry(""));
+      YoVariableDoubleProvider stepTimeProvider = new YoVariableDoubleProvider("", new YoRegistry("Dummy"));
       stepTimeProvider.set(0.8);
       PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint3D(worldFrame, new double[] {-0.1, 2.3, 0.0}));
       VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0.2, 0.0, -0.05}));
@@ -63,7 +58,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
       waypoints.add(firstIntermediatePosition);
       waypoints.add(secondIntermediatePosition);
 
-      YoFramePoint3D finalPosition = new YoFramePoint3D("", worldFrame, new YoVariableRegistry(""));
+      YoFramePoint3D finalPosition = new YoFramePoint3D("", worldFrame, new YoRegistry("Dummy"));
       finalPosition.set(new FramePoint3D(worldFrame, new double[] {0.2, 2.35, 0.03}));
       YoPositionProvider finalPositionProvider = new YoPositionProvider(finalPosition);
       VectorProvider finalVelocityProvider = new ConstantVectorProvider(new FrameVector3D(worldFrame, new double[] {0.1, 0.01, -0.02}));
@@ -72,7 +67,7 @@ public class TwoWaypointPositionTrajectoryGeneratorTest
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 
       TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, initialPositionProvider,
-            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), null, 0.0,
+            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoRegistry("Dummy"), null, 0.0,
             false);
 
       List<Point3D> points = new ArrayList<Point3D>();

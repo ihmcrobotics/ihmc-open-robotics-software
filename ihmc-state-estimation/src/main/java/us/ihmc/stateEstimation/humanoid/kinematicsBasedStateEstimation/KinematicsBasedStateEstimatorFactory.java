@@ -32,7 +32,7 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -122,7 +122,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public StateEstimatorController createStateEstimator(YoVariableRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
+   public StateEstimatorController createStateEstimator(YoRegistry stateEstimatorRegistry, YoGraphicsListRegistry stateEstimatorYoGraphicsListRegistry)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 

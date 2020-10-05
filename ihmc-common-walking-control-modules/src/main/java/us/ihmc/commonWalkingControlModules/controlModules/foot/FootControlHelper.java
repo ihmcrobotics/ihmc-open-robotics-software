@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FootControlHelper
@@ -33,7 +33,6 @@ public class FootControlHelper
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final ToeSlippingDetector toeSlippingDetector;
@@ -43,10 +42,11 @@ public class FootControlHelper
 
    public FootControlHelper(RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
+                            WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             FootholdRotationParameters footholdRotationParameters,
-                            YoVariableRegistry registry)
+                            YoRegistry registry)
    {
       this.robotSide = robotSide;
       this.controllerToolbox = controllerToolbox;
@@ -78,15 +78,16 @@ public class FootControlHelper
 
       if (walkingControllerParameters.enableLegSingularityAndKneeCollapseAvoidanceModule())
       {
-//         legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-//                                                                                                                       walkingControllerParameters,
-//                                                                                                                       controllerToolbox, registry);
-         legSingularityAndKneeCollapseAvoidanceControlModule = null;
-         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix, contactableFoot, robotSide, walkingControllerParameters, controllerToolbox, registry);
+         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix,
+                                                                           contactableFoot,
+                                                                           robotSide,
+                                                                           workspaceLimiterParameters,
+                                                                           walkingControllerParameters,
+                                                                           controllerToolbox,
+                                                                           registry);
       }
       else
       {
-         legSingularityAndKneeCollapseAvoidanceControlModule = null;
          workspaceLimiterControlModule = null;
       }
 
@@ -170,11 +171,6 @@ public class FootControlHelper
    public FrameVector3D getFullyConstrainedNormalContactVector()
    {
       return fullyConstrainedNormalContactVector;
-   }
-
-   public LegSingularityAndKneeCollapseAvoidanceControlModule getLegSingularityAndKneeCollapseAvoidanceControlModule()
-   {
-      return legSingularityAndKneeCollapseAvoidanceControlModule;
    }
 
    public WorkspaceLimiterControlModule getWorkspaceLimiterControlModule()

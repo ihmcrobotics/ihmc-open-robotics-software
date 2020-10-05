@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie;
 
 import com.martiansoftware.jsap.JSAPException;
-
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.communication.producers.VideoControlSettings;
@@ -9,7 +8,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.externalForceEstimation.ValkyrieExternalForceEstimationModule;
-import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -43,11 +41,11 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       if (ihmc_launchFootstepPlannerModule)
-         networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+         networkProcessor.setupFootstepPlanningToolboxModule();
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
       ValkyrieSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
@@ -78,12 +76,12 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
 
       new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
-      networkProcessor.setupFootstepPlanningToolboxModule(new ValkyrieAdaptiveSwingParameters());
+      networkProcessor.setupFootstepPlanningToolboxModule();
       networkProcessor.setupWalkingPreviewModule(false);
 
       networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupRosModule();
 
       ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();

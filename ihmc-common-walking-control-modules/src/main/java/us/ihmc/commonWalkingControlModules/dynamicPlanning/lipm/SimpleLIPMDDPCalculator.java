@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
@@ -50,7 +50,7 @@ public class SimpleLIPMDDPCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
-   public void initialize(DenseMatrix64F currentState, SegmentedFrameTrajectory3D copDesiredPlan)
+   public void initialize(DMatrixRMaj currentState, SegmentedFrameTrajectory3D copDesiredPlan)
    {
       modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
@@ -59,14 +59,14 @@ public class SimpleLIPMDDPCalculator
 
       double time = 0.0;
       copDesiredPlan.update(time, tempPoint, tempVector);
-      DenseMatrix64F desiredState = desiredTrajectory.getState(0);
+      DMatrixRMaj desiredState = desiredTrajectory.getState(0);
 
       desiredState.set(0, tempPoint.getX());
       desiredState.set(1, tempPoint.getY());
       desiredState.set(2, tempVector.getX());
       desiredState.set(3, tempVector.getY());
 
-      DenseMatrix64F desiredControl = desiredTrajectory.getControl(0);
+      DMatrixRMaj desiredControl = desiredTrajectory.getControl(0);
       desiredControl.set(0, tempPoint.getX());
       desiredControl.set(1, tempPoint.getY());
 

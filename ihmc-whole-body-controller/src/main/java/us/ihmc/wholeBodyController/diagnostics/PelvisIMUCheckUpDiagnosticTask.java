@@ -2,11 +2,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,23 +22,19 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
-import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
-import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.*;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 {
    private Logger logger;
    private final NumberFormat doubleFormat = new DecimalFormat("0.000;-0.000");
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final IMUDefinition imuDefinition;
    private final IMUSensorReadOnly imuSensor;
@@ -109,7 +101,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       imuSensor = toolbox.getIMUSensorReadOnly(imuName);
 
-      registry = new YoVariableRegistry(imuName + nameSuffix);
+      registry = new YoRegistry(imuName + nameSuffix);
       diagnosticParameters = toolbox.getDiagnosticParameters();
 
       for (Axis3D axis : Axis3D.values)
@@ -550,7 +542,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   public void attachParentYoVariableRegistry(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

@@ -1,11 +1,11 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -18,19 +18,17 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class PlanarRegion implements SupportingVertexHolder
+public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterface<PlanarRegion>
 {
    public static final int NO_REGION_ID = -1;
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
@@ -48,6 +46,8 @@ public class PlanarRegion implements SupportingVertexHolder
     * the plane.
     */
    private final List<ConvexPolygon2D> convexPolygons;
+   /** To detect concave hull separation */
+   private List<Boolean> visited;
 
    private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -58,15 +58,15 @@ public class PlanarRegion implements SupportingVertexHolder
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
+   private final PlanarRegionOrigin origin = new PlanarRegionOrigin(fromLocalToWorldTransform);
+   private final PlanarRegionNormal normal = new PlanarRegionNormal(fromLocalToWorldTransform);
+
    /**
     * Create a new, empty planar region.
     */
    public PlanarRegion()
    {
-      convexPolygons = new ArrayList<>();
-      concaveHullsVertices = new ArrayList<>();
-      updateBoundingBox();
-      updateConvexHull();
+      this(new RigidBodyTransform(), new ArrayList<>());
    }
 
    /**
@@ -78,13 +78,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public PlanarRegion(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
-      fromLocalToWorldTransform.set(transformToWorld);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      convexPolygons = planarRegionConvexPolygons;
-      updateBoundingBox();
-      updateConvexHull();
-
-      concaveHullsVertices = new ArrayList<>();
+      this(transformToWorld, new ArrayList<>(), planarRegionConvexPolygons);
       updateConcaveHull();
    }
    
@@ -117,7 +111,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param convexPolygon a single convex polygon that represents the planar region. Expressed in
     *           local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransform transformToWorld, ConvexPolygon2D convexPolygon)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier convexPolygon)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -130,7 +124,7 @@ public class PlanarRegion implements SupportingVertexHolder
       checkConcaveHullRepeatVertices(false);
 
       convexPolygons = new ArrayList<>();
-      convexPolygons.add(convexPolygon);
+      convexPolygons.add(new ConvexPolygon2D(convexPolygon));
       updateBoundingBox();
       updateConvexHull();
    }
@@ -146,7 +140,8 @@ public class PlanarRegion implements SupportingVertexHolder
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
       convexPolygons.clear();
-      convexPolygons.addAll(planarRegionConvexPolygons);
+      for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
+         convexPolygons.add(planarRegionConvexPolygons.get(i));
 
       updateBoundingBox();
       updateConvexHull();
@@ -863,35 +858,18 @@ public class PlanarRegion implements SupportingVertexHolder
          return pollConvexPolygon(getNumberOfConvexPolygons() - 1);
    }
 
-   /**
-    * Retrieves and returns a copy of the normal in world frame of this planar region.
-    */
-   public Vector3D getNormal()
+   /** {@inheritDoc} */
+   @Override
+   public Point3DReadOnly getPoint()
    {
-      Vector3D normal = new Vector3D();
-      getNormal(normal);
+      return origin;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public UnitVector3DReadOnly getNormal()
+   {
       return normal;
-   }
-
-   /**
-    * Retrieves the normal of this planar region in the world frame and stores it in the given {@link Vector3D}.
-    *
-    * @param normalToPack used to store the normal of this planar region.
-    */
-   public void getNormal(Vector3DBasics normalToPack)
-   {
-      normalToPack.setX(fromLocalToWorldTransform.getM02());
-      normalToPack.setY(fromLocalToWorldTransform.getM12());
-      normalToPack.setZ(fromLocalToWorldTransform.getM22());
-   }
-
-   /**
-    * Retrieves the origin of this planar region in the world frame and stores it in the given {@link Point3D}.
-    * @param originToPack
-    */
-   public void getOrigin(Point3DBasics originToPack)
-   {
-      originToPack.set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
    }
 
    /**
@@ -1149,6 +1127,8 @@ public class PlanarRegion implements SupportingVertexHolder
          return;
       }
 
+      visited = new ArrayList<>(); // for concave hull separation detection
+
       int maximumIterations = 0;
 
       double minX = Double.MAX_VALUE;
@@ -1157,6 +1137,7 @@ public class PlanarRegion implements SupportingVertexHolder
       for (int i = 0; i < convexPolygons.size(); i++)
       {
          ConvexPolygon2D polygon = convexPolygons.get(i);
+         visited.add(false);
 
          // Concave hull generation breaks regions contain empty, point or line sub-polygons
          if (polygon.getNumberOfVertices() < 3)
@@ -1193,6 +1174,7 @@ public class PlanarRegion implements SupportingVertexHolder
       }
 
       concaveHullsVertices.add(new Point2D(convexPolygons.get(minXPolygonIndex).getVertex(0)));
+      visited.set(minXPolygonIndex, true);
       int polygonIndex = minXPolygonIndex;
       int vertexIndex = 0;
       int iterations = 0;
@@ -1217,6 +1199,7 @@ public class PlanarRegion implements SupportingVertexHolder
          else
          {
             concaveHullsVertices.add(new Point2D(convexPolygons.get(polygonIndex).getVertex(vertexIndex)));
+            visited.set(polygonIndex, true);
          }
 
          iterations++;
@@ -1226,6 +1209,20 @@ public class PlanarRegion implements SupportingVertexHolder
       {
          LogTools.error("Unable to solve for concave hull. region " + regionId);
          concaveHullsVertices.clear();
+      }
+   }
+
+   public void checkConcaveHullIsNotSeparated()
+   {
+      boolean allVisited = true;
+      for (Boolean value : visited)
+      {
+         allVisited &= value;
+      }
+      if (!allVisited)
+      {
+         LogTools.error("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
+         throw new RuntimeException("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
       }
    }
 

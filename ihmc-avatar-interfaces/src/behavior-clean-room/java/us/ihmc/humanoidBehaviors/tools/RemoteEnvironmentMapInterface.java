@@ -2,16 +2,17 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class RemoteEnvironmentMapInterface
 {
@@ -22,19 +23,24 @@ public class RemoteEnvironmentMapInterface
 
    private final Stopwatch stopwatch = new Stopwatch();
 
-   public RemoteEnvironmentMapInterface(Ros2NodeInterface ros2Node)
-   {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME, this::acceptRealsenseSLAMRegions);
+   private final ArrayList<Consumer<PlanarRegionsList>> callbacks = new ArrayList<>();
 
-      new ROS2Callback<>(ros2Node,
-                         PlanarRegionsListMessage.class,
-                         ROS2Tools.REA_SUPPORT_REGIONS_TOPIC_NAME,
-                         this::acceptAdditionalRegionList);
+   public RemoteEnvironmentMapInterface(ROS2NodeInterface ros2Node)
+   {
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MODULE.withOutput(), this::acceptRealsenseSLAMRegions);
+
+      // used to be "/ihmc/rea/custom_region/input/planar_regions_list"
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withOutput(), this::acceptAdditionalRegionList);
    }
 
    public synchronized PlanarRegionsList getLatestCombinedRegionsList()
    {
       return latestCombinedRegionsList;
+   }
+
+   public void addPlanarRegionsListCallback(Consumer<PlanarRegionsList> planarRegionsListConsumer)
+   {
+      callbacks.add(planarRegionsListConsumer);
    }
 
    private void acceptRealsenseSLAMRegions(PlanarRegionsListMessage message)
@@ -82,6 +88,11 @@ public class RemoteEnvironmentMapInterface
       combinedRegionsList.addAll(realsenseSLAMRegions.getPlanarRegionsAsList());
       combinedRegionsList.addAll(supportRegions.values());
       latestCombinedRegionsList = new PlanarRegionsList(combinedRegionsList);
+
+      for (Consumer<PlanarRegionsList> callback : callbacks)
+      {
+         callback.accept(latestCombinedRegionsList);
+      }
    }
 
    /**

@@ -10,7 +10,8 @@ public class TunedFootstepPlannerParameters
    private double maxStepLength     ;
    private double maxStepWidth      ;
    private double maxStepYaw        ;
-   private double maxStepZ          ;
+   private double maxLeftStepZ      ;
+   private double maxRightStepZ     ;
    private double maxXYWiggle       ;
    private double maxYawWiggle      ;
    private double minFootholdPercent;
@@ -18,8 +19,7 @@ public class TunedFootstepPlannerParameters
    private double minStepWidth      ;
    private double minStepYaw        ;
    private double minSurfaceIncline ;
-   private double minXClearance     ;
-   private double minYClearance     ;
+   private double minClearance      ;
    private double wiggleInsideDelta ;
    private double stepUpHeight      ;
    private double stepDownHeight    ;
@@ -34,11 +34,12 @@ public class TunedFootstepPlannerParameters
    public void setFromFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       cliffClearance      = footstepPlannerParameters.getMinimumDistanceFromCliffBottoms();
-      cliffHeight         = footstepPlannerParameters.getCliffBaseHeightToAvoid()             ;
+      cliffHeight         = footstepPlannerParameters.getCliffBaseHeightToAvoid()         ;
       maxStepLength       = footstepPlannerParameters.getMaximumStepReach()               ;
       maxStepWidth        = footstepPlannerParameters.getMaximumStepWidth()               ;
       maxStepYaw          = footstepPlannerParameters.getMaximumStepYaw()                 ;
-      maxStepZ            = footstepPlannerParameters.getMaximumStepZ()                   ;
+      maxLeftStepZ        = footstepPlannerParameters.getMaximumLeftStepZ()               ;
+      maxRightStepZ        = footstepPlannerParameters.getMaximumRightStepZ()             ;
       maxXYWiggle         = footstepPlannerParameters.getMaximumXYWiggleDistance()        ;
       maxYawWiggle        = footstepPlannerParameters.getMaximumYawWiggle()               ;
       minFootholdPercent  = footstepPlannerParameters.getMinimumFootholdPercent()         ;
@@ -46,9 +47,8 @@ public class TunedFootstepPlannerParameters
       minStepWidth        = footstepPlannerParameters.getMinimumStepWidth()               ;
       minStepYaw          = footstepPlannerParameters.getMinimumStepYaw()                 ;
       minSurfaceIncline   = footstepPlannerParameters.getMinimumSurfaceInclineRadians()   ;
-      minXClearance       = footstepPlannerParameters.getMinXClearanceFromStance()        ;
-      minYClearance       = footstepPlannerParameters.getMinYClearanceFromStance()        ;
-      wiggleInsideDelta   = footstepPlannerParameters.getWiggleInsideDelta()              ;
+      minClearance        = footstepPlannerParameters.getMinClearanceFromStance()         ;
+      wiggleInsideDelta   = footstepPlannerParameters.getWiggleInsideDeltaTarget()              ;
       stepUpHeight        = footstepPlannerParameters.getMaximumStepZWhenSteppingUp()     ;
       stepDownHeight      = footstepPlannerParameters.getMaximumStepZWhenForwardAndDown() ;
       maxStepUpX          = footstepPlannerParameters.getMaximumStepReachWhenSteppingUp() ;
@@ -62,7 +62,8 @@ public class TunedFootstepPlannerParameters
       footstepPlannerParameters.setMaximumStepReach(                      maxStepLength       );
       footstepPlannerParameters.setMaximumStepWidth(                      maxStepWidth        );
       footstepPlannerParameters.setMaximumStepYaw(                        maxStepYaw          );
-      footstepPlannerParameters.setMaximumStepZ(                          maxStepZ            );
+      footstepPlannerParameters.setMaximumLeftStepZ(                      maxLeftStepZ        );
+      footstepPlannerParameters.setMaximumRightStepZ(                     maxRightStepZ       );
       footstepPlannerParameters.setMaximumXYWiggleDistance(               maxXYWiggle         );
       footstepPlannerParameters.setMaximumYawWiggle(                      maxYawWiggle        );
       footstepPlannerParameters.setMinimumFootholdPercent(                minFootholdPercent  );
@@ -70,9 +71,8 @@ public class TunedFootstepPlannerParameters
       footstepPlannerParameters.setMinimumStepWidth(                      minStepWidth        );
       footstepPlannerParameters.setMinimumStepYaw(                        minStepYaw          );
       footstepPlannerParameters.setMinimumSurfaceInclineRadians(          minSurfaceIncline   );
-      footstepPlannerParameters.setMinXClearanceFromStance(               minXClearance       );
-      footstepPlannerParameters.setMinYClearanceFromStance(               minYClearance       );
-      footstepPlannerParameters.setWiggleInsideDelta(                     wiggleInsideDelta   );
+      footstepPlannerParameters.setMinClearanceFromStance(                minClearance        );
+      footstepPlannerParameters.setWiggleInsideDeltaTarget(wiggleInsideDelta   );
       footstepPlannerParameters.setMaximumStepZWhenSteppingUp(            stepUpHeight        );
       footstepPlannerParameters.setMaximumStepZWhenForwardAndDown(        stepDownHeight      );
       footstepPlannerParameters.setMaximumStepReachWhenSteppingUp(        maxStepUpX          );
@@ -129,14 +129,24 @@ public class TunedFootstepPlannerParameters
       this.maxStepYaw = maxStepYaw;
    }
 
-   public double getMaxStepZ()
+   public double getMaxLeftStepZ()
    {
-      return maxStepZ;
+      return maxLeftStepZ;
    }
 
-   public void setMaxStepZ(double maxStepZ)
+   public void setMaxLeftStepZ(double maxStepZ)
    {
-      this.maxStepZ = maxStepZ;
+      this.maxLeftStepZ = maxStepZ;
+   }
+
+   public double getMaxRightStepZ()
+   {
+      return maxRightStepZ;
+   }
+
+   public void setMaxRightStepZ(double maxStepZ)
+   {
+      this.maxRightStepZ = maxStepZ;
    }
 
    public double getMaxXYWiggle()
@@ -209,24 +219,14 @@ public class TunedFootstepPlannerParameters
       this.minSurfaceIncline = minSurfaceIncline;
    }
 
-   public double getMinXClearance()
+   public double getMinClearance()
    {
-      return minXClearance;
+      return minClearance;
    }
 
-   public void setMinXClearance(double minXClearance)
+   public void setMinClearance(double minClearance)
    {
-      this.minXClearance = minXClearance;
-   }
-
-   public double getMinYClearance()
-   {
-      return minYClearance;
-   }
-
-   public void setMinYClearance(double minYClearance)
-   {
-      this.minYClearance = minYClearance;
+      this.minClearance = minClearance;
    }
 
    public double getWiggleInsideDelta()

@@ -7,9 +7,9 @@ import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCommunicatorInterface
 {
@@ -17,12 +17,12 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    private final IHMCRealtimeROS2Publisher<PelvisPoseErrorPacket> poseErrorPublisher;
    private final IHMCRealtimeROS2Publisher<LocalizationPacket> localizationPublisher;
 
-   public PelvisPoseCorrectionCommunicator(RealtimeRos2Node realtimeRos2Node, MessageTopicNameGenerator topicNameGenerator)
+   public PelvisPoseCorrectionCommunicator(RealtimeROS2Node realtimeROS2Node, ROS2Topic topicName)
    {
-      if (realtimeRos2Node != null && topicNameGenerator != null)
+      if (realtimeROS2Node != null && topicName != null)
       {
-         poseErrorPublisher = ROS2Tools.createPublisher(realtimeRos2Node, PelvisPoseErrorPacket.class, topicNameGenerator);
-         localizationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, LocalizationPacket.class, topicNameGenerator);
+         poseErrorPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, PelvisPoseErrorPacket.class, topicName);
+         localizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, LocalizationPacket.class, topicName);
       }
       else
       {

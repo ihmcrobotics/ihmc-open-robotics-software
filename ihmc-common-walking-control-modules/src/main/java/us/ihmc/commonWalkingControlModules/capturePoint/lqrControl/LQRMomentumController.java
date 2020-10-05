@@ -1,23 +1,27 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import java.util.List;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.linearAlgebra.careSolvers.*;
+import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
+import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This LQR controller tracks the CoM dynamics of the robot, using a VRP output.
@@ -35,7 +39,7 @@ import java.util.List;
  */
 public class LQRMomentumController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D relativeCoMPosition = new YoFramePoint3D("relativeCoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -43,72 +47,73 @@ public class LQRMomentumController
    private final YoFramePoint3D finalVRPPosition = new YoFramePoint3D("finalVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D referenceVRPPosition = new YoFramePoint3D("referenceVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D feedbackVRPPosition = new YoFramePoint3D("feedbackVRPPosition", ReferenceFrame.getWorldFrame(), registry);
-
+   private final YoDouble omega = new YoDouble("omega", registry);
+   
    static final double defaultVrpTrackingWeight = 1e2;
    static final double defaultMomentumRateWeight = 1e-4;
 
    private double vrpTrackingWeight = defaultVrpTrackingWeight;
    private double momentumRateWeight = defaultMomentumRateWeight;
 
-   final DenseMatrix64F Q = new DenseMatrix64F(3, 3);
-   final DenseMatrix64F R = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj Q = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj R = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F A = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F B = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F BTranspose = new DenseMatrix64F(3, 6);
-   final DenseMatrix64F C = new DenseMatrix64F(3, 6);
-   final DenseMatrix64F D = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj A = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj B = new DMatrixRMaj(6, 3);
+   private final DMatrixRMaj BTranspose = new DMatrixRMaj(3, 6);
+   final DMatrixRMaj C = new DMatrixRMaj(3, 6);
+   final DMatrixRMaj D = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F A2 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F A2Inverse = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F B2 = new DenseMatrix64F(6, 3);
+   final DMatrixRMaj A2 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj A2Inverse = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj B2 = new DMatrixRMaj(6, 3);
 
-   final DenseMatrix64F Q1 = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj Q1 = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F R1 = new DenseMatrix64F(3, 3);
-   final DenseMatrix64F R1Inverse = new DenseMatrix64F(3, 3);
+   final DMatrixRMaj R1 = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj R1Inverse = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F N = new DenseMatrix64F(6, 3);
-   final DenseMatrix64F NTranspose = new DenseMatrix64F(3, 6);
+   final DMatrixRMaj N = new DMatrixRMaj(6, 3);
+   final DMatrixRMaj NTranspose = new DMatrixRMaj(3, 6);
 
-   final DenseMatrix64F NB = new DenseMatrix64F(3, 6);
+   final DMatrixRMaj NB = new DMatrixRMaj(3, 6);
 
-   final DenseMatrix64F S1 = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F s2 = new DenseMatrix64F(6, 1);
+   final DMatrixRMaj S1 = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj s2 = new DMatrixRMaj(6, 1);
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
 
-   final DenseMatrix64F K1 = new DenseMatrix64F(3, 6);
-   final DenseMatrix64F k2 = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F u = new DenseMatrix64F(3, 1);
+   final DMatrixRMaj K1 = new DMatrixRMaj(3, 6);
+   final DMatrixRMaj k2 = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj u = new DMatrixRMaj(3, 1);
 
-   final DenseMatrix64F QRiccati = new DenseMatrix64F(3, 3);
-   final DenseMatrix64F ARiccati = new DenseMatrix64F(6, 6);
+   final DMatrixRMaj QRiccati = new DMatrixRMaj(3, 3);
+   final DMatrixRMaj ARiccati = new DMatrixRMaj(6, 6);
 
-   private final DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-   private final DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseDQ = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F R1InverseBTranspose = new DenseMatrix64F(3, 6);
-   private final DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
+   private final DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj R1InverseDQ = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj R1InverseBTranspose = new DMatrixRMaj(3, 6);
+   private final DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
-   final DenseMatrix64F A2Exponential = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F timeScaledA2 = new DenseMatrix64F(6, 6);
-   final DenseMatrix64F summedBetas = new DenseMatrix64F(6, 1);
+   final DMatrixRMaj A2Exponential = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj timeScaledA2 = new DMatrixRMaj(6, 6);
+   final DMatrixRMaj summedBetas = new DMatrixRMaj(6, 1);
 
-   private final DenseMatrix64F finalVRPState = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj finalVRPState = new DMatrixRMaj(6, 1);
 
-   private final DenseMatrix64F relativeState = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F relativeDesiredVRP = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj relativeState = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj relativeDesiredVRP = new DMatrixRMaj(3, 1);
 
-   final RecyclingArrayList<DenseMatrix64F> alphas = new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1));
-   final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> betas = new RecyclingArrayList<>(
-         () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(6, 1)));
-   final RecyclingArrayList<RecyclingArrayList<DenseMatrix64F>> gammas = new RecyclingArrayList<>(
-         () -> new RecyclingArrayList<>(() -> new DenseMatrix64F(3, 1)));
+   final RecyclingArrayList<DMatrixRMaj> alphas = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
+   final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> betas = new RecyclingArrayList<>(
+         () -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
+   final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> gammas = new RecyclingArrayList<>(
+         () -> new RecyclingArrayList<>(() -> new DMatrixRMaj(3, 1)));
 
    final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
 
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(3);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(3);
 
    private final MatrixExponentialCalculator a2ExponentialCalculator = new MatrixExponentialCalculator(6);
    private final CARESolver careSolver = new DefectCorrectionCARESolver(new SignFunctionCARESolver());
@@ -120,11 +125,22 @@ public class LQRMomentumController
       this(omega, null);
    }
 
-   public LQRMomentumController(DoubleProvider omega, YoVariableRegistry parentRegistry)
+   public LQRMomentumController(DoubleProvider omega, YoRegistry parentRegistry)
    {
-      computeDynamicsMatrix(omega.getValue());
+      this(omega.getValue(), parentRegistry);
+   }
+   
+   public LQRMomentumController(double omega, YoRegistry parentRegistry)
+   {
+      this.omega.set(omega);
+      computeDynamicsMatrix(this.omega.getDoubleValue());
+                            
+      this.omega.addListener(v -> {
+         computeDynamicsMatrix(this.omega.getDoubleValue());
+      });
 
       computeS1();
+      
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -144,14 +160,14 @@ public class LQRMomentumController
       shouldUpdateS1 = true;
    }
 
-   private void computeDynamicsMatrix(double omega)
+   public void computeDynamicsMatrix(double omega)
    {
-      MatrixTools.setMatrixBlock(A, 0, 3, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(B, 3, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(C, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps.identity(3, 3), 0, 0, 3, 3, -1.0 / MathTools.square(omega));
+      MatrixTools.setMatrixBlock(A, 0, 3, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(B, 3, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(C, 0, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(D, 0, 0, CommonOps_DDRM.identity(3, 3), 0, 0, 3, 3, -1.0 / MathTools.square(omega));
 
-      CommonOps.transpose(B, BTranspose);
+      CommonOps_DDRM.transpose(B, BTranspose);
 
       shouldUpdateS1 = true;
    }
@@ -185,16 +201,16 @@ public class LQRMomentumController
 
       NativeCommonOps.multQuad(C, Q, Q1);
       NativeCommonOps.multQuad(D, Q, R1);
-      CommonOps.addEquals(R1, R);
+      CommonOps_DDRM.addEquals(R1, R);
 
       NativeCommonOps.invert(R1, R1Inverse);
 
-      CommonOps.mult(D, Q, DQ);
+      CommonOps_DDRM.mult(D, Q, DQ);
 
       tempMatrix.reshape(3, 3);
-      CommonOps.mult(Q, D, tempMatrix);
-      CommonOps.multTransA(C, tempMatrix, N);
-      CommonOps.transpose(N, NTranspose);
+      CommonOps_DDRM.mult(Q, D, tempMatrix);
+      CommonOps_DDRM.multTransA(C, tempMatrix, N);
+      CommonOps_DDRM.transpose(N, NTranspose);
 
       /*
         A' S1 + S1 A - Nb' R1inv Nb + Q1 = S1dot = 0
@@ -211,39 +227,39 @@ public class LQRMomentumController
       QRiccati.set(Q1);
       tempMatrix.reshape(6, 6);
       NativeCommonOps.multQuad(NTranspose, R1Inverse, tempMatrix);
-      CommonOps.addEquals(QRiccati, -1.0, tempMatrix);
+      CommonOps_DDRM.addEquals(QRiccati, -1.0, tempMatrix);
 
       ARiccati.set(A);
       tempMatrix.reshape(3, 6);
-      CommonOps.mult(R1Inverse, NTranspose, tempMatrix);
-      CommonOps.multAdd(-1.0, B, tempMatrix, ARiccati);
+      CommonOps_DDRM.mult(R1Inverse, NTranspose, tempMatrix);
+      CommonOps_DDRM.multAdd(-1.0, B, tempMatrix, ARiccati);
 
       careSolver.setMatrices(ARiccati, B, null, QRiccati, R1);
       S1.set(careSolver.computeP());
 
       // all the below stuff is constant
       // Nb = N' + B' S1
-      CommonOps.transpose(N, NB);
-      CommonOps.multAddTransA(B, S1, NB);
+      CommonOps_DDRM.transpose(N, NB);
+      CommonOps_DDRM.multAddTransA(B, S1, NB);
 
       // K1 = -R1inv NB
-      CommonOps.mult(-1.0, R1Inverse, NB, K1);
+      CommonOps_DDRM.mult(-1.0, R1Inverse, NB, K1);
 
       // A2 = Nb' R1inv B' - A'
       tempMatrix.reshape(3, 6);
       MatrixTools.scaleTranspose(-1.0, A, A2);
-      CommonOps.multTransB(R1Inverse, B, tempMatrix);
-      CommonOps.multAddTransA(NB, tempMatrix, A2);
+      CommonOps_DDRM.multTransB(R1Inverse, B, tempMatrix);
+      CommonOps_DDRM.multAddTransA(NB, tempMatrix, A2);
 
       // B2 = 2 (C' - Nb' R1inv D) Q
-      CommonOps.mult(R1Inverse, DQ, R1InverseDQ);
-      CommonOps.multTransA(-2.0, NB, R1InverseDQ, B2);
-      CommonOps.multAddTransA(2.0, C, Q, B2);
+      CommonOps_DDRM.mult(R1Inverse, DQ, R1InverseDQ);
+      CommonOps_DDRM.multTransA(-2.0, NB, R1InverseDQ, B2);
+      CommonOps_DDRM.multAddTransA(2.0, C, Q, B2);
 
       NativeCommonOps.invert(A2, A2Inverse);
-      CommonOps.mult(-1.0, A2Inverse, B2, A2InverseB2);
+      CommonOps_DDRM.mult(-1.0, A2Inverse, B2, A2InverseB2);
 
-      CommonOps.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
+      CommonOps_DDRM.multTransB(-0.5, R1Inverse, B, R1InverseBTranspose);
 
       shouldUpdateS1 = false;
    }
@@ -285,16 +301,16 @@ public class LQRMomentumController
 
          // solve for betas and gammas
          trajectorySegment.getCoefficients(k, coefficients);
-         DenseMatrix64F betaLocal = betas.get(j).get(k);
-         DenseMatrix64F gammaLocal = gammas.get(j).get(k);
+         DMatrixRMaj betaLocal = betas.get(j).get(k);
+         DMatrixRMaj gammaLocal = gammas.get(j).get(k);
 
          // betaJK = -A2inv B2 cJK
-         CommonOps.mult(A2InverseB2, coefficients, betaLocal);
+         CommonOps_DDRM.mult(A2InverseB2, coefficients, betaLocal);
          // gammaJK = R1inv D Q cJK - 0.5 R1inv B' betaJK
-         CommonOps.mult(R1InverseDQ, coefficients, gammaLocal);
-         CommonOps.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
+         CommonOps_DDRM.mult(R1InverseDQ, coefficients, gammaLocal);
+         CommonOps_DDRM.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
 
-         DenseMatrix64F betaLocalPrevious = betaLocal;
+         DMatrixRMaj betaLocalPrevious = betaLocal;
 
          for (int i = k - 1; i >= 0; i--)
          {
@@ -303,12 +319,12 @@ public class LQRMomentumController
             trajectorySegment.getCoefficients(i, coefficients);
 
             // betaJI = A2inv ((i + 1) betaJI+1 - B2 cJI)
-            CommonOps.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
-            CommonOps.multAdd(A2InverseB2, coefficients, betaLocal);
+            CommonOps_DDRM.mult(i + 1.0, A2Inverse, betaLocalPrevious, betaLocal);
+            CommonOps_DDRM.multAdd(A2InverseB2, coefficients, betaLocal);
 
             // gammaJI = R1inv D Q cJI - 0.5 R1Inv B' betaJI
-            CommonOps.mult(R1InverseDQ, coefficients, gammaLocal);
-            CommonOps.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
+            CommonOps_DDRM.mult(R1InverseDQ, coefficients, gammaLocal);
+            CommonOps_DDRM.multAdd(R1InverseBTranspose, betaLocal, gammaLocal);
 
             betaLocalPrevious = betaLocal;
          }
@@ -316,15 +332,15 @@ public class LQRMomentumController
          double duration = relativeVRPTrajectories.get(j).getDuration();
          summedBetas.zero();
          for (int i = 0; i <= k; i++)
-            CommonOps.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
+            CommonOps_DDRM.addEquals(summedBetas, -MathTools.pow(duration, i), betas.get(j).get(i));
 
-         CommonOps.scale(duration, A2, timeScaledA2);
+         CommonOps_DDRM.scale(duration, A2, timeScaledA2);
          a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
 
          if (j != numberOfSegments)
          {
-            CommonOps.addEquals(summedBetas, alphas.get(j + 1));
-            CommonOps.addEquals(summedBetas, betas.get(j + 1).get(0));
+            CommonOps_DDRM.addEquals(summedBetas, alphas.get(j + 1));
+            CommonOps_DDRM.addEquals(summedBetas, betas.get(j + 1).get(0));
          }
          solver.setA(A2Exponential);
          solver.solve(summedBetas, alphas.get(j));
@@ -341,20 +357,20 @@ public class LQRMomentumController
       referenceVRPPosition.add(finalVRPPosition);
 
       // s2 = exp(A2 (t - tJ) alphaJ + sum_i=0^k betaJI (t - tj)^i
-      CommonOps.scale(timeInSegment, A2, timeScaledA2);
+      CommonOps_DDRM.scale(timeInSegment, A2, timeScaledA2);
       a2ExponentialCalculator.compute(A2Exponential, timeScaledA2);
 
-      CommonOps.mult(A2Exponential, alphas.get(j), s2);
+      CommonOps_DDRM.mult(A2Exponential, alphas.get(j), s2);
       int k = relativeVRPTrajectories.get(j).getNumberOfCoefficients() - 1;
       for (int i = 0; i <= k; i++)
-         CommonOps.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
+         CommonOps_DDRM.addEquals(s2, MathTools.pow(timeInSegment, i), betas.get(j).get(i));
 
       // defined this way, because the R1Inverse BT already has a -0.5 appended.
       tempMatrix.reshape(3, 6);
-      CommonOps.mult(R1InverseBTranspose, A2Exponential, tempMatrix);
-      CommonOps.mult(tempMatrix, alphas.get(j), k2);
+      CommonOps_DDRM.mult(R1InverseBTranspose, A2Exponential, tempMatrix);
+      CommonOps_DDRM.mult(tempMatrix, alphas.get(j), k2);
       for (int i = 0; i <= k; i++)
-         CommonOps.addEquals(k2, MathTools.pow(timeInSegment, i), gammas.get(j).get(i));
+         CommonOps_DDRM.addEquals(k2, MathTools.pow(timeInSegment, i), gammas.get(j).get(i));
 
       yoK2.set(k2);
    }
@@ -363,7 +379,7 @@ public class LQRMomentumController
     * The current state is a stacked vector of the current CoM state and current CoM velocity, such that entries (0:2) are occupied by the position,
     * and entries (3:5) are occupied by the velocity
     */
-   public void computeControlInput(DenseMatrix64F currentState, double time)
+   public void computeControlInput(DMatrixRMaj currentState, double time)
    {
       if (shouldUpdateS1)
          computeS1();
@@ -379,48 +395,48 @@ public class LQRMomentumController
       relativeCoMVelocity.set(3, relativeState);
 
       // u = K1 relativeX + k2
-      CommonOps.mult(K1, relativeState, u);
+      CommonOps_DDRM.mult(K1, relativeState, u);
       feedbackForce.set(u);
 
-      CommonOps.addEquals(u, k2);
+      CommonOps_DDRM.addEquals(u, k2);
 
-      CommonOps.mult(C, relativeState, relativeDesiredVRP);
-      CommonOps.multAdd(D, u, relativeDesiredVRP);
+      CommonOps_DDRM.mult(C, relativeState, relativeDesiredVRP);
+      CommonOps_DDRM.multAdd(D, u, relativeDesiredVRP);
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
    }
 
    /**
-    * Returns the unconstrained optimal control input, calculated by {@link #computeControlInput(DenseMatrix64F, double)}.
+    * Returns the unconstrained optimal control input, calculated by {@link #computeControlInput(DMatrixRMaj, double)}.
     */
-   public DenseMatrix64F getU()
+   public DMatrixRMaj getU()
    {
       return u;
    }
 
    /**
     * If the optimal cost to go is assumed be x<sup>T</sup>(t) S<sub>1</sub>(t) x(t) + s<sub>2</sub><sup>T</sup>(t) x(t) + s<sub>3</sub>(t),
-    * this method returns S<sub>1</sub>(t), where t is defined by {@link #computeControlInput(DenseMatrix64F, double)}.
+    * this method returns S<sub>1</sub>(t), where t is defined by {@link #computeControlInput(DMatrixRMaj, double)}.
     *
     * <p>
     *    Note: this is ONLY the optimal solution if u(t) is completely defined by x(t), meaning u(t) is completely unconstrained.
     * </p>
     */
-   public DenseMatrix64F getCostHessian()
+   public DMatrixRMaj getCostHessian()
    {
       return S1;
    }
 
    /**
     * If the optimal cost to go is assumed be x<sup>T</sup>(t) S<sub>1</sub>(t) x(t) + s<sub>2</sub><sup>T</sup>(t) x(t) + s<sub>3</sub>(t),
-    * this method returns s<sub>21</sub>(t), where t is defined by {@link #computeControlInput(DenseMatrix64F, double)}.
+    * this method returns s<sub>21</sub>(t), where t is defined by {@link #computeControlInput(DMatrixRMaj, double)}.
     *
     * <p>
     *    Note: this is ONLY the optimal solution if u(t) is completely defined by x(t), meaning u(t) is completely unconstrained.
     * </p>
     */
-   public DenseMatrix64F getCostJacobian()
+   public DMatrixRMaj getCostJacobian()
    {
       return s2;
    }
@@ -445,5 +461,10 @@ public class LQRMomentumController
       for (int i = 0; i < segment; i++)
          timeOffset += relativeVRPTrajectories.get(i).getDuration();
       return time - timeOffset;
+   }
+   
+   public void setOmega(double omega)
+   {
+      this.omega.set(omega);
    }
 }

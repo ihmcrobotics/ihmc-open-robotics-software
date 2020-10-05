@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.simulationconstructionset.NewDataListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class GUISideProtocolTalker
@@ -57,7 +57,7 @@ public class GUISideProtocolTalker
       }
    }
 
-   public void sendRegistrySettings(HashMap<YoVariableRegistry, Integer> registryIndexMap, int registrySettingsIdentifier)
+   public void sendRegistrySettings(HashMap<YoRegistry, Integer> registryIndexMap, int registrySettingsIdentifier)
    {
       try
       {
@@ -66,12 +66,12 @@ public class GUISideProtocolTalker
          dataOutputStream.writeInt(registrySettingsIdentifier);
          dataOutputStream.writeInt(registryIndexMap.size());
 
-         for (YoVariableRegistry registry : registryIndexMap.keySet())
+         for (YoRegistry registry : registryIndexMap.keySet())
          {
             dataOutputStream.writeInt(registryIndexMap.get(registry));
-            dataOutputStream.writeBoolean(registry.isSent());
+//            dataOutputStream.writeBoolean(registry.isSent());
 //            dataOutputStream.writeBoolean(registry.isDisallowSendingSet());
-            dataOutputStream.writeBoolean(registry.isLogged());
+//            dataOutputStream.writeBoolean(registry.isLogged());
          }
 
          dataOutputStream.writeByte(OUT_SYNC_BYTE);
@@ -188,7 +188,7 @@ public class GUISideProtocolTalker
       }
    }
 
-   public void sendData(int listid, ArrayList<YoVariable<?>> vars)
+   public void sendData(int listid, ArrayList<YoVariable> vars)
    {
       try
       {
@@ -199,7 +199,7 @@ public class GUISideProtocolTalker
 
          for (int i = 0; i < vars.size(); i++)
          {
-            YoVariable<?> v = vars.get(i);
+            YoVariable v = vars.get(i);
             dataOutputStream.writeFloat((float) v.getValueAsDouble());
          }
 

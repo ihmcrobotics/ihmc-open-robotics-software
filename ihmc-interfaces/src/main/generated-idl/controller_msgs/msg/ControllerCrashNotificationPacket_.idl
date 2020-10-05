@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__ControllerCrashNotificationPacket__idl__
 #define __controller_msgs__msg__ControllerCrashNotificationPacket__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,101 +7,41 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet CONTROLLER_READ =
-
+      const octet CONTROLLER_READ =
       0;
 
-
-
-   
-   const octet CONTROLLER_WRITE =
-
+      const octet CONTROLLER_WRITE =
       1;
 
-
-
-   
-   const octet CONTROLLER_RUN =
-
+      const octet CONTROLLER_RUN =
       2;
 
-
-
-   
-   const octet ESTIMATOR_READ =
-
+      const octet ESTIMATOR_READ =
       3;
 
-
-
-   
-   const octet ESTIMATOR_WRITE =
-
+      const octet ESTIMATOR_WRITE =
       4;
 
-
-
-   
-   const octet ESTIMATOR_RUN =
-
+      const octet ESTIMATOR_RUN =
       5;
 
 
-
-   
-   /**
-   
-    * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::ControllerCrashNotificationPacket_")
+      /**
+       * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ControllerCrashNotificationPacket_")
       struct ControllerCrashNotificationPacket
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
         octet controller_crash_location;
-
-
-    
-
-
-    string exception_type;
-
-
-    
-
-
-    string error_message;
-
-
-    
-
-
-    sequence<string, 50> stacktrace;
-
-
-
+        string exception_type;
+        string error_message;
+        sequence<string, 50> stacktrace;
       };
-
     };
   };
 };

@@ -18,7 +18,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
    private double fallbackRegionSize = defaultFallbackRegionSize;
 
 
-   public AbstractWaypointsForPawStepPlanner(String prefix, YoVariableRegistry registry)
+   public AbstractWaypointsForPawStepPlanner(String prefix, YoRegistry registry)
    {
       yoResult = new YoEnum<>(prefix + "PathPlanningResult", registry, PawStepPlanningResult.class);
    }

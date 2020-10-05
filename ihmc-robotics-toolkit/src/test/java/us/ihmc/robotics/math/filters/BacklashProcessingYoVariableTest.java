@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BacklashProcessingYoVariableTest
@@ -17,7 +17,7 @@ public class BacklashProcessingYoVariableTest
    @Test
    public void testAgainstRevisedBacklash()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       YoDouble slopTime = new YoDouble("slopTime", registry);
       double dt = 0.002;
       YoDouble alpha = new YoDouble("alpha", registry);

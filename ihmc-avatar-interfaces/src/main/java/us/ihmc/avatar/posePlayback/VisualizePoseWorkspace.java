@@ -10,8 +10,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -24,7 +24,7 @@ public class VisualizePoseWorkspace
    private PlaybackPoseSequence posePlaybackRobotPoseSequence;
 
    private final PlaybackPoseInterpolator interpolator;
-   private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
+   private final YoRegistry registry = new YoRegistry("PlaybackPoseSCSBridge");
    private final double controlDT;
    
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -39,7 +39,7 @@ public class VisualizePoseWorkspace
       interpolator = new PlaybackPoseInterpolator(registry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       fullRobotModelForSlider = robotModel.createFullRobotModel();
@@ -62,7 +62,7 @@ public class VisualizePoseWorkspace
       scs.startOnAThread();
    }
 
-   private class CaptureSnapshotListener implements VariableChangedListener
+   private class CaptureSnapshotListener implements YoVariableChangedListener
    {
       private final HumanoidFloatingRootJointRobot sdfRobot;
       private final SimulationConstructionSet scs;
@@ -76,7 +76,7 @@ public class VisualizePoseWorkspace
       }
 
 
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          PlaybackPose pose = new PlaybackPose(fullRobotModelForSlider, sdfRobot);
 
@@ -108,7 +108,7 @@ public class VisualizePoseWorkspace
    }
 
 
-   private class LoadSequenceListener implements VariableChangedListener
+   private class LoadSequenceListener implements YoVariableChangedListener
    {
       private final SimulationConstructionSet scs;
 
@@ -117,7 +117,7 @@ public class VisualizePoseWorkspace
          this.scs = scs;
       }
 
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          System.out.println("Load Sequence Listener");
 
@@ -153,9 +153,9 @@ public class VisualizePoseWorkspace
    }
 
 
-   private class SaveSequenceListener implements VariableChangedListener
+   private class SaveSequenceListener implements YoVariableChangedListener
    {
-      public void notifyOfVariableChange(YoVariable yoVariable)
+      public void changed(YoVariable yoVariable)
       {
          System.out.println("saving file");
          PlaybackPoseSequenceWriter.promptWriteToFile(posePlaybackRobotPoseSequence);

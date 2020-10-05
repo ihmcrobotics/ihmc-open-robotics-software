@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.MathTools;
@@ -18,11 +18,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression.PointCoordinateConsumer;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2TopicNameTools;
 
 public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 {
-   private static final IntrinsicParameters intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
+   private static final CameraPinholeBrown intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
    protected final List<Point3DBasics> pointCloudToCalculate;
    protected final RegionOfInterest objectROI = new RegionOfInterest();
 
@@ -30,12 +31,12 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
    private final IHMCROS2Publisher<T> packetPublisher;
    protected final AtomicReference<T> newPacket = new AtomicReference<>(null);
 
-   public AbstractObjectParameterCalculator(Ros2Node ros2Node, Class<T> messageType)
+   public AbstractObjectParameterCalculator(ROS2Node ros2Node, Class<T> messageType)
    {
       this.messageType = messageType;
       pointCloudToCalculate = new ArrayList<Point3DBasics>();
-      packetPublisher = ROS2Tools.createPublisher(ros2Node, messageType, ROS2Tools.getDefaultTopicNameGenerator());
-      newPacket.set(ROS2Tools.newMessageInstance(messageType));
+      packetPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, ROS2Tools.IHMC_ROOT);
+      newPacket.set(ROS2TopicNameTools.newMessageInstance(messageType));
    }
 
    public void trimPointCloudInROI(StereoVisionPointCloudMessage pointCloudMessage, RegionOfInterest roi)
@@ -64,7 +65,7 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 
    public void initialize()
    {
-      newPacket.set(ROS2Tools.newMessageInstance(messageType));
+      newPacket.set(ROS2TopicNameTools.newMessageInstance(messageType));
       pointCloudToCalculate.clear();
    }
 

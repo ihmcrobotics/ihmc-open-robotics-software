@@ -3,13 +3,13 @@ package us.ihmc.quadrupedRobotics.output;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedJointIntegrator
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final OneDoFJointBasics controllerJoint;
    private final JointDesiredOutputBasics jointDesiredSetpoints;
@@ -20,11 +20,11 @@ public class QuadrupedJointIntegrator
    private boolean resetIntegrators;
 
    public QuadrupedJointIntegrator(OneDoFJointBasics controllerJoint, JointDesiredOutputBasics jointDesiredSetpoints, double controlDT,
-                                   YoVariableRegistry parentRegistry)
+                                   YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
 
-      registry = new YoVariableRegistry(controllerJoint.getName() + name);
+      registry = new YoRegistry(controllerJoint.getName() + name);
 
       this.controllerJoint = controllerJoint;
       this.jointDesiredSetpoints = jointDesiredSetpoints;

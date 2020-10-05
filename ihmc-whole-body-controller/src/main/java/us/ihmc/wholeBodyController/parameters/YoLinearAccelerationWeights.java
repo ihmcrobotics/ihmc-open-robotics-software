@@ -1,14 +1,14 @@
 package us.ihmc.wholeBodyController.parameters;
 
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoLinearAccelerationWeights
 {
    private final YoDouble xAccelerationWeights, yAccelerationWeights, zAccelerationWeight;
 
-   public YoLinearAccelerationWeights(String prefix, YoVariableRegistry registry)
+   public YoLinearAccelerationWeights(String prefix, YoRegistry registry)
    {
       xAccelerationWeights = new YoDouble(prefix + "_XAccelerationWeights", registry);
       yAccelerationWeights = new YoDouble(prefix + "_YAccelerationWeights", registry);
@@ -26,13 +26,13 @@ public class YoLinearAccelerationWeights
    {
       Matrix3D weightMatrix = new Matrix3D();
 
-      xAccelerationWeights.addVariableChangedListener(new MatrixUpdater(0, 0, weightMatrix));
-      yAccelerationWeights.addVariableChangedListener(new MatrixUpdater(1, 1, weightMatrix));
-      zAccelerationWeight.addVariableChangedListener(new MatrixUpdater(2, 2, weightMatrix));
+      xAccelerationWeights.addListener(new MatrixUpdater(0, 0, weightMatrix));
+      yAccelerationWeights.addListener(new MatrixUpdater(1, 1, weightMatrix));
+      zAccelerationWeight.addListener(new MatrixUpdater(2, 2, weightMatrix));
 
-      xAccelerationWeights.notifyVariableChangedListeners();
-      yAccelerationWeights.notifyVariableChangedListeners();
-      zAccelerationWeight.notifyVariableChangedListeners();
+      xAccelerationWeights.notifyListeners();
+      yAccelerationWeights.notifyListeners();
+      zAccelerationWeight.notifyListeners();
 
       return weightMatrix;
    }

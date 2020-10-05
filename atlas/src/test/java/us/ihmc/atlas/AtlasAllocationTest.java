@@ -3,10 +3,10 @@ package us.ihmc.atlas;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.alg.dense.decomposition.bidiagonal.BidiagonalDecompositionRow_D64;
-import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
-import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.decomposition.bidiagonal.BidiagonalDecompositionRow_DDRM;
+import org.ejml.dense.row.decomposition.chol.CholeskyDecompositionCommon_DDRM;
+import org.ejml.dense.row.decomposition.lu.LUDecompositionBase_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -91,14 +91,14 @@ public class AtlasAllocationTest
       allocationProfiler.excludeAllocationsInsideClass(StatusMessageOutputManager.class.getName()); // fix this
 
       // These methods are "safe" as they will only allocate to increase their capacity.
-      allocationProfiler.excludeAllocationsInsideMethod(DenseMatrix64F.class.getName() + ".reshape");
+      allocationProfiler.excludeAllocationsInsideMethod(DMatrixRMaj.class.getName() + ".reshape");
       allocationProfiler.excludeAllocationsInsideMethod(TIntArrayList.class.getName() + ".ensureCapacity");
       allocationProfiler.excludeAllocationsInsideMethod(ConvexPolygon2D.class.getName() + ".setOrCreate");
       allocationProfiler.excludeAllocationsInsideMethod(FrameConvexPolygon2D.class.getName() + ".setOrCreate");
       allocationProfiler.excludeAllocationsInsideMethod(RecyclingArrayList.class.getName() + ".ensureCapacity");
-      allocationProfiler.excludeAllocationsInsideMethod(LUDecompositionBase_D64.class.getName() + ".decomposeCommonInit");
-      allocationProfiler.excludeAllocationsInsideMethod(CholeskyDecompositionCommon_D64.class.getName() + ".decompose");
-      allocationProfiler.excludeAllocationsInsideMethod(BidiagonalDecompositionRow_D64.class.getName() + ".init");
+      allocationProfiler.excludeAllocationsInsideMethod(LUDecompositionBase_DDRM.class.getName() + ".decomposeCommonInit");
+      allocationProfiler.excludeAllocationsInsideMethod(CholeskyDecompositionCommon_DDRM.class.getName() + ".decompose");
+      allocationProfiler.excludeAllocationsInsideMethod(BidiagonalDecompositionRow_DDRM.class.getName() + ".init");
 
       // Ignore the following methods as they are related to printouts.
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");

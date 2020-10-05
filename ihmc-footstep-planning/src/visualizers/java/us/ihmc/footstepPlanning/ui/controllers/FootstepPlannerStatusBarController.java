@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,13 +10,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.util.StringConverter;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
+import java.text.NumberFormat;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerExceptionStackTrace;
@@ -51,9 +55,9 @@ public class FootstepPlannerStatusBarController
    private Label regionFrameLabel;
 
    @FXML
-   private TableView<FootstepTableProperty> footstepPlanTable;
+   private TableView<FootstepResponseTableRow> footstepPlanTable;
 
-   private final ObservableList<FootstepTableProperty> footstepPlanTableItems = FXCollections.observableArrayList();
+   private final ObservableList<FootstepResponseTableRow> footstepPlanTableItems = FXCollections.observableArrayList();
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -96,18 +100,28 @@ public class FootstepPlannerStatusBarController
          for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
          {
             FootstepDataMessage footstepDataMessage = footstepPlanResponse.getFootstepDataList().get(i);
-            footstepPlanTableItems.add(new FootstepTableProperty(i, footstepDataMessage));
+            footstepPlanTableItems.add(new FootstepResponseTableRow(i, footstepDataMessage));
          }
       });
 
-      footstepPlanTable.setPrefWidth(240.0);
-      footstepPlanTable.setPrefHeight(320.0);
+      TableColumn<FootstepResponseTableRow, SwingTimeCellValue> swingTimeColumn = new TableColumn<>("Swing Time");;
+      swingTimeColumn.setPrefWidth(100.0);
+      swingTimeColumn.setCellValueFactory(tableRow -> new ReadOnlyObjectWrapper<>(new SwingTimeCellValue(tableRow.getValue())));
+      swingTimeColumn.setCellFactory(param -> new SwingTimeCell());
+
+      footstepPlanTable.setPrefWidth(320.0);
+      footstepPlanTable.setPrefHeight(360.0);
       footstepPlanTable.getColumns().add(new TableColumn<>("Index"));
       footstepPlanTable.getColumns().add(new TableColumn<>("Side"));
+      footstepPlanTable.getColumns().add(swingTimeColumn);
+      footstepPlanTable.getColumns().add(new TableColumn<>("Traj Type"));
       footstepPlanTable.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("stepIndex"));
       footstepPlanTable.getColumns().get(1).setCellValueFactory(new PropertyValueFactory<>("side"));
-      footstepPlanTable.getColumns().get(0).setPrefWidth(120.0);
-      footstepPlanTable.getColumns().get(1).setPrefWidth(120.0);
+      footstepPlanTable.getColumns().get(3).setCellValueFactory(new PropertyValueFactory<>("trajectoryType"));
+      footstepPlanTable.getColumns().get(0).setPrefWidth(60.0);
+      footstepPlanTable.getColumns().get(1).setPrefWidth(60.0);
+      footstepPlanTable.getColumns().get(3).setPrefWidth(100.0);
+
       footstepPlanTable.setItems(footstepPlanTableItems);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, c -> footstepPlanTableItems.clear());
@@ -161,17 +175,92 @@ public class FootstepPlannerStatusBarController
       }
    }
 
-   public class FootstepTableProperty
+   private class SwingTimeCellValue
+   {
+      private final int stepIndex;
+      private final double initialSwingTime;
+
+      public SwingTimeCellValue(FootstepResponseTableRow tableRow)
+      {
+         this.stepIndex = tableRow.getStepIndex();
+         this.initialSwingTime = tableRow.getSwingTime();
+      }
+   }
+
+   private static final NumberFormat swingTimeNumberFormat = NumberFormat.getInstance();
+
+   static
+   {
+      swingTimeNumberFormat.setMinimumIntegerDigits(1);
+      swingTimeNumberFormat.setMinimumFractionDigits(3);
+      swingTimeNumberFormat.setMaximumFractionDigits(3);
+   }
+
+   public static class DoubleStringConverter extends StringConverter<Double>
+   {
+      @Override
+      public String toString(Double object)
+      {
+         if (object == null)
+            return swingTimeNumberFormat.format(0.0);
+         else if (!Double.isFinite(object))
+            return Double.toString(object);
+         else
+            return swingTimeNumberFormat.format(object);
+      }
+
+      @Override
+      public Double fromString(String string)
+      {
+         return Double.parseDouble(string);
+      }
+   }
+
+   private class SwingTimeCell extends TableCell<FootstepResponseTableRow, SwingTimeCellValue>
+   {
+      private final Spinner<Double> spinner = new Spinner<>(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1);
+
+      public SwingTimeCell()
+      {
+         spinner.getEditor().setTextFormatter(new TextFormatter<>(new DoubleStringConverter()));
+         spinner.getValueFactory().setConverter(new DoubleStringConverter());
+      }
+
+      @Override
+      protected void updateItem(SwingTimeCellValue tableCell, boolean empty)
+      {
+         super.updateItem(tableCell, empty);
+
+         if (tableCell != null)
+         {
+            spinner.setEditable(true);
+            spinner.getValueFactory()
+                   .valueProperty()
+                   .addListener(((observable, oldValue, newValue) -> messager.submitMessage(FootstepPlannerMessagerAPI.OverrideSpecificSwingTime,
+                                                                                            Pair.of(tableCell.stepIndex, newValue))));
+            spinner.getValueFactory().valueProperty().setValue(tableCell.initialSwingTime);
+            setGraphic(spinner);
+         }
+         else
+         {
+            setGraphic(null);
+         }
+      }
+   }
+
+   public class FootstepResponseTableRow
    {
       private final int stepIndex;
       private final FootstepDataMessage footstepDataMessage;
       private final RobotSide side;
+      private final TrajectoryType trajectoryType;
 
-      public FootstepTableProperty(int stepIndex, FootstepDataMessage footstepDataMessage)
+      public FootstepResponseTableRow(int stepIndex, FootstepDataMessage footstepDataMessage)
       {
          this.stepIndex = stepIndex;
          this.footstepDataMessage = footstepDataMessage;
          this.side = RobotSide.fromByte(footstepDataMessage.getRobotSide());
+         this.trajectoryType = TrajectoryType.fromByte(footstepDataMessage.getTrajectoryType());
       }
 
       public int getStepIndex()
@@ -182,6 +271,16 @@ public class FootstepPlannerStatusBarController
       public RobotSide getSide()
       {
          return side;
+      }
+
+      public double getSwingTime()
+      {
+         return footstepDataMessage.getSwingDuration();
+      }
+
+      public TrajectoryType getTrajectoryType()
+      {
+         return trajectoryType;
       }
    }
 }

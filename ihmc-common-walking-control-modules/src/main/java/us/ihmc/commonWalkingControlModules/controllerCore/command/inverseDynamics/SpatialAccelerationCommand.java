@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -47,6 +47,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class SpatialAccelerationCommand implements InverseDynamicsCommand<SpatialAccelerationCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -119,6 +120,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public void set(SpatialAccelerationCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearAcceleration.set(other.desiredLinearAcceleration);
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
@@ -650,7 +652,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is stored
     *           in. Modified.
     */
-   public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       weightMatrix.getFullWeightMatrixInFrame(destinationFrame, weightMatrixToPack);
    }
@@ -715,7 +717,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           spatial acceleration is stored. The given matrix is reshaped to ensure proper size.
     *           Modified.
     */
-   public void getDesiredSpatialAcceleration(DenseMatrix64F desiredSpatialAccelerationToPack)
+   public void getDesiredSpatialAcceleration(DMatrixRMaj desiredSpatialAccelerationToPack)
    {
       desiredSpatialAccelerationToPack.reshape(6, 1);
       desiredAngularAcceleration.get(0, desiredSpatialAccelerationToPack);
@@ -793,7 +795,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
@@ -938,6 +940,18 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -948,6 +962,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       {
          SpatialAccelerationCommand other = (SpatialAccelerationCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredLinearAcceleration.equals(other.desiredLinearAcceleration))

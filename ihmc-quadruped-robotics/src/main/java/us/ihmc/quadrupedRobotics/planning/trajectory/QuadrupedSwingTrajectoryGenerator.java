@@ -16,7 +16,7 @@ import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedP
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedSwingTrajectoryGenerator
@@ -31,7 +31,7 @@ public class QuadrupedSwingTrajectoryGenerator
 
    private final RobotQuadrant robotQuadrant;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    
    private final FramePoint3D desiredEndEffectorPosition = new FramePoint3D();
@@ -46,12 +46,12 @@ public class QuadrupedSwingTrajectoryGenerator
    private int ballCounter = 0;
 
 
-   public QuadrupedSwingTrajectoryGenerator(RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double dt)
+   public QuadrupedSwingTrajectoryGenerator(RobotQuadrant robotQuadrant, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double dt)
    {
       this.dt = dt;
       this.robotQuadrant = robotQuadrant;
       String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-      registry = new YoVariableRegistry(prefix + "QuadrupedSwingTrajectoryGenerator");
+      registry = new YoRegistry(prefix + "QuadrupedSwingTrajectoryGenerator");
       swingTimeDoubleProvider = new YoVariableDoubleProvider(prefix + "swingTime", registry);
       swingTimeDoubleProvider.set(DEFAULT_SWING_TIME);
       

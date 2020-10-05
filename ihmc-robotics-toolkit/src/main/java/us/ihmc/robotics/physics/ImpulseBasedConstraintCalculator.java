@@ -2,7 +2,7 @@ package us.ihmc.robotics.physics;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -65,7 +65,7 @@ public interface ImpulseBasedConstraintCalculator
 
    RigidBodyBasics getRootBody(int index);
 
-   DenseMatrix64F getJointVelocityChange(int index);
+   DMatrixRMaj getJointVelocityChange(int index);
 
    List<? extends RigidBodyBasics> getRigidBodyTargets();
 

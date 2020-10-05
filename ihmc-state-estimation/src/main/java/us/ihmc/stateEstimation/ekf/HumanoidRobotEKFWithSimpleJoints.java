@@ -30,7 +30,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A wrapper class for the {@link LeggedRobotEKF}: for parts of the upper body (such as the arms) we do not want to use
@@ -138,9 +138,9 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
-      return leggedRobotEKF.getYoVariableRegistry();
+      return leggedRobotEKF.getYoRegistry();
    }
 
    @Override

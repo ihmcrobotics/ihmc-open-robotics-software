@@ -7,58 +7,34 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This class is used to build 1D trajectory messages including jointspace trajectory messages.
-   
- * For 3D trajectory points look at:
-   
- * - EuclideanTrajectoryMessage (translational),
-   
- * - SO3TrajectoryPointMessage (rotational),
-   
- * - SE3TrajectoryPointMessage (translational AND rotational).
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This class is used to build 1D trajectory messages including jointspace trajectory messages.
+       * For 3D trajectory points look at:
+       * - EuclideanTrajectoryMessage (translational),
+       * - SO3TrajectoryPointMessage (rotational),
+       * - SE3TrajectoryPointMessage (translational AND rotational).
+       */
 public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
 {
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
-
    /**
-       
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-       
-    */
+            * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+            */
    public double time_;
-
    /**
-       
-    * Define the desired 1D position to be reached at this trajectory point.
-       
-    */
+            * Define the desired 1D position to be reached at this trajectory point.
+            */
    public double position_;
-
    /**
-       
-    * Define the desired 1D velocity to be reached at this trajectory point.
-       
-    */
+            * Define the desired 1D velocity to be reached at this trajectory point.
+            */
    public double velocity_;
 
    public TrajectoryPoint1DMessage()
    {
-
-
-
-
-
    }
 
    public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage other)
@@ -69,95 +45,71 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
 
    public void set(TrajectoryPoint1DMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       time_ = other.time_;
 
-
       position_ = other.position_;
-
 
       velocity_ = other.velocity_;
 
    }
 
-
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
-
    /**
-       
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-       
-    */
+            * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+            */
    public void setTime(double time)
    {
       time_ = time;
    }
    /**
-       
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-       
-    */
+            * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+            */
    public double getTime()
    {
       return time_;
    }
 
-
    /**
-       
-    * Define the desired 1D position to be reached at this trajectory point.
-       
-    */
+            * Define the desired 1D position to be reached at this trajectory point.
+            */
    public void setPosition(double position)
    {
       position_ = position;
    }
    /**
-       
-    * Define the desired 1D position to be reached at this trajectory point.
-       
-    */
+            * Define the desired 1D position to be reached at this trajectory point.
+            */
    public double getPosition()
    {
       return position_;
    }
 
-
    /**
-       
-    * Define the desired 1D velocity to be reached at this trajectory point.
-       
-    */
+            * Define the desired 1D velocity to be reached at this trajectory point.
+            */
    public void setVelocity(double velocity)
    {
       velocity_ = velocity;
    }
    /**
-       
-    * Define the desired 1D velocity to be reached at this trajectory point.
-       
-    */
+            * Define the desired 1D velocity to be reached at this trajectory point.
+            */
    public double getVelocity()
    {
       return velocity_;
@@ -181,15 +133,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_, other.position_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.velocity_, other.velocity_, epsilon)) return false;
 
@@ -206,15 +154,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
 
       TrajectoryPoint1DMessage otherMyClass = (TrajectoryPoint1DMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.time_ != otherMyClass.time_) return false;
 
-
       if(this.position_ != otherMyClass.position_) return false;
-
 
       if(this.velocity_ != otherMyClass.velocity_) return false;
 
@@ -228,16 +172,12 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage> i
       StringBuilder builder = new StringBuilder();
 
       builder.append("TrajectoryPoint1DMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("time=");
       builder.append(this.time_);      builder.append(", ");
-
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
-
       builder.append("velocity=");
       builder.append(this.velocity_);
       builder.append("}");

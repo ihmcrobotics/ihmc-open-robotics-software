@@ -192,7 +192,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       double alphaSlip = 0.5;
 
       GroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, kXY, bXY, kZ, bZ, alphaSlip, alphaStick,
-            robot.getRobotsYoVariableRegistry());
+            robot.getRobotsYoRegistry());
       groundContactModel.setGroundProfile3D(groundProfile);
 
       return groundContactModel;
