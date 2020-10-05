@@ -149,13 +149,13 @@
 
                         <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <ComboBox fx:id="initialSupportSide" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="pathHeading" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Spinner fx:id="pathHeading" editable="true" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                         <ComboBox fx:id="swingPlannerType" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                         <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                         <Spinner fx:id="horizonLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
                         <Label text="Initial Support" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                        <Label text="Path heading" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Path heading (degrees)" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label text="Swing planner" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Label text="Timeout" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <Label text="Horizon Length" GridPane.columnIndex="1" GridPane.rowIndex="5" />
