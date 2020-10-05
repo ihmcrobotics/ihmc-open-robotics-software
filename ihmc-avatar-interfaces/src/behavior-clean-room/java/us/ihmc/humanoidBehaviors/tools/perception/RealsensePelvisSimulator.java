@@ -66,15 +66,18 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
    {
       syncedRobot.update();
 
+      List<Point3DReadOnly> pointCloud;
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return simulatedDepthCamera.computePointCloudFrame(map);
+         pointCloud = simulatedDepthCamera.computePointCloudFrame(map);
       }
       else
       {
          // blank result
-         return new ArrayList<>();
+         pointCloud = new ArrayList<>();
       }
+
+      return pointCloud;
    }
 
    public Pose3DReadOnly getSensorPose()
