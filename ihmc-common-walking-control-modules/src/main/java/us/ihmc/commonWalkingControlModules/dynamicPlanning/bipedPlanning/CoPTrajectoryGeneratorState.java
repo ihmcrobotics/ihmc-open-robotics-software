@@ -166,7 +166,6 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       footsteps.clear();
       footstepTimings.clear();
       footstepShiftFractions.clear();
-      initialCoP.setToNaN();
    }
 
    public void addFootstep(Footstep footstep)
@@ -185,6 +184,11 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    {
       if (footstepShiftFractions.size() < footstepShiftFractions.capacity())
          footstepShiftFractions.add().set(shiftFraction);
+   }
+
+   public void setInitialCoP(FramePoint3DReadOnly initialCoP)
+   {
+      this.initialCoP.set(initialCoP);
    }
 
    public void setInitialCoP(FramePoint2DReadOnly initialCoP)

@@ -160,7 +160,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       resetMatrices();
 
       CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(), gravityZ, omega.getValue(), currentCoMVelocity, contactSequence, startVRPPositions,
-                                                    endVRPPositions);
+                                                    endVRPPositions, false);
 
       solveForCoefficientConstraintMatrix(contactSequence);
 
