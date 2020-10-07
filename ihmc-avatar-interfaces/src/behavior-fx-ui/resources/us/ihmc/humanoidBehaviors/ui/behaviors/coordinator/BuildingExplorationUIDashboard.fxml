@@ -35,8 +35,9 @@
     <Text fx:id="stairsDetected" GridPane.columnIndex="5" GridPane.rowIndex="2" />
     <Text fx:id="doorDetected" GridPane.columnIndex="5" GridPane.rowIndex="3" />
     <Button text="Not debris" onAction="#ignoreDebris" GridPane.columnIndex="5" GridPane.rowIndex="4" />
-    <Button text="Approve stairs steps" onAction="#approveStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="5" />
-    <Button text="Replan stairs steps" onAction="#replanStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+    <Button text="Confirm door" onAction="#confirmDoor" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+    <Button text="Approve stairs steps" onAction="#approveStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+    <Button text="Replan stairs steps" onAction="#replanStairsSteps" GridPane.columnIndex="5" GridPane.rowIndex="7" />
 
     <padding>
         <Insets bottom="5.0" left="5.0" right="12.0" top="12.0"/>

@@ -66,6 +66,7 @@ public class BuildingExplorationBehaviorUI
       behaviorCoordinator.setStairsDetectedCallback(() -> messager.submitMessage(StairsDetected, true));
       behaviorCoordinator.setDoorDetectedCallback(() -> messager.submitMessage(DoorDetected, true));
       messager.registerTopicListener(IgnoreDebris, ignore -> behaviorCoordinator.ignoreDebris());
+      messager.registerTopicListener(ConfirmDoor, confirm -> behaviorCoordinator.proceedWithDoorBehavior());
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
