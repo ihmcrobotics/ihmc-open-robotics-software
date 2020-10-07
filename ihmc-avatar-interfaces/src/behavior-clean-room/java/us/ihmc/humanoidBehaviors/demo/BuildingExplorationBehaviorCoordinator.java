@@ -498,10 +498,10 @@ public class BuildingExplorationBehaviorCoordinator
          ROS2Topic<?> inputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
          ROS2Topic<?> outputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
-         behaviorModePublisher = ROS2Tools.createPublisher(ros2Node, BehaviorControlModePacket.class, inputTopic);
-         behaviorTypePublisher = ROS2Tools.createPublisher(ros2Node, HumanoidBehaviorTypePacket.class, inputTopic);
+         behaviorModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorControlModePacket.class, inputTopic);
+         behaviorTypePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HumanoidBehaviorTypePacket.class, inputTopic);
 
-         ROS2Tools.createCallbackSubscription(ros2Node, BehaviorStatusPacket.class, outputTopic, s ->
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BehaviorStatusPacket.class, outputTopic, s ->
          {
             BehaviorStatusPacket behaviorStatusPacket = s.takeNextData();
             CurrentBehaviorStatus behaviorStatus = CurrentBehaviorStatus.fromByte(behaviorStatusPacket.getCurrentBehaviorStatus());
