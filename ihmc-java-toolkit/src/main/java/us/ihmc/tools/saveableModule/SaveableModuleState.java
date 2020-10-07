@@ -1,5 +1,6 @@
 package us.ihmc.tools.saveableModule;
 
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -75,22 +76,22 @@ public class SaveableModuleState
       for (int i = 0; i < doubles.size(); i++)
       {
          YoDouble yoDouble = doubles.get(i);
-         string += yoDouble.getFullNameString() + ": " + yoDouble.getValue() + ", ";
+         string += yoDouble.getFullNameString() + ": " + yoDouble.getValue() + ",\n";
       }
       for (int i = 0; i < integers.size(); i++)
       {
          YoInteger yoInteger = integers.get(i);
-         string += yoInteger.getFullNameString() + ": " + yoInteger.getValue() + ", ";
+         string += yoInteger.getFullNameString() + ": " + yoInteger.getValue() + ",\n";
       }
       for (int i = 0; i < booleans.size(); i++)
       {
          YoBoolean yoBoolean = booleans.get(i);
-         string += yoBoolean.getFullNameString() + ": " + yoBoolean.getValue() + ", ";
+         string += yoBoolean.getFullNameString() + ": " + yoBoolean.getValue() + ",\n";
       }
       for (int i = 0; i < enums.size(); i++)
       {
          YoEnum<?> yoEnum = enums.get(i);
-         string += yoEnum.getFullNameString() + ": " + yoEnum.getOrdinal() + ", ";
+         string += yoEnum.getFullNameString() + ": " + yoEnum.getOrdinal() + ",\n";
       }
 
       return string;

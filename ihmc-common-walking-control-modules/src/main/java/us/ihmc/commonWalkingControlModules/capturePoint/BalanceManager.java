@@ -220,6 +220,7 @@ public class BalanceManager
       copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
                                                  defaultSupportPolygon,
                                                  registry);
+      copTrajectory.registerState(copTrajectoryState);
 //      copTrajectory = new CopTrajectory(registry, controllerToolbox.getYoGraphicsListRegistry());
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);

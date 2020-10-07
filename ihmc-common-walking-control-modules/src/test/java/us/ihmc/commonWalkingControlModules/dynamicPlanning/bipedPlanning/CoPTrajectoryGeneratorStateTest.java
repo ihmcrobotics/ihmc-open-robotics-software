@@ -25,13 +25,13 @@ public class CoPTrajectoryGeneratorStateTest
    @Test
    public void testConstruction()
    {
-      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(createSoleFrames(), new YoRegistry("test"));
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(CoPTrajectoryGeneratorTestTools.createSoleFrames(), new YoRegistry("test"));
    }
 
    @Test
    public void testSaveAndLoad()
    {
-      SideDependentList<PoseReferenceFrame> soleFrames = createSoleFrames();
+      SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
 
       CoPTrajectoryGeneratorState stateA = new CoPTrajectoryGeneratorState(soleFrames, new YoRegistry("test"));
       CoPTrajectoryGeneratorState stateB = new CoPTrajectoryGeneratorState(soleFrames, new YoRegistry("test"));
@@ -95,28 +95,5 @@ public class CoPTrajectoryGeneratorStateTest
          EuclidFrameTestTools.assertFrameConvexPolygon2DEquals(randomLeftFootPolygon, stateB.getFootPolygonInSole(RobotSide.LEFT), epsilon);
          EuclidFrameTestTools.assertFrameConvexPolygon2DEquals(randomRightFootPolygon, stateB.getFootPolygonInSole(RobotSide.RIGHT), epsilon);
       }
-   }
-
-   private static SideDependentList<PoseReferenceFrame> createSoleFrames()
-   {
-      SideDependentList<PoseReferenceFrame> soleFrames = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getLowerCaseName() + "SoleFrame", ReferenceFrame.getWorldFrame());
-         soleFrame.setPositionWithoutChecksAndUpdate(0.0, robotSide.negateIfRightSide(0.1), 0.0);
-         soleFrames.put(robotSide, soleFrame);
-      }
-      return soleFrames;
-   }
-
-   private static ConvexPolygon2D createDefaultSupportPolygon()
-   {
-      ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
-      defaultSupportPolygon.addVertex(0.1, 0.05);
-      defaultSupportPolygon.addVertex(0.1, -0.05);
-      defaultSupportPolygon.addVertex(-0.1, 0.05);
-      defaultSupportPolygon.addVertex(-0.1, -0.05);
-      defaultSupportPolygon.update();
-      return defaultSupportPolygon;
    }
 }

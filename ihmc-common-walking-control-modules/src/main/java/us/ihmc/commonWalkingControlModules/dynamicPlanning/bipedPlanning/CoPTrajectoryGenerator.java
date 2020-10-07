@@ -61,7 +61,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
                                  YoRegistry parentRegistry)
    {
-      super("COPTrajectory", parentRegistry);
+      super(CoPTrajectoryGenerator.class, parentRegistry);
 
       this.parameters = parameters;
       this.defaultSupportPolygon.set(defaultSupportPolygon);
@@ -71,8 +71,6 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
       percentageStandingWeightDistributionOnLeftFoot = new YoDouble("PercentageStandingWeightDistributionOnLeftFoot", registry);
-
-
 
       for (RobotSide robotSide : RobotSide.values)
       {
