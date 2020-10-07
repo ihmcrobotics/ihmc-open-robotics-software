@@ -34,7 +34,7 @@ public class ValkyrieRobotTransformOptimizerTest extends HumanoidRobotTransformO
       initialSetupB.rootJointOrientation.preMultiply(EuclidCoreRandomTools.nextQuaternion(random));
       initialSetupB.rootJointPosition.add(EuclidCoreRandomTools.nextPoint3D(random));
 
-      runTest(initialSetupA, initialSetupB);
+      runTest(initialSetupA, initialSetupB, 1.0e-10);
    }
 
    @Test
@@ -60,7 +60,7 @@ public class ValkyrieRobotTransformOptimizerTest extends HumanoidRobotTransformO
 
       System.out.println("Error norm: " + Math.sqrt(errorNorm));
 
-      runTest(initialSetupA, initialSetupB);
+      runTest(initialSetupA, initialSetupB, 0.075);
 
    }
 }
