@@ -1,5 +1,8 @@
 package us.ihmc.robotics.saveableModule;
 
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,6 +15,22 @@ public abstract class SaveableModule<T extends SaveableModuleState>
 {
    private File file;
    private T state;
+
+   private final YoBoolean saveStateFileTrigger;
+
+   public SaveableModule(String moduleName, YoRegistry registry)
+   {
+      saveStateFileTrigger = new YoBoolean(moduleName + "SaveStateFileTrigger", registry);
+      saveStateFileTrigger.addListener((v) ->
+                                       {
+                                          if (saveStateFileTrigger.getBooleanValue())
+                                          {
+                                             saveStateFileTrigger.set(false, false);
+                                             save(moduleName);
+                                          }
+                                       });
+   }
+
 
    public abstract void compute(T state);
 

@@ -61,6 +61,8 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
                                  ConvexPolygon2DReadOnly defaultSupportPolygon,
                                  YoRegistry parentRegistry)
    {
+      super("COPTrajectory", parentRegistry);
+
       this.parameters = parameters;
       this.defaultSupportPolygon.set(defaultSupportPolygon);
 
