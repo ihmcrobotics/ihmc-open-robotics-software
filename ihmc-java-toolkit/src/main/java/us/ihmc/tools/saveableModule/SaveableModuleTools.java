@@ -1,4 +1,4 @@
-package us.ihmc.robotics.saveableModule;
+package us.ihmc.tools.saveableModule;
 
 import java.io.Closeable;
 import java.io.File;
