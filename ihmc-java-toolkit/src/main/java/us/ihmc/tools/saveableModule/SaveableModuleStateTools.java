@@ -1,4 +1,4 @@
-package us.ihmc.robotics.saveableModule;
+package us.ihmc.tools.saveableModule;
 
 import us.ihmc.yoVariables.euclid.YoTuple2D;
 import us.ihmc.yoVariables.euclid.YoTuple3D;

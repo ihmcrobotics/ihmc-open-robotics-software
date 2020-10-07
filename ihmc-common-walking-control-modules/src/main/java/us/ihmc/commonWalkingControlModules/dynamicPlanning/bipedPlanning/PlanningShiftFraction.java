@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
-import us.ihmc.robotics.saveableModule.SaveableModuleState;
+import us.ihmc.tools.saveableModule.SaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
