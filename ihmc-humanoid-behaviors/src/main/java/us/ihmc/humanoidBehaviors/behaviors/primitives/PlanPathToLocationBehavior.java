@@ -51,6 +51,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final FramePose3D startLeftFootPose = new FramePose3D();
    private final FramePose3D startRightFootPose = new FramePose3D();
    private RobotSide initialStanceSide;
+   private double desiredHeading;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
 
@@ -88,7 +89,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          Pose3DReadOnly leftFootPose,
                          Pose3DReadOnly rightFootPose,
                          boolean planBodyPath,
-                         boolean assumeFlatGround)
+                         boolean assumeFlatGround,
+                         double desiredHeading)
    {
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
@@ -96,6 +98,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       this.initialStanceSide = initialStanceSide;
       this.startLeftFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), leftFootPose);
       this.startRightFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), rightFootPose);
+      this.desiredHeading = desiredHeading;
    }
 
    public FootstepDataListMessage getFootStepList()
@@ -162,6 +165,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             goalRightFootPose.appendTranslation(0.0, -0.5 * footstepPlannerParameters.getIdealFootstepWidth(), 0.0);
             footstepPlan.addFootstep(RobotSide.LEFT, startLeftFootPose);
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
+            request.setRequestedPathHeading(desiredHeading);
+
             FootstepDataListMessage footstepDataGoalStepForVisualization = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                                        0.0,
                                                                                                                                        0.0);
