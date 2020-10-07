@@ -1,4 +1,4 @@
-package us.ihmc.robotics.saveableModule;
+package us.ihmc.tools.saveableModule;
 
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
