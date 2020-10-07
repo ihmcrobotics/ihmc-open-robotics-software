@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
@@ -11,7 +12,9 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -112,5 +115,28 @@ public class CoPTrajectoryGeneratorTestTools
       footstep.set(getRandomFootstep(random));
 
       return footstep;
+   }
+
+   static SideDependentList<PoseReferenceFrame> createSoleFrames()
+   {
+      SideDependentList<PoseReferenceFrame> soleFrames = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getLowerCaseName() + "SoleFrame", ReferenceFrame.getWorldFrame());
+         soleFrame.setPositionWithoutChecksAndUpdate(0.0, robotSide.negateIfRightSide(0.1), 0.0);
+         soleFrames.put(robotSide, soleFrame);
+      }
+      return soleFrames;
+   }
+
+   public static ConvexPolygon2D createDefaultSupportPolygon()
+   {
+      ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
+      defaultSupportPolygon.addVertex(0.1, 0.05);
+      defaultSupportPolygon.addVertex(0.1, -0.05);
+      defaultSupportPolygon.addVertex(-0.1, 0.05);
+      defaultSupportPolygon.addVertex(-0.1, -0.05);
+      defaultSupportPolygon.update();
+      return defaultSupportPolygon;
    }
 }

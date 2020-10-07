@@ -1,6 +1,5 @@
 package us.ihmc.tools.saveableModule;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -24,17 +23,6 @@ public class SaveableModuleTools
       }
    }
 
-   static void closeStreamSilently(Closeable streamToClose)
-   {
-      try
-      {
-         if (streamToClose != null)
-            streamToClose.close();
-      }
-      catch (Exception e)
-      {
-      }
-   }
 
    public static double readNextDouble(Scanner scanner)
    {
