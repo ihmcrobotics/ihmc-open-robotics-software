@@ -9,7 +9,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -162,6 +161,11 @@ public class BuildingExplorationBehaviorCoordinator
    {
       lookAndStepState.ignoreDebris();
       requestState(BuildingExplorationStateName.LOOK_AND_STEP);
+   }
+
+   public void proceedWithDoorBehavior()
+   {
+      walkThroughDoorState.proceedWithDoorBehavior();
    }
 
    public void start()
@@ -486,6 +490,8 @@ public class BuildingExplorationBehaviorCoordinator
       final IHMCROS2Publisher<BehaviorControlModePacket> behaviorModePublisher;
       final IHMCROS2Publisher<HumanoidBehaviorTypePacket> behaviorTypePublisher;
       final AtomicBoolean isDone = new AtomicBoolean();
+      final AtomicBoolean receivedOperatorConfirmation = new AtomicBoolean();
+      final AtomicBoolean hasStartedBehavior = new AtomicBoolean();
 
       public WalkThroughDoorState(String robotName, ROS2Node ros2Node)
       {
@@ -509,9 +515,8 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
-         HumanoidBehaviorTypePacket humanoidBehaviorTypePacket = new HumanoidBehaviorTypePacket();
-         humanoidBehaviorTypePacket.setHumanoidBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR.toByte());
-         behaviorTypePublisher.publish(humanoidBehaviorTypePacket);
+         receivedOperatorConfirmation.set(false);
+         hasStartedBehavior.set(false);
          isDone.set(false);
 
          if (DEBUG)
@@ -520,9 +525,26 @@ public class BuildingExplorationBehaviorCoordinator
          }
       }
 
+      private void startBehavior()
+      {
+         HumanoidBehaviorTypePacket humanoidBehaviorTypePacket = new HumanoidBehaviorTypePacket();
+         humanoidBehaviorTypePacket.setHumanoidBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR.toByte());
+         behaviorTypePublisher.publish(humanoidBehaviorTypePacket);
+      }
+
       @Override
       public void doAction(double timeInState)
       {
+         if (receivedOperatorConfirmation.get() && !hasStartedBehavior.get())
+         {
+            startBehavior();
+            hasStartedBehavior.set(true);
+
+            if (DEBUG)
+            {
+               LogTools.info("Sent packet to start " + HumanoidBehaviorType.WALK_THROUGH_DOOR);
+            }
+         }
       }
 
       @Override
@@ -542,6 +564,11 @@ public class BuildingExplorationBehaviorCoordinator
       public boolean isDone(double timeInState)
       {
          return isDone.get();
+      }
+
+      public void proceedWithDoorBehavior()
+      {
+         receivedOperatorConfirmation.set(true);
       }
    }
 

@@ -114,6 +114,12 @@ public class BuildingExplorationUIDashboardController
    }
 
    @FXML
+   public void confirmDoor()
+   {
+      messager.submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
+   }
+
+   @FXML
    public void approveStairsSteps()
    {
       executeStairsStepsPublisher.publish(new Empty());
