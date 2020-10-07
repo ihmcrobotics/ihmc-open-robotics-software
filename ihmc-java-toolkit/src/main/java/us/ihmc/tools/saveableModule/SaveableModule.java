@@ -9,7 +9,7 @@ public abstract class SaveableModule<T extends SaveableModuleState>
 
    public SaveableModule(Class<? extends SaveableModule> moduleName, YoRegistry registry)
    {
-      this(moduleName.getName(), registry);
+      this(moduleName.getSimpleName(), registry);
    }
 
    public SaveableModule(String moduleName, YoRegistry registry)

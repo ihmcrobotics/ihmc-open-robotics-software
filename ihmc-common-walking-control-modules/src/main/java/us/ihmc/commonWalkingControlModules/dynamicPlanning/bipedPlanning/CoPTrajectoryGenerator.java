@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
@@ -71,6 +72,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
       percentageStandingWeightDistributionOnLeftFoot = new YoDouble("PercentageStandingWeightDistributionOnLeftFoot", registry);
+      percentageStandingWeightDistributionOnLeftFoot.set(0.5);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -200,6 +202,25 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
          viewer.updateWaypoints(contactStateProviders);
    }
 
+
+   public void update(double time, FixedFramePoint3DBasics desiredCoP)
+   {
+      for (int i = 0; i < contactStateProviders.size(); i++)
+      {
+         ContactStateProvider contactStateProvider = contactStateProviders.get(i);
+         if (contactStateProvider.getTimeInterval().intervalContains(time))
+         {
+            double alpha = (time - contactStateProvider.getTimeInterval().getStartTime()) / contactStateProvider.getTimeInterval().getDuration();
+            desiredCoP.interpolate(contactStateProvider.getCopStartPosition(), contactStateProvider.getCopEndPosition(), alpha);
+            break;
+         }
+         else
+         {
+            continue;
+         }
+      }
+   }
+
    public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
    {
       return contactStateProviders;
@@ -255,7 +276,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(segmentDuration);
+      contactState.setDuration(Double.POSITIVE_INFINITY);
    }
 
    private void computeCoPPointsForFinalTransfer(RobotSide lastFootstepSide,
@@ -263,7 +284,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
                                                  double finalTransferSplitFraction,
                                                  double finalTransferWeightDistribution)
    {
-      ContactStateProvider previousContactState = contactStateProviders.getLast();
+      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
 
       tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide).getCentroid());
       tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
@@ -272,14 +293,11 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       tempPointForCoPCalculation.interpolate(tempFramePoint2D, finalTransferWeightDistribution);
 
       double segmentDuration = finalTransferSplitFraction * finalTransferDuration;
-      SettableContactStateProvider contactState = contactStateProviders.add();
-      contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(tempPointForCoPCalculation);
-      contactState.setDuration(segmentDuration);
+      previousContactState.setEndCopPosition(tempPointForCoPCalculation);
+      previousContactState.setDuration(segmentDuration);
 
       segmentDuration = (1.0 - finalTransferSplitFraction) * finalTransferDuration;
-      previousContactState = contactState;
-      contactState = contactStateProviders.add();
+      SettableContactStateProvider contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
@@ -293,7 +311,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
                                                     RobotSide supportSide)
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      previousCoPPosition.setIncludingFrame(previousContactState.getCopEndPosition());
+      previousCoPPosition.setIncludingFrame(previousContactState.getCopStartPosition());
 
       computeEntryCoPPointLocation(tempPointForCoPCalculation, previousPolygon, nextPolygon, supportSide);
       midfootCoP.interpolate(previousCoPPosition, tempPointForCoPCalculation, weightDistribution);
@@ -333,6 +351,8 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       contactState.setStartFromEnd(previousContactState);
       contactState.setDuration((1.0 - shiftFraction) * duration);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
+
+      contactStateProviders.add().setStartFromEnd(contactState);
    }
 
    private void computeEntryCoPPointLocation(FramePoint2DBasics copLocationToPack,
@@ -400,7 +420,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       copLocationToPack.add(copXOffset, supportSide.negateIfRightSide(copOffset.getY()));
 
       constrainToPolygon(copLocationToPack, basePolygon, parameters.getMinimumDistanceInsidePolygon());
-      copLocationToPack.changeFrame(worldFrame);
+      copLocationToPack.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
    /**
