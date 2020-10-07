@@ -137,7 +137,6 @@ public class BalanceManager
    private boolean minimizeAngularMomentumRateZ = false;
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
-   private double finalTransferDuration;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
    private RobotSide transferToSide;
@@ -375,7 +374,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
       linearMomentumRateControlModuleInput.setFromFootsteps(footsteps);
       linearMomentumRateControlModuleInput.setFromFootstepTimings(footstepTimings);
-      linearMomentumRateControlModuleInput.setFinalTransferDuration(finalTransferDuration);
+      linearMomentumRateControlModuleInput.setFinalTransferDuration(copTrajectoryState.getFinalTransferDuration());
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
@@ -424,7 +423,7 @@ public class BalanceManager
          timeInSupportSequence.add(controllerToolbox.getControlDT());
 
       if (inFinalTransfer.getValue())
-         icpPlannerDone.set(timeInSupportSequence.getValue() >= finalTransferDuration);
+         icpPlannerDone.set(timeInSupportSequence.getValue() >= copTrajectoryState.getFinalTransferDuration());
       else if (footstepTimings.isEmpty())
          icpPlannerDone.set(true);
       else if (inSingleSupport.getValue())
