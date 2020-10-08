@@ -103,6 +103,7 @@ public class QPVariableSubstitution
 
       tempA.set(transformation);
       transformation.reshape(newSizeX, newSizeY);
+      transformation.zero();
       CommonOps_DDRM.insert(tempA, transformation, 0, 0);
       CommonOps_DDRM.insert(other.transformation, transformation, oldSizeX, oldSizeY);
 
