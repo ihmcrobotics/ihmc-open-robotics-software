@@ -376,10 +376,10 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
-         balanceManager.getDesiredCMP(desiredCMP);
-         balanceManager.getDesiredICP(desiredICP);
-         balanceManager.getCapturePoint(currentICP);
-         balanceManager.getNextExitCMP(nextExitCMP);
+         desiredCMP.setIncludingFrame(balanceManager.getDesiredCMP());
+         desiredICP.setIncludingFrame(balanceManager.getDesiredICP());
+         currentICP.setIncludingFrame(balanceManager.getCapturePoint());
+         nextExitCMP.setIncludingFrame(balanceManager.getNextExitCMP());
 
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);

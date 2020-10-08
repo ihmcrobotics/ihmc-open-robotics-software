@@ -263,7 +263,7 @@ public class SimpleBalanceManager
       yoDesiredCoMPosition.set(comPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comPlanner.getDesiredCoMVelocity());
 
-      pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
+      pelvisICPBasedTranslationManager.compute(supportLeg);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
