@@ -29,7 +29,7 @@ mainDependencies {
    api("org.boofcv:boofcv-geo:0.36")
 
    api("us.ihmc:euclid-frame:0.15.1")
-   api("us.ihmc:ihmc-yovariables:0.9.4")
+   api("us.ihmc:ihmc-yovariables:0.9.5")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -38,7 +38,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:simulation-construction-set-test:0.20.5")
+   api("us.ihmc:simulation-construction-set-test:0.20.6")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
