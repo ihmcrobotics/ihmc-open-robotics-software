@@ -337,10 +337,20 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ExceptionHandler exceptionHandler)
    {
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
+                                                     Class<T> messageType,
+                                                     String topicName,
+                                                     NewMessageListener<T> newMessageListener,
+                                                     ROS2QosProfile qosProfile,
+                                                     ExceptionHandler exceptionHandler)
+   {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
+         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, qosProfile);
       }
       catch (IOException e)
       {
