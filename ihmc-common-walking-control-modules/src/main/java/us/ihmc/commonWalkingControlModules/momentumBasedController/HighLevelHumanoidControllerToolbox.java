@@ -970,7 +970,7 @@ public class HighLevelHumanoidControllerToolbox
       return omega0.getDoubleValue();
    }
    
-   public DoubleProvider getOmega0Provider()
+   public YoDouble getOmega0Provider()
    {
       return omega0;
    }

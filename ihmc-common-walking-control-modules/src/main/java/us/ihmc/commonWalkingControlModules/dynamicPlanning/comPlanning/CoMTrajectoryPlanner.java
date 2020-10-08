@@ -7,6 +7,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,6 +22,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -76,7 +78,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
 
-   private final YoDouble omega = new YoDouble("omegaForPlanning", registry);
+   private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
 
@@ -121,9 +123,24 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    public CoMTrajectoryPlanner(double gravityZ, double nominalCoMHeight, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
+      YoDouble omega = new YoDouble("omegaForPlanning", registry);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
+
+      this.omega = omega;
+
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
+   }
+
+   public CoMTrajectoryPlanner(double gravityZ, YoDouble omega, YoRegistry parentRegistry)
+   {
+      this.omega = omega;
+      this.gravityZ = Math.abs(gravityZ);
+
+      omega.addListener(v -> comHeight.set(gravityZ / MathTools.square(omega.getValue())));
+      omega.notifyListeners();
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);

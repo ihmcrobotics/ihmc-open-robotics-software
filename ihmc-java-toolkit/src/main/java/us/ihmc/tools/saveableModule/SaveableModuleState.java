@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class SaveableModuleState
+public abstract class SaveableModuleState
 {
    private final List<YoDouble> doubles = new ArrayList<>();
    private final List<YoInteger> integers = new ArrayList<>();
