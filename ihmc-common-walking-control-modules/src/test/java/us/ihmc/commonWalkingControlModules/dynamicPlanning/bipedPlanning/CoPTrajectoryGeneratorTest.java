@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.saveableModule.SaveableModuleStateTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -107,4 +108,20 @@ public class CoPTrajectoryGeneratorTest
          CoPTrajectoryVisualizer.visualize(copTrajectory);
    }
 
+   public static void main(String[] args)
+   {
+      YoRegistry registry = new YoRegistry("test");
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters(registry);
+      CoPTrajectoryGenerator copTrajectory = new CoPTrajectoryGenerator(parameters,
+                                                                        CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
+                                                                        registry);
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(copTrajectory.getYoRegistry());
+      copTrajectory.registerState(state);
+      state.registerStateToSave(parameters);
+
+      SaveableModuleStateTools.load(state);
+
+      copTrajectory.compute(state);
+      CoPTrajectoryVisualizer.visualize(copTrajectory);
+   }
 }
