@@ -110,9 +110,9 @@ public class LookAndStepFootstepPlanningTask
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-         localizationResultInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         planarRegionsInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.queueExecution(this::evaluateAndRun));
+         localizationResultInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         planarRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         footstepCompletedInput.addCallback(() -> executor.submitTask(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));

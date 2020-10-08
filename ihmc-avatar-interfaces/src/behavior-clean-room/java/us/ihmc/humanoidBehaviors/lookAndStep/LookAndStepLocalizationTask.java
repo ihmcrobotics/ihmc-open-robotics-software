@@ -72,8 +72,8 @@ public class LookAndStepLocalizationTask
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-         bodyPathPlanInput.addCallback(data -> executor.queueExecution(this::snapshotAndRun));
-         swingSleepCompleteInput.addCallback(() -> executor.queueExecution(this::snapshotAndRun));
+         bodyPathPlanInput.addCallback(data -> executor.submitTask(this::snapshotAndRun));
+         swingSleepCompleteInput.addCallback(() -> executor.submitTask(this::snapshotAndRun));
       }
 
       public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)

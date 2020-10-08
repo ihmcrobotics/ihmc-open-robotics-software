@@ -60,7 +60,7 @@ public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscribe
    @Override
    public void onNewMessage(sensor_msgs.PointCloud2 ros1PointCloud)
    {
-      executor.queueExecution(() -> waitThenAct(ros1PointCloud));
+      executor.submitTask(() -> waitThenAct(ros1PointCloud));
    }
 
    private void waitThenAct(sensor_msgs.PointCloud2 ros1PointCloud)

@@ -52,7 +52,7 @@ public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sen
    {
       if (THROTTLE)
       {
-         executor.queueExecution(() -> waitThenAct(ros1Image));
+         executor.submitTask(() -> waitThenAct(ros1Image));
       }
       else
       {
