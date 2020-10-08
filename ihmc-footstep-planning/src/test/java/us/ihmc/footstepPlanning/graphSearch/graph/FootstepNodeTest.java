@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.flatGroundPlanning;
+package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,13 +17,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class FootstepNodeTest
 {
    @Test
-   public void testEqualsAndHashMethodsWithRandomTransforms()
+   public void testEqualsAndHashcode()
    {
       Random random = new Random(3823L);
       int numTrials = 100;
@@ -32,8 +31,6 @@ public class FootstepNodeTest
       for (int i = 0; i < numTrials; i++)
       {
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
-
-         // test for exact same transform
          double x = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double y = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double yaw = EuclidCoreRandomTools.nextDouble(random, 1.0);
@@ -43,33 +40,16 @@ public class FootstepNodeTest
 
          assertTrue(nodeA.equals(nodeB));
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
+
+         nodeB = new FootstepNode(x + 0.1, y, yaw, robotSide);
+         assertFalse(nodeA.equals(nodeB));
+         nodeB = new FootstepNode(x, y + 0.1, yaw, robotSide);
+         assertFalse(nodeA.equals(nodeB));
+         nodeB = new FootstepNode(x, y, yaw + 0.5, robotSide);
+         assertFalse(nodeA.equals(nodeB));
+         nodeB = new FootstepNode(x, y, yaw, robotSide.getOppositeSide());
+         assertFalse(nodeA.equals(nodeB));
       }
-   }
-
-   @Test
-   public void testShiftInSoleFrame()
-   {
-      Vector3D soleTranslation = new Vector3D();
-      double yaw = 0.0;
-      RigidBodyTransform soleTransform = new RigidBodyTransform(new AxisAngle(0.0, 0.0, 1.0, yaw), soleTranslation);
-      FootstepNode node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
-
-      Vector2D shiftVector = new Vector2D(1.0, 2.0);
-      RigidBodyTransform shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), shiftedSoleTransform.getTranslation(), 1e-7);
-      assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
-
-      soleTranslation = new Vector3D();
-      yaw = Math.PI/2.0;
-      soleTransform = new RigidBodyTransform(new AxisAngle(0.0, 0.0, 1.0, yaw), soleTranslation);
-      soleTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI/2.0);
-      node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
-
-      shiftVector = new Vector2D(1.0, 2.0);
-      shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
-
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), shiftedSoleTransform.getTranslation(), 1e-7);
-      assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
    }
 
    @Test

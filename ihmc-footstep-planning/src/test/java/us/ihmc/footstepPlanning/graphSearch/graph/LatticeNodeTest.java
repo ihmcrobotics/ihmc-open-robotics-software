@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.flatGroundPlanning;
+package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

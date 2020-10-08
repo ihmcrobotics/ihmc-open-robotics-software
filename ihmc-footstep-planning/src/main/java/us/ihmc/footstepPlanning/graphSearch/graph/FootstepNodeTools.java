@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -10,29 +9,16 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepNodeTools
 {
-   public static RigidBodyTransform shiftInSoleFrame(Vector2D shiftVector, RigidBodyTransform soleTransform)
-   {
-      RigidBodyTransform shiftTransform = new RigidBodyTransform();
-      shiftTransform.getTranslation().set(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
-      soleTransform.multiply(shiftTransform);
-      return soleTransform;
-   }
-
    /**
     * Computes a node-to-world RigidBodyTransform from the node's x, y and yaw. This transform
     * will always have no z translation, pitch and roll.
