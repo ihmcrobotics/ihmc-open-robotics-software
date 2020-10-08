@@ -27,7 +27,8 @@ public class CoPTrajectoryVisualizer
       YoFramePoint3D desiredCoP = new YoFramePoint3D("desiredCoP", ReferenceFrame.getWorldFrame(), registry);
       BagOfBalls desiredCoPViz = new BagOfBalls(100, 0.005, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);
 
-      SimulationConstructionSet simulationConstructionSet = new SimulationConstructionSet(new Robot("Dummy"));
+      Robot robot = new Robot("dummy");
+      SimulationConstructionSet simulationConstructionSet = new SimulationConstructionSet(robot);
       simulationConstructionSet.getRootRegistry().addChild(registry);
       simulationConstructionSet.addYoGraphicsListRegistry(graphicsListRegistry);
 
@@ -44,8 +45,9 @@ public class CoPTrajectoryVisualizer
 
       for (double time = 0; time <= totalDuration; time += 0.01)
       {
+         robot.getYoTime().set(time);
          copTrajectoryGenerator.update(time, desiredCoP);
-         desiredCoPViz.setBall(desiredCoP);
+         desiredCoPViz.setBallLoop(desiredCoP);
          simulationConstructionSet.tickAndUpdate();
       }
 
