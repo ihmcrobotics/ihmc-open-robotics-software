@@ -29,7 +29,7 @@ public class ThrottledRobotStateCallback
    {
       updatePeriod = UnitConversions.hertzToSeconds(rateHz);
       syncableRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.queueExecution(waitThenAct));
+      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.submitTask(waitThenAct));
    }
 
    private void waitThenAct()

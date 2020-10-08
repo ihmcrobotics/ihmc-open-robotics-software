@@ -97,8 +97,8 @@ public class LookAndStepBodyPathPlanningTask
          // don't run two body path plans at the same time
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-         mapRegionsInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         goalInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
+         mapRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         goalInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));

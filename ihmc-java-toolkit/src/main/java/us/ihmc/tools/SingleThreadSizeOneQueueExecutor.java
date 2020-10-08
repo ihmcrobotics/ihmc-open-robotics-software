@@ -36,7 +36,7 @@ public class SingleThreadSizeOneQueueExecutor
       executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, sizeOneQueue, ThreadTools.createNamedDaemonThreadFactory(prefix));
    }
 
-   public void queueExecution(Runnable runnable)
+   public void submitTask(Runnable runnable)
    {
       try
       {
