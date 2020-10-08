@@ -7,12 +7,20 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
+   private static final boolean THROTTLE = false;
+   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(24.0);
+
    private final IHMCROS2Publisher<CompressedImage> publisher;
+   private final Timer throttleTimer = new Timer();
+   private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
    public RealsenseD435VideoROS1Bridge(RosMainNode ros1Node, ROS2Node ros2Node)
    {
@@ -29,6 +37,26 @@ public class RealsenseD435VideoROS1Bridge extends AbstractRosTopicSubscriber<sen
 
    @Override
    public void onNewMessage(sensor_msgs.CompressedImage ros1Image)
+   {
+      if (THROTTLE)
+      {
+         executor.queueExecution(() -> waitThenAct(ros1Image));
+      }
+      else
+      {
+         compute(ros1Image);
+      }
+   }
+
+   private void waitThenAct(sensor_msgs.CompressedImage ros1Image)
+   {
+      throttleTimer.sleepUntilExpiration(MIN_PUBLISH_PERIOD);
+      throttleTimer.reset();
+
+      compute(ros1Image);
+   }
+
+   private void compute(sensor_msgs.CompressedImage ros1Image)
    {
       try
       {
