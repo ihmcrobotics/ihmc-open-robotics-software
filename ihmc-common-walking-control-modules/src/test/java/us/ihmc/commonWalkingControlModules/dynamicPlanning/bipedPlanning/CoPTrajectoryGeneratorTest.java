@@ -39,7 +39,7 @@ public class CoPTrajectoryGeneratorTest
       SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
-      CoPTrajectoryGenerator copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
+      CoPTrajectoryGenerator copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(registry),
                                                                         CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
                                                                         registry);
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
