@@ -71,7 +71,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       long currentTimestamp;
       while ((currentTimestamp = getNewestTimestamp()) < timestamp)
       {
-         LogTools.info("Current timestamp: {}, waiting for {}", currentTimestamp, timestamp);
+         LogTools.debug("Current timestamp: {}, waiting for {}", currentTimestamp, timestamp);
 
          try
          {
