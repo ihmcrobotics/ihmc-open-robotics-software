@@ -62,6 +62,7 @@ public class ControllerAPIDefinition
 
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(WholeBodyMultiContactTrajectoryCommand.class);
+      commands.add(ContactStateChangeCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));

@@ -10,7 +10,7 @@ module controller_msgs
     {
 
       /**
-       * This message is part of the IHMC whole-body controller API.
+       * This message is part of the IHMC multi-contact controller API.
        * Experimental mode of specifying a desired configuration in terms of root pose and joint angles.
        */
       @TypeCode(type="controller_msgs::msg::dds_::WholeBodyMultiContactTrajectoryMessage_")
@@ -20,9 +20,21 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Duration of trajectory in seconds
+         */
         double trajectory_duration;
+        /**
+         * Target joint angles of the trajectory
+         */
         sequence<double, 50> joint_angles;
+        /**
+         * Terminal pelvis pose in world frame
+         */
         geometry_msgs::msg::dds::Pose pelvis_pose;
+        /**
+         * Hash of joint array
+         */
         long joint_name_hash;
       };
     };

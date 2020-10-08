@@ -53,7 +53,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Returns the ideal length when walking backwards. This value is negative.
+    * Returns the ideal length when walking backwards. This value is positive.
     */
    default double getIdealBackStepLength()
    {

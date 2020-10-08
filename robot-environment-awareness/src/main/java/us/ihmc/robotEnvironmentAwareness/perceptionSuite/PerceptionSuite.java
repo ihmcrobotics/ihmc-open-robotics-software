@@ -131,7 +131,7 @@ public class PerceptionSuite
 
    private PlanarSegmentationModule createSegmentationModule(Messager messager) throws Exception
    {
-      PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath,
+      PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath.toFile(),
                                                                                                       ros2Node,
                                                                                                       messager);
       if (slamModule.getElement() != null)

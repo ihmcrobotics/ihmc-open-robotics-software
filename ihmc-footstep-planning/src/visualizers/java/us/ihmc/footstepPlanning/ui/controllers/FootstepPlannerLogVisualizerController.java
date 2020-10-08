@@ -435,24 +435,9 @@ public class FootstepPlannerLogVisualizerController
       for (int i = 0; i < variablesToChart.size(); i++)
       {
          VariableDescriptor variableDescriptor = variablesToChart.get(i);
-         TableColumn<ChildStepProperty, String> column = new TableColumn<>(variableDescriptor.getName());
-         int variableIndex = variableDescriptors.indexOf(variableDescriptor);
-
-         Function<long[], String> loggedDataFormatter = data ->
-         {
-            if (variableIndex < 0 || variableIndex >= data.length)
-            {
-               return "-";
-            }
-            else
-            {
-               return formatValue(data[variableIndex], variableDescriptor);
-            }
-         };
-
-         column.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(loggedDataFormatter.apply(c.getValue().edgeData.getDataBuffer())));
-         column.setPrefWidth(125);
-         childTable.getColumns().add(column);
+         TableColumn<ChildStepProperty, ?> tableColumn = createTableColumn(variableDescriptor);
+         tableColumn.setPrefWidth(125);
+         childTable.getColumns().add(tableColumn);
       }
 
       FootstepPlannerIterationData iterationData = iterationDataOptional.get();
@@ -484,6 +469,72 @@ public class FootstepPlannerLogVisualizerController
       childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
       childTable.getSelectionModel().select(0);
       childTable.getFocusModel().focus(0);
+   }
+
+   private TableColumn<ChildStepProperty, ?> createTableColumn(VariableDescriptor variableDescriptor)
+   {
+      int variableIndex = variableDescriptors.indexOf(variableDescriptor);
+      switch (variableDescriptor.getType())
+      {
+         case DOUBLE:
+            TableColumn<ChildStepProperty, Double> doubleColumn = new TableColumn<>(variableDescriptor.getName());
+            doubleColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(Double.longBitsToDouble(c.getValue().edgeData.getDataBuffer()[variableIndex])));
+            doubleColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Double>()
+            {
+               @Override
+               public void updateItem(final Double value, boolean empty)
+               {
+                  if (value != null)
+                     setText(doubleFormat.format(value));
+               }
+            });
+
+            return doubleColumn;
+         case BOOLEAN:
+            TableColumn<ChildStepProperty, Boolean> booleanColumn = new TableColumn<>(variableDescriptor.getName());
+            booleanColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().edgeData.getDataBuffer()[variableIndex] == 1));
+            booleanColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Boolean>()
+            {
+               @Override
+               public void updateItem(final Boolean value, boolean empty)
+               {
+                  if (value != null)
+                     setText(Boolean.toString(value));
+               }
+            });
+
+            return booleanColumn;
+         case ENUM:
+            TableColumn<ChildStepProperty, Long> enumColumn = new TableColumn<>(variableDescriptor.getName());
+            enumColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().edgeData.getDataBuffer()[variableIndex]));
+            enumColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Long>()
+            {
+               @Override
+               public void updateItem(final Long value, boolean empty)
+               {
+                  if (value != null)
+                     setText(value == -1 ? "null" : variableDescriptor.getEnumValues()[(int) value.longValue()]);
+               }
+            });
+
+            return enumColumn;
+         case LONG:
+         case INTEGER:
+         default:
+            TableColumn<ChildStepProperty, Long> longColumn = new TableColumn<>(variableDescriptor.getName());
+            longColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().edgeData.getDataBuffer()[variableIndex]));
+            longColumn.setCellFactory(c -> new TableCell<ChildStepProperty, Long>()
+            {
+               @Override
+               public void updateItem(final Long value, boolean empty)
+               {
+                  if (value != null)
+                     setText(value.toString());
+               }
+            });
+
+            return longColumn;
+      }
    }
 
    private ChangeListener<ChildStepProperty> onStepSelected()
@@ -677,7 +728,7 @@ public class FootstepPlannerLogVisualizerController
       }
    }
 
-   private static final DecimalFormat doubleFormat = new DecimalFormat("#0.000");
+   private static final DecimalFormat doubleFormat = new DecimalFormat("#0.00000");
 
    private static String formatValue(long value, VariableDescriptor variableDescriptor)
    {
