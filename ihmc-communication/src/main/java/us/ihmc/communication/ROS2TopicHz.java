@@ -5,6 +5,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -24,7 +25,6 @@ public class ROS2TopicHz
    private double standardDeviation;
    private int window;
 
-   private double lastElapsed = Double.NaN;
    private final List<Double> deltas = new ArrayList<>();
 
    private Stopwatch stopwatch = new Stopwatch();
@@ -115,7 +115,7 @@ public class ROS2TopicHz
       ROS2Topic<?> topic = ROS2Tools.D435_POINT_CLOUD;
       ROS2TopicHz hz = new ROS2TopicHz();
       ROS2Node node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "hz");
-      ROS2Tools.createCallbackSubscription(node, topic, subscriber -> hz.ping());
+      new IHMCROS2Callback<>(node, topic, ROS2QosProfile.DEFAULT(), message -> hz.ping());
 
       ThreadTools.sleepForever();
    }
