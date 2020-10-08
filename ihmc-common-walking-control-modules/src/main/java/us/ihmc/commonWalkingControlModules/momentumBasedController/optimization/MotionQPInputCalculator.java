@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.List;
 
+import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
@@ -262,6 +263,20 @@ public class MotionQPInputCalculator
       DMatrixRMaj loopJacobian = function.getLoopJacobian();
       DMatrixRMaj loopConvectiveTerm = function.getLoopConvectiveTerm();
       List<? extends OneDoFJointReadOnly> loopJoints = function.getLoopJoints();
+      int[] actuatedJointIndices = function.getActuatedJointIndices();
+
+      if (loopJacobian.getNumRows() != loopConvectiveTerm.getNumRows())
+         throw new IllegalArgumentException("Inconsistent dimensions: number of rows in Jacobian: " + loopJacobian.getNumRows() + ", number of joints: "
+               + loopJoints.size());
+
+      if (loopJacobian.getNumRows() != loopConvectiveTerm.getNumRows())
+         throw new MatrixDimensionException("Inconsistent dimensions: loopJacobian.numRows=" + loopJacobian.getNumRows() + ", loopConvectiveTerm.numRows="
+               + loopConvectiveTerm.getNumRows());
+
+      if (actuatedJointIndices.length != loopJacobian.getNumCols())
+         throw new IllegalArgumentException("Inconsistent dimensions: number of actuated joints: " + actuatedJointIndices.length
+               + ", number of columns in Jacobian: " + loopJacobian.getNumCols());
+
       qpVariableSubstitutionToPack.reshape(loopJoints.size(), loopJacobian.getNumRows());
 
       qpVariableSubstitutionToPack.transformation.set(loopJacobian);
@@ -270,6 +285,11 @@ public class MotionQPInputCalculator
       for (int i = 0; i < loopJoints.size(); i++)
       {
          qpVariableSubstitutionToPack.variableIndices[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
+      }
+
+      for (int i = 0; i < actuatedJointIndices.length; i++)
+      {
+         qpVariableSubstitutionToPack.activeIndices.add(actuatedJointIndices[i]);
       }
    }
 

@@ -33,6 +33,8 @@ public class QPVariableSubstitution
    public int numberOfVariablesToSubstitute;
    /** Refers to the index of each element in {@code x} that is to be substituted. */
    public int[] variableIndices = new int[4];
+   /** Refers to the indices of each element in {@code y} that represent the actuated joints. */
+   public TIntArrayList activeIndices = new TIntArrayList(4, -1);
    private TIntArrayList inactiveIndices = new TIntArrayList(4, -1);
 
    /** Refers to the transformation matrix {@code G}. */
@@ -60,6 +62,7 @@ public class QPVariableSubstitution
    public void reset()
    {
       numberOfVariablesToSubstitute = 0;
+      activeIndices.reset();
       inactiveIndices.reset();
       transformation.reshape(0, 0);
       bias.reshape(0, 0);
@@ -72,6 +75,7 @@ public class QPVariableSubstitution
       if (variableIndices.length < numberOfVariablesToSubstitute)
          variableIndices = new int[numberOfVariablesToSubstitute];
 
+      activeIndices.reset();
       transformation.reshape(numberOfVariablesToSubstitute, numberOfVariablesPostSubstitution);
       bias.reshape(numberOfVariablesPostSubstitution, 1);
    }
@@ -99,6 +103,11 @@ public class QPVariableSubstitution
       for (int i = 0; i < other.numberOfVariablesToSubstitute; i++)
       {
          variableIndices[i + oldSizeX] = other.variableIndices[i];
+      }
+
+      for (int i = 0; i < other.activeIndices.size(); i++)
+      {
+         activeIndices.add(other.activeIndices.get(i) + oldSizeX);
       }
 
       tempA.set(transformation);
@@ -392,8 +401,10 @@ public class QPVariableSubstitution
 
       // Assuming that if at least one bound is set, that all are.
       // Consider improving this method to only consider set bounds.
-      for (int variableIndex : variableIndices)
+      for (int i = 0; i < activeIndices.size(); i++)
       {
+         int variableIndex = variableIndices[activeIndices.get(i)];
+
          if (Double.isFinite(xMin.get(variableIndex)) || Double.isFinite(xMax.get(variableIndex)))
          {
             areBoundsSet = true;
@@ -409,18 +420,20 @@ public class QPVariableSubstitution
       DMatrixRMaj g = bias;
 
       int offset_min = Ain.getNumRows();
-      int offset_max = offset_min + G.getNumRows();
+      int offset_max = offset_min + activeIndices.size();
 
-      Ain.reshape(Ain.getNumRows() + 2 * G.getNumRows(), Ain.getNumCols(), true);
-      bin.reshape(bin.getNumRows() + 2 * G.getNumRows(), 1, true);
+      Ain.reshape(Ain.getNumRows() + 2 * activeIndices.size(), Ain.getNumCols(), true);
+      bin.reshape(bin.getNumRows() + 2 * activeIndices.size(), 1, true);
 
-      for (int rowG = 0; rowG < G.getNumRows(); rowG++)
+      for (int i = 0; i < activeIndices.size(); i++)
       {
-         int rowAmin = rowG + offset_min;
-         int rowAmax = rowG + offset_max;
+         int rowAmin = i + offset_min;
+         int rowAmax = i + offset_max;
          // Make sure the new rows do not contain old values.
          MatrixTools.zeroRow(rowAmin, Ain);
          MatrixTools.zeroRow(rowAmax, Ain);
+
+         int rowG = activeIndices.get(i);
 
          for (int colG = 0; colG < G.getNumCols(); colG++)
          {
@@ -430,11 +443,12 @@ public class QPVariableSubstitution
          }
       }
 
-      for (int row_g = 0; row_g < g.getNumRows(); row_g++)
+      for (int i = 0; i < activeIndices.size(); i++)
       {
+         int row_g = activeIndices.get(i);
          int row_x = variableIndices[row_g];
-         int row_b_min = row_g + offset_min;
-         int row_b_max = row_g + offset_max;
+         int row_b_min = i + offset_min;
+         int row_b_max = i + offset_max;
 
          if (ignoreBias)
          {

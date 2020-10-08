@@ -48,6 +48,17 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 public interface KinematicLoopFunction
 {
    /**
+    * Returns the indices of the joints that are actuated.
+    * <p>
+    * The indices should be consistent with the joint position in {@link #getLoopJoints()} and the
+    * number of indices should be equal to the number of columns in the loop Jacobian.
+    * </p>
+    * 
+    * @return the indices of the actuated joints.
+    */
+   int[] getActuatedJointIndices();
+
+   /**
     * Returns the updated loop Jacobian used to perform the following transformations:
     * 
     * <pre>
