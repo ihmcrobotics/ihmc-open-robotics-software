@@ -316,6 +316,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
                        FixedFrameVector3DBasics comAccelerationToPack, FixedFramePoint3DBasics dcmPositionToPack, FixedFrameVector3DBasics dcmVelocityToPack,
                        FixedFramePoint3DBasics vrpPositionToPack, FixedFramePoint3DBasics ecmpPositionToPack)
    {
+      if (segmentId < 0)
+         throw new IllegalArgumentException("time is invalid.");
+
       int startIndex = indexHandler.getContactSequenceStartIndex(segmentId);
       firstCoefficient.setX(xCoefficientVector.get(startIndex));
       firstCoefficient.setY(yCoefficientVector.get(startIndex));

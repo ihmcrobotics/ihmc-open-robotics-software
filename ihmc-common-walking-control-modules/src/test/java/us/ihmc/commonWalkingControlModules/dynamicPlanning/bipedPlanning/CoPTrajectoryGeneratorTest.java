@@ -42,7 +42,7 @@ public class CoPTrajectoryGeneratorTest
       CoPTrajectoryGenerator copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
                                                                         CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
                                                                         registry);
-      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(soleFrames, registry);
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
       state.setInitialCoP(new FramePoint2D());
 
       for (RobotSide robotSide : RobotSide.values)

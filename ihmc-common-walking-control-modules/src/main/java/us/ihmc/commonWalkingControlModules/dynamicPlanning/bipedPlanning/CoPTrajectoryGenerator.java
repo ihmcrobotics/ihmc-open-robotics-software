@@ -35,8 +35,6 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
    private final YoDouble safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
    private final YoDouble exitCoPForwardSafetyMarginOnToes;
-   // FIXME this is kind of a state variable
-   private final YoDouble percentageStandingWeightDistributionOnLeftFoot;
 
    private final ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
@@ -71,9 +69,6 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble("SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
       exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
-      percentageStandingWeightDistributionOnLeftFoot = new YoDouble("PercentageStandingWeightDistributionOnLeftFoot", registry);
-      percentageStandingWeightDistributionOnLeftFoot.set(0.5);
-
       for (RobotSide robotSide : RobotSide.values)
       {
          stepFrames.put(robotSide, new RecyclingArrayList<>(3, new Supplier<PoseReferenceFrame>()
@@ -106,9 +101,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
    {
       contactStateProviders.clear();
       for (RobotSide robotSide : RobotSide.values)
-      {
          stepFrames.get(robotSide).clear();
-      }
    }
 
    public void set(Point2DReadOnly constantCop)
@@ -138,6 +131,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
          stepFrame.setPoseAndUpdate(tempPose);
 
          movingPolygonsInSole.get(robotSide).setIncludingFrame(state.getFootPolygonInSole(robotSide));
+         movingPolygonsInSole.get(robotSide).changeFrameAndProjectToXYPlane(stepFrame);
       }
 
       // compute cop waypoint location
@@ -149,10 +143,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       if (numberOfUpcomingFootsteps == 0)
       {
          // just standing there
-         computeCoPPointsForStanding(RobotSide.LEFT,
-                                     state.getFinalTransferDuration(),
-                                     state.getFinalTransferSplitFraction(),
-                                     percentageStandingWeightDistributionOnLeftFoot.getDoubleValue());
+         computeCoPPointsForStanding();
       }
       else
       {
@@ -193,9 +184,9 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
          RobotSide lastStepSide = state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide().getOppositeSide();
          if (lastStepSide == RobotSide.RIGHT)
-            percentageStandingWeightDistributionOnLeftFoot.set(1.0 - state.getFinalTransferWeightDistribution());
+            state.setPercentageStandingWeightDistributionOnLeftFoot(1.0 - state.getFinalTransferWeightDistribution());
          else
-            percentageStandingWeightDistributionOnLeftFoot.set(state.getFinalTransferWeightDistribution());
+            state.setPercentageStandingWeightDistributionOnLeftFoot(state.getFinalTransferWeightDistribution());
       }
 
       if (viewer != null)
@@ -255,23 +246,19 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
    }
 
 
-   private void computeCoPPointsForStanding(RobotSide lastFootstepSide,
-                                           double finalTransferDuration,
-                                           double finalTransferSplitFraction,
-                                           double finalTransferWeightDistribution)
+   private void computeCoPPointsForStanding()
    {
-      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide).getCentroid());
+      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(RobotSide.LEFT).getCentroid());
       tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
-      tempFramePoint2D.setIncludingFrame(movingPolygonsInSole.get(lastFootstepSide.getOppositeSide()).getCentroid());
+      tempFramePoint2D.setIncludingFrame(movingPolygonsInSole.get(RobotSide.RIGHT).getCentroid());
       tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-      tempPointForCoPCalculation.interpolate(tempFramePoint2D, finalTransferWeightDistribution);
+      tempPointForCoPCalculation.interpolate(tempFramePoint2D, state.getPercentageStandingWeightDistributionOnLeftFoot());
 
-      double segmentDuration = finalTransferSplitFraction * finalTransferDuration;
+      double segmentDuration = state.getFinalTransferSplitFraction() * state.getFinalTransferDuration();
       SettableContactStateProvider contactState = contactStateProviders.getLast();
       contactState.setEndCopPosition(tempPointForCoPCalculation);
       contactState.setDuration(segmentDuration);
 
-      segmentDuration = (1.0 - finalTransferSplitFraction) * finalTransferDuration;
       SettableContactStateProvider previousContactState = contactState;
       contactState = contactStateProviders.add();
       contactState.setStartFromEnd(previousContactState);
@@ -414,6 +401,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
                                    FrameConvexPolygon2DReadOnly otherPolygon,
                                    RobotSide supportSide)
    {
+      // FIXME this should be done in the sole frame, not the world frame
       copLocationToPack.setIncludingFrame(basePolygon.getCentroid());
 
       double copXOffset = MathTools.clamp(copOffset.getX() + lengthOffsetFactor * getStepLength(otherPolygon, basePolygon),
@@ -446,7 +434,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       if (supportFootPolygon.getArea() == 0.0)
       { // FIXME this is bad if it's a line, right?
          framePointToPack.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
-         framePointToPack.changeFrame(worldFrame);
+         framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
          return true;
       }
       else if (parameters.getPlanForToeOffCalculator().shouldPutCMPOnToes(supportToSwingStepLength, supportToSwingStepHeight))
@@ -455,7 +443,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
          framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
                               supportSide.negateIfRightSide(parameters.getExitCMPOffset().getY()));
          constrainToPolygon(framePointToPack, supportFootPolygon, safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getDoubleValue());
-         framePointToPack.changeFrame(worldFrame);
+         framePointToPack.changeFrameAndProjectToXYPlane(worldFrame);
          return true;
       }
       else

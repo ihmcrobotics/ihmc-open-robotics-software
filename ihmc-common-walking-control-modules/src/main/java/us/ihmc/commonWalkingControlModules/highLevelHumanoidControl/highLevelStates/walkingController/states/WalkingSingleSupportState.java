@@ -156,7 +156,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
             double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
 
-            balanceManager.clearICPPlan();
+//            balanceManager.clearICPPlan();
             balanceManager.setFinalTransferTime(finalTransferTime);
             balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
             balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);

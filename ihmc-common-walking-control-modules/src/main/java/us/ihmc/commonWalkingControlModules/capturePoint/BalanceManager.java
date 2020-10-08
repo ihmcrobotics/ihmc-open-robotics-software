@@ -216,14 +216,12 @@ public class BalanceManager
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
 //      supportSeqence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleZUpFrames, bipedSupportPolygons, registry, controllerToolbox.getYoGraphicsListRegistry());
-      comTrajectoryPlanner = new SimpleCoMTrajectoryPlanner(controllerToolbox.getOmega0Provider());
-      ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
-      copTrajectoryState = new CoPTrajectoryGeneratorState(soleFrames, registry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), 1.0, registry);
+      copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
       copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
                                                  defaultSupportPolygon,
                                                  registry);
       copTrajectory.registerState(copTrajectoryState);
-//      copTrajectory = new CopTrajectory(registry, controllerToolbox.getYoGraphicsListRegistry());
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -231,6 +229,9 @@ public class BalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
+         ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
+//         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
+
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
@@ -417,10 +418,9 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
       copTrajectory.update(timeInSupportSequence.getDoubleValue(), yoPlannedCoP);
 
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStateProviders());
-      int segment = inSingleSupport.getBooleanValue() ? 1 : 0;
-      comTrajectoryPlanner.compute(segment, timeInSupportSequence.getDoubleValue());
+      comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
          yoFinalDesiredICP.setToNaN();
@@ -438,6 +438,7 @@ public class BalanceManager
       else
          icpPlannerDone.set(timeInSupportSequence.getValue() >= currentTiming.getTransferTime());
    }
+
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
@@ -548,6 +549,7 @@ public class BalanceManager
       yoPlannedCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
@@ -567,8 +569,9 @@ public class BalanceManager
       inSingleSupport.set(true);
       inFinalTransfer.set(false);
 //      copTrajectory.changeFootFrame(footsteps.get(0).getRobotSide(), worldFrame);
-      timeInSupportSequence.set(0.0);
-      copTrajectoryState.setInitialCoP(yoPlannedCoP);
+      timeInSupportSequence.set(footstepTimings.get(0).getTransferTime());
+//      copTrajectoryState.setInitialCoP(yoPlannedCoP);
+//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       initializeForSingleSupport = true;
 
@@ -589,6 +592,8 @@ public class BalanceManager
       }
       copTrajectoryState.setInitialCoP(yoPlannedCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
@@ -606,6 +611,8 @@ public class BalanceManager
       }
       copTrajectoryState.setInitialCoP(yoPlannedCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(true);
@@ -624,6 +631,8 @@ public class BalanceManager
 
       copTrajectoryState.setInitialCoP(yoPlannedCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
       currentTiming.set(footstepTimings.get(0));
       timeInSupportSequence.set(0.0);
       inFinalTransfer.set(false);

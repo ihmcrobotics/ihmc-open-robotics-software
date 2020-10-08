@@ -37,8 +37,8 @@ public class WaypointViewer
          copStartPoints.add(copStartPoint);
          copEndPoints.add(copEndPoint);
 
-         YoGraphicPosition copStartPointGraphic = new YoGraphicPosition("copStartPoint" + i, copStartPoint, size, YoAppearance.Green(), GraphicType.BALL);
-         YoGraphicPosition copEndPointGraphic = new YoGraphicPosition("copEndPoint" + i, copEndPoint, size, YoAppearance.Green(), GraphicType.SOLID_BALL);
+         YoGraphicPosition copStartPointGraphic = new YoGraphicPosition("copStartPoint" + i, copStartPoint, size, YoAppearance.DarkRed(), GraphicType.BALL);
+         YoGraphicPosition copEndPointGraphic = new YoGraphicPosition("copEndPoint" + i, copEndPoint, size, YoAppearance.DarkRed(), GraphicType.SOLID_BALL);
 
          yoGraphicsListRegistry.registerYoGraphic(name, copStartPointGraphic);
          yoGraphicsListRegistry.registerYoGraphic(name, copEndPointGraphic);
