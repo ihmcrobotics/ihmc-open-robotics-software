@@ -81,7 +81,7 @@ public class FlamingoStanceState extends SingleSupportState
             feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
       }
 
-      balanceManager.getCapturePoint(capturePoint2d);
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > 0.05;
 

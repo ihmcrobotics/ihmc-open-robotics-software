@@ -154,7 +154,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, FramePoint2DReadOnly actualICP)
+   public void compute(RobotSide supportLeg)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
