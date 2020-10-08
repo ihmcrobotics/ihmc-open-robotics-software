@@ -333,11 +333,13 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
                                                  RobotSide supportSide)
    {
       computeBallCoPLocation(tempPointForCoPCalculation, supportPolygon, nextPolygon, supportSide);
-      SettableContactStateProvider contactState = contactStateProviders.getLast();
+      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
+      SettableContactStateProvider contactState = contactStateProviders.add();
+      contactState.setStartFromEnd(previousContactState);
       contactState.setDuration(shiftFraction * splitFraction * duration);
       contactState.setEndCopPosition(tempPointForCoPCalculation);
 
-      SettableContactStateProvider previousContactState = contactState;
+      previousContactState = contactState;
 
       computeExitCoPLocation(tempPointForCoPCalculation, supportPolygon, nextPolygon, supportSide);
 
@@ -417,7 +419,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       double copXOffset = MathTools.clamp(copOffset.getX() + lengthOffsetFactor * getStepLength(otherPolygon, basePolygon),
                                           minXOffset,
                                           maxXOffset);
-      copLocationToPack.add(copXOffset, supportSide.negateIfRightSide(copOffset.getY()));
+      copLocationToPack.add(copXOffset, supportSide.negateIfLeftSide(copOffset.getY()));
 
       constrainToPolygon(copLocationToPack, basePolygon, parameters.getMinimumDistanceInsidePolygon());
       copLocationToPack.changeFrameAndProjectToXYPlane(worldFrame);
