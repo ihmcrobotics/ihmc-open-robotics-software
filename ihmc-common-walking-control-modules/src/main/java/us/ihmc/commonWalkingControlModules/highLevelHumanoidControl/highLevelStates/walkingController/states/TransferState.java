@@ -128,7 +128,7 @@ public abstract class TransferState extends WalkingState
 
       if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
       {
-         balanceManager.getCapturePoint(capturePoint2d);
+         capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
          FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
          FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
 
@@ -155,10 +155,10 @@ public abstract class TransferState extends WalkingState
 
       if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
-         balanceManager.getDesiredCMP(desiredCMP);
-         balanceManager.getDesiredICP(desiredICPLocal);
-         balanceManager.getCapturePoint(capturePoint2d);
-         balanceManager.getNextExitCMP(nextExitCMP);
+         desiredCMP.setIncludingFrame(balanceManager.getDesiredCMP());
+         desiredICPLocal.setIncludingFrame(balanceManager.getDesiredICP());
+         capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+         nextExitCMP.setIncludingFrame(balanceManager.getNextExitCMP());
 
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);

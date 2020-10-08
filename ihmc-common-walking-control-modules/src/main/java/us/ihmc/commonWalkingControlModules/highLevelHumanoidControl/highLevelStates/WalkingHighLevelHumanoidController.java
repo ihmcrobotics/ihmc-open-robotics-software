@@ -551,7 +551,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
 
    public void doAction()
    {
@@ -629,9 +628,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void updateFailureDetection()
    {
-      balanceManager.getCapturePoint(capturePoint2d);
-      balanceManager.getDesiredICP(desiredCapturePoint2d);
-      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, desiredCapturePoint2d);
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
+      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();

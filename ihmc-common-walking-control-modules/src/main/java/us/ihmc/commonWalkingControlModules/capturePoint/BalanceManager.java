@@ -82,6 +82,8 @@ public class BalanceManager
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
 
+   private final SwingSpeedUpCalculator swingSpeedUpCalculator = new SwingSpeedUpCalculator();
+
    /** CoP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
    /** CMP position according to the ICP planner */
@@ -97,7 +99,6 @@ public class BalanceManager
    private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
@@ -154,8 +155,6 @@ public class BalanceManager
    private final YoBoolean inFinalTransfer = new YoBoolean("InFinalTransfer", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
-//   private final CopTrajectory copTrajectory;
-//   private final SupportSequence supportSeqence;
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final CoPTrajectoryGenerator copTrajectory;
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
@@ -310,18 +309,16 @@ public class BalanceManager
    {
    }
 
-   private final FramePoint3D copEstimate = new FramePoint3D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
-      controllerToolbox.getCoP(copEstimate);
-
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
       perfectCoP2d.set(comTrajectoryPlanner.getDesiredECMPPosition());
       yoDesiredCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
 
-      pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
+      capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
+      pelvisICPBasedTranslationManager.compute(supportLeg);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
@@ -333,7 +330,7 @@ public class BalanceManager
       else
          pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
-      // --- compute adjusted desired capture point
+      https://ihmcrobotics.slack.com/archives/G9W48LXA8      // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
@@ -356,8 +353,6 @@ public class BalanceManager
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
       yoPerfectCoP.set(perfectCoP2d);
 
-      getICPError(icpError2d);
-
       CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -377,7 +372,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
-      linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
@@ -416,9 +411,12 @@ public class BalanceManager
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
+      {
          yoFinalDesiredICP.setToNaN();
+         yoFinalDesiredCoM.setToNaN();
+      }
 
-      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence! // FIXME is this right
+      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
          timeInSupportSequence.add(controllerToolbox.getControlDT());
 
@@ -460,27 +458,41 @@ public class BalanceManager
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
+      double stateDuration = currentTiming.getStepTime();
+      double timeRemainingInCurrentState = timeInSupportSequence.getDoubleValue() - stateDuration;
+      if (icpPlannerDone.getBooleanValue())
+         return 0.0;
+
       controllerToolbox.getCapturePoint(capturePoint2d);
+      double deltaTimeToBeAccounted = swingSpeedUpCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
+                                                                                                            yoPerfectCMP,
+                                                                                                            yoFinalDesiredICP,
+                                                                                                            capturePoint2d,
+                                                                                                            controllerToolbox.getOmega0());
 
+      if (Double.isNaN(deltaTimeToBeAccounted))
+         return 0.0;
 
-      // FIXME
-//      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
-      return 0.0;
+      double estimatedTimeRemaining = timeRemainingInCurrentState - deltaTimeToBeAccounted;
+      estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+
+      return estimatedTimeRemaining;
    }
+
 
    public void freezePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.freeze();
    }
 
-   public void getDesiredCMP(FramePoint2D desiredCMPToPack)
+   public FramePoint2DReadOnly getDesiredCMP()
    {
-      desiredCMPToPack.setIncludingFrame(desiredCMP);
+      return desiredCMP;
    }
 
-   public void getDesiredICP(FramePoint2D desiredICPToPack)
+   public FramePoint2DReadOnly getDesiredICP()
    {
-      desiredICPToPack.setIncludingFrame(yoDesiredCapturePoint);
+      return yoDesiredCapturePoint;
    }
 
    public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
@@ -503,10 +515,10 @@ public class BalanceManager
       desiredCoMVelocityToPack.set(yoDesiredCoMVelocity);
    }
 
-   public void getNextExitCMP(FramePoint3D entryCMPToPack)
+   public FramePoint3DReadOnly getNextExitCMP()
    {
-      // TODO:
-      entryCMPToPack.setToNaN();
+      // This value is hard coded because we have two segments in transfer, and three in swing.
+      return copTrajectory.getContactStateProviders().get(4).getCopEndPosition();
    }
 
    public double getTimeRemainingInCurrentState()
@@ -534,11 +546,9 @@ public class BalanceManager
 
    public void initialize()
    {
-      yoFinalDesiredICP.set(Double.NaN, Double.NaN);
-      controllerToolbox.getCapturePoint(tempCapturePoint);
-      yoDesiredCapturePoint.set(tempCapturePoint);
+      yoFinalDesiredICP.setToNaN();
+      yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
 
-      desiredCapturePoint2d.set(tempCapturePoint);
       yoPerfectCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
@@ -665,16 +675,14 @@ public class BalanceManager
 
    public double getICPErrorMagnitude()
    {
-      controllerToolbox.getCapturePoint(capturePoint2d);
-      return capturePoint2d.distance(yoDesiredCapturePoint);
+      return controllerToolbox.getCapturePoint().distanceXY(yoDesiredCapturePoint);
    }
 
    public void getICPError(FrameVector2D icpErrorToPack)
    {
-      controllerToolbox.getCapturePoint(capturePoint2d);
-      desiredCapturePoint2d.setIncludingFrame(yoDesiredCapturePoint);
-      icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
-      icpErrorToPack.sub(capturePoint2d);
+      icpErrorToPack.setIncludingFrame(yoDesiredCapturePoint);
+      icpErrorToPack.checkReferenceFrameMatch(controllerToolbox.getCapturePoint());
+      icpErrorToPack.sub(controllerToolbox.getCapturePoint().getX(), controllerToolbox.getCapturePoint().getY());
    }
 
    public boolean isPrecomputedICPPlannerActive()
@@ -772,17 +780,12 @@ public class BalanceManager
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
    {
-      desiredCapturePoint2d.setIncludingFrame(yoDesiredCapturePoint);
       centerOfMassPosition.setToZero(centerOfMassFrame);
       centerOfMassPosition.changeFrame(worldFrame);
 
-      controllerToolbox.getCapturePoint(capturePoint2d);
-      capturePoint2d.checkReferenceFrameMatch(worldFrame);
-      desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
-
       capturabilityBasedStatus.setOmega(controllerToolbox.getOmega0());
-      capturabilityBasedStatus.getCapturePoint2d().set(capturePoint2d);
-      capturabilityBasedStatus.getDesiredCapturePoint2d().set(desiredCapturePoint2d);
+      capturabilityBasedStatus.getCapturePoint2d().set(controllerToolbox.getCapturePoint());
+      capturabilityBasedStatus.getDesiredCapturePoint2d().set(yoDesiredCapturePoint);
       capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -806,9 +809,9 @@ public class BalanceManager
       return effectiveICPAdjustment;
    }
 
-   public void getCapturePoint(FramePoint2D capturePointToPack)
+   public FramePoint3DReadOnly getCapturePoint()
    {
-      controllerToolbox.getCapturePoint(capturePointToPack);
+      return controllerToolbox.getCapturePoint();
    }
 
    public void minimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)

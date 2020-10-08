@@ -74,7 +74,6 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    @Tag("fast")
    public void testWalkingOverCinderBlockField() throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
