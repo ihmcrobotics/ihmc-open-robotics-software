@@ -1,8 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -11,8 +16,21 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.List;
+
+import static us.ihmc.robotics.Assert.assertEquals;
+
 public class CoPTrajectoryGeneratorTest
 {
+   private static boolean visualize = true;
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
+
+   private static final double epsilon = 1e-7;
    @Test
    public void testSingleStep()
    {
@@ -37,15 +55,21 @@ public class CoPTrajectoryGeneratorTest
       footstep.getFootstepPose().getPosition().set(0.5, -0.5 * stanceWidth, 0.0);
       footstep.setRobotSide(RobotSide.RIGHT);
 
+      double swingTime = 1.0;
+      double transferTime = 0.6;
+      double finalTransferTime = 1.0;
+      double swingShiftFraction = 0.9;
+      double swingSplitFraction = 0.4;
+      double transferSplitFraction = 0.5;
       FootstepTiming timing = new FootstepTiming();
-      timing.setTimings(1.0, 0.5);
+      timing.setTimings(swingTime, transferTime);
 
       FootstepShiftFractions shiftFractions = new FootstepShiftFractions();
-      shiftFractions.setShiftFractions(0.9, 0.5, 0.5);
+      shiftFractions.setShiftFractions(swingShiftFraction, swingSplitFraction, transferSplitFraction);
       shiftFractions.setTransferWeightDistribution(0.5);
 
-      state.setFinalTransferDuration(1.0);
-      state.setFinalTransferSplitFraction(0.5);
+      state.setFinalTransferDuration(finalTransferTime);
+      state.setFinalTransferSplitFraction(transferSplitFraction);
       state.setFinalTransferWeightDistribution(0.5);
       state.addFootstep(footstep);
       state.addFootstepTiming(timing);
@@ -54,7 +78,33 @@ public class CoPTrajectoryGeneratorTest
 
       copTrajectory.compute(state);
 
-      CoPTrajectoryVisualizer.visualize(copTrajectory);
+      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      for (int i = 0; i < contactStateProviders.size() - 1; i++)
+      {
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getCopEndPosition(), contactStateProviders.get(i + 1).getCopStartPosition(), epsilon);
+         assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
+      }
+
+      // check the timings
+      double time = 0.0;
+      assertEquals(time, contactStateProviders.get(0).getTimeInterval().getStartTime(), epsilon);
+      time += transferSplitFraction * transferTime;
+      assertEquals(time, contactStateProviders.get(0).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - transferSplitFraction) * transferTime;
+      assertEquals(time, contactStateProviders.get(1).getTimeInterval().getEndTime(), epsilon);
+      time += swingShiftFraction * swingSplitFraction * swingTime;
+      assertEquals(time, contactStateProviders.get(2).getTimeInterval().getEndTime(), epsilon);
+      time += swingShiftFraction * (1.0 - swingSplitFraction) * swingTime;
+      assertEquals(time, contactStateProviders.get(3).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - swingShiftFraction) * swingTime;
+      assertEquals(time, contactStateProviders.get(4).getTimeInterval().getEndTime(), epsilon);
+      time += transferSplitFraction * finalTransferTime;
+      assertEquals(time, contactStateProviders.get(5).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - transferSplitFraction) * finalTransferTime;
+      assertEquals(time, contactStateProviders.get(6).getTimeInterval().getEndTime(), epsilon);
+
+      if (visualize)
+         CoPTrajectoryVisualizer.visualize(copTrajectory);
    }
 
 }
