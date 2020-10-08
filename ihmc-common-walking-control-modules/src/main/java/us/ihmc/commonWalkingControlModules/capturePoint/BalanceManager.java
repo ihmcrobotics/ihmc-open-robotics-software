@@ -75,7 +75,6 @@ public class BalanceManager
    private final PushRecoveryControlModule pushRecoveryControlModule;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final YoFramePoint3D yoPlannedCoP = new YoFramePoint3D("PlannedCoP", worldFrame, registry);
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
    private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
    private final YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
@@ -87,8 +86,6 @@ public class BalanceManager
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
    /** CMP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
-
-   private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
    private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
 
@@ -200,8 +197,6 @@ public class BalanceManager
       }
       blendICPTrajectories.set(true);
 
-      editStepTimingForReachability.set(walkingControllerParameters.editStepTimingForReachability());
-
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
@@ -215,12 +210,11 @@ public class BalanceManager
 
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
-//      supportSeqence = new SupportSequence(new CoPTrajectoryPolygonParameters(), defaultSupportPolygon, soleFrames, soleZUpFrames, bipedSupportPolygons, registry, controllerToolbox.getYoGraphicsListRegistry());
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), 1.0, registry);
+      CoPTrajectoryParameters copParameters = new CoPTrajectoryParameters(registry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
-      copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(),
-                                                 defaultSupportPolygon,
-                                                 registry);
+      copTrajectoryState.registerStateToSave(copParameters);
+      copTrajectory = new CoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
@@ -237,7 +231,6 @@ public class BalanceManager
          YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
          YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
-         YoGraphicPosition plannedCoPViz = new YoGraphicPosition("Planned CoP", yoPlannedCoP, 0.005, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
          YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
          yoGraphicsListRegistry.registerArtifact(graphicListName, adjustedDesiredCapturePointViz.createArtifact());
@@ -251,8 +244,6 @@ public class BalanceManager
          YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
          perfectCoPArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCoPArtifact);
-
-         yoGraphicsListRegistry.registerArtifact(graphicListName, plannedCoPViz.createArtifact());
       }
       yoDesiredCapturePoint.setToNaN();
       yoFinalDesiredICP.setToNaN();
@@ -413,12 +404,8 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
-      // update state with values
-//      copTrajectory.compute(footsteps, footstepTimings, footstepShiftFractions, initialReferenceCop);
       copTrajectory.compute(copTrajectoryState);
-      copTrajectory.update(timeInSupportSequence.getDoubleValue(), yoPlannedCoP);
 
-//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStateProviders());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
@@ -546,7 +533,7 @@ public class BalanceManager
       yoDesiredCapturePoint.set(tempCapturePoint);
 
       desiredCapturePoint2d.set(tempCapturePoint);
-      yoPlannedCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
+      yoPerfectCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
@@ -568,10 +555,7 @@ public class BalanceManager
    {
       inSingleSupport.set(true);
       inFinalTransfer.set(false);
-//      copTrajectory.changeFootFrame(footsteps.get(0).getRobotSide(), worldFrame);
       timeInSupportSequence.set(footstepTimings.get(0).getTransferTime());
-//      copTrajectoryState.setInitialCoP(yoPlannedCoP);
-//      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       initializeForSingleSupport = true;
 
@@ -590,7 +574,7 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      copTrajectoryState.setInitialCoP(yoPlannedCoP);
+      copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
@@ -609,7 +593,7 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      copTrajectoryState.setInitialCoP(yoPlannedCoP);
+      copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
@@ -629,7 +613,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
 
-      copTrajectoryState.setInitialCoP(yoPlannedCoP);
+      copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
@@ -640,6 +624,7 @@ public class BalanceManager
 
       initializeForTransfer = true;
 
+      // TODO
 //      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
 //      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
