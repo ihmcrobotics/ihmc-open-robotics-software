@@ -86,6 +86,7 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
          YoFrameConvexPolygon2D footPolygonInSole = new YoFrameConvexPolygon2D(vertexBuffer,
                                                                                numberOfVertices,
                                                                                soleFrame);
+         footPolygonInSole.clearAndUpdate();
          footPolygonsInSole.put(robotSide, footPolygonInSole);
       }
    }
@@ -99,9 +100,9 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
 
    public void initializeStance(RobotSide robotSide, FrameConvexPolygon2DReadOnly supportPolygon, ReferenceFrame soleFrame)
    {
-      footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
       footPoses.get(robotSide).setFromReferenceFrame(soleFrame);
-      soleContactFrames.get(robotSide).update();
+      soleContactFrames.get(robotSide).setPoseAndUpdate(footPoses.get(robotSide));
+      footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
    }
 
    public int getNumberOfFootstep()

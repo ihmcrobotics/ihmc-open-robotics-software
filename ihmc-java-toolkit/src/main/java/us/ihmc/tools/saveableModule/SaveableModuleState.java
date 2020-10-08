@@ -76,22 +76,26 @@ public abstract class SaveableModuleState
       for (int i = 0; i < doubles.size(); i++)
       {
          YoDouble yoDouble = doubles.get(i);
-         string += yoDouble.getFullNameString() + ": " + yoDouble.getValue() + ",\n";
+         string += "\n" + yoDouble.getName();
+         string += "\n" + yoDouble.getValue();
       }
       for (int i = 0; i < integers.size(); i++)
       {
          YoInteger yoInteger = integers.get(i);
-         string += yoInteger.getFullNameString() + ": " + yoInteger.getValue() + ",\n";
+         string += "\n" + yoInteger.getName();
+         string += "\n" + yoInteger.getValue();
       }
       for (int i = 0; i < booleans.size(); i++)
       {
          YoBoolean yoBoolean = booleans.get(i);
-         string += yoBoolean.getFullNameString() + ": " + yoBoolean.getValue() + ",\n";
+         string += "\n" + yoBoolean.getName();
+         string += "\n" + yoBoolean.getValue();
       }
       for (int i = 0; i < enums.size(); i++)
       {
          YoEnum<?> yoEnum = enums.get(i);
-         string += yoEnum.getFullNameString() + ": " + yoEnum.getOrdinal() + ",\n";
+         string += "\n" + yoEnum.getName();
+         string += "\n" + yoEnum.getOrdinal();
       }
 
       return string;

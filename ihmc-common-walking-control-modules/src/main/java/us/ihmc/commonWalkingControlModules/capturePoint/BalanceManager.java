@@ -224,7 +224,7 @@ public class BalanceManager
       if (yoGraphicsListRegistry != null)
       {
          ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
-//         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
+         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
@@ -404,6 +404,12 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
+      // update online to account for foot slip
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (controllerToolbox.getFootContactState(robotSide).inContact())
+            copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame().get(robotSide), soleFrames.get(robotSide));
+      }
       copTrajectory.compute(copTrajectoryState);
 
       comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStateProviders());

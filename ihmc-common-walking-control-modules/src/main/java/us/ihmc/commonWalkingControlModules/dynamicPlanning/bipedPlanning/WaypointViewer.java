@@ -46,6 +46,7 @@ public class WaypointViewer
          yoGraphicsListRegistry.registerArtifact(name, copStartPointGraphic.createArtifact());
          yoGraphicsListRegistry.registerArtifact(name, copEndPointGraphic.createArtifact());
       }
+
    }
 
    public void updateWaypoints(List<? extends ContactStateProvider> vrpSegments)
@@ -62,5 +63,10 @@ public class WaypointViewer
          copStartPoints.get(i).setToNaN();
          copEndPoints.get(i).setToNaN();
       }
+   }
+
+   public void updatePolygons()
+   {
+
    }
 }
