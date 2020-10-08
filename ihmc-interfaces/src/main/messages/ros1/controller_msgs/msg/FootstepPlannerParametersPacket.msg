@@ -53,7 +53,7 @@ float64 ideal_footstep_length
 # Field default value -11.1
 float64 ideal_side_step_width
 
-# Returns the ideal length when walking backwards. This value is negative.
+# Returns the ideal length when walking backwards. This value is positive.
 # Field default value -11.1
 float64 ideal_back_step_length
 

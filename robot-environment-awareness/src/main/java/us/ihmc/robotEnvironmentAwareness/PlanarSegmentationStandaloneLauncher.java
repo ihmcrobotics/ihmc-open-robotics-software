@@ -31,7 +31,7 @@ public class PlanarSegmentationStandaloneLauncher extends Application
       segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
 
       ui = PlanarSegmentationUI.createIntraprocessUI(messager, primaryStage);
-      module = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath, messager);
+      module = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath.toFile(), messager);
 
       ui.show();
       module.start();

@@ -30,13 +30,13 @@ mainDependencies {
    api("us.ihmc:euclid-frame-shape:0.15.1")
    api("us.ihmc:mecano:0.7.1")
    api("us.ihmc:mecano-yovariables:0.7.1")
-   api("us.ihmc:ihmc-yovariables:0.9.4")
+   api("us.ihmc:ihmc-yovariables:0.9.5")
    api("us.ihmc:ihmc-realtime:1.3.0")
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)
    }
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.20.5")
+   api("us.ihmc:simulation-construction-set:0.20.6")
    api("us.ihmc:ihmc-graphics-description:0.19.1")
    api("us.ihmc:ihmc-robot-description:0.20.1")
    api("us.ihmc:ihmc-communication:source")

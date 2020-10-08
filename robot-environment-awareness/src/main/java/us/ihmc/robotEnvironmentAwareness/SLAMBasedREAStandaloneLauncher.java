@@ -43,7 +43,7 @@ public class SLAMBasedREAStandaloneLauncher extends Application
 
       Stage secondStage = new Stage();
       planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
-      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath, segmentationMessager);
+      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath.toFile(), segmentationMessager);
 
       slamModule.attachOcTreeConsumer(segmentationModule);
 

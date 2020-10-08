@@ -4,14 +4,6 @@ int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1
 
-int8 FOOTSTEP_PLAN_HEADING_FORWARD=0
-
-int8 FOOTSTEP_PLAN_HEADING_BACKWARD=1
-
-int8 FOOTSTEP_PLAN_HEADING_LEFT=2
-
-int8 FOOTSTEP_PLAN_HEADING_RIGHT=3
-
 int8 SWING_PLANNER_TYPE_NONE=0
 
 int8 SWING_PLANNER_TYPE_POSITION=1
@@ -73,9 +65,9 @@ float64 goal_distance_proximity
 # Field default value -1.0
 float64 goal_yaw_proximity
 
-# Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-# Field default value 255
-int8 requested_path_heading
+# Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+# The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+float64 requested_path_heading
 
 # Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
 # Field default value 5.0

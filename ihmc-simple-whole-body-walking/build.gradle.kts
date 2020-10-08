@@ -17,7 +17,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:simulation-construction-set:0.20.5")
+   api("us.ihmc:simulation-construction-set:0.20.6")
 
 }
 
@@ -27,5 +27,5 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.20.5")
+   api("us.ihmc:simulation-construction-set:0.20.6")
 }

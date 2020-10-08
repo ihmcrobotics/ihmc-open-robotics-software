@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -106,7 +105,7 @@ public class MainTabController
    @FXML
    private ComboBox<RobotSide> initialSupportSide;
    @FXML
-   private ComboBox<us.ihmc.footstepPlanning.FootstepPlanHeading> pathHeading;
+   private Spinner<Double> pathHeading;
 
    @FXML
    private Spinner<Double> goalYaw;
@@ -227,12 +226,10 @@ public class MainTabController
 
       timeout.setValueFactory(createTimeoutValueFactory());
       horizonLength.setValueFactory(createHorizonValueFactory());
+      pathHeading.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(- Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1));
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
       initialSupportSide.setValue(RobotSide.LEFT);
-
-      pathHeading.setItems(FXCollections.observableArrayList(FootstepPlanHeading.values()));
-      pathHeading.setValue(FootstepPlanHeading.FORWARD);
 
       swingPlannerType.setItems(FXCollections.observableArrayList(SwingPlannerType.values()));
       swingPlannerType.setValue(SwingPlannerType.NONE);
@@ -269,7 +266,7 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide.valueProperty(), true);
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, pathHeading.valueProperty(), false);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, pathHeading.getValueFactory().valueProperty(), false);
 
       goalPositionProperty.bindBidirectionalX(goalXPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());
