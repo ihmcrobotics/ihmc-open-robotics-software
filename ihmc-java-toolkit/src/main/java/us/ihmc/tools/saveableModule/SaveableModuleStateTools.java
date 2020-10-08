@@ -8,9 +8,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -82,6 +85,43 @@ public class SaveableModuleStateTools
          FileWriter fileWriter = new FileWriter(fileToSaveTo);
          fileWriter.write(stateToSave.toString());
          fileWriter.close();
+      }
+      catch (IOException ex)
+      {
+         throw new RuntimeException("Problem when saving module.");
+      }
+   }
+
+   public static void load(SaveableModuleState state)
+   {
+      JFileChooser fileChooser = new JFileChooser();
+      Path directory = rootPath;
+      File logDirectory = new File(directory.toString());
+      SaveableModuleTools.ensureFileExists(logDirectory);
+
+      fileChooser.setCurrentDirectory(logDirectory);
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int chooserState = fileChooser.showOpenDialog(null);
+
+      if (chooserState != JFileChooser.APPROVE_OPTION)
+         return;
+
+      File file = fileChooser.getSelectedFile();
+
+      load(file, state);
+   }
+
+   public static void load(File fileToLoad, SaveableModuleState stateToLoad)
+   {
+      if (fileToLoad == null)
+         throw new IllegalArgumentException("File has not been set.");
+      if (stateToLoad == null)
+         throw new IllegalArgumentException("State has not been set.");
+
+      try
+      {
+         String content = new String(Files.readAllBytes(Paths.get(fileToLoad.getPath())));
+         stateToLoad.loadValues(content);
       }
       catch (IOException ex)
       {

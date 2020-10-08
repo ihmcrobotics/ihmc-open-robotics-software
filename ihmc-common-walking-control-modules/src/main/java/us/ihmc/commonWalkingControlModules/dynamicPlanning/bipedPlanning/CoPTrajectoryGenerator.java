@@ -21,6 +21,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.SaveableModule;
+import us.ihmc.tools.saveableModule.SaveableModuleState;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -33,6 +34,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final YoRegistry registry;
    private final YoDouble safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
    private final YoDouble exitCoPForwardSafetyMarginOnToes;
 
@@ -65,7 +67,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       this.parameters = parameters;
       this.defaultSupportPolygon.set(defaultSupportPolygon);
 
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      registry = new YoRegistry(getClass().getSimpleName());
       safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble("SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
       exitCoPForwardSafetyMarginOnToes = new YoDouble("ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
@@ -85,6 +87,11 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
 
       parentRegistry.addChild(registry);
       clear();
+   }
+
+   public YoRegistry getYoRegistry()
+   {
+      return registry;
    }
 
    public void setWaypointViewer(WaypointViewer viewer)
@@ -143,7 +150,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
       if (numberOfUpcomingFootsteps == 0)
       {
          // just standing there
-         computeCoPPointsForStanding();
+         computeCoPPointsForStanding(state);
       }
       else
       {
@@ -246,7 +253,7 @@ public class CoPTrajectoryGenerator extends SaveableModule<CoPTrajectoryGenerato
    }
 
 
-   private void computeCoPPointsForStanding()
+   private void computeCoPPointsForStanding(CoPTrajectoryGeneratorState state)
    {
       tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(RobotSide.LEFT).getCentroid());
       tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
