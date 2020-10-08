@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import javafx.geometry.Side;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.lists.YoPreallocatedList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.SaveableModuleState;
@@ -29,13 +31,15 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    private final YoDouble finalTransferSplitFraction;
    private final YoDouble finalTransferWeightDistribution;
    private final YoDouble finalTransferDuration;
+   private final YoDouble percentageStandingWeightDistributionOnLeftFoot;
 
    private final YoFramePoint2D initialCoP;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
    private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
+   private final SideDependentList<PoseReferenceFrame> soleContactFrames = new SideDependentList<>();
 
-   public CoPTrajectoryGeneratorState(SideDependentList<? extends ReferenceFrame> soleFrames, YoRegistry registry)
+   public CoPTrajectoryGeneratorState(YoRegistry registry)
    {
       footsteps = new YoPreallocatedList<>(PlanningFootstep.class, () -> createFootstep(registry), "footstep", registry, 3);
       footstepTimings = new YoPreallocatedList<>(PlanningTiming.class, () -> createTiming(registry), "footstepTiming", registry, 3);
@@ -47,20 +51,33 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       finalTransferSplitFraction = new YoDouble("finalTransferSplitFraction", registry);
       finalTransferWeightDistribution = new YoDouble("finalTransferWeightDistribution", registry);
       finalTransferDuration = new YoDouble("finalTransferDuration", registry);
+      percentageStandingWeightDistributionOnLeftFoot = new YoDouble("percentageStandingWeightDistributionOnLeftFoot", registry);
       registerDoubleToSave(finalTransferSplitFraction);
       registerDoubleToSave(finalTransferWeightDistribution);
       registerDoubleToSave(finalTransferDuration);
+      registerDoubleToSave(percentageStandingWeightDistributionOnLeftFoot);
+
+      percentageStandingWeightDistributionOnLeftFoot.set(0.5);
 
       initialCoP = new YoFramePoint2D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
       SaveableModuleStateTools.registerYoTuple2DToSave(initialCoP, this);
 
       for (RobotSide robotSide : RobotSide.values)
       {
+
+
+         YoFramePose3D footPose = new YoFramePose3D(robotSide.getCamelCaseName() + "FootPose", ReferenceFrame.getWorldFrame(), registry);
+         SaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
+         footPoses.put(robotSide, footPose);
+
+         PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getCamelCaseName() + "SoleFrame", footPose);
+         soleContactFrames.put(robotSide, soleFrame);
+
          List<YoFramePoint2D> vertexBuffer = new ArrayList<>();
          String prefix = robotSide.getCamelCaseName() + "FootPolygonInSole";
          for (int i = 0; i < 6; i++)
          {
-            YoFramePoint2D vertex = new YoFramePoint2D(prefix + "_" + i, soleFrames.get(robotSide), registry);
+            YoFramePoint2D vertex = new YoFramePoint2D(prefix + "_" + i, soleFrame, registry);
             SaveableModuleStateTools.registerYoTuple2DToSave(vertex, this);
             vertexBuffer.add(vertex);
          }
@@ -68,12 +85,8 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
          registerIntegerToSave(numberOfVertices);
          YoFrameConvexPolygon2D footPolygonInSole = new YoFrameConvexPolygon2D(vertexBuffer,
                                                                                numberOfVertices,
-                                                                               soleFrames.get(robotSide));
+                                                                               soleFrame);
          footPolygonsInSole.put(robotSide, footPolygonInSole);
-
-         YoFramePose3D footPose = new YoFramePose3D(robotSide.getCamelCaseName() + "FootPose", ReferenceFrame.getWorldFrame(), registry);
-         SaveableModuleStateTools.registerYoFramePose3DToSave(footPose, this);
-         footPoses.put(robotSide, footPose);
       }
    }
 
@@ -88,6 +101,7 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    {
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
       footPoses.get(robotSide).setFromReferenceFrame(soleFrame);
+      soleContactFrames.get(robotSide).update();
    }
 
    public int getNumberOfFootstep()
@@ -140,6 +154,11 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
       return finalTransferWeightDistribution.getDoubleValue();
    }
 
+   public double getPercentageStandingWeightDistributionOnLeftFoot()
+   {
+      return percentageStandingWeightDistributionOnLeftFoot.getValue();
+   }
+
    public void setFinalTransferDuration(double transferDuration)
    {
       finalTransferDuration.set(transferDuration);
@@ -153,6 +172,11 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    public void setFinalTransferWeightDistribution(double finalTransferWeightDistribution)
    {
       this.finalTransferWeightDistribution.set(finalTransferWeightDistribution);
+   }
+
+   public void setPercentageStandingWeightDistributionOnLeftFoot(double percentageStandingWeightDistributionOnLeftFoot)
+   {
+      this.percentageStandingWeightDistributionOnLeftFoot.set(percentageStandingWeightDistributionOnLeftFoot);
    }
 
    public void clear()
