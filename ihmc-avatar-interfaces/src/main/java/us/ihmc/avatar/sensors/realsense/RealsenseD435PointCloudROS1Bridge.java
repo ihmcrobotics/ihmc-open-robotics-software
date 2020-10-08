@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -25,9 +24,6 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class RealsenseD435PointCloudROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.PointCloud2>
 {
