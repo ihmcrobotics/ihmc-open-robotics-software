@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
@@ -50,18 +51,18 @@ public class FootstepPlannerHeuristicCalculator
       this.desiredHeading = desiredHeading;
    }
 
-   public double compute(FootstepNode node)
+   public double compute(FootstanceNode node)
    {
-      midfootPoint.set(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()), 0.0);
+      midfootPoint.set(node.getOrComputeMidFootPose().getPosition(), 0.0);
 
-      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node);
+      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node.getStanceNode());
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
       {
          snapData.getSnapTransform().transform(midfootPoint);
       }
 
       midFootPose.getPosition().set(midfootPoint);
-      midFootPose.getOrientation().setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      midFootPose.getOrientation().setYawPitchRoll(node.getStanceNode().getYaw(), 0.0, 0.0);
 
       double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalPose.getX(), midFootPose.getY() - goalPose.getY());
 
@@ -84,7 +85,7 @@ public class FootstepPlannerHeuristicCalculator
          walkDistance = xyDistanceToGoal;
 
          /** TODO remove when {@link FootstepPlannerParametersReadOnly#getStepOnlyWithRequestedSide()} is removed */
-         if (node.getRobotSide() == parameters.getStepOnlyWithRequestedSide())
+         if (node.getStanceSide() == parameters.getStepOnlyWithRequestedSide())
          {
             walkDistance += 0.5 * parameters.getIdealFootstepLength();
          }

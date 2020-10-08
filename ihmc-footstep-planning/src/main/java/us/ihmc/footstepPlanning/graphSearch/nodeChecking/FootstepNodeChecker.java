@@ -6,6 +6,7 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -57,28 +58,25 @@ public class FootstepNodeChecker
       parentRegistry.addChild(registry);
    }
 
-   public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
+   public boolean isNodeValid(FootstanceNode candidateNode, FootstanceNode parentNode)
    {
-      if (stanceNode != null && candidateNode.getRobotSide() == stanceNode.getRobotSide())
+      if (parentNode != null && candidateNode.getStanceSide() == parentNode.getStanceSide())
       {
-         throw new RuntimeException(getClass().getSimpleName() + " received a pair stance and swing footsteps both on the " + candidateNode.getRobotSide() + " side");
+         throw new RuntimeException(getClass().getSimpleName() + " received a pair nodes both with stance side " + candidateNode.getStanceSide());
       }
 
       clearLoggedVariables();
-      doValidityCheck(candidateNode, stanceNode);
+      doValidityCheck(candidateNode, parentNode);
       return rejectionReason.getValue() == null;
    }
 
-   public void onIterationStart(FootstepNode footstepNode)
-   {
-      footstepIndex.set(footstepNode.getChildNodes().size() - 1);
-   }
+   // TODO compute step index
 
-   private void doValidityCheck(FootstepNode candidateNode, FootstepNode stanceNode)
+   private void doValidityCheck(FootstanceNode candidateNode, FootstanceNode parentNode)
    {
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, stanceNode, parameters.getWiggleWhilePlanning());
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode.getStanceNode(), candidateNode.getSwingNode(), parameters.getWiggleWhilePlanning());
       candidateNodeSnapData.set(snapData);
-      goodPositionChecker.setApproximateStepDimensions(candidateNode, stanceNode);
+      goodPositionChecker.setApproximateStepDimensions(candidateNode);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
@@ -105,7 +103,7 @@ public class FootstepNodeChecker
       }
 
       // Check incline
-      RigidBodyTransform snappedSoleTransform = candidateNodeSnapData.getSnappedNodeTransform(candidateNode);
+      RigidBodyTransform snappedSoleTransform = candidateNodeSnapData.getSnappedNodeTransform(candidateNode.getStanceNode());
       double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
@@ -116,7 +114,7 @@ public class FootstepNodeChecker
       // Check snap area
       ConvexPolygon2D footholdAfterSnap = candidateNodeSnapData.getCroppedFoothold();
       double croppedFootArea = footholdAfterSnap.getArea();
-      double fullFootArea = footPolygons.get(candidateNode.getRobotSide()).getArea();
+      double fullFootArea = footPolygons.get(candidateNode.getStanceSide()).getArea();
       footAreaPercentage.set(croppedFootArea / fullFootArea);
 
       double epsilonAreaPercentage = 1e-4;
@@ -128,21 +126,14 @@ public class FootstepNodeChecker
 
       // Check for ankle collision
       cliffAvoider.setPlanarRegionsList(planarRegionsList);
-      if(!cliffAvoider.isNodeValid(candidateNode))
+      if(!cliffAvoider.isNodeValid(candidateNode.getStanceNode()))
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
          return;
       }
 
-      if(stanceNode == null)
-      {
-         return;
-      }
-
-      footstepIndex.set(stanceNode.getChildNodes().size());
-
       // Check snapped footstep placement
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = goodPositionChecker.checkStepValidity(candidateNode, stanceNode);
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = goodPositionChecker.checkStepValidity(candidateNode.getStanceNode(), candidateNode.getSwingNode());
       if (poseRejectionReason != null)
       {
          rejectionReason.set(poseRejectionReason);
@@ -155,7 +146,7 @@ public class FootstepNodeChecker
          obstacleBetweenNodesChecker.setPlanarRegions(planarRegionsList);
          try
          {
-            if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode, stanceNode))
+            if (!obstacleBetweenNodesChecker.isNodeValid(candidateNode.getStanceNode(), candidateNode.getSwingNode()))
             {
                rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
                return;
@@ -170,7 +161,7 @@ public class FootstepNodeChecker
       // Check for bounding box collisions
       if (parameters.checkForBodyBoxCollisions())
       {
-         if (boundingBoxCollisionDetected(candidateNode, stanceNode))
+         if (boundingBoxCollisionDetected(candidateNode.getStanceNode(), candidateNode.getSwingNode()))
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
             return;
@@ -179,7 +170,7 @@ public class FootstepNodeChecker
 
       for (CustomNodeChecker customNodeChecker : customNodeCheckers)
       {
-         if (!customNodeChecker.isNodeValid(candidateNode, stanceNode))
+         if (!customNodeChecker.isNodeValid(candidateNode.getStanceNode(), candidateNode.getSwingNode()))
          {
             rejectionReason.set(customNodeChecker.getRejectionReason());
             return;
@@ -217,11 +208,6 @@ public class FootstepNodeChecker
    {
       this.planarRegionsList = planarRegionsList;
       collisionDetector.setPlanarRegionsList(planarRegionsList);
-   }
-
-   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
-   {
-      this.goodPositionChecker.setParentNodeSupplier(parentNodeSupplier);
    }
 
    private void clearLoggedVariables()

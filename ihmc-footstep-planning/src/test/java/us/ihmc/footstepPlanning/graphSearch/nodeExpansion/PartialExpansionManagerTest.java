@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,17 +23,18 @@ public class PartialExpansionManagerTest
 
       PartialExpansionManager partialExpansionManager = new PartialExpansionManager(footstepPlannerParameters);
 
-      List<FootstepNode> allNodes = new ArrayList<>();
+      List<FootstanceNode> allNodes = new ArrayList<>();
+      FootstepNode swingNode = new FootstepNode(0, 0, 0, RobotSide.RIGHT);
       for (int i = 0; i < maxBranchFactor; i++)
       {
          for (int j = 0; j < numberOfPartialExpansions; j++)
          {
-            allNodes.add(new FootstepNode(i, j, 0, RobotSide.LEFT));
+            allNodes.add(new FootstanceNode(new FootstepNode(i, j, 0, RobotSide.LEFT), swingNode));
          }
       }
 
       partialExpansionManager.initialize(allNodes);
-      List<FootstepNode> partialExpansion = new ArrayList<>();
+      List<FootstanceNode> partialExpansion = new ArrayList<>();
 
       for (int i = 0; i < numberOfPartialExpansions; i++)
       {
@@ -54,14 +56,15 @@ public class PartialExpansionManagerTest
 
       PartialExpansionManager partialExpansionManager = new PartialExpansionManager(footstepPlannerParameters);
 
-      List<FootstepNode> allNodes = new ArrayList<>();
+      List<FootstanceNode> allNodes = new ArrayList<>();
+      FootstepNode swingNode = new FootstepNode(0, 0, 0, RobotSide.RIGHT);
       for (int i = 0; i < numberOfNodes; i++)
       {
-         allNodes.add(new FootstepNode(i, 0, 0, RobotSide.LEFT));
+         allNodes.add(new FootstanceNode(new FootstepNode(i, 0, 0, RobotSide.LEFT), swingNode));
       }
 
       partialExpansionManager.initialize(allNodes);
-      List<FootstepNode> partialExpansion = new ArrayList<>();
+      List<FootstanceNode> partialExpansion = new ArrayList<>();
 
       for (int i = 0; i < numberOfNodes; i++)
       {

@@ -12,7 +12,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -35,8 +37,13 @@ public class FootstepCostCalculatorTest
       SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters);
 
-      HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
-      UnaryOperator<FootstepNode> idealStepCalculator = node -> idealStepMap.computeIfAbsent(node, n -> FootstepNode.generateRandomFootstepNode(random, 2.0));
+      HashMap<FootstanceNode, FootstanceNode> idealStepMap = new HashMap<>();
+      UnaryOperator<FootstanceNode> idealStepCalculator = node -> idealStepMap.computeIfAbsent(node, n ->
+      {
+         FootstepNode stanceNode = FootstepNode.generateRandomFootstepNode(random, 2.0, n.getSwingSide());
+         FootstepNode swingNode = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, stanceNode);
+         return new FootstanceNode(stanceNode, swingNode);
+      });
 
       YoRegistry registry = new YoRegistry("testRegistry");
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons,
@@ -45,25 +52,28 @@ public class FootstepCostCalculatorTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         FootstepNode stanceNode = FootstepNode.generateRandomFootstepNode(random, 10.0);
-         FootstepNode idealStepNode = idealStepCalculator.apply(stanceNode);
+         FootstepNode stanceStep = FootstepNode.generateRandomFootstepNode(random, 10.0);
+         FootstepNode swingStep = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, stanceStep);
+         FootstanceNode node = new FootstanceNode(stanceStep, swingStep);
+
+         FootstanceNode idealStepNode = idealStepCalculator.apply(node);
 
          FramePose3D stanceFoot = new FramePose3D();
          double stanceHeight = EuclidCoreRandomTools.nextDouble(random, -10.0, 10.0);
          double stancePitch = EuclidCoreRandomTools.nextDouble(random, -0.25 * Math.PI, 0.25 * Math.PI);
          double stanceRoll = EuclidCoreRandomTools.nextDouble(random, -0.25 * Math.PI, 0.25 * Math.PI);
-         stanceFoot.getPosition().set(stanceNode.getX(), stanceNode.getY(), stanceHeight);
-         stanceFoot.getOrientation().set(new Quaternion(stanceNode.getYaw(), stancePitch, stanceRoll));
+         stanceFoot.getPosition().set(stanceStep.getX(), stanceStep.getY(), stanceHeight);
+         stanceFoot.getOrientation().set(new Quaternion(stanceStep.getYaw(), stancePitch, stanceRoll));
 
          FramePose3D idealStep = new FramePose3D();
-         idealStep.getPosition().set(idealStepNode.getX(), idealStepNode.getY(), stanceFoot.getZ());
-         idealStep.getOrientation().setYawPitchRoll(idealStepNode.getYaw(), 0.0, 0.0);
+         idealStep.getPosition().set(idealStepNode.getStanceNode().getX(), idealStepNode.getStanceNode().getY(), stanceFoot.getZ());
+         idealStep.getOrientation().setYawPitchRoll(idealStepNode.getStanceNode().getYaw(), 0.0, 0.0);
 
          // test ideal step cost equals base step cost
          snapper.reset();
-         snapper.addSnapData(stanceNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceNode, stanceFoot), new ConvexPolygon2D()));
-         snapper.addSnapData(idealStepNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(idealStepNode, idealStep), new ConvexPolygon2D()));
-         double stepCost = stepCostCalculator.computeCost(stanceNode, idealStepNode);
+         snapper.addSnapData(stanceStep, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceStep, stanceFoot), new ConvexPolygon2D()));
+         snapper.addSnapData(idealStepNode.getStanceNode(), new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(idealStepNode.getStanceNode(), idealStep), new ConvexPolygon2D()));
+         double stepCost = stepCostCalculator.computeCost(node, idealStepNode);
          Assertions.assertTrue(MathTools.epsilonEquals(stepCost, footstepPlannerParameters.getCostPerStep(), 1e-10), "Ideal step cost does not equal per step cost.");
 
          // test partial area cost for ideal step
@@ -73,28 +83,28 @@ public class FootstepCostCalculatorTest
          foothold.scale(Math.sqrt(percentFoothold));
 
          snapper.reset();
-         snapper.addSnapData(stanceNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceNode, stanceFoot), new ConvexPolygon2D()));
-         snapper.addSnapData(idealStepNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(idealStepNode, idealStep), foothold));
-         stepCost = stepCostCalculator.computeCost(stanceNode, idealStepNode);
+         snapper.addSnapData(stanceStep, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceStep, stanceFoot), new ConvexPolygon2D()));
+         snapper.addSnapData(idealStepNode.getStanceNode(), new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(idealStepNode.getStanceNode(), idealStep), foothold));
+         stepCost = stepCostCalculator.computeCost(node, idealStepNode);
          double expectedCost = footstepPlannerParameters.getCostPerStep() + footstepPlannerParameters.getFootholdAreaWeight() * percentAreaCost;
          Assertions.assertTrue(MathTools.epsilonEquals(stepCost, expectedCost, 1e-10), "Area based cost does not equal expected value.");
 
          // test random footstep cost
-         FootstepNode randomNode = new FootstepNode(EuclidCoreRandomTools.nextDouble(random, 2.0),
+         FootstepNode randomStep = new FootstepNode(EuclidCoreRandomTools.nextDouble(random, 2.0),
                                                     EuclidCoreRandomTools.nextDouble(random, 2.0),
                                                     EuclidCoreRandomTools.nextDouble(random, Math.PI),
-                                                    idealStepNode.getRobotSide());
+                                                    idealStepNode.getStanceSide());
 
          double randomStepHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);
          double randomStepPitch = EuclidCoreRandomTools.nextDouble(random, 0.25 * Math.PI);
          double randomStepRoll = EuclidCoreRandomTools.nextDouble(random, 0.25 * Math.PI);
          FramePose3D randomStepPose = new FramePose3D();
-         randomStepPose.getPosition().set(randomNode.getX(), randomNode.getY(), randomStepHeight);
-         randomStepPose.getOrientation().set(new Quaternion(randomNode.getYaw(), randomStepPitch, randomStepRoll));
+         randomStepPose.getPosition().set(randomStep.getX(), randomStep.getY(), randomStepHeight);
+         randomStepPose.getOrientation().set(new Quaternion(randomStep.getYaw(), randomStepPitch, randomStepRoll));
 
          FramePose3D stanceFootZUpPose = new FramePose3D();
          stanceFootZUpPose.getPosition().set(stanceFoot.getPosition());
-         stanceFootZUpPose.getOrientation().setYawPitchRoll(stanceNode.getYaw(), 0.0, 0.0);
+         stanceFootZUpPose.getOrientation().setYawPitchRoll(stanceStep.getYaw(), 0.0, 0.0);
          PoseReferenceFrame stanceFootZUpFrame = new PoseReferenceFrame("stanceNodeFrame", stanceFootZUpPose);
 
          randomStepPose.changeFrame(stanceFootZUpFrame);
@@ -118,11 +128,11 @@ public class FootstepCostCalculatorTest
          randomStepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          snapper.reset();
-         snapper.addSnapData(stanceNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceNode, stanceFoot), new ConvexPolygon2D()));
-         snapper.addSnapData(randomNode, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(randomNode, randomStepPose), new ConvexPolygon2D()));
+         snapper.addSnapData(stanceStep, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(stanceStep, stanceFoot), new ConvexPolygon2D()));
+         snapper.addSnapData(randomStep, new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(randomStep, randomStepPose), new ConvexPolygon2D()));
          randomStepPose.changeFrame(stanceFootZUpFrame);
 
-         stepCost = stepCostCalculator.computeCost(stanceNode, randomNode);
+         stepCost = stepCostCalculator.computeCost(node, new FootstanceNode(randomStep, stanceStep));
          Assertions.assertTrue(MathTools.epsilonEquals(stepCost, expectedCost, 1e-10), "Pose based cost does not equal expected value.");
       }
    }

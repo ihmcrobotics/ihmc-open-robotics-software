@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
@@ -28,10 +29,10 @@ public class IdealStepCalculator
    private static final double maxDistanceAdjustmentTowardsPath = 0.15;
    private static final double maxYawAdjustmentTowardsPath = Math.toRadians(20.0);
 
-   private final HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
+   private final HashMap<FootstanceNode, FootstanceNode> idealStepMap = new HashMap<>();
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private final BiPredicate<FootstepNode, FootstepNode> nodeChecker;
+   private final BiPredicate<FootstanceNode, FootstanceNode> nodeChecker;
 
    private SideDependentList<FootstepNode> goalNodes;
    private PlanarRegionsList planarRegionsList;
@@ -52,7 +53,7 @@ public class IdealStepCalculator
    private double pathLength;
 
    public IdealStepCalculator(FootstepPlannerParametersReadOnly parameters,
-                              BiPredicate<FootstepNode, FootstepNode> nodeChecker,
+                              BiPredicate<FootstanceNode, FootstanceNode> nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                               YoRegistry registry)
    {
@@ -63,7 +64,7 @@ public class IdealStepCalculator
       for (RobotSide robotSide : RobotSide.values)
       {
          idealStepLengths.put(robotSide, new YoDouble(robotSide.getShortLowerCaseName() + "_IdealStepLength", registry));
-         idealStepWidths.put(robotSide, new YoDouble(robotSide.getShortLowerCaseName() + "-IdealStepWidth", registry));
+         idealStepWidths.put(robotSide, new YoDouble(robotSide.getShortLowerCaseName() + "_IdealStepWidth", registry));
       }
 
       correctiveDistanceX = new YoDouble("correctiveDistanceX", registry);
@@ -165,9 +166,9 @@ public class IdealStepCalculator
       this.planarRegionsList = planarRegionsList;
    }
 
-   public FootstepNode computeIdealStep(FootstepNode stanceNode)
+   public FootstanceNode computeIdealNode(FootstanceNode stanceNode)
    {
-      return idealStepMap.computeIfAbsent(stanceNode, this::computeIdealStepInternal);
+      return idealStepMap.computeIfAbsent(stanceNode, this::computeIdealStanceInternal);
    }
 
    private boolean flatGroundMode()
@@ -175,16 +176,25 @@ public class IdealStepCalculator
       return planarRegionsList == null || planarRegionsList.isEmpty();
    }
 
-   private FootstepNode computeIdealStepInternal(FootstepNode stanceNode)
+   private FootstanceNode computeIdealStanceInternal(FootstanceNode node)
    {
+      FootstepNode stanceNode = node.getStanceNode();
       boolean attemptSquareUp = attemptSquareUp(stanceNode);
 
       // If goal node is reachable, it's the ideal step
       FootstepNode goalNode = goalNodes.get(stanceNode.getRobotSide().getOppositeSide());
-      if (!flatGroundMode() && nodeChecker.test(goalNode, stanceNode) && !attemptSquareUp)
+      FootstanceNode goalStanceNode = new FootstanceNode(goalNode, stanceNode);
+      if (!flatGroundMode() && nodeChecker.test(goalStanceNode, node) && !attemptSquareUp)
       {
-         return goalNode;
+         return goalStanceNode;
       }
+
+      return new FootstanceNode(computeIdealStepInternal(node, attemptSquareUp), stanceNode);
+   }
+
+   private FootstepNode computeIdealStepInternal(FootstanceNode node, boolean attemptSquareUp)
+   {
+      FootstepNode stanceNode = node.getStanceNode();
 
       // Square up if requested
       Point2D midFootPoint = stanceNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());

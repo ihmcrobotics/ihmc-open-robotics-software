@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -189,5 +191,17 @@ public class FootstepNodeTools
       }
 
       return minDistance;
+   }
+
+   public static FootstepNode constructNodeInPreviousNodeFrame(double stepLength, double stepWidth, double stepYaw, FootstepNode node)
+   {
+      Vector2D footstepTranslation = new Vector2D(stepLength, stepWidth);
+      AxisAngle footstepRotation = new AxisAngle(node.getYaw(), 0.0, 0.0);
+      footstepRotation.transform(footstepTranslation);
+
+      return new FootstepNode(node.getX() + footstepTranslation.getX(),
+                              node.getY() + footstepTranslation.getY(),
+                              stepYaw + node.getYaw(),
+                              node.getRobotSide().getOppositeSide());
    }
 }

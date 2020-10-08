@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.footstepPlanning.FootstepPlanHeading;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -29,7 +29,7 @@ public class IdealStepCalculatorTest
       footstepPlannerParameters.setIdealFootstepWidth(0.3);
       footstepPlannerParameters.setIdealFootstepLength(0.4);
 
-      BiPredicate<FootstepNode, FootstepNode> checker = (touchdown, stance) -> true;
+      BiPredicate<FootstanceNode, FootstanceNode> checker = (firstStance, secondStance) -> true;
       WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
       double pathLength = 20.0;
@@ -63,11 +63,14 @@ public class IdealStepCalculatorTest
          RobotSide side = RobotSide.generateRandomRobotSide(random);
          double startX = EuclidCoreRandomTools.nextDouble(random, 0.5 * pathLength - 1.0);
 
-         FootstepNode testNode = new FootstepNode(startX, 0.5 * side.negateIfRightSide(idealStepWidth), 0.0, side);
-         FootstepNode idealStep = idealStepCalculator.computeIdealStep(testNode);
+         FootstepNode testStanceNode = new FootstepNode(startX, 0.5 * side.negateIfRightSide(idealStepWidth), 0.0, side);
+         FootstepNode testSwingNode = new FootstepNode(0.0, 0.0, 0.0, side.getOppositeSide());
+         FootstanceNode node = new FootstanceNode(testStanceNode, testSwingNode);
 
-         double stepLength = idealStep.getX() - testNode.getX();
-         double stepWidth = side.negateIfLeftSide(idealStep.getY() - testNode.getY());
+         FootstanceNode idealStep = idealStepCalculator.computeIdealNode(node);
+
+         double stepLength = idealStep.getStanceNode().getX() - node.getStanceNode().getX();
+         double stepWidth = side.negateIfLeftSide(idealStep.getStanceNode().getY() - node.getStanceNode().getY());
 
          Assertions.assertTrue(MathTools.epsilonEquals(stepLength, idealStepLength, 1e-10));
          Assertions.assertTrue(MathTools.epsilonEquals(stepWidth, idealStepWidth, 1e-10));

@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -42,8 +43,6 @@ public class FootstepPoseChecker
    private final YoFramePoseUsingYawPitchRoll yoStanceFootPose = new YoFramePoseUsingYawPitchRoll("stance", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingYawPitchRoll yoCandidateFootPose = new YoFramePoseUsingYawPitchRoll("candidate", stanceFootZUpFrame, registry);
 
-   private UnaryOperator<FootstepNode> parentNodeSupplier;
-
    private final YoDouble stepWidth = new YoDouble("stepWidth", registry);
    private final YoDouble stepLength = new YoDouble("stepLength", registry);
    private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
@@ -61,11 +60,6 @@ public class FootstepPoseChecker
       this.parameters = parameters;
       this.snapper = snapper;
       parentRegistry.addChild(registry);
-   }
-
-   public void setParentNodeSupplier(UnaryOperator<FootstepNode> parentNodeSupplier)
-   {
-      this.parentNodeSupplier = parentNodeSupplier;
    }
 
    public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(FootstepNode candidateNode, FootstepNode stanceNode)
@@ -174,46 +168,50 @@ public class FootstepPoseChecker
          return BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
       }
 
-      // Check reach from start of swing
-      FootstepNode grandParentNode;
-      FootstepNodeSnapData grandparentNodeSnapData;
-      double alphaSoS = parameters.getTranslationScaleFromGrandparentNode();
-      if (alphaSoS > 0.0 && parentNodeSupplier != null && (grandParentNode = parentNodeSupplier.apply(stanceNode)) != null
-          && (grandparentNodeSnapData = snapper.snapFootstepNode(grandParentNode)) != null)
-      {
-         startOfSwingFrame.setTransformAndUpdate(grandparentNodeSnapData.getSnappedNodeTransform(grandParentNode));
-         startOfSwingZUpFrame.update();
-         candidateFootPose.changeFrame(startOfSwingZUpFrame);
-         double swingHeight = candidateFootPose.getZ();
-         double swingReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(candidateFootPose.getY()));
-
-         if (swingHeight > parameters.getMaximumStepZWhenSteppingUp())
-         {
-            if (swingReach > alphaSoS * parameters.getMaximumStepReachWhenSteppingUp())
-            {
-               return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-            }
-         }
-      }
+      // TODO
+//      // Check reach from start of swing
+//      FootstepNode grandParentNode;
+//      FootstepNodeSnapData grandparentNodeSnapData;
+//      double alphaSoS = parameters.getTranslationScaleFromGrandparentNode();
+//      if (alphaSoS > 0.0 && parentNodeSupplier != null && (grandParentNode = parentNodeSupplier.apply(stanceNode)) != null
+//          && (grandparentNodeSnapData = snapper.snapFootstepNode(grandParentNode)) != null)
+//      {
+//         startOfSwingFrame.setTransformAndUpdate(grandparentNodeSnapData.getSnappedNodeTransform(grandParentNode));
+//         startOfSwingZUpFrame.update();
+//         candidateFootPose.changeFrame(startOfSwingZUpFrame);
+//         double swingHeight = candidateFootPose.getZ();
+//         double swingReach = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(candidateFootPose.getY()));
+//
+//         if (swingHeight > parameters.getMaximumStepZWhenSteppingUp())
+//         {
+//            if (swingReach > alphaSoS * parameters.getMaximumStepReachWhenSteppingUp())
+//            {
+//               return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
+//            }
+//         }
+//      }
 
       return null;
    }
 
-   void setApproximateStepDimensions(FootstepNode candidateNode, FootstepNode stanceNode)
+   void setApproximateStepDimensions(FootstanceNode candidateNode)
    {
-      if (stanceNode == null)
+      if (candidateNode.getStanceNode() == null)
       {
          return;
       }
 
-      double dx = candidateNode.getX() - stanceNode.getX();
-      double dy = candidateNode.getY() - stanceNode.getY();
+      FootstepNode stanceNode = candidateNode.getStanceNode();
+      FootstepNode swingNode = candidateNode.getSwingNode();
+
+      double dx = swingNode.getX() - stanceNode.getX();
+      double dy = swingNode.getY() - stanceNode.getY();
 
       double stepLength = dx * Math.cos(stanceNode.getYaw()) + dy * Math.sin(stanceNode.getYaw());
       double stepWidth = - dx * Math.sin(stanceNode.getYaw()) + dy * Math.cos(stanceNode.getYaw());
       stepWidth = stanceNode.getRobotSide().negateIfLeftSide(stepWidth);
 
-      double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw());
+      double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(swingNode.getYaw(), stanceNode.getYaw());
       stepYaw = stanceNode.getRobotSide().negateIfLeftSide(stepYaw);
 
       this.stepLength.set(stepLength);
