@@ -16,8 +16,8 @@ public class CoPTrajectoryParameters
    private final boolean planWithExitCMPOnToes = false;
    private final boolean planWithExitCMPOnToesWhenSteppingDown = true;
 
-   private final double entryCMPMinX = -0.4;
-   private final double entryCMPMaxX = 0.2;
+   private final double entryCMPMinX = -0.04;
+   private final double entryCMPMaxX = 0.03;
 
    private final double ballCMPMinX = 0.0;
    private final double ballCMPMaxX = 0.055;

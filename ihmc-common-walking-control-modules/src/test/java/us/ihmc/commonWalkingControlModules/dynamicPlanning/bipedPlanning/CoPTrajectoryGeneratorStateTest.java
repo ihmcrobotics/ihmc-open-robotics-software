@@ -25,7 +25,7 @@ public class CoPTrajectoryGeneratorStateTest
    @Test
    public void testConstruction()
    {
-      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(CoPTrajectoryGeneratorTestTools.createSoleFrames(), new YoRegistry("test"));
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(new YoRegistry("test"));
    }
 
    @Test
@@ -33,8 +33,8 @@ public class CoPTrajectoryGeneratorStateTest
    {
       SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
 
-      CoPTrajectoryGeneratorState stateA = new CoPTrajectoryGeneratorState(soleFrames, new YoRegistry("test"));
-      CoPTrajectoryGeneratorState stateB = new CoPTrajectoryGeneratorState(soleFrames, new YoRegistry("test"));
+      CoPTrajectoryGeneratorState stateA = new CoPTrajectoryGeneratorState(new YoRegistry("test"));
+      CoPTrajectoryGeneratorState stateB = new CoPTrajectoryGeneratorState(new YoRegistry("test"));
 
       Random random = new Random(1738L);
       for (int j = 0; j < 50; j++)
