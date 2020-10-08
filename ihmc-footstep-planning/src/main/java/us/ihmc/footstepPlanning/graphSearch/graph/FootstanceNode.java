@@ -1,13 +1,27 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstanceNode
 {
    private final FootstepNode stanceNode;
    private final FootstepNode swingNode;
+   private Pose2D midFootPose = null;
 
    private final int hashCode;
+
+   public FootstanceNode(FootstanceNode parentNode, double stanceStepX, double stanceStepY, double stanceStepYaw)
+   {
+      this(new FootstepNode(stanceStepX, stanceStepY, stanceStepYaw, parentNode.getSwingSide()), parentNode.getStanceNode());
+   }
+
+   public FootstanceNode(FootstanceNode parentNode, int stanceStepXIndex, int stanceStepYIndex, int stanceStepYawIndex)
+   {
+      this(new FootstepNode(stanceStepXIndex, stanceStepYIndex, stanceStepYawIndex, parentNode.getSwingSide()), parentNode.getStanceNode());
+   }
 
    public FootstanceNode(FootstepNode stanceNode, FootstepNode swingNode)
    {
@@ -15,46 +29,6 @@ public class FootstanceNode
       this.stanceNode = stanceNode;
       this.swingNode = swingNode;
       this.hashCode = computeHashCode(this);
-   }
-
-   public double getX()
-   {
-      return stanceNode.getX();
-   }
-
-   public double getY()
-   {
-      return stanceNode.getY();
-   }
-
-   public double getYaw()
-   {
-      return stanceNode.getYaw();
-   }
-
-   public int getXIndex()
-   {
-      return stanceNode.getXIndex();
-   }
-
-   public int getYIndex()
-   {
-      return stanceNode.getYIndex();
-   }
-
-   public int getYawIndex()
-   {
-      return stanceNode.getYawIndex();
-   }
-
-   public LatticeNode getStanceLatticeNode()
-   {
-      return stanceNode.getLatticeNode();
-   }
-
-   public LatticeNode getSwingLatticeNode()
-   {
-      return swingNode.getLatticeNode();
    }
 
    public FootstepNode getStanceNode()
@@ -75,6 +49,19 @@ public class FootstanceNode
    public RobotSide getSwingSide()
    {
       return swingNode.getRobotSide();
+   }
+
+   public Pose2D getOrComputeMidFootPose()
+   {
+      if (midFootPose == null)
+      {
+         midFootPose = new Pose2D();
+         midFootPose.setX(EuclidCoreTools.interpolate(stanceNode.getX(), swingNode.getX(), 0.5));
+         midFootPose.setY(EuclidCoreTools.interpolate(stanceNode.getY(), swingNode.getY(), 0.5));
+         midFootPose.setYaw(AngleTools.interpolateAngle(stanceNode.getYaw(), swingNode.getYaw(), 0.5));
+      }
+
+      return midFootPose;
    }
 
    @Override

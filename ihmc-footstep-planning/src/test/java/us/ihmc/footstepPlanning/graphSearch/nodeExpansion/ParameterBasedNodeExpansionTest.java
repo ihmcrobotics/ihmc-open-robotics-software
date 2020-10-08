@@ -6,6 +6,7 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -39,8 +40,12 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      List<FootstepNode> childNodes = new ArrayList<>();
-      expansion.doFullExpansion(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT), childNodes);
+      List<FootstanceNode> childNodes = new ArrayList<>();
+
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      FootstepNode swingNode = new FootstepNode(0.0, 0.3, 0.0, RobotSide.RIGHT);
+
+      expansion.doFullExpansion(new FootstanceNode(stanceNode, swingNode), childNodes);
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -79,8 +84,11 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      List<FootstepNode> childNodes = new ArrayList<>();
-      expansion.doFullExpansion(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT), childNodes);
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
+      FootstepNode swingNode = new FootstepNode(0.0, -0.3, 0.0, RobotSide.LEFT);
+
+      List<FootstanceNode> childNodes = new ArrayList<>();
+      expansion.doFullExpansion(new FootstanceNode(stanceNode, swingNode), childNodes);
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -122,9 +130,11 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      FootstepNode swingNode = new FootstepNode(0.0, 0.3, 0.0, RobotSide.RIGHT);
 
-      List<FootstepNode> childNodes = new ArrayList<>();
-      expansion.doFullExpansion(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT), childNodes);
+      List<FootstanceNode> childNodes = new ArrayList<>();
+      expansion.doFullExpansion(new FootstanceNode(stanceNode, swingNode), childNodes);
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -168,15 +178,15 @@ public class ParameterBasedNodeExpansionTest
       return LatticeNode.gridSizeYaw * Math.floorMod((int) (Math.round((yaw) / LatticeNode.gridSizeYaw)), LatticeNode.yawDivisions);
    }
 
-   private FootstepNode getExtremumNode(Collection<FootstepNode> nodes, Comparator<FootstepNode> comparator)
+   private FootstepNode getExtremumNode(Collection<FootstanceNode> nodes, Comparator<FootstepNode> comparator)
    {
       FootstepNode extremumNode = null;
-      for (FootstepNode node : nodes)
+      for (FootstanceNode node : nodes)
       {
          if (extremumNode == null)
-            extremumNode = node;
-         else if (comparator.compare(node, extremumNode) == 1)
-            extremumNode = node;
+            extremumNode = node.getStanceNode();
+         else if (comparator.compare(node.getStanceNode(), extremumNode) == 1)
+            extremumNode = node.getStanceNode();
       }
 
       return extremumNode;
@@ -189,13 +199,13 @@ public class ParameterBasedNodeExpansionTest
       int branchFactor = 100;
       parameters.setMaximumBranchFactor(branchFactor);
 
-      UnaryOperator<FootstepNode> idealStepSupplier = step -> new FootstepNode(step.getX(), step.getY(), step.getYaw(), step.getRobotSide().getOppositeSide());
+      UnaryOperator<FootstanceNode> idealStepSupplier = step -> new FootstanceNode(step, step.getStanceNode().getX(), step.getStanceNode().getY(), step.getStanceNode().getYaw());
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
 
       expansion.initialize();
 
-      List<FootstepNode> expansionList = new ArrayList<>();
-      FootstepNode stanceNode = new FootstepNode(0, 0, 0, RobotSide.LEFT);
+      List<FootstanceNode> expansionList = new ArrayList<>();
+      FootstanceNode stanceNode = new FootstanceNode(new FootstepNode(0, 0, 0, RobotSide.LEFT), new FootstepNode(0, -6, 0, RobotSide.RIGHT));
       expansion.doFullExpansion(stanceNode, expansionList);
       int fullExpansionSize = expansionList.size();
 
@@ -230,24 +240,30 @@ public class ParameterBasedNodeExpansionTest
       for (int i = 0; i < numberOfStanceNodes; i++)
       {
          FootstepNode stanceNode = FootstepNode.generateRandomFootstepNode(random, 5.0);
+         FootstepNode swingNode = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, stanceNode);
+         FootstanceNode node = new FootstanceNode(stanceNode, swingNode);
+
          for (int j = 0; j < numberOfIdealSteps; j++)
          {
-            FootstepNode randomIdealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
-            UnaryOperator<FootstepNode> idealStepSupplier = step -> randomIdealStep;
+            FootstepNode randomStanceStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
+            FootstepNode randomSwingStep = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, randomStanceStep);
+            FootstanceNode randomIdealStep = new FootstanceNode(randomStanceStep, randomSwingStep);
+
+            UnaryOperator<FootstanceNode> idealStepSupplier = step -> randomIdealStep;
             ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
-            List<FootstepNode> fullExpansion = new ArrayList<>();
-            expansion.doFullExpansion(stanceNode, fullExpansion);
-            List<FootstepNode> fullExpansionSorted = new ArrayList<>(fullExpansion);
+            List<FootstanceNode> fullExpansion = new ArrayList<>();
+            expansion.doFullExpansion(node, fullExpansion);
+            List<FootstanceNode> fullExpansionSorted = new ArrayList<>(fullExpansion);
 
-            ToDoubleFunction<FootstepNode> stepDistance = step -> ParameterBasedNodeExpansion.IdealStepProximityComparator.calculateStepProximity(step, randomIdealStep);
-            Comparator<FootstepNode> sorter = Comparator.comparingDouble(stepDistance);
+            ToDoubleFunction<FootstanceNode> stepDistance = step -> ParameterBasedNodeExpansion.IdealStepProximityComparator.calculateStepProximity(step.getStanceNode(), randomIdealStep.getStanceNode());
+            Comparator<FootstanceNode> sorter = Comparator.comparingDouble(stepDistance);
             fullExpansionSorted.sort(sorter);
 
             for (int k = 0; k < fullExpansion.size(); k++)
             {
-               Assertions.assertTrue(fullExpansion.get(i).equalPosition(fullExpansionSorted.get(i)));
+               Assertions.assertTrue(fullExpansion.get(i).getStanceNode().equalPosition(fullExpansionSorted.get(i).getStanceNode()));
             }
          }
       }
@@ -267,26 +283,32 @@ public class ParameterBasedNodeExpansionTest
       for (int i = 0; i < numberOfStanceNodes; i++)
       {
          FootstepNode stanceNode = FootstepNode.generateRandomFootstepNode(random, 5.0);
+         FootstepNode swingNode = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, stanceNode);
+         FootstanceNode node = new FootstanceNode(stanceNode, swingNode);
+
          for (int j = 0; j < numberOfIdealSteps; j++)
          {
-            FootstepNode randomIdealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
-            UnaryOperator<FootstepNode> idealStepSupplier = step -> randomIdealStep;
+            FootstepNode randomStanceStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
+            FootstepNode randomSwingStep = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, randomStanceStep);
+            FootstanceNode randomIdealStep = new FootstanceNode(randomStanceStep, randomSwingStep);
+
+            UnaryOperator<FootstanceNode> idealStepSupplier = step -> randomIdealStep;
             ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
-            List<FootstepNode> fullExpansion = new ArrayList<>();
-            expansion.doFullExpansion(stanceNode, fullExpansion);
+            List<FootstanceNode> fullExpansion = new ArrayList<>();
+            expansion.doFullExpansion(node, fullExpansion);
 
             int numberOfIterativeExpansions = fullExpansion.size() / branchFactor + 1;
             for (int k = 0; k < numberOfIterativeExpansions; k++)
             {
-               List<FootstepNode> iterativeExpansion = new ArrayList<>();
-               expansion.doIterativeExpansion(stanceNode, iterativeExpansion);
+               List<FootstanceNode> iterativeExpansion = new ArrayList<>();
+               expansion.doIterativeExpansion(node, iterativeExpansion);
 
                for (int l = 0; l < iterativeExpansion.size(); l++)
                {
-                  FootstepNode stepFromFullExpansion = fullExpansion.get(branchFactor * k + l);
-                  FootstepNode stepFromIterativeExpansion = iterativeExpansion.get(l);
+                  FootstanceNode stepFromFullExpansion = fullExpansion.get(branchFactor * k + l);
+                  FootstanceNode stepFromIterativeExpansion = iterativeExpansion.get(l);
                   Assertions.assertEquals(stepFromFullExpansion, stepFromIterativeExpansion);
                }
             }
@@ -311,23 +333,26 @@ public class ParameterBasedNodeExpansionTest
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, footPolygons);
       expansion.initialize();
 
-      List<FootstepNode> expansionList = new ArrayList<>();
+      List<FootstanceNode> expansionList = new ArrayList<>();
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       ConvexPolygon2D intersectionPolygon = new ConvexPolygon2D();
       Point2D pointA = new Point2D();
       Point2D pointB = new Point2D();
 
       FootstepNode stanceNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
-      expansion.doFullExpansion(stanceNode, expansionList);
+      FootstepNode swingNode = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, stanceNode);
+      FootstanceNode node = new FootstanceNode(stanceNode, swingNode);
+
+      expansion.doFullExpansion(node, expansionList);
 
       ConvexPolygon2D stanceNodePolygon = new ConvexPolygon2D();
       FootstepNodeTools.getFootPolygon(stanceNode, footPolygons.get(stanceNode.getRobotSide()), stanceNodePolygon);
 
       for (int i = 0; i < expansionList.size(); i++)
       {
-         FootstepNode childNode = expansionList.get(i);
+         FootstanceNode childNode = expansionList.get(i);
          ConvexPolygon2D childNodePolygon = new ConvexPolygon2D();
-         FootstepNodeTools.getFootPolygon(childNode, footPolygons.get(childNode.getRobotSide()), childNodePolygon);
+         FootstepNodeTools.getFootPolygon(childNode.getStanceNode(), footPolygons.get(childNode.getStanceSide()), childNodePolygon);
 
          boolean intersectionDetected = convexPolygonTools.computeIntersectionOfPolygons(stanceNodePolygon, childNodePolygon, intersectionPolygon);
          Assertions.assertFalse(intersectionDetected, "Intersection detected in footstep node expansion");

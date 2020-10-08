@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -32,12 +33,12 @@ public class FootstepPlannerCompletionChecker
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private final Pose2D midFootPose = new Pose2D();
-   private final List<FootstepNode> childNodes = new ArrayList<>();
+   private final List<FootstanceNode> childNodes = new ArrayList<>();
 
    private double goalDistanceProximity;
    private double goalYawProximity;
 
-   private FootstepNode startNode, endNode;
+   private FootstanceNode startNode, endNode;
    private int endNodePathSize;
    private SideDependentList<FootstepNode> goalNodes;
    private double endNodeCost;
@@ -54,7 +55,7 @@ public class FootstepPlannerCompletionChecker
       goalProximityComparator = new GoalProximityComparator(footstepPlannerParameters);
    }
 
-   public void initialize(FootstepNode startNode, SideDependentList<FootstepNode> goalNodes, double goalDistanceProximity, double goalYawProximity)
+   public void initialize(FootstanceNode startNode, SideDependentList<FootstepNode> goalNodes, double goalDistanceProximity, double goalYawProximity)
    {
       this.startNode = startNode;
       this.goalNodes = goalNodes;
@@ -75,43 +76,44 @@ public class FootstepPlannerCompletionChecker
     * Checks if goal is reachable. If it is, the goal step is appended by a goal step on the opposite side and the expanded step is returned.
     * If the goal is not reached this returns null
     */
-   public FootstepNode checkIfGoalIsReached(AStarIterationData<FootstepNode> iterationData)
+   public FootstanceNode checkIfGoalIsReached(AStarIterationData<FootstanceNode> iterationData)
    {
-      if (isProximityModeEnabled())
+      //      if (isProximityModeEnabled())
+      //      {
+      // TODO implement proximity mode with FootstepStanceNode
+      //         iterationData.getValidChildNodes().sort(goalProximityComparator);
+      //         for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
+      //         {
+      //            FootstepNode childNode = iterationData.getValidChildNodes().get(i);
+      //            midFootPose.set(childNode.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth()), childNode.getYaw());
+      //
+      //            boolean validYawProximity = midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) <= goalYawProximity;
+      //            boolean validDistanceProximity = midFootPose.getPosition().distanceSquared(goalMidFootPose.getPosition()) <= MathTools.square(goalDistanceProximity);
+      //
+      //            if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))
+      //            {
+      //               return childNode;
+      //            }
+      //         }
+      //      }
+      //      else
       {
-         iterationData.getValidChildNodes().sort(goalProximityComparator);
          for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
          {
-            FootstepNode childNode = iterationData.getValidChildNodes().get(i);
-            midFootPose.set(childNode.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth()), childNode.getYaw());
-
-            boolean validYawProximity = midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) <= goalYawProximity;
-            boolean validDistanceProximity = midFootPose.getPosition().distanceSquared(goalMidFootPose.getPosition()) <= MathTools.square(goalDistanceProximity);
-
-            if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))
+            FootstanceNode childNode = iterationData.getValidChildNodes().get(i);
+            if (childNode.getStanceNode().equals(goalNodes.get(childNode.getStanceSide())))
             {
-               return childNode;
-            }
-         }
-      }
-      else
-      {
-         for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
-         {
-            FootstepNode childNode = iterationData.getValidChildNodes().get(i);
-            FootstepNode goalNode = goalNodes.get(childNode.getRobotSide());
-            if (childNode.equals(goalNode))
-            {
-               endNode = goalNodes.get(childNode.getRobotSide().getOppositeSide());
+               endNode = new FootstanceNode(goalNodes.get(childNode.getSwingSide()), goalNodes.get(childNode.getStanceSide()));
                iterationConductor.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
                return childNode;
             }
          }
       }
+      //      }
 
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {
-         FootstepNode childNode = iterationData.getValidChildNodes().get(i);
+         FootstanceNode childNode = iterationData.getValidChildNodes().get(i);
 
          double cost = heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
@@ -125,60 +127,60 @@ public class FootstepPlannerCompletionChecker
       return null;
    }
 
-   /**
-    * Checks if this step can be followed by a square-up step that's also within the proximity bounds.
-    * If so, the square-up step is set as the end nodeInProximity and the edge cost is set to zero.
-    *
-    * @param nodeInProximity step that's within goal proximity
-    * @return if a square-up step was found
-    */
-   private boolean searchForSquaredUpStepInProximity(FootstepNode parentNode, FootstepNode nodeInProximity)
-   {
-      DirectedGraph<FootstepNode> graph = iterationConductor.getGraph();
-      if (!graph.getOutgoingEdges().containsKey(nodeInProximity))
-      {
-         // this step hasn't been expanded yet, perform iteration now
-         iterationConductor.doPlanningIteration(nodeInProximity, false);
-      }
-
-      // grab all outgoing edges
-      childNodes.clear();
-      Predicate<GraphEdge<FootstepNode>> validEdgeFilter = edge -> Double.isFinite(graph.getEdgeCostMap().get(edge).getEdgeCost());
-      graph.getOutgoingEdges().get(nodeInProximity).stream().filter(validEdgeFilter).forEach(edge -> childNodes.add(edge.getEndNode()));
-
-      if (childNodes.isEmpty())
-         return false;
-
-      squaredUpStepComparator.squaredUpStep.set(nodeInProximity.getX(), nodeInProximity.getY(), nodeInProximity.getYaw());
-      squaredUpStepComparator.squaredUpStep.appendTranslation(0.0, nodeInProximity.getRobotSide().negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
-      childNodes.sort(squaredUpStepComparator);
-
-      for (int i = 0; i < childNodes.size(); i++)
-      {
-         FootstepNode closestStepToSquaredUp = childNodes.get(i);
-         double distanceFromSquaredUpSquared = EuclidCoreTools.normSquared(closestStepToSquaredUp.getX() - squaredUpStepComparator.squaredUpStep.getX(),
-                                                                           closestStepToSquaredUp.getY() - squaredUpStepComparator.squaredUpStep.getY());
-         double angleFromSquaredUp = Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(closestStepToSquaredUp.getYaw(),
-                                                                                         squaredUpStepComparator.squaredUpStep.getYaw()));
-
-         if (distanceFromSquaredUpSquared < MathTools.square(distanceEpsilonForSquaredUp) && angleFromSquaredUp < yawEpsilonForSquaredUp)
-         {
-            graph.updateEdgeCost(parentNode, nodeInProximity, 0.0);
-            graph.updateEdgeCost(nodeInProximity, closestStepToSquaredUp, 0.0);
-            endNode = closestStepToSquaredUp;
-            return true;
-         }
-      }
-
-      return false;
-   }
+//   /**
+//    * Checks if this step can be followed by a square-up step that's also within the proximity bounds.
+//    * If so, the square-up step is set as the end nodeInProximity and the edge cost is set to zero.
+//    *
+//    * @param nodeInProximity step that's within goal proximity
+//    * @return if a square-up step was found
+//    */
+//   private boolean searchForSquaredUpStepInProximity(FootstanceNode parentNode, FootstanceNode nodeInProximity)
+//   {
+//      DirectedGraph<FootstanceNode> graph = iterationConductor.getGraph();
+//      if (!graph.getOutgoingEdges().containsKey(nodeInProximity))
+//      {
+//         // this step hasn't been expanded yet, perform iteration now
+//         iterationConductor.doPlanningIteration(nodeInProximity, false);
+//      }
+//
+//      // grab all outgoing edges
+//      childNodes.clear();
+//      Predicate<GraphEdge<FootstanceNode>> validEdgeFilter = edge -> Double.isFinite(graph.getEdgeCostMap().get(edge).getEdgeCost());
+//      graph.getOutgoingEdges().get(nodeInProximity).stream().filter(validEdgeFilter).forEach(edge -> childNodes.add(edge.getEndNode()));
+//
+//      if (childNodes.isEmpty())
+//         return false;
+//
+//      squaredUpStepComparator.squaredUpStep.set(nodeInProximity.getX(), nodeInProximity.getY(), nodeInProximity.getYaw());
+//      squaredUpStepComparator.squaredUpStep.appendTranslation(0.0, nodeInProximity.getRobotSide().negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
+//      childNodes.sort(squaredUpStepComparator);
+//
+//      for (int i = 0; i < childNodes.size(); i++)
+//      {
+//         FootstepNode closestStepToSquaredUp = childNodes.get(i);
+//         double distanceFromSquaredUpSquared = EuclidCoreTools.normSquared(closestStepToSquaredUp.getX() - squaredUpStepComparator.squaredUpStep.getX(),
+//                                                                           closestStepToSquaredUp.getY() - squaredUpStepComparator.squaredUpStep.getY());
+//         double angleFromSquaredUp = Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(closestStepToSquaredUp.getYaw(),
+//                                                                                         squaredUpStepComparator.squaredUpStep.getYaw()));
+//
+//         if (distanceFromSquaredUpSquared < MathTools.square(distanceEpsilonForSquaredUp) && angleFromSquaredUp < yawEpsilonForSquaredUp)
+//         {
+//            graph.updateEdgeCost(parentNode, nodeInProximity, 0.0);
+//            graph.updateEdgeCost(nodeInProximity, closestStepToSquaredUp, 0.0);
+//            endNode = closestStepToSquaredUp;
+//            return true;
+//         }
+//      }
+//
+//      return false;
+//   }
 
    public boolean isProximityModeEnabled()
    {
       return goalDistanceProximity > 0.0 || goalYawProximity > 0.0;
    }
 
-   public FootstepNode getEndNode()
+   public FootstanceNode getEndNode()
    {
       return endNode;
    }
@@ -188,7 +190,7 @@ public class FootstepPlannerCompletionChecker
       return endNodePathSize;
    }
 
-   private class GoalProximityComparator implements Comparator<FootstepNode>
+   private class GoalProximityComparator implements Comparator<FootstanceNode>
    {
       private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -197,17 +199,17 @@ public class FootstepPlannerCompletionChecker
          this.footstepPlannerParameters = footstepPlannerParameters;
       }
 
-      public int compare(FootstepNode nodeA, FootstepNode nodeB)
+      public int compare(FootstanceNode nodeA, FootstanceNode nodeB)
       {
-         Point2D midFootPointA = nodeA.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth());
-         Point2D midFootPointB = nodeB.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth());
+         Pose2D midFootPoseA = nodeA.getOrComputeMidFootPose();
+         Pose2D midFootPoseB = nodeB.getOrComputeMidFootPose();
 
-         double positionDistanceA = midFootPointA.distanceSquared(goalMidFootPose.getPosition());
-         double positionDistanceB = midFootPointB.distanceSquared(goalMidFootPose.getPosition());
+         double positionDistanceA = midFootPoseA.getPosition().distanceSquared(goalMidFootPose.getPosition());
+         double positionDistanceB = midFootPoseB.getPosition().distanceSquared(goalMidFootPose.getPosition());
 
          double yawScalar = 3.0;
-         double yawDistanceA = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getYaw()));
-         double yawDistanceB = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getYaw()));
+         double yawDistanceA = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getStanceNode().getYaw()));
+         double yawDistanceB = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getStanceNode().getYaw()));
 
          return Double.compare(positionDistanceA + yawDistanceA, positionDistanceB + yawDistanceB);
       }

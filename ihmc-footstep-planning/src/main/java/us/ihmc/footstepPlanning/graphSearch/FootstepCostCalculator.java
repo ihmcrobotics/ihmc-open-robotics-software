@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -20,8 +21,8 @@ public class FootstepCostCalculator
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapperReadOnly snapper;
-   private final UnaryOperator<FootstepNode> idealStepCalculator;
-   private final ToDoubleFunction<FootstepNode> heuristics;
+   private final UnaryOperator<FootstanceNode> idealStepCalculator;
+   private final ToDoubleFunction<FootstanceNode> heuristics;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
    private final RigidBodyTransform stanceNodeTransform = new RigidBodyTransform();
@@ -34,8 +35,8 @@ public class FootstepCostCalculator
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepNodeSnapperReadOnly snapper,
-                                 UnaryOperator<FootstepNode> idealStepCalculator,
-                                 ToDoubleFunction<FootstepNode> heuristics,
+                                 UnaryOperator<FootstanceNode> idealStepCalculator,
+                                 ToDoubleFunction<FootstanceNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
                                  YoRegistry parentRegistry)
    {
@@ -47,14 +48,14 @@ public class FootstepCostCalculator
       parentRegistry.addChild(registry);
    }
 
-   public double computeCost(FootstepNode stanceNode, FootstepNode candidateNode)
+   public double computeCost(FootstanceNode parentNode, FootstanceNode candidateNode)
    {
-      FootstepNode idealStep = idealStepCalculator.apply(stanceNode);
+      FootstanceNode idealStep = idealStepCalculator.apply(parentNode);
 
-      FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapper.snapFootstepNode(stanceNode).getSnapTransform(), stanceNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapper.snapFootstepNode(candidateNode).getSnapTransform(), candidateNodeTransform);
-      idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
-      idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
+      FootstepNodeTools.getSnappedNodeTransform(parentNode.getStanceNode(), snapper.snapFootstepNode(parentNode.getStanceNode()).getSnapTransform(), stanceNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(candidateNode.getStanceNode(), snapper.snapFootstepNode(candidateNode.getStanceNode()).getSnapTransform(), candidateNodeTransform);
+      idealStepTransform.getTranslation().set(idealStep.getStanceNode().getX(), idealStep.getStanceNode().getY(), stanceNodeTransform.getTranslationZ());
+      idealStepTransform.getRotation().setToYawOrientation(idealStep.getStanceNode().getYaw());
 
       // calculate offset from ideal in a z-up frame
       stanceNodeTransform.getRotation().setToYawOrientation(stanceNodeTransform.getRotation().getYaw());
@@ -76,7 +77,7 @@ public class FootstepCostCalculator
       edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
 
-      edgeCost.add(computeAreaCost(candidateNode));
+      edgeCost.add(computeAreaCost(candidateNode.getStanceNode()));
       edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
