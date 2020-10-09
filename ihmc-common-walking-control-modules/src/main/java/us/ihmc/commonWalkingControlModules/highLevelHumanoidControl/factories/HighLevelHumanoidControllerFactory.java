@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerComma
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -109,10 +110,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
-   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
+   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
+                                             SideDependentList<String> footForceSensorNames,
+                                             SideDependentList<String> footContactSensorNames,
+                                             SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
+                                             WalkingControllerParameters walkingControllerParameters,
+                                             ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
+                                             CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -135,6 +140,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
 

@@ -154,6 +154,7 @@ public class BalanceManager
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+                         CoPTrajectoryParameters copTrajectoryParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
                          YoRegistry parentRegistry)
    {
@@ -203,13 +204,13 @@ public class BalanceManager
 
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
-      CoPTrajectoryParameters copParameters = new CoPTrajectoryParameters(registry);
+      registry.addChild(copTrajectoryParameters.getRegistry());
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
-      copTrajectoryState.registerStateToSave(copParameters);
-      copTrajectory = new WalkingCoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
+      copTrajectoryState.registerStateToSave(copTrajectoryParameters);
+      copTrajectory = new WalkingCoPTrajectoryGenerator(copTrajectoryParameters, defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
-      flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copParameters, registry);
+      flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);

@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -100,6 +101,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private ValkyrieCalibrationParameters calibrationParameters;
 
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
+   private CoPTrajectoryParameters copTrajectoryParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
@@ -631,6 +633,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (capturePointPlannerParameters == null)
          capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(getRobotPhysicalProperties(), target);
       return capturePointPlannerParameters;
+   }
+
+   @Override
+   public CoPTrajectoryParameters getCoPTrajectoryParameters()
+   {
+      if (copTrajectoryParameters == null)
+         copTrajectoryParameters = new ValkyrieCoPTrajectoryParameters();
+      return copTrajectoryParameters;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
