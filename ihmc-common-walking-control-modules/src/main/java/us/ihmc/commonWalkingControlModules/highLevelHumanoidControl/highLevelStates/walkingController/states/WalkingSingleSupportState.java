@@ -179,6 +179,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
+            balanceManager.adjustFootstep(nextFootstep);
             balanceManager.computeICPPlan();
 
             updateHeightManager();
