@@ -199,8 +199,8 @@ public class ParameterBasedNodeExpansionTest
       int branchFactor = 100;
       parameters.setMaximumBranchFactor(branchFactor);
 
-      UnaryOperator<FootstanceNode> idealStepSupplier = step -> new FootstanceNode(step, step.getStanceNode().getX(), step.getStanceNode().getY(), step.getStanceNode().getYaw());
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
+      IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> new FootstepNode(stance.getLatticeNode(), stance.getRobotSide().getOppositeSide());
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
 
       expansion.initialize();
 
@@ -245,19 +245,16 @@ public class ParameterBasedNodeExpansionTest
 
          for (int j = 0; j < numberOfIdealSteps; j++)
          {
-            FootstepNode randomStanceStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
-            FootstepNode randomSwingStep = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, randomStanceStep);
-            FootstanceNode randomIdealStep = new FootstanceNode(randomStanceStep, randomSwingStep);
-
-            UnaryOperator<FootstanceNode> idealStepSupplier = step -> randomIdealStep;
-            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
+            FootstepNode idealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
+            IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStep;
+            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
             List<FootstanceNode> fullExpansion = new ArrayList<>();
             expansion.doFullExpansion(node, fullExpansion);
             List<FootstanceNode> fullExpansionSorted = new ArrayList<>(fullExpansion);
 
-            ToDoubleFunction<FootstanceNode> stepDistance = step -> ParameterBasedNodeExpansion.IdealStepProximityComparator.calculateStepProximity(step.getStanceNode(), randomIdealStep.getStanceNode());
+            ToDoubleFunction<FootstanceNode> stepDistance = step -> ParameterBasedNodeExpansion.IdealStepProximityComparator.calculateStepProximity(step.getStanceNode(), idealStep);
             Comparator<FootstanceNode> sorter = Comparator.comparingDouble(stepDistance);
             fullExpansionSorted.sort(sorter);
 
@@ -288,12 +285,9 @@ public class ParameterBasedNodeExpansionTest
 
          for (int j = 0; j < numberOfIdealSteps; j++)
          {
-            FootstepNode randomStanceStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
-            FootstepNode randomSwingStep = FootstepNodeTools.constructNodeInPreviousNodeFrame(0.0, 0.3, 0.0, randomStanceStep);
-            FootstanceNode randomIdealStep = new FootstanceNode(randomStanceStep, randomSwingStep);
-
-            UnaryOperator<FootstanceNode> idealStepSupplier = step -> randomIdealStep;
-            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
+            FootstepNode idealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
+            IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStep;
+            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
             List<FootstanceNode> fullExpansion = new ArrayList<>();

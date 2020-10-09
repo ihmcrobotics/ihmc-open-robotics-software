@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch;
+package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -7,6 +7,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculatorInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -16,12 +17,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.function.ToDoubleFunction;
 import java.util.function.UnaryOperator;
 
-public class FootstepCostCalculator
+public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapperReadOnly snapper;
-   private final UnaryOperator<FootstanceNode> idealStepCalculator;
+   private final IdealStepCalculatorInterface idealStepCalculator;
    private final ToDoubleFunction<FootstanceNode> heuristics;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
@@ -35,7 +36,7 @@ public class FootstepCostCalculator
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepNodeSnapperReadOnly snapper,
-                                 UnaryOperator<FootstanceNode> idealStepCalculator,
+                                 IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstanceNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
                                  YoRegistry parentRegistry)
@@ -48,14 +49,15 @@ public class FootstepCostCalculator
       parentRegistry.addChild(registry);
    }
 
-   public double computeCost(FootstanceNode parentNode, FootstanceNode candidateNode)
+   @Override
+   public double computeCost(FootstepNode candidateStep, FootstepNode stanceStep, FootstepNode startOfSwing)
    {
-      FootstanceNode idealStep = idealStepCalculator.apply(parentNode);
+      FootstepNode idealStep = idealStepCalculator.computeIdealStep(stanceStep, startOfSwing);
 
-      FootstepNodeTools.getSnappedNodeTransform(parentNode.getStanceNode(), snapper.snapFootstepNode(parentNode.getStanceNode()).getSnapTransform(), stanceNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(candidateNode.getStanceNode(), snapper.snapFootstepNode(candidateNode.getStanceNode()).getSnapTransform(), candidateNodeTransform);
-      idealStepTransform.getTranslation().set(idealStep.getStanceNode().getX(), idealStep.getStanceNode().getY(), stanceNodeTransform.getTranslationZ());
-      idealStepTransform.getRotation().setToYawOrientation(idealStep.getStanceNode().getYaw());
+      FootstepNodeTools.getSnappedNodeTransform(stanceStep, snapper.snapFootstepNode(stanceStep).getSnapTransform(), stanceNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(candidateStep, snapper.snapFootstepNode(candidateStep).getSnapTransform(), candidateNodeTransform);
+      idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
+      idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
 
       // calculate offset from ideal in a z-up frame
       stanceNodeTransform.getRotation().setToYawOrientation(stanceNodeTransform.getRotation().getYaw());
@@ -77,12 +79,12 @@ public class FootstepCostCalculator
       edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
 
-      edgeCost.add(computeAreaCost(candidateNode.getStanceNode()));
+      edgeCost.add(computeAreaCost(candidateStep));
       edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
-      idealStepHeuristicCost.set(heuristics.applyAsDouble(idealStep));
-      heuristicCost.set(heuristics.applyAsDouble(candidateNode));
+      idealStepHeuristicCost.set(heuristics.applyAsDouble(new FootstanceNode(idealStep, stanceStep)));
+      heuristicCost.set(heuristics.applyAsDouble(new FootstanceNode(candidateStep, stanceStep)));
       double deltaHeuristics = idealStepHeuristicCost.getDoubleValue() - heuristicCost.getDoubleValue();
 
       if(deltaHeuristics > 0.0)

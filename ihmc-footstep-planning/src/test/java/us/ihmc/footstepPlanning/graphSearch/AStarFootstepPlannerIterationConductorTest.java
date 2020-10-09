@@ -20,7 +20,7 @@ public class AStarFootstepPlannerIterationConductorTest
    public void testSimple2DGridSearch()
    {
       ManhattanDistanceCalculator distanceCalculator = new ManhattanDistanceCalculator();
-      AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors, (n1, n2) -> true, (n1, n2) -> 1.0, distanceCalculator::getManhattanDistance);
+      AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors, (n1, n2, n3) -> true, (n1, n2, n3) -> 1.0, distanceCalculator::getManhattanDistance);
 
       FootstepNode leftStartStep = new FootstepNode(0, 1, 0, RobotSide.LEFT);
       FootstepNode rightStartStep = new FootstepNode(0, -1, 0, RobotSide.RIGHT);
