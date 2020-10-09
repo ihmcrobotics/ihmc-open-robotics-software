@@ -138,6 +138,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeICPPlan();
+
       if (!doManualLiftOff())
          switchToToeOffIfPossible();
 

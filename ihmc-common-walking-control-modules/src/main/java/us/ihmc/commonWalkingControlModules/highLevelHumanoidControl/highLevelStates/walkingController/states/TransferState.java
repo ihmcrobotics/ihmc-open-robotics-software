@@ -34,14 +34,11 @@ public abstract class TransferState extends WalkingState
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
-   private final FramePoint2D desiredICPLocal = new FramePoint2D();
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint3D desiredCoM = new FramePoint3D();
 
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
-   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    private final FootstepTiming stepTiming = new FootstepTiming();
 
@@ -155,20 +152,23 @@ public abstract class TransferState extends WalkingState
 
       if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
-         desiredCMP.setIncludingFrame(balanceManager.getDesiredCMP());
-         desiredICPLocal.setIncludingFrame(balanceManager.getDesiredICP());
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
-         nextExitCMP.setIncludingFrame(balanceManager.getNextExitCMP());
 
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
 
-         feetManager.updateToeOffStatusDoubleSupport(trailingLeg, nextFootstep, nextExitCMP, desiredCMP, desiredCoP, desiredICPLocal, capturePoint2d);
+         feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
+                                                     nextFootstep,
+                                                     balanceManager.getNextExitCMP(),
+                                                     balanceManager.getDesiredCMP(),
+                                                     desiredCoP,
+                                                     balanceManager.getDesiredICP(),
+                                                     capturePoint2d);
 
          if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
-            feetManager.requestPointToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
+            feetManager.requestPointToeOff(trailingLeg, balanceManager.getNextExitCMP(), filteredDesiredCoP);
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
-            feetManager.requestLineToeOff(trailingLeg, nextExitCMP, filteredDesiredCoP);
+            feetManager.requestLineToeOff(trailingLeg, balanceManager.getNextExitCMP(), filteredDesiredCoP);
       }
    }
 
