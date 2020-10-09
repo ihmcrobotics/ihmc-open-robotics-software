@@ -578,6 +578,8 @@ public class BalanceManager
    {
       inSingleSupport.set(true);
       inFinalTransfer.set(false);
+      currentTiming.set(footstepTimings.get(0));
+
       timeInSupportSequence.set(currentTiming.getTransferTime());
       currentStateDuration.set(currentTiming.getStepTime());
 
