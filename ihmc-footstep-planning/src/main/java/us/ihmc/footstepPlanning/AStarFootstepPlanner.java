@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
@@ -64,7 +64,7 @@ public class AStarFootstepPlanner
    private final AtomicBoolean haltRequested = new AtomicBoolean();
 
    private Consumer<Pair<FootstepPlannerRequest, FootstepPlannerOutput>> postProcessorCallback = null;
-   private Consumer<AStarIterationData<FootstanceNode>> iterationCallback = iterationData -> {};
+   private Consumer<AStarIterationData<FootstepGraphNode>> iterationCallback = iterationData -> {};
 
    private final Stopwatch stopwatch = new Stopwatch();
    private int iterations = 0;
@@ -148,7 +148,7 @@ public class AStarFootstepPlanner
       }
 
       // Setup footstep planner
-      FootstanceNode startNode = createStartNode(request);
+      FootstepGraphNode startNode = createStartNode(request);
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
       distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
@@ -187,22 +187,22 @@ public class AStarFootstepPlanner
             break;
          }
 
-         FootstanceNode nodeToExpand = footstepPlanner.getNextNode();
+         FootstepGraphNode nodeToExpand = footstepPlanner.getNextNode();
          if (nodeToExpand == null)
          {
             result = FootstepPlanningResult.NO_PATH_EXISTS;
             break;
          }
 
-         AStarIterationData<FootstanceNode> iterationData = footstepPlanner.doPlanningIteration(nodeToExpand, true);
+         AStarIterationData<FootstepGraphNode> iterationData = footstepPlanner.doPlanningIteration(nodeToExpand, true);
 //         recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
-         FootstanceNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
+         FootstepGraphNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
          if (achievedGoalNode != null)
          {
             // the final graph expansion is handled manually
-            AStarIterationData<FootstanceNode> finalIterationData = new AStarIterationData<>();
+            AStarIterationData<FootstepGraphNode> finalIterationData = new AStarIterationData<>();
             finalIterationData.setParentNode(achievedGoalNode);
             finalIterationData.getValidChildNodes().add(completionChecker.getEndNode());
 //            recordIterationData(finalIterationData);
@@ -240,13 +240,13 @@ public class AStarFootstepPlanner
 
       // Pack solution path
       outputToPack.getFootstepPlan().clear();
-      List<FootstanceNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
+      List<FootstepGraphNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
       for (int i = 1; i < path.size(); i++)
       {
-         FootstanceNode footstepNode = path.get(i);
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(footstepNode.getStanceNode(), footstepNode.getSwingNode(), true);
-         PlannedFootstep footstep = new PlannedFootstep(footstepNode.getStanceSide());
-         footstep.getFootstepPose().set(snapData.getSnappedNodeTransform(footstepNode.getStanceNode()));
+         FootstepGraphNode footstepNode = path.get(i);
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(footstepNode.getEndStep(), footstepNode.getStartStart(), true);
+         PlannedFootstep footstep = new PlannedFootstep(footstepNode.getEndSide());
+         footstep.getFootstepPose().set(snapData.getSnappedNodeTransform(footstepNode.getEndStep()));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
@@ -318,8 +318,8 @@ public class AStarFootstepPlanner
          return false;
       }
 
-      FootstanceNode endNode = completionChecker.getEndNode();
-      endNodePose.set(endNode.getStanceNode().getX(), endNode.getStanceNode().getY(), endNode.getStanceNode().getYaw());
+      FootstepGraphNode endNode = completionChecker.getEndNode();
+      endNodePose.set(endNode.getEndStep().getX(), endNode.getEndStep().getY(), endNode.getEndStep().getYaw());
       int endNodePathSize = completionChecker.getEndNodePathSize();
 
       for (int i = 0; i < customTerminationConditions.size(); i++)
@@ -339,7 +339,7 @@ public class AStarFootstepPlanner
       this.postProcessorCallback = postProcessorCallback;
    }
 
-   public void addIterationCallback(Consumer<AStarIterationData<FootstanceNode>> callback)
+   public void addIterationCallback(Consumer<AStarIterationData<FootstepGraphNode>> callback)
    {
       iterationCallback = iterationCallback.andThen(callback);
    }
@@ -401,7 +401,7 @@ public class AStarFootstepPlanner
       snapper.addSnapData(footstepNode, snapData);
    }
 
-   private static FootstanceNode createStartNode(FootstepPlannerRequest request)
+   private static FootstepGraphNode createStartNode(FootstepPlannerRequest request)
    {
       RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
 
@@ -410,7 +410,7 @@ public class AStarFootstepPlanner
 
       FootstepNode initialStanceNode = new FootstepNode(initialStancePose.getX(), initialStancePose.getY(), initialStancePose.getYaw(), initialStanceSide);
       FootstepNode initialSwingNode = new FootstepNode(initialSwingPose.getX(), initialSwingPose.getY(), initialSwingPose.getYaw(), initialStanceSide.getOppositeSide());
-      return new FootstanceNode(initialStanceNode, initialSwingNode);
+      return new FootstepGraphNode(initialStanceNode, initialSwingNode);
    }
 
    private static SideDependentList<FootstepNode> createGoalNodes(Function<RobotSide, Pose3D> poses)
@@ -447,7 +447,7 @@ public class AStarFootstepPlanner
       return footstepPlanner;
    }
 
-   public FootstanceNode getEndNode()
+   public FootstepGraphNode getEndNode()
    {
       return completionChecker.getEndNode();
    }

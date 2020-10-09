@@ -8,7 +8,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -20,11 +20,11 @@ import java.util.*;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
-   private final List<FootstanceNode> fullExpansion = new ArrayList<>();
+   private final List<FootstepGraphNode> fullExpansion = new ArrayList<>();
    private final FootstepPlannerParametersReadOnly parameters;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
-   private final HashMap<FootstanceNode, PartialExpansionManager> expansionManagers = new HashMap<>();
+   private final HashMap<FootstepGraphNode, PartialExpansionManager> expansionManagers = new HashMap<>();
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
@@ -105,7 +105,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    }
 
    @Override
-   public boolean doIterativeExpansion(FootstanceNode stanceNode, List<FootstanceNode> expansionToPack)
+   public boolean doIterativeExpansion(FootstepGraphNode stanceNode, List<FootstepGraphNode> expansionToPack)
    {
       if (partialExpansionEnabled)
       {
@@ -127,18 +127,18 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    }
 
    @Override
-   public void doFullExpansion(FootstanceNode nodeToExpand, List<FootstanceNode> fullExpansionToPack)
+   public void doFullExpansion(FootstepGraphNode nodeToExpand, List<FootstepGraphNode> fullExpansionToPack)
    {
       fullExpansionToPack.clear();
-      RobotSide stepSide = nodeToExpand.getSwingSide();
+      RobotSide stepSide = nodeToExpand.getStartSide();
 
       for (int i = 0; i < xOffsets.size(); i++)
       {
          double stepLength = xOffsets.get(i);
          double stepWidth = stepSide.negateIfRightSide(yOffsets.get(i));
          double stepYaw = stepSide.negateIfRightSide(yawOffsets.get(i));
-         FootstepNode childStep = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, nodeToExpand.getStanceNode());
-         FootstanceNode childNode = new FootstanceNode(childStep, nodeToExpand.getStanceNode());
+         FootstepNode childStep = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, nodeToExpand.getEndStep());
+         FootstepGraphNode childNode = new FootstepGraphNode(childStep, nodeToExpand.getEndStep());
 
          if (!fullExpansionToPack.contains(childNode))
             fullExpansionToPack.add(childNode);
@@ -156,66 +156,66 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       }
    }
 
-   private void applyMask(List<FootstanceNode> listToFilter, FootstanceNode stanceNode)
+   private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)
    {
-      FootstepNode idealStep = idealStepCalculator.computeIdealStep(stanceNode.getStanceNode(), stanceNode.getSwingNode());
+      FootstepNode idealStep = idealStepCalculator.computeIdealStep(stanceNode.getEndStep(), stanceNode.getStartStart());
 
       int minXYManhattanDistance = computeMinXYManhattanDistance(listToFilter, idealStep);
       int minYawDistance = computeMinYawDistance(listToFilter, idealStep);
 
       listToFilter.removeIf(node ->
                             {
-                               int xyManhattanDistance = idealStep.computeXYManhattanDistance(node.getStanceNode()) - minXYManhattanDistance;
+                               int xyManhattanDistance = idealStep.computeXYManhattanDistance(node.getEndStep()) - minXYManhattanDistance;
                                if (!xyExpansionMask.contains(xyManhattanDistance))
                                {
                                   return true;
                                }
 
-                               int yawDistance = idealStep.computeYawIndexDistance(node.getStanceNode()) - minYawDistance;
+                               int yawDistance = idealStep.computeYawIndexDistance(node.getEndStep()) - minYawDistance;
                                return !yawExpansionMask.contains(yawDistance);
                             });
    }
 
-   private static int computeMinYawDistance(List<FootstanceNode> listToFilter, FootstepNode idealStep)
+   private static int computeMinYawDistance(List<FootstepGraphNode> listToFilter, FootstepNode idealStep)
    {
       int minYawDistance = Integer.MAX_VALUE;
       for (int i = 0; i < listToFilter.size(); i++)
       {
-         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getStanceNode());
+         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getEndStep());
          if (yawDistance < minYawDistance)
             minYawDistance = yawDistance;
       }
       return minYawDistance;
    }
 
-   private static int computeMinXYManhattanDistance(List<FootstanceNode> listToFilter, FootstepNode idealStep)
+   private static int computeMinXYManhattanDistance(List<FootstepGraphNode> listToFilter, FootstepNode idealStep)
    {
       int minXYManhattanDistance = Integer.MAX_VALUE;
       for (int i = 0; i < listToFilter.size(); i++)
       {
-         int xyManhattanDistance = idealStep.computeXYManhattanDistance(listToFilter.get(i).getStanceNode());
+         int xyManhattanDistance = idealStep.computeXYManhattanDistance(listToFilter.get(i).getEndStep());
          if (xyManhattanDistance < minXYManhattanDistance)
             minXYManhattanDistance = xyManhattanDistance;
       }
       return minXYManhattanDistance;
    }
 
-   static class IdealStepProximityComparator implements Comparator<FootstanceNode>
+   static class IdealStepProximityComparator implements Comparator<FootstepGraphNode>
    {
       private FootstepNode idealStep = null;
 
-      void update(FootstanceNode stanceNode, IdealStepCalculatorInterface idealStepCalculator)
+      void update(FootstepGraphNode stanceNode, IdealStepCalculatorInterface idealStepCalculator)
       {
-         idealStep = idealStepCalculator.computeIdealStep(stanceNode.getStanceNode(), stanceNode.getSwingNode());
+         idealStep = idealStepCalculator.computeIdealStep(stanceNode.getEndStep(), stanceNode.getStartStart());
       }
 
       @Override
-      public int compare(FootstanceNode node1, FootstanceNode node2)
+      public int compare(FootstepGraphNode node1, FootstepGraphNode node2)
       {
          Objects.requireNonNull(idealStep);
 
-         double d1 = calculateStepProximity(node1.getStanceNode(), idealStep);
-         double d2 = calculateStepProximity(node2.getStanceNode(), idealStep);
+         double d1 = calculateStepProximity(node1.getEndStep(), idealStep);
+         double d2 = calculateStepProximity(node2.getEndStep(), idealStep);
          return Double.compare(d1, d2);
       }
 

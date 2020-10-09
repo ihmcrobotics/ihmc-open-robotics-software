@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculatorInterface;
@@ -26,7 +25,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.HashMap;
 import java.util.Random;
-import java.util.function.UnaryOperator;
 
 public class FootstepCostCalculatorTest
 {

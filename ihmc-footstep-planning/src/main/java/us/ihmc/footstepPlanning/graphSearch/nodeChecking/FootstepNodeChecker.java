@@ -6,7 +6,6 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -20,7 +19,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 public class FootstepNodeChecker implements FootstepNodeCheckerInterface
 {
