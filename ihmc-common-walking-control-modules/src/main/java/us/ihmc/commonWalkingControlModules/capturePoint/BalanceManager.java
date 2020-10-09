@@ -146,6 +146,7 @@ public class BalanceManager
 
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
    private final YoBoolean inFinalTransfer = new YoBoolean("InFinalTransfer", registry);
+   private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
    private final CoPTrajectoryGeneratorState copTrajectoryState;
@@ -153,9 +154,9 @@ public class BalanceManager
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
 
-   public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                         WalkingControllerParameters walkingControllerParameters,
                          CoPTrajectoryParameters copTrajectoryParameters,
-                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
                          YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -415,6 +416,11 @@ public class BalanceManager
       copTrajectory.compute(copTrajectoryState);
 
       comTrajectoryPlanner.solveForTrajectory(copTrajectory.getContactStateProviders());
+      comTrajectoryPlanner.compute(currentStateDuration.getDoubleValue());
+
+      yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
+      yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
+
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
@@ -431,14 +437,8 @@ public class BalanceManager
          icpPlannerDone.set(timeInSupportSequence.getValue() >= copTrajectoryState.getFinalTransferDuration());
       else if (footstepTimings.isEmpty())
          icpPlannerDone.set(true);
-      else if (inSingleSupport.getValue())
-         icpPlannerDone.set(timeInSupportSequence.getValue() >= currentTiming.getStepTime());
       else
-         icpPlannerDone.set(timeInSupportSequence.getValue() >= currentTiming.getTransferTime());
-
-      // TODO
-      //      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-      //      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
+         icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
    }
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
@@ -510,9 +510,9 @@ public class BalanceManager
       return yoDesiredICPVelocity;
    }
 
-   public void getFinalDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
+   public FramePoint3DReadOnly getFinalDesiredCoMPosition()
    {
-      desiredCoMPositionToPack.set(yoFinalDesiredCoM);
+      return yoFinalDesiredCoM;
    }
 
    public FrameVector3DReadOnly getDesiredCoMVelocity()
@@ -552,6 +552,7 @@ public class BalanceManager
    public void initialize()
    {
       yoFinalDesiredICP.setToNaN();
+      yoFinalDesiredCoM.setToNaN();
       yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
 
       yoPerfectCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
@@ -561,6 +562,7 @@ public class BalanceManager
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
+      currentStateDuration.set(Double.NaN);
 
       initializeForStanding = true;
 
@@ -576,14 +578,10 @@ public class BalanceManager
    {
       inSingleSupport.set(true);
       inFinalTransfer.set(false);
-      timeInSupportSequence.set(footstepTimings.get(0).getTransferTime());
+      timeInSupportSequence.set(currentTiming.getTransferTime());
+      currentStateDuration.set(currentTiming.getStepTime());
 
       initializeForSingleSupport = true;
-
-      // FIXME
-//      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-//      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
-
       icpPlannerDone.set(false);
    }
 
@@ -600,6 +598,8 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       timeInSupportSequence.set(0.0);
+      currentStateDuration.set(Double.POSITIVE_INFINITY);
+
       inSingleSupport.set(false);
       inFinalTransfer.set(false);
       initializeForStanding = true;
@@ -619,6 +619,8 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       timeInSupportSequence.set(0.0);
+      currentStateDuration.set(currentTiming.getTransferTime());
+
       inSingleSupport.set(false);
       inFinalTransfer.set(true);
       initializeForStanding = true;
@@ -640,15 +642,12 @@ public class BalanceManager
 
       currentTiming.set(footstepTimings.get(0));
       timeInSupportSequence.set(0.0);
+      currentStateDuration.set(currentTiming.getTransferTime());
+
       inFinalTransfer.set(false);
       inSingleSupport.set(false);
 
       initializeForTransfer = true;
-
-      // TODO
-//      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-//      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
-
       icpPlannerDone.set(false);
    }
 
@@ -787,11 +786,6 @@ public class BalanceManager
       }
 
       return capturabilityBasedStatus;
-   }
-
-   // FIXME was this ever used?
-   public void updateCurrentICPPlan()
-   {
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

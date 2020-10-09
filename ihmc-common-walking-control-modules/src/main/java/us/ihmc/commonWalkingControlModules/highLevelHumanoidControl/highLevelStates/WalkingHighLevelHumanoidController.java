@@ -620,7 +620,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.updateCurrentICPPlan();
+      balanceManager.computeICPPlan();
    }
 
    public void updateFailureDetection()
