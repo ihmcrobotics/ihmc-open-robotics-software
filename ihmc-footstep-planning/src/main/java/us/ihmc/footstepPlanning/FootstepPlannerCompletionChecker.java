@@ -1,23 +1,18 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
-import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
-import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 public class FootstepPlannerCompletionChecker
 {
@@ -33,12 +28,12 @@ public class FootstepPlannerCompletionChecker
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private final Pose2D midFootPose = new Pose2D();
-   private final List<FootstanceNode> childNodes = new ArrayList<>();
+   private final List<FootstepGraphNode> childNodes = new ArrayList<>();
 
    private double goalDistanceProximity;
    private double goalYawProximity;
 
-   private FootstanceNode startNode, endNode;
+   private FootstepGraphNode startNode, endNode;
    private int endNodePathSize;
    private SideDependentList<FootstepNode> goalNodes;
    private double endNodeCost;
@@ -55,7 +50,7 @@ public class FootstepPlannerCompletionChecker
       goalProximityComparator = new GoalProximityComparator(footstepPlannerParameters);
    }
 
-   public void initialize(FootstanceNode startNode, SideDependentList<FootstepNode> goalNodes, double goalDistanceProximity, double goalYawProximity)
+   public void initialize(FootstepGraphNode startNode, SideDependentList<FootstepNode> goalNodes, double goalDistanceProximity, double goalYawProximity)
    {
       this.startNode = startNode;
       this.goalNodes = goalNodes;
@@ -76,7 +71,7 @@ public class FootstepPlannerCompletionChecker
     * Checks if goal is reachable. If it is, the goal step is appended by a goal step on the opposite side and the expanded step is returned.
     * If the goal is not reached this returns null
     */
-   public FootstanceNode checkIfGoalIsReached(AStarIterationData<FootstanceNode> iterationData)
+   public FootstepGraphNode checkIfGoalIsReached(AStarIterationData<FootstepGraphNode> iterationData)
    {
       //      if (isProximityModeEnabled())
       //      {
@@ -100,10 +95,10 @@ public class FootstepPlannerCompletionChecker
       {
          for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
          {
-            FootstanceNode childNode = iterationData.getValidChildNodes().get(i);
-            if (childNode.getStanceNode().equals(goalNodes.get(childNode.getStanceSide())))
+            FootstepGraphNode childNode = iterationData.getValidChildNodes().get(i);
+            if (childNode.getEndStep().equals(goalNodes.get(childNode.getEndSide())))
             {
-               endNode = new FootstanceNode(goalNodes.get(childNode.getSwingSide()), goalNodes.get(childNode.getStanceSide()));
+               endNode = new FootstepGraphNode(goalNodes.get(childNode.getStartSide()), goalNodes.get(childNode.getEndSide()));
                iterationConductor.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
                return childNode;
             }
@@ -113,7 +108,7 @@ public class FootstepPlannerCompletionChecker
 
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {
-         FootstanceNode childNode = iterationData.getValidChildNodes().get(i);
+         FootstepGraphNode childNode = iterationData.getValidChildNodes().get(i);
 
          double cost = heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
@@ -180,7 +175,7 @@ public class FootstepPlannerCompletionChecker
       return goalDistanceProximity > 0.0 || goalYawProximity > 0.0;
    }
 
-   public FootstanceNode getEndNode()
+   public FootstepGraphNode getEndNode()
    {
       return endNode;
    }
@@ -190,7 +185,7 @@ public class FootstepPlannerCompletionChecker
       return endNodePathSize;
    }
 
-   private class GoalProximityComparator implements Comparator<FootstanceNode>
+   private class GoalProximityComparator implements Comparator<FootstepGraphNode>
    {
       private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -199,7 +194,7 @@ public class FootstepPlannerCompletionChecker
          this.footstepPlannerParameters = footstepPlannerParameters;
       }
 
-      public int compare(FootstanceNode nodeA, FootstanceNode nodeB)
+      public int compare(FootstepGraphNode nodeA, FootstepGraphNode nodeB)
       {
          Pose2D midFootPoseA = nodeA.getOrComputeMidFootPose();
          Pose2D midFootPoseB = nodeB.getOrComputeMidFootPose();
@@ -208,8 +203,8 @@ public class FootstepPlannerCompletionChecker
          double positionDistanceB = midFootPoseB.getPosition().distanceSquared(goalMidFootPose.getPosition());
 
          double yawScalar = 3.0;
-         double yawDistanceA = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getStanceNode().getYaw()));
-         double yawDistanceB = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getStanceNode().getYaw()));
+         double yawDistanceA = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getEndStep().getYaw()));
+         double yawDistanceB = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getEndStep().getYaw()));
 
          return Double.compare(positionDistanceA + yawDistanceA, positionDistanceB + yawDistanceB);
       }

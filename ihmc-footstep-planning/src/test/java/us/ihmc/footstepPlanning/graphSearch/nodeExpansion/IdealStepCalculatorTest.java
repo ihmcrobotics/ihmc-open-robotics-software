@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -17,7 +16,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.function.BiPredicate;
 
 public class IdealStepCalculatorTest
 {

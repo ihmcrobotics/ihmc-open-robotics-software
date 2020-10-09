@@ -7,16 +7,13 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootstepPlannerHeuristicCalculator
 {
@@ -51,18 +48,18 @@ public class FootstepPlannerHeuristicCalculator
       this.desiredHeading = desiredHeading;
    }
 
-   public double compute(FootstanceNode node)
+   public double compute(FootstepGraphNode node)
    {
       midfootPoint.set(node.getOrComputeMidFootPose().getPosition(), 0.0);
 
-      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node.getStanceNode());
+      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node.getEndStep());
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
       {
          snapData.getSnapTransform().transform(midfootPoint);
       }
 
       midFootPose.getPosition().set(midfootPoint);
-      midFootPose.getOrientation().setYawPitchRoll(node.getStanceNode().getYaw(), 0.0, 0.0);
+      midFootPose.getOrientation().setYawPitchRoll(node.getEndStep().getYaw(), 0.0, 0.0);
 
       double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalPose.getX(), midFootPose.getY() - goalPose.getY());
 
@@ -85,7 +82,7 @@ public class FootstepPlannerHeuristicCalculator
          walkDistance = xyDistanceToGoal;
 
          /** TODO remove when {@link FootstepPlannerParametersReadOnly#getStepOnlyWithRequestedSide()} is removed */
-         if (node.getStanceSide() == parameters.getStepOnlyWithRequestedSide())
+         if (node.getEndSide() == parameters.getStepOnlyWithRequestedSide())
          {
             walkDistance += 0.5 * parameters.getIdealFootstepLength();
          }

@@ -4,7 +4,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculatorInterface;
@@ -15,7 +15,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.function.ToDoubleFunction;
-import java.util.function.UnaryOperator;
 
 public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 {
@@ -23,7 +22,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapperReadOnly snapper;
    private final IdealStepCalculatorInterface idealStepCalculator;
-   private final ToDoubleFunction<FootstanceNode> heuristics;
+   private final ToDoubleFunction<FootstepGraphNode> heuristics;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
    private final RigidBodyTransform stanceNodeTransform = new RigidBodyTransform();
@@ -37,7 +36,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepNodeSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
-                                 ToDoubleFunction<FootstanceNode> heuristics,
+                                 ToDoubleFunction<FootstepGraphNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
                                  YoRegistry parentRegistry)
    {
@@ -83,8 +82,8 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
-      idealStepHeuristicCost.set(heuristics.applyAsDouble(new FootstanceNode(idealStep, stanceStep)));
-      heuristicCost.set(heuristics.applyAsDouble(new FootstanceNode(candidateStep, stanceStep)));
+      idealStepHeuristicCost.set(heuristics.applyAsDouble(new FootstepGraphNode(idealStep, stanceStep)));
+      heuristicCost.set(heuristics.applyAsDouble(new FootstepGraphNode(candidateStep, stanceStep)));
       double deltaHeuristics = idealStepHeuristicCost.getDoubleValue() - heuristicCost.getDoubleValue();
 
       if(deltaHeuristics > 0.0)

@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 
 import java.util.function.Consumer;
 
-public class FootstepPlannerOccupancyMapAssembler implements Consumer<AStarIterationData<FootstanceNode>>
+public class FootstepPlannerOccupancyMapAssembler implements Consumer<AStarIterationData<FootstepGraphNode>>
 {
    private final PlannerOccupancyMap occupancyMap = new PlannerOccupancyMap();
 
@@ -15,18 +15,18 @@ public class FootstepPlannerOccupancyMapAssembler implements Consumer<AStarItera
    }
 
    @Override
-   public void accept(AStarIterationData<FootstanceNode> iterationData)
+   public void accept(AStarIterationData<FootstepGraphNode> iterationData)
    {
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {
-         FootstanceNode node = iterationData.getValidChildNodes().get(i);
-         occupancyMap.addOccupiedCell(new PlannerCell(node.getStanceNode().getXIndex(), node.getStanceNode().getYIndex()));
+         FootstepGraphNode node = iterationData.getValidChildNodes().get(i);
+         occupancyMap.addOccupiedCell(new PlannerCell(node.getEndStep().getXIndex(), node.getEndStep().getYIndex()));
       }
 
       for (int i = 0; i < iterationData.getInvalidChildNodes().size(); i++)
       {
-         FootstanceNode node = iterationData.getInvalidChildNodes().get(i);
-         occupancyMap.addOccupiedCell(new PlannerCell(node.getStanceNode().getXIndex(), node.getStanceNode().getYIndex()));
+         FootstepGraphNode node = iterationData.getInvalidChildNodes().get(i);
+         occupancyMap.addOccupiedCell(new PlannerCell(node.getEndStep().getXIndex(), node.getEndStep().getYIndex()));
       }
    }
 

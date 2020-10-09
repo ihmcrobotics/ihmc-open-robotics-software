@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -277,7 +277,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       requestCallback = requestCallback.andThen(callback);
    }
 
-   public void addIterationCallback(Consumer<AStarIterationData<FootstanceNode>> callback)
+   public void addIterationCallback(Consumer<AStarIterationData<FootstepGraphNode>> callback)
    {
       aStarFootstepPlanner.addIterationCallback(callback);
    }
@@ -375,7 +375,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return bodyPathPlanHolder.getBodyPathPlan();
    }
 
-   public FootstanceNode getEndNode()
+   public FootstepGraphNode getEndNode()
    {
       return aStarFootstepPlanner.getEndNode();
    }
