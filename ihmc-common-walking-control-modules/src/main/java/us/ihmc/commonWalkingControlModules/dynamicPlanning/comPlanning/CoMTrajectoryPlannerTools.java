@@ -385,6 +385,97 @@ public class CoMTrajectoryPlannerTools
    }
 
    /**
+    * <p> Set a continuity constraint on the VRP position at a state change, aka a trajectory knot.. </p>
+    * <p> Recall that the equation for the center of mass position is defined by </p>
+    * <p>
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * </p>
+    * <p> This constraint is then defined as </p>
+    * <p> x<sub>i-1</sub>(T<sub>i-1</sub>) = x<sub>i</sub>(0), </p>
+    * <p> substituting in the trajectory coefficients. </p>
+    *
+    * @param previousSequence i-1 in the above equations.
+    * @param nextSequence i in the above equations.
+    */
+   public static void addVRPPositionContinuityConstraint(int previousSequence, int nextSequence, int constraintRow, double omega, double previousDuration,
+                                                         DMatrixRMaj constraintMatrixToPack)
+   {
+      // move next sequence coefficients to the left hand side
+      int previousStartIndex = 6 * previousSequence;
+      int nextStartIndex = 6 * nextSequence;
+
+      previousDuration = Math.min(previousDuration, sufficientlyLongTime);
+
+      constraintMatrixToPack.set(constraintRow, previousStartIndex, getVRPPositionFirstCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 1, getVRPPositionSecondCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 2, getVRPPositionThirdCoefficientTimeFunction(omega, previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 3, getVRPPositionFourthCoefficientTimeFunction(omega, previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 4, getVRPPositionFifthCoefficientTimeFunction(previousDuration));
+      constraintMatrixToPack.set(constraintRow, previousStartIndex + 5, getVRPPositionSixthCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintRow, nextStartIndex, -getVRPPositionFirstCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 1, -getVRPPositionSecondCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 2, -getVRPPositionThirdCoefficientTimeFunction(omega, 0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 3, -getVRPPositionFourthCoefficientTimeFunction(omega, 0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 4, -getVRPPositionFifthCoefficientTimeFunction(0.0));
+      constraintMatrixToPack.set(constraintRow, nextStartIndex + 5, -getVRPPositionSixthCoefficientTimeFunction());
+   }
+
+   public static void addImplicitVRPVelocityConstraint(int sequenceId,
+                                                       int constraintNumber,
+                                                       int vrpWaypointPositionIndex,
+                                                       double time,
+                                                       double timeOfRelativePosition,
+                                                       double omega,
+                                                       FramePoint3DReadOnly relativeDesiredVRPPosition,
+                                                       DMatrixRMaj constraintMatrixToPack,
+                                                       DMatrixRMaj xObjectiveMatrixToPack,
+                                                       DMatrixRMaj yObjectiveMatrixToPack,
+                                                       DMatrixRMaj zObjectiveMatrixToPack,
+                                                       DMatrixRMaj vrpWaypointJacobianToPack)
+   {
+      int startIndex = 6 * sequenceId;
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      relativeDesiredVRPPosition.checkReferenceFrameMatch(worldFrame);
+
+      double duration = time - timeOfRelativePosition;
+
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex + 0,
+                                 CoMTrajectoryPlannerTools.getVRPPositionFirstCoefficientTimeFunction()
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityFirstCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex + 1,
+                                 CoMTrajectoryPlannerTools.getVRPPositionSecondCoefficientTimeFunction()
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocitySecondCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex + 2,
+                                 CoMTrajectoryPlannerTools.getVRPPositionThirdCoefficientTimeFunction(omega, time)
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityThirdCoefficientTimeFunction(omega, time));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex + 3,
+                                 CoMTrajectoryPlannerTools.getVRPPositionFourthCoefficientTimeFunction(omega, time)
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityFourthCoefficientTimeFunction(time));
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex + 4,
+                                 CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(time)
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocityFifthCoefficientTimeFunction());
+      constraintMatrixToPack.set(constraintNumber,
+                                 startIndex + 5,
+                                 CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction()
+                                 - duration * CoMTrajectoryPlannerTools.getVRPVelocitySixthCoefficientTimeFunction());
+
+      vrpWaypointJacobianToPack.set(constraintNumber, vrpWaypointPositionIndex, 1.0);
+
+      xObjectiveMatrixToPack.set(vrpWaypointPositionIndex, 0, relativeDesiredVRPPosition.getX());
+      yObjectiveMatrixToPack.set(vrpWaypointPositionIndex, 0, relativeDesiredVRPPosition.getY());
+      zObjectiveMatrixToPack.set(vrpWaypointPositionIndex, 0, relativeDesiredVRPPosition.getZ());
+   }
+
+   /**
     * <p> Adds a constraint for the CoM trajectory to have an acceleration equal to gravity at time t.</p>
     * <p> Recall that the CoM acceleration is defined as </p>
     * d<sup>2</sup> / dt<sup>2</sup> x<sub>i</sub>(t<sub>i</sub>) = &omega;<sup>2</sup> c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> +
