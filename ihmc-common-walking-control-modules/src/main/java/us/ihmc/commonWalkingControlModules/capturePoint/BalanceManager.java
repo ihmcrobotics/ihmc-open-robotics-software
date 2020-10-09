@@ -395,6 +395,11 @@ public class BalanceManager
       }
    }
 
+   public void adjustFootstep(Footstep footstep)
+   {
+      copTrajectoryState.getFootstep(0).set(footstep);
+   }
+
    public void computeICPPlan()
    {
      computeICPPlanInternal(copTrajectory);
