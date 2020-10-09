@@ -80,11 +80,6 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactStateProviders.clear();
    }
 
-   private void reset()
-   {
-      contactStateProviders.clear();
-   }
-
    public void compute(CoPTrajectoryGeneratorState state)
    {
       contactStateProviders.clear();

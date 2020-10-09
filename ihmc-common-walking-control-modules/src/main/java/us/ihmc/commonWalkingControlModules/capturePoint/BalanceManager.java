@@ -754,8 +754,9 @@ public class BalanceManager
       centerOfMassPosition.set(centerOfMassPosition2d, 0.0);
 
       centerOfMassPosition.changeFrame(worldFrame);
-      // TODO
-      throw new RuntimeException("Reimplement me.");
+
+      // This tricks it to the current value.
+      copTrajectoryState.setInitialCoP(centerOfMassPosition);
    }
 
    public void setFinalTransferWeightDistribution(double weightDistribution)
