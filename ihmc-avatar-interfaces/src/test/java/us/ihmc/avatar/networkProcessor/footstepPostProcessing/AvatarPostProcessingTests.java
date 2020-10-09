@@ -445,7 +445,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
          stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       }
-      double simulationTime = 2.0 + stepTime * footstepDataListMessage.getFootstepDataList().size();
+      double simulationTime = 2.0 + 1.5 * stepTime * footstepDataListMessage.getFootstepDataList().size();
 
       boolean success =  drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
