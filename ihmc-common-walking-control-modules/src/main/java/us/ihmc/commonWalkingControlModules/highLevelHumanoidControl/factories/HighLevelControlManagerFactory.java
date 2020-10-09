@@ -70,7 +70,6 @@ public class HighLevelControlManagerFactory
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -110,7 +109,6 @@ public class HighLevelControlManagerFactory
    {
       this.walkingControllerParameters = walkingControllerParameters;
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
       // Transform weights and gains to their parameterized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
@@ -160,8 +158,6 @@ public class HighLevelControlManagerFactory
       balanceManager = new BalanceManager(controllerToolbox,
                                           walkingControllerParameters,
                                           copTrajectoryParameters,
-                                          capturePointPlannerParameters,
-                                          angularMomentumModifierParameters,
                                           registry);
       return balanceManager;
    }
