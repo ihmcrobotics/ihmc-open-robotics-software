@@ -209,7 +209,7 @@ public class BalanceManager
       copTrajectoryState.registerStateToSave(copParameters);
       copTrajectory = new WalkingCoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
-      flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
+      flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
