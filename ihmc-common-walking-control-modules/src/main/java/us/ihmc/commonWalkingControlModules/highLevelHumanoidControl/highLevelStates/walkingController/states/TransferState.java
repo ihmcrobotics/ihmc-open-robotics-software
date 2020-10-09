@@ -35,7 +35,6 @@ public abstract class TransferState extends WalkingState
    protected final FeetManager feetManager;
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint3D desiredCoM = new FramePoint3D();
 
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
@@ -196,9 +195,8 @@ public abstract class TransferState extends WalkingState
       double transferTime = walkingMessageHandler.getNextTransferTime();
       comHeightManager.transfer(transferFootPosition, transferTime, swingSide, extraToeOffHeight);
 
-      balanceManager.getFinalDesiredCoMPosition(desiredCoM);
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
-      transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
+      transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
