@@ -42,35 +42,37 @@ public class CoPTrajectoryParameters extends SaveableModuleState
 
    private static final int defaultNumberOfStepsToConsider = 3;
 
-   private final YoDouble minimumDistanceInsidePolygon;
+   protected final YoDouble minimumDistanceInsidePolygon;
 
-   private final YoDouble stepLengthToPutExitCoPOnToes;
-   private final YoDouble stepHeightToPutExitCoPOnToesSteppingDown;
-   private final YoDouble stepLengthToPutExitCoPOnToesSteppingDown;
+   protected final YoDouble stepLengthToPutExitCoPOnToes;
+   protected final YoDouble stepHeightToPutExitCoPOnToesSteppingDown;
+   protected final YoDouble stepLengthToPutExitCoPOnToesSteppingDown;
 
-   private final YoBoolean planWithExitCMPOnToes;
-   private final YoBoolean planWithExitCMPOnToesWhenSteppingDown;
+   protected final YoBoolean planWithExitCMPOnToes;
+   protected final YoBoolean planWithExitCMPOnToesWhenSteppingDown;
 
-   private final YoDouble entryCMPMinX;
-   private final YoDouble entryCMPMaxX;
+   protected final YoDouble entryCMPMinX;
+   protected final YoDouble entryCMPMaxX;
 
-   private final YoDouble ballCMPMinX;
-   private final YoDouble ballCMPMaxX;
+   protected final YoDouble ballCMPMinX;
+   protected final YoDouble ballCMPMaxX;
 
-   private final YoDouble exitCMPMinX;
-   private final YoDouble exitCMPMaxX;
+   protected final YoDouble exitCMPMinX;
+   protected final YoDouble exitCMPMaxX;
 
-   private final YoVector2D entryCMPOffset;
-   private final YoVector2D ballCMPOffset;
-   private final YoVector2D exitCMPOffset;
+   protected final YoVector2D entryCMPOffset;
+   protected final YoVector2D ballCMPOffset;
+   protected final YoVector2D exitCMPOffset;
 
-   private final YoDouble entryCMPLengthOffsetFactor;
-   private final YoDouble ballCMPLengthOffsetFactor;
-   private final YoDouble exitCMPLengthOffsetFactor;
+   protected final YoDouble entryCMPLengthOffsetFactor;
+   protected final YoDouble ballCMPLengthOffsetFactor;
+   protected final YoDouble exitCMPLengthOffsetFactor;
 
-   private final YoInteger numberOfStepsToConsider;
+   protected final YoInteger numberOfStepsToConsider;
 
-   public CoPTrajectoryParameters(YoRegistry registry)
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   public CoPTrajectoryParameters()
    {
       minimumDistanceInsidePolygon = new YoDouble("minimumDistanceInsidePolygon", registry);
       minimumDistanceInsidePolygon.set(defaultMinimumDistanceInsidePolygon);
@@ -138,6 +140,11 @@ public class CoPTrajectoryParameters extends SaveableModuleState
       registerDoubleToSave(ballCMPLengthOffsetFactor);
       registerDoubleToSave(exitCMPLengthOffsetFactor);
       registerIntegerToSave(numberOfStepsToConsider);
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 
    private final PlanForToeOffCalculator planForToeOffCalculator = new PlanForToeOffCalculator()

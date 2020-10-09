@@ -39,7 +39,9 @@ public class CoPTrajectoryGeneratorTest
       SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
-      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(new CoPTrajectoryParameters(registry),
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
+      registry.addChild(parameters.getRegistry());
+      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
                                                                                       CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
                                                                                       registry);
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
@@ -110,7 +112,8 @@ public class CoPTrajectoryGeneratorTest
    public static void main(String[] args)
    {
       YoRegistry registry = new YoRegistry("test");
-      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters(registry);
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
+      registry.addChild(parameters.getRegistry());
       WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
                                                                                       CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
                                                                                       registry);
