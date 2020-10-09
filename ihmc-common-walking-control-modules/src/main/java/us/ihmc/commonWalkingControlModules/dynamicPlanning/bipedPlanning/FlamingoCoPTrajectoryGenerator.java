@@ -33,11 +33,8 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final YoRegistry registry;
 
-   private final ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
-   private final FrameConvexPolygon2DBasics nextPolygon = new FrameConvexPolygon2D();
-   private final PoseReferenceFrame nextStepFrame;
    private final SideDependentList<PoseReferenceFrame> stepFrames = new SideDependentList<>();
 
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
@@ -51,12 +48,11 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private WaypointViewer viewer = null;
 
-   public FlamingoCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, ConvexPolygon2DReadOnly defaultSupportPolygon, YoRegistry parentRegistry)
+   public FlamingoCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, YoRegistry parentRegistry)
    {
       super(FlamingoCoPTrajectoryGenerator.class, parentRegistry);
 
       this.parameters = parameters;
-      this.defaultSupportPolygon.set(defaultSupportPolygon);
 
       registry = new YoRegistry(getClass().getSimpleName());
 
@@ -64,7 +60,6 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       {
          stepFrames.put(robotSide, new PoseReferenceFrame(robotSide.getLowerCaseName() + "StepFrame", ReferenceFrame.getWorldFrame()));
       }
-      nextStepFrame = new PoseReferenceFrame("nextStepFrame", ReferenceFrame.getWorldFrame());
 
       parentRegistry.addChild(registry);
       clear();
@@ -89,17 +84,6 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    {
       contactStateProviders.clear();
    }
-
-   public void set(Point2DReadOnly constantCop)
-   {
-      clear();
-
-      SettableContactStateProvider contactState = contactStateProviders.add();
-      contactState.getTimeInterval().setInterval(0.0, Double.POSITIVE_INFINITY);
-      contactState.setStartCopPosition(constantCop);
-      contactState.setEndCopPosition(constantCop);
-   }
-
 
    public void compute(CoPTrajectoryGeneratorState state)
    {
@@ -126,16 +110,9 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       PlanningFootstep footstep = state.getFootstep(0);
       PlanningTiming timings = state.getTiming(0);
       PlanningShiftFraction shiftFraction = state.getShiftFraction(0);
-      RobotSide swingSide = footstep.getRobotSide();
-      RobotSide supportSide = swingSide.getOppositeSide();
+      RobotSide supportSide = footstep.getRobotSide().getOppositeSide();
 
-      FrameConvexPolygon2DReadOnly previousPolygon = movingPolygonsInSole.get(swingSide);
-      FrameConvexPolygon2DReadOnly currentPolygon = movingPolygonsInSole.get(swingSide.getOppositeSide());
-
-      nextStepFrame.setPoseAndUpdate(footstep.getFootstepPose());
-      extractSupportPolygon(footstep, nextStepFrame, nextPolygon, defaultSupportPolygon);
-
-      computeEntryCoPPointLocation(tempPointForCoPCalculation, previousPolygon, nextPolygon, supportSide);
+      computeEntryCoPPointLocation(tempPointForCoPCalculation, movingPolygonsInSole.get(supportSide), supportSide);
       midfootCoP.interpolate(state.getInitialCoP(), tempPointForCoPCalculation, shiftFraction.getTransferWeightDistribution());
 
       contactStateProvider.setDuration(shiftFraction.getTransferSplitFraction() * timings.getTransferTime());
@@ -151,7 +128,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartFromEnd(previousContactState);
       contactStateProvider.setDuration(Double.POSITIVE_INFINITY);
-      tempPointForCoPCalculation.setIncludingFrame(currentPolygon.getCentroid());
+      tempPointForCoPCalculation.setIncludingFrame(movingPolygonsInSole.get(supportSide).getCentroid());
       tempPointForCoPCalculation.changeFrameAndProjectToXYPlane(worldFrame);
       contactStateProvider.setEndCopPosition(tempPointForCoPCalculation);
 
@@ -164,71 +141,18 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       return contactStateProviders;
    }
 
-   private void extractSupportPolygon(PlanningFootstep footstep,
-                                      ReferenceFrame stepFrame,
-                                      FrameConvexPolygon2DBasics footSupportPolygonToPack,
-                                      ConvexPolygon2DReadOnly defaultSupportPolygon)
-   {
-      if (footstep.hasPredictedContactPoints())
-      {
-         List<? extends Point2DReadOnly> predictedContactPoints = footstep.getPredictedContactPoints();
-
-         footSupportPolygonToPack.clear(stepFrame);
-         for (int i = 0; i < predictedContactPoints.size(); i++)
-            footSupportPolygonToPack.addVertex(predictedContactPoints.get(i));
-         footSupportPolygonToPack.update();
-      }
-      else
-      {
-         footSupportPolygonToPack.setIncludingFrame(stepFrame, defaultSupportPolygon);
-      }
-   }
-
    private void computeEntryCoPPointLocation(FramePoint2DBasics copLocationToPack,
-                                             FrameConvexPolygon2DReadOnly previousFootPolygon,
-                                             FrameConvexPolygon2DReadOnly footPolygon,
+                                             FrameConvexPolygon2DReadOnly supportPolygon,
                                              RobotSide supportSide)
    {
-      computeCoPLocation(copLocationToPack,
-                         parameters.getEntryCMPLengthOffsetFactor(),
-                         parameters.getEntryCMPOffset(),
-                         parameters.getEntryCMPMinX(),
-                         parameters.getEntryCMPMaxX(),
-                         footPolygon,
-                         previousFootPolygon,
-                         supportSide);
-   }
+      copLocationToPack.setIncludingFrame(supportPolygon.getCentroid());
 
-   private void computeCoPLocation(FramePoint2DBasics copLocationToPack,
-                                   double lengthOffsetFactor,
-                                   Vector2DReadOnly copOffset,
-                                   double minXOffset,
-                                   double maxXOffset,
-                                   FrameConvexPolygon2DReadOnly basePolygon,
-                                   FrameConvexPolygon2DReadOnly otherPolygon,
-                                   RobotSide supportSide)
-   {
-      // FIXME this should be done in the sole frame, not the world frame
-      copLocationToPack.setIncludingFrame(basePolygon.getCentroid());
-
-      double copXOffset = MathTools.clamp(copOffset.getX() + lengthOffsetFactor * getStepLength(otherPolygon, basePolygon), minXOffset, maxXOffset);
+      Vector2DReadOnly copOffset = parameters.getEntryCMPOffset();
+      double copXOffset = MathTools.clamp(copOffset.getX(), parameters.getEntryCMPMinX(), parameters.getEntryCMPMaxX());
       copLocationToPack.add(copXOffset, supportSide.negateIfLeftSide(copOffset.getY()));
 
-      constrainToPolygon(copLocationToPack, basePolygon, parameters.getMinimumDistanceInsidePolygon());
+      constrainToPolygon(copLocationToPack, supportPolygon, parameters.getMinimumDistanceInsidePolygon());
       copLocationToPack.changeFrameAndProjectToXYPlane(worldFrame);
-   }
-
-   private final FramePoint2D mostForwardPointOnOtherPolygon = new FramePoint2D();
-
-   private double getStepLength(FrameConvexPolygon2DReadOnly otherPolygon, FrameConvexPolygon2DReadOnly basePolygon)
-   {
-      mostForwardPointOnOtherPolygon.setIncludingFrame(otherPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(otherPolygon,
-                                                                                                                         true,
-                                                                                                                         Bound.MAX,
-                                                                                                                         Bound.MAX)));
-      mostForwardPointOnOtherPolygon.changeFrameAndProjectToXYPlane(basePolygon.getReferenceFrame());
-
-      return mostForwardPointOnOtherPolygon.getX() - basePolygon.getMaxX();
    }
 
    /**
