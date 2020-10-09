@@ -6,8 +6,6 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -18,28 +16,23 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -156,7 +149,8 @@ public class BalanceManager
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
    private final CoPTrajectoryGeneratorState copTrajectoryState;
-   private final CoPTrajectoryGenerator copTrajectory;
+   private final WalkingCoPTrajectoryGenerator copTrajectory;
+   private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
    private final CoMTrajectoryPlannerInterface comTrajectoryPlanner;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -213,8 +207,10 @@ public class BalanceManager
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       copTrajectoryState = new CoPTrajectoryGeneratorState(registry);
       copTrajectoryState.registerStateToSave(copParameters);
-      copTrajectory = new CoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
+      copTrajectory = new WalkingCoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
+      flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copParameters, defaultSupportPolygon, registry);
+      flamingoCopTrajectory.registerState(copTrajectoryState);
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -223,7 +219,7 @@ public class BalanceManager
       if (yoGraphicsListRegistry != null)
       {
          ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
-         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
+//         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
@@ -330,7 +326,7 @@ public class BalanceManager
       else
          pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
-      https://ihmcrobotics.slack.com/archives/G9W48LXA8      // --- compute adjusted desired capture point
+      // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
@@ -399,6 +395,16 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
+     computeICPPlanInternal(copTrajectory);
+   }
+
+   public void computeFlamingoStateICPPlan()
+   {
+      computeICPPlanInternal(flamingoCopTrajectory);
+   }
+
+   private void computeICPPlanInternal(CoPTrajectoryGenerator copTrajectory)
+   {
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -428,8 +434,11 @@ public class BalanceManager
          icpPlannerDone.set(timeInSupportSequence.getValue() >= currentTiming.getStepTime());
       else
          icpPlannerDone.set(timeInSupportSequence.getValue() >= currentTiming.getTransferTime());
-   }
 
+      // TODO
+      //      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      //      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
+   }
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
@@ -495,9 +504,9 @@ public class BalanceManager
       return yoDesiredCapturePoint;
    }
 
-   public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
+   public FrameVector2DReadOnly getDesiredICPVelocity()
    {
-      desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
+      return yoDesiredICPVelocity;
    }
 
    public void getFinalDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
@@ -505,14 +514,9 @@ public class BalanceManager
       desiredCoMPositionToPack.set(yoFinalDesiredCoM);
    }
 
-   public void getDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
+   public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
-      desiredCoMPositionToPack.set(yoDesiredCoMPosition);
-   }
-
-   public void getDesiredCoMVelocity(FixedFrameVector2DBasics desiredCoMVelocityToPack)
-   {
-      desiredCoMVelocityToPack.set(yoDesiredCoMVelocity);
+      return yoDesiredCoMVelocity;
    }
 
    public FramePoint3DReadOnly getNextExitCMP()
@@ -767,17 +771,6 @@ public class BalanceManager
       copTrajectoryState.setFinalTransferDuration(finalTransferDuration);
    }
 
-   /**
-    * Update the basics: capture point, omega0, and the support polygons.
-    */
-   public void update()
-   {
-      computeICPPlan();
-      // TODO
-//      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-//      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
-   }
-
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
@@ -795,6 +788,7 @@ public class BalanceManager
       return capturabilityBasedStatus;
    }
 
+   // FIXME was this ever used?
    public void updateCurrentICPPlan()
    {
    }

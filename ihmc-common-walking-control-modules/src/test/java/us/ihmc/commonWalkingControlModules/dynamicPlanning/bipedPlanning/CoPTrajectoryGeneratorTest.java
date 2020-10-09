@@ -7,7 +7,6 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -40,9 +39,9 @@ public class CoPTrajectoryGeneratorTest
       SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
       SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
 
-      CoPTrajectoryGenerator copTrajectory = new CoPTrajectoryGenerator(new CoPTrajectoryParameters(registry),
-                                                                        CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
-                                                                        registry);
+      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(new CoPTrajectoryParameters(registry),
+                                                                                      CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
+                                                                                      registry);
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
       state.setInitialCoP(new FramePoint2D());
 
@@ -112,9 +111,9 @@ public class CoPTrajectoryGeneratorTest
    {
       YoRegistry registry = new YoRegistry("test");
       CoPTrajectoryParameters parameters = new CoPTrajectoryParameters(registry);
-      CoPTrajectoryGenerator copTrajectory = new CoPTrajectoryGenerator(parameters,
-                                                                        CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
-                                                                        registry);
+      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
+                                                                                      CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
+                                                                                      registry);
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(copTrajectory.getYoRegistry());
       copTrajectory.registerState(state);
       state.registerStateToSave(parameters);

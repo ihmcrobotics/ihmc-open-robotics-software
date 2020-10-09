@@ -70,6 +70,8 @@ public class FlamingoStanceState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeFlamingoStateICPPlan();
+
       super.doAction(timeInState);
 
       if (loadFoot.getBooleanValue() && loadFootStartTime.isNaN())
