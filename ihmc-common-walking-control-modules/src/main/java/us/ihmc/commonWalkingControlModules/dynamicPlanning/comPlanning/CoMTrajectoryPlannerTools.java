@@ -146,6 +146,47 @@ public class CoMTrajectoryPlannerTools
    }
 
    /**
+    * <p> Sets the continuity constraint on the initial CoM velocity. </p>
+    * <p> This constraint should be used for the initial velocity of the center of mass to properly initialize the trajectory. </p>
+    * <p> Recall that the equation for the center of mass is defined by </p>
+    * <p>
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * </p>
+    * <p>
+    *    This constraint defines
+    * </p>
+    * <p>
+    *    x<sub>0</sub>(0) = x<sub>d</sub>,
+    * </p>
+    * <p>
+    *    substituting in the coefficients into the constraint matrix.
+    * </p>
+    * @param centerOfMassVelocityForConstraint x<sub>d</sub> in the above equations
+    */
+   public static void addCoMVelocityConstraint(FrameVector3DReadOnly centerOfMassVelocityForConstraint, double omega, double time, int sequenceId, int rowStart,
+                                               DMatrixRMaj constraintMatrixToPack, DMatrixRMaj xObjectiveMatrixToPack,
+                                               DMatrixRMaj yObjectiveMatrixToPack, DMatrixRMaj zObjectiveMatrixToPack)
+   {
+      centerOfMassVelocityForConstraint.checkReferenceFrameMatch(worldFrame);
+
+      time = Math.min(time, sufficientlyLongTime);
+
+      int colStart = 6 * sequenceId;
+      constraintMatrixToPack.set(rowStart, colStart, getCoMVelocityFirstCoefficientTimeFunction(omega, time));
+      constraintMatrixToPack.set(rowStart, colStart + 1, getCoMVelocitySecondCoefficientTimeFunction(omega, time));
+      constraintMatrixToPack.set(rowStart, colStart + 2, getCoMVelocityThirdCoefficientTimeFunction(time));
+      constraintMatrixToPack.set(rowStart, colStart + 3, getCoMVelocityFourthCoefficientTimeFunction(time));
+      constraintMatrixToPack.set(rowStart, colStart + 4, getCoMVelocityFifthCoefficientTimeFunction());
+      constraintMatrixToPack.set(rowStart, colStart + 5, getCoMVelocitySixthCoefficientTimeFunction());
+
+      xObjectiveMatrixToPack.add(rowStart, 0, centerOfMassVelocityForConstraint.getX());
+      yObjectiveMatrixToPack.add(rowStart, 0, centerOfMassVelocityForConstraint.getY());
+      zObjectiveMatrixToPack.add(rowStart, 0, centerOfMassVelocityForConstraint.getZ());
+   }
+
+   /**
     * <p> Sets a constraint on the desired DCM position. This constraint is useful for constraining the terminal location of the DCM trajectory. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>

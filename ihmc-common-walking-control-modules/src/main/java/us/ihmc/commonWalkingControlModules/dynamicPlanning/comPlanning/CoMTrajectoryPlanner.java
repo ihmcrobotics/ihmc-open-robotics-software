@@ -244,6 +244,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       // set initial constraint
       setCoMPositionConstraint(currentCoMPosition);
+//      setCoMVelocityConstraint(currentCoMVelocity); // Todo when do I include this?
       setDynamicsInitialConstraint(contactSequence, 0);
 
       // add transition continuity constraints
@@ -505,6 +506,33 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private void setCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
       CoMTrajectoryPlannerTools.addCoMPositionConstraint(centerOfMassLocationForConstraint, omega.getValue(), 0.0, 0, numberOfConstraints,
+                                                         coefficientMultipliers, xConstants, yConstants, zConstants);
+      numberOfConstraints++;
+   }
+
+   /**
+    * <p> Sets the continuity constraint on the initial CoM velocity.
+    * <p> This constraint should be used for the initial velocity of the center of mass to properly initialize the trajectory. </p>
+    * <p> Recall that the equation for the center of mass is defined by </p>
+    * <p>
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
+    * </p>
+    * <p>
+    *    This constraint defines
+    * </p>
+    * <p>
+    *    x<sub>0</sub>(0) = x<sub>d</sub>,
+    * </p>
+    * <p>
+    *    substituting in the coefficients into the constraint matrix.
+    * </p>
+    * @param centerOfMassVelocityForConstraint x<sub>d</sub> in the above equations
+    */
+   private void setCoMVelocityConstraint(FrameVector3DReadOnly centerOfMassVelocityForConstraint)
+   {
+      CoMTrajectoryPlannerTools.addCoMVelocityConstraint(centerOfMassVelocityForConstraint, omega.getValue(), 0.0, 0, numberOfConstraints,
                                                          coefficientMultipliers, xConstants, yConstants, zConstants);
       numberOfConstraints++;
    }
