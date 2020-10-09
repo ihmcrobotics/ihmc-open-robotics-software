@@ -4,7 +4,7 @@ import javafx.scene.Group;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.robotics.robotDescription.RobotDescription;

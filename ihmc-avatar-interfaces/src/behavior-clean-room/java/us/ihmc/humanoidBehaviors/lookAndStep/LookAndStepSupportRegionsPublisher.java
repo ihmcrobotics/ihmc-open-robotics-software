@@ -69,7 +69,7 @@ public class LookAndStepSupportRegionsPublisher
 
    public void queuePublish()
    {
-      executor.queueExecution(this::evaluateAndRun);
+      executor.submitTask(this::evaluateAndRun);
    }
 
    public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)

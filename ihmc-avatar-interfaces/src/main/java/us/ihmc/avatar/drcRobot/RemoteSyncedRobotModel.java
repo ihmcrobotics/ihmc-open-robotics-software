@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.avatar.drcRobot;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

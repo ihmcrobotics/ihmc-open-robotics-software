@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -72,8 +72,8 @@ public class LookAndStepLocalizationTask
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-         bodyPathPlanInput.addCallback(data -> executor.queueExecution(this::snapshotAndRun));
-         swingSleepCompleteInput.addCallback(() -> executor.queueExecution(this::snapshotAndRun));
+         bodyPathPlanInput.addCallback(data -> executor.submitTask(this::snapshotAndRun));
+         swingSleepCompleteInput.addCallback(() -> executor.submitTask(this::snapshotAndRun));
       }
 
       public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)

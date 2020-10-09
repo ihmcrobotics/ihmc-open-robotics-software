@@ -36,7 +36,7 @@ public class JavaFXReactiveSlider
          skipNextChange = false;
          return;
       }
-      executor.queueExecution(() -> waitThenAct(newValue));
+      executor.submitTask(() -> waitThenAct(newValue));
    }
 
    private void waitThenAct(Number newValue)

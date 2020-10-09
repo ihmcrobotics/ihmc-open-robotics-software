@@ -93,7 +93,7 @@ public class ROS2Tools
    public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<CompressedImage> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(CompressedImage.class).withSuffix("video");
+   public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD
@@ -337,10 +337,20 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ExceptionHandler exceptionHandler)
    {
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
+                                                     Class<T> messageType,
+                                                     String topicName,
+                                                     NewMessageListener<T> newMessageListener,
+                                                     ROS2QosProfile qosProfile,
+                                                     ExceptionHandler exceptionHandler)
+   {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
+         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, qosProfile);
       }
       catch (IOException e)
       {

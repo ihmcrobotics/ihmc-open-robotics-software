@@ -23,7 +23,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
@@ -110,9 +110,9 @@ public class LookAndStepFootstepPlanningTask
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-         localizationResultInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         planarRegionsInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.queueExecution(this::evaluateAndRun));
+         localizationResultInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         planarRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         footstepCompletedInput.addCallback(() -> executor.submitTask(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
