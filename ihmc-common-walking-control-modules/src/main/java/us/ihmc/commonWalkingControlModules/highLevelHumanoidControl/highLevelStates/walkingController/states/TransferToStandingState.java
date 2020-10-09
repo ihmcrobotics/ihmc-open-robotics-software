@@ -70,6 +70,8 @@ public class TransferToStandingState extends WalkingState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeICPPlan();
+
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }

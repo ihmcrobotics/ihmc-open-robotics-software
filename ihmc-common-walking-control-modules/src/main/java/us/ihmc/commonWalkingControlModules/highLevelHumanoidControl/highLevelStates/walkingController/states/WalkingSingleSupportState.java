@@ -51,7 +51,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
-   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -116,6 +115,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeICPPlan();
+
       super.doAction(timeInState);
 
       boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
@@ -364,9 +365,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D(worldFrame);
-   private final FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
    private final FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-   private final FramePoint2D desiredICP = new FramePoint2D(worldFrame);
    private final FramePoint2D currentICP = new FramePoint2D(worldFrame);
 
    public void switchToToeOffIfPossible(RobotSide supportSide)
@@ -376,20 +375,22 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
-         desiredCMP.setIncludingFrame(balanceManager.getDesiredCMP());
-         desiredICP.setIncludingFrame(balanceManager.getDesiredICP());
          currentICP.setIncludingFrame(balanceManager.getCapturePoint());
-         nextExitCMP.setIncludingFrame(balanceManager.getNextExitCMP());
 
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
-         feetManager.updateToeOffStatusSingleSupport(nextFootstep, nextExitCMP, desiredCMP, desiredCoP, desiredICP, currentICP);
+         feetManager.updateToeOffStatusSingleSupport(nextFootstep,
+                                                     balanceManager.getNextExitCMP(),
+                                                     balanceManager.getDesiredCMP(),
+                                                     desiredCoP,
+                                                     balanceManager.getDesiredICP(),
+                                                     currentICP);
 
          if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
-            feetManager.requestPointToeOff(supportSide, nextExitCMP, filteredDesiredCoP);
+            feetManager.requestPointToeOff(supportSide, balanceManager.getNextExitCMP(), filteredDesiredCoP);
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
-            feetManager.requestLineToeOff(supportSide, nextExitCMP, filteredDesiredCoP);
+            feetManager.requestLineToeOff(supportSide, balanceManager.getNextExitCMP(), filteredDesiredCoP);
       }
    }
 

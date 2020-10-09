@@ -64,9 +64,4 @@ public class WaypointViewer
          copEndPoints.get(i).setToNaN();
       }
    }
-
-   public void updatePolygons()
-   {
-
-   }
 }

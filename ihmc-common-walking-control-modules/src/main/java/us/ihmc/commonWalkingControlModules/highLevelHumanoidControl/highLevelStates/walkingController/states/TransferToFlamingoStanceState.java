@@ -32,6 +32,8 @@ public class TransferToFlamingoStanceState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeFlamingoStateICPPlan();
+
       switchToToeOffIfPossible();
       super.doAction(timeInState);
    }

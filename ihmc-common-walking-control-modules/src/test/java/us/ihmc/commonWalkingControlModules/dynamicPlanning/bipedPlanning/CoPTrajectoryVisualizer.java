@@ -14,7 +14,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -24,7 +23,7 @@ import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVi
 
 public class CoPTrajectoryVisualizer
 {
-   public static void visualize(CoPTrajectoryGenerator copTrajectoryGenerator)
+   public static void visualize(WalkingCoPTrajectoryGenerator copTrajectoryGenerator)
    {
       YoRegistry registry = new YoRegistry("visualizer");
       registry.addChild(copTrajectoryGenerator.getYoRegistry());
