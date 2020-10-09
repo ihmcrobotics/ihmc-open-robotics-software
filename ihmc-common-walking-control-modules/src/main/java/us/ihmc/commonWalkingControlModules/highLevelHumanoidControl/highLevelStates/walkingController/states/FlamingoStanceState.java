@@ -148,6 +148,7 @@ public class FlamingoStanceState extends SingleSupportState
       double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
       double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
       footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
+      footstepShiftFractions.setTransferWeightDistribution(0.5);
 
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);

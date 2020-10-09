@@ -69,6 +69,7 @@ public class TransferToFlamingoStanceState extends TransferState
       double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
       double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
       footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
+      footstepShiftFractions.setTransferWeightDistribution(0.5);
 
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
