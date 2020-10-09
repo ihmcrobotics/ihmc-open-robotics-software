@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
@@ -76,7 +76,7 @@ public class LookAndStepSteppingTask
          this.replanFootstepsOutput = replanFootstepsOutput;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
-         footstepPlanEtcInput.addCallback(data -> executor.queueExecution(this::evaluateAndRun));
+         footstepPlanEtcInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
          suppressor.addCondition("Not in robot motion state", () -> !behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
