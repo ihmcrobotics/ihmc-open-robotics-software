@@ -123,8 +123,8 @@ public class FootstepNodeCheckerTest
       }
       else
       {
-         Assert.assertFalse(checker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
-      }
+      }         Assert.assertFalse(checker.isNodeValid(step2, step1, step0));
+
    }
 
    @Test
@@ -202,7 +202,7 @@ public class FootstepNodeCheckerTest
       }
       else
       {
-         Assert.assertFalse(checker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         Assert.assertFalse(checker.isNodeValid(step2, step1, step0));
       }
    }
 
@@ -223,7 +223,7 @@ public class FootstepNodeCheckerTest
       snapper.addSnapData(step1, FootstepNodeSnapData.identityData());
       snapper.addSnapData(step2, FootstepNodeSnapData.identityData());
 
-      Assert.assertTrue(checker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+      Assert.assertTrue(checker.isNodeValid(step2, step1, step0));
    }
 
    @Test
@@ -239,7 +239,7 @@ public class FootstepNodeCheckerTest
       snapper.addSnapData(step0, FootstepNodeSnapData.identityData());
       snapper.addSnapData(step1, FootstepNodeSnapData.identityData());
 
-      Assert.assertTrue(checker.isNodeValid(new FootstanceNode(step1, step0), null));
+      Assert.assertTrue(checker.isNodeValid(step1, step0, null));
    }
 
    @Test
@@ -247,21 +247,17 @@ public class FootstepNodeCheckerTest
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeChecker checker = new FootstepNodeChecker(parameters, footPolygons, new TestSnapper(), registry);
-
       FootstepNode leftNode0 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
       FootstepNode leftNode1 = new FootstepNode(5.0, 0.0, 2.0, RobotSide.LEFT);
       FootstepNode rightNode0 = new FootstepNode(-1.0, 0.0, -2.5, RobotSide.RIGHT);
       FootstepNode rightNode1 = new FootstepNode(0.0, 2.0, 1.0, RobotSide.RIGHT);
 
-      FootstanceNode stance0 = new FootstanceNode(leftNode0, rightNode0);
-      FootstanceNode stance1 = new FootstanceNode(leftNode0, rightNode1);
-      FootstanceNode stance2 = new FootstanceNode(rightNode0, leftNode0);
-      FootstanceNode stance3 = new FootstanceNode(rightNode1, leftNode1);
-
-      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(stance0, stance1));
-      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(stance1, stance0));
-      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(stance2, stance3));
-      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(stance3, stance2));
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(leftNode0, leftNode0, null));
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(leftNode0, leftNode1, null));
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(rightNode0, rightNode0, null));
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(rightNode0, rightNode1, null));
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(leftNode0, rightNode0, rightNode1));
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(rightNode0, leftNode0, leftNode0));
    }
 
    @Test
@@ -301,7 +297,7 @@ public class FootstepNodeCheckerTest
       snapTransform1.getTranslation().setZ(parameters.getMaximumAverageStepZ() + 1.0e-10);
       snapper.addSnapData(step1, new FootstepNodeSnapData(snapTransform0));
       snapper.addSnapData(step2, new FootstepNodeSnapData(snapTransform1));
-      Assert.assertFalse(checker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+      Assert.assertFalse(checker.isNodeValid(step2, step1, step0));
 
       // too low step
       // if we add different step-up vs step-down heights this will need to be adjusted
@@ -309,13 +305,13 @@ public class FootstepNodeCheckerTest
       RigidBodyTransform snapTransform2 = new RigidBodyTransform();
       snapTransform2.getTranslation().setZ(-parameters.getMaximumAverageStepZ() - 1.0e-10);
       snapper.addSnapData(step3, new FootstepNodeSnapData(snapTransform2));
-      Assert.assertFalse(checker.isNodeValid(new FootstanceNode(step3, step1), new FootstanceNode(step1, step0)));
+      Assert.assertFalse(checker.isNodeValid(step3, step1, step0));
 
       // good step
       FootstepNode step4 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform3 = new RigidBodyTransform();
       snapper.addSnapData(step4, new FootstepNodeSnapData(snapTransform3));
-      Assert.assertTrue(checker.isNodeValid(new FootstanceNode(step4, step1), new FootstanceNode(step1, step0)));
+      Assert.assertTrue(checker.isNodeValid(step4, step1, step0));
    }
 
    @Test
@@ -350,7 +346,7 @@ public class FootstepNodeCheckerTest
 
       // sufficient foothold
       snapper.addSnapData(step2, new FootstepNodeSnapData(snapTransform0, goodFoothold));
-      Assert.assertTrue(checker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+      Assert.assertTrue(checker.isNodeValid(step2, step1, step0));
 
       footholdArea = footArea * minFoothold * 0.99;
       side = Math.sqrt(footholdArea);
@@ -363,7 +359,7 @@ public class FootstepNodeCheckerTest
 
       // too small foothold
       snapper.addSnapData(step2, new FootstepNodeSnapData(snapTransform0, badFoothold));
-      Assert.assertFalse(checker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+      Assert.assertFalse(checker.isNodeValid(step2, step1, step0));
    }
 
    private static final double barelyTooSteepEpsilon = 1.0e-5;
@@ -444,7 +440,7 @@ public class FootstepNodeCheckerTest
       FootstepNode step2 = new FootstepNode(0.0, -0.1, 0.0, RobotSide.RIGHT);
 
       // TODO add getter for rejection reason or retreive from
-      assertTrue(nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+      assertTrue(nodeChecker.isNodeValid(step2, step1, step0));
 //      assertEquals(null, nodeChecker.getRejectionReason());
 
       double rotationAngle;
@@ -458,7 +454,7 @@ public class FootstepNodeCheckerTest
          nodeChecker.setPlanarRegions(planarRegionsList);
          snapper.setPlanarRegions(planarRegionsList);
 
-         Assert.assertTrue(nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         Assert.assertTrue(nodeChecker.isNodeValid(step2, step1, step0));
 //         assertEquals(null, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
@@ -466,7 +462,7 @@ public class FootstepNodeCheckerTest
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
-         Assert.assertTrue(nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         Assert.assertTrue(nodeChecker.isNodeValid(step2, step1, step0));
 //         assertEquals(null, registry.getRejectionReason());
       }
 
@@ -478,7 +474,7 @@ public class FootstepNodeCheckerTest
          snapper.setPlanarRegions(planarRegionsList);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
-         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
@@ -486,7 +482,7 @@ public class FootstepNodeCheckerTest
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
-         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
       }
 
@@ -498,7 +494,7 @@ public class FootstepNodeCheckerTest
          nodeChecker.setPlanarRegions(planarRegionsList);
          snapper.setPlanarRegions(planarRegionsList);
 
-         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
 
          transformToWorld.setIdentity();
@@ -506,7 +502,7 @@ public class FootstepNodeCheckerTest
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
 
-         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+         assertFalse("rotation = " + rotationAngle, nodeChecker.isNodeValid(step2, step1, step0));
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
       }
 
@@ -531,15 +527,15 @@ public class FootstepNodeCheckerTest
          if (Math.abs(angleFromFlat) > parameters.getMinimumSurfaceInclineRadians())
          {
             String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinimumSurfaceInclineRadians();
-            assertFalse(message, nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
+            assertFalse(message, nodeChecker.isNodeValid(step2, step1, step0));
 //            boolean correctRejection = BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP == registry.getRejectionReason() ||
 //                                       BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP == registry.getRejectionReason();
 //            assertTrue(message, correctRejection);
          }
          else
          {
-            assertTrue(nodeChecker.isNodeValid(new FootstanceNode(step2, step1), new FootstanceNode(step1, step0)));
-//            assertEquals(null, registry.getRejectionReason());
+            assertTrue(nodeChecker.isNodeValid(step2, step1, step0));
+            //            assertEquals(null, registry.getRejectionReason());
          }
       }
    }
@@ -587,7 +583,7 @@ public class FootstepNodeCheckerTest
       checker.setPlanarRegions(regions);
       snapper.initialize();
       snapper.addSnapData(step0, new FootstepNodeSnapData(new RigidBodyTransform()));
-      boolean valid = checker.isNodeValid(new FootstanceNode(step1, step0), null);
+      boolean valid = checker.isNodeValid(step1, step0, null);
       System.out.println(valid);
 
       // test just too little area along x
@@ -603,7 +599,7 @@ public class FootstepNodeCheckerTest
       checker.setPlanarRegions(regions);
       snapper.initialize();
       snapper.addSnapData(step0, new FootstepNodeSnapData(new RigidBodyTransform()));
-      valid = checker.isNodeValid(new FootstanceNode(step1, step0), null);
+      valid = checker.isNodeValid(step1, step0, null);
       System.out.println(valid);
 
       // test just too little area along y
@@ -619,7 +615,7 @@ public class FootstepNodeCheckerTest
       checker.setPlanarRegions(regions);
       snapper.initialize();
       snapper.addSnapData(step0, new FootstepNodeSnapData(new RigidBodyTransform()));
-      valid = checker.isNodeValid(new FootstanceNode(step1, step0), null);
+      valid = checker.isNodeValid(step1, step0, null);
       System.out.println(valid);
    }
 

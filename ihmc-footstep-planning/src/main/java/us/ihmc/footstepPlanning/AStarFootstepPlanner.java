@@ -10,7 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.FootstepCostCalculator;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -80,13 +80,13 @@ public class AStarFootstepPlanner
       this.snapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
       this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, registry);
-      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder, registry);
-      this.expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, idealStepCalculator::computeIdealNode, footPolygons);
+      this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
+      this.expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, registry);
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealNode, distanceAndYawHeuristics::compute, footPolygons, registry);
+      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
 
-      this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
+      this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, footstepPlanner, distanceAndYawHeuristics);
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();

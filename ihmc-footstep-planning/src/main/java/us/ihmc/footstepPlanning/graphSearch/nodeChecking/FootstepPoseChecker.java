@@ -194,25 +194,22 @@ public class FootstepPoseChecker
       return null;
    }
 
-   void setApproximateStepDimensions(FootstanceNode candidateNode)
+   void setApproximateStepDimensions(FootstepNode candidateStep, FootstepNode stanceStep)
    {
-      if (candidateNode.getStanceNode() == null)
+      if (candidateStep == null)
       {
          return;
       }
 
-      FootstepNode stanceNode = candidateNode.getStanceNode();
-      FootstepNode swingNode = candidateNode.getSwingNode();
+      double dx = candidateStep.getX() - stanceStep.getX();
+      double dy = candidateStep.getY() - stanceStep.getY();
 
-      double dx = swingNode.getX() - stanceNode.getX();
-      double dy = swingNode.getY() - stanceNode.getY();
+      double stepLength = dx * Math.cos(stanceStep.getYaw()) + dy * Math.sin(stanceStep.getYaw());
+      double stepWidth = - dx * Math.sin(stanceStep.getYaw()) + dy * Math.cos(stanceStep.getYaw());
+      stepWidth = stanceStep.getRobotSide().negateIfLeftSide(stepWidth);
 
-      double stepLength = dx * Math.cos(stanceNode.getYaw()) + dy * Math.sin(stanceNode.getYaw());
-      double stepWidth = - dx * Math.sin(stanceNode.getYaw()) + dy * Math.cos(stanceNode.getYaw());
-      stepWidth = stanceNode.getRobotSide().negateIfLeftSide(stepWidth);
-
-      double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(swingNode.getYaw(), stanceNode.getYaw());
-      stepYaw = stanceNode.getRobotSide().negateIfLeftSide(stepYaw);
+      double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStep.getYaw(), stanceStep.getYaw());
+      stepYaw = stanceStep.getRobotSide().negateIfLeftSide(stepYaw);
 
       this.stepLength.set(stepLength);
       this.stepWidth.set(stepWidth);

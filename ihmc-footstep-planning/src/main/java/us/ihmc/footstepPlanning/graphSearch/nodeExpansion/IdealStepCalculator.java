@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -22,17 +23,17 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.HashMap;
 import java.util.function.BiPredicate;
 
-public class IdealStepCalculator
+public class IdealStepCalculator implements IdealStepCalculatorInterface
 {
    // TODO extract these to parameters once they're stable
    private static final double idealStepLengthWhenUpOrDownMultiplier = 0.7;
    private static final double maxDistanceAdjustmentTowardsPath = 0.15;
    private static final double maxYawAdjustmentTowardsPath = Math.toRadians(20.0);
 
-   private final HashMap<FootstanceNode, FootstanceNode> idealStepMap = new HashMap<>();
+   private final HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private final BiPredicate<FootstanceNode, FootstanceNode> nodeChecker;
+   private final FootstepNodeCheckerInterface nodeChecker;
 
    private SideDependentList<FootstepNode> goalNodes;
    private PlanarRegionsList planarRegionsList;
@@ -53,7 +54,7 @@ public class IdealStepCalculator
    private double pathLength;
 
    public IdealStepCalculator(FootstepPlannerParametersReadOnly parameters,
-                              BiPredicate<FootstanceNode, FootstanceNode> nodeChecker,
+                              FootstepNodeCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                               YoRegistry registry)
    {
@@ -166,7 +167,8 @@ public class IdealStepCalculator
       this.planarRegionsList = planarRegionsList;
    }
 
-   public FootstanceNode computeIdealNode(FootstanceNode stanceNode)
+   @Override
+   public FootstepNode computeIdealStep(FootstepNode stanceNode, FootstepNode startOfSwing)
    {
       return idealStepMap.computeIfAbsent(stanceNode, this::computeIdealStanceInternal);
    }
@@ -176,25 +178,16 @@ public class IdealStepCalculator
       return planarRegionsList == null || planarRegionsList.isEmpty();
    }
 
-   private FootstanceNode computeIdealStanceInternal(FootstanceNode node)
+   private FootstepNode computeIdealStanceInternal(FootstepNode stanceNode)
    {
-      FootstepNode stanceNode = node.getStanceNode();
       boolean attemptSquareUp = attemptSquareUp(stanceNode);
 
       // If goal node is reachable, it's the ideal step
       FootstepNode goalNode = goalNodes.get(stanceNode.getRobotSide().getOppositeSide());
-      FootstanceNode goalStanceNode = new FootstanceNode(goalNode, stanceNode);
-      if (!flatGroundMode() && nodeChecker.test(goalStanceNode, node) && !attemptSquareUp)
+      if (!flatGroundMode() && nodeChecker.isNodeValid(goalNode, stanceNode, null) && !attemptSquareUp)
       {
-         return goalStanceNode;
+         return goalNode;
       }
-
-      return new FootstanceNode(computeIdealStepInternal(node, attemptSquareUp), stanceNode);
-   }
-
-   private FootstepNode computeIdealStepInternal(FootstanceNode node, boolean attemptSquareUp)
-   {
-      FootstepNode stanceNode = node.getStanceNode();
 
       // Square up if requested
       Point2D midFootPoint = stanceNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());

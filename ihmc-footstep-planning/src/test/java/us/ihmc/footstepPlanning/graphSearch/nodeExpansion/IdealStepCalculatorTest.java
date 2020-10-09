@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstanceNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
@@ -29,7 +30,7 @@ public class IdealStepCalculatorTest
       footstepPlannerParameters.setIdealFootstepWidth(0.3);
       footstepPlannerParameters.setIdealFootstepLength(0.4);
 
-      BiPredicate<FootstanceNode, FootstanceNode> checker = (firstStance, secondStance) -> true;
+      FootstepNodeCheckerInterface checker = (touchdown, stance, startOfSwing) -> true;
       WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
       double pathLength = 20.0;
@@ -65,12 +66,11 @@ public class IdealStepCalculatorTest
 
          FootstepNode testStanceNode = new FootstepNode(startX, 0.5 * side.negateIfRightSide(idealStepWidth), 0.0, side);
          FootstepNode testSwingNode = new FootstepNode(0.0, 0.0, 0.0, side.getOppositeSide());
-         FootstanceNode node = new FootstanceNode(testStanceNode, testSwingNode);
 
-         FootstanceNode idealStep = idealStepCalculator.computeIdealNode(node);
+         FootstepNode idealStep = idealStepCalculator.computeIdealStep(testStanceNode, testSwingNode);
 
-         double stepLength = idealStep.getStanceNode().getX() - node.getStanceNode().getX();
-         double stepWidth = side.negateIfLeftSide(idealStep.getStanceNode().getY() - node.getStanceNode().getY());
+         double stepLength = idealStep.getX() - testStanceNode.getX();
+         double stepWidth = side.negateIfLeftSide(idealStep.getY() - testStanceNode.getY());
 
          Assertions.assertTrue(MathTools.epsilonEquals(stepLength, idealStepLength, 1e-10));
          Assertions.assertTrue(MathTools.epsilonEquals(stepWidth, idealStepWidth, 1e-10));

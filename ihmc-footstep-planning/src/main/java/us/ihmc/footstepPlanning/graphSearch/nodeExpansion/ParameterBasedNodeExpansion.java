@@ -17,13 +17,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
    private final List<FootstanceNode> fullExpansion = new ArrayList<>();
    private final FootstepPlannerParametersReadOnly parameters;
-   private final UnaryOperator<FootstanceNode> idealStepSupplier;
+   private final IdealStepCalculatorInterface idealStepCalculator;
    private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
    private final HashMap<FootstanceNode, PartialExpansionManager> expansionManagers = new HashMap<>();
 
@@ -39,10 +38,10 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private final TIntArrayList xyExpansionMask = new TIntArrayList();
    private final TIntArrayList yawExpansionMask = new TIntArrayList();
 
-   public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters, UnaryOperator<FootstanceNode> idealStepSupplier, SideDependentList<ConvexPolygon2D> footPolygons)
+   public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters, IdealStepCalculatorInterface idealStepCalculator, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
-      this.idealStepSupplier = idealStepSupplier;
+      this.idealStepCalculator = idealStepCalculator;
       this.footPolygons = footPolygons;
 
       fillExpansionMask();
@@ -145,56 +144,56 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             fullExpansionToPack.add(childNode);
       }
 
-      if (idealStepSupplier != null && parameters.getEnabledExpansionMask())
+      if (idealStepCalculator != null && parameters.getEnabledExpansionMask())
       {
          applyMask(fullExpansionToPack, nodeToExpand);
       }
 
-      if (idealStepSupplier != null)
+      if (idealStepCalculator != null)
       {
-         idealStepProximityComparator.update(nodeToExpand, idealStepSupplier);
+         idealStepProximityComparator.update(nodeToExpand, idealStepCalculator);
          fullExpansionToPack.sort(idealStepProximityComparator);
       }
    }
 
    private void applyMask(List<FootstanceNode> listToFilter, FootstanceNode stanceNode)
    {
-      FootstanceNode idealStep = idealStepSupplier.apply(stanceNode);
+      FootstepNode idealStep = idealStepCalculator.computeIdealStep(stanceNode.getStanceNode(), stanceNode.getSwingNode());
 
       int minXYManhattanDistance = computeMinXYManhattanDistance(listToFilter, idealStep);
       int minYawDistance = computeMinYawDistance(listToFilter, idealStep);
 
       listToFilter.removeIf(node ->
                             {
-                               int xyManhattanDistance = idealStep.getStanceNode().computeXYManhattanDistance(node.getStanceNode()) - minXYManhattanDistance;
+                               int xyManhattanDistance = idealStep.computeXYManhattanDistance(node.getStanceNode()) - minXYManhattanDistance;
                                if (!xyExpansionMask.contains(xyManhattanDistance))
                                {
                                   return true;
                                }
 
-                               int yawDistance = idealStep.getStanceNode().computeYawIndexDistance(node.getStanceNode()) - minYawDistance;
+                               int yawDistance = idealStep.computeYawIndexDistance(node.getStanceNode()) - minYawDistance;
                                return !yawExpansionMask.contains(yawDistance);
                             });
    }
 
-   private static int computeMinYawDistance(List<FootstanceNode> listToFilter, FootstanceNode idealStep)
+   private static int computeMinYawDistance(List<FootstanceNode> listToFilter, FootstepNode idealStep)
    {
       int minYawDistance = Integer.MAX_VALUE;
       for (int i = 0; i < listToFilter.size(); i++)
       {
-         int yawDistance = idealStep.getStanceNode().computeYawIndexDistance(listToFilter.get(i).getStanceNode());
+         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getStanceNode());
          if (yawDistance < minYawDistance)
             minYawDistance = yawDistance;
       }
       return minYawDistance;
    }
 
-   private static int computeMinXYManhattanDistance(List<FootstanceNode> listToFilter, FootstanceNode idealStep)
+   private static int computeMinXYManhattanDistance(List<FootstanceNode> listToFilter, FootstepNode idealStep)
    {
       int minXYManhattanDistance = Integer.MAX_VALUE;
       for (int i = 0; i < listToFilter.size(); i++)
       {
-         int xyManhattanDistance = idealStep.getStanceNode().computeXYManhattanDistance(listToFilter.get(i).getStanceNode());
+         int xyManhattanDistance = idealStep.computeXYManhattanDistance(listToFilter.get(i).getStanceNode());
          if (xyManhattanDistance < minXYManhattanDistance)
             minXYManhattanDistance = xyManhattanDistance;
       }
@@ -203,20 +202,20 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
    static class IdealStepProximityComparator implements Comparator<FootstanceNode>
    {
-      private FootstanceNode idealNode = null;
+      private FootstepNode idealStep = null;
 
-      void update(FootstanceNode stanceNode, UnaryOperator<FootstanceNode> idealStepSupplier)
+      void update(FootstanceNode stanceNode, IdealStepCalculatorInterface idealStepCalculator)
       {
-         idealNode = idealStepSupplier.apply(stanceNode);
+         idealStep = idealStepCalculator.computeIdealStep(stanceNode.getStanceNode(), stanceNode.getSwingNode());
       }
 
       @Override
       public int compare(FootstanceNode node1, FootstanceNode node2)
       {
-         Objects.requireNonNull(idealNode);
+         Objects.requireNonNull(idealStep);
 
-         double d1 = calculateStepProximity(node1.getStanceNode(), idealNode.getStanceNode());
-         double d2 = calculateStepProximity(node2.getStanceNode(), idealNode.getStanceNode());
+         double d1 = calculateStepProximity(node1.getStanceNode(), idealStep);
+         double d2 = calculateStepProximity(node2.getStanceNode(), idealStep);
          return Double.compare(d1, d2);
       }
 
