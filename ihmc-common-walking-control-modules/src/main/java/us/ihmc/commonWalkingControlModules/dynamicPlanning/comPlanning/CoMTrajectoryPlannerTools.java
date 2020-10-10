@@ -441,7 +441,7 @@ public class CoMTrajectoryPlannerTools
 
       relativeDesiredVRPPosition.checkReferenceFrameMatch(worldFrame);
 
-      double duration = time - timeOfRelativePosition;
+      double duration = Math.min(sufficientlyLarge, time - timeOfRelativePosition);
 
       constraintMatrixToPack.set(constraintNumber,
                                  startIndex + 0,

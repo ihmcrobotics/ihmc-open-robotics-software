@@ -172,15 +172,16 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          throw new IllegalArgumentException("The contact sequence is not valid.");
 
       insertKnotForContinuity(contactSequence);
+      contactSequence = contactSequenceInternal;
 
-      indexHandler.update(contactSequenceInternal);
+      indexHandler.update(contactSequence);
 
       resetMatrices();
 
-      CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(), gravityZ, omega.getValue(), currentCoMVelocity, contactSequenceInternal, startVRPPositions,
+      CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(), gravityZ, omega.getValue(), currentCoMVelocity, contactSequence, startVRPPositions,
                                                     endVRPPositions, false);
 
-      solveForCoefficientConstraintMatrix(contactSequenceInternal);
+      solveForCoefficientConstraintMatrix(contactSequence);
 
       xEquivalents.set(xConstants);
       yEquivalents.set(yConstants);
@@ -226,7 +227,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       yoSixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex));
       yoSixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex));
 
-      updateCornerPoints(contactSequenceInternal);
+      updateCornerPoints(contactSequence);
 
       if (viewer != null)
       {
@@ -238,7 +239,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
    private final SettableContactStateProvider startContactSequenceForContinuity = new SettableContactStateProvider();
    private final SettableContactStateProvider nextContactSequenceForContinuity = new SettableContactStateProvider();
-   private static final double defaultContinuitySegmentDuration = 0.05;
+   private static final double defaultContinuitySegmentDuration = 0.1;
    private final FramePoint3D fakeContinuityPosition = new FramePoint3D();
 
    private void insertKnotForContinuity(List<? extends ContactStateProvider> contactSequence)
@@ -286,7 +287,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          setCoMVelocityContinuity(contactSequence, 0, 1);
          setDynamicsContinuityConstraint(contactSequence, 0, 1);
       }
-
 
       // add transition continuity constraints
       for (int transition = 1; transition < numberOfTransitions; transition++)
