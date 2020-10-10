@@ -525,10 +525,12 @@ public class BalanceManager
       return yoDesiredCoMVelocity;
    }
 
-   public FramePoint3DReadOnly getNextExitCMP()
+   public FramePoint3DReadOnly getFirstExitCMPForToeOff(boolean isInTransfer)
    {
-      // This value is hard coded because we have two segments in transfer, and three in swing.
-      return copTrajectory.getContactStateProviders().get(4).getCopEndPosition();
+      if (isInTransfer)
+         return copTrajectory.getContactStateProviders().get(0).getCopStartPosition();
+      else
+         return copTrajectory.getContactStateProviders().get(4).getCopEndPosition();
    }
 
    public double getTimeRemainingInCurrentState()
