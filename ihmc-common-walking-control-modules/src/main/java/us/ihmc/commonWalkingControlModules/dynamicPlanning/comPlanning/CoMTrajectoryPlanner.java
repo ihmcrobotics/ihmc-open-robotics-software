@@ -267,6 +267,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          contactSequenceInternal.add(contactSequence.get(i));
    }
 
+   private static final boolean constrainCoMInitialVelocity = true;
 
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
    {
@@ -279,17 +280,21 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       setCoMPositionConstraint(currentCoMPosition);
       setDynamicsInitialConstraint(contactSequence, 0);
 
+      int transition = 0;
       // add a moveable waypoint for the center of mass velocity constraint
-      if (contactSequence.get(0).getContactState().isLoadBearing())
+      if (constrainCoMInitialVelocity && contactSequence.get(0).getContactState().isLoadBearing())
       {
          setCoMVelocityConstraint(currentCoMVelocity);
          setCoMPositionContinuity(contactSequence, 0, 1);
          setCoMVelocityContinuity(contactSequence, 0, 1);
+
          setDynamicsContinuityConstraint(contactSequence, 0, 1);
+         transition++;
       }
 
+
       // add transition continuity constraints
-      for (int transition = 1; transition < numberOfTransitions; transition++)
+      for (; transition < numberOfTransitions; transition++)
       {
          int previousSequence = transition;
          int nextSequence = transition + 1;
@@ -811,7 +816,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private void addImplicitVRPVelocityConstraint(int sequenceId, int vrpWaypointPositionIndex, double time, double timeAtWaypoint,
                                                  FramePoint3DReadOnly desiredVRPPosition)
    {
-      CoMTrajectoryPlannerTools.addImplicitVRPVelocityConstraint(sequenceId, numberOfConstraints, vrpWaypointPositionIndex, omega.getValue(), time, timeAtWaypoint,
+      CoMTrajectoryPlannerTools.addImplicitVRPVelocityConstraint(sequenceId, numberOfConstraints, vrpWaypointPositionIndex, time, timeAtWaypoint, omega.getValue(),
                                                                  desiredVRPPosition, coefficientMultipliers, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
       numberOfConstraints++;
    }
