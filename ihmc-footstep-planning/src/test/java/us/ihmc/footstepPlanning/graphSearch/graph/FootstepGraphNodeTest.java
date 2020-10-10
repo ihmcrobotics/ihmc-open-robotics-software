@@ -27,30 +27,30 @@ public class FootstepGraphNodeTest
          double ySwing = EuclidCoreRandomTools.nextDouble(random, 1.0);
          double yawSwing = EuclidCoreRandomTools.nextDouble(random, 1.0);
 
-         nodeA = new FootstepGraphNode(new FootstepNode(xStance, yStance, yawStance, stanceSide), new FootstepNode(xSwing, ySwing, yawSwing, stanceSide.getOppositeSide()));
-         nodeB = new FootstepGraphNode(new FootstepNode(xStance, yStance, yawStance, stanceSide), new FootstepNode(xSwing, ySwing, yawSwing, stanceSide.getOppositeSide()));
+         nodeA = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing, yawSwing, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing, yawSwing, stanceSide.getOppositeSide()));
 
          assertTrue(nodeA.equals(nodeB));
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
 
-         nodeB = new FootstepGraphNode(new FootstepNode(xStance, yStance, yawStance, stanceSide), new FootstepNode(xSwing + 0.5, ySwing, yawSwing, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing + 0.5, ySwing, yawSwing, stanceSide.getOppositeSide()));
          assertFalse(nodeA.equals(nodeB));
-         nodeB = new FootstepGraphNode(new FootstepNode(xStance, yStance, yawStance, stanceSide), new FootstepNode(xSwing, ySwing + 0.5, yawSwing, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing + 0.5, yawSwing, stanceSide.getOppositeSide()));
          assertFalse(nodeA.equals(nodeB));
-         nodeB = new FootstepGraphNode(new FootstepNode(xStance, yStance, yawStance, stanceSide), new FootstepNode(xSwing, ySwing, yawSwing + 0.5, stanceSide.getOppositeSide()));
+         nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing, yawSwing + 0.5, stanceSide.getOppositeSide()));
          assertFalse(nodeA.equals(nodeB));
 
          // assert exception thrown
          try
          {
-            nodeB = new FootstepGraphNode(new FootstepNode(xStance, yStance, yawStance, stanceSide), new FootstepNode(xSwing, ySwing, yawSwing + 0.5, stanceSide));
+            nodeB = new FootstepGraphNode(new DiscreteFootstep(xStance, yStance, yawStance, stanceSide), new DiscreteFootstep(xSwing, ySwing, yawSwing + 0.5, stanceSide));
             fail();
          }
          catch (Exception e)
          {
          }
 
-         nodeB = new FootstepGraphNode(nodeA.getStartStart(), nodeA.getEndStep());
+         nodeB = new FootstepGraphNode(nodeA.getStartStep(), nodeA.getEndStep());
          assertFalse(nodeA.equals(nodeB));
       }
    }

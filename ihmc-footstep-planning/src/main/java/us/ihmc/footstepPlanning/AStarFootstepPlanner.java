@@ -10,16 +10,16 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
@@ -46,16 +46,16 @@ public class AStarFootstepPlanner
 
    private final AStarFootstepPlannerIterationConductor footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final FootstepNodeSnapAndWiggler snapper;
-   private final ParameterBasedNodeExpansion expansion;
-   private final FootstepNodeChecker checker;
+   private final FootstepSnapAndWiggler snapper;
+   private final ParameterBasedStepExpansion expansion;
+   private final FootstepChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
    private final FootstepPlannerCompletionChecker completionChecker;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final FootstepPlannerEdgeData edgeData;
-   private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
+   private final HashMap<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
    private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
 
@@ -77,11 +77,11 @@ public class AStarFootstepPlanner
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
-      this.snapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
-      this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, registry);
+      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
-      this.expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
+      this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, registry);
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
@@ -134,17 +134,17 @@ public class AStarFootstepPlanner
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength =
             request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
-      SideDependentList<FootstepNode> goalNodes;
+      SideDependentList<DiscreteFootstep> goalSteps;
       if (imposeHorizonLength)
       {
          bodyPathPlanHolder.getPointAlongPath(request.getHorizonLength() / pathLength, goalMidFootPose);
-         SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
-         goalNodes = createGoalNodes(goalSteps::get);
+         SideDependentList<Pose3D> goalStepPoses = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
+         goalSteps = createGoalSteps(goalStepPoses::get);
       }
       else
       {
          goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
-         goalNodes = createGoalNodes(request.getGoalFootPoses()::get);
+         goalSteps = createGoalSteps(request.getGoalFootPoses()::get);
       }
 
       // Setup footstep planner
@@ -152,13 +152,13 @@ public class AStarFootstepPlanner
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
       distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
-      idealStepCalculator.initialize(goalNodes, request.getDesiredHeading());
-      completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
+      idealStepCalculator.initialize(goalSteps, request.getDesiredHeading());
+      completionChecker.initialize(startNode, goalSteps, request.getGoalDistanceProximity(), request.getGoalYawProximity());
       expansion.initialize();
       snapper.initialize();
 
       // Check valid goal
-      if (!snapAndCheckGoalNodes(goalNodes, imposeHorizonLength, request))
+      if (!snapAndCheckGoalNodes(goalSteps, imposeHorizonLength, request))
       {
          result = FootstepPlanningResult.INVALID_GOAL;
          reportStatus(request, outputToPack);
@@ -244,9 +244,9 @@ public class AStarFootstepPlanner
       for (int i = 1; i < path.size(); i++)
       {
          FootstepGraphNode footstepNode = path.get(i);
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(footstepNode.getEndStep(), footstepNode.getStartStart(), true);
+         FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getEndStep(), footstepNode.getStartStep(), true);
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getEndSide());
-         footstep.getFootstepPose().set(snapData.getSnappedNodeTransform(footstepNode.getEndStep()));
+         footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getEndStep()));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
@@ -354,15 +354,15 @@ public class AStarFootstepPlanner
       customTerminationConditions.clear();
    }
 
-   private boolean snapAndCheckGoalNodes(SideDependentList<FootstepNode> goalNodes, boolean horizonLengthImposed, FootstepPlannerRequest request)
+   private boolean snapAndCheckGoalNodes(SideDependentList<DiscreteFootstep> goalSteps, boolean horizonLengthImposed, FootstepPlannerRequest request)
    {
-      FootstepNodeSnapData leftGoalStepSnapData, rightGoalStepSnapData;
+      FootstepSnapData leftGoalStepSnapData, rightGoalStepSnapData;
       boolean snapGoalSteps = horizonLengthImposed || request.getSnapGoalSteps();
 
       if (snapGoalSteps)
       {
-         leftGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.LEFT));
-         rightGoalStepSnapData = snapper.snapFootstepNode(goalNodes.get(RobotSide.RIGHT));
+         leftGoalStepSnapData = snapper.snapFootstep(goalSteps.get(RobotSide.LEFT));
+         rightGoalStepSnapData = snapper.snapFootstep(goalSteps.get(RobotSide.RIGHT));
       }
       else
       {
@@ -394,11 +394,11 @@ public class AStarFootstepPlanner
 
    private void addSnapData(Pose3D footstepPose, RobotSide side)
    {
-      FootstepNode footstepNode = new FootstepNode(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
-      FootstepNodeSnapData snapData = new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(footstepNode, footstepPose));
+      DiscreteFootstep footstep = new DiscreteFootstep(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
+      FootstepSnapData snapData = new FootstepSnapData(FootstepSnappingTools.computeSnapTransform(footstep, footstepPose));
       snapData.getCroppedFoothold().set(footPolygons.get(side));
       snapData.getWiggleTransformInWorld().setIdentity();
-      snapper.addSnapData(footstepNode, snapData);
+      snapper.addSnapData(footstep, snapData);
    }
 
    private static FootstepGraphNode createStartNode(FootstepPlannerRequest request)
@@ -408,17 +408,17 @@ public class AStarFootstepPlanner
       Pose3D initialStancePose = request.getStartFootPoses().get(initialStanceSide);
       Pose3D initialSwingPose = request.getStartFootPoses().get(initialStanceSide.getOppositeSide());
 
-      FootstepNode initialStanceNode = new FootstepNode(initialStancePose.getX(), initialStancePose.getY(), initialStancePose.getYaw(), initialStanceSide);
-      FootstepNode initialSwingNode = new FootstepNode(initialSwingPose.getX(), initialSwingPose.getY(), initialSwingPose.getYaw(), initialStanceSide.getOppositeSide());
-      return new FootstepGraphNode(initialStanceNode, initialSwingNode);
+      DiscreteFootstep initialStanceStep = new DiscreteFootstep(initialStancePose.getX(), initialStancePose.getY(), initialStancePose.getYaw(), initialStanceSide);
+      DiscreteFootstep initialStartOfSwing = new DiscreteFootstep(initialSwingPose.getX(), initialSwingPose.getY(), initialSwingPose.getYaw(), initialStanceSide.getOppositeSide());
+      return new FootstepGraphNode(initialStanceStep, initialStartOfSwing);
    }
 
-   private static SideDependentList<FootstepNode> createGoalNodes(Function<RobotSide, Pose3D> poses)
+   private static SideDependentList<DiscreteFootstep> createGoalSteps(Function<RobotSide, Pose3D> poses)
    {
       return new SideDependentList<>(side ->
                                      {
                                         Pose3DReadOnly goalFootPose = poses.apply(side);
-                                        return new FootstepNode(goalFootPose.getX(), goalFootPose.getY(), goalFootPose.getYaw(), side);
+                                        return new DiscreteFootstep(goalFootPose.getX(), goalFootPose.getY(), goalFootPose.getYaw(), side);
                                      });
    }
 
@@ -432,12 +432,12 @@ public class AStarFootstepPlanner
       return footPolygons;
    }
 
-   public FootstepNodeSnapAndWiggler getSnapper()
+   public FootstepSnapAndWiggler getSnapper()
    {
       return snapper;
    }
 
-   public FootstepNodeChecker getChecker()
+   public FootstepChecker getChecker()
    {
       return checker;
    }
@@ -452,7 +452,7 @@ public class AStarFootstepPlanner
       return completionChecker.getEndNode();
    }
 
-   public HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
+   public HashMap<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }

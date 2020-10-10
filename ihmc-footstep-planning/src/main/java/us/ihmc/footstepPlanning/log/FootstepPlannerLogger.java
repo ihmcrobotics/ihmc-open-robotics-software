@@ -15,8 +15,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -332,7 +332,7 @@ public class FootstepPlannerLogger
             writeNode(1, "stanceNode", iterationData.getStanceNode());
             writeNode(1, "idealStep", iterationData.getIdealStep());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
-            writeSnapData(1, iterationData.getStanceNodeSnapData());
+            writeSnapData(1, iterationData.getStanceStepSnapData());
 
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
@@ -384,7 +384,7 @@ public class FootstepPlannerLogger
       printStream.close();
    }
 
-   private void writeNode(int numTabs, String name, FootstepNode node) throws IOException
+   private void writeNode(int numTabs, String name, DiscreteFootstep node) throws IOException
    {
       if (node == null)
          writeLine(numTabs, name + ":null");
@@ -392,7 +392,7 @@ public class FootstepPlannerLogger
          writeLine(numTabs, name + ":" + node.getXIndex() + "," + node.getYIndex() + "," + node.getYawIndex() + "," + node.getRobotSide().ordinal());
    }
 
-   private void writeSnapData(int numTabs, FootstepNodeSnapData snapData) throws IOException
+   private void writeSnapData(int numTabs, FootstepSnapData snapData) throws IOException
    {
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       writeTransform(numTabs, "snapTransform: ", new Quaternion(snapTransform.getRotation()), snapTransform.getTranslation());

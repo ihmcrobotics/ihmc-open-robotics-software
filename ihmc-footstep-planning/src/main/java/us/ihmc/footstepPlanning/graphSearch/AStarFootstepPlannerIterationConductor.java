@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.footstepPlanning.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerInterface;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.FootstepExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculatorInterface;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
@@ -26,8 +26,8 @@ public class AStarFootstepPlannerIterationConductor
    private final List<FootstepGraphNode> neighbors = new ArrayList<>();
 
    private final PriorityQueue<FootstepGraphNode> stack;
-   private final FootstepNodeExpansion nodeExpansion;
-   private final FootstepNodeCheckerInterface edgeChecker;
+   private final FootstepExpansion nodeExpansion;
+   private final FootstepCheckerInterface edgeChecker;
    private final FootstepCostCalculatorInterface edgeCostCalculator;
 
    /**
@@ -36,8 +36,8 @@ public class AStarFootstepPlannerIterationConductor
     * @param edgeCostCalculator calculates the cost of an edge (nodes are assumed zero cost), the arguments are {@code edgeCostCalculator.applyAsDouble(parentNode, childNode)}
     * @param heuristicsCalculator calling {@code heuristicsCalculator.applyAsDouble(node)} returns the heuristic cost from the node to the goal
     */
-   public AStarFootstepPlannerIterationConductor(FootstepNodeExpansion nodeExpansion,
-                                                 FootstepNodeCheckerInterface edgeChecker,
+   public AStarFootstepPlannerIterationConductor(FootstepExpansion nodeExpansion,
+                                                 FootstepCheckerInterface edgeChecker,
                                                  FootstepCostCalculatorInterface edgeCostCalculator,
                                                  ToDoubleFunction<FootstepGraphNode> heuristicsCalculator)
    {
@@ -87,9 +87,9 @@ public class AStarFootstepPlannerIterationConductor
 
       for(FootstepGraphNode neighbor : neighbors)
       {
-         if(edgeChecker.isNodeValid(neighbor.getEndStep(), nodeToExpand.getEndStep(), nodeToExpand.getStartStart()))
+         if(edgeChecker.isStepValid(neighbor.getEndStep(), nodeToExpand.getEndStep(), nodeToExpand.getStartStep()))
          {
-            double edgeCost = edgeCostCalculator.computeCost(neighbor.getEndStep(), nodeToExpand.getEndStep(), nodeToExpand.getStartStart());
+            double edgeCost = edgeCostCalculator.computeCost(neighbor.getEndStep(), nodeToExpand.getEndStep(), nodeToExpand.getStartStep());
             graph.checkAndSetEdge(nodeToExpand, neighbor, edgeCost);
             iterationData.getValidChildNodes().add(neighbor);
             stack.add(neighbor);

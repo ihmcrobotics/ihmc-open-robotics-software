@@ -1,7 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepPoseChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -21,7 +22,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
-    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.nodeChecking.ObstacleBetweenNodesChecker}
+    * between consecutive steps and invalidates steps with collisions, see: {@link ObstacleBetweenStepsChecker}
     */
    default boolean checkForPathCollisions()
    {

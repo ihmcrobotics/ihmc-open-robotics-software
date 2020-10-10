@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 
 public interface FootstepCostCalculatorInterface
 {
-   double computeCost(FootstepNode candidateStep, FootstepNode stanceStep, FootstepNode startOfSwing);
+   double computeCost(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing);
 }

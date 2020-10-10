@@ -7,38 +7,28 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepGraphNode
 {
-   private final FootstepNode endStep;
-   private final FootstepNode startStart;
+   private final DiscreteFootstep endStep;
+   private final DiscreteFootstep startStep;
    private Pose2D midFootPose = null;
 
    private final int hashCode;
 
-   public FootstepGraphNode(FootstepGraphNode parentNode, double childStepX, double childStepY, double childStepYaw)
+   public FootstepGraphNode(DiscreteFootstep endStep, DiscreteFootstep startStep)
    {
-      this(new FootstepNode(childStepX, childStepY, childStepYaw, parentNode.getStartSide()), parentNode.getEndStep());
-   }
-
-   public FootstepGraphNode(FootstepGraphNode parentNode, int childStepXIndex, int childStepYIndex, int childStepYawIndex)
-   {
-      this(new FootstepNode(childStepXIndex, childStepYIndex, childStepYawIndex, parentNode.getStartSide()), parentNode.getEndStep());
-   }
-
-   public FootstepGraphNode(FootstepNode endStep, FootstepNode startStart)
-   {
-      checkDifferentSides(endStep, startStart);
+      checkDifferentSides(endStep, startStep);
       this.endStep = endStep;
-      this.startStart = startStart;
+      this.startStep = startStep;
       this.hashCode = computeHashCode(this);
    }
 
-   public FootstepNode getEndStep()
+   public DiscreteFootstep getEndStep()
    {
       return endStep;
    }
 
-   public FootstepNode getStartStart()
+   public DiscreteFootstep getStartStep()
    {
-      return startStart;
+      return startStep;
    }
 
    public RobotSide getEndSide()
@@ -48,7 +38,7 @@ public class FootstepGraphNode
 
    public RobotSide getStartSide()
    {
-      return startStart.getRobotSide();
+      return startStep.getRobotSide();
    }
 
    public Pose2D getOrComputeMidFootPose()
@@ -56,9 +46,9 @@ public class FootstepGraphNode
       if (midFootPose == null)
       {
          midFootPose = new Pose2D();
-         midFootPose.setX(EuclidCoreTools.interpolate(endStep.getX(), startStart.getX(), 0.5));
-         midFootPose.setY(EuclidCoreTools.interpolate(endStep.getY(), startStart.getY(), 0.5));
-         midFootPose.setYaw(AngleTools.interpolateAngle(endStep.getYaw(), startStart.getYaw(), 0.5));
+         midFootPose.setX(EuclidCoreTools.interpolate(endStep.getX(), startStep.getX(), 0.5));
+         midFootPose.setY(EuclidCoreTools.interpolate(endStep.getY(), startStep.getY(), 0.5));
+         midFootPose.setYaw(AngleTools.interpolateAngle(endStep.getYaw(), startStep.getYaw(), 0.5));
       }
 
       return midFootPose;
@@ -82,7 +72,7 @@ public class FootstepGraphNode
       FootstepGraphNode other = (FootstepGraphNode) obj;
       if(!endStep.equals(other.endStep))
          return false;
-      if(!startStart.equals(other.startStart))
+      if(!startStep.equals(other.startStep))
          return false;
       return true;
    }
@@ -92,17 +82,17 @@ public class FootstepGraphNode
       final int prime = 31;
       int result = 1;
       result = prime * result + node.endStep.hashCode();
-      result = prime * result + node.startStart.hashCode();
+      result = prime * result + node.startStep.hashCode();
       return result;
    }
 
    @Override
    public String toString()
    {
-      return "Footstep graph node:\n\t End " + endStep.toString() + "\n\t Start" + startStart.toString();
+      return "Footstep graph node:\n\t End " + endStep.toString() + "\n\t Start" + startStep.toString();
    }
 
-   private static void checkDifferentSides(FootstepNode endStep, FootstepNode startStep)
+   private static void checkDifferentSides(DiscreteFootstep endStep, DiscreteFootstep startStep)
    {
       if (endStep.getRobotSide() == startStep.getRobotSide())
          throw new RuntimeException("Footstep graph node given two steps on the same side!");

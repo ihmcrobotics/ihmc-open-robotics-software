@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.log;
 
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 
 public class FootstepPlannerEdgeData
 {
-   private FootstepNode stanceNode = null;
-   private FootstepNode candidateNode = null;
-   private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
+   private DiscreteFootstep stanceNode = null;
+   private DiscreteFootstep candidateNode = null;
+   private final FootstepSnapData candidateNodeSnapData = FootstepSnapData.identityData();
    private boolean solutionEdge = false;
 
    private final int capacity;
@@ -44,17 +44,17 @@ public class FootstepPlannerEdgeData
 
    //////////////// GETTERS ////////////////
 
-   public FootstepNode getStanceNode()
+   public DiscreteFootstep getStanceNode()
    {
       return stanceNode;
    }
 
-   public FootstepNode getCandidateNode()
+   public DiscreteFootstep getCandidateNode()
    {
       return candidateNode;
    }
 
-   public FootstepNodeSnapData getCandidateNodeSnapData()
+   public FootstepSnapData getCandidateNodeSnapData()
    {
       return candidateNodeSnapData;
    }
@@ -71,17 +71,17 @@ public class FootstepPlannerEdgeData
 
    //////////////// SETTERS ////////////////
 
-   public void setStanceNode(FootstepNode stanceNode)
+   public void setStanceNode(DiscreteFootstep stanceNode)
    {
       this.stanceNode = stanceNode;
    }
 
-   public void setCandidateNode(FootstepNode candidateNode)
+   public void setCandidateNode(DiscreteFootstep candidateNode)
    {
       this.candidateNode = candidateNode;
    }
 
-   public void setCandidateNodeSnapData(FootstepNodeSnapData candidateNodeSnapData)
+   public void setCandidateNodeSnapData(FootstepSnapData candidateNodeSnapData)
    {
       this.candidateNodeSnapData.set(candidateNodeSnapData);
    }

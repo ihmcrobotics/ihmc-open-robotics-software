@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
@@ -40,8 +40,8 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minSurfaceIncline                            = keys.addDoubleKey ("Min surface incline", Math.toRadians(45.0));
    public static final BooleanStoredPropertyKey enableConcaveHullWiggler                     = keys.addBooleanKey("Enable concave hull wiggler", false);
    public static final BooleanStoredPropertyKey wiggleWhilePlanning                          = keys.addBooleanKey("Wiggle while planning", false);
-   public static final DoubleStoredPropertyKey  maximumXYWiggleDistance                      = keys.addDoubleKey ("Max XY wiggle distance", LatticeNode.gridSizeXY / 2.0);
-   public static final DoubleStoredPropertyKey  maximumYawWiggle                             = keys.addDoubleKey ("Max yaw wiggle", LatticeNode.gridSizeYaw / 2.0);
+   public static final DoubleStoredPropertyKey  maximumXYWiggleDistance                      = keys.addDoubleKey ("Max XY wiggle distance", LatticePoint.gridSizeXY / 2.0);
+   public static final DoubleStoredPropertyKey  maximumYawWiggle                             = keys.addDoubleKey ("Max yaw wiggle", LatticePoint.gridSizeYaw / 2.0);
    public static final DoubleStoredPropertyKey  maximumZPenetrationOnValleyRegions           = keys.addDoubleKey ("Max Z penetration on valley regions", Double.POSITIVE_INFINITY);
    public static final DoubleStoredPropertyKey  cliffBaseHeightToAvoid                       = keys.addDoubleKey ("Cliff bottom height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms              = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
