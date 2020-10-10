@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -183,10 +184,11 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalDCM, planner.getDesiredDCMPosition(), epsilon);
 
       FramePoint3D initialDCM = new FramePoint3D();
-      DCMTrajectoryTestTools
-            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(),
-                                      firstContact.getCopStartPosition(), initialDCM);
-      initialDCM.addZ(nominalHeight);
+      CapturePointTools.computeCapturePointPosition(comPosition, comVelocity, omega.getDoubleValue(), initialDCM);
+//      DCMTrajectoryTestTools
+//            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(),
+//                                      firstContact.getCopStartPosition(), initialDCM);
+//      initialDCM.addZ(nominalHeight);
 
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
