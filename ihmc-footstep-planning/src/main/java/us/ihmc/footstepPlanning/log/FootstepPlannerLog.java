@@ -2,8 +2,7 @@ package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,7 +27,7 @@ public class FootstepPlannerLog
    // Logged data
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
    private final List<VariableDescriptor> variableDescriptors = new ArrayList<>();
-   private final Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
+   private final Map<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
 
@@ -82,7 +81,7 @@ public class FootstepPlannerLog
       return variableDescriptors;
    }
 
-   public Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
+   public Map<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }
@@ -100,25 +99,25 @@ public class FootstepPlannerLog
    /**
     * Reconstructs the solution as a list of FootstepNodes from the log
     */
-   public List<FootstepNode> getFootstepPlan()
+   public List<DiscreteFootstep> getFootstepPlan()
    {
       List<FootstepPlannerIterationData> iterationData = getIterationData();
-      Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = getEdgeDataMap();
+      Map<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap = getEdgeDataMap();
 
       int iterationIndex = 0;
-      List<FootstepNode> footstepNodes = new ArrayList<>();
+      List<DiscreteFootstep> footstepNodes = new ArrayList<>();
       footstepNodes.add(iterationData.get(0).getStanceNode());
 
       mainLoop:
       while (true)
       {
-         FootstepNode stanceNode = iterationData.get(iterationIndex).getStanceNode();
+         DiscreteFootstep stanceNode = iterationData.get(iterationIndex).getStanceNode();
 
          stepLoop:
          for (int i = 0; i < iterationData.get(iterationIndex).getChildNodes().size(); i++)
          {
-            FootstepNode childNode = iterationData.get(iterationIndex).getChildNodes().get(i);
-            GraphEdge<FootstepNode> edge = new GraphEdge<>(stanceNode, childNode);
+            DiscreteFootstep childNode = iterationData.get(iterationIndex).getChildNodes().get(i);
+            GraphEdge<DiscreteFootstep> edge = new GraphEdge<>(stanceNode, childNode);
 
             // TODO
 //            if (edgeDataMap.get(edge).getSolutionEdge())

@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
@@ -35,7 +35,7 @@ public class FootstepPlannerCompletionChecker
 
    private FootstepGraphNode startNode, endNode;
    private int endNodePathSize;
-   private SideDependentList<FootstepNode> goalNodes;
+   private SideDependentList<DiscreteFootstep> goalNodes;
    private double endNodeCost;
 
    public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
@@ -50,7 +50,7 @@ public class FootstepPlannerCompletionChecker
       goalProximityComparator = new GoalProximityComparator(footstepPlannerParameters);
    }
 
-   public void initialize(FootstepGraphNode startNode, SideDependentList<FootstepNode> goalNodes, double goalDistanceProximity, double goalYawProximity)
+   public void initialize(FootstepGraphNode startNode, SideDependentList<DiscreteFootstep> goalNodes, double goalDistanceProximity, double goalYawProximity)
    {
       this.startNode = startNode;
       this.goalNodes = goalNodes;
@@ -210,11 +210,11 @@ public class FootstepPlannerCompletionChecker
       }
    }
 
-   private class SquaredUpStepComparator implements Comparator<FootstepNode>
+   private class SquaredUpStepComparator implements Comparator<DiscreteFootstep>
    {
       private final Pose2D squaredUpStep = new Pose2D();
 
-      public int compare(FootstepNode nodeA, FootstepNode nodeB)
+      public int compare(DiscreteFootstep nodeA, DiscreteFootstep nodeB)
       {
          double positionDistanceA = EuclidCoreTools.norm(nodeA.getX() - squaredUpStep.getX(), nodeA.getY() - squaredUpStep.getY());
          double positionDistanceB = EuclidCoreTools.norm(nodeB.getX() - squaredUpStep.getX(), nodeB.getY() - squaredUpStep.getY());

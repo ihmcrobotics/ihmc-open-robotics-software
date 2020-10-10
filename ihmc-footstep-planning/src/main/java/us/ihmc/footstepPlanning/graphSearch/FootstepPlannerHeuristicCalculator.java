@@ -7,8 +7,8 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class FootstepPlannerHeuristicCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final FootstepNodeSnapperReadOnly snapper;
+   private final FootstepSnapperReadOnly snapper;
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
@@ -30,7 +30,7 @@ public class FootstepPlannerHeuristicCalculator
    private final FramePose3D goalPose = new FramePose3D();
    private final Point3DBasics midfootPoint = new Point3D();
 
-   public FootstepPlannerHeuristicCalculator(FootstepNodeSnapperReadOnly snapper,
+   public FootstepPlannerHeuristicCalculator(FootstepSnapperReadOnly snapper,
                                              FootstepPlannerParametersReadOnly parameters,
                                              WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                              YoRegistry parentRegistry)
@@ -52,7 +52,7 @@ public class FootstepPlannerHeuristicCalculator
    {
       midfootPoint.set(node.getOrComputeMidFootPose().getPosition(), 0.0);
 
-      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node.getEndStep());
+      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(node.getEndStep());
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
       {
          snapData.getSnapTransform().transform(midfootPoint);

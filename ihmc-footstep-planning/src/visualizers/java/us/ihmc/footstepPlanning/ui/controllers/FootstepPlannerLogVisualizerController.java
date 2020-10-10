@@ -21,10 +21,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
@@ -49,8 +49,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.IntToDoubleFunction;
 
 public class FootstepPlannerLogVisualizerController
 {
@@ -59,14 +57,14 @@ public class FootstepPlannerLogVisualizerController
 
    private JavaFXMessager messager;
    private FootstepPlannerLog footstepPlannerLog = null;
-   private List<FootstepNode> path = new ArrayList<>();
-   private final Stack<FootstepNode> parentStepStack = new Stack<>();
+   private List<DiscreteFootstep> path = new ArrayList<>();
+   private final Stack<DiscreteFootstep> parentStepStack = new Stack<>();
    private final AtomicReference<ChildStepProperty> selectedRow = new AtomicReference<>();
 
    private List<FootstepPlannerIterationData> iterationDataList;
-   private Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap;
+   private Map<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap;
    private List<VariableDescriptor> variableDescriptors;
-   private FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters()); // TODO
+   private FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters()); // TODO
 
    private final AtomicBoolean loadingLog = new AtomicBoolean();
    private final List<VariableDescriptor> variablesToChart = new ArrayList<>();
@@ -238,7 +236,7 @@ public class FootstepPlannerLogVisualizerController
                                                                                    List<Point2D> footPoints = defaultContactPoints.get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
-      snapper = new FootstepNodeSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters());
+      snapper = new FootstepSnapAndWiggler(footPolygons, new DefaultFootstepPlannerParameters());
    }
 
    public void loadLog(LoadRequestType loadRequestType)
@@ -369,7 +367,7 @@ public class FootstepPlannerLogVisualizerController
    }
 
    private void updateGraphData(PlanarRegionsList planarRegionsList,
-                                Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap,
+                                Map<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap,
                                 List<FootstepPlannerIterationData> iterationData,
                                 List<VariableDescriptor> variableDescriptors)
    {
@@ -385,20 +383,20 @@ public class FootstepPlannerLogVisualizerController
       if (!iterationDataList.isEmpty())
       {
          recursivelyBuildPath(iterationDataList.get(0), iterationDataList, this.edgeDataMap);
-         FootstepNode startNode = path.get(0);
+         DiscreteFootstep startNode = path.get(0);
          parentStepStack.push(startNode);
          updateTable();
       }
    }
 
-   private void recursivelyBuildPath(FootstepPlannerIterationData iterationData, List<FootstepPlannerIterationData> iterationDataList, Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap)
+   private void recursivelyBuildPath(FootstepPlannerIterationData iterationData, List<FootstepPlannerIterationData> iterationDataList, Map<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap)
    {
-      FootstepNode stanceNode = iterationData.getStanceNode();
+      DiscreteFootstep stanceNode = iterationData.getStanceNode();
       path.add(stanceNode);
 
       for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
-         FootstepNode childNode = iterationData.getChildNodes().get(i);
+         DiscreteFootstep childNode = iterationData.getChildNodes().get(i);
          if(edgeDataMap.get(new GraphEdge<>(stanceNode, childNode)).isSolutionEdge())
          {
             iterationDataList.stream().filter(data -> data.getStanceNode().equals(childNode)).findAny().ifPresent(nextData -> recursivelyBuildPath(nextData, iterationDataList, edgeDataMap));
@@ -409,7 +407,7 @@ public class FootstepPlannerLogVisualizerController
 
    private void updateTable()
    {
-      FootstepNode parentNode = parentStepStack.peek();
+      DiscreteFootstep parentNode = parentStepStack.peek();
       Optional<FootstepPlannerIterationData> iterationDataOptional = iterationDataList.stream().filter(data -> data.getStanceNode().equals(parentNode)).findFirst();
 
       parentTableItems.clear();
@@ -443,7 +441,7 @@ public class FootstepPlannerLogVisualizerController
       FootstepPlannerIterationData iterationData = iterationDataOptional.get();
       for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
-         FootstepNode childNode = iterationData.getChildNodes().get(i);
+         DiscreteFootstep childNode = iterationData.getChildNodes().get(i);
          FootstepPlannerEdgeData edgeData = edgeDataMap.get(new GraphEdge<>(iterationData.getStanceNode(), childNode));
          boolean expanded = iterationDataList.stream().anyMatch(data -> data.getStanceNode().equals(childNode));
          ChildStepProperty stepProperty = new ChildStepProperty(edgeData, expanded);
@@ -612,27 +610,27 @@ public class FootstepPlannerLogVisualizerController
 
    public class ParentStepProperty
    {
-      private final FootstepNode stanceNode;
-      private final FootstepNodeSnapData snapData;
+      private final DiscreteFootstep stanceNode;
+      private final FootstepSnapData snapData;
       private final RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
       private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
 
       public ParentStepProperty(FootstepPlannerIterationData iterationData)
       {
          this.stanceNode = iterationData.getStanceNode();
-         this.snapData = iterationData.getStanceNodeSnapData();
-         snappedNodeTransform.set(snapData.getSnappedNodeTransform(stanceNode));
+         this.snapData = iterationData.getStanceStepSnapData();
+         snappedNodeTransform.set(snapData.getSnappedStepTransform(stanceNode));
 
-         FootstepNode idealStep = iterationData.getIdealStep();
-         FootstepNodeSnapData idealStepSnapData = snapper.snapFootstepNode(idealStep);
+         DiscreteFootstep idealStep = iterationData.getIdealStep();
+         FootstepSnapData idealStepSnapData = snapper.snapFootstep(idealStep);
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
-            FootstepNodeTools.getNodeTransform(idealStep, idealStepTransform);
+            DiscreteFootstepTools.getStepTransform(idealStep, idealStepTransform);
             idealStepTransform.getTranslation().setZ(snappedNodeTransform.getTranslationZ());
          }
          else
          {
-            FootstepNodeTools.getSnappedNodeTransform(idealStep, idealStepSnapData.getSnapTransform(), idealStepTransform);
+            DiscreteFootstepTools.getSnappedStepTransform(idealStep, idealStepSnapData.getSnapTransform(), idealStepTransform);
          }
       }
 
@@ -669,7 +667,7 @@ public class FootstepPlannerLogVisualizerController
 
    public class ChildStepProperty
    {
-      private final FootstepNode candidateNode;
+      private final DiscreteFootstep candidateNode;
       private final FootstepPlannerEdgeData edgeData;
       private final RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
       private final RigidBodyTransform snapAndWiggledNodeTransform = new RigidBodyTransform();
@@ -682,7 +680,7 @@ public class FootstepPlannerLogVisualizerController
          this.expanded = expanded;
 
          candidateNode = edgeData.getCandidateNode();
-         FootstepNodeSnapData snapData = edgeData.getCandidateNodeSnapData();
+         FootstepSnapData snapData = edgeData.getCandidateNodeSnapData();
 
          // TODO take yet another pass at this api, it doesn't read that clearly
          if (snapData.getSnapTransform().containsNaN())
@@ -692,8 +690,8 @@ public class FootstepPlannerLogVisualizerController
          }
          else
          {
-            FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapData.getSnapTransform(), snappedNodeTransform);
-            snapAndWiggledNodeTransform.set(snapData.getSnappedNodeTransform(candidateNode));
+            DiscreteFootstepTools.getSnappedStepTransform(candidateNode, snapData.getSnapTransform(), snappedNodeTransform);
+            snapAndWiggledNodeTransform.set(snapData.getSnappedStepTransform(candidateNode));
          }
       }
 

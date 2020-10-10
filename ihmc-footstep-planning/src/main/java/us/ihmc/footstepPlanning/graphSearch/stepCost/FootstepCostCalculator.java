@@ -2,12 +2,12 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculatorInterface;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -20,21 +20,21 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepNodeSnapperReadOnly snapper;
+   private final FootstepSnapperReadOnly snapper;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final ToDoubleFunction<FootstepGraphNode> heuristics;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
-   private final RigidBodyTransform stanceNodeTransform = new RigidBodyTransform();
+   private final RigidBodyTransform stanceStepTransform = new RigidBodyTransform();
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
-   private final RigidBodyTransform candidateNodeTransform = new RigidBodyTransform();
+   private final RigidBodyTransform candidateStepTransform = new RigidBodyTransform();
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
-                                 FootstepNodeSnapperReadOnly snapper,
+                                 FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstepGraphNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
@@ -49,26 +49,26 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    }
 
    @Override
-   public double computeCost(FootstepNode candidateStep, FootstepNode stanceStep, FootstepNode startOfSwing)
+   public double computeCost(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
-      FootstepNode idealStep = idealStepCalculator.computeIdealStep(stanceStep, startOfSwing);
+      DiscreteFootstep idealStep = idealStepCalculator.computeIdealStep(stanceStep, startOfSwing);
 
-      FootstepNodeTools.getSnappedNodeTransform(stanceStep, snapper.snapFootstepNode(stanceStep).getSnapTransform(), stanceNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(candidateStep, snapper.snapFootstepNode(candidateStep).getSnapTransform(), candidateNodeTransform);
-      idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
+      DiscreteFootstepTools.getSnappedStepTransform(stanceStep, snapper.snapFootstep(stanceStep).getSnapTransform(), stanceStepTransform);
+      DiscreteFootstepTools.getSnappedStepTransform(candidateStep, snapper.snapFootstep(candidateStep).getSnapTransform(), candidateStepTransform);
+      idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceStepTransform.getTranslationZ());
       idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
 
       // calculate offset from ideal in a z-up frame
-      stanceNodeTransform.getRotation().setToYawOrientation(stanceNodeTransform.getRotation().getYaw());
-      idealStepTransform.preMultiplyInvertOther(stanceNodeTransform);
-      candidateNodeTransform.preMultiplyInvertOther(stanceNodeTransform);
+      stanceStepTransform.getRotation().setToYawOrientation(stanceStepTransform.getRotation().getYaw());
+      idealStepTransform.preMultiplyInvertOther(stanceStepTransform);
+      candidateStepTransform.preMultiplyInvertOther(stanceStepTransform);
 
-      double xOffset = candidateNodeTransform.getTranslationX() - idealStepTransform.getTranslationX();
-      double yOffset = candidateNodeTransform.getTranslationY() - idealStepTransform.getTranslationY();
-      double zOffset = candidateNodeTransform.getTranslationZ() - idealStepTransform.getTranslationZ();
-      double yawOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNodeTransform.getRotation().getYaw(), idealStepTransform.getRotation().getYaw());
-      double pitchOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNodeTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch());
-      double rollOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNodeTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll());
+      double xOffset = candidateStepTransform.getTranslationX() - idealStepTransform.getTranslationX();
+      double yOffset = candidateStepTransform.getTranslationY() - idealStepTransform.getTranslationY();
+      double zOffset = candidateStepTransform.getTranslationZ() - idealStepTransform.getTranslationZ();
+      double yawOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), idealStepTransform.getRotation().getYaw());
+      double pitchOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch());
+      double rollOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll());
 
       edgeCost.set(0.0);
       edgeCost.add(Math.abs(xOffset * parameters.getForwardWeight()));
@@ -100,9 +100,9 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       return edgeCost.getValue();
    }
 
-   private double computeAreaCost(FootstepNode footstepNode)
+   private double computeAreaCost(DiscreteFootstep footstep)
    {
-      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(footstepNode);
+      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
       if (snapData != null)
       {
          ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
@@ -112,7 +112,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
          }
 
          double area = footholdAfterSnap.getArea();
-         double footArea = footPolygons.get(footstepNode.getRobotSide()).getArea();
+         double footArea = footPolygons.get(footstep.getRobotSide()).getArea();
 
          if (footholdAfterSnap.isEmpty())
             return 0.0;

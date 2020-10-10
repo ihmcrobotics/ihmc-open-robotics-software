@@ -1,59 +1,59 @@
 package us.ihmc.footstepPlanning.log;
 
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FootstepPlannerIterationData
 {
-   private FootstepNode stanceNode = null;
-   private FootstepNode idealStep = null;
-   private final List<FootstepNode> childNodes = new ArrayList<>();
-   private final FootstepNodeSnapData stanceNodeSnapData = FootstepNodeSnapData.identityData();
+   private DiscreteFootstep stanceNode = null;
+   private DiscreteFootstep idealStep = null;
+   private final List<DiscreteFootstep> childNodes = new ArrayList<>();
+   private final FootstepSnapData stanceNodeSnapData = FootstepSnapData.identityData();
 
    public FootstepPlannerIterationData()
    {
       clear();
    }
 
-   public void setStanceNode(FootstepNode stanceNode)
+   public void setStanceNode(DiscreteFootstep stanceNode)
    {
       this.stanceNode = stanceNode;
    }
 
-   public void setIdealStep(FootstepNode idealStep)
+   public void setIdealStep(DiscreteFootstep idealStep)
    {
       this.idealStep = idealStep;
    }
 
-   public void setStanceNodeSnapData(FootstepNodeSnapData stanceNodeSnapData)
+   public void setStanceNodeSnapData(FootstepSnapData stanceNodeSnapData)
    {
       this.stanceNodeSnapData.set(stanceNodeSnapData);
    }
 
-   public void addChildNode(FootstepNode childNode)
+   public void addChildNode(DiscreteFootstep childNode)
    {
       childNodes.add(childNode);
    }
 
-   public FootstepNode getStanceNode()
+   public DiscreteFootstep getStanceNode()
    {
       return stanceNode;
    }
 
-   public FootstepNode getIdealStep()
+   public DiscreteFootstep getIdealStep()
    {
       return idealStep;
    }
 
-   public List<FootstepNode> getChildNodes()
+   public List<DiscreteFootstep> getChildNodes()
    {
       return childNodes;
    }
 
-   public FootstepNodeSnapData getStanceNodeSnapData()
+   public FootstepSnapData getStanceStepSnapData()
    {
       return stanceNodeSnapData;
    }
