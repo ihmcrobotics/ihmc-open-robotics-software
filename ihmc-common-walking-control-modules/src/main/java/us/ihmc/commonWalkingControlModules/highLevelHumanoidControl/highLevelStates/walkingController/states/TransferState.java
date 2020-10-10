@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -156,18 +156,19 @@ public abstract class TransferState extends WalkingState
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
 
+         FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
                                                      nextFootstep,
-                                                     balanceManager.getNextExitCMP(),
+                                                     trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
                                                      desiredCoP,
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d);
 
          if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
-            feetManager.requestPointToeOff(trailingLeg, balanceManager.getNextExitCMP(), filteredDesiredCoP);
+            feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
-            feetManager.requestLineToeOff(trailingLeg, balanceManager.getNextExitCMP(), filteredDesiredCoP);
+            feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
       }
    }
 
