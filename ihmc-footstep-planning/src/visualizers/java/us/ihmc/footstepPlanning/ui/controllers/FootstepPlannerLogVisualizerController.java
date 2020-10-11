@@ -12,6 +12,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -101,6 +102,11 @@ public class FootstepPlannerLogVisualizerController
    @FXML
    private CheckBox showIdealStep;
 
+   @FXML
+   private Text iterationRange;
+   @FXML
+   private Spinner<Integer> iterationLoadSpinner;
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -133,6 +139,9 @@ public class FootstepPlannerLogVisualizerController
          messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, show);
          messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, show);
       });
+
+      iterationLoadSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0, 1));
+      iterationLoadSpinner.valueProperty().addListener((obs, oldValue, newValue) -> loadIteration());
    }
 
    public void onPrimaryStageLoaded()
@@ -388,6 +397,9 @@ public class FootstepPlannerLogVisualizerController
          parentNodeStack.push(startNode);
          updateTable();
       }
+
+      iterationRange.setText("0 - " + (iterationData.size() - 1));
+      iterationLoadSpinner.getValueFactory().setValue(0);
    }
 
    private void recursivelyBuildPath(FootstepPlannerIterationData iterationData, List<FootstepPlannerIterationData> iterationDataList, Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap)
@@ -568,6 +580,18 @@ public class FootstepPlannerLogVisualizerController
 
       parentNodeStack.pop();
       updateTable();
+   }
+
+   public void loadIteration()
+   {
+      Integer iterationToLoad = iterationLoadSpinner.getValue();
+
+      if (iterationToLoad < iterationDataList.size())
+      {
+         FootstepPlannerIterationData iterationData = iterationDataList.get(iterationToLoad);
+         parentNodeStack.push(iterationData.getParentNode());
+         updateTable();
+      }
    }
 
    private static List<TableColumn> createDefaultColumns()
