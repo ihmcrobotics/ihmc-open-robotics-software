@@ -380,7 +380,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getEndNode();
    }
 
-   public HashMap<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> getEdgeDataMap()
+   public HashMap<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
       return aStarFootstepPlanner.getEdgeDataMap();
    }

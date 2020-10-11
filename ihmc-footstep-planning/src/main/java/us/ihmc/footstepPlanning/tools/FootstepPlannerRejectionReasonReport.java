@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.tools;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
@@ -36,7 +37,7 @@ public class FootstepPlannerRejectionReasonReport
 
          for (int j = 0; j < iterationData.getChildNodes().size(); j++)
          {
-            GraphEdge<DiscreteFootstep> edgeKey = new GraphEdge<>(iterationData.getStanceNode(), iterationData.getChildNodes().get(j));
+            GraphEdge<FootstepGraphNode> edgeKey = new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j));
             FootstepPlannerEdgeData edgeData = footstepPlanningModule.getEdgeDataMap().get(edgeKey);
 
             BipedalFootstepPlannerNodeRejectionReason rejectionReason

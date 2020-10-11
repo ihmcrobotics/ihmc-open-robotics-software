@@ -16,6 +16,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
@@ -47,7 +48,7 @@ public class GradientDescentStepConstraintSolverVisualizer
       }
 
       FootstepPlannerLog log = logLoader.getLog();
-      List<DiscreteFootstep> footstepPlan = log.getFootstepPlan();
+      List<FootstepGraphNode> footstepPlan = log.getFootstepPlan();
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("testRobot"));
@@ -87,9 +88,9 @@ public class GradientDescentStepConstraintSolverVisualizer
       int maxIndex = footstepPlan.size();
       for (int i = 1; i < maxIndex; i++)
       {
-         DiscreteFootstep footstepNode = footstepPlan.get(i);
+         FootstepGraphNode footstepNode = footstepPlan.get(i);
          FootstepPlannerEdgeData edgeData = log.getEdgeDataMap().get(new GraphEdge<>(footstepPlan.get(i - 1), footstepNode));
-         FootstepSnapData snapData = edgeData.getCandidateNodeSnapData();
+         FootstepSnapData snapData = edgeData.getEndStepSnapData();
          int regionIndex = snapData.getRegionIndex();
          if (regionIndex == -1)
          {
@@ -100,7 +101,7 @@ public class GradientDescentStepConstraintSolverVisualizer
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
 
          // from FootstepNodeSnapAndWiggler#computeWiggleTransform
-         DiscreteFootstepTools.getFootPolygon(footstepNode, footPolygons.get(footstepNode.getRobotSide()), footPolygon);
+         DiscreteFootstepTools.getFootPolygon(footstepNode.getEndStep(), footPolygons.get(footstepNode.getEndSide()), footPolygon);
          tempTransform.set(snapData.getSnapTransform());
          tempTransform.preMultiply(planarRegion.getTransformToLocal());
          ConvexPolygon2D footPolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
@@ -111,7 +112,7 @@ public class GradientDescentStepConstraintSolverVisualizer
          gradientDescentStepConstraintInput.setPlanarRegion(planarRegion);
          gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
 
-         RigidBodyTransform snappedNodeTransform = snapData.getSnappedStepTransform(footstepNode);
+         RigidBodyTransform snappedNodeTransform = snapData.getSnappedStepTransform(footstepNode.getEndStep());
          tempTransform.set(snappedNodeTransform);
          tempTransform.preMultiply(planarRegion.getTransformToLocal());
          gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);

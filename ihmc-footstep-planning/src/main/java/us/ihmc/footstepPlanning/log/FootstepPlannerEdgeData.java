@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.log;
 
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 
 public class FootstepPlannerEdgeData
 {
-   private DiscreteFootstep stanceNode = null;
-   private DiscreteFootstep candidateNode = null;
-   private final FootstepSnapData candidateNodeSnapData = FootstepSnapData.identityData();
+   private FootstepGraphNode parentNode = null;
+   private FootstepGraphNode childNode = null;
+   private final FootstepSnapData endStepSnapData = FootstepSnapData.identityData();
    private boolean solutionEdge = false;
 
    private final int capacity;
@@ -21,18 +21,18 @@ public class FootstepPlannerEdgeData
 
    public void clear()
    {
-      stanceNode = null;
-      candidateNode = null;
-      candidateNodeSnapData.clear();
+      parentNode = null;
+      childNode = null;
+      endStepSnapData.clear();
       solutionEdge = false;
    }
 
    public FootstepPlannerEdgeData getCopyAndClear()
    {
       FootstepPlannerEdgeData copy = new FootstepPlannerEdgeData(capacity);
-      copy.stanceNode = stanceNode;
-      copy.candidateNode = candidateNode;
-      copy.candidateNodeSnapData.set(candidateNodeSnapData);
+      copy.parentNode = parentNode;
+      copy.childNode = childNode;
+      copy.endStepSnapData.set(endStepSnapData);
       copy.solutionEdge = solutionEdge;
       for (int i = 0; i < dataBuffer.length; i++)
       {
@@ -44,19 +44,19 @@ public class FootstepPlannerEdgeData
 
    //////////////// GETTERS ////////////////
 
-   public DiscreteFootstep getStanceNode()
+   public FootstepGraphNode getParentNode()
    {
-      return stanceNode;
+      return parentNode;
    }
 
-   public DiscreteFootstep getCandidateNode()
+   public FootstepGraphNode getChildNode()
    {
-      return candidateNode;
+      return childNode;
    }
 
-   public FootstepSnapData getCandidateNodeSnapData()
+   public FootstepSnapData getEndStepSnapData()
    {
-      return candidateNodeSnapData;
+      return endStepSnapData;
    }
 
    public long[] getDataBuffer()
@@ -71,19 +71,19 @@ public class FootstepPlannerEdgeData
 
    //////////////// SETTERS ////////////////
 
-   public void setStanceNode(DiscreteFootstep stanceNode)
+   public void setParentNode(FootstepGraphNode parentNode)
    {
-      this.stanceNode = stanceNode;
+      this.parentNode = parentNode;
    }
 
-   public void setCandidateNode(DiscreteFootstep candidateNode)
+   public void setChildNode(FootstepGraphNode childNode)
    {
-      this.candidateNode = candidateNode;
+      this.childNode = childNode;
    }
 
-   public void setCandidateNodeSnapData(FootstepSnapData candidateNodeSnapData)
+   public void setEndStepSnapData(FootstepSnapData endStepSnapData)
    {
-      this.candidateNodeSnapData.set(candidateNodeSnapData);
+      this.endStepSnapData.set(endStepSnapData);
    }
 
    public void setSolutionEdge(boolean solutionEdge)
