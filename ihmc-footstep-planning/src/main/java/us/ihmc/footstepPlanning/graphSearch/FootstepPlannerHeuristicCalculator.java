@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -24,11 +25,8 @@ public class FootstepPlannerHeuristicCalculator
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
    private double desiredHeading;
 
-   private final FramePose3D midFootPose = new FramePose3D();
-   private final Point2D midFootPoint = new Point2D();
    private final Pose3D projectionPose = new Pose3D();
-   private final FramePose3D goalPose = new FramePose3D();
-   private final Point3DBasics midfootPoint = new Point3D();
+   private final Pose3D goalPose = new Pose3D();
 
    public FootstepPlannerHeuristicCalculator(FootstepSnapperReadOnly snapper,
                                              FootstepPlannerParametersReadOnly parameters,
@@ -50,16 +48,7 @@ public class FootstepPlannerHeuristicCalculator
 
    public double compute(FootstepGraphNode node)
    {
-      midfootPoint.set(node.getOrComputeMidFootPose().getPosition(), 0.0);
-
-      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(node.getEndStep());
-      if (snapData != null && !snapData.getSnapTransform().containsNaN())
-      {
-         snapData.getSnapTransform().transform(midfootPoint);
-      }
-
-      midFootPose.getPosition().set(midfootPoint);
-      midFootPose.getOrientation().setYawPitchRoll(node.getEndStep().getYaw(), 0.0, 0.0);
+      Pose2D midFootPose = node.getOrComputeMidFootPose();
 
       double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalPose.getX(), midFootPose.getY() - goalPose.getY());
 
@@ -73,8 +62,7 @@ public class FootstepPlannerHeuristicCalculator
       }
       else
       {
-         midFootPoint.set(midFootPose.getPosition());
-         double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
+         double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPose.getPosition(), projectionPose);
          int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
          double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
 
