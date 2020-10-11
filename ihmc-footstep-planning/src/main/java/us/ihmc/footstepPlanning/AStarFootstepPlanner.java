@@ -55,7 +55,7 @@ public class AStarFootstepPlanner
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final FootstepPlannerEdgeData edgeData;
-   private final HashMap<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
+   private final HashMap<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
    private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
 
@@ -98,12 +98,11 @@ public class AStarFootstepPlanner
                                                                  edgeData.setData(i, allVariables.get(i).getValueAsLongBits());
                                                               }
 
-                                                              // TODO
-//                                                              edgeData.setStanceNode(edge.getStartNode());
-//                                                              edgeData.setCandidateNode(edge.getEndNode());
-//                                                              edgeData.getCandidateNodeSnapData().set(snapper.snapFootstepNode(edge.getEndNode()));
+                                                              edgeData.setParentNode(edge.getStartNode());
+                                                              edgeData.setChildNode(edge.getEndNode());
+                                                              edgeData.getEndStepSnapData().set(snapper.snapFootstep(edge.getEndNode().getEndStep()));
 
-//                                                              edgeDataMap.put(edge, edgeData.getCopyAndClear());
+                                                              edgeDataMap.put(edge, edgeData.getCopyAndClear());
                                                               stepCostCalculator.resetLoggedVariables();
                                                            });
    }
@@ -195,7 +194,7 @@ public class AStarFootstepPlanner
          }
 
          AStarIterationData<FootstepGraphNode> iterationData = footstepPlanner.doPlanningIteration(nodeToExpand, true);
-//         recordIterationData(iterationData);
+         recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
 
          FootstepGraphNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
@@ -205,7 +204,7 @@ public class AStarFootstepPlanner
             AStarIterationData<FootstepGraphNode> finalIterationData = new AStarIterationData<>();
             finalIterationData.setParentNode(achievedGoalNode);
             finalIterationData.getValidChildNodes().add(completionChecker.getEndNode());
-//            recordIterationData(finalIterationData);
+            recordIterationData(finalIterationData);
             iterationCallback.accept(finalIterationData);
 
             result = FootstepPlanningResult.FOUND_SOLUTION;
@@ -218,7 +217,7 @@ public class AStarFootstepPlanner
          }
       }
 
-//      markSolutionEdges();
+      markSolutionEdges();
       reportStatus(request, outputToPack);
    }
 
@@ -257,7 +256,7 @@ public class AStarFootstepPlanner
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {
             // log wiggle transform if not yet computed
-//            edgeDataMap.get(new GraphEdge<>(path.get(i - 1).getStanceNode(), path.get(i).getStanceNode())).getCandidateNodeSnapData().set(snapData);
+            edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).getEndStepSnapData().set(snapData);
          }
 
          footstep.getFoothold().set(snapData.getCroppedFoothold());
@@ -268,46 +267,49 @@ public class AStarFootstepPlanner
       postProcessorCallback.accept(Pair.of(request, outputToPack));
    }
 
-//   private void markSolutionEdges()
-//   {
-//      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
-//
-//      List<FootstanceNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
-//      for (int i = 1; i < path.size(); i++)
-//      {
-//         edgeDataMap.get(new GraphEdge<>(path.get(i - 1).getStanceNode(), path.get(i).getStanceNode())).setSolutionEdge(true);
-//      }
-//   }
+   private void markSolutionEdges()
+   {
+      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
 
-//   private void recordIterationData(AStarIterationData<FootstanceNode> iterationData)
-//   {
-//      if (iterationData.getParentNode() == null)
-//      {
-//         return;
-//      }
-//
-//      FootstepPlannerIterationData loggedData = null;
-//      for (int i = 0; i < this.iterationData.size(); i++)
-//      {
-//         if (this.iterationData.get(i).getStanceNode().equals(iterationData.getParentNode()))
-//         {
-//            loggedData = this.iterationData.get(i);
-//            break;
-//         }
-//      }
-//
-//      if (loggedData == null)
-//      {
-//         loggedData = new FootstepPlannerIterationData();
-//         loggedData.setStanceNode(iterationData.getParentNode());
-//         loggedData.setIdealStep(idealStepCalculator.computeIdealNode(iterationData.getParentNode()));
-//         loggedData.setStanceNodeSnapData(snapper.snapFootstepNode(iterationData.getParentNode()));
-//         this.iterationData.add(loggedData);
-//      }
-//
-//      iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
-//      iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
-//   }
+      List<FootstepGraphNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
+      for (int i = 1; i < path.size(); i++)
+      {
+         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+      }
+   }
+
+   private void recordIterationData(AStarIterationData<FootstepGraphNode> iterationData)
+   {
+      if (iterationData.getParentNode() == null)
+      {
+         return;
+      }
+
+      FootstepPlannerIterationData loggedData = null;
+      for (int i = 0; i < this.iterationData.size(); i++)
+      {
+         if (this.iterationData.get(i).getParentNode().equals(iterationData.getParentNode()))
+         {
+            loggedData = this.iterationData.get(i);
+            break;
+         }
+      }
+
+      if (loggedData == null)
+      {
+         loggedData = new FootstepPlannerIterationData();
+         loggedData.setParentNode(iterationData.getParentNode());
+         DiscreteFootstep idealFootstep = idealStepCalculator.computeIdealStep(iterationData.getParentNode().getEndStep(),
+                                                                                  iterationData.getParentNode().getStartStep());
+         loggedData.setIdealChildNode(new FootstepGraphNode(idealFootstep, iterationData.getParentNode().getEndStep()));
+         loggedData.setParentEndSnapData(snapper.snapFootstep(iterationData.getParentNode().getEndStep()));
+         loggedData.setParentStartSnapData(snapper.snapFootstep(iterationData.getParentNode().getStartStep()));
+         this.iterationData.add(loggedData);
+      }
+
+      iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
+      iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
+   }
 
    private final Pose2D endNodePose = new Pose2D();
 
@@ -452,7 +454,7 @@ public class AStarFootstepPlanner
       return completionChecker.getEndNode();
    }
 
-   public HashMap<GraphEdge<DiscreteFootstep>, FootstepPlannerEdgeData> getEdgeDataMap()
+   public HashMap<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }

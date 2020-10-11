@@ -50,6 +50,8 @@
                     <Separator orientation="HORIZONTAL" prefHeight="20"/>
 
                     <VBox>
+                        <CheckBox fx:id="showStartOfSwingStep" selected="true" text="Show start of swing step"/>
+                        <Region prefHeight="5"/>
                         <CheckBox fx:id="showStanceStep" selected="true" text="Show stance step"/>
                         <Region prefHeight="5"/>
                         <CheckBox fx:id="showUnsnappedStep" selected="true" text="Show unsnapped step"/>
