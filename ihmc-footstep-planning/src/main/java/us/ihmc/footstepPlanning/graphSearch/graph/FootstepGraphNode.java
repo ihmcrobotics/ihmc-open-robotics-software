@@ -54,6 +54,11 @@ public class FootstepGraphNode
       return midFootPose;
    }
 
+   public double getStanceAngle()
+   {
+      return Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(endStep.getYaw(), startStep.getYaw()));
+   }
+
    @Override
    public int hashCode()
    {

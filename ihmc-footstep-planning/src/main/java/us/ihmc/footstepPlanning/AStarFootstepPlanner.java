@@ -200,12 +200,15 @@ public class AStarFootstepPlanner
          FootstepGraphNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
          if (achievedGoalNode != null)
          {
-            // the final graph expansion is handled manually
-            AStarIterationData<FootstepGraphNode> finalIterationData = new AStarIterationData<>();
-            finalIterationData.setParentNode(achievedGoalNode);
-            finalIterationData.getValidChildNodes().add(completionChecker.getEndNode());
-            recordIterationData(finalIterationData);
-            iterationCallback.accept(finalIterationData);
+            // the final graph expansion is handled manually when not in proximity mode
+            if (!completionChecker.isProximityModeEnabled())
+            {
+               AStarIterationData<FootstepGraphNode> finalIterationData = new AStarIterationData<>();
+               finalIterationData.setParentNode(achievedGoalNode);
+               finalIterationData.getValidChildNodes().add(completionChecker.getEndNode());
+               recordIterationData(finalIterationData);
+               iterationCallback.accept(finalIterationData);
+            }
 
             result = FootstepPlanningResult.FOUND_SOLUTION;
             break;
