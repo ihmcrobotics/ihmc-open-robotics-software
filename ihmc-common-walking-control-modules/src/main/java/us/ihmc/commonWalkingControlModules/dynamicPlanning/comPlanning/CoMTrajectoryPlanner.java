@@ -3,9 +3,15 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import org.ejml.interfaces.linsol.LinearSolverSparse;
+import org.ejml.sparse.FillReducing;
+import org.ejml.sparse.csc.CommonOps_DSCC;
+import org.ejml.sparse.csc.factory.LinearSolverFactory_DSCC;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -57,23 +63,47 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final DMatrixRMaj coefficientMultipliers = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj coefficientMultipliersInv = new DMatrixRMaj(0, 0);
 
+   private final DMatrixSparseCSC coefficientMultipliersSparse = new DMatrixSparseCSC(0, 0);
+
    private final DMatrixRMaj xEquivalents = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj yEquivalents = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj zEquivalents = new DMatrixRMaj(0, 1);
+
+   private final DMatrixSparseCSC xEquivalentsSparse = new DMatrixSparseCSC(0, 1);
+   private final DMatrixSparseCSC yEquivalentsSparse = new DMatrixSparseCSC(0, 1);
+   private final DMatrixSparseCSC zEquivalentsSparse = new DMatrixSparseCSC(0, 1);
 
    private final DMatrixRMaj xConstants = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj yConstants = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj zConstants = new DMatrixRMaj(0, 1);
 
+   private final DMatrixSparseCSC xConstantsSparse = new DMatrixSparseCSC(0, 1);
+   private final DMatrixSparseCSC yConstantsSparse = new DMatrixSparseCSC(0, 1);
+   private final DMatrixSparseCSC zConstantsSparse = new DMatrixSparseCSC(0, 1);
+
    private final DMatrixRMaj vrpWaypointJacobian = new DMatrixRMaj(0, 1);
+   private final DMatrixSparseCSC vrpWaypointJacobianSparse = new DMatrixSparseCSC(0, 1);
 
    private final DMatrixRMaj vrpXWaypoints = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj vrpYWaypoints = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj vrpZWaypoints = new DMatrixRMaj(0, 1);
 
+   private final DMatrixSparseCSC vrpXWaypointsSparse = new DMatrixSparseCSC(0, 1);
+   private final DMatrixSparseCSC vrpYWaypointsSparse = new DMatrixSparseCSC(0, 1);
+   private final DMatrixSparseCSC vrpZWaypointsSparse = new DMatrixSparseCSC(0, 1);
+
+   // FIXME fill reducing?
+   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> luSolver = LinearSolverFactory_DSCC.lu(FillReducing.NONE);
+   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> cholSolver = LinearSolverFactory_DSCC.cholesky(FillReducing.NONE);
+   private final LinearSolverSparse<DMatrixSparseCSC, DMatrixRMaj> qrSolver = LinearSolverFactory_DSCC.qr(FillReducing.NONE);
+
    final DMatrixRMaj xCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj yCoefficientVector = new DMatrixRMaj(0, 1);
    final DMatrixRMaj zCoefficientVector = new DMatrixRMaj(0, 1);
+
+   final DMatrixSparseCSC xCoefficientVectorSparse = new DMatrixSparseCSC(0, 1);
+   final DMatrixSparseCSC yCoefficientVectorSparse = new DMatrixSparseCSC(0, 1);
+   final DMatrixSparseCSC zCoefficientVectorSparse = new DMatrixSparseCSC(0, 1);
 
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
@@ -192,17 +222,18 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       solveForCoefficientConstraintMatrix(contactSequence);
 
-      xEquivalents.set(xConstants);
-      yEquivalents.set(yConstants);
-      zEquivalents.set(zConstants);
-
-      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
-      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
-      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
-
-      CommonOps_DDRM.mult(coefficientMultipliersInv, xEquivalents, xCoefficientVector);
-      CommonOps_DDRM.mult(coefficientMultipliersInv, yEquivalents, yCoefficientVector);
-      CommonOps_DDRM.mult(coefficientMultipliersInv, zEquivalents, zCoefficientVector);
+//      xEquivalents.set(xConstants);
+//      yEquivalents.set(yConstants);
+//      zEquivalents.set(zConstants);
+//
+//      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
+//      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
+//      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
+//
+//
+//      CommonOps_DDRM.mult(coefficientMultipliersInv, xEquivalents, xCoefficientVector);
+//      CommonOps_DDRM.mult(coefficientMultipliersInv, yEquivalents, yCoefficientVector);
+//      CommonOps_DDRM.mult(coefficientMultipliersInv, zEquivalents, zCoefficientVector);
 
       // update coefficient holders
       int firstCoefficientIndex = 0;
@@ -281,21 +312,27 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
+
       numberOfConstraints = 0;
 
+      long startTime = System.nanoTime();
+
+
       // set initial constraint
-      setCoMPositionConstraint(currentCoMPosition);
-      setDynamicsInitialConstraint(contactSequence, 0);
+      setCoMPositionConstraint(coefficientMultipliers, xConstants, yConstants, zConstants, currentCoMPosition);
+      setDynamicsInitialConstraint(coefficientMultipliers, vrpWaypointJacobian, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints,
+                                   zConstants, contactSequence, 0);
 
       int transition = 0;
       // add a moveable waypoint for the center of mass velocity constraint
       if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing())
       {
-         setCoMVelocityConstraint(currentCoMVelocity);
-         setCoMPositionContinuity(contactSequence, 0, 1);
-         setCoMVelocityContinuity(contactSequence, 0, 1);
+         setCoMVelocityConstraint(coefficientMultipliers, xConstants, yConstants, zConstants, currentCoMVelocity);
+         setCoMPositionContinuity(coefficientMultipliers, contactSequence, 0, 1);
+         setCoMVelocityContinuity(coefficientMultipliers, contactSequence, 0, 1);
 
-         setDynamicsContinuityConstraint(contactSequence, 0, 1);
+         setDynamicsContinuityConstraint(coefficientMultipliers, vrpWaypointJacobian, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints,
+                                         contactSequence, 0, 1);
          transition++;
       }
 
@@ -305,20 +342,98 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          int previousSequence = transition;
          int nextSequence = transition + 1;
-         setCoMPositionContinuity(contactSequence, previousSequence, nextSequence);
-         setCoMVelocityContinuity(contactSequence, previousSequence, nextSequence);
-         setDynamicsFinalConstraint(contactSequence, previousSequence);
-         setDynamicsInitialConstraint(contactSequence, nextSequence);
+         setCoMPositionContinuity(coefficientMultipliers, contactSequence, previousSequence, nextSequence);
+         setCoMVelocityContinuity(coefficientMultipliers, contactSequence, previousSequence, nextSequence);
+         setDynamicsFinalConstraint(coefficientMultipliers, vrpWaypointJacobian, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, zConstants, contactSequence, previousSequence);
+         setDynamicsInitialConstraint(coefficientMultipliers, vrpWaypointJacobian, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, zConstants, contactSequence, nextSequence);
       }
 
       // set terminal constraint
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
       finalDCMPosition.set(endVRPPositions.getLast());
       double finalDuration = lastContactPhase.getTimeInterval().getDuration();
-      setDCMPositionConstraint(numberOfPhases - 1, finalDuration, finalDCMPosition);
-      setDynamicsFinalConstraint(contactSequence, numberOfPhases - 1);
+      setDCMPositionConstraint(coefficientMultipliers, xConstants, yConstants, zConstants,
+                               numberOfPhases - 1, finalDuration, finalDCMPosition);
+      setDynamicsFinalConstraint(coefficientMultipliers, vrpWaypointJacobian, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, zConstants, contactSequence, numberOfPhases - 1);
+
+
 
       NativeCommonOps.invert(coefficientMultipliers, coefficientMultipliersInv);
+
+      xEquivalents.set(xConstants);
+      yEquivalents.set(yConstants);
+      zEquivalents.set(zConstants);
+
+      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
+      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
+      CommonOps_DDRM.multAdd(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
+
+      CommonOps_DDRM.mult(coefficientMultipliersInv, xEquivalents, xCoefficientVector);
+      CommonOps_DDRM.mult(coefficientMultipliersInv, yEquivalents, yCoefficientVector);
+      CommonOps_DDRM.mult(coefficientMultipliersInv, zEquivalents, zCoefficientVector);
+
+      System.out.println("Full inverse time: " + (System.nanoTime() - startTime));
+
+      startTime = System.nanoTime();
+
+
+      numberOfConstraints = 0;
+
+      // set initial constraint
+      setCoMPositionConstraint(coefficientMultipliersSparse, xConstantsSparse, yConstantsSparse, zConstantsSparse, currentCoMPosition);
+      setDynamicsInitialConstraint(coefficientMultipliersSparse, vrpWaypointJacobianSparse, vrpXWaypointsSparse, vrpYWaypointsSparse, vrpZWaypointsSparse,
+                                   zConstantsSparse, contactSequence, 0);
+
+      transition = 0;
+      // add a moveable waypoint for the center of mass velocity constraint
+      if (maintainInitialCoMVelocityContinuity && contactSequence.get(0).getContactState().isLoadBearing())
+      {
+         setCoMVelocityConstraint(coefficientMultipliersSparse, xConstantsSparse, yConstantsSparse, zConstantsSparse, currentCoMVelocity);
+         setCoMPositionContinuity(coefficientMultipliersSparse, contactSequence, 0, 1);
+         setCoMVelocityContinuity(coefficientMultipliersSparse, contactSequence, 0, 1);
+
+         setDynamicsContinuityConstraint(coefficientMultipliersSparse, vrpWaypointJacobianSparse, vrpXWaypointsSparse, vrpYWaypointsSparse, vrpZWaypointsSparse,
+                                         contactSequence, 0, 1);
+         transition++;
+      }
+
+
+      // add transition continuity constraints
+      for (; transition < numberOfTransitions; transition++)
+      {
+         int previousSequence = transition;
+         int nextSequence = transition + 1;
+         setCoMPositionContinuity(coefficientMultipliersSparse, contactSequence, previousSequence, nextSequence);
+         setCoMVelocityContinuity(coefficientMultipliersSparse, contactSequence, previousSequence, nextSequence);
+         setDynamicsFinalConstraint(coefficientMultipliersSparse, vrpWaypointJacobianSparse, vrpXWaypointsSparse, vrpYWaypointsSparse, vrpZWaypointsSparse, zConstantsSparse, contactSequence, previousSequence);
+         setDynamicsInitialConstraint(coefficientMultipliersSparse, vrpWaypointJacobianSparse, vrpXWaypointsSparse, vrpYWaypointsSparse, vrpZWaypointsSparse, zConstantsSparse, contactSequence, nextSequence);
+      }
+
+      // set terminal constraint
+      lastContactPhase = contactSequence.get(numberOfPhases - 1);
+      finalDCMPosition.set(endVRPPositions.getLast());
+      finalDuration = lastContactPhase.getTimeInterval().getDuration();
+      setDCMPositionConstraint(coefficientMultipliersSparse, xConstantsSparse, yConstantsSparse, zConstantsSparse,
+                               numberOfPhases - 1, finalDuration, finalDCMPosition);
+      setDynamicsFinalConstraint(coefficientMultipliersSparse, vrpWaypointJacobianSparse, vrpXWaypointsSparse, vrpYWaypointsSparse, vrpZWaypointsSparse, zConstantsSparse,
+                                 contactSequence, numberOfPhases - 1);
+
+      luSolver.setA(coefficientMultipliersSparse);
+
+      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpXWaypointsSparse, xEquivalentsSparse);
+      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpYWaypointsSparse, yEquivalentsSparse);
+      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpZWaypointsSparse, zEquivalentsSparse);
+      // TODO is this right?
+      CommonOps_DSCC.add(1.0, xEquivalentsSparse, 1.0, xConstantsSparse, xEquivalentsSparse, null, null);
+      CommonOps_DSCC.add(1.0, yEquivalentsSparse, 1.0, yConstantsSparse, yEquivalentsSparse, null, null);
+      CommonOps_DSCC.add(1.0, zEquivalentsSparse, 1.0, zConstantsSparse, zEquivalentsSparse, null, null);
+
+      luSolver.solveSparse(xEquivalentsSparse, xCoefficientVectorSparse);
+      luSolver.solveSparse(yEquivalentsSparse, yCoefficientVectorSparse);
+      luSolver.solveSparse(zEquivalentsSparse, zCoefficientVectorSparse);
+
+
+      System.out.println("LU sparse inverse time: " + (System.nanoTime() - startTime));
    }
 
 
@@ -533,6 +648,34 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       xCoefficientVector.zero();
       yCoefficientVector.zero();
       zCoefficientVector.zero();
+
+
+      coefficientMultipliersSparse.reshape(size, size);
+      xEquivalentsSparse.reshape(size, 1);
+      yEquivalentsSparse.reshape(size, 1);
+      zEquivalentsSparse.reshape(size, 1);
+      xConstantsSparse.reshape(size, 1);
+      yConstantsSparse.reshape(size, 1);
+      zConstantsSparse.reshape(size, 1);
+      vrpWaypointJacobianSparse.reshape(size, numberOfVRPWaypoints); // only position
+      vrpXWaypointsSparse.reshape(numberOfVRPWaypoints, 1);
+      vrpYWaypointsSparse.reshape(numberOfVRPWaypoints, 1);
+      vrpZWaypointsSparse.reshape(numberOfVRPWaypoints, 1);
+      xCoefficientVectorSparse.reshape(size, 1);
+      yCoefficientVectorSparse.reshape(size, 1);
+      zCoefficientVectorSparse.reshape(size, 1);
+
+      coefficientMultipliersSparse.zero();
+      xEquivalentsSparse.zero();
+      yEquivalentsSparse.zero();
+      zEquivalentsSparse.zero();
+      xConstantsSparse.zero();
+      yConstantsSparse.zero();
+      zConstantsSparse.zero();
+      vrpWaypointJacobianSparse.zero();
+      vrpXWaypointsSparse.zero();
+      vrpYWaypointsSparse.zero();
+      vrpZWaypointsSparse.zero();
    }
 
    /**
@@ -556,10 +699,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * </p>
     * @param centerOfMassLocationForConstraint x<sub>d</sub> in the above equations
     */
-   private void setCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint)
+   private void setCoMPositionConstraint(DMatrix matrixToPack,
+                                         DMatrix xConstantsToPack,
+                                         DMatrix yConstantsToPack,
+                                         DMatrix zConstantsToPack,
+                                         FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
       CoMTrajectoryPlannerTools.addCoMPositionConstraint(centerOfMassLocationForConstraint, omega.getValue(), 0.0, 0, numberOfConstraints,
-                                                         coefficientMultipliers, xConstants, yConstants, zConstants);
+                                                         matrixToPack, xConstantsToPack, yConstantsToPack, zConstantsToPack);
       numberOfConstraints++;
    }
 
@@ -583,10 +730,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * </p>
     * @param centerOfMassVelocityForConstraint x<sub>d</sub> in the above equations
     */
-   private void setCoMVelocityConstraint(FrameVector3DReadOnly centerOfMassVelocityForConstraint)
+   private void setCoMVelocityConstraint(DMatrix matrixToPack,
+                                         DMatrix xConstantsToPack,
+                                         DMatrix yConstantsToPack,
+                                         DMatrix zConstantsToPack,
+                                         FrameVector3DReadOnly centerOfMassVelocityForConstraint)
    {
       CoMTrajectoryPlannerTools.addCoMVelocityConstraint(centerOfMassVelocityForConstraint, omega.getValue(), 0.0, 0, numberOfConstraints,
-                                                         coefficientMultipliers, xConstants, yConstants, zConstants);
+                                                         matrixToPack, xConstantsToPack, yConstantsToPack, zConstantsToPack);
       numberOfConstraints++;
    }
 
@@ -613,10 +764,16 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param time t<sub>i</sub> in the above equations
     * @param desiredDCMPosition desired DCM location. &xi;<sub>d</sub> in the above equations.
     */
-   private void setDCMPositionConstraint(int sequenceId, double time, FramePoint3DReadOnly desiredDCMPosition)
+   private void setDCMPositionConstraint(DMatrix matrixToPack,
+                                         DMatrix xConstantsToPack,
+                                         DMatrix yConstantsToPack,
+                                         DMatrix zConstantsToPack,
+                                         int sequenceId,
+                                         double time,
+                                         FramePoint3DReadOnly desiredDCMPosition)
    {
-      CoMTrajectoryPlannerTools.addDCMPositionConstraint(sequenceId, numberOfConstraints, time, omega.getValue(), desiredDCMPosition, coefficientMultipliers,
-                                                         xConstants, yConstants, zConstants);
+      CoMTrajectoryPlannerTools.addDCMPositionConstraint(sequenceId, numberOfConstraints, time, omega.getValue(), desiredDCMPosition, matrixToPack,
+                                                         xConstantsToPack, yConstantsToPack, zConstantsToPack);
       numberOfConstraints++;
    }
 
@@ -636,11 +793,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
-   private void setCoMPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
+   private void setCoMPositionContinuity(DMatrix matrixToPack,
+                                         List<? extends ContactStateProvider> contactSequence,
+                                         int previousSequence,
+                                         int nextSequence)
    {
       double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
       CoMTrajectoryPlannerTools.addCoMPositionContinuityConstraint(previousSequence, nextSequence, numberOfConstraints, omega.getValue(), previousDuration,
-                                                                   coefficientMultipliers);
+                                                                   matrixToPack);
       numberOfConstraints++;
    }
 
@@ -660,11 +820,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
-   private void setCoMVelocityContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
+   private void setCoMVelocityContinuity(DMatrix matrixToPack,
+                                         List<? extends ContactStateProvider> contactSequence,
+                                         int previousSequence,
+                                         int nextSequence)
    {
       double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
       CoMTrajectoryPlannerTools.addCoMVelocityContinuityConstraint(previousSequence, nextSequence, numberOfConstraints, omega.getValue(), previousDuration,
-                                                                   coefficientMultipliers);
+                                                                   matrixToPack);
       numberOfConstraints++;
    }
 
@@ -676,7 +839,13 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param contactSequence current contact sequence.
     * @param sequenceId desired trajectory segment.
     */
-   private void setDynamicsInitialConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
+   private void setDynamicsInitialConstraint(DMatrix matrixToPack,
+                                             DMatrix vrpWaypointJacobianToPack,
+                                             DMatrix vrpXWaypointsToPack,
+                                             DMatrix vrpYWaypointsToPack,
+                                             DMatrix vrpZWaypointsToPack,
+                                             DMatrix zConstantsToPack,
+                                             List<? extends ContactStateProvider> contactSequence, int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       ContactState contactState = contactStateProvider.getContactState();
@@ -685,13 +854,15 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          double duration = contactStateProvider.getTimeInterval().getDuration();
          desiredVelocity.sub(endVRPPositions.get(sequenceId), startVRPPositions.get(sequenceId));
          desiredVelocity.scale(1.0 / duration);
-         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
-         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, desiredVelocity);
+         constrainVRPPosition(matrixToPack, vrpWaypointJacobianToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack,
+                              sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
+         constrainVRPVelocity(matrixToPack, vrpWaypointJacobianToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack,
+                              sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, desiredVelocity);
       }
       else
       {
-         constrainCoMAccelerationToGravity(sequenceId, 0.0);
-         constrainCoMJerkToZero(sequenceId, 0.0);
+         constrainCoMAccelerationToGravity(matrixToPack, zConstantsToPack, sequenceId, 0.0);
+         constrainCoMJerkToZero(matrixToPack, sequenceId, 0.0);
       }
    }
 
@@ -701,7 +872,14 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param contactSequence current contact sequence.
     * @param sequenceId desired trajectory segment.
     */
-   private void setDynamicsFinalConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
+   private void setDynamicsFinalConstraint(DMatrix matrixToPack,
+                                           DMatrix vrpWaypointJacobianToPack,
+                                           DMatrix vrpXWaypointsToPack,
+                                           DMatrix vrpYWaypointsToPack,
+                                           DMatrix vrpZWaypointsToPack,
+                                           DMatrix zConstantsToPack,
+                                           List<? extends ContactStateProvider> contactSequence,
+                                           int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       ContactState contactState = contactStateProvider.getContactState();
@@ -710,29 +888,40 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       {
          desiredVelocity.sub(endVRPPositions.get(sequenceId), startVRPPositions.get(sequenceId));
          desiredVelocity.scale(1.0 / duration);
-         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
-         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, desiredVelocity);
+         constrainVRPPosition(matrixToPack, vrpWaypointJacobianToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack,
+                              sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
+         constrainVRPVelocity(matrixToPack, vrpWaypointJacobianToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack,
+                              sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, desiredVelocity);
       }
       else
       {
-         constrainCoMAccelerationToGravity(sequenceId, duration);
-         constrainCoMJerkToZero(sequenceId, duration);
+         constrainCoMAccelerationToGravity(matrixToPack, zConstantsToPack, sequenceId, duration);
+         constrainCoMJerkToZero(matrixToPack, sequenceId, duration);
       }
    }
 
-   private void setDynamicsContinuityConstraint(List<? extends ContactStateProvider> contactSequence, int previousSequenceId, int nextSequenceId)
+   private void setDynamicsContinuityConstraint(DMatrix matrixToPack,
+                                                DMatrix vrpWaypointJacobianToPack,
+                                                DMatrix vrpXWaypointsToPack,
+                                                DMatrix vrpYWaypointsToPack,
+                                                DMatrix vrpZWaypointsToPack,
+                                                List<? extends ContactStateProvider> contactSequence,
+                                                int previousSequenceId,
+                                                int nextSequenceId)
    {
       ContactStateProvider previousSequence = contactSequence.get(previousSequenceId);
       ContactStateProvider nextSequence = contactSequence.get(nextSequenceId);
       if (previousSequence.getContactState().isLoadBearing() != nextSequence.getContactState().isLoadBearing())
          throw new IllegalArgumentException("Cannot constrain two sequences of different types to have equivalent dynamics.");
 
-      setVRPPositionContinuity(contactSequence, previousSequenceId, nextSequenceId);
+      setVRPPositionContinuity(matrixToPack, contactSequence, previousSequenceId, nextSequenceId);
 
       double previousDuration = previousSequence.getTimeInterval().getDuration();
       double nextDuration = nextSequence.getTimeInterval().getDuration();
-      addImplicitVRPVelocityConstraint(previousSequenceId, indexHandler.getVRPWaypointStartPositionIndex(previousSequenceId), previousDuration, 0.0, startVRPPositions.get(previousSequenceId));
-      addImplicitVRPVelocityConstraint(nextSequenceId, indexHandler.getVRPWaypointFinalPositionIndex(nextSequenceId), 0.0, nextDuration, endVRPPositions.get(nextSequenceId));
+      addImplicitVRPVelocityConstraint(matrixToPack, vrpWaypointJacobianToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack,
+                                       previousSequenceId, indexHandler.getVRPWaypointStartPositionIndex(previousSequenceId), previousDuration, 0.0, startVRPPositions.get(previousSequenceId));
+      addImplicitVRPVelocityConstraint(matrixToPack, vrpWaypointJacobianToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack,
+                                       nextSequenceId, indexHandler.getVRPWaypointFinalPositionIndex(nextSequenceId), 0.0, nextDuration, endVRPPositions.get(nextSequenceId));
    }
 
    /**
@@ -749,10 +938,18 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param time time in the segment, t<sub>i</sub> in the above equations
     * @param desiredVRPPosition reference VRP position, v<sub>r</sub> in the above equations.
     */
-   private void constrainVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
+   private void constrainVRPPosition(DMatrix matrixToPack,
+                                     DMatrix vrpWaypointJacobianToPack,
+                                     DMatrix vrpXWaypointsToPack,
+                                     DMatrix vrpYWaypointsToPack,
+                                     DMatrix vrpZWaypointsToPack,
+                                     int sequenceId,
+                                     int vrpWaypointPositionIndex,
+                                     double time,
+                                     FramePoint3DReadOnly desiredVRPPosition)
    {
       CoMTrajectoryPlannerTools.addVRPPositionConstraint(sequenceId, numberOfConstraints, vrpWaypointPositionIndex, time, omega.getValue(), desiredVRPPosition,
-                                                         coefficientMultipliers, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
+                                                         matrixToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack, vrpWaypointJacobianToPack);
       numberOfConstraints++;
    }
 
@@ -770,10 +967,18 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param time time in the segment, t<sub>i</sub> in the above equations
     * @param desiredVRPVelocity reference VRP veloctiy, d/dt v<sub>r</sub> in the above equations.
     */
-   private void constrainVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
+   private void constrainVRPVelocity(DMatrix matrixToPack,
+                                     DMatrix vrpWaypointJacobianToPack,
+                                     DMatrix vrpXWaypointsToPack,
+                                     DMatrix vrpYWaypointsToPack,
+                                     DMatrix vrpZWaypointsToPack,
+                                     int sequenceId,
+                                     int vrpWaypointVelocityIndex,
+                                     double time,
+                                     FrameVector3DReadOnly desiredVRPVelocity)
    {
       CoMTrajectoryPlannerTools.addVRPVelocityConstraint(sequenceId, numberOfConstraints, vrpWaypointVelocityIndex, omega.getValue(), time, desiredVRPVelocity,
-                                                         coefficientMultipliers, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
+                                                         matrixToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack, vrpWaypointJacobianToPack);
       numberOfConstraints++;
    }
 
@@ -788,10 +993,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param sequenceId segment of interest, i in the above equations.
     * @param time time for the constraint, t<sub>i</sub> in the above equations.
     */
-   private void constrainCoMAccelerationToGravity(int sequenceId, double time)
+   private void constrainCoMAccelerationToGravity(DMatrix matrixToPack, DMatrix zConstantsToPack, int sequenceId, double time)
    {
-      CoMTrajectoryPlannerTools.constrainCoMAccelerationToGravity(sequenceId, numberOfConstraints, omega.getValue(), time, gravityZ, coefficientMultipliers,
-                                                                  zConstants);
+      CoMTrajectoryPlannerTools.constrainCoMAccelerationToGravity(sequenceId, numberOfConstraints, omega.getValue(), time, gravityZ, matrixToPack,
+                                                                  zConstantsToPack);
       numberOfConstraints++;
    }
 
@@ -806,25 +1011,33 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
     * @param sequenceId segment of interest, i in the above equations.
     * @param time time for the constraint, t<sub>i</sub> in the above equations.
     */
-   private void constrainCoMJerkToZero(int sequenceId, double time)
+   private void constrainCoMJerkToZero(DMatrix matrixToPack, int sequenceId, double time)
    {
-      CoMTrajectoryPlannerTools.constrainCoMJerkToZero(time, omega.getValue(), sequenceId, numberOfConstraints, coefficientMultipliers);
+      CoMTrajectoryPlannerTools.constrainCoMJerkToZero(time, omega.getValue(), sequenceId, numberOfConstraints, matrixToPack);
       numberOfConstraints++;
    }
 
-   private void setVRPPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
+   private void setVRPPositionContinuity(DMatrix matrixToPack, List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
    {
       double previousDuration = contactSequence.get(previousSequence).getTimeInterval().getDuration();
       CoMTrajectoryPlannerTools.addVRPPositionContinuityConstraint(previousSequence, nextSequence, numberOfConstraints, omega.getValue(), previousDuration,
-                                                                   coefficientMultipliers);
+                                                                   matrixToPack);
       numberOfConstraints++;
    }
 
-   private void addImplicitVRPVelocityConstraint(int sequenceId, int vrpWaypointPositionIndex, double time, double timeAtWaypoint,
+   private void addImplicitVRPVelocityConstraint(DMatrix matrixToPack,
+                                                 DMatrix vrpWaypointJacobianToPack,
+                                                 DMatrix vrpXWaypointsToPack,
+                                                 DMatrix vrpYWaypointsToPack,
+                                                 DMatrix vrpZWaypointsToPack,
+                                                 int sequenceId,
+                                                 int vrpWaypointPositionIndex,
+                                                 double time,
+                                                 double timeAtWaypoint,
                                                  FramePoint3DReadOnly desiredVRPPosition)
    {
       CoMTrajectoryPlannerTools.addImplicitVRPVelocityConstraint(sequenceId, numberOfConstraints, vrpWaypointPositionIndex, time, timeAtWaypoint, omega.getValue(),
-                                                                 desiredVRPPosition, coefficientMultipliers, vrpXWaypoints, vrpYWaypoints, vrpZWaypoints, vrpWaypointJacobian);
+                                                                 desiredVRPPosition, matrixToPack, vrpXWaypointsToPack, vrpYWaypointsToPack, vrpZWaypointsToPack, vrpWaypointJacobianToPack);
       numberOfConstraints++;
    }
 
