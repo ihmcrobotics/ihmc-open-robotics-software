@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
@@ -16,20 +17,11 @@ import java.util.*;
 
 public class FootstepPlannerCompletionChecker
 {
-   private static final double distanceEpsilonForSquaredUp = 0.06;
-   private static final double yawEpsilonForSquaredUp = Math.toRadians(20.0);
-
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarFootstepPlannerIterationConductor iterationConductor;
    private final FootstepPlannerHeuristicCalculator heuristics;
 
-   private final SquaredUpStepComparator squaredUpStepComparator;
-   private final GoalProximityComparator goalProximityComparator;
-
    private final Pose2D goalMidFootPose = new Pose2D();
-   private final Pose2D midFootPose = new Pose2D();
-   private final List<FootstepGraphNode> childNodes = new ArrayList<>();
-
    private double goalDistanceProximity;
    private double goalYawProximity;
 
@@ -38,6 +30,8 @@ public class FootstepPlannerCompletionChecker
    private SideDependentList<DiscreteFootstep> goalNodes;
    private double endNodeCost;
 
+   private final SquaredUpStepComparator squaredUpStepComparator = new SquaredUpStepComparator();
+
    public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
                                            AStarFootstepPlannerIterationConductor iterationConductor,
                                            FootstepPlannerHeuristicCalculator heuristics)
@@ -45,9 +39,6 @@ public class FootstepPlannerCompletionChecker
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.iterationConductor = iterationConductor;
       this.heuristics = heuristics;
-
-      squaredUpStepComparator = new SquaredUpStepComparator();
-      goalProximityComparator = new GoalProximityComparator(footstepPlannerParameters);
    }
 
    public void initialize(FootstepGraphNode startNode, SideDependentList<DiscreteFootstep> goalNodes, double goalDistanceProximity, double goalYawProximity)
@@ -73,25 +64,24 @@ public class FootstepPlannerCompletionChecker
     */
    public FootstepGraphNode checkIfGoalIsReached(AStarIterationData<FootstepGraphNode> iterationData)
    {
-      //      if (isProximityModeEnabled())
-      //      {
-      // TODO implement proximity mode with FootstepStanceNode
-      //         iterationData.getValidChildNodes().sort(goalProximityComparator);
-      //         for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
-      //         {
-      //            FootstepNode childNode = iterationData.getValidChildNodes().get(i);
-      //            midFootPose.set(childNode.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth()), childNode.getYaw());
-      //
-      //            boolean validYawProximity = midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) <= goalYawProximity;
-      //            boolean validDistanceProximity = midFootPose.getPosition().distanceSquared(goalMidFootPose.getPosition()) <= MathTools.square(goalDistanceProximity);
-      //
-      //            if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))
-      //            {
-      //               return childNode;
-      //            }
-      //         }
-      //      }
-      //      else
+      if (isProximityModeEnabled() && iterationData.getParentNode() != null)
+      {
+         DiscreteFootstep stanceStep = iterationData.getParentNode().getEndStep();
+         squaredUpStepComparator.setIdealSquaredUpStep(stanceStep, footstepPlannerParameters.getIdealFootstepWidth());
+         iterationData.getValidChildNodes().sort(squaredUpStepComparator);
+         FootstepGraphNode candidateStepInProximity = iterationData.getValidChildNodes().get(0);
+         Pose2D midFootPose = candidateStepInProximity.getOrComputeMidFootPose();
+
+         boolean validPosition = goalDistanceProximity < 0.0 || midFootPose.getPosition().distance(goalMidFootPose.getPosition()) < goalDistanceProximity;
+         boolean validOrientation = goalYawProximity < 0.0 || midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) < goalYawProximity;
+
+         if (validPosition && validOrientation)
+         {
+            endNode = candidateStepInProximity;
+            return endNode;
+         }
+      }
+      else
       {
          for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
          {
@@ -104,7 +94,6 @@ public class FootstepPlannerCompletionChecker
             }
          }
       }
-      //      }
 
       for (int i = 0; i < iterationData.getValidChildNodes().size(); i++)
       {
@@ -122,54 +111,6 @@ public class FootstepPlannerCompletionChecker
       return null;
    }
 
-//   /**
-//    * Checks if this step can be followed by a square-up step that's also within the proximity bounds.
-//    * If so, the square-up step is set as the end nodeInProximity and the edge cost is set to zero.
-//    *
-//    * @param nodeInProximity step that's within goal proximity
-//    * @return if a square-up step was found
-//    */
-//   private boolean searchForSquaredUpStepInProximity(FootstanceNode parentNode, FootstanceNode nodeInProximity)
-//   {
-//      DirectedGraph<FootstanceNode> graph = iterationConductor.getGraph();
-//      if (!graph.getOutgoingEdges().containsKey(nodeInProximity))
-//      {
-//         // this step hasn't been expanded yet, perform iteration now
-//         iterationConductor.doPlanningIteration(nodeInProximity, false);
-//      }
-//
-//      // grab all outgoing edges
-//      childNodes.clear();
-//      Predicate<GraphEdge<FootstanceNode>> validEdgeFilter = edge -> Double.isFinite(graph.getEdgeCostMap().get(edge).getEdgeCost());
-//      graph.getOutgoingEdges().get(nodeInProximity).stream().filter(validEdgeFilter).forEach(edge -> childNodes.add(edge.getEndNode()));
-//
-//      if (childNodes.isEmpty())
-//         return false;
-//
-//      squaredUpStepComparator.squaredUpStep.set(nodeInProximity.getX(), nodeInProximity.getY(), nodeInProximity.getYaw());
-//      squaredUpStepComparator.squaredUpStep.appendTranslation(0.0, nodeInProximity.getRobotSide().negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
-//      childNodes.sort(squaredUpStepComparator);
-//
-//      for (int i = 0; i < childNodes.size(); i++)
-//      {
-//         FootstepNode closestStepToSquaredUp = childNodes.get(i);
-//         double distanceFromSquaredUpSquared = EuclidCoreTools.normSquared(closestStepToSquaredUp.getX() - squaredUpStepComparator.squaredUpStep.getX(),
-//                                                                           closestStepToSquaredUp.getY() - squaredUpStepComparator.squaredUpStep.getY());
-//         double angleFromSquaredUp = Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(closestStepToSquaredUp.getYaw(),
-//                                                                                         squaredUpStepComparator.squaredUpStep.getYaw()));
-//
-//         if (distanceFromSquaredUpSquared < MathTools.square(distanceEpsilonForSquaredUp) && angleFromSquaredUp < yawEpsilonForSquaredUp)
-//         {
-//            graph.updateEdgeCost(parentNode, nodeInProximity, 0.0);
-//            graph.updateEdgeCost(nodeInProximity, closestStepToSquaredUp, 0.0);
-//            endNode = closestStepToSquaredUp;
-//            return true;
-//         }
-//      }
-//
-//      return false;
-//   }
-
    public boolean isProximityModeEnabled()
    {
       return goalDistanceProximity > 0.0 || goalYawProximity > 0.0;
@@ -185,45 +126,29 @@ public class FootstepPlannerCompletionChecker
       return endNodePathSize;
    }
 
-   private class GoalProximityComparator implements Comparator<FootstepGraphNode>
-   {
-      private final FootstepPlannerParametersBasics footstepPlannerParameters;
-
-      public GoalProximityComparator(FootstepPlannerParametersBasics footstepPlannerParameters)
-      {
-         this.footstepPlannerParameters = footstepPlannerParameters;
-      }
-
-      public int compare(FootstepGraphNode nodeA, FootstepGraphNode nodeB)
-      {
-         Pose2D midFootPoseA = nodeA.getOrComputeMidFootPose();
-         Pose2D midFootPoseB = nodeB.getOrComputeMidFootPose();
-
-         double positionDistanceA = midFootPoseA.getPosition().distanceSquared(goalMidFootPose.getPosition());
-         double positionDistanceB = midFootPoseB.getPosition().distanceSquared(goalMidFootPose.getPosition());
-
-         double yawScalar = 3.0;
-         double yawDistanceA = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getEndStep().getYaw()));
-         double yawDistanceB = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(goalMidFootPose.getYaw(), nodeA.getEndStep().getYaw()));
-
-         return Double.compare(positionDistanceA + yawDistanceA, positionDistanceB + yawDistanceB);
-      }
-   }
-
-   private class SquaredUpStepComparator implements Comparator<DiscreteFootstep>
+   private static class SquaredUpStepComparator implements Comparator<FootstepGraphNode>
    {
       private final Pose2D squaredUpStep = new Pose2D();
 
-      public int compare(DiscreteFootstep nodeA, DiscreteFootstep nodeB)
+      public int compare(FootstepGraphNode nodeA, FootstepGraphNode nodeB)
       {
-         double positionDistanceA = EuclidCoreTools.norm(nodeA.getX() - squaredUpStep.getX(), nodeA.getY() - squaredUpStep.getY());
-         double positionDistanceB = EuclidCoreTools.norm(nodeB.getX() - squaredUpStep.getX(), nodeB.getY() - squaredUpStep.getY());
+         double positionDistanceA = EuclidCoreTools.norm(nodeA.getEndStep().getX() - squaredUpStep.getX(), nodeA.getEndStep().getY() - squaredUpStep.getY());
+         double positionDistanceB = EuclidCoreTools.norm(nodeB.getEndStep().getX() - squaredUpStep.getX(), nodeB.getEndStep().getY() - squaredUpStep.getY());
 
          double yawScalar = 3.0;
-         double yawDistanceA = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(nodeA.getYaw(), squaredUpStep.getYaw()));
-         double yawDistanceB = yawScalar * Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(nodeB.getYaw(), squaredUpStep.getYaw()));
+         double yawDistanceA = yawScalar * nodeA.getStanceAngle();
+         double yawDistanceB = yawScalar * nodeB.getStanceAngle();
 
          return Double.compare(positionDistanceA + yawDistanceA, positionDistanceB + yawDistanceB);
+      }
+
+      void setIdealSquaredUpStep(DiscreteFootstep footstep, double idealStepWidth)
+      {
+         double stepX = footstep.getRobotSide().negateIfRightSide(Math.sin(footstep.getYaw()) * idealStepWidth);
+         double stepY = -footstep.getRobotSide().negateIfRightSide(Math.cos(footstep.getYaw()) * idealStepWidth);
+         squaredUpStep.setX(footstep.getX() + stepX);
+         squaredUpStep.setY(footstep.getY() + stepY);
+         squaredUpStep.setYaw(footstep.getYaw());
       }
    }
 }
