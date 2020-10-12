@@ -168,11 +168,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumStepYWhenForwardAndDown, maximumStepYWhenForwardAndDown);
    }
 
-   default void setTranslationScaleFromGrandparentNode(double translationScaleFromGrandparentNode)
-   {
-      set(FootstepPlannerParameterKeys.translationScaleFromGrandparentNode, translationScaleFromGrandparentNode);
-   }
-
    default void setIdealFootstepWidth(double idealFootstepWidth)
    {
       set(FootstepPlannerParameterKeys.idealFootstepWidth, idealFootstepWidth);
@@ -353,11 +348,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
    }
 
-   default void setStepOnlyWithRequestedSide(byte side)
-   {
-      set(stepOnlyWithRequestedSide, side);
-   }
-
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -398,8 +388,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepYWhenForwardAndDown(parametersPacket.getMaximumStepYWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZWhenForwardAndDown() != noValue)
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
-      if (parametersPacket.getTranslationScaleFromGrandparentNode() != noValue)
-         setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
       if (parametersPacket.getMaximumLeftStepZ() != noValue)
          setMaximumLeftStepZ(parametersPacket.getMaximumLeftStepZ());
       if (parametersPacket.getMaximumRightStepZ() != noValue)
@@ -490,6 +478,5 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinHeelClearance(parametersPacket.getShinHeelClearance());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
-      setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

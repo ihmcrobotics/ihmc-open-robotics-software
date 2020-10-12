@@ -184,15 +184,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_z_when_forward_and_down_ = -11.1;
    /**
-            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
-            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-            * {@link #getMaximumStepZWhenForwardAndDown()}.
-            * 
-            * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-            */
-   public double translation_scale_from_grandparent_node_ = -11.1;
-   /**
             * Maximum vertical distance between consecutive footsteps
             * 
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
@@ -477,13 +468,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * Height offset of shin collidable cylinder
             */
    public double shin_height_offet_ = -11.1;
-   /**
-            * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
-            * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
-            * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
-            * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
-            */
-   public byte step_only_with_requested_side_ = (byte) 255;
 
    public FootstepPlannerParametersPacket()
    {
@@ -536,8 +520,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_step_y_when_forward_and_down_ = other.maximum_step_y_when_forward_and_down_;
 
       maximum_step_z_when_forward_and_down_ = other.maximum_step_z_when_forward_and_down_;
-
-      translation_scale_from_grandparent_node_ = other.translation_scale_from_grandparent_node_;
 
       maximum_left_step_z_ = other.maximum_left_step_z_;
 
@@ -636,8 +618,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       shin_length_ = other.shin_length_;
 
       shin_height_offet_ = other.shin_height_offet_;
-
-      step_only_with_requested_side_ = other.step_only_with_requested_side_;
 
    }
 
@@ -1069,31 +1049,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepZWhenForwardAndDown()
    {
       return maximum_step_z_when_forward_and_down_;
-   }
-
-   /**
-            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
-            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-            * {@link #getMaximumStepZWhenForwardAndDown()}.
-            * 
-            * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-            */
-   public void setTranslationScaleFromGrandparentNode(double translation_scale_from_grandparent_node)
-   {
-      translation_scale_from_grandparent_node_ = translation_scale_from_grandparent_node;
-   }
-   /**
-            * Scale factor for checking 2D step limitations when changing height from the grandparent node.
-            * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-            * {@link #getMaximumStepZWhenForwardAndDown()}.
-            * 
-            * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-            * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
-            */
-   public double getTranslationScaleFromGrandparentNode()
-   {
-      return translation_scale_from_grandparent_node_;
    }
 
    /**
@@ -2009,27 +1964,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       return shin_height_offet_;
    }
 
-   /**
-            * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
-            * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
-            * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
-            * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
-            */
-   public void setStepOnlyWithRequestedSide(byte step_only_with_requested_side)
-   {
-      step_only_with_requested_side_ = step_only_with_requested_side;
-   }
-   /**
-            * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
-            * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
-            * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
-            * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
-            */
-   public byte getStepOnlyWithRequestedSide()
-   {
-      return step_only_with_requested_side_;
-   }
-
 
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -2087,8 +2021,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_y_when_forward_and_down_, other.maximum_step_y_when_forward_and_down_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_forward_and_down_, other.maximum_step_z_when_forward_and_down_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.translation_scale_from_grandparent_node_, other.translation_scale_from_grandparent_node_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_left_step_z_, other.maximum_left_step_z_, epsilon)) return false;
 
@@ -2188,8 +2120,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_only_with_requested_side_, other.step_only_with_requested_side_, epsilon)) return false;
-
 
       return true;
    }
@@ -2242,8 +2172,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.maximum_step_y_when_forward_and_down_ != otherMyClass.maximum_step_y_when_forward_and_down_) return false;
 
       if(this.maximum_step_z_when_forward_and_down_ != otherMyClass.maximum_step_z_when_forward_and_down_) return false;
-
-      if(this.translation_scale_from_grandparent_node_ != otherMyClass.translation_scale_from_grandparent_node_) return false;
 
       if(this.maximum_left_step_z_ != otherMyClass.maximum_left_step_z_) return false;
 
@@ -2343,8 +2271,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
 
-      if(this.step_only_with_requested_side_ != otherMyClass.step_only_with_requested_side_) return false;
-
 
       return true;
    }
@@ -2395,8 +2321,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_y_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z_when_forward_and_down=");
       builder.append(this.maximum_step_z_when_forward_and_down_);      builder.append(", ");
-      builder.append("translation_scale_from_grandparent_node=");
-      builder.append(this.translation_scale_from_grandparent_node_);      builder.append(", ");
       builder.append("maximum_left_step_z=");
       builder.append(this.maximum_left_step_z_);      builder.append(", ");
       builder.append("maximum_right_step_z=");
@@ -2494,9 +2418,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("shin_length=");
       builder.append(this.shin_length_);      builder.append(", ");
       builder.append("shin_height_offet=");
-      builder.append(this.shin_height_offet_);      builder.append(", ");
-      builder.append("step_only_with_requested_side=");
-      builder.append(this.step_only_with_requested_side_);
+      builder.append(this.shin_height_offet_);
       builder.append("}");
       return builder.toString();
    }

@@ -242,9 +242,5 @@ public class FootstepPlannerParametersTest
       double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
-
-      byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
-      parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);
-      assertEquals(RobotSide.fromByte(stepOnlyWithRequestedSide), parameters.getStepOnlyWithRequestedSide());
    }
 }
