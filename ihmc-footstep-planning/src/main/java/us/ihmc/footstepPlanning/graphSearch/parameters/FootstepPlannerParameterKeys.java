@@ -33,8 +33,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  maxStepWidth                                 = keys.addDoubleKey ("Max step width", 0.4);
    public static final DoubleStoredPropertyKey  maxStepReach                                 = keys.addDoubleKey ("Max step reach", 0.45);
    public static final DoubleStoredPropertyKey  maxStepYaw                                   = keys.addDoubleKey ("Max step yaw", 0.6);
-   public static final DoubleStoredPropertyKey  maxLeftStepZ                                 = keys.addDoubleKey ("Max left step Z", 0.28);
-   public static final DoubleStoredPropertyKey  maxRightStepZ                                = keys.addDoubleKey ("Max right step Z", 0.28);
+   public static final DoubleStoredPropertyKey  maxStepZ                                     = keys.addDoubleKey ("Max step Z", 0.28);
    public static final DoubleStoredPropertyKey  maxStepXWhenFullyPitched                     = keys.addDoubleKey ("Max step X when fully pitched", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepXWhenForwardAndDown               = keys.addDoubleKey ("Max step X when forward and down", 0.35);
    public static final DoubleStoredPropertyKey  maximumStepYWhenForwardAndDown               = keys.addDoubleKey ("Max step Y when forward and down", 0.4);

@@ -80,7 +80,7 @@ public class FootstepPoseChecker
       stepWidth.set(stepSide.negateIfRightSide(candidateFootPose.getY()));
       stepReachXY.set(EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(stepWidth.getValue() - parameters.getIdealFootstepWidth())));
       stepHeight.set(candidateFootPose.getZ());
-      double maximumStepZ = stepSide == RobotSide.LEFT ? parameters.getMaximumLeftStepZ() : parameters.getMaximumRightStepZ();
+      double maximumStepZ = parameters.getMaxStepZ();
 
       if (stepWidth.getValue() < parameters.getMinimumStepWidth())
       {

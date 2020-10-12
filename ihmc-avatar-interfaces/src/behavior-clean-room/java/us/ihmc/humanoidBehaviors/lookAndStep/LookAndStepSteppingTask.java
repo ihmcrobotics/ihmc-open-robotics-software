@@ -131,7 +131,7 @@ public class LookAndStepSteppingTask
       PlannedFootstep endStep = shortenedFootstepPlan.getFootstep(0);
       Pose3DReadOnly startStep = footstepPlanEtc.getStartFootPoses().get(endStep.getRobotSide());
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
-      double maxStepZ = Math.max(footstepPlannerParameters.getMaximumLeftStepZ(), footstepPlannerParameters.getMaximumRightStepZ());
+      double maxStepZ = footstepPlannerParameters.getMaxStepZ();
       double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
       double stepDistance = startStep.getPosition().distance(endStep.getFootstepPose().getPosition());
       double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);

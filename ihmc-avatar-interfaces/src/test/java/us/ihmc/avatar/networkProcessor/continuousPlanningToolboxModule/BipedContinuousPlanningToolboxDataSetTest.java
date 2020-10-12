@@ -931,7 +931,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          {
             double fudgeFactor = 1.25;
             double heightChange = step.getLocation().getZ() - previousStep.getLocation().getZ();
-            double allowableChange = fudgeFactor * (parameters.getMaximumAverageStepZ() + 2.0 * heightChangeFromWiggling);
+            double allowableChange = fudgeFactor * (parameters.getMaxStepZ() + 2.0 * heightChangeFromWiggling);
             if (Math.abs(heightChange) > allowableChange)
             {
                String error =  "Step " + i + " height changed " + heightChange + ", which was too much. Max is " + allowableChange;

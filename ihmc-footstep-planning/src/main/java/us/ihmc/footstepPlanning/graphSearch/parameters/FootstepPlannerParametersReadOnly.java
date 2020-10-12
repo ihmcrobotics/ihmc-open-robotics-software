@@ -320,31 +320,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * z-up sole frame.
     * </p>
     */
-   default double getMaximumLeftStepZ()
+   default double getMaxStepZ()
    {
-      return get(maxLeftStepZ);
-   }
-
-   /**
-    * Maximum vertical distance between consecutive footsteps
-    *
-    * <p>
-    * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-    * z-up sole frame.
-    * </p>
-    */
-   default double getMaximumRightStepZ()
-   {
-      return get(maxRightStepZ);
-   }
-
-   /**
-    * Returns nominal maximum step z
-    * @return
-    */
-   default double getMaximumAverageStepZ()
-   {
-      return EuclidCoreTools.interpolate(getMaximumLeftStepZ(), getMaximumRightStepZ(), 0.5);
+      return get(maxStepZ);
    }
 
    /**

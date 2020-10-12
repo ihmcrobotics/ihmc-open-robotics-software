@@ -189,14 +189,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public double maximum_left_step_z_ = -11.1;
-   /**
-            * Maximum vertical distance between consecutive footsteps
-            * 
-            * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-            * z-up sole frame.
-            */
-   public double maximum_right_step_z_ = -11.1;
+   public double maximum_step_z_ = -11.1;
    /**
             * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
             * 
@@ -521,9 +514,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       maximum_step_z_when_forward_and_down_ = other.maximum_step_z_when_forward_and_down_;
 
-      maximum_left_step_z_ = other.maximum_left_step_z_;
-
-      maximum_right_step_z_ = other.maximum_right_step_z_;
+      maximum_step_z_ = other.maximum_step_z_;
 
       minimum_step_z_when_fully_pitched_ = other.minimum_step_z_when_fully_pitched_;
 
@@ -1057,9 +1048,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public void setMaximumLeftStepZ(double maximum_left_step_z)
+   public void setMaximumStepZ(double maximum_step_z)
    {
-      maximum_left_step_z_ = maximum_left_step_z;
+      maximum_step_z_ = maximum_step_z;
    }
    /**
             * Maximum vertical distance between consecutive footsteps
@@ -1067,30 +1058,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public double getMaximumLeftStepZ()
+   public double getMaximumStepZ()
    {
-      return maximum_left_step_z_;
-   }
-
-   /**
-            * Maximum vertical distance between consecutive footsteps
-            * 
-            * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-            * z-up sole frame.
-            */
-   public void setMaximumRightStepZ(double maximum_right_step_z)
-   {
-      maximum_right_step_z_ = maximum_right_step_z;
-   }
-   /**
-            * Maximum vertical distance between consecutive footsteps
-            * 
-            * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-            * z-up sole frame.
-            */
-   public double getMaximumRightStepZ()
-   {
-      return maximum_right_step_z_;
+      return maximum_step_z_;
    }
 
    /**
@@ -2022,9 +1992,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_forward_and_down_, other.maximum_step_z_when_forward_and_down_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_left_step_z_, other.maximum_left_step_z_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_right_step_z_, other.maximum_right_step_z_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_z_when_fully_pitched_, other.minimum_step_z_when_fully_pitched_, epsilon)) return false;
 
@@ -2173,9 +2141,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_step_z_when_forward_and_down_ != otherMyClass.maximum_step_z_when_forward_and_down_) return false;
 
-      if(this.maximum_left_step_z_ != otherMyClass.maximum_left_step_z_) return false;
-
-      if(this.maximum_right_step_z_ != otherMyClass.maximum_right_step_z_) return false;
+      if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
 
       if(this.minimum_step_z_when_fully_pitched_ != otherMyClass.minimum_step_z_when_fully_pitched_) return false;
 
@@ -2321,10 +2287,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_y_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z_when_forward_and_down=");
       builder.append(this.maximum_step_z_when_forward_and_down_);      builder.append(", ");
-      builder.append("maximum_left_step_z=");
-      builder.append(this.maximum_left_step_z_);      builder.append(", ");
-      builder.append("maximum_right_step_z=");
-      builder.append(this.maximum_right_step_z_);      builder.append(", ");
+      builder.append("maximum_step_z=");
+      builder.append(this.maximum_step_z_);      builder.append(", ");
       builder.append("minimum_step_z_when_fully_pitched=");
       builder.append(this.minimum_step_z_when_fully_pitched_);      builder.append(", ");
       builder.append("maximum_step_x_when_fully_pitched=");
