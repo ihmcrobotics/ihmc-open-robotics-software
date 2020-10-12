@@ -3,9 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DMatrix;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
+import org.ejml.data.*;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import org.ejml.interfaces.linsol.LinearSolverSparse;
@@ -69,6 +67,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    private final DMatrixRMaj yEquivalents = new DMatrixRMaj(0, 1);
    private final DMatrixRMaj zEquivalents = new DMatrixRMaj(0, 1);
 
+   private final DMatrixSparseCSC tempSparse = new DMatrixSparseCSC(0, 1);
    private final DMatrixSparseCSC xEquivalentsSparse = new DMatrixSparseCSC(0, 1);
    private final DMatrixSparseCSC yEquivalentsSparse = new DMatrixSparseCSC(0, 1);
    private final DMatrixSparseCSC zEquivalentsSparse = new DMatrixSparseCSC(0, 1);
@@ -307,6 +306,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
          contactSequenceInternal.add(contactSequence.get(i));
    }
 
+   private final IGrowArray gw = new IGrowArray();
+   private final DGrowArray gx = new DGrowArray();
+
    private void solveForCoefficientConstraintMatrix(List<? extends ContactStateProvider> contactSequence)
    {
       int numberOfPhases = contactSequence.size();
@@ -420,20 +422,50 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
       luSolver.setA(coefficientMultipliersSparse);
 
-      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpXWaypointsSparse, xEquivalentsSparse);
-      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpYWaypointsSparse, yEquivalentsSparse);
-      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpZWaypointsSparse, zEquivalentsSparse);
-      // TODO is this right?
-      CommonOps_DSCC.add(1.0, xEquivalentsSparse, 1.0, xConstantsSparse, xEquivalentsSparse, null, null);
-      CommonOps_DSCC.add(1.0, yEquivalentsSparse, 1.0, yConstantsSparse, yEquivalentsSparse, null, null);
-      CommonOps_DSCC.add(1.0, zEquivalentsSparse, 1.0, zConstantsSparse, zEquivalentsSparse, null, null);
+      assertMatrixEquals(vrpWaypointJacobian, vrpWaypointJacobianSparse);
+      assertMatrixEquals(vrpXWaypoints, vrpXWaypointsSparse);
+      assertMatrixEquals(vrpYWaypoints, vrpYWaypointsSparse);
+      assertMatrixEquals(vrpZWaypoints, vrpZWaypointsSparse);
+
+
+      // TODO make an add equals method. Also don't pass in null, as that apparently makes garbage.
+      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpXWaypointsSparse, tempSparse);
+      CommonOps_DSCC.add(1.0, tempSparse, 1.0, xConstantsSparse, xEquivalentsSparse, gw, gx);
+
+      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpYWaypointsSparse, tempSparse);
+      CommonOps_DSCC.add(1.0, tempSparse, 1.0, yConstantsSparse, yEquivalentsSparse, gw, gx);
+
+      CommonOps_DSCC.mult(vrpWaypointJacobianSparse, vrpZWaypointsSparse, tempSparse);
+      CommonOps_DSCC.add(1.0, tempSparse, 1.0, zConstantsSparse, zEquivalentsSparse, gw, gx);
+
+      assertMatrixEquals(xEquivalents, xEquivalentsSparse);
+      assertMatrixEquals(yEquivalents, yEquivalentsSparse);
+      assertMatrixEquals(zEquivalents, zEquivalentsSparse);
 
       luSolver.solveSparse(xEquivalentsSparse, xCoefficientVectorSparse);
       luSolver.solveSparse(yEquivalentsSparse, yCoefficientVectorSparse);
       luSolver.solveSparse(zEquivalentsSparse, zCoefficientVectorSparse);
 
+      xCoefficientVector.set(xCoefficientVectorSparse);
+      yCoefficientVector.set(yCoefficientVectorSparse);
+      zCoefficientVector.set(zCoefficientVectorSparse);
 
       System.out.println("LU sparse inverse time: " + (System.nanoTime() - startTime));
+   }
+
+   private static void assertMatrixEquals(DMatrix matrixA, DMatrix matrixB)
+   {
+      if (matrixA.getNumCols() != matrixB.getNumCols() || matrixA.getNumRows() != matrixB.getNumRows())
+         throw new IllegalArgumentException("Matrices aren't the same size.");
+
+      for (int i = 0; i < matrixA.getNumRows(); i++)
+      {
+         for (int j = 0; j < matrixA.getNumCols(); j++)
+         {
+            if (!MathTools.epsilonEquals(matrixA.get(i,j), matrixB.get(i, j), 1e-5))
+               throw new IllegalArgumentException("Matrices don't match in value. Expected " + matrixA.get(i, j) + ", got " + matrixB.get(i, j));
+         }
+      }
    }
 
 
@@ -651,6 +683,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
 
 
       coefficientMultipliersSparse.reshape(size, size);
+      tempSparse.reshape(size, 1);
       xEquivalentsSparse.reshape(size, 1);
       yEquivalentsSparse.reshape(size, 1);
       zEquivalentsSparse.reshape(size, 1);
