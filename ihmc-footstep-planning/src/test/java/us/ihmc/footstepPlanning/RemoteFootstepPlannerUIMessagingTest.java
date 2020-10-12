@@ -388,9 +388,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
 
-         // step only with requested side is exception, has to be in interval [-1,1]
-         randomParameters.setStepOnlyWithRequestedSide((byte) (random.nextInt(2) - 1));
-
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
