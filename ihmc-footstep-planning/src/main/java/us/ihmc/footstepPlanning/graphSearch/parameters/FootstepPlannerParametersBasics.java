@@ -62,20 +62,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepYaw, yaw);
    }
 
-   default void setMaximumLeftStepZ(double stepZ)
+   default void setMaximumStepZ(double maxStepZ)
    {
-      set(FootstepPlannerParameterKeys.maxLeftStepZ, stepZ);
-   }
-
-   default void setMaximumRightStepZ(double stepZ)
-   {
-      set(FootstepPlannerParameterKeys.maxRightStepZ, stepZ);
-   }
-
-   default void setMaximumStepZ(double stepZ)
-   {
-      setMaximumLeftStepZ(stepZ);
-      setMaximumRightStepZ(stepZ);
+      set(FootstepPlannerParameterKeys.maxStepZ, maxStepZ);
    }
 
    default void setMinimumStepZWhenFullyPitched(double stepZ)
@@ -388,10 +377,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepYWhenForwardAndDown(parametersPacket.getMaximumStepYWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZWhenForwardAndDown() != noValue)
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
-      if (parametersPacket.getMaximumLeftStepZ() != noValue)
-         setMaximumLeftStepZ(parametersPacket.getMaximumLeftStepZ());
-      if (parametersPacket.getMaximumRightStepZ() != noValue)
-         setMaximumRightStepZ(parametersPacket.getMaximumRightStepZ());
+      if (parametersPacket.getMaximumStepZ() != noValue)
+         setMaximumStepZ(parametersPacket.getMaximumStepZ());
       if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
          setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
       if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)

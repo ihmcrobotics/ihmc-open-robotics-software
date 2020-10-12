@@ -110,7 +110,7 @@ public class AdaptiveSwingTrajectoryCalculator
    {
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
 
-      double maxStepZ = Math.max(footstepPlannerParameters.getMaximumLeftStepZ(), footstepPlannerParameters.getMaximumRightStepZ());
+      double maxStepZ = footstepPlannerParameters.getMaxStepZ();
       double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
 
       double stepDistance = startPosition.distance(endPosition);

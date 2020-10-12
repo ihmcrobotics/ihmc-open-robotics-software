@@ -177,14 +177,7 @@ float64 maximum_step_z_when_forward_and_down
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
 # Field default value -11.1
-float64 maximum_left_step_z
-
-# Maximum vertical distance between consecutive footsteps
-# 
-# A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-# z-up sole frame.
-# Field default value -11.1
-float64 maximum_right_step_z
+float64 maximum_step_z
 
 # Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
 # 

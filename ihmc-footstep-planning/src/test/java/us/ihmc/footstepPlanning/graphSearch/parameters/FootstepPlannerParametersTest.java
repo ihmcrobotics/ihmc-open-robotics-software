@@ -63,13 +63,9 @@ public class FootstepPlannerParametersTest
       parameters.setMaximumStepWidth(maxStepWidth);
       assertEquals(maxStepWidth, parameters.getMaximumStepWidth(), epsilon);
 
-      double maxLeftStepZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumLeftStepZ(maxLeftStepZ);
-      assertEquals(maxLeftStepZ, parameters.getMaximumLeftStepZ(), epsilon);
-
-      double maxRightStepZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumRightStepZ(maxRightStepZ);
-      assertEquals(maxRightStepZ, parameters.getMaximumRightStepZ(), epsilon);
+      double maxStepZ = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumStepZ(maxStepZ);
+      assertEquals(maxStepZ, parameters.getMaxStepZ(), epsilon);
 
       double maxStepXWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepXWhenForwardAndDown(maxStepXWhenForwardAndDown);

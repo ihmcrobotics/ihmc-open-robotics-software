@@ -92,8 +92,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -198,9 +196,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -444,9 +439,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMaximumStepZWhenForwardAndDown());
 
-      cdr.write_type_6(data.getMaximumLeftStepZ());
-
-      cdr.write_type_6(data.getMaximumRightStepZ());
+      cdr.write_type_6(data.getMaximumStepZ());
 
       cdr.write_type_6(data.getMinimumStepZWhenFullyPitched());
 
@@ -586,9 +579,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMaximumStepZWhenForwardAndDown(cdr.read_type_6());
       	
-      data.setMaximumLeftStepZ(cdr.read_type_6());
-      	
-      data.setMaximumRightStepZ(cdr.read_type_6());
+      data.setMaximumStepZ(cdr.read_type_6());
       	
       data.setMinimumStepZWhenFullyPitched(cdr.read_type_6());
       	
@@ -710,8 +701,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("maximum_step_x_when_forward_and_down", data.getMaximumStepXWhenForwardAndDown());
       ser.write_type_6("maximum_step_y_when_forward_and_down", data.getMaximumStepYWhenForwardAndDown());
       ser.write_type_6("maximum_step_z_when_forward_and_down", data.getMaximumStepZWhenForwardAndDown());
-      ser.write_type_6("maximum_left_step_z", data.getMaximumLeftStepZ());
-      ser.write_type_6("maximum_right_step_z", data.getMaximumRightStepZ());
+      ser.write_type_6("maximum_step_z", data.getMaximumStepZ());
       ser.write_type_6("minimum_step_z_when_fully_pitched", data.getMinimumStepZWhenFullyPitched());
       ser.write_type_6("maximum_step_x_when_fully_pitched", data.getMaximumStepXWhenFullyPitched());
       ser.write_type_6("step_yaw_reduction_factor_at_max_reach", data.getStepYawReductionFactorAtMaxReach());
@@ -784,8 +774,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumStepXWhenForwardAndDown(ser.read_type_6("maximum_step_x_when_forward_and_down"));
       data.setMaximumStepYWhenForwardAndDown(ser.read_type_6("maximum_step_y_when_forward_and_down"));
       data.setMaximumStepZWhenForwardAndDown(ser.read_type_6("maximum_step_z_when_forward_and_down"));
-      data.setMaximumLeftStepZ(ser.read_type_6("maximum_left_step_z"));
-      data.setMaximumRightStepZ(ser.read_type_6("maximum_right_step_z"));
+      data.setMaximumStepZ(ser.read_type_6("maximum_step_z"));
       data.setMinimumStepZWhenFullyPitched(ser.read_type_6("minimum_step_z_when_fully_pitched"));
       data.setMaximumStepXWhenFullyPitched(ser.read_type_6("maximum_step_x_when_fully_pitched"));
       data.setStepYawReductionFactorAtMaxReach(ser.read_type_6("step_yaw_reduction_factor_at_max_reach"));

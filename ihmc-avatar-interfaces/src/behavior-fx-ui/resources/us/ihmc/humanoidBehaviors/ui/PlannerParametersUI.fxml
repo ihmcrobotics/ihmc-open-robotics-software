@@ -54,8 +54,7 @@
             <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="3" />
             <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Spinner fx:id="maxLeftStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-             <Spinner fx:id="maxRightStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             <Spinner fx:id="maxXYWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Spinner fx:id="maxYawWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5" />
             <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="5" />

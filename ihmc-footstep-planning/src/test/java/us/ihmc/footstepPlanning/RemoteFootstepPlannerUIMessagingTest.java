@@ -715,8 +715,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max X forward and down aren't equal", parameters.getMaximumStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon);
       assertEquals("Max Z forward and down aren't equal", parameters.getMaximumStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      assertEquals("Max left step z isn't equal.", parameters.getMaximumLeftStepZ(), packet.getMaximumLeftStepZ(), epsilon);
-      assertEquals("Max right step z isn't equal.", parameters.getMaximumRightStepZ(), packet.getMaximumRightStepZ(), epsilon);
+      assertEquals("Max step z isn't equal.", parameters.getMaxStepZ(), packet.getMaximumStepZ(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
       assertEquals("Wiggle while planning isn't equal.", parameters.getWiggleWhilePlanning(), packet.getWiggleWhilePlanning());

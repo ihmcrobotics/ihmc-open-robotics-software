@@ -265,13 +265,7 @@ public class FootstepCheckerTest
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumLeftStepZ()
-         {
-            return 1.0e-10;
-         };
-
-         @Override
-         public double getMaximumRightStepZ()
+         public double getMaxStepZ()
          {
             return 1.0e-10;
          };
@@ -293,7 +287,7 @@ public class FootstepCheckerTest
       // too high step
       DiscreteFootstep step2 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform1 = new RigidBodyTransform();
-      snapTransform1.getTranslation().setZ(parameters.getMaximumAverageStepZ() + 1.0e-10);
+      snapTransform1.getTranslation().setZ(parameters.getMaxStepZ() + 1.0e-10);
       snapper.addSnapData(step1, new FootstepSnapData(snapTransform0));
       snapper.addSnapData(step2, new FootstepSnapData(snapTransform1));
       Assert.assertFalse(checker.isStepValid(step2, step1, step0));
@@ -302,7 +296,7 @@ public class FootstepCheckerTest
       // if we add different step-up vs step-down heights this will need to be adjusted
       DiscreteFootstep step3 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform2 = new RigidBodyTransform();
-      snapTransform2.getTranslation().setZ(-parameters.getMaximumAverageStepZ() - 1.0e-10);
+      snapTransform2.getTranslation().setZ(-parameters.getMaxStepZ() - 1.0e-10);
       snapper.addSnapData(step3, new FootstepSnapData(snapTransform2));
       Assert.assertFalse(checker.isStepValid(step3, step1, step0));
 
