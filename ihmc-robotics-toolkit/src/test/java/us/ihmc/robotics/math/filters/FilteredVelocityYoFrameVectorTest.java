@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FilteredVelocityYoFrameVectorTest
 {
@@ -33,7 +33,7 @@ public class FilteredVelocityYoFrameVectorTest
       {
          double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-1);
          double alpha = random.nextDouble();
-         YoVariableRegistry registry = new YoVariableRegistry("blop");
+         YoRegistry registry = new YoRegistry("blop");
 
          FilteredVelocityYoFrameVector filteredPoint = new FilteredVelocityYoFrameVector("tested", "", () -> alpha, dt, registry, ReferenceFrame.getWorldFrame());
          FilteredVelocityYoVariable xFiltered = new FilteredVelocityYoVariable("xRef", "", alpha, dt, registry);

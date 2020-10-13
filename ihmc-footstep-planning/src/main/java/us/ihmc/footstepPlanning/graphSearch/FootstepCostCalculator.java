@@ -1,56 +1,59 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.function.ToDoubleFunction;
 import java.util.function.UnaryOperator;
 
 public class FootstepCostCalculator
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepNodeSnapperReadOnly snapper;
    private final UnaryOperator<FootstepNode> idealStepCalculator;
    private final ToDoubleFunction<FootstepNode> heuristics;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
-   private final FootstepPlannerEdgeData edgeData;
 
    private final RigidBodyTransform stanceNodeTransform = new RigidBodyTransform();
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
    private final RigidBodyTransform candidateNodeTransform = new RigidBodyTransform();
+   private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
+   private final YoDouble totalCost = new YoDouble("totalCost", registry);
+   private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
+   private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepNodeSnapperReadOnly snapper,
                                  UnaryOperator<FootstepNode> idealStepCalculator,
                                  ToDoubleFunction<FootstepNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
-                                 FootstepPlannerEdgeData edgeData)
+                                 YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
       this.footPolygons = footPolygons;
-      this.edgeData = edgeData;
+      parentRegistry.addChild(registry);
    }
 
    public double computeCost(FootstepNode stanceNode, FootstepNode candidateNode)
    {
       FootstepNode idealStep = idealStepCalculator.apply(stanceNode);
 
-      FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapper.getSnapData(stanceNode).getSnapTransform(), stanceNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapper.getSnapData(candidateNode).getSnapTransform(), candidateNodeTransform);
-      idealStepTransform.setTranslation(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
+      FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapper.snapFootstepNode(stanceNode).getSnapTransform(), stanceNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapper.snapFootstepNode(candidateNode).getSnapTransform(), candidateNodeTransform);
+      idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
       idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
 
       // calculate offset from ideal in a z-up frame
@@ -65,36 +68,42 @@ public class FootstepCostCalculator
       double pitchOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNodeTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch());
       double rollOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNodeTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll());
 
-      double cost = 0.0;
-      cost += Math.abs(xOffset * parameters.getForwardWeight());
-      cost += Math.abs(yOffset * parameters.getLateralWeight());
-      cost += Math.abs(zOffset * (zOffset > 0.0 ? parameters.getStepUpWeight() : parameters.getStepDownWeight()));
-      cost += Math.abs(yawOffset * parameters.getYawWeight());
-      cost += Math.abs(pitchOffset * parameters.getPitchWeight());
-      cost += Math.abs(rollOffset * parameters.getRollWeight());
+      edgeCost.set(0.0);
+      edgeCost.add(Math.abs(xOffset * parameters.getForwardWeight()));
+      edgeCost.add(Math.abs(yOffset * parameters.getLateralWeight()));
+      edgeCost.add(Math.abs(zOffset * (zOffset > 0.0 ? parameters.getStepUpWeight() : parameters.getStepDownWeight())));
+      edgeCost.add(Math.abs(yawOffset * parameters.getYawWeight()));
+      edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
+      edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
 
-      cost += computeAreaCost(candidateNode);
-      cost += parameters.getCostPerStep();
+      edgeCost.add(computeAreaCost(candidateNode));
+      edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
-      double deltaHeuristics = heuristics.applyAsDouble(idealStep) - heuristics.applyAsDouble(candidateNode);
+      idealStepHeuristicCost.set(heuristics.applyAsDouble(idealStep));
+      heuristicCost.set(heuristics.applyAsDouble(candidateNode));
+      double deltaHeuristics = idealStepHeuristicCost.getDoubleValue() - heuristicCost.getDoubleValue();
+
       if(deltaHeuristics > 0.0)
-         cost += deltaHeuristics;
+      {
+         edgeCost.add(deltaHeuristics);
+      }
       else
-         cost = Math.max(0.0, cost - deltaHeuristics);
+      {
+         // TODO
+         edgeCost.set(Math.max(0.0, edgeCost.getValue() - deltaHeuristics));
+      }
 
-      if (edgeData != null)
-         edgeData.setEdgeCost(cost);
-
-      return cost;
+      totalCost.set(edgeCost.getDoubleValue() + heuristicCost.getDoubleValue());
+      return edgeCost.getValue();
    }
 
    private double computeAreaCost(FootstepNode footstepNode)
    {
-      FootstepNodeSnapData snapData = snapper.getSnapData(footstepNode);
+      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(footstepNode);
       if (snapData != null)
       {
-         ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
+         ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
          if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
          {
             return 0.0;
@@ -113,5 +122,12 @@ public class FootstepCostCalculator
       {
          return 0.0;
       }
+   }
+
+   public void resetLoggedVariables()
+   {
+      edgeCost.setToNaN();
+      totalCost.setToNaN();
+      heuristicCost.setToNaN();
    }
 }

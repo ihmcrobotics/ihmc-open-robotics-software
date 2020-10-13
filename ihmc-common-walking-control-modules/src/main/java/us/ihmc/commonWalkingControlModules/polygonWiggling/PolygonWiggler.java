@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -131,28 +130,17 @@ public class PolygonWiggler
       Point2DReadOnly pointToRotateAbout = polygonToWiggle.getCentroid();
 
       // This creates inequality constraints for points to lie inside the desired polygon.
-      DenseMatrix64F A = new DenseMatrix64F(0);
-      DenseMatrix64F b = new DenseMatrix64F(0);
+      DMatrixRMaj A = new DMatrixRMaj(0);
+      DMatrixRMaj b = new DMatrixRMaj(0);
       convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside, startingVerticesToIgnore);
 
       int constraintsPerPoint = A.getNumRows();
 
       int boundConstraints = 6;
-      DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3 + constraintsPerPoint * numberOfPoints);
-      DenseMatrix64F b_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 1);
+      DMatrixRMaj A_full = new DMatrixRMaj(constraintsPerPoint * numberOfPoints + boundConstraints, 3 + constraintsPerPoint * numberOfPoints);
+      DMatrixRMaj b_full = new DMatrixRMaj(constraintsPerPoint * numberOfPoints + boundConstraints, 1);
       // add limits on allowed rotation and translation
-      A_full.set(constraintsPerPoint * numberOfPoints , 0, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints , parameters.maxX);
-      A_full.set(constraintsPerPoint * numberOfPoints + 1, 0, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 1, -parameters.minX);
-      A_full.set(constraintsPerPoint * numberOfPoints + 2, 1, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 2, parameters.maxY);
-      A_full.set(constraintsPerPoint * numberOfPoints + 3, 1, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 3, -parameters.minY);
-      A_full.set(constraintsPerPoint * numberOfPoints + 4, 2, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 4, parameters.maxYaw);
-      A_full.set(constraintsPerPoint * numberOfPoints + 5, 2, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 5, -parameters.minYaw);
+      PolygonWiggler.addRotationAndTranslationConstraint(A_full, b_full, constraintsPerPoint * numberOfPoints, parameters);
 
       // The inequality constraints of form
       // Ax <= b
@@ -160,50 +148,50 @@ public class PolygonWiggler
       // Ax - s - b == 0.0
       // s <= 0
       // The equality constraint will be converted to an objective causing the wiggler to do the best it can instead of failing when the wiggle is not possible.
-      DenseMatrix64F Aeq = new DenseMatrix64F(constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
-      DenseMatrix64F beq = new DenseMatrix64F(constraintsPerPoint * numberOfPoints, 1);
-      DenseMatrix64F indentity = new DenseMatrix64F(constraintsPerPoint * numberOfPoints, constraintsPerPoint * numberOfPoints);
-      CommonOps.setIdentity(indentity);
-      CommonOps.insert(indentity, A_full, 0, 3);
-      CommonOps.scale(-1.0, indentity);
-      CommonOps.insert(indentity, Aeq, 0, 3);
+      DMatrixRMaj Aeq = new DMatrixRMaj(constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
+      DMatrixRMaj beq = new DMatrixRMaj(constraintsPerPoint * numberOfPoints, 1);
+      DMatrixRMaj indentity = new DMatrixRMaj(constraintsPerPoint * numberOfPoints, constraintsPerPoint * numberOfPoints);
+      CommonOps_DDRM.setIdentity(indentity);
+      CommonOps_DDRM.insert(indentity, A_full, 0, 3);
+      CommonOps_DDRM.scale(-1.0, indentity);
+      CommonOps_DDRM.insert(indentity, Aeq, 0, 3);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         DenseMatrix64F p = new DenseMatrix64F(2, 1);
+         DMatrixRMaj p = new DMatrixRMaj(2, 1);
          p.set(0, polygonToWiggle.getVertex(i).getX());
          p.set(1, polygonToWiggle.getVertex(i).getY());
 
          // inequality constraint becomes A*V * x <= b - A*p
          Point2D point = new Point2D(polygonToWiggle.getVertex(i));
          point.sub(pointToRotateAbout);
-         DenseMatrix64F V = new DenseMatrix64F(new double[][] {{1.0, 0.0, -point.getY()}, {0.0, 1.0, point.getX()}});
+         DMatrixRMaj V = new DMatrixRMaj(new double[][] {{1.0, 0.0, -point.getY()}, {0.0, 1.0, point.getX()}});
 
-         DenseMatrix64F A_new = new DenseMatrix64F(constraintsPerPoint, 3);
-         DenseMatrix64F b_new = new DenseMatrix64F(constraintsPerPoint, 1);
-         CommonOps.mult(A, V, A_new);
-         CommonOps.mult(A, p, b_new);
-         CommonOps.changeSign(b_new);
-         CommonOps.add(b, b_new, b_new);
+         DMatrixRMaj A_new = new DMatrixRMaj(constraintsPerPoint, 3);
+         DMatrixRMaj b_new = new DMatrixRMaj(constraintsPerPoint, 1);
+         CommonOps_DDRM.mult(A, V, A_new);
+         CommonOps_DDRM.mult(A, p, b_new);
+         CommonOps_DDRM.changeSign(b_new);
+         CommonOps_DDRM.add(b, b_new, b_new);
 
-         CommonOps.insert(A_new, Aeq, constraintsPerPoint * i, 0);
-         CommonOps.insert(b_new, beq, constraintsPerPoint * i, 0);
+         CommonOps_DDRM.insert(A_new, Aeq, constraintsPerPoint * i, 0);
+         CommonOps_DDRM.insert(b_new, beq, constraintsPerPoint * i, 0);
       }
 
       // Convert the inequality constraint for being inside the polygon to an objective.
-      DenseMatrix64F costMatrix = new DenseMatrix64F(3 + constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
-      CommonOps.multInner(Aeq, costMatrix);
-      DenseMatrix64F costVector = new DenseMatrix64F(3 + constraintsPerPoint * numberOfPoints, 1);
-      CommonOps.multTransA(Aeq, beq, costVector);
-      CommonOps.changeSign(costVector);
-      CommonOps.scale(polygonWeight, costMatrix);
-      CommonOps.scale(polygonWeight, costVector);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(3 + constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
+      CommonOps_DDRM.multInner(Aeq, costMatrix);
+      DMatrixRMaj costVector = new DMatrixRMaj(3 + constraintsPerPoint * numberOfPoints, 1);
+      CommonOps_DDRM.multTransA(Aeq, beq, costVector);
+      CommonOps_DDRM.changeSign(costVector);
+      CommonOps_DDRM.scale(polygonWeight, costMatrix);
+      CommonOps_DDRM.scale(polygonWeight, costVector);
 
       // Add regularization
       indentity.reshape(3 + constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
-      CommonOps.setIdentity(indentity);
-      CommonOps.scale(regularization, indentity);
-      CommonOps.add(costMatrix, indentity, costMatrix);
+      CommonOps_DDRM.setIdentity(indentity);
+      CommonOps_DDRM.scale(regularization, indentity);
+      CommonOps_DDRM.add(costMatrix, indentity, costMatrix);
 
       // Add movement weight
       costMatrix.add(0, 0, moveWeight);
@@ -211,9 +199,9 @@ public class PolygonWiggler
       costMatrix.add(2, 2, moveWeight * parameters.rotationWeight);
 
       QuadProgSolver solver = new QuadProgSolver();
-      DenseMatrix64F result = new DenseMatrix64F(3 + constraintsPerPoint * numberOfPoints, 1);
-      Aeq = new DenseMatrix64F(0, 3 + constraintsPerPoint * numberOfPoints);
-      beq = new DenseMatrix64F(0, 3 + constraintsPerPoint * numberOfPoints);
+      DMatrixRMaj result = new DMatrixRMaj(3 + constraintsPerPoint * numberOfPoints, 1);
+      Aeq = new DMatrixRMaj(0, 3 + constraintsPerPoint * numberOfPoints);
+      beq = new DMatrixRMaj(0, 3 + constraintsPerPoint * numberOfPoints);
       try
       {
          int iterations = solver.solve(costMatrix, costVector, Aeq, beq, A_full, b_full, result, coldStart);
@@ -252,7 +240,7 @@ public class PolygonWiggler
       fullTransform.multiply(toOriginTransform);
 
       RotationMatrix rotationMatrix = new RotationMatrix();
-      rotationTransform.getRotation(rotationMatrix);
+      rotationMatrix.set(rotationTransform.getRotation());
       rotationMatrix.transpose();
       rotationMatrix.transform(translation);
       RigidBodyTransform translationTransform = new RigidBodyTransform();
@@ -262,10 +250,41 @@ public class PolygonWiggler
       return fullTransform;
    }
 
+   public static void addRotationAndTranslationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, WiggleParameters parameters)
+   {
+      addTranslationConstraint(A, b, constraintRowStart, parameters);
+      addRotationConstraint(A, b, constraintRowStart + 4, parameters);
+   }
+
+   public static void addTranslationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, WiggleParameters parameters)
+   {
+      addTranslationConstraint(A, b, constraintRowStart, parameters.maxX, parameters.minX, parameters.maxY, parameters.minY);
+   }
+
+   public static void addTranslationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, double maxX, double minX, double maxY, double minY)
+   {
+      A.set(constraintRowStart , 0, 1.0);
+      b.set(constraintRowStart , maxX);
+      A.set(constraintRowStart + 1, 0, -1.0);
+      b.set(constraintRowStart + 1, -minX);
+      A.set(constraintRowStart + 2, 1, 1.0);
+      b.set(constraintRowStart + 2, maxY);
+      A.set(constraintRowStart + 3, 1, -1.0);
+      b.set(constraintRowStart + 3, -minY);
+   }
+
+   public static void addRotationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, WiggleParameters parameters)
+   {
+      A.set(constraintRowStart, 2, 1.0);
+      b.set(constraintRowStart, parameters.maxYaw);
+      A.set(constraintRowStart + 1, 2, -1.0);
+      b.set(constraintRowStart + 1, -parameters.minYaw);
+   }
+
    /**
     * Packs the matrices A and b such that any point x is inside the polygon if it satisfies the equation A*x <= b.
     */
-   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DMatrixRMaj A, DMatrixRMaj b, double deltaInside)
    {
       convertToInequalityConstraints(polygon, A, b, deltaInside, emptyArray);
    }
@@ -273,7 +292,7 @@ public class PolygonWiggler
    /**
     * Packs the matrices A and b such that any point x is inside the polygon if it satisfies the equation A*x <= b.
     */
-   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside,
+   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DMatrixRMaj A, DMatrixRMaj b, double deltaInside,
                                                      int[] startingVerticesToIgnore)
    {
       int constraints = polygon.getNumberOfVertices();
@@ -286,17 +305,17 @@ public class PolygonWiggler
          convertToInequalityConstraintsPoint(polygon, A, b);
    }
 
-   public static void convertToInequalityConstraintsPoint(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraintsPoint(ConvexPolygon2DReadOnly polygon, DMatrixRMaj A, DMatrixRMaj b)
    {
       convertToInequalityConstraintsPoint(polygon.getVertex(0), A, b);
    }
 
-   public static void convertToInequalityConstraintsPoint(Point2DReadOnly point, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraintsPoint(Point2DReadOnly point, DMatrixRMaj A, DMatrixRMaj b)
    {
       convertToInequalityConstraintsPoint(point.getX(), point.getY(), A, b);
    }
 
-   public static void convertToInequalityConstraintsPoint(double x, double y, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraintsPoint(double x, double y, DMatrixRMaj A, DMatrixRMaj b)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -316,7 +335,7 @@ public class PolygonWiggler
       b.set(3, 0, -y);
    }
 
-   public static void convertToInequalityConstraintsLine(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsLine(ConvexPolygon2DReadOnly polygon, DMatrixRMaj A, DMatrixRMaj b, double deltaInside)
    {
       // constrain to lying on 2d line
       Point2DReadOnly firstPoint = polygon.getVertex(0);
@@ -367,12 +386,12 @@ public class PolygonWiggler
       }
    }
 
-   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DMatrixRMaj A, DMatrixRMaj b, double deltaInside)
    {
       convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside, emptyArray);
    }
 
-   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside,
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DMatrixRMaj A, DMatrixRMaj b, double deltaInside,
                                                             int[] startingVerticesToIgnore)
    {
       int constraints = polygon.getNumberOfVertices();
@@ -417,7 +436,7 @@ public class PolygonWiggler
       return true;
    }
 
-   public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2DReadOnly polygonExteriorInWorld, ConvexPolygon2DReadOnly polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2DReadOnly polygonExteriorInWorld, ConvexPolygon2DReadOnly polygonInteriorRelative, DMatrixRMaj A, DMatrixRMaj b, double deltaInside)
    {
       int constraints = polygonExteriorInWorld.getNumberOfVertices();
       A.reshape(constraints, 2);
@@ -450,5 +469,4 @@ public class PolygonWiggler
          b.set(exteriorVertexIndex, -(deltaInside + additionalDistanceInside) + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
       }
    }
-
 }

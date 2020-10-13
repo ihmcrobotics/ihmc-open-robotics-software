@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.stiction.StictionCompensator.StictionActionMode;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -27,7 +27,7 @@ public class StictionCompensatorTest
    @Test
    public void testSetDesiredTorque()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
       StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
 
@@ -46,14 +46,14 @@ public class StictionCompensatorTest
    @Test
    public void testResetStictionCompensation()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
       StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
 
       StictionCompensator stictionCompensator = new StictionCompensator("", stictionModel, controlDT, registry);
 
-      YoDouble stictionCompensationLimit = (YoDouble) registry.getVariable("_StictionCompensationLimit");
-      YoDouble stictionCompensation = (YoDouble) registry.getVariable("_StictionCompensation");
+      YoDouble stictionCompensationLimit = (YoDouble) registry.findVariable("_StictionCompensationLimit");
+      YoDouble stictionCompensation = (YoDouble) registry.findVariable("_StictionCompensation");
 
       Random random = new Random(1738L);
       for (int iter = 0; iter < iters; iter++)
@@ -74,19 +74,19 @@ public class StictionCompensatorTest
    @Test
    public void testComputeStictionCompensation()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
       StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
 
       StictionCompensator stictionCompensator = new StictionCompensator("", stictionModel, controlDT, registry);
 
-      YoDouble stictionCompensationLimit = (YoDouble) registry.getVariable("_StictionCompensationLimit");
-      YoDouble yoStictionCompensation = (YoDouble) registry.getVariable("_StictionCompensation");
+      YoDouble stictionCompensationLimit = (YoDouble) registry.findVariable("_StictionCompensationLimit");
+      YoDouble yoStictionCompensation = (YoDouble) registry.findVariable("_StictionCompensation");
 
-      YoDouble stictionCompensationRate = (YoDouble) registry.getVariable("_StictionCompensationRate");
-      YoDouble desiredTorqueStictionLimitFactor = (YoDouble) registry.getVariable("_DesiredTorqueStictionLimitFactor");
-      YoDouble minTimeInMode = (YoDouble) registry.getVariable("_MinTimeInMode");
-      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.getVariable("_StictionActionMode");
+      YoDouble stictionCompensationRate = (YoDouble) registry.findVariable("_StictionCompensationRate");
+      YoDouble desiredTorqueStictionLimitFactor = (YoDouble) registry.findVariable("_DesiredTorqueStictionLimitFactor");
+      YoDouble minTimeInMode = (YoDouble) registry.findVariable("_MinTimeInMode");
+      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.findVariable("_StictionActionMode");
 
 
       DefaultParameterReader reader = new DefaultParameterReader();
@@ -137,15 +137,15 @@ public class StictionCompensatorTest
    @Test
    public void testActionForwardMode()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
       StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
 
       StictionCompensator stictionCompensator = new StictionCompensator("", stictionModel, controlDT, registry);
 
-      YoDouble minTimeInMode = (YoDouble) registry.getVariable("_MinTimeInMode");
+      YoDouble minTimeInMode = (YoDouble) registry.findVariable("_MinTimeInMode");
 
-      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.getVariable("_StictionActionMode");
+      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.findVariable("_StictionActionMode");
 
       DefaultParameterReader reader = new DefaultParameterReader();
       reader.readParametersInRegistry(registry);
@@ -198,15 +198,15 @@ public class StictionCompensatorTest
    @Test
    public void testActionBackwardMode()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
       StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
 
       StictionCompensator stictionCompensator = new StictionCompensator("", stictionModel, controlDT, registry);
 
-      YoDouble minTimeInMode = (YoDouble) registry.getVariable("_MinTimeInMode");
+      YoDouble minTimeInMode = (YoDouble) registry.findVariable("_MinTimeInMode");
 
-      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.getVariable("_StictionActionMode");
+      YoEnum<StictionActionMode> actionMode = (YoEnum<StictionActionMode>) registry.findVariable("_StictionActionMode");
 
       DefaultParameterReader reader = new DefaultParameterReader();
       reader.readParametersInRegistry(registry);

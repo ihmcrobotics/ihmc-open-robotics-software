@@ -3,13 +3,18 @@ package us.ihmc.footstepPlanning;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
+import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
 
 import java.util.ArrayList;
 
@@ -31,6 +36,11 @@ public class FootstepPlannerRequest
    private final SideDependentList<Pose3D> startFootPoses = new SideDependentList<>(side -> new Pose3D());
 
    /**
+    * Initial starting footholds. Used by split fraction calculator to improve robustness for poor footholds
+    */
+   private final SideDependentList<ConvexPolygon2D> startFootholds = new SideDependentList<>(side -> new ConvexPolygon2D());
+
+   /**
     * The goal left and right footstep poses.
     */
    private final SideDependentList<Pose3D> goalFootPoses = new SideDependentList<>(side -> new Pose3D());
@@ -44,6 +54,11 @@ public class FootstepPlannerRequest
     * If {@link #snapGoalSteps} is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
     */
    private boolean abortIfGoalStepSnappingFails;
+
+   /**
+    * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+    */
+   private boolean abortIfBodyPathPlannerFails;
 
    /**
     * If true, the planner will plan a body path. If false, it will try to follow a straight line to the goal.
@@ -66,10 +81,10 @@ public class FootstepPlannerRequest
    private double goalYawProximity;
 
    /**
-    * Specifies the desired robot heading.
+    * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
     * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
     */
-   private FootstepPlanHeading desiredHeading;
+   private double desiredHeading;
 
    /**
     * Planner timeout in seconds. If {@link #maximumIterations} is set also, the planner terminates whenever either is reached
@@ -101,6 +116,26 @@ public class FootstepPlannerRequest
     */
    private final ArrayList<Pose3DReadOnly> bodyPathWaypoints = new ArrayList<>();
 
+   /**
+    * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+    */
+   private double statusPublishPeriod;
+
+   /**
+    * Requested swing planner. Sets swing parameters to avoid collisions
+    */
+   private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
+
+   /**
+    * Enables {@link PositionBasedSplitFractionCalculator}, which sets the ICP plan timings to be more robust to large steps
+    */
+   private boolean performPositionBasedSplitFractionCalculation = false;
+
+   /**
+    * Enables {@link AreaBasedSplitFractionCalculator}, which sets the ICP plan timings to be more robust to steps with low area
+    */
+   private boolean performAreaBasedSplitFractionCalculation = false;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -114,17 +149,22 @@ public class FootstepPlannerRequest
       goalFootPoses.forEach(Pose3D::setToNaN);
       snapGoalSteps = true;
       abortIfGoalStepSnappingFails = false;
+      abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
-      desiredHeading = FootstepPlanHeading.FORWARD;
+      desiredHeading = 0.0;
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
+      statusPublishPeriod = 1.0;
+      swingPlannerType = SwingPlannerType.NONE;
+      performPositionBasedSplitFractionCalculation = false;
+      performAreaBasedSplitFractionCalculation = false;
    }
 
    public void setRequestId(int requestId)
@@ -162,6 +202,11 @@ public class FootstepPlannerRequest
       this.startFootPoses.get(side).set(stanceFootPosition, stanceFootOrientation);
    }
 
+   public void setStartFoothold(RobotSide side, ConvexPolygon2D foothold)
+   {
+      this.startFootholds.get(side).set(foothold);
+   }
+
    public void setGoalFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)
    {
       this.goalFootPoses.get(RobotSide.LEFT).set(leftFootPose);
@@ -197,6 +242,11 @@ public class FootstepPlannerRequest
       this.abortIfGoalStepSnappingFails = abortIfGoalStepSnappingFails;
    }
 
+   public void setAbortIfBodyPathPlannerFails(boolean abortIfBodyPathPlannerFails)
+   {
+      this.abortIfBodyPathPlannerFails = abortIfBodyPathPlannerFails;
+   }
+
    public void setPlanBodyPath(boolean planBodyPath)
    {
       this.planBodyPath = planBodyPath;
@@ -217,7 +267,7 @@ public class FootstepPlannerRequest
       this.goalYawProximity = goalYawProximity;
    }
 
-   public void setDesiredHeading(FootstepPlanHeading desiredHeading)
+   public void setDesiredHeading(double desiredHeading)
    {
       this.desiredHeading = desiredHeading;
    }
@@ -247,6 +297,26 @@ public class FootstepPlannerRequest
       this.assumeFlatGround = assumeFlatGround;
    }
 
+   public void setStatusPublishPeriod(double statusPublishPeriod)
+   {
+      this.statusPublishPeriod = statusPublishPeriod;
+   }
+
+   public void setSwingPlannerType(SwingPlannerType swingPlannerType)
+   {
+      this.swingPlannerType = swingPlannerType;
+   }
+
+   public void setPerformPositionBasedSplitFractionCalculation(boolean performPositionBasedSplitFractionCalculation)
+   {
+      this.performPositionBasedSplitFractionCalculation = performPositionBasedSplitFractionCalculation;
+   }
+
+   public void setPerformAreaBasedSplitFractionCalculation(boolean performAreaBasedSplitFractionCalculation)
+   {
+      this.performAreaBasedSplitFractionCalculation = performAreaBasedSplitFractionCalculation;
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -262,6 +332,11 @@ public class FootstepPlannerRequest
       return startFootPoses;
    }
 
+   public SideDependentList<ConvexPolygon2D> getStartFootholds()
+   {
+      return startFootholds;
+   }
+
    public SideDependentList<Pose3D> getGoalFootPoses()
    {
       return goalFootPoses;
@@ -275,6 +350,11 @@ public class FootstepPlannerRequest
    public boolean getAbortIfGoalStepSnappingFails()
    {
       return abortIfGoalStepSnappingFails;
+   }
+
+   public boolean getAbortIfBodyPathPlannerFails()
+   {
+      return abortIfBodyPathPlannerFails;
    }
 
    public boolean getPlanBodyPath()
@@ -297,7 +377,7 @@ public class FootstepPlannerRequest
       return goalYawProximity;
    }
 
-   public FootstepPlanHeading getDesiredHeading()
+   public double getDesiredHeading()
    {
       return desiredHeading;
    }
@@ -332,6 +412,26 @@ public class FootstepPlannerRequest
       return bodyPathWaypoints;
    }
 
+   public double getStatusPublishPeriod()
+   {
+      return statusPublishPeriod;
+   }
+
+   public SwingPlannerType getSwingPlannerType()
+   {
+      return swingPlannerType;
+   }
+
+   public boolean performPositionBasedSplitFractionCalculation()
+   {
+      return performPositionBasedSplitFractionCalculation;
+   }
+
+   public boolean performAreaBasedSplitFractionCalculation()
+   {
+      return performAreaBasedSplitFractionCalculation;
+   }
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -346,6 +446,7 @@ public class FootstepPlannerRequest
       setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
       setSnapGoalSteps(requestPacket.getSnapGoalSteps());
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
+      setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
       setPlanBodyPath(requestPacket.getPlanBodyPath());
       setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
@@ -355,10 +456,28 @@ public class FootstepPlannerRequest
       if(requestPacket.getHorizonLength() > 0.0)
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
+      setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
+      setPerformAreaBasedSplitFractionCalculation(requestPacket.getPerformAreaBasedSplitFractionCalculation());
+      setPerformPositionBasedSplitFractionCalculation(requestPacket.getPerformPositionBasedSplitFractionCalculation());
 
-      FootstepPlanHeading desiredHeading = FootstepPlanHeading.fromByte(requestPacket.getRequestedPathHeading());
-      if (desiredHeading != null)
-         setDesiredHeading(desiredHeading);
+      startFootholds.get(RobotSide.LEFT).clear();
+      for (Point3D vertex : requestPacket.getInitialLeftContactPoints2d())
+      {
+         startFootholds.get(RobotSide.LEFT).addVertex(vertex);
+      }
+      startFootholds.get(RobotSide.LEFT).update();
+
+      startFootholds.get(RobotSide.RIGHT).clear();
+      for (Point3D vertex : requestPacket.getInitialRightContactPoints2d())
+      {
+         startFootholds.get(RobotSide.RIGHT).addVertex(vertex);
+      }
+      startFootholds.get(RobotSide.RIGHT).update();
+
+      SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
+      if (swingPlannerType != null)
+         setSwingPlannerType(swingPlannerType);
+      setDesiredHeading(requestPacket.getRequestedPathHeading());
 
       for (int i = 0; i < requestPacket.getBodyPathWaypoints().size(); i++)
       {
@@ -380,20 +499,37 @@ public class FootstepPlannerRequest
       requestPacket.getGoalRightFootPose().set(getGoalFootPoses().get(RobotSide.RIGHT));
       requestPacket.setSnapGoalSteps(getSnapGoalSteps());
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
+      requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
       requestPacket.setPlanBodyPath(getPlanBodyPath());
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
-      requestPacket.setRequestedPathHeading(getDesiredHeading().toByte());
+      requestPacket.setRequestedPathHeading(getDesiredHeading());
       requestPacket.setTimeout(getTimeout());
       requestPacket.setMaxIterations(getMaximumIterations());
       requestPacket.setHorizonLength(getHorizonLength());
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
+      requestPacket.setStatusPublishPeriod(getStatusPublishPeriod());
+      requestPacket.setRequestedSwingPlanner(getSwingPlannerType().toByte());
+      requestPacket.setPerformAreaBasedSplitFractionCalculation(performAreaBasedSplitFractionCalculation());
+      requestPacket.setPerformPositionBasedSplitFractionCalculation(performPositionBasedSplitFractionCalculation());
 
       requestPacket.getBodyPathWaypoints().clear();
       for (int i = 0; i < bodyPathWaypoints.size(); i++)
       {
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
+      }
+
+      requestPacket.getInitialLeftContactPoints2d().clear();
+      for (int i = 0; i < startFootholds.get(RobotSide.LEFT).getNumberOfVertices(); i++)
+      {
+         requestPacket.getInitialLeftContactPoints2d().add().set(requestPacket.getInitialLeftContactPoints2d().get(i));
+      }
+
+      requestPacket.getInitialRightContactPoints2d().clear();
+      for (int i = 0; i < startFootholds.get(RobotSide.RIGHT).getNumberOfVertices(); i++)
+      {
+         requestPacket.getInitialRightContactPoints2d().add().set(requestPacket.getInitialRightContactPoints2d().get(i));
       }
 
       if(getPlanarRegionsList() != null)
@@ -416,6 +552,7 @@ public class FootstepPlannerRequest
       this.goalFootPoses.get(RobotSide.RIGHT).set(other.goalFootPoses.get(RobotSide.RIGHT));
       this.snapGoalSteps = other.snapGoalSteps;
       this.abortIfGoalStepSnappingFails = other.abortIfGoalStepSnappingFails;
+      this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
       this.performAStarSearch = other.performAStarSearch;
@@ -426,6 +563,15 @@ public class FootstepPlannerRequest
       this.maximumIterations = other.maximumIterations;
       this.horizonLength = other.horizonLength;
       this.assumeFlatGround = other.assumeFlatGround;
+      this.statusPublishPeriod = other.statusPublishPeriod;
+      this.swingPlannerType = other.swingPlannerType;
+      this.performAreaBasedSplitFractionCalculation = other.performAreaBasedSplitFractionCalculation;
+      this.performPositionBasedSplitFractionCalculation = other.performPositionBasedSplitFractionCalculation;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         this.startFootholds.get(robotSide).set(other.startFootholds.get(robotSide));
+      }
 
       if(other.planarRegionsList != null)
       {

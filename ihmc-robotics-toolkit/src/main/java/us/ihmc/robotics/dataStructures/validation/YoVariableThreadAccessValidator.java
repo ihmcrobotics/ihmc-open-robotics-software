@@ -2,16 +2,11 @@ package us.ihmc.robotics.dataStructures.validation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.List;
 
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.NotFoundException;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import javassist.*;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -23,7 +18,7 @@ public class YoVariableThreadAccessValidator
 {
    private static final boolean DEBUG = false;
    
-   private final YoVariableRegistry root;
+   private final YoRegistry root;
    private Thread accessorThread = null;
    
    private static boolean REGISTERED_ACCESS_VALIDATOR = false;
@@ -56,12 +51,12 @@ public class YoVariableThreadAccessValidator
       }
    }
 
-   public YoVariableThreadAccessValidator(YoVariableRegistry root)
+   public YoVariableThreadAccessValidator(YoRegistry root)
    {
       this.root = root;
    }
 
-   public void validateReadAccess(YoVariable<?> v)
+   public void validateReadAccess(YoVariable v)
    {
       Thread currentThread = Thread.currentThread();
       
@@ -82,7 +77,7 @@ public class YoVariableThreadAccessValidator
       {
          try
          {
-            throw new Exception("Variable " + v.getFullNameWithNameSpace() + " read by thread " + currentThread + ", expected: " + accessorThread);
+            throw new Exception("Variable " + v.getFullNameString() + " read by thread " + currentThread + ", expected: " + accessorThread);
          }
          catch(Exception e)
          {
@@ -94,7 +89,7 @@ public class YoVariableThreadAccessValidator
       }
    }
 
-   private void testAccess(YoVariable<?> v)
+   private void testAccess(YoVariable v)
    {
       Thread currentThread = Thread.currentThread();
 
@@ -115,7 +110,7 @@ public class YoVariableThreadAccessValidator
       {
          try
          {
-            throw new Exception("Variable " + v.getFullNameWithNameSpace() + " changed by thread " + currentThread + ", expected: " + accessorThread);
+            throw new Exception("Variable " + v.getFullNameString() + " changed by thread " + currentThread + ", expected: " + accessorThread);
          }
          catch(Exception e)
          {
@@ -129,7 +124,7 @@ public class YoVariableThreadAccessValidator
 
    public void start()
    {
-      ArrayList<YoVariable<?>> variables = root.getAllVariablesIncludingDescendants();
+      List<YoVariable> variables = root.collectSubtreeVariables();
       
       Field validator = null;
       if(REGISTERED_ACCESS_VALIDATOR)
@@ -146,12 +141,12 @@ public class YoVariableThreadAccessValidator
       
       for (int i = 0; i < variables.size(); i++)
       {
-         YoVariable<?> yoVariable = variables.get(i);
-         yoVariable.addVariableChangedListener(new VariableChangedListener()
+         YoVariable yoVariable = variables.get(i);
+         yoVariable.addListener(new YoVariableChangedListener()
          {
 
             @Override
-            public void notifyOfVariableChange(YoVariable<?> v)
+            public void changed(YoVariable v)
             {
                testAccess(v);
             }

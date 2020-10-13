@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vividsolutions.jts.triangulate.quadedge.LocateFailureException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -40,7 +41,21 @@ public abstract class PlanarRegionPolygonizer
                                                          PlanarRegionSegmentationDataExporter dataExporter)
    {
       List<List<PlanarRegion>> regions = rawData.parallelStream().filter(data -> data.size() >= polygonizerParameters.getMinNumberOfNodes())
-                                                .map(data -> createPlanarRegion(data, concaveHullFactoryParameters, polygonizerParameters, dataExporter))
+                                                .map(data ->
+                                                     {
+                                                        List<PlanarRegion> planarRegion;
+                                                        try
+                                                        {
+                                                           planarRegion = createPlanarRegion(data, concaveHullFactoryParameters,
+                                                                                             polygonizerParameters, dataExporter);
+                                                        }
+                                                        catch (LocateFailureException e)
+                                                        {
+                                                           LogTools.warn("Locate failed to converge.");
+                                                           planarRegion = new ArrayList<>();
+                                                        }
+                                                        return planarRegion;
+                                                     })
                                                 .filter(region -> region != null).collect(Collectors.toList());
 
       List<PlanarRegion> flattenedRegions = new ArrayList<>();
@@ -59,7 +74,8 @@ public abstract class PlanarRegionPolygonizer
          // First compute the set of concave hulls for this region
          List<Point2D> pointCloudInPlane = rawData.getPointCloudInPlane();
          List<LineSegment2D> intersections = rawData.getIntersectionsInPlane();
-         ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane, intersections,
+         ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane,
+                                                                                                            intersections,
                                                                                                             concaveHullFactoryParameters);
 
          // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
@@ -67,16 +83,21 @@ public abstract class PlanarRegionPolygonizer
          double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
          double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
-         for (int i = 0; i < 5; i++)
-         {
-            ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-            ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
-         }
+         ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+         ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+         if (polygonizerParameters.getCutNarrowPassage())
+            concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
          List<PlanarRegion> planarRegions = new ArrayList<>();
 
+         int hullCounter = 0;
+         int regionId = rawData.getRegionId();
+
          for (ConcaveHull concaveHull : concaveHullCollection)
          {
+            if (concaveHull.isEmpty())
+               continue;
+
             // Decompose the concave hulls into convex polygons
             double depthThreshold = polygonizerParameters.getDepthThreshold();
             List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
@@ -84,12 +105,13 @@ public abstract class PlanarRegionPolygonizer
 
             // Pack the data in PlanarRegion
             RigidBodyTransform transformToWorld = rawData.getTransformFromLocalToWorld();
-            Point2D[] concaveHullsVertices = new Point2D[concaveHull.getNumberOfVertices()];
-            concaveHull.getConcaveHullVertices().toArray(concaveHullsVertices);
 
-            PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullsVertices, decomposedPolygons);
-            planarRegion.setRegionId(rawData.getRegionId());
+            PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHull.getConcaveHullVertices(), decomposedPolygons);
+            planarRegion.setRegionId(regionId);
             planarRegions.add(planarRegion);
+
+            hullCounter++;
+            regionId = 31 * regionId + hullCounter;
          }
 
          return planarRegions;

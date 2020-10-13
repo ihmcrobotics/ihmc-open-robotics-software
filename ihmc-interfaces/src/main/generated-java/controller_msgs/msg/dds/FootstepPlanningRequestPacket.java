@@ -13,10 +13,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte FOOTSTEP_PLAN_HEADING_FORWARD = (byte) 0;
-   public static final byte FOOTSTEP_PLAN_HEADING_BACKWARD = (byte) 1;
-   public static final byte FOOTSTEP_PLAN_HEADING_LEFT = (byte) 2;
-   public static final byte FOOTSTEP_PLAN_HEADING_RIGHT = (byte) 3;
+   public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
+   public static final byte SWING_PLANNER_TYPE_POSITION = (byte) 1;
+   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -30,6 +29,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * Starting right foot pose
             */
    public us.ihmc.euclid.geometry.Pose3D start_right_foot_pose_;
+   /**
+            * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  initial_left_contact_points_2d_;
+   /**
+            * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  initial_right_contact_points_2d_;
    /**
             * Goal left foot pose
             */
@@ -51,6 +58,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean abort_if_goal_step_snapping_fails_;
    /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public boolean abort_if_body_path_planner_fails_;
+   /**
             * If true, will plan a body path. If false, will follow a straight-line path to the goal
             */
    public boolean plan_body_path_;
@@ -71,9 +82,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public double goal_yaw_proximity_ = -1.0;
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public byte requested_path_heading_ = (byte) 255;
+   public double requested_path_heading_;
    /**
             * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
@@ -99,6 +111,22 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public int planner_request_id_ = -1;
    /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public double status_publish_period_ = 1.0;
+   /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public byte requested_swing_planner_;
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public boolean perform_position_based_split_fraction_calculation_;
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public boolean perform_area_based_split_fraction_calculation_;
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -108,6 +136,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       start_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       start_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      initial_left_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+      initial_right_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
       goal_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       goal_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       body_path_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (50, new geometry_msgs.msg.dds.PosePubSubType());
@@ -127,6 +157,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_left_foot_pose_, start_left_foot_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.start_right_foot_pose_, start_right_foot_pose_);
+      initial_left_contact_points_2d_.set(other.initial_left_contact_points_2d_);
+      initial_right_contact_points_2d_.set(other.initial_right_contact_points_2d_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_left_foot_pose_, goal_left_foot_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_right_foot_pose_, goal_right_foot_pose_);
       requested_initial_stance_side_ = other.requested_initial_stance_side_;
@@ -134,6 +166,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       snap_goal_steps_ = other.snap_goal_steps_;
 
       abort_if_goal_step_snapping_fails_ = other.abort_if_goal_step_snapping_fails_;
+
+      abort_if_body_path_planner_fails_ = other.abort_if_body_path_planner_fails_;
 
       plan_body_path_ = other.plan_body_path_;
 
@@ -156,6 +190,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       assume_flat_ground_ = other.assume_flat_ground_;
 
       planner_request_id_ = other.planner_request_id_;
+
+      status_publish_period_ = other.status_publish_period_;
+
+      requested_swing_planner_ = other.requested_swing_planner_;
+
+      perform_position_based_split_fraction_calculation_ = other.perform_position_based_split_fraction_calculation_;
+
+      perform_area_based_split_fraction_calculation_ = other.perform_area_based_split_fraction_calculation_;
 
       generate_log_ = other.generate_log_;
 
@@ -192,6 +234,24 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public us.ihmc.euclid.geometry.Pose3D getStartRightFootPose()
    {
       return start_right_foot_pose_;
+   }
+
+
+   /**
+            * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getInitialLeftContactPoints2d()
+   {
+      return initial_left_contact_points_2d_;
+   }
+
+
+   /**
+            * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getInitialRightContactPoints2d()
+   {
+      return initial_right_contact_points_2d_;
    }
 
 
@@ -255,6 +315,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public boolean getAbortIfGoalStepSnappingFails()
    {
       return abort_if_goal_step_snapping_fails_;
+   }
+
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public void setAbortIfBodyPathPlannerFails(boolean abort_if_body_path_planner_fails)
+   {
+      abort_if_body_path_planner_fails_ = abort_if_body_path_planner_fails;
+   }
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public boolean getAbortIfBodyPathPlannerFails()
+   {
+      return abort_if_body_path_planner_fails_;
    }
 
    /**
@@ -327,16 +402,18 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public void setRequestedPathHeading(byte requested_path_heading)
+   public void setRequestedPathHeading(double requested_path_heading)
    {
       requested_path_heading_ = requested_path_heading;
    }
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
             */
-   public byte getRequestedPathHeading()
+   public double getRequestedPathHeading()
    {
       return requested_path_heading_;
    }
@@ -426,6 +503,66 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public void setStatusPublishPeriod(double status_publish_period)
+   {
+      status_publish_period_ = status_publish_period;
+   }
+   /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public double getStatusPublishPeriod()
+   {
+      return status_publish_period_;
+   }
+
+   /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public void setRequestedSwingPlanner(byte requested_swing_planner)
+   {
+      requested_swing_planner_ = requested_swing_planner;
+   }
+   /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public byte getRequestedSwingPlanner()
+   {
+      return requested_swing_planner_;
+   }
+
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public void setPerformPositionBasedSplitFractionCalculation(boolean perform_position_based_split_fraction_calculation)
+   {
+      perform_position_based_split_fraction_calculation_ = perform_position_based_split_fraction_calculation;
+   }
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public boolean getPerformPositionBasedSplitFractionCalculation()
+   {
+      return perform_position_based_split_fraction_calculation_;
+   }
+
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public void setPerformAreaBasedSplitFractionCalculation(boolean perform_area_based_split_fraction_calculation)
+   {
+      perform_area_based_split_fraction_calculation_ = perform_area_based_split_fraction_calculation;
+   }
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public boolean getPerformAreaBasedSplitFractionCalculation()
+   {
+      return perform_area_based_split_fraction_calculation_;
+   }
+
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -464,6 +601,20 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!this.start_left_foot_pose_.epsilonEquals(other.start_left_foot_pose_, epsilon)) return false;
       if (!this.start_right_foot_pose_.epsilonEquals(other.start_right_foot_pose_, epsilon)) return false;
+      if (this.initial_left_contact_points_2d_.size() != other.initial_left_contact_points_2d_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.initial_left_contact_points_2d_.size(); i++)
+         {  if (!this.initial_left_contact_points_2d_.get(i).epsilonEquals(other.initial_left_contact_points_2d_.get(i), epsilon)) return false; }
+      }
+
+      if (this.initial_right_contact_points_2d_.size() != other.initial_right_contact_points_2d_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.initial_right_contact_points_2d_.size(); i++)
+         {  if (!this.initial_right_contact_points_2d_.get(i).epsilonEquals(other.initial_right_contact_points_2d_.get(i), epsilon)) return false; }
+      }
+
       if (!this.goal_left_foot_pose_.epsilonEquals(other.goal_left_foot_pose_, epsilon)) return false;
       if (!this.goal_right_foot_pose_.epsilonEquals(other.goal_right_foot_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_initial_stance_side_, other.requested_initial_stance_side_, epsilon)) return false;
@@ -471,6 +622,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.snap_goal_steps_, other.snap_goal_steps_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_goal_step_snapping_fails_, other.abort_if_goal_step_snapping_fails_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_body_path_planner_fails_, other.abort_if_body_path_planner_fails_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
@@ -500,6 +653,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.status_publish_period_, other.status_publish_period_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_swing_planner_, other.requested_swing_planner_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_position_based_split_fraction_calculation_, other.perform_position_based_split_fraction_calculation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_area_based_split_fraction_calculation_, other.perform_area_based_split_fraction_calculation_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
@@ -519,6 +680,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!this.start_left_foot_pose_.equals(otherMyClass.start_left_foot_pose_)) return false;
       if (!this.start_right_foot_pose_.equals(otherMyClass.start_right_foot_pose_)) return false;
+      if (!this.initial_left_contact_points_2d_.equals(otherMyClass.initial_left_contact_points_2d_)) return false;
+      if (!this.initial_right_contact_points_2d_.equals(otherMyClass.initial_right_contact_points_2d_)) return false;
       if (!this.goal_left_foot_pose_.equals(otherMyClass.goal_left_foot_pose_)) return false;
       if (!this.goal_right_foot_pose_.equals(otherMyClass.goal_right_foot_pose_)) return false;
       if(this.requested_initial_stance_side_ != otherMyClass.requested_initial_stance_side_) return false;
@@ -526,6 +689,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.snap_goal_steps_ != otherMyClass.snap_goal_steps_) return false;
 
       if(this.abort_if_goal_step_snapping_fails_ != otherMyClass.abort_if_goal_step_snapping_fails_) return false;
+
+      if(this.abort_if_body_path_planner_fails_ != otherMyClass.abort_if_body_path_planner_fails_) return false;
 
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
@@ -549,6 +714,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
 
+      if(this.status_publish_period_ != otherMyClass.status_publish_period_) return false;
+
+      if(this.requested_swing_planner_ != otherMyClass.requested_swing_planner_) return false;
+
+      if(this.perform_position_based_split_fraction_calculation_ != otherMyClass.perform_position_based_split_fraction_calculation_) return false;
+
+      if(this.perform_area_based_split_fraction_calculation_ != otherMyClass.perform_area_based_split_fraction_calculation_) return false;
+
       if(this.generate_log_ != otherMyClass.generate_log_) return false;
 
 
@@ -567,6 +740,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.start_left_foot_pose_);      builder.append(", ");
       builder.append("start_right_foot_pose=");
       builder.append(this.start_right_foot_pose_);      builder.append(", ");
+      builder.append("initial_left_contact_points_2d=");
+      builder.append(this.initial_left_contact_points_2d_);      builder.append(", ");
+      builder.append("initial_right_contact_points_2d=");
+      builder.append(this.initial_right_contact_points_2d_);      builder.append(", ");
       builder.append("goal_left_foot_pose=");
       builder.append(this.goal_left_foot_pose_);      builder.append(", ");
       builder.append("goal_right_foot_pose=");
@@ -577,6 +754,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.snap_goal_steps_);      builder.append(", ");
       builder.append("abort_if_goal_step_snapping_fails=");
       builder.append(this.abort_if_goal_step_snapping_fails_);      builder.append(", ");
+      builder.append("abort_if_body_path_planner_fails=");
+      builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
       builder.append("perform_a_star_search=");
@@ -601,6 +780,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
+      builder.append("status_publish_period=");
+      builder.append(this.status_publish_period_);      builder.append(", ");
+      builder.append("requested_swing_planner=");
+      builder.append(this.requested_swing_planner_);      builder.append(", ");
+      builder.append("perform_position_based_split_fraction_calculation=");
+      builder.append(this.perform_position_based_split_fraction_calculation_);      builder.append(", ");
+      builder.append("perform_area_based_split_fraction_calculation=");
+      builder.append(this.perform_area_based_split_fraction_calculation_);      builder.append(", ");
       builder.append("generate_log=");
       builder.append(this.generate_log_);
       builder.append("}");

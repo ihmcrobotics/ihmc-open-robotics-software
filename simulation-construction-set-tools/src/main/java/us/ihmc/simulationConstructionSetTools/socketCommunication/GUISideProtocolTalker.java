@@ -4,10 +4,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class GUISideProtocolTalker
 {
@@ -16,9 +17,9 @@ public class GUISideProtocolTalker
    private static final byte IN_SYNC_BYTE = (byte) 33;
    private static final byte OUT_SYNC_BYTE = (byte) 79;
 
-   private final ArrayList<NewDataListener> newDataListeners;
+   private final List<NewDataListener> newDataListeners;
 
-   public GUISideProtocolTalker(DataOutputStream dataOutputStream, ArrayList<NewDataListener> newDataListeners)
+   public GUISideProtocolTalker(DataOutputStream dataOutputStream, List<NewDataListener> newDataListeners)
    {
       this.dataOutputStream = dataOutputStream;
       this.newDataListeners = newDataListeners;
@@ -56,7 +57,7 @@ public class GUISideProtocolTalker
       }
    }
 
-   public void sendRegistrySettings(HashMap<YoVariableRegistry, Integer> registryIndexMap, int registrySettingsIdentifier)
+   public void sendRegistrySettings(HashMap<YoRegistry, Integer> registryIndexMap, int registrySettingsIdentifier)
    {
       try
       {
@@ -65,12 +66,12 @@ public class GUISideProtocolTalker
          dataOutputStream.writeInt(registrySettingsIdentifier);
          dataOutputStream.writeInt(registryIndexMap.size());
 
-         for (YoVariableRegistry registry : registryIndexMap.keySet())
+         for (YoRegistry registry : registryIndexMap.keySet())
          {
             dataOutputStream.writeInt(registryIndexMap.get(registry));
-            dataOutputStream.writeBoolean(registry.isSent());
+//            dataOutputStream.writeBoolean(registry.isSent());
 //            dataOutputStream.writeBoolean(registry.isDisallowSendingSet());
-            dataOutputStream.writeBoolean(registry.isLogged());
+//            dataOutputStream.writeBoolean(registry.isLogged());
          }
 
          dataOutputStream.writeByte(OUT_SYNC_BYTE);
@@ -187,7 +188,7 @@ public class GUISideProtocolTalker
       }
    }
 
-   public void sendData(int listid, ArrayList<YoVariable<?>> vars)
+   public void sendData(int listid, ArrayList<YoVariable> vars)
    {
       try
       {
@@ -198,7 +199,7 @@ public class GUISideProtocolTalker
 
          for (int i = 0; i < vars.size(); i++)
          {
-            YoVariable<?> v = vars.get(i);
+            YoVariable v = vars.get(i);
             dataOutputStream.writeFloat((float) v.getValueAsDouble());
          }
 

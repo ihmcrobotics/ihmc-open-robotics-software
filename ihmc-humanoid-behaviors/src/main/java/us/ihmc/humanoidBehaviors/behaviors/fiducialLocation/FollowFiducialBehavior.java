@@ -18,13 +18,11 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -42,11 +40,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.YoStopwatch;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -96,7 +92,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    private static int id = 0;
    private final double idealStanceWidth;
 
-   public FollowFiducialBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+   public FollowFiducialBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
                                  HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super(robotName, "followFiducial-"+id++, FollowFiducialState.class, yoTime, ros2Node);
@@ -106,12 +102,12 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       this.fiducialDetectorBehaviorService = goalDetectorBehaviorService;
       addBehaviorService(fiducialDetectorBehaviorService);
 
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
 
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> finalGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(),
                                                                                   packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
 
       createSubscriberFromController(FootstepStatusMessage.class, footstepStatusReference::set);
       createSubscriberFromController(WalkingStatusMessage.class, packet -> {
@@ -130,9 +126,9 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
 
       footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
+      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
+      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
       setupStateMachine();
    }
 
@@ -342,7 +338,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       private final FramePose3D touchdownPose = new FramePose3D();
       private final FramePose3D leftFootStartPose = new FramePose3D();
       private final FramePose3D rightFootStartPose = new FramePose3D();
-      private final YoEnum<RobotSide> swingSide = YoEnum.create("swingSide", RobotSide.class, registry);
+      private final YoEnum<RobotSide> swingSide = new YoEnum<>("swingSide", registry, RobotSide.class);
 
       PlanFromSingleSupportState()
       {
@@ -492,11 +488,11 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       }
       shorterGoalPosition.set(pointBetweenFeet);
       shorterGoalPosition.add(vectorFromFeetToGoal);
-      goalPose.setPosition(shorterGoalPosition);
+      goalPose.getPosition().set(shorterGoalPosition);
 
       double headingFromFeetToGoal = Math.atan2(vectorFromFeetToGoal.getY(), vectorFromFeetToGoal.getX());
       AxisAngle goalOrientation = new AxisAngle(0.0, 0.0, 1.0, headingFromFeetToGoal);
-      goalPose.setOrientation(goalOrientation);
+      goalPose.getOrientation().set(goalOrientation);
       return goalPose;
 
    }

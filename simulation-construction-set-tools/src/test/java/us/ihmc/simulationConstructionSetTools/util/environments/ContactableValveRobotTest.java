@@ -12,7 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ContactableValveRobotTest
 {
@@ -45,7 +45,7 @@ public class ContactableValveRobotTest
    private SliderJoint horizontalJoint;
    private SliderJoint verticalJoint;
 
-   private YoVariableRegistry valveTestRegistry;
+   private YoRegistry valveTestRegistry;
 
    @AfterEach
    public void tearDown()
@@ -57,7 +57,7 @@ public class ContactableValveRobotTest
    public void testValveIsClosing()
    {
       boolean isValveClosed = false;
-      valveTestRegistry = new YoVariableRegistry("valveTestRegistry");
+      valveTestRegistry = new YoRegistry("valveTestRegistry");
 
       createValveRobot();
       createFloatingRobot();
@@ -68,7 +68,7 @@ public class ContactableValveRobotTest
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationTestingParameters);
 
-      scs.addYoVariableRegistry(valveTestRegistry);
+      scs.addYoRegistry(valveTestRegistry);
 
       Thread myThread = new Thread(scs);
       myThread.start();
@@ -83,7 +83,7 @@ public class ContactableValveRobotTest
          PrintTools.error(this, e.getMessage());
       }
 
-      if (robots[1].getVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
+      if (robots[1].findVariable("valveClosePercentage").getValueAsDouble() >= 99.0)
          isValveClosed = true;
 
       assertTrue(isValveClosed);
@@ -128,7 +128,7 @@ public class ContactableValveRobotTest
 
       floatingRobot.setGravity(0.0, 0.0, 0.0);
 
-      horizontalJoint = new SliderJoint("y", position, floatingRobot, Axis.Y);
+      horizontalJoint = new SliderJoint("y", position, floatingRobot, Axis3D.Y);
 
       floatingRobot.addRootJoint(horizontalJoint);
 
@@ -143,7 +143,7 @@ public class ContactableValveRobotTest
 
       horizontalJoint.setLink(linkHorizontal);
 
-      verticalJoint = new SliderJoint("z", new Vector3D(0.0, 0.0, 0.0), floatingRobot, Axis.Z);
+      verticalJoint = new SliderJoint("z", new Vector3D(0.0, 0.0, 0.0), floatingRobot, Axis3D.Z);
 
       Link linkVertical = new Link("linkVertical");
       linkVertical.setMass(0.5);
@@ -188,7 +188,7 @@ public class ContactableValveRobotTest
    {
       floatingRobotController = new RobotController()
       {
-         private YoVariableRegistry robotControllerRegistry = new YoVariableRegistry("robotControllerRegistry");
+         private YoRegistry robotControllerRegistry = new YoRegistry("robotControllerRegistry");
 
          @Override
          public void initialize()
@@ -200,7 +200,7 @@ public class ContactableValveRobotTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return robotControllerRegistry;
          }

@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ConstantForceTrajectoryGeneratorTest
 {
    private String namePrefix = "namePrefix";
-   private YoVariableRegistry parentRegistry = new YoVariableRegistry("parentRegistry");
+   private YoRegistry parentRegistry = new YoRegistry("parentRegistry");
    private double force = 10.0;
    private double finalTime = 10.0;
 

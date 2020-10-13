@@ -4,7 +4,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,7 +25,7 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
    private final Vector3D vectorToPack = new Vector3D();
 
    public ActuatorForceBasedTouchdownDetector(String name, ForceSensorDataReadOnly forceSensorData, double touchdownForceThreshold, double defintielyTouchdownForceThreshold,
-                                              YoVariableRegistry registry)
+                                              YoRegistry registry)
    {
       this.foreSensorData = forceSensorData;
       this.touchdownForceThreshold = new YoDouble(name + "_touchdownForceThreshold", registry);

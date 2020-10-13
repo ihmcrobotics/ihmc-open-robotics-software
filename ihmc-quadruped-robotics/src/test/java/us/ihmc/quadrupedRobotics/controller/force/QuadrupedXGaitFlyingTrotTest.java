@@ -10,7 +10,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -121,12 +121,12 @@ public abstract class QuadrupedXGaitFlyingTrotTest implements QuadrupedMultiRobo
 
    private void setUpVariablesForFlyingTrot()
    {
-      YoVariableRegistry rootRegistry = conductor.getScs().getRootRegistry();
-      YoBoolean requireTwoFeetInContact = ((YoBoolean) rootRegistry.getVariable("requireTwoFeetInContact"));
-      YoBoolean requireFootOnEachEnd = ((YoBoolean) rootRegistry.getVariable("requireFootOnEachEnd"));
-      YoDouble rhoClampingDuration = ((YoDouble) rootRegistry.getVariable("rhoClampingDuration"));
-      YoDouble loadingMaxMagnitude = ((YoDouble) rootRegistry.getVariable("loadingMaxMagnitude"));
-      YoDouble kp_comHeight = ((YoDouble) rootRegistry.getVariable("kp_comHeight"));
+      YoRegistry rootRegistry = conductor.getScs().getRootRegistry();
+      YoBoolean requireTwoFeetInContact = ((YoBoolean) rootRegistry.findVariable("requireTwoFeetInContact"));
+      YoBoolean requireFootOnEachEnd = ((YoBoolean) rootRegistry.findVariable("requireFootOnEachEnd"));
+      YoDouble rhoClampingDuration = ((YoDouble) rootRegistry.findVariable("rhoClampingDuration"));
+      YoDouble loadingMaxMagnitude = ((YoDouble) rootRegistry.findVariable("loadingMaxMagnitude"));
+      YoDouble kp_comHeight = ((YoDouble) rootRegistry.findVariable("kp_comHeight"));
 
       requireFootOnEachEnd.set(false);
       requireTwoFeetInContact.set(false);

@@ -16,7 +16,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTr
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -54,7 +54,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private final YoDouble currentTrajectoryTime;
 
 
-   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
+   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;

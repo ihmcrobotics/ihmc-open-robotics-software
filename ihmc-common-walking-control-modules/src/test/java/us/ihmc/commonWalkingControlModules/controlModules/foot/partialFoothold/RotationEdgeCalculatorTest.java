@@ -17,7 +17,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
@@ -26,7 +26,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 public abstract class RotationEdgeCalculatorTest
 {
    protected RobotSide side;
-   protected YoVariableRegistry registry;
+   protected YoRegistry registry;
    protected double dt;
    protected Twist soleTwist;
    protected MovingReferenceFrame soleFrame;
@@ -34,7 +34,7 @@ public abstract class RotationEdgeCalculatorTest
    @BeforeEach
    public void setup()
    {
-      registry = new YoVariableRegistry(FeetManager.class.getSimpleName());
+      registry = new YoRegistry(FeetManager.class.getSimpleName());
       dt = 0.001;
       side = RobotSide.LEFT;
       soleTwist = new Twist();

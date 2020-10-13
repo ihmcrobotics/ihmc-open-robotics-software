@@ -3,14 +3,16 @@ package us.ihmc.robotics.stateMachine.extra;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoublePredicate;
+import java.util.function.Supplier;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This factory helps by adding complete do nothing state implementations for every enum value
@@ -32,7 +34,7 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
       factory = new StateMachineFactory<>(keyType);
       this.keyType = keyType;
       String name = keyType.getSimpleName() + "Machine";
-      getFactory().setNamePrefix(name).setRegistry(new YoVariableRegistry(name + "Registry"));
+      getFactory().setNamePrefix(name).setRegistry(new YoRegistry(name + "Registry"));
 
       stateMap = new HashMap<>();
       for (K value : EnumSet.allOf(keyType))
@@ -46,6 +48,16 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
    public void addTransition(K from, K to, StateTransitionCondition condition)
    {
       getFactory().addTransition(from,  to, condition);
+   }
+
+   public void addTransition(K from, K to, BooleanSupplier condition)
+   {
+      getFactory().addTransition(from,  to, timeInCurrentState -> condition.getAsBoolean());
+   }
+
+   public void addTransition(K from, List<K> toOptions, Supplier<K> stateTransitionTo)
+   {
+      addTransition(from, toOptions, timeInCurrentState -> stateTransitionTo.get());
    }
 
    /**
@@ -94,6 +106,11 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
    public void setOnEntry(K key, Runnable onEntry)
    {
       getState(key).setOnEntry(onEntry);
+   }
+
+   public void setDoAction(K key, Runnable doAction)
+   {
+      setDoAction(key, timeInCurrentState -> doAction.run());
    }
 
    public void setDoAction(K key, DoubleConsumer doAction)

@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
@@ -24,12 +25,12 @@ public class NewtonCARESolver extends AbstractCARESolver
   private static final double defaultConvergenceEpsilon = 1e-8;
   private final double convergenceEpsilon;
 
-  private final DenseMatrix64F PE = new DenseMatrix64F(0, 0);
+  private final DMatrixRMaj PE = new DMatrixRMaj(0, 0);
 
-  private final DenseMatrix64F Ak = new DenseMatrix64F(0, 0);
-  private final DenseMatrix64F Qk = new DenseMatrix64F(0, 0);
+  private final DMatrixRMaj Ak = new DMatrixRMaj(0, 0);
+  private final DMatrixRMaj Qk = new DMatrixRMaj(0, 0);
 
-  private final DenseMatrix64F EInverse = new DenseMatrix64F(0, 0);
+  private final DMatrixRMaj EInverse = new DMatrixRMaj(0, 0);
 
   private final LyapunovEquationSolver lyapunovSolver = new LyapunovEquationSolver();
 
@@ -53,7 +54,7 @@ public class NewtonCARESolver extends AbstractCARESolver
   }
 
   /** {@inheritDoc} */
-  public DenseMatrix64F computeP()
+  public DMatrixRMaj computeP()
   {
      backendSolver.setMatrices(A, hasE ? E : null, M, Q);
      backendSolver.computeP();
@@ -61,7 +62,7 @@ public class NewtonCARESolver extends AbstractCARESolver
      if (hasE)
      {
         PE.reshape(n, n);
-        CommonOps.mult(backendSolver.getP(), E, PE);
+        CommonOps_DDRM.mult(backendSolver.getP(), E, PE);
      }
      else
         PE.set(backendSolver.getP());
@@ -74,17 +75,17 @@ public class NewtonCARESolver extends AbstractCARESolver
      while (error > convergenceEpsilon)
      {
         // Ak = A - M PEk
-        CommonOps.mult(-1.0, M, PE, Ak);
-        CommonOps.addEquals(Ak, A);
+        CommonOps_DDRM.mult(-1.0, M, PE, Ak);
+        CommonOps_DDRM.addEquals(Ak, A);
 
         // Qk = Q + K' R K
         NativeCommonOps.multQuad(PE, M, Qk);
-        CommonOps.addEquals(Qk, Q);
-        CommonOps.scale(-1.0, Q);
+        CommonOps_DDRM.addEquals(Qk, Q);
+        CommonOps_DDRM.scale(-1.0, Q);
 
         lyapunovSolver.setMatrices(Ak, Qk);
         lyapunovSolver.solve();
-        DenseMatrix64F Pk = lyapunovSolver.getX();
+        DMatrixRMaj Pk = lyapunovSolver.getX();
 
         // error = normSquared(P - P1);
         error = MatrixToolsLocal.distance(PE, Pk);
@@ -100,7 +101,7 @@ public class NewtonCARESolver extends AbstractCARESolver
         EInverse.reshape(n, n);
         P.reshape(n, n);
         NativeCommonOps.invert(E, EInverse);
-        CommonOps.mult(PE, EInverse, P);
+        CommonOps_DDRM.mult(PE, EInverse, P);
      }
      else
      {

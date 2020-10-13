@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AccelerationLimitedYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
@@ -46,7 +46,7 @@ public class AccelerationLimitedYoVariableSCSTest
    private final Robot robot = new Robot("generic_robot");
    private String nameYo = "processed";
    private SimulationConstructionSet scs;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private Random random = new Random(4546556L);
 
    /*
@@ -54,7 +54,7 @@ public class AccelerationLimitedYoVariableSCSTest
     */
    private void setupSCSStuff()
    {
-      registry = new YoVariableRegistry("generic_registry");
+      registry = new YoRegistry("generic_registry");
 
       raw = new YoDouble("raw", registry);
       alphaVariable = new YoDouble("alpha", registry);
@@ -528,7 +528,7 @@ public class AccelerationLimitedYoVariableSCSTest
 
       scs.startOnAThread();
 
-      YoVariableRegistry registry = scs.getRootRegistry();
+      YoRegistry registry = scs.getRootRegistry();
       YoDouble time = new YoDouble("time", registry);
       YoDouble maxRateYo = new YoDouble("maxRate", registry);
       YoDouble maxAccelerationYo = new YoDouble("maxAcceleration", registry);

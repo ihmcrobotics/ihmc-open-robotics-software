@@ -26,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -63,14 +63,14 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          @SuppressWarnings("unchecked") final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs
-               .getVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState");
+               .findVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState");
          String prefix = robotSide.getSideNameFirstLowerCaseLetter();
-         YoBoolean trustFootSwitch = ((YoBoolean) scs.getVariable(prefix + "_footTrustFootSwitch"));
-         YoBoolean trustStateEstimatorFootSwitch = ((YoBoolean) scs.getVariable(prefix + "_footStateEstimatorTrustFootSwitch"));
+         YoBoolean trustFootSwitch = ((YoBoolean) scs.findVariable(prefix + "_footTrustFootSwitch"));
+         YoBoolean trustStateEstimatorFootSwitch = ((YoBoolean) scs.findVariable(prefix + "_footStateEstimatorTrustFootSwitch"));
          trustFootSwitch.set(false);
          trustStateEstimatorFootSwitch.set(false);
-         YoBoolean controllerDetectedTouchdown = ((YoBoolean) scs.getVariable(prefix + "_footControllerDetectedTouchdown"));
-         YoBoolean controllerStateEstimatorDetectedTouchdown = ((YoBoolean) scs.getVariable(prefix + "_footStateEstimatorControllerDetectedTouchdown"));
+         YoBoolean controllerDetectedTouchdown = ((YoBoolean) scs.findVariable(prefix + "_footControllerDetectedTouchdown"));
+         YoBoolean controllerStateEstimatorDetectedTouchdown = ((YoBoolean) scs.findVariable(prefix + "_footStateEstimatorControllerDetectedTouchdown"));
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType, controllerDetectedTouchdown,
                                                                                      controllerStateEstimatorDetectedTouchdown));
       }
@@ -159,7 +159,6 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @AfterEach
@@ -183,7 +182,7 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
 
    private class EarlyTouchdownController implements RobotController
    {
-      private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       private final SideDependentList<SingleSupportStartCondition> startConditions;
       private final double swingDuration;
 
@@ -241,7 +240,7 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
       }
 
       @Override
-      public YoVariableRegistry getYoVariableRegistry()
+      public YoRegistry getYoRegistry()
       {
          return registry;
       }

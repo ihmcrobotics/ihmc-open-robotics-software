@@ -16,13 +16,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface QuadTreeFootstepSnapper
 {
-   public abstract Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap);
+   public abstract FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap);
    /**
     *
     * @param footstep the footstep position and orientaion of the sole
     * @param heightMap the heightmap
     */
-   public abstract Footstep.FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap);
+   public abstract FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap);
 
    public abstract Footstep generateSnappedFootstep(double soleX, double soleY, double yaw, RigidBodyBasics foot, ReferenceFrame soleFrame, RobotSide robotSide,
          HeightMapWithPoints heightMap) throws InsufficientDataException;

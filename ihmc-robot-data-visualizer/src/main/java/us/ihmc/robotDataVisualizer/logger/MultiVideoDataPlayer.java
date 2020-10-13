@@ -11,9 +11,9 @@ import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
-import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.simulationconstructionset.PlaybackListener;
+import us.ihmc.simulationconstructionset.RewoundListener;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {
@@ -61,7 +61,7 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
    }
 
    @Override
-   public void notifyOfIndexChange(int newIndex)
+   public void indexChanged(int newIndex)
    {
       if (activePlayer != null)
       {

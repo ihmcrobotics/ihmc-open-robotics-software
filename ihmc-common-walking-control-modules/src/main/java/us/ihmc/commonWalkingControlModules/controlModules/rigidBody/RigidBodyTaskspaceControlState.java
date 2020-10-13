@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlState
@@ -15,7 +15,7 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
    public static final int maxPoints = 10000;
    public static final int maxPointsInGenerator = 5;
 
-   public RigidBodyTaskspaceControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyTaskspaceControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoRegistry parentRegistry)
    {
       super(controlMode, bodyName, yoTime, parentRegistry);
    }

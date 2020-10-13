@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.stateMachine.core.State;
 
@@ -31,7 +32,7 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    {
    }
 
-   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+   FeedbackControlCommand<?> getFeedbackControlCommand();
 
    /**
     * This method is intended to reset the internal state of this control state to be identical to
@@ -40,16 +41,20 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
     * This allows to re-initialize the walking controller.
     * </p>
     */
-   public abstract void initialize();
+   void initialize();
 
-   public abstract void initializeDesiredHeightToCurrent();
+   void initializeDesiredHeightToCurrent();
 
-   public abstract void goHome(double trajectoryTime);
+   void goHome(double trajectoryTime);
 
-   public abstract void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
+   void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0,
-                                                              boolean isRecoveringFromPush, FeetManager feetManager);
+   double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+                                              FrameVector2DReadOnly desiredCoMVelocity,
+                                              boolean isInDoubleSupport,
+                                              double omega0,
+                                              boolean isRecoveringFromPush,
+                                              FeetManager feetManager);
 
    default TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {

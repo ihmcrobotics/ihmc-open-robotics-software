@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -162,9 +163,9 @@ public class KinematicsToolboxMessageFactory
     * @return the message containing the new privileged configuration ready to be sent to the
     *         {@code KinematicsToolboxModule}.
     */
-   public static KinematicsToolboxConfigurationMessage privilegedConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
+   public static KinematicsToolboxPrivilegedConfigurationMessage privilegedConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
    {
-      KinematicsToolboxConfigurationMessage message = new KinematicsToolboxConfigurationMessage();
+      KinematicsToolboxPrivilegedConfigurationMessage message = new KinematicsToolboxPrivilegedConfigurationMessage();
 
       OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 

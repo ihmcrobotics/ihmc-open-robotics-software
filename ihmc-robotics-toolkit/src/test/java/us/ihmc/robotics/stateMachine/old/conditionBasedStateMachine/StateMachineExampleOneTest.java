@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateChangedListener;
@@ -22,7 +22,7 @@ public class StateMachineExampleOneTest
       // This shows a quick and easy way to make a simple state machine without using the complex machinery for a more complex state machine.
       // This one goes through states Start, StateOne, StateTwo, and Stop.
       // It transitions based on time.
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 
@@ -105,7 +105,7 @@ public class StateMachineExampleOneTest
       // This one goes through states Start, StateOne, StateTwo, and Stop.
       // It transitions based on calling the transitionToDefaultNextState() method in the State...
 
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 
@@ -296,7 +296,7 @@ public class StateMachineExampleOneTest
    @Test
    public void testSomeStateMachineExceptions()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       SettableDoubleProvider time = new SettableDoubleProvider();
       StateMachine<ExampleStateName> stateMachine = new StateMachine<ExampleStateName>("stateMachine", "switchTime", ExampleStateName.class, time, registry);
 

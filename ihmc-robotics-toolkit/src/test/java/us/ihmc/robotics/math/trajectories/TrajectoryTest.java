@@ -1,19 +1,17 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.Assert;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.Assert;
 
 public class TrajectoryTest
 {
@@ -503,7 +501,7 @@ public class TrajectoryTest
          int derivativeOrder = 1 + random.nextInt(numberOfCoefficients);
          double x0 = EuclidCoreRandomTools.nextDouble(random, 5.0);
 
-         DenseMatrix64F derivativeElements = trajectory.evaluateGeometricSequenceDerivative(derivativeOrder, x0);
+         DMatrixRMaj derivativeElements = trajectory.evaluateGeometricSequenceDerivative(derivativeOrder, x0);
          for (int j = 0; j < derivativeOrder; j++)
          {
             Assert.assertEquals(derivativeElements.get(j), 0.0, SMALL_EPSILON);
@@ -630,8 +628,8 @@ public class TrajectoryTest
       double[] coefficients = polynomial.getCoefficients();
       for (int i = 0; i < coefficients.length + 3; i++)
       {
-         DenseMatrix64F generalizedDYPoly = polynomial.evaluateGeometricSequenceDerivative(i, x);
-         DenseMatrix64F generalizedDYHand = new DenseMatrix64F(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
+         DMatrixRMaj generalizedDYPoly = polynomial.evaluateGeometricSequenceDerivative(i, x);
+         DMatrixRMaj generalizedDYHand = new DMatrixRMaj(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
          if (i < coefficients.length)
          {
             for (int j = i; j < coefficients.length; j++)
@@ -655,7 +653,7 @@ public class TrajectoryTest
          double generalizedDYPolyScalar = polynomial.getDerivative(i, x);
          double generalizedDYHandScalar = 0.0;
 
-         DenseMatrix64F generalizedDYPolyVector = polynomial.evaluateGeometricSequenceDerivative(i, x);
+         DMatrixRMaj generalizedDYPolyVector = polynomial.evaluateGeometricSequenceDerivative(i, x);
          for (int j = 0; j < generalizedDYPolyVector.numCols; j++)
          {
             generalizedDYHandScalar += generalizedDYPolyVector.get(j) * coefficients[j];

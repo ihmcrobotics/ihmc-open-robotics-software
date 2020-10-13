@@ -1,15 +1,15 @@
 package us.ihmc.sensorProcessing.outputData;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public class JointDesiredOutputList implements JointDesiredOutputListBasics
 {
-   private final OneDoFJointBasics[] joints;
+   private final OneDoFJointReadOnly[] joints;
    private final JointDesiredOutput[] jointsData;
    private final TIntObjectHashMap<JointDesiredOutput> jointMap;
 
-   public JointDesiredOutputList(OneDoFJointBasics[] joints)
+   public JointDesiredOutputList(OneDoFJointReadOnly[] joints)
    {
       this.joints = joints;
       this.jointsData = new JointDesiredOutput[joints.length];
@@ -27,13 +27,13 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public boolean hasDataForJoint(OneDoFJointBasics joint)
+   public boolean hasDataForJoint(OneDoFJointReadOnly joint)
    {
       return jointMap.containsKey(joint.hashCode());
    }
 
    @Override
-   public OneDoFJointBasics getOneDoFJoint(int index)
+   public OneDoFJointReadOnly getOneDoFJoint(int index)
    {
       return joints[index];
    }
@@ -51,7 +51,7 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(OneDoFJointBasics joint)
+   public JointDesiredOutput getJointDesiredOutput(OneDoFJointReadOnly joint)
    {
       return jointMap.get(joint.hashCode());
    }

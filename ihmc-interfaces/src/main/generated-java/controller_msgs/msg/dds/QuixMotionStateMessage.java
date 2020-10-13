@@ -7,23 +7,23 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is used to switch the control scheme between different control mode.
+       * This message is part of the Quix controller API.
+       * This message is used to notify the crutch display of the current motion state and allow the crutch to communicate a desired change in state.
        */
 public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> implements Settable<QuixMotionStateMessage>, EpsilonComparable<QuixMotionStateMessage>
 {
    public static final byte HOLD_POSITION = (byte) 0;
    public static final byte SIT_DOWN = (byte) 1;
    public static final byte STAND_UP = (byte) 2;
-   public static final byte MOVE_TO_START = (byte) 3;
+   public static final byte MOVE_TO_FLAT_GROUND = (byte) 3;
    public static final byte FLAT_GROUND_WALKING = (byte) 4;
+   public static final byte MOVE_TO_SLOPE = (byte) 5;
+   public static final byte SLOPE_WALKING = (byte) 6;
+   public static final byte OLD_FLAT_GROUND_WALKING = (byte) 7;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   /**
-            * Specifies the which state the controller should transition into.
-            */
    public byte motion_state_name_ = (byte) 255;
 
    public QuixMotionStateMessage()
@@ -59,16 +59,10 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
       return sequence_id_;
    }
 
-   /**
-            * Specifies the which state the controller should transition into.
-            */
    public void setMotionStateName(byte motion_state_name)
    {
       motion_state_name_ = motion_state_name;
    }
-   /**
-            * Specifies the which state the controller should transition into.
-            */
    public byte getMotionStateName()
    {
       return motion_state_name_;

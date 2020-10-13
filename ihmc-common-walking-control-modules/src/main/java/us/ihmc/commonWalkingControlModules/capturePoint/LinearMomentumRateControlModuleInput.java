@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -43,6 +43,8 @@ public class LinearMomentumRateControlModuleInput
     * The desired capture point velocity that the ICP controller should track.
     */
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
+
+   private final FramePoint2D desiredICPAtEndOfState = new FramePoint2D();
 
    /**
     * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
@@ -124,7 +126,7 @@ public class LinearMomentumRateControlModuleInput
     * {@link #finalTransferDuration} should always be set together. Note, that they will only be used if one of the
     * initialize flags is set to {@code true}
     */
-   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
+   private final RecyclingArrayList<SimpleFootstep> footsteps = new RecyclingArrayList<>(SimpleFootstep.class);
 
    /**
     * List of upcoming footstep swing durations that are being executed by the controller. This is of interest to the
@@ -213,6 +215,17 @@ public class LinearMomentumRateControlModuleInput
       return desiredCapturePointVelocity;
    }
 
+   public void setDesiredICPAtEndOfState(FramePoint2DReadOnly desiredICPAtEndOfState)
+   {
+      this.desiredICPAtEndOfState.setIncludingFrame(desiredICPAtEndOfState);
+   }
+
+   public FramePoint2D getDesiredICPAtEndOfState()
+   {
+      return desiredICPAtEndOfState;
+   }
+
+
    @Deprecated // TODO: This should not be coming from the walking controller.
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
    {
@@ -293,7 +306,7 @@ public class LinearMomentumRateControlModuleInput
       }
    }
 
-   public void setFootsteps(List<SimpleAdjustableFootstep> footsteps)
+   public void setFootsteps(List<SimpleFootstep> footsteps)
    {
       this.footsteps.clear();
       for (int i = 0; i < footsteps.size(); i++)
@@ -302,7 +315,7 @@ public class LinearMomentumRateControlModuleInput
       }
    }
 
-   public RecyclingArrayList<SimpleAdjustableFootstep> getFootsteps()
+   public RecyclingArrayList<SimpleFootstep> getFootsteps()
    {
       return footsteps;
    }
@@ -419,6 +432,7 @@ public class LinearMomentumRateControlModuleInput
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
+      desiredICPAtEndOfState.setIncludingFrame(other.desiredICPAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
@@ -458,6 +472,8 @@ public class LinearMomentumRateControlModuleInput
          if (!desiredCapturePoint.equals(other.desiredCapturePoint))
             return false;
          if (!desiredCapturePointVelocity.equals(other.desiredCapturePointVelocity))
+            return false;
+         if (!desiredICPAtEndOfState.equals(other.desiredICPAtEndOfState))
             return false;
          if (!perfectCMP.equals(other.perfectCMP))
             return false;

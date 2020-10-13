@@ -9,7 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -25,6 +27,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -35,12 +38,9 @@ import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.MultiVideoDataPlayer;
 import us.ihmc.robotDataVisualizer.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -48,8 +48,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.gui.SwingUtils;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener
 {
@@ -511,10 +513,10 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          Vector3D cameraPosition = new Vector3D(radius * Math.sin(angle), radius * Math.cos(angle), height);
 
          Robot[] robot = exportM3Data.scs.getRobots();
-         ArrayList<Joint> joint = robot[0].getRootJoints();
+         List<Joint> joint = robot[0].getRootJoints();
          joint.get(0).getTransformToWorld(ret);
          ret.transform(cameraPosition);
-         ret.getTranslation(cameraFix);
+         cameraFix.set(ret.getTranslation());
 
          CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
          cameraConfiguration.setCameraFix(cameraFix);
@@ -540,7 +542,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
                e.printStackTrace();
             }
 
-            exportM3Data.players.notifyOfIndexChange(0);
+            exportM3Data.players.indexChanged(0);
          }
       }
 
@@ -548,9 +550,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       {
          PrintTools.info(this, "Writing Data File " + chosenFile.getAbsolutePath());
 
-         DataBuffer dataBuffer = exportData.scs.getDataBuffer();
+         YoBuffer dataBuffer = exportData.scs.getDataBuffer();
 
-         ArrayList<YoVariable<?>> varsYo = exportData.scs.getVars(vars, new String[0]);
+         List<YoVariable> varsYo = Stream.of(vars).map(varName -> exportData.scs.findVariable(varName)).collect(Collectors.toList());
          writeSpreadsheetFormattedData(chosenFile, dataBuffer, varsYo, timeVariable);
       }
 
@@ -596,9 +598,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       }
 
-      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, ArrayList<? extends YoVariable<?>> vars, String timeVariable)
+      private void writeSpreadsheetFormattedData(File chosenFile, YoBuffer dataBuffer, List<? extends YoVariable> vars, String timeVariable)
       {
-         ArrayList<DataBufferEntry> entries = dataBuffer.getEntries();
+         List<YoBufferVariableEntry> entries = dataBuffer.getEntries();
 
          try
          {
@@ -613,14 +615,14 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
             for (int i = 0; i < entries.size(); i++)
             {
-               DataBufferEntry entry = entries.get(i);
-               YoVariable<?> variable = entry.getVariable();
-               entry.getData();
+               YoBufferVariableEntry entry = entries.get(i);
+               YoVariable variable = entry.getVariable();
+               entry.getBuffer();
 
                if (vars.contains(variable))
                {
                   varnamesToWrite[vars.indexOf(variable)] = entry.getVariable().getName();
-                  double[] allData = entry.getData();
+                  double[] allData = entry.getBuffer();
                   double[] data = getWindowedData(dataBuffer.getInPoint(), allData, bufferLength);
                   if (entry.getVariable().getName().equals(timeVariable))
                   {

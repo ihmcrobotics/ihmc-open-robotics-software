@@ -18,4 +18,5 @@ geometry_msgs/Quaternion goal_orientation_in_world
 int32 planner_request_id -1
 float64 timeout
 float64 best_effort_timeout
+int32 max_iterations -1
 float64 horizon_length

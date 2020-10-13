@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
@@ -14,7 +14,7 @@ public class SetLidarParametersBehavior extends AbstractBehavior
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private DepthDataFilterParameters lidarParamPacket;
 
-   public SetLidarParametersBehavior(String robotName, Ros2Node ros2Node)
+   public SetLidarParametersBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
 

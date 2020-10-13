@@ -29,7 +29,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -550,7 +550,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    private WalkToLocationBehavior createNewWalkToLocationBehavior()
    {
-      Ros2Node ros2Node = drcBehaviorTestHelper.getRos2Node();
+      ROS2Node ros2Node = drcBehaviorTestHelper.getROS2Node();
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();

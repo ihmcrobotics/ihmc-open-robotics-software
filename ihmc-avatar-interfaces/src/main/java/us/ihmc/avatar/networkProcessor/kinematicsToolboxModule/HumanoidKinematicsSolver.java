@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -26,7 +26,7 @@ public class HumanoidKinematicsSolver
    private static final double DEFAULT_MIN_PROGRESSION = 0.005;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final HumanoidKinematicsToolboxController controller;
    private final CommandInputManager commandInputManager = new CommandInputManager(name, KinematicsToolboxModule.supportedCommands());
@@ -45,7 +45,7 @@ public class HumanoidKinematicsSolver
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                   YoVariableRegistry parentRegistry)
+                                   YoRegistry parentRegistry)
    {
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
       FullHumanoidRobotModel desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();

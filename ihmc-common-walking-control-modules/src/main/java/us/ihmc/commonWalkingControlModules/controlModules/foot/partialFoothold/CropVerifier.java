@@ -10,9 +10,10 @@ import us.ihmc.robotics.occupancyGrid.OccupancyGrid;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridTools;
 import us.ihmc.robotics.occupancyGrid.OccupancyGridVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -23,6 +24,7 @@ public class CropVerifier
    private final OccupancyGrid occupancyGrid;
    private final YoDouble perpendicularCoPError;
 
+   private final BooleanProvider useCoPOccupancyGridForCropping;
    private final IntegerProvider numberOfCellsThreshold;
    private final DoubleProvider perpendicularCopErrorThreshold;
    private final DoubleProvider distanceFromLineToComputeDesiredCoPOccupancy;
@@ -45,23 +47,24 @@ public class CropVerifier
    public CropVerifier(String namePrefix,
                        ReferenceFrame soleFrame,
                        double resolution,
-                       FootholdRotationParameters explorationParameters,
-                       YoVariableRegistry parentRegistry,
+                       FootholdRotationParameters rotationParameters,
+                       YoRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.soleFrame = soleFrame;
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       occupancyGrid = new OccupancyGrid(namePrefix + "DesiredCoPOccupancy", soleFrame, registry);
       occupancyGrid.setCellSize(resolution);
 
       perpendicularCoPError = new YoDouble(namePrefix + "PerpendicularCopError", registry);
-      perpendicularCopErrorThreshold = explorationParameters.getPerpendicularCoPErrorThreshold();
-      distanceFromLineToComputeDesiredCoPOccupancy = explorationParameters.getDistanceFromLineToComputeDesiredCoPOccupancy();
+      perpendicularCopErrorThreshold = rotationParameters.getPerpendicularCoPErrorThreshold();
+      distanceFromLineToComputeDesiredCoPOccupancy = rotationParameters.getDistanceFromLineToComputeDesiredCoPOccupancy();
+      useCoPOccupancyGridForCropping = rotationParameters.getUseCoPOccupancyGridForCropping();
       perpendicularCopErrorAboveThreshold = new YoBoolean(namePrefix + "PerpendicularCopErrorAboveThreshold", registry);
       enoughDesiredCopOnCropSide = new YoBoolean(namePrefix + "EnoughDesiredCopOnCropSide", registry);
-      numberOfCellsThreshold = explorationParameters.getNumberOfDesiredCopsOnCropSide();
+      numberOfCellsThreshold = rotationParameters.getNumberOfDesiredCopsOnCropSide();
 
       numberOfCellsOccupiedOnCropSide = new YoInteger(namePrefix + "NumberOfCellsOccupiedOnCropSide", registry);
       previousSideToCrop = new YoEnum<>(namePrefix + "PreviousSideToCrop", registry, RobotSide.class, true);
@@ -137,7 +140,9 @@ public class CropVerifier
                                                                                                       distanceFromLineToComputeDesiredCoPOccupancy.getValue()));
       enoughDesiredCopOnCropSide.set(numberOfCellsOccupiedOnCropSide.getValue() > numberOfCellsThreshold.getValue());
 
-      if (perpendicularCopErrorAboveThreshold.getBooleanValue() && desiredCopOnCorrectSide.getBooleanValue() && enoughDesiredCopOnCropSide.getBooleanValue())
+      boolean shouldCrop = (enoughDesiredCopOnCropSide.getBooleanValue() || !useCoPOccupancyGridForCropping.getValue());// && desiredCopOnCorrectSide.getBooleanValue();
+
+      if (perpendicularCopErrorAboveThreshold.getBooleanValue() && shouldCrop)
       {
          previousSideToCrop.set(sideToCrop);
          return true;

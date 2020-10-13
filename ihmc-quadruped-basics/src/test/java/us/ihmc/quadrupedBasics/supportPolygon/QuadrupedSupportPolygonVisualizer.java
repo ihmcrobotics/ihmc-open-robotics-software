@@ -23,10 +23,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportPolygonVisualizer implements RobotController
 {
@@ -34,7 +34,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private static final double simulateDT = 0.01;
    private static final int recordFrequency = 1;
    
-   private final YoVariableRegistry registry = new YoVariableRegistry("footChooserViz");
+   private final YoRegistry registry = new YoRegistry("footChooserViz");
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    
    private final SimulationConstructionSet scs;
@@ -131,7 +131,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
 //         }
 //      }
       
-      robot.getRobotsYoVariableRegistry();
+      robot.getRobotsYoRegistry();
       robot.setController(this);
       scs = new SimulationConstructionSet();
       scs.setRobot(robot);
@@ -188,7 +188,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

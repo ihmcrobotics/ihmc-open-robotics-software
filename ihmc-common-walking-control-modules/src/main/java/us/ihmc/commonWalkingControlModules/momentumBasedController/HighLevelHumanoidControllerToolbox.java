@@ -27,6 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -53,15 +54,21 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class HighLevelHumanoidControllerToolbox
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final ReferenceFrame centerOfMassFrame;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -177,8 +184,7 @@ public class HighLevelHumanoidControllerToolbox
       {
          referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames,
                                                                                  yoGraphicsListRegistry,
-                                                                                 registry,
-                                                                                 fullRobotModel.getHead().getBodyFixedFrame());
+                                                                                 registry);
       }
       else
       {
@@ -452,6 +458,11 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.set(capturePoint2d, 0.0);
    }
 
+   public CenterOfMassJacobian getCenterOfMassJacobian()
+   {
+      return capturePointCalculator.getCenterOfMassJacobian();
+   }
+
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final Momentum robotMomentum = new Momentum();
 
@@ -632,7 +643,7 @@ public class HighLevelHumanoidControllerToolbox
       wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }
@@ -957,6 +968,11 @@ public class HighLevelHumanoidControllerToolbox
    public double getOmega0()
    {
       return omega0.getDoubleValue();
+   }
+   
+   public DoubleProvider getOmega0Provider()
+   {
+      return omega0;
    }
 
    public void getCoP(FramePoint3D copToPack)

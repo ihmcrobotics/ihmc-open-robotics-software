@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -15,14 +16,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OneDoFJointQuinticTrajectoryGeneratorTest
 {
    private String namePrefix = "namePrefix";
-   private YoVariableRegistry parentRegistry = new YoVariableRegistry("parentRegistry");
+   private YoRegistry parentRegistry = new YoRegistry("parentRegistry");
 
-   private ReferenceFrame parentFrame = ReferenceFrame.constructARootFrame("rootFrame");
+   private ReferenceFrame parentFrame = ReferenceFrameTools.constructARootFrame("rootFrame");
 
    private RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
    private OneDoFJointBasics joint = new RevoluteJoint("revoluteJoint", elevator, new Vector3D());

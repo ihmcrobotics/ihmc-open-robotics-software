@@ -9,19 +9,19 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PolygonSnapperVisualizer
 {
    private final SimulationConstructionSet scs;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameConvexPolygon2D polygonToSnap, snappedPolygon;
    private final YoFramePoseUsingYawPitchRoll polygonToSnapPose, snappedPolygonPose;
    private final YoGraphicPolygon polygonToSnapViz, snappedPolygonViz;
@@ -53,7 +53,7 @@ public class PolygonSnapperVisualizer
       scs.addYoGraphic(polygonToSnapViz);
       scs.addYoGraphic(snappedPolygonViz);
 
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }

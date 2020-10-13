@@ -19,7 +19,6 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class JavaFXGraphicTools
 {
@@ -54,7 +53,7 @@ public class JavaFXGraphicTools
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
 
-      meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), lineWidth, true);
+      meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), lineWidth, true);
 
       for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {

@@ -10,12 +10,12 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch
 {
@@ -36,7 +36,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(String variableSuffix, RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
-                                                    IntegerProvider glitchWindowSize, double totalRobotWeight, YoVariableRegistry parentRegistry)
+                                                    IntegerProvider glitchWindowSize, double totalRobotWeight, YoRegistry parentRegistry)
    {
       super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch" + variableSuffix, parentRegistry);
 

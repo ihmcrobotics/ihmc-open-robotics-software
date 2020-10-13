@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
@@ -14,6 +13,8 @@ public class VisualizationController
    @FXML
    private CheckBox showRobotToggleButton;
    @FXML
+   private CheckBox showCoordinateSystem;
+   @FXML
    private CheckBox showInnerRegionMapsToggleButton;
    @FXML
    private CheckBox showInterRegionMapToggleButton;
@@ -24,7 +25,9 @@ public class VisualizationController
    @FXML
    private CheckBox showPlanarRegionsToggleButton;
    @FXML
-   private CheckBox showGoalSteps;
+   private CheckBox showStart;
+   @FXML
+   private CheckBox showGoal;
    @FXML
    private CheckBox showClusterRawPointsToggleButton;
    @FXML
@@ -58,7 +61,9 @@ public class VisualizationController
       // General
       messager.bindBidirectional(ShowRobot, showRobotToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(ShowGoalSteps, showGoalSteps.selectedProperty(), true);
+      messager.bindBidirectional(ShowStart, showStart.selectedProperty(), true);
+      messager.bindBidirectional(ShowGoal, showGoal.selectedProperty(), true);
+      messager.bindBidirectional(ShowCoordinateSystem, showCoordinateSystem.selectedProperty(), true);
 
       // Body path planner
       messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);

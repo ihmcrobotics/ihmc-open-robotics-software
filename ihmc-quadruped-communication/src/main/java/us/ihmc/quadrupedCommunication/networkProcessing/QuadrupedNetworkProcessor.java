@@ -1,5 +1,14 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -7,21 +16,20 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
+import us.ihmc.quadrupedCommunication.networkProcessing.reaUpdater.QuadrupedREAStateUpdater;
+import us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
-import us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning.PawPlanningModule;
-import us.ihmc.quadrupedCommunication.networkProcessing.reaUpdater.QuadrupedREAStateUpdater;
-import us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedNetworkProcessor
 {
@@ -65,7 +73,7 @@ public class QuadrupedNetworkProcessor
       setupQuadrupedSupportPlanarRegionPublisherModule(robotModel, groundContactPoints, params, pubSubImplementation);
    }
 
-   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
    {
       for (QuadrupedToolboxModule module : modules)
       {
@@ -130,12 +138,16 @@ public class QuadrupedNetworkProcessor
       {
          try
          {
+            REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(outputTopic,
+                                                                                          lidarOutputTopic,
+                                                                                          stereoOutputTopic,
+                                                                                          depthOutputTopic);
+            FilePropertyHelper filePropertyHelper = new FilePropertyHelper(System.getProperty("user.home")
+                  + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt");
             if (pubSubImplementation == DomainFactory.PubSubImplementation.FAST_RTPS)
-               LIDARBasedREAModule.createRemoteModule(System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt").start();
+               LIDARBasedREAModule.createRemoteModule(filePropertyHelper, networkProvider).start();
             else
-               LIDARBasedREAModule.createIntraprocessModule(System.getProperty("user.home") + "/.ihmc/Configurations/defaultREAModuleConfiguration.txt")
-                                  .start();
-
+               LIDARBasedREAModule.createIntraprocessModule(filePropertyHelper, networkProvider).start();
          }
          catch (Exception e)
          {

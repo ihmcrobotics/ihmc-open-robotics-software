@@ -25,7 +25,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -39,11 +38,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Deprecated
+//DO NOT USE THIS BEHAVIOR, this was for testing br stuff only and should be replaced by a mroe complete WalkThroughDoorBehavior.
 public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
 {
    private final boolean DEBUG = true;
@@ -78,7 +79,7 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
 
    //define some of the sub-behaviors that will be used that are specific to this behavior
    private final SearchForDoorBehavior searchForDoorBehavior;
-   private final OpenDoorBehavior openDoorBehavior;
+   private final OpenPushDoorBehavior openDoorBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
 
@@ -95,17 +96,17 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
    private final HumanoidReferenceFrames referenceFrames;
    // private BasicTimingBehavior basicTimingBehavior;
 
-   public SimplifiedWalkThroughDoorBehavior(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
-                                  FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                  WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimplifiedWalkThroughDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                                            FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                            WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions,
+                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+     // doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+     // doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
       addBehaviorService(doorOpenDetectorBehaviorService);
 
@@ -125,11 +126,11 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
-      openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
+      openDoorBehavior = new OpenPushDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
                                               yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       doorToBehaviorPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
-      doorToUIPublisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+      doorToUIPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
       
 
       //setup publisher for sending door location to UI

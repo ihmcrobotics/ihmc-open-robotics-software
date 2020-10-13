@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import boofcv.struct.flow.ImageFlow;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -16,11 +15,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class TransferState extends WalkingState
@@ -39,6 +37,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D desiredICPLocal = new FramePoint2D();
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint3D desiredCoM = new FramePoint3D();
 
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
@@ -54,7 +53,7 @@ public abstract class TransferState extends WalkingState
 
    public TransferState(WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                         HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
+                        DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferStateEnum.getTransferToSide();
@@ -91,7 +90,7 @@ public abstract class TransferState extends WalkingState
       feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
-      comHeightManager.setSupportLeg(transferToSide);
+//      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
 
       balanceManager.computeNormalizedEllipticICPError(transferToSide);
 
@@ -196,6 +195,12 @@ public abstract class TransferState extends WalkingState
       FixedFramePoint3DBasics transferFootPosition = footstep.getFootstepPose().getPosition();
       double transferTime = walkingMessageHandler.getNextTransferTime();
       comHeightManager.transfer(transferFootPosition, transferTime, swingSide, extraToeOffHeight);
+
+      balanceManager.getFinalDesiredCoMPosition(desiredCoM);
+      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
+      transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
+      comHeightManager.setSupportLeg(transferToSide);
+      comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
    protected void updateICPPlan()

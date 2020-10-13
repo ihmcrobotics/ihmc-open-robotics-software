@@ -33,7 +33,7 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -63,7 +63,7 @@ public class AStarPawStepPlannerTest
       double stanceWidth = 0.5;
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(2.0, 0.0, 0.0);
+      goalPose.getPosition().set(2.0, 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -78,7 +78,7 @@ public class AStarPawStepPlannerTest
       double stanceWidth = 0.5;
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(-2.0, 0.0, 0.0);
+      goalPose.getPosition().set(-2.0, 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout, RobotQuadrant.HIND_LEFT);
    }
@@ -93,8 +93,8 @@ public class AStarPawStepPlannerTest
       double stanceWidth = 0.5;
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(0.0, 0.0, Math.PI);
-      goalPose.setOrientationYawPitchRoll(Math.PI, 0.0, 0.0);
+      goalPose.getPosition().set(0.0, 0.0, Math.PI);
+      goalPose.getOrientation().setYawPitchRoll(Math.PI, 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -109,8 +109,8 @@ public class AStarPawStepPlannerTest
 
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(2.5, 2.5, 0.0);
-      goalPose.setOrientationYawPitchRoll(Math.PI / 3.0, 0.0, 0.0);
+      goalPose.getPosition().set(2.5, 2.5, 0.0);
+      goalPose.getOrientation().setYawPitchRoll(Math.PI / 3.0, 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -125,8 +125,8 @@ public class AStarPawStepPlannerTest
 
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(1.5, 0.5, 0.0);
-      goalPose.setOrientationYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
+      goalPose.getPosition().set(1.5, 0.5, 0.0);
+      goalPose.getOrientation().setYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -145,11 +145,11 @@ public class AStarPawStepPlannerTest
       FramePose3D goalPose = new FramePose3D();
 
       PlannerInput plannerInput = dataSet.getPlannerInput();
-      startPose.setPosition(plannerInput.getStartPosition());
-      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+      startPose.getPosition().set(plannerInput.getStartPosition());
+      startPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
 
-      goalPose.setPosition(plannerInput.getGoalPosition());
-      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+      goalPose.getPosition().set(plannerInput.getGoalPosition());
+      goalPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -169,11 +169,11 @@ public class AStarPawStepPlannerTest
       FramePose3D goalPose = new FramePose3D();
 
       PlannerInput plannerInput = dataSet.getPlannerInput();
-      startPose.setPosition(plannerInput.getStartPosition());
-      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+      startPose.getPosition().set(plannerInput.getStartPosition());
+      startPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
 
-      goalPose.setPosition(plannerInput.getGoalPosition());
-      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+      goalPose.getPosition().set(plannerInput.getGoalPosition());
+      goalPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -192,11 +192,11 @@ public class AStarPawStepPlannerTest
       FramePose3D goalPose = new FramePose3D();
 
       PlannerInput plannerInput = dataSet.getPlannerInput();
-      startPose.setPosition(plannerInput.getStartPosition());
-      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+      startPose.getPosition().set(plannerInput.getStartPosition());
+      startPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
 
-      goalPose.setPosition(plannerInput.getGoalPosition());
-      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+      goalPose.getPosition().set(plannerInput.getGoalPosition());
+      goalPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -216,11 +216,11 @@ public class AStarPawStepPlannerTest
       FramePose3D goalPose = new FramePose3D();
 
       PlannerInput plannerInput = dataSet.getPlannerInput();
-      startPose.setPosition(plannerInput.getStartPosition());
-      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+      startPose.getPosition().set(plannerInput.getStartPosition());
+      startPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
 
-      goalPose.setPosition(plannerInput.getGoalPosition());
-      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+      goalPose.getPosition().set(plannerInput.getGoalPosition());
+      goalPose.getOrientation().setYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
@@ -233,7 +233,7 @@ public class AStarPawStepPlannerTest
    private void runTest(double stanceLength, double stanceWidth, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList planarRegionsList,
                         double timeout, RobotQuadrant initialQuadrant)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(stanceLength);
       xGaitSettings.setStanceWidth(stanceWidth);

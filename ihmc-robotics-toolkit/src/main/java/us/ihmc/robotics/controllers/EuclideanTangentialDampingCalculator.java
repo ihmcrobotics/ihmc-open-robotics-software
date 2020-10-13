@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 
 /**
  * Modifies the derivative gain matrix to reduce the amount of derivative action along the main line of action for the feedback controller when there
@@ -43,7 +43,7 @@ public class EuclideanTangentialDampingCalculator
          {
             positionError.changeFrame(bodyFrame);
 
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError, rotationToControlFrame);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(positionError, rotationToControlFrame);
 
             transformToParent.setRotationAndZeroTranslation(rotationToControlFrame);
          }

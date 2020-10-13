@@ -7,7 +7,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;

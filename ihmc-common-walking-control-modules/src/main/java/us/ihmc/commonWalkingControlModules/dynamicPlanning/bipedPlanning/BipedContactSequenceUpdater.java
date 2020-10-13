@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSequenceProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -12,11 +15,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This class computes a list of {@link ContactStateProvider} from a list of {@link BipedTimedStep}. This uses transition trajectories from the
@@ -41,7 +41,7 @@ public class BipedContactSequenceUpdater implements ContactSequenceProvider
    private final SideDependentList<FramePose3D> solePoses = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
-   public BipedContactSequenceUpdater(SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry registry,
+   public BipedContactSequenceUpdater(SideDependentList<MovingReferenceFrame> soleFrames, YoRegistry registry,
                                       YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrames = soleFrames;

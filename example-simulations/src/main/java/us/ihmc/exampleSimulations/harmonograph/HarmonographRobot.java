@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.harmonograph;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.UniversalJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -103,7 +103,7 @@ public class HarmonographRobot extends Robot
       super("Harmonograph");
       
       harmonographPaperJPanel = new HarmonographPaperJPanel();
-      YoVariableRegistry registry = this.getRobotsYoVariableRegistry();
+      YoRegistry registry = this.getRobotsYoRegistry();
       
       kpArmWeld = new YoDouble("kpArmWeld", registry);
       kdArmWeld = new YoDouble("kdArmWeld", registry);
@@ -131,14 +131,14 @@ public class HarmonographRobot extends Robot
       this.addStaticLinkGraphics(tableLinkGraphics);
       
       // Desk Pendulum
-      PinJoint deskPendulumXJoint = new PinJoint("deskPendulumX", new Vector3D(0.0, 0.0, TABLE_HEIGHT), this, Axis.X);
+      PinJoint deskPendulumXJoint = new PinJoint("deskPendulumX", new Vector3D(0.0, 0.0, TABLE_HEIGHT), this, Axis3D.X);
       Link universalLink = createDeskPendulumUniversalLink();
       deskPendulumXJoint.setLink(universalLink);
       deskPendulumXJoint.setLimitStops(-MAXIMUM_ANGLE, MAXIMUM_ANGLE, K_ANGLE_LIMIT, B_ANGLE_LIMIT);
       
       this.addRootJoint(deskPendulumXJoint);
       
-      deskPendulumYJoint = new PinJoint("deskPendulumY", new Vector3D(), this, Axis.Y);
+      deskPendulumYJoint = new PinJoint("deskPendulumY", new Vector3D(), this, Axis3D.Y);
       Link deskPendulumLink = createDeskPendulumLink();
       deskPendulumYJoint.setLink(deskPendulumLink);
       deskPendulumYJoint.setLimitStops(-MAXIMUM_ANGLE, MAXIMUM_ANGLE, K_ANGLE_LIMIT, B_ANGLE_LIMIT);
@@ -159,14 +159,14 @@ public class HarmonographRobot extends Robot
       deskPendulumXJoint.addJoint(deskPendulumYJoint);
       
       // xPendulum
-      PinJoint xPendulumJoint = new PinJoint("xPendulum", new Vector3D(XY_PENDULUM_OFFSET, 0.0, TABLE_HEIGHT), this, Axis.Y);
+      PinJoint xPendulumJoint = new PinJoint("xPendulum", new Vector3D(XY_PENDULUM_OFFSET, 0.0, TABLE_HEIGHT), this, Axis3D.Y);
       Link xPendulumLink = createXYPendulumLink();
       xPendulumJoint.setLink(xPendulumLink);
       xPendulumJoint.setLimitStops(-MAXIMUM_ANGLE, MAXIMUM_ANGLE, K_ANGLE_LIMIT, B_ANGLE_LIMIT);
       this.addRootJoint(xPendulumJoint);
       
 //      GimbalJoint xPendulumArmJoint = new GimbalJoint("xGim1", "xGim2", "xGim3", new Vector3d(0.0, 0.0, XY_PENDULUM_PIVOT_TO_TOP), this, Axis.X, Axis.Y, Axis.Z);
-      UniversalJoint xPendulumArmJoint = new UniversalJoint("xUni1", "xUni2", new Vector3D(0.0, 0.0, XY_PENDULUM_PIVOT_TO_TOP), this, Axis.Y, Axis.Z);
+      UniversalJoint xPendulumArmJoint = new UniversalJoint("xUni1", "xUni2", new Vector3D(0.0, 0.0, XY_PENDULUM_PIVOT_TO_TOP), this, Axis3D.Y, Axis3D.Z);
       Link xPendulumArmLink = createXPendulumArmLink();
       xPendulumArmJoint.setLink(xPendulumArmLink);
       xPendulumJoint.addJoint(xPendulumArmJoint);
@@ -180,13 +180,13 @@ public class HarmonographRobot extends Robot
       xPendulumArmJoint.addExternalForcePoint(penExternalForcePoint);
       
    // yPendulum
-      PinJoint yPendulumJoint = new PinJoint("yPendulum", new Vector3D(0.0, XY_PENDULUM_OFFSET, TABLE_HEIGHT), this, Axis.X);
+      PinJoint yPendulumJoint = new PinJoint("yPendulum", new Vector3D(0.0, XY_PENDULUM_OFFSET, TABLE_HEIGHT), this, Axis3D.X);
       Link yPendulumLink = createXYPendulumLink();
       yPendulumJoint.setLink(yPendulumLink);
       yPendulumJoint.setLimitStops(-MAXIMUM_ANGLE, MAXIMUM_ANGLE, K_ANGLE_LIMIT, B_ANGLE_LIMIT);
       this.addRootJoint(yPendulumJoint);
       
-      GimbalJoint yPendulumArmGimbal = new GimbalJoint("yGim1", "yGim2", "yGim3", new Vector3D(0.0, 0.0, XY_PENDULUM_PIVOT_TO_TOP), this, Axis.X, Axis.Y, Axis.Z);
+      GimbalJoint yPendulumArmGimbal = new GimbalJoint("yGim1", "yGim2", "yGim3", new Vector3D(0.0, 0.0, XY_PENDULUM_PIVOT_TO_TOP), this, Axis3D.X, Axis3D.Y, Axis3D.Z);
       Link yPendulumArmLink = createYPendulumArmLink();
       yPendulumArmGimbal.setLink(yPendulumArmLink);
       yPendulumJoint.addJoint(yPendulumArmGimbal);
@@ -362,7 +362,7 @@ public class HarmonographRobot extends Robot
       xPendulumArmGimbalLink.setComOffset(-ARM_LENGTH/2.0, 0.0, 0.0);
       Graphics3DObject xPendulumArmGimbalLinkGraphics = new Graphics3DObject();
       xPendulumArmGimbalLinkGraphics.addSphere(0.04, YoAppearance.Red());
-      xPendulumArmGimbalLinkGraphics.rotate(-Math.PI/2.0, Axis.Y);
+      xPendulumArmGimbalLinkGraphics.rotate(-Math.PI/2.0, Axis3D.Y);
       xPendulumArmGimbalLinkGraphics.addCylinder(ARM_LENGTH, ARM_RADIUS, YoAppearance.Pink());
       
       // Pen:
@@ -383,7 +383,7 @@ public class HarmonographRobot extends Robot
       yPendulumArmGimbalLink.setComOffset(0.0, -ARM_LENGTH/2.0, 0.0);
       Graphics3DObject yPendulumArmGimbalLinkGraphics = new Graphics3DObject();
       yPendulumArmGimbalLinkGraphics.addSphere(0.04, YoAppearance.Red());
-      yPendulumArmGimbalLinkGraphics.rotate(Math.PI/2.0, Axis.X);
+      yPendulumArmGimbalLinkGraphics.rotate(Math.PI/2.0, Axis3D.X);
       yPendulumArmGimbalLinkGraphics.addCylinder(ARM_LENGTH, ARM_RADIUS, YoAppearance.Pink());
       yPendulumArmGimbalLink.setLinkGraphics(yPendulumArmGimbalLinkGraphics);
       return yPendulumArmGimbalLink;

@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoPositionJointHandleHolder
@@ -20,10 +20,10 @@ public class YoPositionJointHandleHolder
    private final YoDouble positionDesired;
 
    public YoPositionJointHandleHolder(PositionJointHandle handle, OneDoFJointBasics joint, JointDesiredOutputReadOnly desiredJointData,
-                                      YoVariableRegistry parentRegistry)
+                                      YoRegistry parentRegistry)
    {
       this.name = handle.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      YoRegistry registry = new YoRegistry(name);
 
       this.handle = handle;
       this.joint = joint;

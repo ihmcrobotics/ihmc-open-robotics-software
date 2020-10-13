@@ -54,7 +54,8 @@
             <Spinner fx:id="maxStepLength" editable="true" GridPane.columnIndex="3" />
             <Spinner fx:id="maxStepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Spinner fx:id="maxStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Spinner fx:id="maxLeftStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+             <Spinner fx:id="maxRightStepZ" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
             <Spinner fx:id="maxXYWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Spinner fx:id="maxYawWiggle" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5" />
             <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="5" />
@@ -62,12 +63,12 @@
             <Spinner fx:id="minStepWidth" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="3" />
-            <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Spinner fx:id="minClearance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <Spinner fx:id="minYClearance" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Spinner fx:id="wiggleInsideDelta" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             <Button fx:id="cancelPlanning" mnemonicParsing="false" onAction="#cancelPlanning" text="Cancel Planning" GridPane.columnIndex="4" GridPane.rowIndex="6" />
             <Label text="stepUpHeight" GridPane.rowIndex="6" />
-            <Spinner fx:id="stepUpHeight" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Spinner fx:id="stepUpHeight" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
             <Label text="maxStepUpX" GridPane.columnIndex="2" GridPane.rowIndex="6" />
             <Label text="maxStepDownX" GridPane.columnIndex="4" GridPane.rowIndex="5" />
             <Label text="stepDownHeight" GridPane.columnIndex="4" GridPane.rowIndex="4" />

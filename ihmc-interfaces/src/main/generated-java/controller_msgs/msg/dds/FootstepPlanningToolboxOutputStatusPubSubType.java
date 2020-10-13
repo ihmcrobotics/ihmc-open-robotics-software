@@ -42,11 +42,13 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -55,7 +57,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
@@ -78,12 +80,15 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getCdrSerializedSize(data.getFootstepDataList(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
@@ -93,9 +98,9 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyPath().get(i0), current_alignment);}
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLowLevelPlannerGoal(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalPose(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.getCdrSerializedSize(data.getFootstepPlanningStatistics(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.getCdrSerializedSize(data.getPlannerTimings(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getExceptionMessage().length() + 1;
 
@@ -112,18 +117,20 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    {
       cdr.write_type_4(data.getSequenceId());
 
-      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getFootstepDataList(), cdr);
-      cdr.write_type_9(data.getFootstepPlanningResult());
-
       cdr.write_type_2(data.getPlanId());
+
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getFootstepDataList(), cdr);
+      cdr.write_type_9(data.getBodyPathPlanningResult());
+
+      cdr.write_type_9(data.getFootstepPlanningResult());
 
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
           throw new RuntimeException("body_path field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getLowLevelPlannerGoal(), cdr);
-      controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.write(data.getFootstepPlanningStatistics(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalPose(), cdr);
+      controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.write(data.getPlannerTimings(), cdr);
       if(data.getExceptionMessage().length() <= 255)
       cdr.write_type_d(data.getExceptionMessage());else
           throw new RuntimeException("exception_message field exceeds the maximum length");
@@ -138,15 +145,17 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getFootstepDataList(), cdr);	
-      data.setFootstepPlanningResult(cdr.read_type_9());
-      	
       data.setPlanId(cdr.read_type_2());
+      	
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getFootstepDataList(), cdr);	
+      data.setBodyPathPlanningResult(cdr.read_type_9());
+      	
+      data.setFootstepPlanningResult(cdr.read_type_9());
       	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
-      controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType.read(data.getFootstepPlanningStatistics(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalPose(), cdr);	
+      controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.read(data.getPlannerTimings(), cdr);	
       cdr.read_type_d(data.getExceptionMessage());	
       cdr.read_type_e(data.getStacktrace());	
 
@@ -156,16 +165,17 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    public final void serialize(controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
+      ser.write_type_9("body_path_planning_result", data.getBodyPathPlanningResult());
       ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
-      ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.write_type_e("body_path", data.getBodyPath());
-      ser.write_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
+      ser.write_type_a("goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalPose());
 
-      ser.write_type_a("footstep_planning_statistics", new controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType(), data.getFootstepPlanningStatistics());
+      ser.write_type_a("planner_timings", new controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType(), data.getPlannerTimings());
 
       ser.write_type_d("exception_message", data.getExceptionMessage());
       ser.write_type_e("stacktrace", data.getStacktrace());
@@ -175,16 +185,17 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
+      data.setBodyPathPlanningResult(ser.read_type_9("body_path_planning_result"));
       data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
-      data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.read_type_e("body_path", data.getBodyPath());
-      ser.read_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
+      ser.read_type_a("goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalPose());
 
-      ser.read_type_a("footstep_planning_statistics", new controller_msgs.msg.dds.FootstepPlanningStatisticsPubSubType(), data.getFootstepPlanningStatistics());
+      ser.read_type_a("planner_timings", new controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType(), data.getPlannerTimings());
 
       ser.read_type_d("exception_message", data.getExceptionMessage());
       ser.read_type_e("stacktrace", data.getStacktrace());

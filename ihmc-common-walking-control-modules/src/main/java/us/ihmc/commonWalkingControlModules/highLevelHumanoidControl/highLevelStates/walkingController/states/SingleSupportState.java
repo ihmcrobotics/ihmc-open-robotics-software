@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -8,7 +9,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,10 +26,12 @@ public abstract class SingleSupportState extends WalkingState
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final BalanceManager balanceManager;
+   private final CenterOfMassHeightManager comHeightManager;
+
 
    public SingleSupportState(WalkingStateEnum singleSupportStateEnum, WalkingMessageHandler walkingMessageHandler,
                              HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                             YoVariableRegistry parentRegistry)
+                             YoRegistry parentRegistry)
    {
       super(singleSupportStateEnum, parentRegistry);
 
@@ -42,6 +45,7 @@ public abstract class SingleSupportState extends WalkingState
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
    }
 
    public RobotSide getSwingSide()
@@ -78,6 +82,8 @@ public abstract class SingleSupportState extends WalkingState
    {
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
+
+      comHeightManager.setSupportLeg(swingSide.getOppositeSide());
    }
 
    @Override

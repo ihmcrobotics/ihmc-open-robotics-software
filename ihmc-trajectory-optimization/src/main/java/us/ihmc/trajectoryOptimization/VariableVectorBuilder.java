@@ -1,10 +1,10 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
-
 import java.util.function.Supplier;
 
-public class VariableVectorBuilder implements Supplier<DenseMatrix64F>
+import org.ejml.data.DMatrixRMaj;
+
+public class VariableVectorBuilder implements Supplier<DMatrixRMaj>
 {
    private final int rows;
    private final int cols;
@@ -16,8 +16,8 @@ public class VariableVectorBuilder implements Supplier<DenseMatrix64F>
    }
 
    @Override
-   public DenseMatrix64F get()
+   public DMatrixRMaj get()
    {
-      return new DenseMatrix64F(rows, cols);
+      return new DMatrixRMaj(rows, cols);
    }
 }

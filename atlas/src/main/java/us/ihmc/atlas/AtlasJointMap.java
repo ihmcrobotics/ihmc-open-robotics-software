@@ -60,7 +60,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -332,7 +332,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoRegistry registry)
    {
       return null;
    }
@@ -385,9 +385,9 @@ public class AtlasJointMap implements DRCRobotJointMap
       handControlFrameToWristTranform.multiply(attachmentPlateToPalm);
 
       Vector3D translation = new Vector3D();
-      handControlFrameToWristTranform.getTranslation(translation);
+      translation.set(handControlFrameToWristTranform.getTranslation());
       translation.scale(getModelScale());
-      handControlFrameToWristTranform.setTranslation(translation);
+      handControlFrameToWristTranform.getTranslation().set(translation);
 
       return handControlFrameToWristTranform;
    }

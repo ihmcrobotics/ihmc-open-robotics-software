@@ -1,10 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,8 +26,7 @@ public class FootstepNodeSnapperTest
    public void testFootstepCacheing()
    {
       TestSnapper testSnapper = new TestSnapper();
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList(new PlanarRegion());
-      testSnapper.setPlanarRegions(planarRegionsList);
+      testSnapper.setPlanarRegions(PlanarRegionsList.flatGround(1.0));
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -39,10 +38,10 @@ public class FootstepNodeSnapperTest
 
                testSnapper.snapFootstepNode(new FootstepNode(xIndices[i], yIndices[j], yawIndices[k], robotSide));
                assertTrue(testSnapper.dirtyBit);
-               testSnapper.dirtyBit = false;
 
+               testSnapper.dirtyBit = false;
                testSnapper.snapFootstepNode(new FootstepNode(xIndices[i], yIndices[j], yawIndices[k], robotSide));
-               assertTrue(!testSnapper.dirtyBit);
+               assertFalse(testSnapper.dirtyBit);
             }
          }
       }
@@ -71,12 +70,17 @@ public class FootstepNodeSnapperTest
       }
    }
 
-   private class TestSnapper extends FootstepNodeSnapper
+   private class TestSnapper extends FootstepNodeSnapAndWiggler
    {
       boolean dirtyBit = false;
 
+      public TestSnapper()
+      {
+         super(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters());
+      }
+
       @Override
-      protected FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
+      protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode, FootstepNode stanceNode)
       {
          dirtyBit = true;
          return FootstepNodeSnapData.emptyData();

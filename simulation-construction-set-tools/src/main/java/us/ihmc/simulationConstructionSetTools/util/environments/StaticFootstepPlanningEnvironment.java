@@ -10,8 +10,8 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.BoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -249,9 +249,9 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
       goalMarkerRobot.setGravity(0.0);
       environmentRobots.add(goalMarkerRobot);
 
-      YoVariableRegistry robotsYoVariableRegistry = goalMarkerRobot.getRobotsYoVariableRegistry();
-      YoEnum<GoalMarkerLocation> goalMarkerLocationYoEnum = YoEnum.create("DesiredGoalMarkerLocation", GoalMarkerLocation.class, robotsYoVariableRegistry);
-      goalMarkerLocationYoEnum.addVariableChangedListener(new GoalMarkerLocationUpdater());
+      YoRegistry robotsYoVariableRegistry = goalMarkerRobot.getRobotsYoRegistry();
+      YoEnum<GoalMarkerLocation> goalMarkerLocationYoEnum = new YoEnum<>("DesiredGoalMarkerLocation", robotsYoVariableRegistry, GoalMarkerLocation.class);
+      goalMarkerLocationYoEnum.addListener(new GoalMarkerLocationUpdater());
       goalMarkerLocationYoEnum.set(GoalMarkerLocation.TOP_OF_STAIRS);
    }
 
@@ -285,10 +285,10 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
 
    }
 
-   class GoalMarkerLocationUpdater implements VariableChangedListener
+   class GoalMarkerLocationUpdater implements YoVariableChangedListener
    {
       @Override
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void changed(YoVariable v)
       {
          GoalMarkerLocation goalMarkerLocation = ((YoEnum<GoalMarkerLocation>) v).getEnumValue();
          goalMarkerRobot.setPosition(goalMarkerLocation.getMarkerLocation());

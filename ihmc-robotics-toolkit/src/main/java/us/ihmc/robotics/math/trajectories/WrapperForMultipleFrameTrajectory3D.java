@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -17,9 +17,9 @@ public class WrapperForMultipleFrameTrajectory3D
    private final ArrayList<FrameTrajectory3D> frameTrajectories;
    private final YoDouble timeIntoStep;
 
-   public WrapperForMultipleFrameTrajectory3D(ArrayList<FrameTrajectory3D> frameTrajectories, String namePrefix, YoVariableRegistry parentRegistry)
+   public WrapperForMultipleFrameTrajectory3D(ArrayList<FrameTrajectory3D> frameTrajectories, String namePrefix, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + namePostfix);
+      YoRegistry registry = new YoRegistry(namePrefix + namePostfix);
       parentRegistry.addChild(registry);
 
       this.frameTrajectories = frameTrajectories;

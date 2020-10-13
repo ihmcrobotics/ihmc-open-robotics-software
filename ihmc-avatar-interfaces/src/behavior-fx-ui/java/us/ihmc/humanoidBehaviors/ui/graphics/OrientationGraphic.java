@@ -17,14 +17,16 @@ import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 public class OrientationGraphic
 {
    private final MeshView arrow;
-   private final double cylinderLength;
    private final FramePose3D pose = new FramePose3D();
 
    public OrientationGraphic()
    {
-      cylinderLength = 0.25;
-      double radius = 0.01;
-      Color color = Color.GREEN;
+      this(Color.GREEN, 0.25);
+   }
+
+   public OrientationGraphic(Color color, double cylinderLength)
+   {
+      double radius = cylinderLength / 20.0;
 
       TextureColorPalette1D colorPalette = new TextureColorPalette1D();
       colorPalette.setHueBased(1.0, 1.0);
@@ -38,7 +40,6 @@ public class OrientationGraphic
 
       arrow = new MeshView(meshBuilder.generateMesh());
       arrow.setMaterial(meshBuilder.generateMaterial());
-      arrow.setVisible(false);
    }
 
    public FramePose3DBasics getPose()
@@ -54,13 +55,13 @@ public class OrientationGraphic
 
    public void setPosition(Point3DReadOnly position)
    {
-      this.pose.setPosition(position);
+      this.pose.getPosition().set(position);
       update();
    }
 
    public void setOrientation(Orientation3DReadOnly orientation)
    {
-      this.pose.setOrientation(orientation);
+      this.pose.getOrientation().set(orientation);
       update();
    }
 

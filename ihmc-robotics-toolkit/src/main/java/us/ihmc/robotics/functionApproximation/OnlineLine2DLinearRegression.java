@@ -6,9 +6,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
 
 public class OnlineLine2DLinearRegression
 {
@@ -19,7 +19,7 @@ public class OnlineLine2DLinearRegression
    private final YoDouble transverseStandardDeviation;
    private final YoDouble inlineStandardDeviation;
 
-   public OnlineLine2DLinearRegression(String prefix, YoVariableRegistry registry)
+   public OnlineLine2DLinearRegression(String prefix, YoRegistry registry)
    {
       onlineLeastSquaresRegression = new OnlineLeastSquaresRegression(prefix, registry);
       transverseStandardDeviation = new YoDouble(prefix + "TransverseStandardDeviation", registry);

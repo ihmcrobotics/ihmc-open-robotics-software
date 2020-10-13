@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.awt.Color;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,11 +19,13 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This class computes whether a foot is rotating.</br>
@@ -37,7 +41,7 @@ import java.awt.*;
  */
 public class FootRotationDetector
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
@@ -60,13 +64,13 @@ public class FootRotationDetector
 
    private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
-   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
+   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoRegistry parentRegistry,
                                YoGraphicsListRegistry graphicsRegistry)
    {
       this.soleFrame = soleFrame;
       this.dt = dt;
 
-      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
       linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
@@ -118,7 +122,7 @@ public class FootRotationDetector
          lineOfRotationInSole.getPoint().set(tempPointOfRotation);
          lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
 
-         double omega = lineOfRotationInSole.getDirection().length();
+         double omega = soleFrameTwist.getAngularPart().length();
          integratedRotationAngle.add(dt * omega);
 
          lineOfRotationInSole.getDirection().scale(1.0 / omega);

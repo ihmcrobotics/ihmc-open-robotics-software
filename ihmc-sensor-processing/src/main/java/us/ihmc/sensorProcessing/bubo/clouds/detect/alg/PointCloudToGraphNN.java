@@ -19,7 +19,6 @@
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
 import java.util.List;
-import java.util.Stack;
 
 import org.ddogleg.nn.NearestNeighbor;
 import org.ddogleg.nn.NnData;
@@ -32,106 +31,79 @@ import georegression.struct.point.Point3D_F64;
  *
  * @author Peter Abeles
  */
-public class PointCloudToGraphNN {
+public class PointCloudToGraphNN
+{
 
-	NearestNeighbor<PointVectorNN> nn;
+   NearestNeighbor<PointVectorNN> nn;
 
-	// the maximum distance a neighbor can be
-	private double maxDistanceNeighbor;
+   // the maximum distance a neighbor can be
+   private double maxDistanceNeighbor;
 
-	// number of nearest-neighbors it will search for
-	private int numNeighbors;
+   // number of nearest-neighbors it will search for
+   private int numNeighbors;
 
-	// stores and recycles Point3D converted to double[] for use in NN
-	private Stack<double[]> unusedNnData = new Stack<double[]>();
-	private Stack<double[]> usedNnData = new Stack<double[]>();
+   // point normal data which is stored in the graph
+   private FastQueue<PointVectorNN> listPointVector = new FastQueue<>(PointVectorNN::new);
 
-	// point normal data which is stored in the graph
-	private FastQueue<PointVectorNN> listPointVector = new FastQueue<PointVectorNN>(PointVectorNN.class, true);
+   // results of NN search
+   private FastQueue<NnData<PointVectorNN>> resultsNN = new FastQueue<>(NnData::new);
 
-	// results of NN search
-	private FastQueue<NnData<PointVectorNN>> resultsNN = new FastQueue<NnData<PointVectorNN>>((Class) NnData.class, true);
+   public PointCloudToGraphNN(NearestNeighbor<PointVectorNN> nn, int numNeighbors, double maxDistanceNeighbor)
+   {
+      this.nn = nn;
+      this.numNeighbors = numNeighbors;
+      this.maxDistanceNeighbor = maxDistanceNeighbor;
+   }
 
-	public PointCloudToGraphNN(NearestNeighbor<PointVectorNN> nn,
-							   int numNeighbors ,
-							   double maxDistanceNeighbor ) {
-		this.nn = nn;
-		this.numNeighbors = numNeighbors;
-		this.maxDistanceNeighbor = maxDistanceNeighbor;
-	}
+   /**
+    * Converts points into a format understood by the NN algorithm and initializes it
+    */
+   public void process(List<Point3D_F64> cloud)
+   {
+      // declare the output data for creating the NN graph
+      listPointVector.reset();
+      for (int i = 0; i < cloud.size(); i++)
+      {
+         PointVectorNN p = listPointVector.grow();
+         p.reset();
+         p.p = cloud.get(i);
+         p.index = i;
+      }
 
-	/**
-	 * Converts points into a format understood by the NN algorithm and initializes it
-	 */
-	public void process(List<Point3D_F64> cloud) {
-		nn.init(3);
+      findNeighbors();
+   }
 
-		// swap the two lists to recycle old data and avoid creating new memory
-		Stack<double[]> tmp = unusedNnData;
-		unusedNnData = usedNnData;
-		usedNnData = tmp;
-		// add the smaller list to the larger one
-		unusedNnData.addAll(usedNnData);
-		usedNnData.clear();
+   private void findNeighbors()
+   {
+      // find the nearest-neighbor for each point in the cloud
+      nn.setPoints(listPointVector.toList(), true);
 
-		// convert the point cloud into the NN format
-		for (int i = 0; i < cloud.size(); i++) {
-			Point3D_F64 p = cloud.get(i);
+      for (int i = 0; i < listPointVector.size; i++)
+      {
+         // find the nearest-neighbors
+         resultsNN.reset();
 
-			double[] d;
-			if (unusedNnData.isEmpty()) {
-				d = new double[3];
-			} else {
-				d = unusedNnData.pop();
-			}
+         PointVectorNN p = listPointVector.get(i);
+         // numNeighbors+1 since the target node will also be returned and is removed
+         nn.createSearch().findNearest(p, maxDistanceNeighbor, numNeighbors + 1, resultsNN);
 
-			d[0] = p.x;
-			d[1] = p.y;
-			d[2] = p.z;
+         // save the results
+         p.neighbors.reset();
+         for (int j = 0; j < resultsNN.size; j++)
+         {
+            NnData<PointVectorNN> n = resultsNN.get(j);
 
-			usedNnData.add(d);
-		}
+            // don't add the point to its own list of neighbors list
+            if (n.point != p)
+            {
+               p.neighbors.grow().set(n.point);
+            }
+         }
+      }
+   }
 
-		// declare the output data for creating the NN graph
-		listPointVector.reset();
-		for (int i = 0; i < cloud.size(); i++) {
-			PointVectorNN p = listPointVector.grow();
-			p.reset();
-			p.p = cloud.get(i);
-			p.index = i;
-		}
-
-		findNeighbors();
-	}
-
-	private void findNeighbors() {
-		// find the nearest-neighbor for each point in the cloud
-		nn.setPoints(usedNnData, listPointVector.toList());
-
-		for (int i = 0; i < listPointVector.size; i++) {
-			// find the nearest-neighbors
-			resultsNN.reset();
-
-			double[] targetPt = usedNnData.get(i);
-			// numNeighbors+1 since the target node will also be returned and is removed
-			nn.findNearest(targetPt, maxDistanceNeighbor, numNeighbors + 1, resultsNN);
-
-			PointVectorNN p = listPointVector.get(i);
-
-			// save the results
-			p.neighbors.reset();
-			for (int j = 0; j < resultsNN.size; j++) {
-				NnData<PointVectorNN> n = resultsNN.get(j);
-
-				// don't add the point to its own list of neighbors list
-				if (n.point != targetPt) {
-					p.neighbors.add(n.data);
-				}
-			}
-		}
-	}
-
-	public FastQueue<PointVectorNN> getListPointVector() {
-		return listPointVector;
-	}
+   public FastQueue<PointVectorNN> getListPointVector()
+   {
+      return listPointVector;
+   }
 }

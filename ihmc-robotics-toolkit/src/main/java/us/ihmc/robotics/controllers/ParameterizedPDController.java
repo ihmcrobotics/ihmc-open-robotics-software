@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterizedPDController extends AbstractPDController
 {
@@ -11,7 +11,7 @@ public class ParameterizedPDController extends AbstractPDController
    private final DoubleProvider derivativeGain;
    private final DoubleProvider positionDeadband;
 
-   public ParameterizedPDController(String suffix, YoVariableRegistry registry)
+   public ParameterizedPDController(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
 
@@ -21,7 +21,7 @@ public class ParameterizedPDController extends AbstractPDController
    }
 
    public ParameterizedPDController(DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider positionDeadband, String suffix,
-                                    YoVariableRegistry registry)
+                                    YoRegistry registry)
    {
       super(suffix, registry);
 
@@ -30,7 +30,7 @@ public class ParameterizedPDController extends AbstractPDController
       this.positionDeadband = positionDeadband;
    }
 
-   public ParameterizedPDController(DoubleProvider proportionalGain, DoubleProvider derivativeGain, String suffix, YoVariableRegistry registry)
+   public ParameterizedPDController(DoubleProvider proportionalGain, DoubleProvider derivativeGain, String suffix, YoRegistry registry)
    {
       super(suffix, registry);
 

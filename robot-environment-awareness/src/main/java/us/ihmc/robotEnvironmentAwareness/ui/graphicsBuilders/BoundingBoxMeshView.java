@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
@@ -29,11 +30,22 @@ public class BoundingBoxMeshView extends MeshView implements Runnable
 
    private final REAUIMessager uiMessager;
 
+   private final Topic<Boolean> requestBoundingBoxTopic;
+
    public BoundingBoxMeshView(REAUIMessager uiMessager)
    {
+      this(uiMessager, REAModuleAPI.UIOcTreeBoundingBoxShow, REAModuleAPI.RequestBoundingBox, REAModuleAPI.OcTreeBoundingBoxState);
+   }
+
+   public BoundingBoxMeshView(REAUIMessager uiMessager,
+                              Topic<Boolean> uiOcTreeBoundingBoxShowTopic,
+                              Topic<Boolean> requestBoundingBoxTopic,
+                              Topic<BoxMessage> ocTreeBoundingBoxStateTopic)
+   {
       this.uiMessager = uiMessager;
-      showOcTreeBoundingBox = uiMessager.createInput(REAModuleAPI.UIOcTreeBoundingBoxShow, false);
-      boundingBoxState = uiMessager.createInput(REAModuleAPI.OcTreeBoundingBoxState);
+      this.requestBoundingBoxTopic = requestBoundingBoxTopic;
+      showOcTreeBoundingBox = uiMessager.createInput(uiOcTreeBoundingBoxShowTopic, false);
+      boundingBoxState = uiMessager.createInput(ocTreeBoundingBoxStateTopic);
       setMaterial(material);
    }
 
@@ -44,7 +56,7 @@ public class BoundingBoxMeshView extends MeshView implements Runnable
 
       if (showOcTreeBoundingBox.get())
       {
-         uiMessager.submitStateRequestToModule(REAModuleAPI.RequestBoundingBox);
+         uiMessager.submitStateRequestToModule(requestBoundingBoxTopic);
       }
       else
       {

@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -18,10 +18,10 @@ public class YoJointStateHandleHolder
    private final YoDouble q;
    private final YoDouble qd;
 
-   public YoJointStateHandleHolder(JointStateHandle handle, OneDoFJointBasics joint, YoVariableRegistry parentRegistry)
+   public YoJointStateHandleHolder(JointStateHandle handle, OneDoFJointBasics joint, YoRegistry parentRegistry)
    {
       this.name = handle.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      YoRegistry registry = new YoRegistry(name);
 
       this.handle = handle;
       this.joint = joint;

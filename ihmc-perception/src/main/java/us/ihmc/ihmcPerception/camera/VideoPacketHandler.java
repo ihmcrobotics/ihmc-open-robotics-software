@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.camera;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -12,7 +12,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2Node;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
@@ -21,9 +22,14 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    private volatile boolean enable = true;
 
-   public VideoPacketHandler(Ros2Node ros2Node)
+   public VideoPacketHandler(ROS2Node ros2Node)
    {
-      publisher = ROS2Tools.createPublisher(ros2Node, VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
+      this(ros2Node, ROS2Tools.VIDEO);
+   }
+   
+   public VideoPacketHandler(ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
+   {
+      publisher = ROS2Tools.createPublisher(ros2Node, topic);
    }
 
    private Stopwatch timer;
@@ -34,7 +40,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    @Override
    public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                       IntrinsicParameters intrinsicParameters)
+                       CameraPinholeBrown intrinsicParameters)
    {
       if (DEBUG)
       {

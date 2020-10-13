@@ -30,7 +30,7 @@ import java.util.*;
 public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
-   private final String saveFileName;
+   private String saveFileName;
 
    private final Object[] values;
    private final Class<?> classForLoading;
@@ -44,12 +44,21 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             String directoryNameToAssumePresent,
                             String subsequentPathToResourceFolder)
    {
+      this(keys, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, "");
+   }
+
+   public StoredPropertySet(StoredPropertyKeyList keys,
+                            Class<?> classForLoading,
+                            String directoryNameToAssumePresent,
+                            String subsequentPathToResourceFolder,
+                            String fileNameSuffix)
+   {
       this.keys = keys;
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + ".ini";
+      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + fileNameSuffix + ".ini";
 
       values = new Object[keys.keys().size()];
 
@@ -210,8 +219,27 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   @Override
    public void load()
    {
+      load(saveFileName);
+   }
+
+   @Override
+   public void load(String fileName)
+   {
+      load(fileName, true);
+   }
+
+   public void loadUnsafe()
+   {
+      load(saveFileName, false);
+   }
+
+   private void load(String fileName, boolean crashIfMissingKeys)
+   {
+      this.saveFileName = fileName;
+
       ExceptionTools.handle(() ->
       {
          Properties properties = new Properties();
@@ -230,7 +258,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
             {
                if (!properties.containsKey(key.getCamelCasedName()))
                {
-                  if (key.hasDefaultValue())
+                  if (!crashIfMissingKeys && key.hasDefaultValue())
                   {
                      setInternal(key, key.getDefaultValue());
                      continue;
@@ -351,15 +379,18 @@ public class StoredPropertySet implements StoredPropertySetBasics
       return classForLoading.getResource(saveFileName);
    }
 
-   private Path findFileForSaving()
+   public Path findFileForSaving()
    {
       return findSaveFileDirectory().resolve(saveFileName);
    }
 
-   private Path findSaveFileDirectory()
+   @Override
+   public Path findSaveFileDirectory()
    {
       // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
       // of just save the file in the working directory
+
+      // TODO: This should probably use PathTools#findDirectoryInline
 
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
 
@@ -391,9 +422,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
          return absoluteWorkingDirectory;
       }
 
-      String s = classForLoading.getPackage().toString();
-      LogTools.debug(s);
-      String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
+      String packageName = classForLoading.getPackage().toString();
+      LogTools.debug(packageName);
+      String packagePath = packageName.split(" ")[1].replaceAll("\\.", "/");
       LogTools.debug(packagePath);
 
       Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
@@ -403,5 +434,26 @@ public class StoredPropertySet implements StoredPropertySetBasics
       FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       return finalPath;
+   }
+
+   @Override
+   public StoredPropertyKeyListReadOnly getKeyList()
+   {
+      return keys;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (this == object)
+         return true;
+      else if (!(object instanceof StoredPropertySet))
+         return false;
+      else
+      {
+         StoredPropertySet other = (StoredPropertySet) object;
+
+         return Objects.deepEquals(values, other.values);
+      }
    }
 }

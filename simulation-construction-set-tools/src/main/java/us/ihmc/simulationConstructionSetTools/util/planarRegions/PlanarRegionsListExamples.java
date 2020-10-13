@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.planarRegions;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -157,6 +157,28 @@ public class PlanarRegionsListExamples
                                0.6);
    }
 
+   public static void generateFlatCinderBlockSteps(PlanarRegionsListGenerator generator,
+                                                   double cinderBlockSurfaceSquareSize,
+                                                   double cinderBlockThickness,
+                                                   int courseLengthXNumberOfBlocks,
+                                                   int courseWidthYNumberOfBlocks,
+                                                   double zStepUpPerRow
+   )
+   {
+      for (int x = 0; x < courseLengthXNumberOfBlocks; x++)
+      {
+         double halfCinderBlockSizeX = cinderBlockSurfaceSquareSize / 2;
+         double cinderBlockSizeY = cinderBlockSurfaceSquareSize * courseWidthYNumberOfBlocks;
+         double halfCinderBlockSizeY = cinderBlockSizeY / 2;
+         generator.translate(halfCinderBlockSizeX, halfCinderBlockSizeY, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(cinderBlockSurfaceSquareSize, cinderBlockSizeY, cinderBlockThickness);
+         generator.translate(-halfCinderBlockSizeX, -halfCinderBlockSizeY, 0.0);
+         generator.translate(0.0, 0.0, zStepUpPerRow);
+         generator.translate(cinderBlockSurfaceSquareSize, 0.0, 0.0);
+      }
+      generator.translate(-cinderBlockSurfaceSquareSize * courseLengthXNumberOfBlocks, 0.0, -zStepUpPerRow * courseLengthXNumberOfBlocks);
+   }
+
    public static void generateCinderBlockSlope(PlanarRegionsListGenerator generator,
                                                Random random,
                                                double cinderBlockSurfaceSquareSize,
@@ -304,14 +326,14 @@ public class PlanarRegionsListExamples
          break;
       }
 
-      Axis axis = null;
+      Axis3D axis = null;
       switch (axisType)
       {
       case 0:
-         axis = Axis.X;
+         axis = Axis3D.X;
          break;
       case 1:
-         axis = Axis.Y;
+         axis = Axis3D.Y;
          break;
       }
 
@@ -345,14 +367,14 @@ public class PlanarRegionsListExamples
          break;
       }
 
-      Axis axis = null;
+      Axis3D axis = null;
       switch (axisType)
       {
       case 0:
-         axis = Axis.X;
+         axis = Axis3D.X;
          break;
       case 1:
-         axis = Axis.Y;
+         axis = Axis3D.Y;
          break;
       }
 
@@ -466,7 +488,7 @@ public class PlanarRegionsListExamples
          double yPositionAlongCurve = pathRadius * Math.sin(angle);
 
          generator.translate(xPositionAlongCurve, yPositionAlongCurve, -0.001);
-         generator.rotate(-angle, Axis.Z);
+         generator.rotate(-angle, Axis3D.Z);
 
          double xTranslation = cinderBlockSeparationWidth * 0.5;
          if (i % 2 == 0)
@@ -492,43 +514,43 @@ public class PlanarRegionsListExamples
 
       // maze walls along the yz-plane
       generator.translate(2.0, 5.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(2.0 + extrusionDistance, 6.0 + extrusionDistance);
       generator.identity();
 
       generator.translate(4.0, 4.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
       generator.identity();
 
       generator.translate(6.0, 6.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
       generator.identity();
 
       generator.translate(8.0, 4.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
       generator.identity();
 
       generator.translate(8.0, 9.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(2.0 + extrusionDistance, 2.0 + extrusionDistance);
       generator.identity();
 
       // maze walls along the xz-plane
       generator.translate(6.0, 2.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.rotate(0.5 * Math.PI, Axis3D.X);
       generator.addRectangle(4.0 + extrusionDistance, 2.0 + extrusionDistance);
       generator.identity();
 
       generator.translate(9.0, 6.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.rotate(0.5 * Math.PI, Axis3D.X);
       generator.addRectangle(2.0 + extrusionDistance, 2.0 + extrusionDistance);
       generator.identity();
 
       generator.translate(5.0, 8.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.rotate(0.5 * Math.PI, Axis3D.X);
       generator.addRectangle(6.0 + extrusionDistance, 2.0 + extrusionDistance);
       generator.identity();
 
@@ -557,7 +579,7 @@ public class PlanarRegionsListExamples
 
       generator.translate(4.5, 2.5, 0.0);
       generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
       generator.addRectangle(wallHeight, wallWidth);
       generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
@@ -566,14 +588,14 @@ public class PlanarRegionsListExamples
 
       // high-sloped ramp
       generator.translate(3.5, 0.5, 0.5);
-      generator.rotate(-0.25 * Math.PI, Axis.Y);
+      generator.rotate(-0.25 * Math.PI, Axis3D.Y);
       generator.addRectangle(Math.sqrt(2.0), 1.0);
       generator.identity();
       generator.translate(4.5, 0.5, 1.0);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.identity();
       generator.translate(5.5, 0.5, 0.5);
-      generator.rotate(0.25 * Math.PI, Axis.Y);
+      generator.rotate(0.25 * Math.PI, Axis3D.Y);
       generator.addRectangle(Math.sqrt(2.0), 1.0);
       generator.identity();
 
@@ -604,7 +626,7 @@ public class PlanarRegionsListExamples
       generator.translate(4.5, -5.5, 0.0);
       generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.translate(0.0, 0.0, 0.5 * barrierHeight);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(barrierHeight, barrierWidth);
       generator.identity();
 
@@ -637,7 +659,7 @@ public class PlanarRegionsListExamples
       wallHeight = 1.0;
 
       generator.translate(3.0, -9.5, 0.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
       generator.addRectangle(wallHeight, wallWidth);
       generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);

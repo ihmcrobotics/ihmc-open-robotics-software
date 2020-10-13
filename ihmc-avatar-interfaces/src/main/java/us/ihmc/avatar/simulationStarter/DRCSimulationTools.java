@@ -32,14 +32,23 @@ public abstract class DRCSimulationTools
 
    @SuppressWarnings({"hiding", "unchecked"})
    public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(SimulationStarterInterface simulationStarter,
-                                                                                               Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs,
+                                                                                               Class<?> operatorInterfaceClass,
+                                                                                               String[] operatorInterfaceArgs,
                                                                                                T... possibleStartingLocations)
    {
-      List<Modules> modulesToStart = new ArrayList<Modules>();
-      DRCStartingLocation startingLocation = null;
+      List<Modules> modulesToStart = new ArrayList<>();
+      DRCStartingLocation startingLocation = showSelectorWithStartingLocation(modulesToStart, possibleStartingLocations);
 
-      startingLocation = showSelectorWithStartingLocation(modulesToStart, possibleStartingLocations);
+      startSimulation(simulationStarter, operatorInterfaceClass, operatorInterfaceArgs, startingLocation, modulesToStart);
+   }
 
+   @SuppressWarnings({"hiding", "unchecked"})
+   public static <T extends DRCStartingLocation, Enum> void startSimulation(SimulationStarterInterface simulationStarter,
+                                                                            Class<?> operatorInterfaceClass,
+                                                                            String[] operatorInterfaceArgs,
+                                                                            DRCStartingLocation startingLocation,
+                                                                            List<Modules> modulesToStart)
+   {
       if (startingLocation != null)
          simulationStarter.setStartingLocation(startingLocation);
 
@@ -59,11 +68,13 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.setUseKinematicsStreamingToolboxModule(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.setUseFootstepPlanningToolboxModule(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
          networkProcessorParameters.setUseWholeBodyTrajectoryToolboxModule(modulesToStart.contains(Modules.WHOLE_BODY_TRAJECTORY_TOOLBOX));
-         networkProcessorParameters.setUseKinematicsPlanningToolboxModule(true);
+         networkProcessorParameters.setUseKinematicsPlanningToolboxModule(modulesToStart.contains(Modules.KINEMATICS_PLANNING_TOOLBOX));
          boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE) && !modulesToStart.contains(Modules.REA_UI);
          networkProcessorParameters.setUseRobotEnvironmentAwerenessModule(startREAModule);
          networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.setUseMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
+         networkProcessorParameters.setUseFiducialDetectorToolboxModule(modulesToStart.contains(Modules.FIDUCIAL_DETECTOR));
+         networkProcessorParameters.setUseObjectDetectorToolboxModule(modulesToStart.contains(Modules.OBJECT_DETECTOR));
       }
       else
       {
@@ -351,8 +362,11 @@ public abstract class DRCSimulationTools
       REA_UI,
       MOCAP_MODULE,
       KINEMATICS_TOOLBOX,
+      KINEMATICS_PLANNING_TOOLBOX,
       FOOTSTEP_PLANNING_TOOLBOX,
-      WHOLE_BODY_TRAJECTORY_TOOLBOX;
+      WHOLE_BODY_TRAJECTORY_TOOLBOX,
+      FIDUCIAL_DETECTOR,
+      OBJECT_DETECTOR;
 
       public String getPropertyNameForEnable()
       {

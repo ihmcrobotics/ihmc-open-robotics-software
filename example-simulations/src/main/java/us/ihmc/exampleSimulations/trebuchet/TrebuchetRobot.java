@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.trebuchet;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -128,7 +128,7 @@ public class TrebuchetRobot extends Robot
 
       /** ************************ Tower ********************************** */
 
-      xSliderJoint = new SliderJoint("x", new Vector3D(0.0, 0.0, WHEEL_RADIUS + BASE_HEIGHT / 2.0), this, Axis.X);
+      xSliderJoint = new SliderJoint("x", new Vector3D(0.0, 0.0, WHEEL_RADIUS + BASE_HEIGHT / 2.0), this, Axis3D.X);
       Link tower = createTowerLink();
       xSliderJoint.setLink(tower);
       this.addRootJoint(xSliderJoint);
@@ -137,7 +137,7 @@ public class TrebuchetRobot extends Robot
 
       /** ************************ Pole ********************************** */
 
-      pivotJoint = new PinJoint("pivot", new Vector3D(0.0, 0.0, TOWER_HEIGHT), this, Axis.Y);
+      pivotJoint = new PinJoint("pivot", new Vector3D(0.0, 0.0, TOWER_HEIGHT), this, Axis3D.Y);
       Link pole = createPoleLink();
       pivotJoint.setLink(pole);
       xSliderJoint.addJoint(pivotJoint);
@@ -191,28 +191,28 @@ public class TrebuchetRobot extends Robot
       // Wheels:
       linkGraphics.identity();
       linkGraphics.translate(WHEEL_X_SEPARATION / 2.0, BASE_WIDTH / 2.0, -BASE_HEIGHT / 2.0);
-      linkGraphics.rotate(-Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(-Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(WHEEL_WIDTH, WHEEL_RADIUS, wheelAppearance);
       linkGraphics.translate(0.0, 0.0, WHEEL_WIDTH);
       linkGraphics.addCylinder(WHEEL_PIN_RADIUS, WHEEL_PIN_WIDTH, wheelAppearance);
 
       linkGraphics.identity();
       linkGraphics.translate(-WHEEL_X_SEPARATION / 2.0, BASE_WIDTH / 2.0, -BASE_HEIGHT / 2.0);
-      linkGraphics.rotate(-Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(-Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(WHEEL_WIDTH, WHEEL_RADIUS, wheelAppearance);
       linkGraphics.translate(0.0, 0.0, WHEEL_WIDTH);
       linkGraphics.addCylinder(WHEEL_PIN_RADIUS, WHEEL_PIN_WIDTH, wheelAppearance);
 
       linkGraphics.identity();
       linkGraphics.translate(WHEEL_X_SEPARATION / 2.0, -BASE_WIDTH / 2.0, -BASE_HEIGHT / 2.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(WHEEL_WIDTH, WHEEL_RADIUS, wheelAppearance);
       linkGraphics.translate(0.0, 0.0, WHEEL_WIDTH);
       linkGraphics.addCylinder(WHEEL_PIN_RADIUS, WHEEL_PIN_WIDTH, wheelAppearance);
 
       linkGraphics.identity();
       linkGraphics.translate(-WHEEL_X_SEPARATION / 2.0, -BASE_WIDTH / 2.0, -BASE_HEIGHT / 2.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(WHEEL_WIDTH, WHEEL_RADIUS, wheelAppearance);
       linkGraphics.translate(0.0, 0.0, WHEEL_WIDTH);
       linkGraphics.addCylinder(WHEEL_PIN_RADIUS, WHEEL_PIN_WIDTH, wheelAppearance);
@@ -229,46 +229,46 @@ public class TrebuchetRobot extends Robot
       // Side Support Columns:
       linkGraphics.identity();
       linkGraphics.translate(SUPPORT_COLUMN_OFFSET, -(BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0, 0.0);
-      linkGraphics.rotate(-SUPPORT_COLUMN_ANGLE, Axis.Y);
+      linkGraphics.rotate(-SUPPORT_COLUMN_ANGLE, Axis3D.Y);
       linkGraphics.addCube(COLUMN_WIDTH, COLUMN_WIDTH, SUPPORT_COLUMN_LENGTH);
 
       linkGraphics.identity();
       linkGraphics.translate(-SUPPORT_COLUMN_OFFSET, -(BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0, 0.0);
-      linkGraphics.rotate(SUPPORT_COLUMN_ANGLE, Axis.Y);
+      linkGraphics.rotate(SUPPORT_COLUMN_ANGLE, Axis3D.Y);
       linkGraphics.addCube(COLUMN_WIDTH, COLUMN_WIDTH, SUPPORT_COLUMN_LENGTH);
 
       linkGraphics.identity();
       linkGraphics.translate(SUPPORT_COLUMN_OFFSET, (BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0, 0.0);
-      linkGraphics.rotate(-SUPPORT_COLUMN_ANGLE, Axis.Y);
+      linkGraphics.rotate(-SUPPORT_COLUMN_ANGLE, Axis3D.Y);
       linkGraphics.addCube(COLUMN_WIDTH, COLUMN_WIDTH, SUPPORT_COLUMN_LENGTH);
 
       linkGraphics.identity();
       linkGraphics.translate(-SUPPORT_COLUMN_OFFSET, (BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0, 0.0);
-      linkGraphics.rotate(SUPPORT_COLUMN_ANGLE, Axis.Y);
+      linkGraphics.rotate(SUPPORT_COLUMN_ANGLE, Axis3D.Y);
       linkGraphics.addCube(COLUMN_WIDTH, COLUMN_WIDTH, SUPPORT_COLUMN_LENGTH);
 
       // Lower Crossbars:
       linkGraphics.identity();
       linkGraphics.translate(0.0, -(BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 - (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z1);
-      linkGraphics.rotate(LOWER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(LOWER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate((LOWER_CROSSBAR_BOT_LENGTH - LOWER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(LOWER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
       linkGraphics.identity();
       linkGraphics.translate(0.0, -(BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 - (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z1);
-      linkGraphics.rotate(-LOWER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(-LOWER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate(-(LOWER_CROSSBAR_BOT_LENGTH - LOWER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(LOWER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
       linkGraphics.identity();
       linkGraphics.translate(0.0, (BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 + (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z1);
-      linkGraphics.rotate(LOWER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(LOWER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate((LOWER_CROSSBAR_BOT_LENGTH - LOWER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(LOWER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
       linkGraphics.identity();
       linkGraphics.translate(0.0, (BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 + (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z1);
-      linkGraphics.rotate(-LOWER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(-LOWER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate(-(LOWER_CROSSBAR_BOT_LENGTH - LOWER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(LOWER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
@@ -284,25 +284,25 @@ public class TrebuchetRobot extends Robot
       // Upper Crossbars:
       linkGraphics.identity();
       linkGraphics.translate(0.0, -(BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 - (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z3);
-      linkGraphics.rotate(UPPER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(UPPER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate((UPPER_CROSSBAR_BOT_LENGTH - UPPER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(UPPER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
       linkGraphics.identity();
       linkGraphics.translate(0.0, -(BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 - (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z3);
-      linkGraphics.rotate(-UPPER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(-UPPER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate(-(UPPER_CROSSBAR_BOT_LENGTH - UPPER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(UPPER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
       linkGraphics.identity();
       linkGraphics.translate(0.0, (BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 + (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z3);
-      linkGraphics.rotate(UPPER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(UPPER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate((UPPER_CROSSBAR_BOT_LENGTH - UPPER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(UPPER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
       linkGraphics.identity();
       linkGraphics.translate(0.0, (BASE_WIDTH - COLUMN_WIDTH * 0.95) / 2.0 + (COLUMN_WIDTH / 2.0 + CROSSBAR_WIDTH / 2.0), CROSSBAR_Z3);
-      linkGraphics.rotate(-UPPER_CROSSBAR_ANGLE, Axis.Y);
+      linkGraphics.rotate(-UPPER_CROSSBAR_ANGLE, Axis3D.Y);
       linkGraphics.translate(-(UPPER_CROSSBAR_BOT_LENGTH - UPPER_CROSSBAR_TOP_LENGTH) / 2.0, 0.0, 0.0);
       linkGraphics.addCube(UPPER_CROSSBAR_LENGTH, CROSSBAR_WIDTH, CROSSBAR_HEIGHT);
 
@@ -333,7 +333,7 @@ public class TrebuchetRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       
       // Pivot:
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.translate(0.0, 0.0, -0.6 * BASE_WIDTH);
       linkGraphics.addCylinder(1.2 * BASE_WIDTH, PIVOT_RADIUS, YoAppearance.BlackMetalMaterial());
 

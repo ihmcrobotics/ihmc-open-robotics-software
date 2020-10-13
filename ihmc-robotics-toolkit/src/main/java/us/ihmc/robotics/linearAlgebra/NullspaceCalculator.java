@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface NullspaceCalculator
 {
@@ -9,13 +9,13 @@ public interface NullspaceCalculator
     * @param matrixToProjectOntoNullspace the matrix to be projected. Modified.
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection. Not Modified.
     */
-   void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf);
+   void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf);
    /**
     * Perform a projection
     * @param matrixToProjectOntoNullspace the matrix to be projected. Modified.
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection. Not Modified.
     */
-   void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack);
+   void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj projectedMatrixToPack);
 
-   void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack);
+   void computeNullspaceProjector(DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj nullspaceProjectorToPack);
 }

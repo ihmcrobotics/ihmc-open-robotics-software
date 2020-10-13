@@ -6,13 +6,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private final String namePostFix = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoMinimumJerkTrajectory minimumJerkTrajectory;
    private final YoParabolicTrajectoryGenerator parabolicTrajectoryGenerator;
    protected final YoDouble groundClearance;
@@ -24,9 +24,9 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    private final PositionProvider finalPositionProvider;
 
    public ParabolicPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, double groundClearance, YoVariableRegistry parentRegistry)
+         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, double groundClearance, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + namePostFix);
+      this.registry = new YoRegistry(namePrefix + namePostFix);
       this.minimumJerkTrajectory = new YoMinimumJerkTrajectory(namePrefix, registry);
       this.parabolicTrajectoryGenerator = new YoParabolicTrajectoryGenerator(namePrefix, referenceFrame, registry);
       this.groundClearance = new YoDouble("groundClearance", registry);

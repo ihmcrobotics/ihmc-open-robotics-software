@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DelayedYoBooleanTest
 {
-   private static YoVariableRegistry registry;
+   private static YoRegistry registry;
    private static YoBoolean variableToDelay;
    private static Boolean DEBUG = false;
    private int ticksToDelay;
@@ -21,7 +21,7 @@ public class DelayedYoBooleanTest
    @BeforeEach
    public void setUp()
    {
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variableToDelay = new YoBoolean("variableToDelay", registry);
    }
    

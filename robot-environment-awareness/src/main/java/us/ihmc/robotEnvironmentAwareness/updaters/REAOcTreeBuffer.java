@@ -27,6 +27,7 @@ public class REAOcTreeBuffer
 
    private final AtomicReference<LidarScanMessage> latestLidarScanMessage = new AtomicReference<>(null);
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
+   private final AtomicReference<StereoVisionPointCloudMessage> latestDepthCloudPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<ScanCollection> newFullScanReference = new AtomicReference<>(null);
    private final AtomicReference<Pose3DReadOnly> newSensorPoseReference = new AtomicReference<>(null);
 
@@ -54,6 +55,7 @@ public class REAOcTreeBuffer
    private final Topic<NormalOcTreeMessage> stateTopic;
 
    private final AtomicReference<Integer> stereoVisionBufferSize;
+   private final AtomicReference<Integer> depthCloudBufferSize;
 
    public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
                           Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
@@ -75,6 +77,7 @@ public class REAOcTreeBuffer
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
       stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, NUMBER_OF_SAMPLES);
+      depthCloudBufferSize = reaMessager.createInput(REAModuleAPI.DepthCloudBufferSize, NUMBER_OF_SAMPLES);
    }
 
    private void sendCurrentState()
@@ -201,6 +204,11 @@ public class REAOcTreeBuffer
       latestStereoVisionPointCloudMessage.set(message);
    }
 
+   public void handleDepthCloudPointCloudMessage(StereoVisionPointCloudMessage message)
+   {
+      latestDepthCloudPointCloudMessage.set(message);
+   }
+
    public void handleLidarScanMessage(LidarScanMessage message)
    {
       latestLidarScanMessage.set(message);
@@ -210,6 +218,7 @@ public class REAOcTreeBuffer
    {
       LidarScanMessage lidarMessage = latestLidarScanMessage.getAndSet(null);
       StereoVisionPointCloudMessage stereoMessage = latestStereoVisionPointCloudMessage.getAndSet(null);
+      StereoVisionPointCloudMessage depthCloudMessage = latestDepthCloudPointCloudMessage.getAndSet(null);
 
       if (!enable.get() || !enableBuffer.get())
          return;
@@ -223,8 +232,8 @@ public class REAOcTreeBuffer
          scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
 
          Pose3D sensorPose = new Pose3D();
-         sensorPose.setPosition(lidarMessage.getLidarPosition());
-         sensorPose.setOrientation(lidarMessage.getLidarOrientation());
+         sensorPose.getPosition().set(lidarMessage.getLidarPosition());
+         sensorPose.getOrientation().set(lidarMessage.getLidarOrientation());
          newSensorPoseReference.set(sensorPose);
       }
 
@@ -238,8 +247,23 @@ public class REAOcTreeBuffer
          // TODO: make NormalOctree constructor with octreeDepth.get().
 
          Pose3D sensorPose = new Pose3D();
-         sensorPose.setPosition(stereoMessage.getSensorPosition());
-         sensorPose.setOrientation(stereoMessage.getSensorOrientation());
+         sensorPose.getPosition().set(stereoMessage.getSensorPosition());
+         sensorPose.getOrientation().set(stereoMessage.getSensorOrientation());
+         newSensorPoseReference.set(sensorPose);
+      }
+
+      if (depthCloudMessage != null)
+      {
+         ScanCollection scanCollection = new ScanCollection();
+         newFullScanReference.set(scanCollection);
+         scanCollection.setSubSampleSize(depthCloudBufferSize.get());
+         // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
+         scanCollection.addScan(toScan(stereoMessage));
+         // TODO: make NormalOctree constructor with octreeDepth.get().
+
+         Pose3D sensorPose = new Pose3D();
+         sensorPose.getPosition().set(depthCloudMessage.getSensorPosition());
+         sensorPose.getOrientation().set(depthCloudMessage.getSensorOrientation());
          newSensorPoseReference.set(sensorPose);
       }
    }

@@ -1,10 +1,6 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import org.ejml.data.DMatrixRMaj;
 
 public class DiscreteOptimizationTrajectory implements DiscreteOptimizationData
 {
@@ -29,7 +25,7 @@ public class DiscreteOptimizationTrajectory implements DiscreteOptimizationData
       controlTrajectory.setTrajectoryDuration(startTime, endTime, deltaT);
    }
 
-   public void compute(double time, DenseMatrix64F stateMatrixToPack, DenseMatrix64F controlMatrixToPack)
+   public void compute(double time, DMatrixRMaj stateMatrixToPack, DMatrixRMaj controlMatrixToPack)
    {
       computeState(time, stateMatrixToPack);
       computeControl(time, controlMatrixToPack);
@@ -51,12 +47,12 @@ public class DiscreteOptimizationTrajectory implements DiscreteOptimizationData
    }
 
 
-   public void computeState(double time, DenseMatrix64F stateMatrixToPack)
+   public void computeState(double time, DMatrixRMaj stateMatrixToPack)
    {
       stateTrajectory.compute(time, stateMatrixToPack);
    }
 
-   public void computeControl(double time, DenseMatrix64F controlMatrixToPack)
+   public void computeControl(double time, DMatrixRMaj controlMatrixToPack)
    {
       controlTrajectory.compute(time, controlMatrixToPack);
    }
@@ -89,25 +85,25 @@ public class DiscreteOptimizationTrajectory implements DiscreteOptimizationData
    }
 
    @Override
-   public DenseMatrix64F getState(int index)
+   public DMatrixRMaj getState(int index)
    {
       return stateTrajectory.get(index);
    }
 
    @Override
-   public DenseMatrix64F getControl(int index)
+   public DMatrixRMaj getControl(int index)
    {
       return controlTrajectory.get(index);
    }
 
    @Override
-   public void setState(int index, DenseMatrix64F state)
+   public void setState(int index, DMatrixRMaj state)
    {
       stateTrajectory.get(index).set(state);
    }
 
    @Override
-   public void setControl(int index, DenseMatrix64F control)
+   public void setControl(int index, DMatrixRMaj control)
    {
       controlTrajectory.get(index).set(control);
    }

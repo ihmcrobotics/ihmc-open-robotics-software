@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class SphereJumpVisualizer
 
          robots.add(sphereRobot1.getScsRobot());
 
-         YoVariableRegistry registry = sphereRobot1.getScsRobot().getRobotsYoVariableRegistry();
+         YoRegistry registry = sphereRobot1.getScsRobot().getRobotsYoRegistry();
          CoMTrajectoryPlanner dcmPlan = new CoMTrajectoryPlanner(gravity, desiredHeight, registry);
          dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry1));
 
@@ -78,7 +78,7 @@ public class SphereJumpVisualizer
 
          robots.add(sphereRobot2.getScsRobot());
 
-         YoVariableRegistry registry = sphereRobot2.getScsRobot().getRobotsYoVariableRegistry();
+         YoRegistry registry = sphereRobot2.getScsRobot().getRobotsYoRegistry();
          CoMTrajectoryPlanner dcmPlan = new CoMTrajectoryPlanner(gravity, desiredHeight, registry);
          dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry2));
 
@@ -152,7 +152,7 @@ public class SphereJumpVisualizer
       double bXY = 100.0; //150.6;
       double kZ = 20.0; //50.0;
       double bZ = 50.0; //1000.0;
-      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, kXY, bXY, kZ, bZ, robot.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, kXY, bXY, kZ, bZ, robot.getRobotsYoRegistry());
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
       groundContactModel.setGroundProfile3D(groundProfile);

@@ -108,7 +108,7 @@ public class NaiveFaceTracker
          }
          else
          {
-            panel.setBufferedImageSafe(bufferedImage);
+            panel.setImageUI(bufferedImage);
          }
       }
    }

@@ -6,11 +6,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class RateLimitedYoFrameQuaternion extends YoFrameQuaternion
 {
@@ -21,45 +21,45 @@ public class RateLimitedYoFrameQuaternion extends YoFrameQuaternion
    private final YoBoolean limited;
    private final DoubleProvider maxRateVariable;
 
-   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoVariableRegistry registry)
+   private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
       YoDouble maxRate = new YoDouble(namePrefix + "MaxRate" + nameSuffix, registry);
       maxRate.set(initialValue);
       return maxRate;
    }
 
-   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt,
                                        FrameQuaternionReadOnly rawQuaternion)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, rawQuaternion.getReferenceFrame(),
            rawQuaternion);
    }
 
-   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt,
                                        ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, referenceFrame, null);
    }
 
-   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoVariableRegistry registry, double maxRate, double dt,
+   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoRegistry registry, double maxRate, double dt,
                                        ReferenceFrame referenceFrame, QuaternionReadOnly rawQuaternion)
    {
       this(namePrefix, nameSuffix, registry, createMaxRateYoDouble(namePrefix, nameSuffix, maxRate, registry), dt, referenceFrame, rawQuaternion);
    }
 
-   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                        FrameQuaternionReadOnly rawQuaternion)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, rawQuaternion.getReferenceFrame(), rawQuaternion);
    }
 
-   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                        ReferenceFrame referenceFrame)
    {
       this(namePrefix, nameSuffix, registry, maxRate, dt, referenceFrame, null);
    }
 
-   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider maxRate, double dt,
+   public RateLimitedYoFrameQuaternion(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider maxRate, double dt,
                                        ReferenceFrame referenceFrame, QuaternionReadOnly rawQuaternion)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

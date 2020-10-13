@@ -294,7 +294,7 @@ public class RobotDescriptionFromSDFLoader
       Vector3D offset = new Vector3D(joint.getOffsetFromParentJoint());
 
       RigidBodyTransform visualTransform = new RigidBodyTransform();
-      visualTransform.setRotation(joint.getLinkRotation());
+      visualTransform.getRotation().set(joint.getLinkRotation());
 
       String sanitizedJointName = ModelFileLoaderConversionsHelper.sanitizeJointName(joint.getName());
 
@@ -488,7 +488,7 @@ public class RobotDescriptionFromSDFLoader
          {
             // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
             RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
-            linkRotation.setTranslation(0.0, 0.0, 0.0);
+            linkRotation.getTranslation().set(0.0, 0.0, 0.0);
             RigidBodyTransform linkToSensor = ModelFileLoaderConversionsHelper.poseToTransform(sensor.getPose());
             RigidBodyTransform sensorToCamera = ModelFileLoaderConversionsHelper.poseToTransform(camera.getPose());
             RigidBodyTransform linkToCamera = new RigidBodyTransform();
@@ -530,7 +530,7 @@ public class RobotDescriptionFromSDFLoader
       {
          // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
-         linkRotation.setTranslation(0.0, 0.0, 0.0);
+         linkRotation.getTranslation().set(0.0, 0.0, 0.0);
          RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
          linkToSensorInZUp.set(linkRotation);
          linkToSensorInZUp.multiply(ModelFileLoaderConversionsHelper.poseToTransform(sdfSensor.getPose()));
@@ -621,7 +621,7 @@ public class RobotDescriptionFromSDFLoader
 
          // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
-         linkRotation.setTranslation(0.0, 0.0, 0.0);
+         linkRotation.getTranslation().set(0.0, 0.0, 0.0);
          RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
          linkToSensorInZUp.set(linkRotation);
          linkToSensorInZUp.multiply(ModelFileLoaderConversionsHelper.poseToTransform(sensor.getPose()));

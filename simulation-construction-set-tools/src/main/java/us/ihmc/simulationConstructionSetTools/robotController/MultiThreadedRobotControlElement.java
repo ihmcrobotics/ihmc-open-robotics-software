@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 
 public interface MultiThreadedRobotControlElement extends Runnable
@@ -30,9 +30,9 @@ public interface MultiThreadedRobotControlElement extends Runnable
    public void write(long timestamp);
    
    /**
-    * Get the controllers YoVariableRegistry.
+    * Get the controllers YoRegistry.
     */
-   public YoVariableRegistry getYoVariableRegistry();
+   public YoRegistry getYoVariableRegistry();
 
    /**
     * @return Name of the controller, used to name the control thread.

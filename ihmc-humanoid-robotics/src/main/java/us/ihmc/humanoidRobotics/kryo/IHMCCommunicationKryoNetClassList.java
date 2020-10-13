@@ -3,19 +3,49 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 import java.util.List;
 
-import geometry_msgs.msg.dds.*;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusArrayPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusPubSubType;
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import builtin_interfaces.msg.dds.DurationPubSubType;
 import builtin_interfaces.msg.dds.TimePubSubType;
 import controller_msgs.msg.dds.*;
 import diagnostic_msgs.msg.dds.DiagnosticArrayPubSubType;
 import diagnostic_msgs.msg.dds.DiagnosticStatusPubSubType;
 import diagnostic_msgs.msg.dds.KeyValuePubSubType;
+import geometry_msgs.msg.dds.AccelPubSubType;
+import geometry_msgs.msg.dds.AccelStampedPubSubType;
+import geometry_msgs.msg.dds.AccelWithCovariancePubSubType;
+import geometry_msgs.msg.dds.AccelWithCovarianceStampedPubSubType;
+import geometry_msgs.msg.dds.InertiaPubSubType;
+import geometry_msgs.msg.dds.InertiaStampedPubSubType;
+import geometry_msgs.msg.dds.Point32PubSubType;
+import geometry_msgs.msg.dds.PointPubSubType;
+import geometry_msgs.msg.dds.PointStampedPubSubType;
+import geometry_msgs.msg.dds.PolygonPubSubType;
+import geometry_msgs.msg.dds.PolygonStampedPubSubType;
+import geometry_msgs.msg.dds.Pose2DPubSubType;
+import geometry_msgs.msg.dds.PoseArrayPubSubType;
+import geometry_msgs.msg.dds.PosePubSubType;
+import geometry_msgs.msg.dds.PoseStampedPubSubType;
+import geometry_msgs.msg.dds.PoseWithCovariancePubSubType;
+import geometry_msgs.msg.dds.PoseWithCovarianceStampedPubSubType;
+import geometry_msgs.msg.dds.QuaternionPubSubType;
+import geometry_msgs.msg.dds.QuaternionStampedPubSubType;
+import geometry_msgs.msg.dds.TransformPubSubType;
+import geometry_msgs.msg.dds.TransformStampedPubSubType;
+import geometry_msgs.msg.dds.Twist;
+import geometry_msgs.msg.dds.TwistPubSubType;
+import geometry_msgs.msg.dds.TwistStampedPubSubType;
+import geometry_msgs.msg.dds.TwistWithCovariancePubSubType;
+import geometry_msgs.msg.dds.TwistWithCovarianceStampedPubSubType;
+import geometry_msgs.msg.dds.Vector3PubSubType;
+import geometry_msgs.msg.dds.Vector3StampedPubSubType;
+import geometry_msgs.msg.dds.Wrench;
+import geometry_msgs.msg.dds.WrenchPubSubType;
+import geometry_msgs.msg.dds.WrenchStampedPubSubType;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -117,9 +147,9 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -257,7 +287,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(WalkingControllerFailureStatusMessagePubSubType.class);
       registerPacketField(ParameterValuePubSubType.class);
       registerPacketField(FootstepDataMessagePubSubType.class);
-      registerPacketField(FootstepPlanningStatistics.class);
+      registerPacketField(FootstepPlanningTimingsMessage.class);
       registerPacketField(FootstepPlanningToolboxOutputStatusPubSubType.class);
       registerPacketField(ColorRGBAPubSubType.class);
       registerPacketField(PelvisPoseErrorPacketPubSubType.class);
@@ -282,7 +312,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(MultisenseParameterPacketPubSubType.class);
       registerPacketField(PoseArrayPubSubType.class);
       registerPacketField(WeightMatrix3DMessagePubSubType.class);
-      registerPacketField(FootstepPlanRequestPacketPubSubType.class);
       registerPacketField(ReachingManifoldMessagePubSubType.class);
       registerPacketField(PolygonPubSubType.class);
       registerPacketField(ParameterDescriptorPubSubType.class);
@@ -377,7 +406,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HumanoidKinematicsToolboxConfigurationMessagePubSubType.class);
       registerPacketField(BatteryStatePubSubType.class);
       registerPacketField(SO3TrajectoryMessagePubSubType.class);
-      registerPacketField(FootstepPathPlanPacketPubSubType.class);
       registerPacketField(NeckTrajectoryMessagePubSubType.class);
       registerPacketField(BytePubSubType.class);
       registerPacketField(DiagnosticArrayPubSubType.class);
@@ -642,8 +670,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(RobotConfigurationData.class);
       registerPacketClass(AtlasAuxiliaryRobotData.class);
       registerPacketFields(double[].class, Vector3D.class);
-      registerPacketFields(DenseMatrix64F.class);
-      registerPacketFields(DenseMatrix64F[].class);
+      registerPacketFields(DMatrixRMaj.class);
+      registerPacketFields(DMatrixRMaj[].class);
       registerPacketField(SpatialVectorMessage.class);
       registerPacketField(SpatialVectorMessage[].class);
 
@@ -718,7 +746,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BDIBehaviorStatusPacket.class);
 
       // Camera information related
-      registerPacketField(IntrinsicParameters.class);
+      registerPacketField(CameraPinholeBrown.class);
 
       registerPacketClass(FisheyePacket.class);
 
@@ -738,7 +766,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BlackFlyParameterPacket.class);
       registerPacketClass(WalkToGoalBehaviorPacket.class);
       registerPacketField(WalkToGoalAction.class);
-      registerPacketClass(FootstepPlanRequestPacket.class);
       registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepDataMessage[].class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
@@ -751,9 +778,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(CurrentBehaviorStatus.class);
 
       registerPacketClass(CapturabilityBasedStatus.class);
-
-      // Planning
-      registerPacketClass(FootstepPathPlanPacket.class);
 
       // Localization
       registerPacketClass(LocalizationPacket.class);

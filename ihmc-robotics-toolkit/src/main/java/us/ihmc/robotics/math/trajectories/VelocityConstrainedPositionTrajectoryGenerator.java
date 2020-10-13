@@ -14,17 +14,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoPolynomial xPolynomial, yPolynomial, zPolynomial;
 
    private final YoDouble currentTime;
@@ -40,9 +36,9 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    private final FrameVector3DBasics currentVelocity;
    private final FrameVector3DBasics currentAcceleration;
 
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public VelocityConstrainedPositionTrajectoryGenerator(String name, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
 
       String initialPositionName = name + "InitialPosition";
       String initialVelocityName = name + "InitialVelocity";

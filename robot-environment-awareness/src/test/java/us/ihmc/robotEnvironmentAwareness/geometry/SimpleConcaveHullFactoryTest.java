@@ -22,7 +22,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Line3D;
@@ -123,7 +123,7 @@ public class SimpleConcaveHullFactoryTest
       pointcloud.add(new Point3D(4.493, 0.931, 0.0));
       pointcloud.add(new Point3D(4.350, 0.932, 0.0));
 
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis.Z, new Point3D(), pointcloud);
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis3D.Z, new Point3D(), pointcloud);
       ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
       messager.submitMessage(Polygonizer.PolygonizerParameters, parameters);
 
@@ -166,7 +166,7 @@ public class SimpleConcaveHullFactoryTest
          }
       }
 
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis.Z, new Point3D(), pointcloud);
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis3D.Z, new Point3D(), pointcloud);
       ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
       parameters.setRemoveAllTrianglesWithTwoBorderEdges(false);
       parameters.setTriangulationTolerance(1.0e-3);
@@ -212,7 +212,7 @@ public class SimpleConcaveHullFactoryTest
          pointcloud.add(new Point3D(nextPointInPointCloudHull(random, expectedHull)));
       }
 
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis.Z, new Point3D(), pointcloud);
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis3D.Z, new Point3D(), pointcloud);
       ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
       parameters.setTriangulationTolerance(1.0e-5);
       parameters.setEdgeLengthThreshold(0.15);
@@ -250,7 +250,7 @@ public class SimpleConcaveHullFactoryTest
       lineConstraints.add(new LineSegment3D(0.0, 0.5, 0.0, 2.0, 0.5, 0.0));
       lineConstraints.add(new LineSegment3D(0.0, -0.5, 0.0, 2.0, -0.5, 0.0));
 
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis.Z, new Point3D(), pointcloud);
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(1, Axis3D.Z, new Point3D(), pointcloud);
       data.addIntersections(lineConstraints);
 
       ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
@@ -290,7 +290,7 @@ public class SimpleConcaveHullFactoryTest
       }
 
       Random random = new Random(34543);
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(random.nextInt(), Axis.Z, new Point3D(), pointcloud);
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(random.nextInt(), Axis3D.Z, new Point3D(), pointcloud);
 
       List<LineSegment3D> polygon1 = Arrays.asList(new LineSegment3D(0.25, -0.025, 0, 0.25, -0.20, 0),
                                                    new LineSegment3D(0.35, -0.025, 0, 0.35, -0.20, 0),
@@ -332,7 +332,7 @@ public class SimpleConcaveHullFactoryTest
          }
       }
 
-      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(random.nextInt(), Axis.Z, new Point3D(), pointcloud);
+      PlanarRegionSegmentationRawData data = new PlanarRegionSegmentationRawData(random.nextInt(), Axis3D.Z, new Point3D(), pointcloud);
 
       List<LineSegment3D> polygon1 = Arrays.asList(new LineSegment3D(0.25, -0.025, 0, 0.25, -0.20, 0),
                                                    new LineSegment3D(0.35, -0.025, 0, 0.35, -0.20, 0),

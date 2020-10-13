@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -15,9 +15,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
  */
 public class LeastSquaresZPlaneFitter implements PlaneFitter
 {
-   private final DenseMatrix64F covarianceMatrix = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F zVarianceVector = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj covarianceMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj zVarianceVector = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
    public LeastSquaresZPlaneFitter()
    {
@@ -66,7 +66,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
 
       double centerZ = planeToPack.getZOnPlane(center.getX(), center.getY());
       Point3D planePoint = new Point3D(center.getX(), center.getY(), centerZ);
-      planeToPack.setPoint(planePoint);
+      planeToPack.getPoint().set(planePoint);
       return squareError;
    }
    
@@ -125,8 +125,8 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       zVarianceVector.set(1, 0, -1.0 * yz);
       zVarianceVector.set(2, 0, -1.0 * z);
       
-      CommonOps.invert(covarianceMatrix);
-      CommonOps.mult(covarianceMatrix, zVarianceVector, coefficients);
+      CommonOps_DDRM.invert(covarianceMatrix);
+      CommonOps_DDRM.mult(covarianceMatrix, zVarianceVector, coefficients);
 
       double xSolution = x / n;
       double ySolution = y / n;
@@ -138,8 +138,8 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
          return Double.POSITIVE_INFINITY;
       }
       
-      planeToPack.setPoint(xSolution, ySolution, zSolution);
-      planeToPack.setNormal(coefficients.get(0), coefficients.get(1), 1.0);
+      planeToPack.getPoint().set(xSolution, ySolution, zSolution);
+      planeToPack.getNormal().set(coefficients.get(0), coefficients.get(1), 1.0);
 
       double squaredError = 0;
       double A = coefficients.get(0);

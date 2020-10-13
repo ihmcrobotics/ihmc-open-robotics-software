@@ -1,11 +1,15 @@
 package us.ihmc.footstepPlanning.ui.components;
 
+import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
@@ -16,7 +20,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -76,6 +79,8 @@ public class FootstepPathCalculatorModule
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
+
+      messager.registerTopicListener(HaltPlanning, halt -> planningModule.halt());
    }
 
    public void clear()
@@ -146,32 +151,50 @@ public class FootstepPathCalculatorModule
          planningModule.getFootstepPlannerParameters().set(parameters.get());
          planningModule.getVisibilityGraphParameters().set(visibilityGraphsParameters.get());
 
-         messager.submitMessage(PlannerStatus, FootstepPlannerStatus.PLANNING_PATH);
-
-         planningModule.addBodyPathPlanCallback(bodyPathMessage ->
-                                                {
-                                                   if (FootstepPlanningResult.fromByte(bodyPathMessage.getFootstepPlanningResult()).validForExecution())
-                                                   {
-                                                      messager.submitMessage(PlannerStatus, FootstepPlannerStatus.PLANNING_STEPS);
-                                                      messager.submitMessage(BodyPathData, new ArrayList<>(bodyPathMessage.getBodyPath()));
-                                                   }
-                                                });
-         planningModule.addStatusCallback(status -> messager.submitMessage(PlanningResult, status.getResult()));
+         planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));
 
          FootstepPlannerOutput output = planningModule.handleRequest(request);
 
-         messager.submitMessage(PlanningResult, output.getResult());
-         messager.submitMessage(PlannerStatus, FootstepPlannerStatus.IDLE);
+         messager.submitMessage(BodyPathPlanningResultTopic, output.getBodyPathPlanningResult());
+         messager.submitMessage(FootstepPlanningResultTopic, output.getFootstepPlanningResult());
 
-         if (output.getResult().validForExecution())
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse,
+                                FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, output.getRequestId());
+         messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, output.getBodyPath());
+
+         if (output.getGoalPose() != null)
          {
-            messager.submitMessage(FootstepPlanResponse, FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
-            if (!output.getLowLevelGoal().containsNaN())
-            {
-               messager.submitMessage(LowLevelGoalPosition, new Point3D(output.getLowLevelGoal().getPosition()));
-               messager.submitMessage(LowLevelGoalOrientation, new Quaternion(output.getLowLevelGoal().getOrientation()));
-            }
+            messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, output.getGoalPose().getPosition());
+            messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, output.getGoalPose().getOrientation());
          }
+         if (output.getFootstepPlanningResult() == FootstepPlanningResult.EXCEPTION)
+         {
+            StringBuilder stackTrace = new StringBuilder();
+            StackTraceElement[] stackTraceArray = output.getException().getStackTrace();
+            for (int i = 0; i < Math.min(stackTraceArray.length, 20); i++)
+            {
+               stackTrace.append(stackTraceArray[i].toString());
+            }
+            messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace, stackTrace.toString());
+         }
+         else
+         {
+            messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace,
+                                   "No stack trace available, planner status wasn't " + FootstepPlanningResult.EXCEPTION + ", it was: " + output.getFootstepPlanningResult());
+         }
+
+         FootstepPlanningTimingsMessage timingsMessage = new FootstepPlanningTimingsMessage();
+         output.getPlannerTimings().setPacket(timingsMessage);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, timingsMessage);
+
+         // broadcast log data
+         messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
+                                Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getVariableDescriptors()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getBodyPathPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
       catch (Exception e)
       {

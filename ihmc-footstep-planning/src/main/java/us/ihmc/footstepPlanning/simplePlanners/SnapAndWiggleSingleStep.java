@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionCliffAvoider;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -85,7 +85,7 @@ public class SnapAndWiggleSingleStep
    {
       PlanarRegion regionToMoveTo = new PlanarRegion();
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, regionToMoveTo);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, Double.POSITIVE_INFINITY, regionToMoveTo);
       if (snapTransform == null)
       {
          throw new SnappingFailedException();
@@ -163,71 +163,6 @@ public class SnapAndWiggleSingleStep
          }
       }
       return false;
-   }
-
-   // method to avoid getting stuck at the top of a ledge
-   private void checkAndHandleTopOfCliff(FramePose3D inputPose, FramePose3D outputPose, boolean walkingForward, ConvexPolygon2DReadOnly footStepPolygon, FrameConvexPolygon2D footPolygon)
-   {
-      if(Double.isNaN(parameters.getFootLength()) || parameters.getWiggleInWrongDirectionThreshold() <= 0.0)
-      {
-         return;
-      }
-
-      double yaw = inputPose.getYaw();
-      double desiredForwardHeading = walkingForward ? 1.0 : -1.0;
-      Vector2D desiredHeading = new Vector2D(Math.cos(yaw) * desiredForwardHeading, Math.sin(yaw) * desiredForwardHeading);
-      Vector2D achievedHeading = new Vector2D(outputPose.getX() - inputPose.getX(), outputPose.getY() - inputPose.getY());
-      double projectionScale = achievedHeading.dot(desiredHeading);
-
-      if(projectionScale < - parameters.getWiggleInWrongDirectionThreshold())
-      {
-         FramePose3D shiftedPose = new FramePose3D(inputPose);
-         desiredHeading.scale(parameters.getFootLength() + wiggleParameters.deltaInside);
-         shiftedPose.prependTranslation(desiredHeading.getX(), desiredHeading.getY(), 0.0);
-         outputPose.set(shiftedPose);
-         try
-         {
-            doSnapAndWiggle(outputPose, footStepPolygon, footPolygon);
-         }
-         catch(SnappingFailedException e)
-         {
-         }
-      }
-   }
-
-   private void checkAndHandleBottomOfCliff(FramePose3D footPose)
-   {
-      if (Double.isNaN(parameters.getFootLength()) || parameters.getCliffHeightToAvoid() <= 0.0 || parameters.getClosestDistanceToCliff() <= 0.0)
-      {
-         return;
-      }
-
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      footPose.get(soleTransform);
-
-      ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
-      lineSegmentsInSoleFrame
-            .add(new LineSegment2D(0.5 * parameters.getFootLength(), 0.0, 0.5 * parameters.getFootLength() + parameters.getClosestDistanceToCliff(), 0.0));
-      lineSegmentsInSoleFrame
-            .add(new LineSegment2D(-0.5 * parameters.getFootLength(), 0.0, -0.5 * parameters.getFootLength() - parameters.getClosestDistanceToCliff(), 0.0));
-
-      Point3D highestPointInSoleFrame = new Point3D();
-      LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
-      Point3D closestPointOnCliff = new Point3D();
-
-      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      double highestPointZ = PlanarRegionBaseOfCliffAvoider
-            .findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame,
-                                     closestPointOnCliff);
-
-      if (highestPointZ > parameters.getCliffHeightToAvoid())
-      {
-         double shiftSign = Math.signum(-closestPointOnCliff.getX());
-         double shiftAmount = shiftSign * (parameters.getClosestDistanceToCliff() - (Math.abs(closestPointOnCliff.getX()) - 0.5 * parameters.getFootLength()));
-
-         double footstepYaw = footPose.getYaw();
-         footPose.prependTranslation(shiftAmount * Math.cos(footstepYaw), shiftAmount * Math.sin(footstepYaw), 0.0);
-      }
    }
 
    public static class SnappingFailedException extends Exception

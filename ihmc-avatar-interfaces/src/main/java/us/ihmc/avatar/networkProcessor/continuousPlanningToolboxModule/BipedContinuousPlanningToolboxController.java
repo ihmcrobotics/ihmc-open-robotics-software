@@ -1,6 +1,17 @@
 package us.ihmc.avatar.networkProcessor.continuousPlanningToolboxModule;
 
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -15,14 +26,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class BipedContinuousPlanningToolboxController extends ToolboxController
 {
@@ -73,7 +80,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
                                                    IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher,
                                                    IHMCRealtimeROS2Publisher<ToolboxStateMessage> plannerStatePublisher,
                                                    FootstepPlannerParametersBasics plannerParameters,
-                                                   YoVariableRegistry parentRegistry)
+                                                   YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -126,8 +133,8 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          footstepStatusBuffer.set(newBuffer);
 
          Pose3D footPose = new Pose3D();
-         footPose.setOrientation(message.getActualFootOrientationInWorld());
-         footPose.setPosition(message.getActualFootPositionInWorld());
+         footPose.getOrientation().set(message.getActualFootOrientationInWorld());
+         footPose.getPosition().set(message.getActualFootPositionInWorld());
          currentFeetPositions.put(RobotSide.fromByte(message.getRobotSide()), footPose);
 
          if (verbose)
@@ -233,11 +240,11 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          {
          */
             Pose3D leftFoot = new Pose3D();
-            leftFoot.setPosition(continuousPlanningRequestPacket.getLeftStartPositionInWorld());
-            leftFoot.setOrientation(continuousPlanningRequestPacket.getLeftStartOrientationInWorld());
+            leftFoot.getPosition().set(continuousPlanningRequestPacket.getLeftStartPositionInWorld());
+            leftFoot.getOrientation().set(continuousPlanningRequestPacket.getLeftStartOrientationInWorld());
             Pose3D rightFoot = new Pose3D();
-            rightFoot.setPosition(continuousPlanningRequestPacket.getRightStartPositionInWorld());
-            rightFoot.setOrientation(continuousPlanningRequestPacket.getRightStartOrientationInWorld());
+            rightFoot.getPosition().set(continuousPlanningRequestPacket.getRightStartPositionInWorld());
+            rightFoot.getOrientation().set(continuousPlanningRequestPacket.getRightStartOrientationInWorld());
 
             startPositions.put(RobotSide.LEFT, leftFoot);
             startPositions.put(RobotSide.RIGHT, rightFoot);
@@ -253,8 +260,8 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          {
             Pose3D footPose = new Pose3D();
             FootstepDataMessage footstep = fixedStepQueue.get(numberOfFixedSteps - 2);
-            footPose.setPosition(footstep.getLocation());
-            footPose.setOrientation(footstep.getOrientation());
+            footPose.getPosition().set(footstep.getLocation());
+            footPose.getOrientation().set(footstep.getOrientation());
             currentFeetPositions.put(RobotSide.fromByte(footstep.getRobotSide()), footPose);
          }
 
@@ -262,8 +269,8 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
          {
             Pose3D footPose = new Pose3D();
             FootstepDataMessage footstep = fixedStepQueue.get(numberOfFixedSteps - 1);
-            footPose.setPosition(footstep.getLocation());
-            footPose.setOrientation(footstep.getOrientation());
+            footPose.getPosition().set(footstep.getLocation());
+            footPose.getOrientation().set(footstep.getOrientation());
             currentFeetPositions.put(RobotSide.fromByte(footstep.getRobotSide()), footPose);
          }
       }
@@ -459,8 +466,8 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       boolean doesThePlanReachTheFinalGoal = false;
       if (currentPlannerOutput.get() != null)
       {
-         isPlannedGoalTheFinalGoal = currentPlannerOutput.get().getLowLevelPlannerGoal().getPosition().distanceXY(planningRequestPacket.get().getGoalPositionInWorld()) < proximityGoal;
-         doesThePlanReachTheFinalGoal = FootstepPlanningResult.fromByte(currentPlannerOutput.get().getFootstepPlanningResult()) != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+         isPlannedGoalTheFinalGoal = currentPlannerOutput.get().getGoalPose().getPosition().distanceXY(planningRequestPacket.get().getGoalPositionInWorld()) < proximityGoal;
+         doesThePlanReachTheFinalGoal = FootstepPlanningResult.fromByte(currentPlannerOutput.get().getFootstepPlanningResult()) != FootstepPlanningResult.PLANNING;
       }
       if (!isInitialSegmentOfPlan.getBooleanValue() && isPlannedGoalTheFinalGoal && doesThePlanReachTheFinalGoal && stepQueue.isEmpty())
          hasReachedGoal.set(true);

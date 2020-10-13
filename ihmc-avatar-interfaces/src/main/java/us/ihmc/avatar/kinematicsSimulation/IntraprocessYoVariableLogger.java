@@ -1,13 +1,13 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.collect.Lists;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
@@ -15,13 +15,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.*;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.File;
@@ -49,16 +48,25 @@ public class IntraprocessYoVariableLogger
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final String SUMMARY_FILENAME = "summary.csv";
    public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc/logs");
-   private final String timestamp;
+
+   private final String logName;
+   private final LogModelProvider logModelProvider;
+   private final List<RegistrySendBufferBuilder> registrySendBufferBuilders;
+   private final int maxTicksToRecord;
+   private final double dt;
+   private final Path incomingLogsFolder;
+
+   private String timestamp;
    private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
-   private List<YoVariable<?>> variables;
+   private ArrayList<YoVariable> variables = new ArrayList<>();
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
+   private volatile boolean shutdown = false;
 
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    private ConcurrentRingBuffer<VariableChangedMessage> variableChanged = new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(),
@@ -66,29 +74,51 @@ public class IntraprocessYoVariableLogger
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
-                                       YoVariableRegistry registry,
+                                       YoRegistry registry,
                                        RigidBodyBasics rootBody,
                                        YoGraphicsListRegistry yoGraphicsListRegistry,
                                        int maxTicksToRecord,
                                        double dt,
                                        Path incomingLogsFolder)
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      this(logName,
+           logModelProvider,
+           Lists.newArrayList(new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry)),
+           maxTicksToRecord,
+           dt,
+           incomingLogsFolder);
+   }
+
+   public IntraprocessYoVariableLogger(String logName,
+                                       LogModelProvider logModelProvider,
+                                       List<RegistrySendBufferBuilder> registrySendBufferBuilders,
+                                       int maxTicksToRecord,
+                                       double dt,
+                                       Path incomingLogsFolder)
+   {
+      this.logName = logName;
+      this.logModelProvider = logModelProvider;
+      this.registrySendBufferBuilders = registrySendBufferBuilders;
+      this.maxTicksToRecord = maxTicksToRecord;
+      this.dt = dt;
+      this.incomingLogsFolder = incomingLogsFolder;
+   }
+
+   public void start()
+   {
+      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
       logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);
       deleteOldLogs(incomingLogsFolder, 10);
 
-      RegistrySendBufferBuilder registrySendBufferBuilder = new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry);
-
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
-      handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
+      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
+      {
+         handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
+      }
       Handshake handshake = handshakeBuilder.getHandShake();
-
-      LogHandshake logHandshake = new LogHandshake();
-
-      ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
       try
       {
@@ -150,7 +180,6 @@ public class IntraprocessYoVariableLogger
          e.printStackTrace();
       }
 
-
       int numberOfJointStates = 0;
       for (int i = 0; i < handshake.getJoints().size(); i++)
       {
@@ -160,15 +189,31 @@ public class IntraprocessYoVariableLogger
 
       int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
-      LogTools.info("Buffer size: {}", bufferSize);
-      LogTools.info("Number of YoVariables: {}", registry.getNumberOfYoVariables());
-      LogTools.info("Number of joint states: {}", numberOfJointStates);
 
-      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
-      variables = registry.getAllVariables();
+      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
+      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
+      {
+         variables.addAll(registrySendBufferBuilder.getYoRegistry().collectSubtreeVariables());
+      }
       jointHolders = handshakeBuilder.getJointHolders();
+
+      long numberOfYoGraphics = 0;
+      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
+      {
+         if (registrySendBufferBuilder.getYoGraphicsListRegistry() != null)
+         {
+            for (YoGraphicsList yoGraphicsList : registrySendBufferBuilder.getYoGraphicsListRegistry().getYoGraphicsLists())
+            {
+               numberOfYoGraphics += yoGraphicsList.getYoGraphics().size();
+            }
+         }
+      }
+      LogTools.info("Buffer size: {}", bufferSize);
+      LogTools.info("Number of YoVariables: {}", variables.size());
+      LogTools.info("Number of YoGraphics: {}", numberOfYoGraphics);
+      LogTools.info("Number of joint states: {}", numberOfJointStates);
 
       try
       {
@@ -184,19 +229,34 @@ public class IntraprocessYoVariableLogger
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
-         try
+         shutdown = true;
+         synchronized (this)
          {
-            dataChannel.close();
+            try
+            {
+               LogTools.info("Closing data channel...");
+               dataChannel.close();
+               LogTools.info("Data channel closed.");
+               LogTools.info("Closing index channel...");
+               indexChannel.close();
+               LogTools.info("Index channel closed.");
+            }
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
          }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-      }));
+      }, getClass().getSimpleName() + "Shutdown"));
    }
 
-   public void update(long timestamp)
+   public synchronized void update(long timestamp)
    {
+      if (shutdown)
+      {
+         LogTools.error("Logger has already shutdown!");
+         return;
+      }
+
       dataBuffer.clear();
       dataBufferAsLong.clear();
 
@@ -225,11 +285,11 @@ public class IntraprocessYoVariableLogger
       }
 
       dataBufferAsLong.flip();
-      dataBuffer.clear();
+      dataBuffer.position(0);
+      dataBuffer.limit(dataBufferAsLong.limit() * 8);
 
       try
       {
-         dataBuffer.clear();
          compressedBuffer.clear();
          SnappyUtils.compress(dataBuffer, compressedBuffer);
          compressedBuffer.flip();

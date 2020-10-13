@@ -10,16 +10,19 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.*;
@@ -30,10 +33,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -78,6 +83,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
 
    private ValkyrieSensorSuiteManager sensorSuiteManager = null;
 
@@ -213,6 +219,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.sdfDescriptionMutator = sdfDescriptionMutator;
    }
 
+   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup)
+   {
+      if (this.valkyrieInitialSetup != null)
+         throw new IllegalArgumentException("Cannot set valkyrieInitialSetup once it has been created.");
+      this.valkyrieInitialSetup = valkyrieInitialSetup;
+   }
+
    public SDFDescriptionMutator getSDFDescriptionMutator()
    {
       if (sdfDescriptionMutator == null)
@@ -327,7 +340,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
-      return new ValkyrieInitialSetup(groundHeight, initialYaw);
+      if (valkyrieInitialSetup == null)
+         valkyrieInitialSetup = new ValkyrieInitialSetup();
+      valkyrieInitialSetup.setInitialGroundHeight(groundHeight);
+      valkyrieInitialSetup.setInitialYaw(initialYaw);
+      return valkyrieInitialSetup;
    }
 
    @Override
@@ -413,7 +430,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
       if (!robotVersion.hasFingers())
          return null;
@@ -428,10 +445,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (hasFingers)
       {
          return new SimulatedValkyrieFingerController(simulatedRobot,
-                                                      realtimeRos2Node,
+                                                      realtimeROS2Node,
                                                       this,
-                                                      ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                      ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+                                                      ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                      ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
       }
       else
       {
@@ -506,6 +523,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
+   {
+      return new DefaultSplitFractionCalculatorParameters();
+   }
+
+   @Override
    public RobotContactPointParameters<RobotSide> getContactPointParameters()
    {
       if (contactPointParameters == null)
@@ -577,15 +606,23 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidRobotKinematicsCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel();
+      return new ValkyrieKinematicsCollisionModel(getJointMap());
+   }
+
+   @Override
+   public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
+      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+      return collisionModel;
    }
 
    @Override
    public UIParameters getUIParameters()
    {
-      return new ValkyrieUIParameters(getRobotPhysicalProperties());
+      return new ValkyrieUIParameters(getRobotPhysicalProperties(), getJointMap());
    }
 
    @Override

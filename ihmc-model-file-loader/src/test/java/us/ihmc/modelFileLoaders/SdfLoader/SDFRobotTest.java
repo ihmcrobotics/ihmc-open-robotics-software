@@ -1,6 +1,8 @@
 package us.ihmc.modelFileLoaders.SdfLoader;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -12,8 +14,6 @@ import javax.xml.bind.JAXBException;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -70,8 +70,8 @@ public class SDFRobotTest
 
       assertEquals(robotOne.getName(), robotTwo.getName());
 
-      ArrayList<Joint> rootJointsOne = robotOne.getRootJoints();
-      ArrayList<Joint> rootJointsTwo = robotTwo.getRootJoints();
+      List<Joint> rootJointsOne = robotOne.getRootJoints();
+      List<Joint> rootJointsTwo = robotTwo.getRootJoints();
 
       assertEquals(rootJointsOne.size(), rootJointsTwo.size());
 
@@ -109,8 +109,8 @@ public class SDFRobotTest
 
       // Check the children
 
-      ArrayList<Joint> childrenJointsOne = jointOne.getChildrenJoints();
-      ArrayList<Joint> childrenJointsTwo = jointTwo.getChildrenJoints();
+      List<Joint> childrenJointsOne = jointOne.getChildrenJoints();
+      List<Joint> childrenJointsTwo = jointTwo.getChildrenJoints();
 
       int numberOfChildren = childrenJointsOne.size();
       assertEquals(numberOfChildren, childrenJointsTwo.size());
@@ -167,8 +167,8 @@ public class SDFRobotTest
       Graphics3DObject linkGraphicsOne = linkOne.getLinkGraphics();
       Graphics3DObject linkGraphicsTwo = linkTwo.getLinkGraphics();
 
-      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsOne;
-      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsTwo;
+      List<Graphics3DPrimitiveInstruction> graphics3dInstructionsOne;
+      List<Graphics3DPrimitiveInstruction> graphics3dInstructionsTwo;
       try
       {
          graphics3dInstructionsOne = linkGraphicsOne.getGraphics3DInstructions();

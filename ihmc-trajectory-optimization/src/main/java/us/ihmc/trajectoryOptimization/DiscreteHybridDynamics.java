@@ -1,6 +1,6 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface DiscreteHybridDynamics<E extends Enum>
 {
@@ -10,21 +10,21 @@ public interface DiscreteHybridDynamics<E extends Enum>
    int getConstantVectorSize();
 
    /** f */
-   void getNextState(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getNextState(E hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_x */
-   void getDynamicsStateGradient(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsStateGradient(E hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_u */
-   void getDynamicsControlGradient(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsControlGradient(E hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_xx */
-   void getDynamicsStateHessian(E hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsStateHessian(E hybridState, int stateVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_uu */
-   void getDynamicsControlHessian(E hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsControlHessian(E hybridState, int controlVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_ux */
-   void getDynamicsStateGradientOfControlGradient(E hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-         DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsStateGradientOfControlGradient(E hybridState, int stateVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+         DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_xu */
-   void getDynamicsControlGradientOfStateGradient(E hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-         DenseMatrix64F constants, DenseMatrix64F matrixToPack);
-   void getContinuousAMatrix(DenseMatrix64F A);
-   void getContinuousBMatrix(DenseMatrix64F A);
+   void getDynamicsControlGradientOfStateGradient(E hybridState, int controlVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+         DMatrixRMaj constants, DMatrixRMaj matrixToPack);
+   void getContinuousAMatrix(DMatrixRMaj A);
+   void getContinuousBMatrix(DMatrixRMaj A);
 }

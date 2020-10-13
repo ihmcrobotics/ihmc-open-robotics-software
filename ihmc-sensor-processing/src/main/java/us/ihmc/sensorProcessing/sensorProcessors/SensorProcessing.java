@@ -1,25 +1,11 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.FORCE_SENSOR;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_ACCELERATION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.TORQUE_SENSOR;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -30,40 +16,25 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.BacklashProcessingYoFrameVector;
-import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.robotics.math.filters.ProcessingYoVariable;
-import us.ihmc.robotics.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
-import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
+import us.ihmc.robotics.math.filters.*;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
-import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
-import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
-import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
-import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
-import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
-import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
-import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.*;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class SensorProcessing implements SensorOutputMapReadOnly
@@ -177,7 +148,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    };
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoLong wallTime = new YoLong("wallTime", registry);
    private final YoLong monotonicTime = new YoLong("monotonicTime", registry);
@@ -295,7 +266,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    };
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
-                           YoVariableRegistry parentRegistry)
+                           YoRegistry parentRegistry)
    {
       this.updateDT = sensorProcessingConfiguration.getEstimatorDT();
 
@@ -1970,7 +1941,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered in
-    * the {@code SensorProcessing}'s {@code YoVariableRegistry}.
+    * the {@code SensorProcessing}'s {@code YoRegistry}.
     * 
     * @param name           name of the variable.
     * @param breakFrequency break frequency in Hertz
@@ -2236,7 +2207,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       inputLinearAccelerations.get(imuDefinition).set(value);
    }
 
-   public void setForceSensorValue(ForceSensorDefinition forceSensorDefinition, DenseMatrix64F value)
+   public void setForceSensorValue(ForceSensorDefinition forceSensorDefinition, DMatrixRMaj value)
    {
       if (value.getNumRows() != Wrench.SIZE || value.getNumCols() != 1)
          throw new RuntimeException("Unexpected size");
@@ -2273,7 +2244,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return outputForceSensors;
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }

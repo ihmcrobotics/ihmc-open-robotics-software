@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TimestampedVelocityYoVariableTest
@@ -20,7 +20,7 @@ public class TimestampedVelocityYoVariableTest
    @BeforeEach
    public void setUp() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       position = new YoDouble("testPosition", registry);
       timestamp = new YoDouble("testTimestamp", registry);
       velocityYoVariable = new TimestampedVelocityYoVariable("testVelVar", "", position, timestamp, registry, 1e-9);

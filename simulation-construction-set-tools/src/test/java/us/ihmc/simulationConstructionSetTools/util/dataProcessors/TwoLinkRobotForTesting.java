@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -40,7 +40,7 @@ public class TwoLinkRobotForTesting extends Robot
 
       this.setGravity(0.0, 0.0, -gravity);
 
-      upperJoint = new PinJoint("upper", new Vector3D(0.0, 0.0, 4.0 * linkLength), this, Axis.Y);
+      upperJoint = new PinJoint("upper", new Vector3D(0.0, 0.0, 4.0 * linkLength), this, Axis3D.Y);
 
       //upperJoint.setCartesianPosition(0.0, activeLegLength + passiveLegLength + footLength + 0.13);
 
@@ -56,7 +56,7 @@ public class TwoLinkRobotForTesting extends Robot
       this.addRootJoint(upperJoint);
 
 
-      elbowJoint = new PinJoint("elbow", new Vector3D(0.0, 0.0, -linkLength), this, Axis.Y);
+      elbowJoint = new PinJoint("elbow", new Vector3D(0.0, 0.0, -linkLength), this, Axis3D.Y);
       upperJoint.addJoint(elbowJoint);
       Link lowerArmLink = lowerArm();
       elbowJoint.setLink(lowerArmLink);

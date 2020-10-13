@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.toolbox;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class LinearInvertedPendulumModel
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble totalMass = new YoDouble("totalMass", registry);
    private final YoDouble lipmHeight = new YoDouble("lipmHeight", registry);
@@ -19,9 +19,9 @@ public class LinearInvertedPendulumModel
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
 
-   public LinearInvertedPendulumModel(ReferenceFrame comZUpFrame, double totalMass, double gravity, double comHeight, YoVariableRegistry parentRegistry)
+   public LinearInvertedPendulumModel(ReferenceFrame comZUpFrame, double totalMass, double gravity, double comHeight, YoRegistry parentRegistry)
    {
-      lipmHeight.addVariableChangedListener(v -> omega0.set(computeNaturalFrequency()));
+      lipmHeight.addListener(v -> omega0.set(computeNaturalFrequency()));
 
       this.totalMass.set(totalMass);
       this.gravity = gravity;

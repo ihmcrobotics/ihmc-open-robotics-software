@@ -7,7 +7,7 @@ import java.util.Map;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -77,7 +77,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     *           to.
     */
    public StateMachine(K initialStateKey, Map<K, S> states, Map<K, StateTransition<K>> stateTransitions, List<StateChangedListener<K>> stateChangedListeners,
-                       StateMachineClock clock, String namePrefix, YoVariableRegistry registry)
+                       StateMachineClock clock, String namePrefix, YoRegistry registry)
    {
       this.initialStateKey = initialStateKey;
       this.states = states;
@@ -255,7 +255,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
       {
          S currentState = states.get(currentStateKey.getEnumValue());
          if (currentState != null)
-            currentState.onExit();
+            currentState.onExit(clock.getTimeInCurrentState());
       }
 
       S nextState = getState(nextStateKey);

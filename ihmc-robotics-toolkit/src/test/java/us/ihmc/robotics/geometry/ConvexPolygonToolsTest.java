@@ -1,7 +1,10 @@
 package us.ihmc.robotics.geometry;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNotNull;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -13,34 +16,28 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class ConvexPolygonToolsTest
 {
@@ -59,7 +56,7 @@ public class ConvexPolygonToolsTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
+      ReferenceFrame zUpFrame = ReferenceFrameTools.constructARootFrame("someFrame");
       double xMin1 = 0.0, xMax1 = 1.0, yMin1 = 0.0, yMax1 = 1.0;
       ArrayList<FramePoint2D> points1 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1, 100);
 
@@ -1235,7 +1232,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       Random random = new Random(1886L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
+      ReferenceFrame zUpFrame = ReferenceFrameTools.constructARootFrame("someFrame");
 
       double xMin = 0.0, xMax = 1.0, yMin = 0.0, yMax = 1.0;
       double widthMax = 0.5, heightMax = 0.5;

@@ -1,27 +1,25 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPTimeFreezerParameters;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreezerInterface
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final String namePrefix = "icpPlanner";
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -59,7 +57,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
       initializeTimeFreezerParameters(icpTimeFreezerParameters);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }
@@ -166,7 +164,6 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public void updateCurrentPlan()
    {
       timeDelay.set(0.0);
-      previousTime.set(getTimeInCurrentState());
       icpPlanner.updateCurrentPlan();
    }
 
@@ -217,6 +214,12 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack)
    {
       icpPlanner.getDesiredCenterOfMassPosition(desiredCenterOfMassPositionToPack);
+   }
+
+   @Override
+   public void getDesiredCenterOfMassVelocity(FixedFrameVector2DBasics desiredCenterOfMassVelocityToPack)
+   {
+      icpPlanner.getDesiredCenterOfMassVelocity(desiredCenterOfMassVelocityToPack);
    }
 
    /** {@inheritDoc} */
@@ -452,7 +455,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
    {
       icpPlanner.getFinalDesiredCenterOfMassPosition(finalDesiredCenterOfMassPositionToPack);
    }
@@ -520,7 +523,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    {
       icpPlanner.compute(time - timeDelay.getDoubleValue());
 
-      if (doTimeFreezing.getBooleanValue())
+      if (icpPlanner.isInDoubleSupport() && doTimeFreezing.getBooleanValue())
       {
          icpPlanner.getDesiredCapturePointPosition(tmpCapturePointPosition);
          icpPlanner.getDesiredCapturePointVelocity(tmpCapturePointVelocity);

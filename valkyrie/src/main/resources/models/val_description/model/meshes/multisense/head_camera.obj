@@ -555,7 +555,7 @@ vt 0.3005 0.5862 0.0000
 vt 0.3007 0.5833 0.0000
 # 264 texture coords
 
-o head002
+#o head002
 g head002
 usemtl drc_torso_head_diffuse
 s off

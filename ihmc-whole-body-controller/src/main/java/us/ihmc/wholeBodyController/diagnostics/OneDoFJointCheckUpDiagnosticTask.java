@@ -16,14 +16,14 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
 {
    private Logger logger;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final OneDoFJointBasics joint;
    private final YoDouble desiredJointPositionOffset;
@@ -90,7 +90,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       this.joint = jointToCheck;
       String jointName = joint.getName();
       String nameSuffix = "CheckUp";
-      registry = new YoVariableRegistry(jointName + nameSuffix);
+      registry = new YoRegistry(jointName + nameSuffix);
       diagnosticParameters = toolbox.getDiagnosticParameters();
 
       desiredJointPositionOffset = new YoDouble("q_off_d_" + jointName + nameSuffix, registry);
@@ -349,7 +349,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
    }
 
    @Override
-   public void attachParentYoVariableRegistry(YoVariableRegistry parentRegistry)
+   public void attachParentYoVariableRegistry(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

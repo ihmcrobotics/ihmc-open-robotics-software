@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
@@ -19,17 +19,17 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
  */
 public class SplitUpMatrixExponentialStateSpaceSystemDiscretizer implements StateSpaceSystemDiscretizer
 {
-   private final DenseMatrix64F discretizationMatrix1;
+   private final DMatrixRMaj discretizationMatrix1;
    private final MatrixExponentialCalculator matrixExponentialCalculator1;
 
-   private final DenseMatrix64F discretizationMatrix2;
+   private final DMatrixRMaj discretizationMatrix2;
    private final MatrixExponentialCalculator matrixExponentialCalculator2;
 
-   private final DenseMatrix64F F3;
-   private final DenseMatrix64F G2;
-   private final DenseMatrix64F G3;
+   private final DMatrixRMaj F3;
+   private final DMatrixRMaj G2;
+   private final DMatrixRMaj G3;
    
-   private final DenseMatrix64F negativeATranspose;
+   private final DMatrixRMaj negativeATranspose;
 
    private final int nStates;
    private final int nInputs;
@@ -37,18 +37,18 @@ public class SplitUpMatrixExponentialStateSpaceSystemDiscretizer implements Stat
    public SplitUpMatrixExponentialStateSpaceSystemDiscretizer(int numberOfStates, int numberOfInputs)
    {
       int discretizationMatrix1Size = numberOfStates + numberOfInputs;
-      this.discretizationMatrix1 = new DenseMatrix64F(discretizationMatrix1Size, discretizationMatrix1Size);
+      this.discretizationMatrix1 = new DMatrixRMaj(discretizationMatrix1Size, discretizationMatrix1Size);
       this.matrixExponentialCalculator1 = new MatrixExponentialCalculator(discretizationMatrix1Size);
       
       int discretizationMatrix2Size = 2 * numberOfStates;
-      this.discretizationMatrix2 = new DenseMatrix64F(discretizationMatrix2Size, discretizationMatrix2Size);
+      this.discretizationMatrix2 = new DMatrixRMaj(discretizationMatrix2Size, discretizationMatrix2Size);
       this.matrixExponentialCalculator2 = new MatrixExponentialCalculator(discretizationMatrix2Size);
 
-      this.negativeATranspose = new DenseMatrix64F(numberOfStates, numberOfStates);
+      this.negativeATranspose = new DMatrixRMaj(numberOfStates, numberOfStates);
       
-      this.F3 = new DenseMatrix64F(numberOfStates, numberOfStates);
-      this.G2 = new DenseMatrix64F(numberOfStates, numberOfStates);
-      this.G3 = new DenseMatrix64F(numberOfStates, numberOfInputs);
+      this.F3 = new DMatrixRMaj(numberOfStates, numberOfStates);
+      this.G2 = new DMatrixRMaj(numberOfStates, numberOfStates);
+      this.G3 = new DMatrixRMaj(numberOfStates, numberOfInputs);
       this.nStates = numberOfStates;
       this.nInputs = numberOfInputs;
    }
@@ -60,7 +60,7 @@ public class SplitUpMatrixExponentialStateSpaceSystemDiscretizer implements Stat
     * @param Q process noise covariance matrix
     * @param dt time step
     */
-   public void discretize(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, double dt)
+   public void discretize(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj Q, double dt)
    {
       MatrixTools.checkMatrixDimensions(A, nStates, nStates);
       MatrixTools.checkMatrixDimensions(B, nStates, nInputs);
@@ -72,9 +72,9 @@ public class SplitUpMatrixExponentialStateSpaceSystemDiscretizer implements Stat
        * [A B]
        * [0 0];
        */
-      CommonOps.insert(A, discretizationMatrix1, 0, 0);
-      CommonOps.insert(B, discretizationMatrix1, 0, nStates);      
-      CommonOps.scale(dt, discretizationMatrix1);
+      CommonOps_DDRM.insert(A, discretizationMatrix1, 0, 0);
+      CommonOps_DDRM.insert(B, discretizationMatrix1, 0, nStates);      
+      CommonOps_DDRM.scale(dt, discretizationMatrix1);
       matrixExponentialCalculator1.compute(discretizationMatrix1, discretizationMatrix1);
 
       /*
@@ -82,31 +82,31 @@ public class SplitUpMatrixExponentialStateSpaceSystemDiscretizer implements Stat
        * [-A^T Q]
        * [0    A]
        */
-      CommonOps.insert(A, discretizationMatrix2, nStates, nStates);
-      CommonOps.transpose(A, negativeATranspose);
-      CommonOps.changeSign(negativeATranspose);
-      CommonOps.insert(negativeATranspose, discretizationMatrix2, 0, 0);
-      CommonOps.insert(Q, discretizationMatrix2, 0, nStates);
-      CommonOps.scale(dt, discretizationMatrix2);
+      CommonOps_DDRM.insert(A, discretizationMatrix2, nStates, nStates);
+      CommonOps_DDRM.transpose(A, negativeATranspose);
+      CommonOps_DDRM.changeSign(negativeATranspose);
+      CommonOps_DDRM.insert(negativeATranspose, discretizationMatrix2, 0, 0);
+      CommonOps_DDRM.insert(Q, discretizationMatrix2, 0, nStates);
+      CommonOps_DDRM.scale(dt, discretizationMatrix2);
       matrixExponentialCalculator2.compute(discretizationMatrix2, discretizationMatrix2);
 
       // blocks
-      CommonOps.extract(discretizationMatrix1, 0, nStates, 0, nStates, F3, 0, 0);
-      CommonOps.extract(discretizationMatrix2, 0, nStates, nStates, 2 * nStates, G2, 0, 0);
-      CommonOps.extract(discretizationMatrix1, 0, nStates, nStates, nStates + nInputs, G3, 0, 0);
+      CommonOps_DDRM.extract(discretizationMatrix1, 0, nStates, 0, nStates, F3, 0, 0);
+      CommonOps_DDRM.extract(discretizationMatrix2, 0, nStates, nStates, 2 * nStates, G2, 0, 0);
+      CommonOps_DDRM.extract(discretizationMatrix1, 0, nStates, nStates, nStates + nInputs, G3, 0, 0);
 
       // A
       A.set(F3);
 
       // B
-      CommonOps.mult(F3, G3, B);
+      CommonOps_DDRM.mult(F3, G3, B);
 
       // Q
-      CommonOps.multTransA(F3, G2, Q);
+      CommonOps_DDRM.multTransA(F3, G2, Q);
 
       // R stays R. Matlab kalmd says to scale it by 1/dt, but 
       // we think this is only true if you are averaging out the noise during the reading.
       // More realistically, you are not and just getting a noisy discrete reading.
-//      CommonOps.scale(1.0 / dt, R);
+//      CommonOps_DDRM.scale(1.0 / dt, R);
    }
 }

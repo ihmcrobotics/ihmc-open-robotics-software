@@ -30,19 +30,19 @@ public class CarEgressEnvironment implements CommonAvatarEnvironmentInterface
    public CarEgressEnvironment()
    {
       RigidBodyTransform locationStep = new RigidBodyTransform();
-      locationStep.setTranslation(new Vector3D(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + 0.5 * stepDimensions.getY(), stepDimensions.getZ() / 2.0));
+      locationStep.getTranslation().set(new Vector3D(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + 0.5 * stepDimensions.getY(), stepDimensions.getZ() / 2.0));
       Box3D stepBox = new Box3D(locationStep, stepDimensions.getX(), stepDimensions.getY(), stepDimensions.getZ());
       terrain.addTerrainObject(new RotatableCinderBlockTerrainObject(stepBox, YoAppearance.DarkGray()));   
       
       RigidBodyTransform locationCar = new RigidBodyTransform();
-      locationCar.setTranslation(new Vector3D(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + stepDimensions.getY() + 0.5 * carDimensions.getY(), carDimensions.getZ() / 2.0));
+      locationCar.getTranslation().set(new Vector3D(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + stepDimensions.getY() + 0.5 * carDimensions.getY(), carDimensions.getZ() / 2.0));
       Box3D carBox = new Box3D(locationCar, carDimensions.getX(), carDimensions.getY(), carDimensions.getZ());      
       terrain.addTerrainObject(new RotatableCinderBlockTerrainObject(carBox, YoAppearance.DarkGray()));   
       
       terrain.addTerrainObject(setUpGround("ground"));
       
       RigidBodyTransform polarisTransform = new RigidBodyTransform();
-      polarisTransform.setTranslation(polarisPosition);
+      polarisTransform.getTranslation().set(polarisPosition);
       robots.add(new PolarisRobot("polaris", polarisTransform));
    }
    
@@ -80,7 +80,7 @@ public class CarEgressEnvironment implements CommonAvatarEnvironmentInterface
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/brick.png");
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3D(0, 0, -0.5));
+      location.getTranslation().set(new Vector3D(0, 0, -0.5));
 
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, 10, 10, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);

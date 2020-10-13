@@ -17,17 +17,17 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PushRobotController implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble pushDuration;
    private final YoDouble pushForceMagnitude;
    private final YoFrameVector3D pushDirection;
@@ -58,7 +58,7 @@ public class PushRobotController implements RobotController
    public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3DReadOnly forcePointOffset, double visualScale)
    {
       yoTime = pushableRobot.getYoTime();
-      registry = new YoVariableRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
+      registry = new YoRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
       forcePoint = new ExternalForcePoint(jointNameToApplyForce + "_externalForcePoint", forcePointOffset, pushableRobot);
 
       pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
@@ -203,7 +203,7 @@ public class PushRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

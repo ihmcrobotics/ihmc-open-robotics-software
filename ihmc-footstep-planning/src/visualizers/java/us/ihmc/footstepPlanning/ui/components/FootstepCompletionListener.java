@@ -36,7 +36,7 @@ public class FootstepCompletionListener extends AnimationTimer
       }
       
       FootstepDataListMessage activePlan = activeFootstepPlan.get();
-      if (activePlan.getFootstepDataList().isEmpty())
+      if (activePlan == null || activePlan.getFootstepDataList().isEmpty())
       {
          return;
       }

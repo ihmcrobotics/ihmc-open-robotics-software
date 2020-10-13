@@ -49,20 +49,20 @@ public class ValkyriePhysicalProperties
       {
          RigidBodyTransform soleToAnkleFrame = new RigidBodyTransform();
          //         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
-         soleToAnkleFrame.setTranslation(new Vector3D(footLength / 2.0 - footBack, 0.0, -ankleHeight));
+         soleToAnkleFrame.getTranslation().set(new Vector3D(footLength / 2.0 - footBack, 0.0, -ankleHeight));
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
-         controlFrameToWristTransform.setTranslation(0.025, robotSide.negateIfRightSide(0.07), 0.0);
+         controlFrameToWristTransform.getTranslation().set(0.025, robotSide.negateIfRightSide(0.07), 0.0);
          controlFrameToWristTransform.getTranslation().scale(modelSizeScale);
          controlFrameToWristTransform.appendYawRotation(robotSide.negateIfRightSide(Math.PI * 0.5));
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
 
          RigidBodyTransform controlFrameToArmMassSimTransform = new RigidBodyTransform();
-         controlFrameToArmMassSimTransform.setTranslation(-0.0275, robotSide.negateIfRightSide(0.4), 0.0);
+         controlFrameToArmMassSimTransform.getTranslation().set(-0.0275, robotSide.negateIfRightSide(0.4), 0.0);
          controlFrameToArmMassSimTransform.getTranslation().scale(modelSizeScale);
          controlFrameToArmMassSimTransform.appendYawRotation(robotSide.negateIfRightSide(0.5 * Math.PI));
          controlFrameToArmMassSimTransform.appendRollRotation(robotSide.negateIfRightSide(0.5 * Math.PI));

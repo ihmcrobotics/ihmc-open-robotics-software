@@ -11,7 +11,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.visualization.P
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -42,7 +42,7 @@ public class AStarPawStepPlannerDataSetTest extends PawStepPlannerDataSetTest
    @Override
    public BodyPathAndPawPlanner createPlanner()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
       if (plannerParameters == null)

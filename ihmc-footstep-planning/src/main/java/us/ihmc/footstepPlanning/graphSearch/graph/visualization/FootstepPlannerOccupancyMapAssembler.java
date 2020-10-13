@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.pathPlanning.graph.search.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 
 import java.util.function.Consumer;
 

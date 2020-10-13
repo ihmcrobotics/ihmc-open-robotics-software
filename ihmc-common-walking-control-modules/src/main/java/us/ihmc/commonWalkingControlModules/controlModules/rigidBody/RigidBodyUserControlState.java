@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccel
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -27,7 +27,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    private final YoBoolean abortUserControlMode;
    private final YoBoolean hasWeights;
 
-   public RigidBodyUserControlState(String bodyName, OneDoFJointBasics[] jointsToControl, YoDouble yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyUserControlState(String bodyName, OneDoFJointBasics[] jointsToControl, YoDouble yoTime, YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";

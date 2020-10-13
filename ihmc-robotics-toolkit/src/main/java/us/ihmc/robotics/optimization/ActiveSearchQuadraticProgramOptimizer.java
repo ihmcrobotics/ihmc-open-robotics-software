@@ -2,9 +2,9 @@ package us.ihmc.robotics.optimization;
 
 import java.util.Set;
 
-import org.ejml.alg.dense.mult.VectorVectorMult;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
 
 import us.ihmc.commons.MathTools;
 
@@ -21,17 +21,17 @@ public class ActiveSearchQuadraticProgramOptimizer
    private final EqualityConstraintEnforcer equalityConstraintEnforcer;
 
    // temp stuff
-   private final DenseMatrix64F cX = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F aCopy = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F bCopy = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F cActive = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F dActive = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F xBarStar = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F ci = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F step = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F axMinusB = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F lambda = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F aCPlus = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj cX = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj aCopy = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj bCopy = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj cActive = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj dActive = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj xBarStar = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj ci = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj step = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj axMinusB = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj lambda = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj aCPlus = new DMatrixRMaj(1, 1);
 
    public ActiveSearchQuadraticProgramOptimizer(ActiveSearchOptimizationSettings settings)
    {
@@ -44,21 +44,21 @@ public class ActiveSearchQuadraticProgramOptimizer
       this.quadraticProgram = quadraticProgram;
    }
 
-   private void setInitialGuess(DenseMatrix64F initialGuess)
+   private void setInitialGuess(DMatrixRMaj initialGuess)
    {
       solutionInfo.setSolution(initialGuess);
       determineActiveSet(initialGuess);
    }
 
-   private void determineActiveSet(DenseMatrix64F x)
+   private void determineActiveSet(DMatrixRMaj x)
    {
       solutionInfo.clearActiveSet();
 
-      DenseMatrix64F c = quadraticProgram.getC();
-      DenseMatrix64F d = quadraticProgram.getD();
+      DMatrixRMaj c = quadraticProgram.getC();
+      DMatrixRMaj d = quadraticProgram.getD();
 
       cX.reshape(quadraticProgram.getInequalityConstraintSize(), 1);
-      CommonOps.mult(c, x, cX);
+      CommonOps_DDRM.mult(c, x, cX);
 
       for (int i = 0; i < cX.getNumRows(); i++)
       {
@@ -72,7 +72,7 @@ public class ActiveSearchQuadraticProgramOptimizer
       }
    }
 
-   public void solve(DenseMatrix64F initialGuess)
+   public void solve(DMatrixRMaj initialGuess)
    {
       if (quadraticProgram == null)
          throw new RuntimeException("Quadratic program has not been set!");
@@ -86,12 +86,12 @@ public class ActiveSearchQuadraticProgramOptimizer
          solutionInfo.setConverged(true);
 
          updateActiveConstraintEquation();
-         DenseMatrix64F xStar = computeOptimumForCurrentActiveSet();
+         DMatrixRMaj xStar = computeOptimumForCurrentActiveSet();
 
          // compute step length
-         DenseMatrix64F x = solutionInfo.getSolution();
+         DMatrixRMaj x = solutionInfo.getSolution();
          step.set(xStar);
-         CommonOps.subtractEquals(step, x); // step = xStar - x
+         CommonOps_DDRM.subtractEquals(step, x); // step = xStar - x
          ci.reshape(1, quadraticProgram.getSolutionSize());
 
          double tau = 1.0;
@@ -101,16 +101,16 @@ public class ActiveSearchQuadraticProgramOptimizer
             if (!solutionInfo.getActiveSet().contains(constraintIndex))
             {
                // c_i
-               CommonOps.extract(quadraticProgram.getC(), constraintIndex, constraintIndex + 1, 0, quadraticProgram.getSolutionSize(), ci, 0, 0);
+               CommonOps_DDRM.extract(quadraticProgram.getC(), constraintIndex, constraintIndex + 1, 0, quadraticProgram.getSolutionSize(), ci, 0, 0);
 
                // d_i
                double di = quadraticProgram.getD().get(constraintIndex, 0);
 
                // ci * x
-               double ciX = VectorVectorMult.innerProd(ci, x);
+               double ciX = VectorVectorMult_DDRM.innerProd(ci, x);
 
                // ci * step
-               double ciStep = VectorVectorMult.innerProd(ci, step);
+               double ciStep = VectorVectorMult_DDRM.innerProd(ci, step);
 
                // tau_i
                double tauI = -(ciX - di) / ciStep;
@@ -139,8 +139,8 @@ public class ActiveSearchQuadraticProgramOptimizer
       Set<Integer> activeSet = solutionInfo.getActiveSet();
       int nActiveConstraints = activeSet.size();
 
-      DenseMatrix64F c = quadraticProgram.getC();
-      DenseMatrix64F d = quadraticProgram.getD();
+      DMatrixRMaj c = quadraticProgram.getC();
+      DMatrixRMaj d = quadraticProgram.getD();
 
       cActive.reshape(nActiveConstraints, quadraticProgram.getSolutionSize());
       dActive.reshape(nActiveConstraints, 1);
@@ -148,7 +148,7 @@ public class ActiveSearchQuadraticProgramOptimizer
       int activeConstraintIndex = 0;
       for (Integer constraintIndex : activeSet)
       {
-         CommonOps.extract(c, constraintIndex, constraintIndex + 1, 0, quadraticProgram.getSolutionSize(), cActive,
+         CommonOps_DDRM.extract(c, constraintIndex, constraintIndex + 1, 0, quadraticProgram.getSolutionSize(), cActive,
                activeConstraintIndex, 0);
          dActive.set(activeConstraintIndex, 0, d.get(constraintIndex, 0));
 
@@ -156,7 +156,7 @@ public class ActiveSearchQuadraticProgramOptimizer
       }
    }
 
-   private DenseMatrix64F computeOptimumForCurrentActiveSet()
+   private DMatrixRMaj computeOptimumForCurrentActiveSet()
    {
       // compute the optimum for the current active set (treat all active constraints as equalities)
       aCopy.set(quadraticProgram.getA());
@@ -187,13 +187,13 @@ public class ActiveSearchQuadraticProgramOptimizer
       // if necessary, decrease the active set
       // first compute lambda (solution to dual problem)
       axMinusB.reshape(quadraticProgram.getObjectiveSize(), 1);
-      CommonOps.mult(quadraticProgram.getA(), solutionInfo.getSolution(), axMinusB);
-      CommonOps.subtractEquals(axMinusB, quadraticProgram.getB());
+      CommonOps_DDRM.mult(quadraticProgram.getA(), solutionInfo.getSolution(), axMinusB);
+      CommonOps_DDRM.subtractEquals(axMinusB, quadraticProgram.getB());
       aCPlus.reshape(quadraticProgram.getObjectiveSize(), cActive.getNumRows());
-      CommonOps.mult(quadraticProgram.getA(), equalityConstraintEnforcer.getConstraintPseudoInverse(), aCPlus);
+      CommonOps_DDRM.mult(quadraticProgram.getA(), equalityConstraintEnforcer.getConstraintPseudoInverse(), aCPlus);
       lambda.reshape(cActive.getNumRows(), 1);
-      CommonOps.multTransA(aCPlus, axMinusB, lambda);
-      CommonOps.changeSign(lambda);
+      CommonOps_DDRM.multTransA(aCPlus, axMinusB, lambda);
+      CommonOps_DDRM.changeSign(lambda);
       // TODO: do you need to update cActive after possible changes in the active set due to increaseActiveSetIfNecessary?
 
       // compute nu
@@ -219,8 +219,8 @@ public class ActiveSearchQuadraticProgramOptimizer
    private void updateSolution(double tau)
    {
       // update solution
-      CommonOps.scale(tau, step);
-      CommonOps.addEquals(solutionInfo.getSolution(), step);
+      CommonOps_DDRM.scale(tau, step);
+      CommonOps_DDRM.addEquals(solutionInfo.getSolution(), step);
    }
 
    public ActiveSearchSolutionInfo getSolutionInfo()

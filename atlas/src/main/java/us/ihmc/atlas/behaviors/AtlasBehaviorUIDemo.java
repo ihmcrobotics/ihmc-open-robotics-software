@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.jfxvisualizer.AtlasRemoteFootstepPlannerUI;
+import us.ihmc.atlas.jfxvisualizer.AtlasFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -92,9 +92,9 @@ public class AtlasBehaviorUIDemo
       else
       {
          LogTools.info("Creating dynamics simulation");
-         AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
+         AtlasDynamicsSimulation.createForManualTest(createRobotModel(),
                                                      new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
-                                                     recordFrequencySpeedup).simulate();
+                                                     recordFrequencySpeedup, 10).simulate();
       }
    }
 
@@ -125,8 +125,8 @@ public class AtlasBehaviorUIDemo
    private void footstepPlannerUI()
    {
       LogTools.info("Launching remote footstep planner UI");
-      AtlasRemoteFootstepPlannerUI atlasRemoteFootstepPlannerUI = new AtlasRemoteFootstepPlannerUI();
-      JavaFXMissingTools.runApplication(atlasRemoteFootstepPlannerUI);
+      AtlasFootstepPlannerUI atlasFootstepPlannerUI = new AtlasFootstepPlannerUI();
+      JavaFXMissingTools.runApplication(atlasFootstepPlannerUI);
    }
 
    private AtlasRobotModel createRobotModel()

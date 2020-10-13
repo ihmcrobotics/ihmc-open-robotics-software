@@ -2,7 +2,6 @@ package us.ihmc.robotEnvironmentAwareness.ui.io;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,13 +72,14 @@ public class PlanarRegionDataImporterVisualizer extends Application
       RigidBodyTransform transform = new RigidBodyTransform();
       data.getTransformToWorld(transform);
 
-      Point2D[] concaveHullVerticesLocal = data.getConcaveHull();
+      List<Point2D> concaveHullVerticesLocal = data.getConcaveHull();
       Color regionColor = OcTreeMeshBuilder.getRegionColor(regionId);
 
-      List<Point3D> concaveHullVertices = Arrays.stream(concaveHullVerticesLocal).map(Point3D::new).map(p -> {
-         transform.transform(p);
-         return p;
-      }).collect(Collectors.toList());
+      List<Point3D> concaveHullVertices = concaveHullVerticesLocal.stream().map(Point3D::new).map(p ->
+                                                                                                  {
+                                                                                                     transform.transform(p);
+                                                                                                     return p;
+                                                                                                  }).collect(Collectors.toList());
 
       for (int vertexIndex = 0; vertexIndex < concaveHullVertices.size(); vertexIndex++)
       {

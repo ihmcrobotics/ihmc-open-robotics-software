@@ -1,7 +1,7 @@
 package us.ihmc.robotics.weightMatrices;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixDimensionException;
+import org.ejml.MatrixDimensionException;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -347,7 +347,7 @@ public class WeightMatrix6D
     *                           represent this. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       weightMatrixToPack.reshape(6, 6);
       weightMatrixToPack.zero();
@@ -360,7 +360,7 @@ public class WeightMatrix6D
     * Converts this into an actual 6-by-6 weight matrix that is to be used with data expressed in the
     * {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DenseMatrix64F)} does,
+    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DMatrixRMaj)} does,
     * this method also removes the zero-rows of the given weight matrix. This will help to improve
     * performance especially when the resulting weight matrix is to be multiplied to a large matrix.
     * </p>
@@ -375,7 +375,7 @@ public class WeightMatrix6D
     *                           Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       weightMatrixToPack.reshape(6, 6);
       weightMatrixToPack.zero();

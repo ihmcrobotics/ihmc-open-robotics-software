@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.Random;
@@ -40,19 +41,90 @@ public class PawNodeToolsTest
          double hindRightX = hindRightXLatticeIndex * PawNode.gridSizeXY;
          double hindRightY = hindRightYLatticeIndex * PawNode.gridSizeXY;
 
-         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0, 0.0, 0.0, 0.0, 0.0,
-                            0.0, 0.0, 0.0);
-         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
-                            0.4995 * PawNode.gridSizeXY, 0.0, 0.4995 * PawNode.gridSizeXY, 0.0, 0.4995 * PawNode.gridSizeXY, 0.0,
-                            0.4995 * PawNode.gridSizeXY, 0.0);
-         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
-                            -0.4995 * PawNode.gridSizeXY, 0.0, -0.4995 * PawNode.gridSizeXY, 0.0, -0.4995 * PawNode.gridSizeXY, 0.0,
-                            -0.4995 * PawNode.gridSizeXY, 0.0);
-         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0,
-                            0.4995 * PawNode.gridSizeXY, 0.0, 0.4995 * PawNode.gridSizeXY, 0.0, 0.4995 * PawNode.gridSizeXY, 0.0,
+         checkNodeTransform(quadrant,
+                            frontLeftX,
+                            frontLeftY,
+                            frontRightX,
+                            frontRightY,
+                            hindLeftX,
+                            hindLeftY,
+                            hindRightX,
+                            hindRightY,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0);
+         checkNodeTransform(quadrant,
+                            frontLeftX,
+                            frontLeftY,
+                            frontRightX,
+                            frontRightY,
+                            hindLeftX,
+                            hindLeftY,
+                            hindRightX,
+                            hindRightY,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0);
+         checkNodeTransform(quadrant,
+                            frontLeftX,
+                            frontLeftY,
+                            frontRightX,
+                            frontRightY,
+                            hindLeftX,
+                            hindLeftY,
+                            hindRightX,
+                            hindRightY,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0);
+         checkNodeTransform(quadrant,
+                            frontLeftX,
+                            frontLeftY,
+                            frontRightX,
+                            frontRightY,
+                            hindLeftX,
+                            hindLeftY,
+                            hindRightX,
+                            hindRightY,
+                            0.0,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            0.4995 * PawNode.gridSizeXY,
+                            0.0,
                             0.4995 * PawNode.gridSizeXY);
-         checkNodeTransform(quadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY, 0.0,
-                            -0.4995 * PawNode.gridSizeXY, 0.0, -0.4995 * PawNode.gridSizeXY, 0.0, -0.4995 * PawNode.gridSizeXY, 0.0,
+         checkNodeTransform(quadrant,
+                            frontLeftX,
+                            frontLeftY,
+                            frontRightX,
+                            frontRightY,
+                            hindLeftX,
+                            hindLeftY,
+                            hindRightX,
+                            hindRightY,
+                            0.0,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0,
+                            -0.4995 * PawNode.gridSizeXY,
+                            0.0,
                             -0.4995 * PawNode.gridSizeXY);
       }
    }
@@ -65,14 +137,27 @@ public class PawNodeToolsTest
       double length = frontLeftX + frontLeftXOffset - hindRightX - hindRightXOffset;
       double width = frontLeftY + frontLeftYOffset - hindRightY - hindRightYOffset;
 
+      double yaw = PawNode.computeNominalYaw(frontLeftX + frontLeftXOffset,
+                                             frontLeftY + frontLeftYOffset,
+                                             frontRightX + frontRightXOffset,
+                                             frontRightY + frontRightYOffset,
+                                             hindLeftX + hindLeftXOffset,
+                                             hindLeftY + hindLeftYOffset,
+                                             hindRightX + hindRightXOffset,
+                                             hindRightY + hindRightYOffset);
 
-      double yaw = PawNode.computeNominalYaw(frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
-                                             frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
-                                             hindRightX + hindRightXOffset, hindRightY + hindRightYOffset);
-
-      PawNode node = new PawNode(quadrant, frontLeftX + frontLeftXOffset, frontLeftY + frontLeftYOffset, frontRightX + frontRightXOffset,
-                                 frontRightY + frontRightYOffset, hindLeftX + hindLeftXOffset, hindLeftY + hindLeftYOffset,
-                                 hindRightX + hindRightXOffset, hindRightY + hindRightYOffset, yaw, length, width);
+      PawNode node = new PawNode(quadrant,
+                                 frontLeftX + frontLeftXOffset,
+                                 frontLeftY + frontLeftYOffset,
+                                 frontRightX + frontRightXOffset,
+                                 frontRightY + frontRightYOffset,
+                                 hindLeftX + hindLeftXOffset,
+                                 hindLeftY + hindLeftYOffset,
+                                 hindRightX + hindRightXOffset,
+                                 hindRightY + hindRightYOffset,
+                                 yaw,
+                                 length,
+                                 width);
 
       RigidBodyTransform frontLeftNodeTransform = new RigidBodyTransform();
       RigidBodyTransform frontRightNodeTransform = new RigidBodyTransform();
@@ -83,38 +168,38 @@ public class PawNodeToolsTest
       PawNodeTools.getNodeTransformToWorld(RobotQuadrant.HIND_LEFT, node, hindLeftNodeTransform);
       PawNodeTools.getNodeTransformToWorld(RobotQuadrant.HIND_RIGHT, node, hindRightNodeTransform);
 
-      double[] frontLeftRotationYawPitchRoll = new double[3];
-      double[] frontRightRotationYawPitchRoll = new double[3];
-      double[] hindLeftRotationYawPitchRoll = new double[3];
-      double[] hindRightRotationYawPitchRoll = new double[3];
-      frontLeftNodeTransform.getRotationYawPitchRoll(frontLeftRotationYawPitchRoll);
-      frontRightNodeTransform.getRotationYawPitchRoll(frontRightRotationYawPitchRoll);
-      hindLeftNodeTransform.getRotationYawPitchRoll(hindLeftRotationYawPitchRoll);
-      hindRightNodeTransform.getRotationYawPitchRoll(hindRightRotationYawPitchRoll);
+      YawPitchRoll frontLeftRotationYawPitchRoll = new YawPitchRoll();
+      YawPitchRoll frontRightRotationYawPitchRoll = new YawPitchRoll();
+      YawPitchRoll hindLeftRotationYawPitchRoll = new YawPitchRoll();
+      YawPitchRoll hindRightRotationYawPitchRoll = new YawPitchRoll();
+      frontLeftRotationYawPitchRoll.set(frontLeftNodeTransform.getRotation());
+      frontRightRotationYawPitchRoll.set(frontRightNodeTransform.getRotation());
+      hindLeftRotationYawPitchRoll.set(hindLeftNodeTransform.getRotation());
+      hindRightRotationYawPitchRoll.set(hindRightNodeTransform.getRotation());
 
       assertEquals(frontLeftNodeTransform.getTranslationX(), frontLeftX, epsilon);
       assertEquals(frontLeftNodeTransform.getTranslationY(), frontLeftY, epsilon);
       assertEquals(frontLeftNodeTransform.getTranslationZ(), 0.0, epsilon);
-      assertEquals(frontLeftRotationYawPitchRoll[1], 0.0, epsilon);
-      assertEquals(frontLeftRotationYawPitchRoll[2], 0.0, epsilon);
+      assertEquals(frontLeftRotationYawPitchRoll.getPitch(), 0.0, epsilon);
+      assertEquals(frontLeftRotationYawPitchRoll.getRoll(), 0.0, epsilon);
 
       assertEquals(frontRightNodeTransform.getTranslationX(), frontRightX, epsilon);
       assertEquals(frontRightNodeTransform.getTranslationY(), frontRightY, epsilon);
       assertEquals(frontRightNodeTransform.getTranslationZ(), 0.0, epsilon);
-      assertEquals(frontRightRotationYawPitchRoll[1], 0.0, epsilon);
-      assertEquals(frontRightRotationYawPitchRoll[2], 0.0, epsilon);
+      assertEquals(frontRightRotationYawPitchRoll.getPitch(), 0.0, epsilon);
+      assertEquals(frontRightRotationYawPitchRoll.getRoll(), 0.0, epsilon);
 
       assertEquals(hindLeftNodeTransform.getTranslationX(), hindLeftX, epsilon);
       assertEquals(hindLeftNodeTransform.getTranslationY(), hindLeftY, epsilon);
       assertEquals(hindLeftNodeTransform.getTranslationZ(), 0.0, epsilon);
-      assertEquals(hindLeftRotationYawPitchRoll[1], 0.0, epsilon);
-      assertEquals(hindLeftRotationYawPitchRoll[2], 0.0, epsilon);
+      assertEquals(hindLeftRotationYawPitchRoll.getPitch(), 0.0, epsilon);
+      assertEquals(hindLeftRotationYawPitchRoll.getRoll(), 0.0, epsilon);
 
       assertEquals(hindRightNodeTransform.getTranslationX(), hindRightX, epsilon);
       assertEquals(hindRightNodeTransform.getTranslationY(), hindRightY, epsilon);
       assertEquals(hindRightNodeTransform.getTranslationZ(), 0.0, epsilon);
-      assertEquals(hindRightRotationYawPitchRoll[1], 0.0, epsilon);
-      assertEquals(hindRightRotationYawPitchRoll[2], 0.0, epsilon);
+      assertEquals(hindRightRotationYawPitchRoll.getPitch(), 0.0, epsilon);
+      assertEquals(hindRightRotationYawPitchRoll.getRoll(), 0.0, epsilon);
    }
 
    @Test
@@ -137,11 +222,20 @@ public class PawNodeToolsTest
          double length = frontLeftX - hindRightX;
          double width = frontLeftY - hindRightY;
 
-
          double yaw = PawNode.computeNominalYaw(frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY);
 
-         PawNode node = new PawNode(robotQuadrant, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX, hindRightY,
-                                    yaw, length, width);
+         PawNode node = new PawNode(robotQuadrant,
+                                    frontLeftX,
+                                    frontLeftY,
+                                    frontRightX,
+                                    frontRightY,
+                                    hindLeftX,
+                                    hindLeftY,
+                                    hindRightX,
+                                    hindRightY,
+                                    yaw,
+                                    length,
+                                    width);
 
          RigidBodyTransform frontLeftSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          RigidBodyTransform frontRightSnapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);

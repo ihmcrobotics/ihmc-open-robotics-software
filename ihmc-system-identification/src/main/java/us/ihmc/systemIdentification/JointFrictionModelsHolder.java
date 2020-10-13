@@ -2,7 +2,7 @@ package us.ihmc.systemIdentification;
 
 import java.util.EnumMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -31,7 +31,7 @@ public abstract class JointFrictionModelsHolder
    protected final YoEnum<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
 
-   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity,
+   public JointFrictionModelsHolder(String name, YoRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity,
          double maxJointVelocityToCompensate)
    {
       alphaForFilteredVelocity = new YoDouble(name + "_alphaForFilteredVelocity", registry);

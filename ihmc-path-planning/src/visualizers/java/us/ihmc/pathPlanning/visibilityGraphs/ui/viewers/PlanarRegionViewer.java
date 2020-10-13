@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,7 +12,6 @@ import com.google.common.util.concurrent.AtomicDouble;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
@@ -119,7 +117,7 @@ public class PlanarRegionViewer
          int regionId = planarRegion.getRegionId();
          planarRegion.getTransformToWorld(transformToWorld);
 
-         meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
+         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
          {

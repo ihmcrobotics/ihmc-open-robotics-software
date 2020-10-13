@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -33,7 +33,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PelvisRotationalStateUpdaterTest
 {
@@ -50,7 +50,7 @@ public class PelvisRotationalStateUpdaterTest
 	@Test
    public void testConstructorWithOneIMU()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -77,7 +77,7 @@ public class PelvisRotationalStateUpdaterTest
 	@Test
    public void testConstructorWithZeroIMUSensor()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -105,7 +105,7 @@ public class PelvisRotationalStateUpdaterTest
 	@Test
    public void testInitializeAndReadWithOneIMU()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -135,7 +135,7 @@ public class PelvisRotationalStateUpdaterTest
       
       // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
       rootJoint.setJointConfiguration(new RigidBodyTransform());
-      rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+      rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
       
       // Need to initialize the sensor data source manually
       jointAndIMUSensorDataSource.startComputation(0, 0, -1);
@@ -156,7 +156,7 @@ public class PelvisRotationalStateUpdaterTest
          
          // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
          rootJoint.setJointConfiguration(new RigidBodyTransform());
-         rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
          
          // Need to run the sensor data source manually
          jointAndIMUSensorDataSource.startComputation(0, 0, -1);
@@ -186,7 +186,7 @@ public class PelvisRotationalStateUpdaterTest
          
          RigidBodyTransform transformFromMeasFrameToWorld = imuSensor.getMeasurementFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          RotationMatrix rotationFromMeasFrameToWorld = new RotationMatrix();
-         transformFromMeasFrameToWorld.getRotation(rotationFromMeasFrameToWorld);
+         rotationFromMeasFrameToWorld.set(transformFromMeasFrameToWorld.getRotation());
          jointAndIMUSensorDataSource.setOrientationSensorValue(imuDefinition, rotationFromMeasFrameToWorld);
       }
 
@@ -204,7 +204,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
    
-   private SensorProcessing buildSensorConfigurations(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoVariableRegistry registry)
+   private SensorProcessing buildSensorConfigurations(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoRegistry registry)
    {
       SensorProcessingConfiguration sensorProcessingConfiguration = new SensorProcessingConfiguration()
       {

@@ -2,6 +2,6 @@ start_position -1.5 0.15 0.0
 goal_position 1.5 0.0 0.0
 start_yaw 0.0
 goal_yaw 0.0
-a_star_timeout 15.0
-vis_graph_with_a_star_timeout 15.0
+a_star_iteration_limit 50
+vis_graph_with_a_star_iteration_limit 75
 step_planner_status dev

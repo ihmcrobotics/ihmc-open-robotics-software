@@ -5,12 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -34,16 +29,16 @@ import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * PelvisKinematicsBasedPositionCalculator estimates the pelvis position and linear velocity using the leg kinematics.
@@ -54,7 +49,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 {
    private static final boolean VISUALIZE = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FloatingJointBasics rootJoint;
    private final List<RigidBodyBasics> feetRigidBodies;
@@ -118,7 +113,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
                                                      Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                                      CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
                                                      StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                     YoVariableRegistry parentRegistry)
+                                                     YoRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
@@ -189,7 +184,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             {
                transformToParent.setIdentity();
                copOffset.set(copFilteredInFootFrame);
-               transformToParent.setTranslation(copOffset);
+               transformToParent.getTranslation().set(copOffset);
             }
          };
          copFrames.put(foot, copFrame);

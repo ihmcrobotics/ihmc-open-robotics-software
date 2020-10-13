@@ -26,6 +26,10 @@
 
 float64 DEFAULT_NO_VALUE=-11.1
 
+int8 ROBOT_SIDE_LEFT=0
+
+int8 ROBOT_SIDE_RIGHT=1
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
@@ -49,20 +53,19 @@ float64 ideal_footstep_length
 # Field default value -11.1
 float64 ideal_side_step_width
 
-# Returns the ideal length when walking backwards. This value is negative.
+# Returns the ideal length when walking backwards. This value is positive.
 # Field default value -11.1
 float64 ideal_back_step_length
 
-# If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-# regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-# edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-# to allowing footsteps that partially intersect planar regions.
-# 
-# If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-# choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-# The smallest acceptable distance to the edge of a cliff
-# The maximum error between desired and actual foot placement
-float64 wiggle_inside_delta
+# The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+# to the edge. A negative value means the footstep can overhang a region.
+# Field default value -11.1
+float64 wiggle_inside_delta_target
+
+# This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+# it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+# Field default value -11.1
+float64 wiggle_inside_delta_minimum
 
 # Maximum xy-distance the planner will consider for candidate steps.
 # Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
@@ -183,7 +186,14 @@ float64 translation_scale_from_grandparent_node
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
 # Field default value -11.1
-float64 maximum_step_z
+float64 maximum_left_step_z
+
+# Maximum vertical distance between consecutive footsteps
+# 
+# A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+# z-up sole frame.
+# Field default value -11.1
+float64 maximum_right_step_z
 
 # Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
 # 
@@ -223,21 +233,16 @@ float64 minimum_foothold_percent
 # Field default value -11.1
 float64 minimum_surface_incline_radians
 
-# There are two methods of wiggling a polygon into a planar region:
-# Wiggle the polygon into the planar region itself, which isn't necessarily convex
-# Wiggle the polygon into the convex hull of the planar region
-# The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-# has the biggest overlap with the foothold.
-# 
-# If this parameter is set to true (recommended), the second wiggle method will be used.
-# Field default value True
-bool wiggle_into_convex_hull_of_planar_regions
+# The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+# If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+bool wiggle_while_planning
 
-# If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-# This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-# {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-# candidate footstep will be rejected if this method returns {@code true}.
-bool reject_if_cannot_fully_wiggle_inside
+# If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+bool reject_if_wiggle_not_satisfied
+
+# There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
+# this toggles between them.
+bool enable_concave_hull_wiggler
 
 # When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
 # distance the planner will use
@@ -273,10 +278,10 @@ float64 maximum_step_width
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
 # Field default value -11.1
-float64 cliff_height_to_avoid
+float64 cliff_base_height_to_avoid
 
 # The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-# nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+# nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
 # until it is minimumDistanceFromCliffBottoms away from it.
 # 
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
@@ -285,15 +290,25 @@ float64 cliff_height_to_avoid
 # Field default value -11.1
 float64 minimum_distance_from_cliff_bottoms
 
-# When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-# planner should return the best plan that it found. If this value is false, the planner will return
-# a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-# "best" is determined by the planner.
-bool return_best_effort_plan
+# The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+# nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+# until it is minimumDistanceFromCliffTops away from it.
+# 
+# If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+# hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+# generator is capable of swinging over.
+# Field default value -11.1
+float64 cliff_top_height_to_avoid
 
-# When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-# contains at least this many footsteps.
-uint32 minimum_steps_for_best_effort_plan
+# The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+# nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+# until it is minimumDistanceFromCliffBottoms away from it.
+# 
+# If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+# hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+# generator is capable of swinging over.
+# Field default value -11.1
+float64 minimum_distance_from_cliff_tops
 
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
@@ -331,32 +346,20 @@ float64 body_box_base_y
 # Field default value -11.1
 float64 body_box_base_z
 
-# Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-# Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-# this parameter.
+# Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+# Intended to avoid ceilings or obstacles that are above the top of the robot
 # Field default value -11.1
-float64 min_x_clearance_from_stance
+float64 maximum_snap_height
 
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
 # this parameter.
 # Field default value -11.1
-float64 min_y_clearance_from_stance
+float64 min_clearance_from_stance
 
 # Radius around the goal inside which the planner should start to turn to match the goal's orientation
 # Field default value -11.1
 float64 final_turn_proximity
-
-# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-# Field default value -11.1
-float64 final_turn_body_path_proximity
-
-# Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-# final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the final orientation.
-# Field default value -11.1
-float64 final_turn_proximity_blend_factor
 
 # When using a cost based planning approach this value defined how the yaw of a footstep will be
 # weighted in comparison to its position.
@@ -406,27 +409,9 @@ float64 foothold_area_weight
 # Field default value -11.1
 float64 cost_per_step
 
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-bool use_quadratic_distance_cost
-
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-bool use_quadratic_height_cost
-
 # Gets the weight for the heuristics in the A Star planner.
 # Field default value -11.1
 float64 a_star_heuristics_weight
-
-# Gets the weight for the heuristics in the Visibility graph with A star planner.
-# Field default value -11.1
-float64 vis_graph_with_a_star_heuristics_weight
-
-# Gets the weight for the heuristics in the Depth First planner.
-# Field default value -11.1
-float64 depth_first_heuristics_weight
-
-# Gets the weight for the heuristics in the Body path based planner.
-# Field default value -11.1
-float64 body_path_based_heuristics_weight
 
 # This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
 # Additional checks are done by interpolating between the start and end steps
@@ -438,19 +423,50 @@ uint32 number_of_bounding_box_checks
 # Field default value -11.1
 float64 maximum_2d_distance_from_bounding_box_to_penalize
 
-# If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-# where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-# {@code c * (1 - d / d_max)}, where d_max is this value.
-# Field default value -11.1
-float64 bounding_box_cost
-
-# Field default value -11.1
-float64 body_path_violation_weight
-
+# If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+# Otherwise, it will turn towards the body path
 # Field default value -11.1
 float64 distance_from_path_tolerance
 
+# If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+# Otherwise, it will turn in plance towards the body path
 # Field default value -11.1
 float64 delta_yaw_from_reference_tolerance
+
+# Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+# ideal step are considered and the others are ignored. Set to non-positive number to disable
+# Field default value -1
+int32 maximum_branch_factor
+
+# If true, enables a mask that reduces the number of calculated steps away from the ideal step
+# Field default value True
+bool enable_expansion_mask
+
+# If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+# Enable concave hull wiggler must be true in order for the shin collision checker to run.
+bool enable_shin_collision_check
+
+# How far the shin collision cylinder extends from the toe
+# Field default value -11.1
+float64 shin_toe_clearance
+
+# How far the shin collision cylinder extends from the heel
+# Field default value -11.1
+float64 shin_heel_clearance
+
+# Length of the shin collidable cylinder
+# Field default value -11.1
+float64 shin_length
+
+# Height offset of shin collidable cylinder
+# Field default value -11.1
+float64 shin_height_offet
+
+# If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+# The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+# so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+# encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+# Field default value 255
+int8 step_only_with_requested_side
 
 

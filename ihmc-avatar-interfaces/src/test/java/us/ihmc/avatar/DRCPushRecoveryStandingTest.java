@@ -96,7 +96,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -127,7 +127,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -166,7 +166,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -209,7 +209,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -247,7 +247,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("ContinuousStepGenerator", "walkCSG");
+      YoBoolean walk = (YoBoolean) scs.findVariable("ContinuousStepGenerator", "walkCSG");
 
       // disable walking
       walk.set(false);
@@ -292,7 +292,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
-      YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
 
       // enable push recovery
       enable.set(true);

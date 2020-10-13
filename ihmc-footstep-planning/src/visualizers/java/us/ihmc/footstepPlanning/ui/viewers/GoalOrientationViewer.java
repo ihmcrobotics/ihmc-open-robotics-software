@@ -6,6 +6,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPosition
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
@@ -18,20 +19,15 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -81,7 +77,7 @@ public class GoalOrientationViewer extends AnimationTimer
       leftFootGoalPose = messager.createInput(LeftFootGoalPose);
       rightFootGoalPose = messager.createInput(RightFootGoalPose);
 
-      messager.registerTopicListener(ShowGoalSteps, root::setVisible);
+      messager.registerTopicListener(ShowGoal, root::setVisible);
    }
 
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
@@ -153,16 +149,14 @@ public class GoalOrientationViewer extends AnimationTimer
       foot.setRotate(Math.toDegrees(footPose.getYaw()));
    }
 
-   public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
+   public void setDefaultContactPoints(SideDependentList<List<Point2D>> defaultContactPoints)
    {
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = defaultContactPointParameters.getControllerFootGroundContactPoints();
       for(RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         ArrayList<Point2D> defaultContactPoints = controllerFootGroundContactPoints.get(robotSide);
-         for (int i = 0; i < defaultContactPoints.size(); i++)
+         for (int i = 0; i < defaultContactPoints.get(robotSide).size(); i++)
          {
-            defaultFoothold.addVertex(defaultContactPoints.get(i));
+            defaultFoothold.addVertex(defaultContactPoints.get(robotSide).get(i));
          }
 
          defaultFoothold.update();

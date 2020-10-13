@@ -6,9 +6,9 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -129,21 +129,21 @@ public class MomentumCalculatorTest
       }
 
       Momentum momentum = computeMomentum(elevator, centerOfMassFrame);
-      DenseMatrix64F momentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
+      DMatrixRMaj momentumMatrix = new DMatrixRMaj(Momentum.SIZE, 1);
       momentum.get(momentumMatrix);
 
       CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(elevator, centerOfMassFrame);
       centroidalMomentumMatrix.reset();
-      DenseMatrix64F centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
-      DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
+      DMatrixRMaj centroidalMomentumMatrixMatrix = centroidalMomentumMatrix.getCentroidalMomentumMatrix();
+      DMatrixRMaj jointVelocitiesMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointsArray), 1);
       MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, jointVelocitiesMatrix);
-      DenseMatrix64F momentumFromCentroidalMomentumMatrix = new DenseMatrix64F(Momentum.SIZE, 1);
-      CommonOps.mult(centroidalMomentumMatrixMatrix, jointVelocitiesMatrix, momentumFromCentroidalMomentumMatrix);
+      DMatrixRMaj momentumFromCentroidalMomentumMatrix = new DMatrixRMaj(Momentum.SIZE, 1);
+      CommonOps_DDRM.mult(centroidalMomentumMatrixMatrix, jointVelocitiesMatrix, momentumFromCentroidalMomentumMatrix);
 
       double epsilon = 1e-9;
       assertEquals(momentum.getReferenceFrame(), centerOfMassFrame);
       MatrixTestTools.assertMatrixEquals(momentumFromCentroidalMomentumMatrix, momentumMatrix, epsilon);
-      double norm = NormOps.normP2(momentumMatrix);
+      double norm = NormOps_DDRM.normP2(momentumMatrix);
       assertTrue(norm > epsilon);
    }
 

@@ -1,11 +1,17 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.commons.MathTools;
@@ -19,11 +25,6 @@ import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.trajectories.Trajectory3D;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.robotics.Assert.assertEquals;
 
 public class LQRMomentumControllerTest
 {
@@ -44,23 +45,23 @@ public class LQRMomentumControllerTest
 
       controller.setVRPTrajectory(trajectories);
 
-      DenseMatrix64F AExpected = new DenseMatrix64F(6, 6);
+      DMatrixRMaj AExpected = new DMatrixRMaj(6, 6);
       AExpected.set(0, 3, 1.0);
       AExpected.set(1, 4, 1.0);
       AExpected.set(2, 5, 1.0);
 
-      DenseMatrix64F BExpected = new DenseMatrix64F(6, 3);
+      DMatrixRMaj BExpected = new DMatrixRMaj(6, 3);
       BExpected.set(3, 0, 1.0);
       BExpected.set(4, 1, 1.0);
       BExpected.set(5, 2, 1.0);
 
-      DenseMatrix64F CExpected = new DenseMatrix64F(3, 6);
+      DMatrixRMaj CExpected = new DMatrixRMaj(3, 6);
 
       CExpected.set(0, 0, 1.0);
       CExpected.set(1, 1, 1.0);
       CExpected.set(2, 2, 1.0);
 
-      DenseMatrix64F DExpected = new DenseMatrix64F(3, 3);
+      DMatrixRMaj DExpected = new DMatrixRMaj(3, 3);
 
       DExpected.set(0, 0, -1.0 / MathTools.square(omega));
       DExpected.set(1, 1, -1.0 / MathTools.square(omega));
@@ -71,12 +72,12 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(CExpected, controller.C, epsilon);
       EjmlUnitTests.assertEquals(DExpected, controller.D, epsilon);
 
-      DenseMatrix64F QExpected = new DenseMatrix64F(3, 3);
+      DMatrixRMaj QExpected = new DMatrixRMaj(3, 3);
       QExpected.set(0, 0, LQRMomentumController.defaultVrpTrackingWeight);
       QExpected.set(1, 1, LQRMomentumController.defaultVrpTrackingWeight);
       QExpected.set(2, 2, LQRMomentumController.defaultVrpTrackingWeight);
 
-      DenseMatrix64F RExpected = new DenseMatrix64F(3, 3);
+      DMatrixRMaj RExpected = new DMatrixRMaj(3, 3);
       RExpected.set(0, 0, LQRMomentumController.defaultMomentumRateWeight);
       RExpected.set(1, 1, LQRMomentumController.defaultMomentumRateWeight);
       RExpected.set(2, 2, LQRMomentumController.defaultMomentumRateWeight);
@@ -84,25 +85,25 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(QExpected, controller.Q, epsilon);
       EjmlUnitTests.assertEquals(RExpected, controller.R, epsilon);
 
-      DenseMatrix64F Q1Expected = new DenseMatrix64F(3, 3);
+      DMatrixRMaj Q1Expected = new DMatrixRMaj(3, 3);
       NativeCommonOps.multQuad(CExpected, QExpected, Q1Expected);
 
-      DenseMatrix64F R1Expected = new DenseMatrix64F(3, 3);
-      DenseMatrix64F R1InverseExpected = new DenseMatrix64F(3, 3);
+      DMatrixRMaj R1Expected = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R1InverseExpected = new DMatrixRMaj(3, 3);
       NativeCommonOps.multQuad(DExpected, QExpected, R1Expected);
-      CommonOps.addEquals(R1Expected, RExpected);
+      CommonOps_DDRM.addEquals(R1Expected, RExpected);
       NativeCommonOps.invert(R1Expected, R1InverseExpected);
 
       EjmlUnitTests.assertEquals(Q1Expected, controller.Q1, epsilon);
       EjmlUnitTests.assertEquals(R1Expected, controller.R1, epsilon);
       EjmlUnitTests.assertEquals(R1InverseExpected, controller.R1Inverse, epsilon);
 
-      DenseMatrix64F NExpected = new DenseMatrix64F(6, 3);
-      DenseMatrix64F NTransposeExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.mult(QExpected, DExpected, tempMatrix);
-      CommonOps.multTransA(CExpected, tempMatrix, NExpected);
-      CommonOps.transpose(NExpected, NTransposeExpected);
+      DMatrixRMaj NExpected = new DMatrixRMaj(6, 3);
+      DMatrixRMaj NTransposeExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(QExpected, DExpected, tempMatrix);
+      CommonOps_DDRM.multTransA(CExpected, tempMatrix, NExpected);
+      CommonOps_DDRM.transpose(NExpected, NTransposeExpected);
 
       EjmlUnitTests.assertEquals(NExpected, controller.N, epsilon);
       EjmlUnitTests.assertEquals(NTransposeExpected, controller.NTranspose, epsilon);
@@ -124,38 +125,38 @@ public class LQRMomentumControllerTest
 
       EjmlUnitTests.assertEquals(NExpected, controller.N, epsilon);
 
-      DenseMatrix64F QRiccatiExpected = new DenseMatrix64F(3, 3);
-      DenseMatrix64F ARiccatiExpected = new DenseMatrix64F(6, 6);
+      DMatrixRMaj QRiccatiExpected = new DMatrixRMaj(3, 3);
+      DMatrixRMaj ARiccatiExpected = new DMatrixRMaj(6, 6);
 
       NativeCommonOps.multQuad(NTransposeExpected, R1InverseExpected, QRiccatiExpected);
-      CommonOps.scale(-1.0, QRiccatiExpected);
-      CommonOps.addEquals(QRiccatiExpected, Q1Expected);
+      CommonOps_DDRM.scale(-1.0, QRiccatiExpected);
+      CommonOps_DDRM.addEquals(QRiccatiExpected, Q1Expected);
 
-      tempMatrix = new DenseMatrix64F(3, 6);
-      CommonOps.multTransB(R1InverseExpected, NExpected, tempMatrix);
-      CommonOps.mult(-1.0, BExpected, tempMatrix, ARiccatiExpected);
-      CommonOps.addEquals(ARiccatiExpected, AExpected);
+      tempMatrix = new DMatrixRMaj(3, 6);
+      CommonOps_DDRM.multTransB(R1InverseExpected, NExpected, tempMatrix);
+      CommonOps_DDRM.mult(-1.0, BExpected, tempMatrix, ARiccatiExpected);
+      CommonOps_DDRM.addEquals(ARiccatiExpected, AExpected);
 
       EjmlUnitTests.assertEquals(QRiccatiExpected, controller.QRiccati, epsilon);
       EjmlUnitTests.assertEquals(ARiccatiExpected, controller.ARiccati, epsilon);
 
 
-      DenseMatrix64F S1 = controller.S1;
-//      DenseMatrix64F S1Constructor = new DenseMatrix64F(6, 6);
+      DMatrixRMaj S1 = controller.S1;
+//      DMatrixRMaj S1Constructor = new DMatrixRMaj(6, 6);
 //      S1Constructor.setData(RandomNumbers.nextDoubleArray(random, 36, 10.0));
-//      CommonOps.transpose(S1Constructor, S1);
-//      CommonOps.addEquals(S1, S1Constructor);
+//      CommonOps_DDRM.transpose(S1Constructor, S1);
+//      CommonOps_DDRM.addEquals(S1, S1Constructor);
 //
-      DenseMatrix64F NB = new DenseMatrix64F(NExpected);
-      CommonOps.transpose(NB);
-      CommonOps.multAddTransA(BExpected, S1, NB);
-      DenseMatrix64F S1DotExpected = new DenseMatrix64F(6, 6);
+      DMatrixRMaj NB = new DMatrixRMaj(NExpected);
+      CommonOps_DDRM.transpose(NB);
+      CommonOps_DDRM.multAddTransA(BExpected, S1, NB);
+      DMatrixRMaj S1DotExpected = new DMatrixRMaj(6, 6);
       NativeCommonOps.multQuad(NB, R1InverseExpected, S1DotExpected);
-      CommonOps.addEquals(S1DotExpected, -1.0, Q1Expected);
-      CommonOps.multAdd(-1.0, S1, AExpected, S1DotExpected);
-      CommonOps.multAddTransA(-1.0, AExpected, S1, S1DotExpected);
+      CommonOps_DDRM.addEquals(S1DotExpected, -1.0, Q1Expected);
+      CommonOps_DDRM.multAdd(-1.0, S1, AExpected, S1DotExpected);
+      CommonOps_DDRM.multAddTransA(-1.0, AExpected, S1, S1DotExpected);
 
-      DenseMatrix64F H = new DenseMatrix64F( 4, 4);
+      DMatrixRMaj H = new DMatrixRMaj( 4, 4);
       H.set(0, 1, 1.0);
       H.set(1, 0, 0.5);
       H.set(1, 3, -1.0);
@@ -166,17 +167,17 @@ public class LQRMomentumControllerTest
 
 
       tempMatrix.reshape(6, 3);
-      DenseMatrix64F S1Dot = new DenseMatrix64F(6, 6);
-      DenseMatrix64F BTranspose = new DenseMatrix64F(controller.B);
-      CommonOps.transpose(BTranspose);
+      DMatrixRMaj S1Dot = new DMatrixRMaj(6, 6);
+      DMatrixRMaj BTranspose = new DMatrixRMaj(controller.B);
+      CommonOps_DDRM.transpose(BTranspose);
       NativeCommonOps.multQuad(BTranspose, controller.R1Inverse, tempMatrix);
       NativeCommonOps.multQuad(S1, tempMatrix, S1Dot);
-      CommonOps.addEquals(S1Dot, -1.0, controller.QRiccati);
-      CommonOps.multAdd(-1.0, S1, controller.ARiccati, S1Dot);
-      CommonOps.multAddTransA(-1.0, controller.ARiccati, S1, S1Dot);
+      CommonOps_DDRM.addEquals(S1Dot, -1.0, controller.QRiccati);
+      CommonOps_DDRM.multAdd(-1.0, S1, controller.ARiccati, S1Dot);
+      CommonOps_DDRM.multAddTransA(-1.0, controller.ARiccati, S1, S1Dot);
 
       EjmlUnitTests.assertEquals(S1DotExpected, S1Dot, epsilon);
-      EjmlUnitTests.assertEquals(new DenseMatrix64F(6, 6), S1Dot, epsilon);
+      EjmlUnitTests.assertEquals(new DMatrixRMaj(6, 6), S1Dot, epsilon);
    }
 
    @Test
@@ -193,7 +194,7 @@ public class LQRMomentumControllerTest
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
-      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
       controller.setVRPTrajectory(trajectories);
@@ -201,36 +202,36 @@ public class LQRMomentumControllerTest
       controller.computeS1();
       controller.computeS2Parameters();
 
-      DenseMatrix64F NExpected = new DenseMatrix64F(6, 3);
-      DenseMatrix64F NBExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F NTransposeExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.mult(controller.Q, controller.D, tempMatrix);
-      CommonOps.multTransA(controller.C, tempMatrix, NExpected);
-      CommonOps.transpose(NExpected, NTransposeExpected);
+      DMatrixRMaj NExpected = new DMatrixRMaj(6, 3);
+      DMatrixRMaj NBExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj NTransposeExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(controller.Q, controller.D, tempMatrix);
+      CommonOps_DDRM.multTransA(controller.C, tempMatrix, NExpected);
+      CommonOps_DDRM.transpose(NExpected, NTransposeExpected);
 
-      CommonOps.multTransA(controller.B, controller.getCostHessian(), NBExpected);
-      CommonOps.addEquals(NBExpected, NTransposeExpected);
+      CommonOps_DDRM.multTransA(controller.B, controller.getCostHessian(), NBExpected);
+      CommonOps_DDRM.addEquals(NBExpected, NTransposeExpected);
 
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(0, 0);
+      LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(0, 0);
 
-      DenseMatrix64F A2Expected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F A2InverseExpected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F B2Expected = new DenseMatrix64F(6, 3);
+      DMatrixRMaj A2Expected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj A2InverseExpected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj B2Expected = new DMatrixRMaj(6, 3);
 
-      CommonOps.transpose(controller.A, A2Expected);
-      CommonOps.scale(-1.0, A2Expected);
+      CommonOps_DDRM.transpose(controller.A, A2Expected);
+      CommonOps_DDRM.scale(-1.0, A2Expected);
 
       tempMatrix.reshape(3, 6);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
-      CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, tempMatrix);
+      CommonOps_DDRM.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
+      DMatrixRMaj tempMatrix2 = new DMatrixRMaj(6, 3);
       tempMatrix.reshape(6, 3);
-      CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.transpose(controller.C, tempMatrix2);
-      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
-      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
+      CommonOps_DDRM.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
+      CommonOps_DDRM.transpose(controller.C, tempMatrix2);
+      CommonOps_DDRM.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps_DDRM.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -241,18 +242,18 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(A2InverseExpected, controller.A2Inverse, epsilon);
 
 
-      DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-      DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
-      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
+      DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
+      DMatrixRMaj R1InvDQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R1InvBTrans = new DMatrixRMaj(3, 6);
+      DMatrixRMaj k2Method1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2Method2 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj yd = new DMatrixRMaj(3, 1);
 
-      CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
-      CommonOps.mult(controller.D, controller.Q, DQ);
-      CommonOps.mult(controller.R1Inverse, DQ, R1InvDQ);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
+      CommonOps_DDRM.mult(A2InverseExpected, B2Expected, A2InverseB2);
+      CommonOps_DDRM.mult(controller.D, controller.Q, DQ);
+      CommonOps_DDRM.mult(controller.R1Inverse, DQ, R1InvDQ);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
 
       assertEquals(1, controller.alphas.size());
       assertEquals(1, controller.betas.size());
@@ -260,25 +261,25 @@ public class LQRMomentumControllerTest
       assertEquals(2, controller.betas.get(0).size());
       assertEquals(2, controller.gammas.get(0).size());
 
-      DenseMatrix64F beta1Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta2Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F gamma1Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma2Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+      DMatrixRMaj beta1Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta2Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj gamma1Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma2Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
       vrpTrajectory.getCoefficients(1, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta2Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta2Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma2Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma2Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2Expected);
 
       vrpTrajectory.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta2Expected, beta1Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta1Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta2Expected, beta1Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta1Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma1Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma1Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1Expected);
 
       EjmlUnitTests.assertEquals(beta2Expected, controller.betas.get(0).get(1), epsilon);
       EjmlUnitTests.assertEquals(gamma2Expected, controller.gammas.get(0).get(1), epsilon);
@@ -287,16 +288,16 @@ public class LQRMomentumControllerTest
 
       MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
 
-      DenseMatrix64F alphaExpected = new DenseMatrix64F(6, 1);
+      DMatrixRMaj alphaExpected = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
-      DenseMatrix64F matrixExponential = new DenseMatrix64F(6, 6);
-      DenseMatrix64F betaSum = new DenseMatrix64F(6, 1);
+      DMatrixRMaj timeScaledDynamics = new DMatrixRMaj(6, 6);
+      DMatrixRMaj matrixExponential = new DMatrixRMaj(6, 6);
+      DMatrixRMaj betaSum = new DMatrixRMaj(6, 1);
 
-      CommonOps.scale(finalTime, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 0), beta1Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 1), beta2Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 0), beta1Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 1), beta2Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alphaExpected);
@@ -306,32 +307,32 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
       EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
-      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalY = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalY);
 
       for (double time = 0.0; time <= finalTime; time += 0.01)
       {
          controller.computeS2(time);
 
-         CommonOps.scale(time, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(time, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alphaExpected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 0), beta1Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 1), beta2Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alphaExpected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 0), beta1Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 1), beta2Expected);
 
-         DenseMatrix64F gamma1ExpectedAlt = new DenseMatrix64F(3, 1);
-         DenseMatrix64F gamma2ExpectedAlt = new DenseMatrix64F(3, 1);
+         DMatrixRMaj gamma1ExpectedAlt = new DMatrixRMaj(3, 1);
+         DMatrixRMaj gamma2ExpectedAlt = new DMatrixRMaj(3, 1);
 
          vrpTrajectory.getCoefficients(0, coefficients);
-         CommonOps.subtractEquals(coefficients, finalPosition);
-         CommonOps.mult(R1InvDQ, coefficients, gamma1ExpectedAlt);
-         CommonOps.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1ExpectedAlt);
+         CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+         CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma1ExpectedAlt);
+         CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1ExpectedAlt);
 
          vrpTrajectory.getCoefficients(1, coefficients);
-         CommonOps.mult(R1InvDQ, coefficients, gamma2ExpectedAlt);
-         CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2ExpectedAlt);
+         CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma2ExpectedAlt);
+         CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2ExpectedAlt);
 
          EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
          EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
@@ -348,20 +349,20 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory.compute(time);
          vrpTrajectory.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps_DDRM.subtractEquals(yd, finalY);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
          tempMatrix.reshape(3, 6);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(0), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
 
-         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
@@ -371,7 +372,7 @@ public class LQRMomentumControllerTest
       controller.computeS2(finalTime);
 
       // should be zero at tf
-      DenseMatrix64F zeroMatrix = new DenseMatrix64F(6, 1);
+      DMatrixRMaj zeroMatrix = new DMatrixRMaj(6, 1);
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
    }
 
@@ -388,7 +389,7 @@ public class LQRMomentumControllerTest
       List<Trajectory3D> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
 
-      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
       controller.setVRPTrajectory(trajectories);
@@ -396,36 +397,36 @@ public class LQRMomentumControllerTest
       controller.computeS1();
       controller.computeS2Parameters();
 
-      DenseMatrix64F NExpected = new DenseMatrix64F(6, 3);
-      DenseMatrix64F NBExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F NTransposeExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.mult(controller.Q, controller.D, tempMatrix);
-      CommonOps.multTransA(controller.C, tempMatrix, NExpected);
-      CommonOps.transpose(NExpected, NTransposeExpected);
+      DMatrixRMaj NExpected = new DMatrixRMaj(6, 3);
+      DMatrixRMaj NBExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj NTransposeExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(controller.Q, controller.D, tempMatrix);
+      CommonOps_DDRM.multTransA(controller.C, tempMatrix, NExpected);
+      CommonOps_DDRM.transpose(NExpected, NTransposeExpected);
 
-      CommonOps.multTransA(controller.B, controller.getCostHessian(), NBExpected);
-      CommonOps.addEquals(NBExpected, NTransposeExpected);
+      CommonOps_DDRM.multTransA(controller.B, controller.getCostHessian(), NBExpected);
+      CommonOps_DDRM.addEquals(NBExpected, NTransposeExpected);
 
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(0, 0);
+      LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(0, 0);
 
-      DenseMatrix64F A2Expected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F A2InverseExpected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F B2Expected = new DenseMatrix64F(6, 3);
+      DMatrixRMaj A2Expected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj A2InverseExpected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj B2Expected = new DMatrixRMaj(6, 3);
 
-      CommonOps.transpose(controller.A, A2Expected);
-      CommonOps.scale(-1.0, A2Expected);
+      CommonOps_DDRM.transpose(controller.A, A2Expected);
+      CommonOps_DDRM.scale(-1.0, A2Expected);
 
       tempMatrix.reshape(3, 6);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
-      CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, tempMatrix);
+      CommonOps_DDRM.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
+      DMatrixRMaj tempMatrix2 = new DMatrixRMaj(6, 3);
       tempMatrix.reshape(6, 3);
-      CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.transpose(controller.C, tempMatrix2);
-      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
-      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
+      CommonOps_DDRM.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
+      CommonOps_DDRM.transpose(controller.C, tempMatrix2);
+      CommonOps_DDRM.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps_DDRM.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -435,24 +436,24 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(B2Expected, controller.B2, epsilon);
       EjmlUnitTests.assertEquals(A2InverseExpected, controller.A2Inverse, epsilon);
 
-      DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-      CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+      DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+      CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
       MatrixTestTools.assertMatrixEquals(K1Expected, controller.K1, epsilon);
 
 
-      DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-      DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
-      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
+      DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
+      DMatrixRMaj R1InvDQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R1InvBTrans = new DMatrixRMaj(3, 6);
+      DMatrixRMaj k2Method1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2Method2 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj yd = new DMatrixRMaj(3, 1);
 
-      CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
-      CommonOps.mult(controller.D, controller.Q, DQ);
-      CommonOps.mult(controller.R1Inverse, DQ, R1InvDQ);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
+      CommonOps_DDRM.mult(A2InverseExpected, B2Expected, A2InverseB2);
+      CommonOps_DDRM.mult(controller.D, controller.Q, DQ);
+      CommonOps_DDRM.mult(controller.R1Inverse, DQ, R1InvDQ);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
 
       assertEquals(1, controller.alphas.size());
       assertEquals(1, controller.betas.size());
@@ -460,43 +461,43 @@ public class LQRMomentumControllerTest
       assertEquals(4, controller.betas.get(0).size());
       assertEquals(4, controller.gammas.get(0).size());
 
-      DenseMatrix64F beta1Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta2Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta3Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta4Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F gamma1Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma2Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma3Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma4Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+      DMatrixRMaj beta1Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta2Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta3Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta4Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj gamma1Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma2Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma3Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma4Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
       vrpTrajectory.getCoefficients(3, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta4Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta4Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma4Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta4Expected, gamma4Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma4Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta4Expected, gamma4Expected);
 
       vrpTrajectory.getCoefficients(2, coefficients);
-      CommonOps.mult(3, A2InverseExpected, beta4Expected, beta3Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta3Expected);
+      CommonOps_DDRM.mult(3, A2InverseExpected, beta4Expected, beta3Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta3Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma3Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta3Expected, gamma3Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma3Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta3Expected, gamma3Expected);
 
       vrpTrajectory.getCoefficients(1, coefficients);
-      CommonOps.mult(2, A2InverseExpected, beta3Expected, beta2Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta2Expected);
+      CommonOps_DDRM.mult(2, A2InverseExpected, beta3Expected, beta2Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta2Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma2Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma2Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta2Expected, gamma2Expected);
 
       vrpTrajectory.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta2Expected, beta1Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta1Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta2Expected, beta1Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta1Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma1Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma1Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta1Expected, gamma1Expected);
 
       EjmlUnitTests.assertEquals(beta4Expected, controller.betas.get(0).get(3), epsilon);
       EjmlUnitTests.assertEquals(beta3Expected, controller.betas.get(0).get(2), epsilon);
@@ -509,18 +510,18 @@ public class LQRMomentumControllerTest
 
       MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
 
-      DenseMatrix64F alphaExpected = new DenseMatrix64F(6, 1);
+      DMatrixRMaj alphaExpected = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
-      DenseMatrix64F matrixExponential = new DenseMatrix64F(6, 6);
-      DenseMatrix64F betaSum = new DenseMatrix64F(6, 1);
+      DMatrixRMaj timeScaledDynamics = new DMatrixRMaj(6, 6);
+      DMatrixRMaj matrixExponential = new DMatrixRMaj(6, 6);
+      DMatrixRMaj betaSum = new DMatrixRMaj(6, 1);
 
-      CommonOps.scale(finalTime, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 0), beta1Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 1), beta2Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 2), beta3Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 3), beta4Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 0), beta1Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 1), beta2Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 2), beta3Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime, 3), beta4Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alphaExpected);
@@ -530,22 +531,22 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(betaSum, controller.summedBetas, epsilon);
       EjmlUnitTests.assertEquals(alphaExpected, controller.alphas.get(0), epsilon);
 
-      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalY = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalY);
 
       for (double time = 0.0; time <= finalTime; time += 0.01)
       {
          controller.computeS2(time);
 
-         CommonOps.scale(time, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(time, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alphaExpected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 0), beta1Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 1), beta2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 2), beta3Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 3), beta4Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alphaExpected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 0), beta1Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 1), beta2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 2), beta3Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 3), beta4Expected);
 
          EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
          EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
@@ -556,22 +557,22 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory.compute(time);
          vrpTrajectory.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps_DDRM.subtractEquals(yd, finalY);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
          tempMatrix.reshape(3, 6);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(0), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
 
-         K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method2, controller.k2, epsilon);
@@ -582,7 +583,7 @@ public class LQRMomentumControllerTest
       controller.computeS2(finalTime);
 
       // should be zero at tf
-      DenseMatrix64F zeroMatrix = new DenseMatrix64F(6, 1);
+      DMatrixRMaj zeroMatrix = new DMatrixRMaj(6, 1);
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
    }
 
@@ -604,7 +605,7 @@ public class LQRMomentumControllerTest
       trajectories.add(vrpTrajectory1);
       trajectories.add(vrpTrajectory2);
 
-      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
       controller.setVRPTrajectory(trajectories);
@@ -612,36 +613,36 @@ public class LQRMomentumControllerTest
       controller.computeS1();
       controller.computeS2Parameters();
 
-      DenseMatrix64F NExpected = new DenseMatrix64F(6, 3);
-      DenseMatrix64F NBExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F NTransposeExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.mult(controller.Q, controller.D, tempMatrix);
-      CommonOps.multTransA(controller.C, tempMatrix, NExpected);
-      CommonOps.transpose(NExpected, NTransposeExpected);
+      DMatrixRMaj NExpected = new DMatrixRMaj(6, 3);
+      DMatrixRMaj NBExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj NTransposeExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(controller.Q, controller.D, tempMatrix);
+      CommonOps_DDRM.multTransA(controller.C, tempMatrix, NExpected);
+      CommonOps_DDRM.transpose(NExpected, NTransposeExpected);
 
-      CommonOps.multTransA(controller.B, controller.getCostHessian(), NBExpected);
-      CommonOps.addEquals(NBExpected, NTransposeExpected);
+      CommonOps_DDRM.multTransA(controller.B, controller.getCostHessian(), NBExpected);
+      CommonOps_DDRM.addEquals(NBExpected, NTransposeExpected);
 
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(0, 0);
+      LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(0, 0);
 
-      DenseMatrix64F A2Expected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F A2InverseExpected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F B2Expected = new DenseMatrix64F(6, 3);
+      DMatrixRMaj A2Expected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj A2InverseExpected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj B2Expected = new DMatrixRMaj(6, 3);
 
-      CommonOps.transpose(controller.A, A2Expected);
-      CommonOps.scale(-1.0, A2Expected);
+      CommonOps_DDRM.transpose(controller.A, A2Expected);
+      CommonOps_DDRM.scale(-1.0, A2Expected);
 
       tempMatrix.reshape(3, 6);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
-      CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, tempMatrix);
+      CommonOps_DDRM.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
+      DMatrixRMaj tempMatrix2 = new DMatrixRMaj(6, 3);
       tempMatrix.reshape(6, 3);
-      CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.transpose(controller.C, tempMatrix2);
-      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
-      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
+      CommonOps_DDRM.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
+      CommonOps_DDRM.transpose(controller.C, tempMatrix2);
+      CommonOps_DDRM.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps_DDRM.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -652,19 +653,19 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(A2InverseExpected, controller.A2Inverse, epsilon);
 
 
-      DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-      DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F R1InvDQInverse = new DenseMatrix64F(3, 3);
-      DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
-      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
+      DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
+      DMatrixRMaj R1InvDQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R1InvDQInverse = new DMatrixRMaj(3, 3);
+      DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R1InvBTrans = new DMatrixRMaj(3, 6);
+      DMatrixRMaj k2Method1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2Method2 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj yd = new DMatrixRMaj(3, 1);
 
-      CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
-      CommonOps.mult(controller.D, controller.Q, DQ);
-      CommonOps.mult(controller.R1Inverse, DQ, R1InvDQ);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
+      CommonOps_DDRM.mult(A2InverseExpected, B2Expected, A2InverseB2);
+      CommonOps_DDRM.mult(controller.D, controller.Q, DQ);
+      CommonOps_DDRM.mult(controller.R1Inverse, DQ, R1InvDQ);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
       solver.setA(R1InvDQ);
       solver.invert(R1InvDQInverse);
 
@@ -676,42 +677,42 @@ public class LQRMomentumControllerTest
       assertEquals(2, controller.gammas.get(0).size());
       assertEquals(2, controller.gammas.get(1).size());
 
-      DenseMatrix64F beta11Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta12Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta21Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta22Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F gamma11Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma12Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma21Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma22Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
-      DenseMatrix64F constructedCoefficient11 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F constructedCoefficient12 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F constructedCoefficient21 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F constructedCoefficient22 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj beta11Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta12Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta21Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta22Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj gamma11Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma12Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma21Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma22Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
+      DMatrixRMaj constructedCoefficient11 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj constructedCoefficient12 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj constructedCoefficient21 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj constructedCoefficient22 = new DMatrixRMaj(3, 1);
 
 
       vrpTrajectory2.getCoefficients(1, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta22Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta22Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma22Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma22Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22Expected);
 
       vrpTrajectory2.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta22Expected, beta21Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta21Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta22Expected, beta21Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta21Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma21Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma21Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21Expected);
 
       tempMatrix.set(gamma21Expected);
-      CommonOps.multAdd(0.5, R1InvBTrans, beta21Expected, tempMatrix);
-      CommonOps.mult(R1InvDQInverse, tempMatrix, constructedCoefficient21);
+      CommonOps_DDRM.multAdd(0.5, R1InvBTrans, beta21Expected, tempMatrix);
+      CommonOps_DDRM.mult(R1InvDQInverse, tempMatrix, constructedCoefficient21);
 
       tempMatrix.set(gamma22Expected);
-      CommonOps.multAdd(0.5, R1InvBTrans, beta22Expected, tempMatrix);
-      CommonOps.mult(R1InvDQInverse, tempMatrix, constructedCoefficient22);
+      CommonOps_DDRM.multAdd(0.5, R1InvBTrans, beta22Expected, tempMatrix);
+      CommonOps_DDRM.mult(R1InvDQInverse, tempMatrix, constructedCoefficient22);
 
       EjmlUnitTests.assertEquals(beta21Expected, controller.betas.get(1).get(0), epsilon);
       EjmlUnitTests.assertEquals(beta22Expected, controller.betas.get(1).get(1), epsilon);
@@ -726,28 +727,28 @@ public class LQRMomentumControllerTest
 
 
       vrpTrajectory1.getCoefficients(1, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta12Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta12Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma12Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta12Expected, gamma12Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma12Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta12Expected, gamma12Expected);
 
 
       vrpTrajectory1.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta12Expected, beta11Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta11Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta12Expected, beta11Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta11Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma11Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta11Expected, gamma11Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma11Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta11Expected, gamma11Expected);
 
 
       tempMatrix.set(gamma11Expected);
-      CommonOps.multAdd(0.5, R1InvBTrans, beta11Expected, tempMatrix);
-      CommonOps.mult(R1InvDQInverse, tempMatrix, constructedCoefficient11);
+      CommonOps_DDRM.multAdd(0.5, R1InvBTrans, beta11Expected, tempMatrix);
+      CommonOps_DDRM.mult(R1InvDQInverse, tempMatrix, constructedCoefficient11);
 
       tempMatrix.set(gamma12Expected);
-      CommonOps.multAdd(0.5, R1InvBTrans, beta12Expected, tempMatrix);
-      CommonOps.mult(R1InvDQInverse, tempMatrix, constructedCoefficient12);
+      CommonOps_DDRM.multAdd(0.5, R1InvBTrans, beta12Expected, tempMatrix);
+      CommonOps_DDRM.mult(R1InvDQInverse, tempMatrix, constructedCoefficient12);
 
 
       EjmlUnitTests.assertEquals(beta11Expected, controller.betas.get(0).get(0), epsilon);
@@ -763,28 +764,28 @@ public class LQRMomentumControllerTest
 
       MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
 
-      DenseMatrix64F alpha2Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F alpha1Expected = new DenseMatrix64F(6, 1);
+      DMatrixRMaj alpha2Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj alpha1Expected = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
-      DenseMatrix64F matrixExponential = new DenseMatrix64F(6, 6);
-      DenseMatrix64F betaSum = new DenseMatrix64F(6, 1);
+      DMatrixRMaj timeScaledDynamics = new DMatrixRMaj(6, 6);
+      DMatrixRMaj matrixExponential = new DMatrixRMaj(6, 6);
+      DMatrixRMaj betaSum = new DMatrixRMaj(6, 1);
 
-      CommonOps.scale((finalTime2 - finalTime1), A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale((finalTime2 - finalTime1), A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 0), beta21Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 1), beta22Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 0), beta21Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 1), beta22Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha2Expected);
 
-      CommonOps.scale(finalTime1, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
       betaSum.zero();
-      CommonOps.addEquals(betaSum, alpha2Expected);
-      CommonOps.addEquals(betaSum, beta21Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 0), beta11Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 1), beta12Expected);
+      CommonOps_DDRM.addEquals(betaSum, alpha2Expected);
+      CommonOps_DDRM.addEquals(betaSum, beta21Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 0), beta11Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 1), beta12Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha1Expected);
@@ -797,19 +798,19 @@ public class LQRMomentumControllerTest
       /*
       // check for continuity
        */
-      DenseMatrix64F relativeMiddleVRP = new DenseMatrix64F(3, 1);
+      DMatrixRMaj relativeMiddleVRP = new DMatrixRMaj(3, 1);
       vrpMiddle.get(relativeMiddleVRP);
-      CommonOps.subtractEquals(relativeMiddleVRP, finalPosition);
+      CommonOps_DDRM.subtractEquals(relativeMiddleVRP, finalPosition);
 
-      DenseMatrix64F constructedPositionEndOf1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F constructedPositionStartOf2 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F positionEndOf1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F positionStartOf2 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj constructedPositionEndOf1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj constructedPositionStartOf2 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj positionEndOf1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj positionStartOf2 = new DMatrixRMaj(3, 1);
 
       controller.relativeVRPTrajectories.get(0).getCoefficients(0, coefficients);
-      CommonOps.addEquals(constructedPositionEndOf1, MathTools.pow(finalTime1, 0), coefficients);
+      CommonOps_DDRM.addEquals(constructedPositionEndOf1, MathTools.pow(finalTime1, 0), coefficients);
       controller.relativeVRPTrajectories.get(0).getCoefficients(1, coefficients);
-      CommonOps.addEquals(constructedPositionEndOf1, MathTools.pow(finalTime1, 1), coefficients);
+      CommonOps_DDRM.addEquals(constructedPositionEndOf1, MathTools.pow(finalTime1, 1), coefficients);
 
       controller.relativeVRPTrajectories.get(0).compute(finalTime1);
       controller.relativeVRPTrajectories.get(1).compute(0.0);
@@ -818,63 +819,63 @@ public class LQRMomentumControllerTest
 
 
       controller.relativeVRPTrajectories.get(1).getCoefficients(0, coefficients);
-      CommonOps.addEquals(constructedPositionStartOf2, MathTools.pow(0, 0), coefficients);
+      CommonOps_DDRM.addEquals(constructedPositionStartOf2, MathTools.pow(0, 0), coefficients);
       controller.relativeVRPTrajectories.get(1).getCoefficients(1, coefficients);
-      CommonOps.addEquals(constructedPositionStartOf2, MathTools.pow(0, 1), coefficients);
+      CommonOps_DDRM.addEquals(constructedPositionStartOf2, MathTools.pow(0, 1), coefficients);
 
-      DenseMatrix64F s2EndOf1 = new DenseMatrix64F(6, 1);
-      DenseMatrix64F s2StartOf2 = new DenseMatrix64F(6, 1);
+      DMatrixRMaj s2EndOf1 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj s2StartOf2 = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F k2EndOf1Method1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2EndOf1Method2 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2StartOf2Method1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2StartOf2Method2 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj k2EndOf1Method1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2EndOf1Method2 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2StartOf2Method1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2StartOf2Method2 = new DMatrixRMaj(3, 1);
 
-      DenseMatrix64F actualS2 = new DenseMatrix64F(6, 1);
-      DenseMatrix64F actualk2 = new DenseMatrix64F(6, 1);
+      DMatrixRMaj actualS2 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj actualk2 = new DMatrixRMaj(6, 1);
 
       controller.computeS2(finalTime1);
       actualk2.set(controller.k2);
       actualS2.set(controller.getCostJacobian());
 
       // s2 at end of 1
-      CommonOps.scale(finalTime1, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(matrixExponential, controller.alphas.get(0), s2EndOf1);
-      CommonOps.addEquals(s2EndOf1, MathTools.pow(finalTime1, 0), controller.betas.get(0).get(0));
-      CommonOps.addEquals(s2EndOf1, MathTools.pow(finalTime1, 1), controller.betas.get(0).get(1));
+      CommonOps_DDRM.mult(matrixExponential, controller.alphas.get(0), s2EndOf1);
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 0), controller.betas.get(0).get(0));
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 1), controller.betas.get(0).get(1));
 
       // k2 method 1 end of 1
-      CommonOps.mult(-0.5, R1InvBTrans, s2EndOf1, k2EndOf1Method1);
-      CommonOps.multAdd(R1InvDQ, relativeMiddleVRP, k2EndOf1Method1);
+      CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2EndOf1, k2EndOf1Method1);
+      CommonOps_DDRM.multAdd(R1InvDQ, relativeMiddleVRP, k2EndOf1Method1);
 
       // k2 method 2 end of 1
-      CommonOps.scale(finalTime1, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
       tempMatrix.reshape(3, 6);
-      CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-      CommonOps.mult(tempMatrix, controller.alphas.get(0), k2EndOf1Method2);
-      CommonOps.addEquals(k2EndOf1Method2, MathTools.pow(finalTime1, 0), controller.gammas.get(0).get(0));
-      CommonOps.addEquals(k2EndOf1Method2, MathTools.pow(finalTime1, 1), controller.gammas.get(0).get(1));
+      CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+      CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(0), k2EndOf1Method2);
+      CommonOps_DDRM.addEquals(k2EndOf1Method2, MathTools.pow(finalTime1, 0), controller.gammas.get(0).get(0));
+      CommonOps_DDRM.addEquals(k2EndOf1Method2, MathTools.pow(finalTime1, 1), controller.gammas.get(0).get(1));
 
       // s2 at start of 1
-      CommonOps.scale(0, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(0, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(matrixExponential, controller.alphas.get(1), s2StartOf2);
-      CommonOps.addEquals(s2StartOf2, MathTools.pow(0, 0), controller.betas.get(1).get(0));
-      CommonOps.addEquals(s2StartOf2, MathTools.pow(0, 1), controller.betas.get(1).get(1));
+      CommonOps_DDRM.mult(matrixExponential, controller.alphas.get(1), s2StartOf2);
+      CommonOps_DDRM.addEquals(s2StartOf2, MathTools.pow(0, 0), controller.betas.get(1).get(0));
+      CommonOps_DDRM.addEquals(s2StartOf2, MathTools.pow(0, 1), controller.betas.get(1).get(1));
 
       // k2 method 1 start of 2
-      CommonOps.mult(-0.5, R1InvBTrans, s2StartOf2, k2StartOf2Method1);
-      CommonOps.multAdd(R1InvDQ, relativeMiddleVRP, k2StartOf2Method1);
+      CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2StartOf2, k2StartOf2Method1);
+      CommonOps_DDRM.multAdd(R1InvDQ, relativeMiddleVRP, k2StartOf2Method1);
 
       // k2 method 2 start of 2
-      CommonOps.scale(0.0, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(0.0, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-      CommonOps.mult(tempMatrix, controller.alphas.get(1), k2StartOf2Method2);
-      CommonOps.addEquals(k2StartOf2Method2, MathTools.pow(0, 0), controller.gammas.get(1).get(0));
-      CommonOps.addEquals(k2StartOf2Method2, MathTools.pow(0, 1), controller.gammas.get(1).get(1));
+      CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+      CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(1), k2StartOf2Method2);
+      CommonOps_DDRM.addEquals(k2StartOf2Method2, MathTools.pow(0, 0), controller.gammas.get(1).get(0));
+      CommonOps_DDRM.addEquals(k2StartOf2Method2, MathTools.pow(0, 1), controller.gammas.get(1).get(1));
 
 
       EjmlUnitTests.assertEquals(s2EndOf1, s2StartOf2, epsilon);
@@ -894,13 +895,13 @@ public class LQRMomentumControllerTest
       {
          controller.computeS2(time);
 
-         CommonOps.scale(time, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(time, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alpha1Expected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 0), beta11Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 1), beta12Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alpha1Expected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 0), beta11Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 1), beta12Expected);
 
          EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
          EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
@@ -911,21 +912,21 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory1.compute(time);
          vrpTrajectory1.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalPosition);
+         CommonOps_DDRM.subtractEquals(yd, finalPosition);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
          tempMatrix.reshape(3, 6);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(0), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
 
 
-         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
@@ -939,13 +940,13 @@ public class LQRMomentumControllerTest
          double localTime = time - finalTime1;
          controller.computeS2(time);
 
-         CommonOps.scale(localTime, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(localTime, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alpha2Expected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 0), beta21Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 1), beta22Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alpha2Expected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 0), beta21Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 1), beta22Expected);
 
          EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
 
@@ -954,17 +955,17 @@ public class LQRMomentumControllerTest
          MatrixTestTools.assertMatrixEquals("S2 calculation failed at time " + time, s2Expected, controller.getCostJacobian(), epsilon);
 
          // validate the gammas
-         DenseMatrix64F gamma21ExpectedAlt = new DenseMatrix64F(3, 1);
-         DenseMatrix64F gamma22ExpectedAlt = new DenseMatrix64F(3, 1);
+         DMatrixRMaj gamma21ExpectedAlt = new DMatrixRMaj(3, 1);
+         DMatrixRMaj gamma22ExpectedAlt = new DMatrixRMaj(3, 1);
 
          vrpTrajectory2.getCoefficients(0, coefficients);
-         CommonOps.subtractEquals(coefficients, finalPosition);
-         CommonOps.mult(R1InvDQ, coefficients, gamma21ExpectedAlt);
-         CommonOps.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21ExpectedAlt);
+         CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+         CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma21ExpectedAlt);
+         CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21ExpectedAlt);
 
          vrpTrajectory2.getCoefficients(1, coefficients);
-         CommonOps.mult(R1InvDQ, coefficients, gamma22ExpectedAlt);
-         CommonOps.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22ExpectedAlt);
+         CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma22ExpectedAlt);
+         CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22ExpectedAlt);
 
          MatrixTestTools.assertMatrixEquals(gamma21ExpectedAlt, controller.gammas.get(1).get(0), epsilon);
          MatrixTestTools.assertMatrixEquals(gamma22ExpectedAlt, controller.gammas.get(1).get(1), epsilon);
@@ -975,24 +976,24 @@ public class LQRMomentumControllerTest
          // validate the feedback solution
          vrpTrajectory2.compute(localTime);
          vrpTrajectory2.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalPosition);
+         CommonOps_DDRM.subtractEquals(yd, finalPosition);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
 
          tempMatrix.reshape(3, 6);
-         CommonOps.scale(localTime, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(localTime, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(1), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(1), k2Method2);
 //         MatrixTestTools.assertMatrixEquals(matrixExponential, controller.A2Exponential, epsilon);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
 
-         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          MatrixTestTools.assertMatrixEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
@@ -1002,7 +1003,7 @@ public class LQRMomentumControllerTest
       controller.computeS2(finalTime2);
 
       // should be zero at tf
-      DenseMatrix64F zeroMatrix = new DenseMatrix64F(6, 1);
+      DMatrixRMaj zeroMatrix = new DMatrixRMaj(6, 1);
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
    }
 
@@ -1029,7 +1030,7 @@ public class LQRMomentumControllerTest
       trajectories.add(vrpTrajectory2);
       trajectories.add(vrpTrajectory3);
 
-      DenseMatrix64F finalPosition = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
       controller.setVRPTrajectory(trajectories);
@@ -1040,36 +1041,36 @@ public class LQRMomentumControllerTest
       controller.computeS2Parameters();
       controller.computeS2Parameters();
 
-      DenseMatrix64F NExpected = new DenseMatrix64F(6, 3);
-      DenseMatrix64F NBExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F NTransposeExpected = new DenseMatrix64F(3, 6);
-      DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.mult(controller.Q, controller.D, tempMatrix);
-      CommonOps.multTransA(controller.C, tempMatrix, NExpected);
-      CommonOps.transpose(NExpected, NTransposeExpected);
+      DMatrixRMaj NExpected = new DMatrixRMaj(6, 3);
+      DMatrixRMaj NBExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj NTransposeExpected = new DMatrixRMaj(3, 6);
+      DMatrixRMaj tempMatrix = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.mult(controller.Q, controller.D, tempMatrix);
+      CommonOps_DDRM.multTransA(controller.C, tempMatrix, NExpected);
+      CommonOps_DDRM.transpose(NExpected, NTransposeExpected);
 
-      CommonOps.multTransA(controller.B, controller.getCostHessian(), NBExpected);
-      CommonOps.addEquals(NBExpected, NTransposeExpected);
+      CommonOps_DDRM.multTransA(controller.B, controller.getCostHessian(), NBExpected);
+      CommonOps_DDRM.addEquals(NBExpected, NTransposeExpected);
 
-      LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.general(0, 0);
+      LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(0, 0);
 
-      DenseMatrix64F A2Expected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F A2InverseExpected = new DenseMatrix64F(6, 6);
-      DenseMatrix64F B2Expected = new DenseMatrix64F(6, 3);
+      DMatrixRMaj A2Expected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj A2InverseExpected = new DMatrixRMaj(6, 6);
+      DMatrixRMaj B2Expected = new DMatrixRMaj(6, 3);
 
-      CommonOps.transpose(controller.A, A2Expected);
-      CommonOps.scale(-1.0, A2Expected);
+      CommonOps_DDRM.transpose(controller.A, A2Expected);
+      CommonOps_DDRM.scale(-1.0, A2Expected);
 
       tempMatrix.reshape(3, 6);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, tempMatrix);
-      CommonOps.multAddTransA(NBExpected, tempMatrix, A2Expected);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, tempMatrix);
+      CommonOps_DDRM.multAddTransA(NBExpected, tempMatrix, A2Expected);
 
-      DenseMatrix64F tempMatrix2 = new DenseMatrix64F(6, 3);
+      DMatrixRMaj tempMatrix2 = new DMatrixRMaj(6, 3);
       tempMatrix.reshape(6, 3);
-      CommonOps.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
-      CommonOps.transpose(controller.C, tempMatrix2);
-      CommonOps.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
-      CommonOps.mult(2.0, tempMatrix2, controller.Q, B2Expected);
+      CommonOps_DDRM.multTransA(NBExpected, controller.R1Inverse, tempMatrix);
+      CommonOps_DDRM.transpose(controller.C, tempMatrix2);
+      CommonOps_DDRM.multAdd(-1.0, tempMatrix, controller.D, tempMatrix2);
+      CommonOps_DDRM.mult(2.0, tempMatrix2, controller.Q, B2Expected);
 
       solver.setA(A2Expected);
       solver.invert(A2InverseExpected);
@@ -1080,18 +1081,18 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(A2InverseExpected, controller.A2Inverse, epsilon);
 
 
-      DenseMatrix64F A2InverseB2 = new DenseMatrix64F(6, 3);
-      DenseMatrix64F R1InvDQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F DQ = new DenseMatrix64F(3, 3);
-      DenseMatrix64F R1InvBTrans = new DenseMatrix64F(3, 6);
-      DenseMatrix64F k2Method1 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F k2Method2 = new DenseMatrix64F(3, 1);
-      DenseMatrix64F yd = new DenseMatrix64F(3, 1);
+      DMatrixRMaj A2InverseB2 = new DMatrixRMaj(6, 3);
+      DMatrixRMaj R1InvDQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj DQ = new DMatrixRMaj(3, 3);
+      DMatrixRMaj R1InvBTrans = new DMatrixRMaj(3, 6);
+      DMatrixRMaj k2Method1 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj k2Method2 = new DMatrixRMaj(3, 1);
+      DMatrixRMaj yd = new DMatrixRMaj(3, 1);
 
-      CommonOps.mult(A2InverseExpected, B2Expected, A2InverseB2);
-      CommonOps.mult(controller.D, controller.Q, DQ);
-      CommonOps.mult(controller.R1Inverse, DQ, R1InvDQ);
-      CommonOps.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
+      CommonOps_DDRM.mult(A2InverseExpected, B2Expected, A2InverseB2);
+      CommonOps_DDRM.mult(controller.D, controller.Q, DQ);
+      CommonOps_DDRM.mult(controller.R1Inverse, DQ, R1InvDQ);
+      CommonOps_DDRM.multTransB(controller.R1Inverse, controller.B, R1InvBTrans);
 
       assertEquals(3, controller.alphas.size());
       assertEquals(3, controller.betas.size());
@@ -1103,59 +1104,59 @@ public class LQRMomentumControllerTest
       assertEquals(4, controller.gammas.get(1).size());
       assertEquals(4, controller.gammas.get(2).size());
 
-      DenseMatrix64F beta11Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta12Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta13Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta14Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta21Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta22Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta23Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta24Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta31Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta32Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta33Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F beta34Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F gamma11Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma12Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma13Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma14Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma21Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma22Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma23Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma24Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma31Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma32Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma33Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gamma34Expected = new DenseMatrix64F(3, 1);
-      DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+      DMatrixRMaj beta11Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta12Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta13Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta14Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta21Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta22Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta23Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta24Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta31Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta32Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta33Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj beta34Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj gamma11Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma12Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma13Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma14Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma21Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma22Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma23Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma24Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma31Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma32Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma33Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gamma34Expected = new DMatrixRMaj(3, 1);
+      DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
       vrpTrajectory3.getCoefficients(3, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta34Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta34Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma34Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta34Expected, gamma34Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma34Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta34Expected, gamma34Expected);
 
       vrpTrajectory3.getCoefficients(2, coefficients);
-      CommonOps.mult(3, A2InverseExpected, beta34Expected, beta33Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta33Expected);
+      CommonOps_DDRM.mult(3, A2InverseExpected, beta34Expected, beta33Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta33Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma33Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta33Expected, gamma33Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma33Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta33Expected, gamma33Expected);
 
       vrpTrajectory3.getCoefficients(1, coefficients);
-      CommonOps.mult(2, A2InverseExpected, beta33Expected, beta32Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta32Expected);
+      CommonOps_DDRM.mult(2, A2InverseExpected, beta33Expected, beta32Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta32Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma32Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta32Expected, gamma32Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma32Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta32Expected, gamma32Expected);
 
       vrpTrajectory3.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta32Expected, beta31Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta31Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta32Expected, beta31Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta31Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma31Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta31Expected, gamma31Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma31Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta31Expected, gamma31Expected);
 
       EjmlUnitTests.assertEquals(beta34Expected, controller.betas.get(2).get(3), epsilon);
       EjmlUnitTests.assertEquals(beta33Expected, controller.betas.get(2).get(2), epsilon);
@@ -1168,32 +1169,32 @@ public class LQRMomentumControllerTest
 
 
       vrpTrajectory2.getCoefficients(3, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta24Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta24Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma24Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta24Expected, gamma24Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma24Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta24Expected, gamma24Expected);
 
       vrpTrajectory2.getCoefficients(2, coefficients);
-      CommonOps.mult(3, A2InverseExpected, beta24Expected, beta23Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta23Expected);
+      CommonOps_DDRM.mult(3, A2InverseExpected, beta24Expected, beta23Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta23Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma23Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta23Expected, gamma23Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma23Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta23Expected, gamma23Expected);
 
       vrpTrajectory2.getCoefficients(1, coefficients);
-      CommonOps.mult(2, A2InverseExpected, beta23Expected, beta22Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta22Expected);
+      CommonOps_DDRM.mult(2, A2InverseExpected, beta23Expected, beta22Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta22Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma22Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma22Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta22Expected, gamma22Expected);
 
       vrpTrajectory2.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta22Expected, beta21Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta21Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta22Expected, beta21Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta21Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma21Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma21Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta21Expected, gamma21Expected);
 
       EjmlUnitTests.assertEquals(beta24Expected, controller.betas.get(1).get(3), epsilon);
       EjmlUnitTests.assertEquals(beta23Expected, controller.betas.get(1).get(2), epsilon);
@@ -1205,32 +1206,32 @@ public class LQRMomentumControllerTest
       EjmlUnitTests.assertEquals(gamma21Expected, controller.gammas.get(1).get(0), epsilon);
 
       vrpTrajectory1.getCoefficients(3, coefficients);
-      CommonOps.mult(-1, A2InverseB2, coefficients, beta14Expected);
+      CommonOps_DDRM.mult(-1, A2InverseB2, coefficients, beta14Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma14Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta14Expected, gamma14Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma14Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta14Expected, gamma14Expected);
 
       vrpTrajectory1.getCoefficients(2, coefficients);
-      CommonOps.mult(3, A2InverseExpected, beta14Expected, beta13Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta13Expected);
+      CommonOps_DDRM.mult(3, A2InverseExpected, beta14Expected, beta13Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta13Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma13Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta13Expected, gamma13Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma13Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta13Expected, gamma13Expected);
 
       vrpTrajectory1.getCoefficients(1, coefficients);
-      CommonOps.mult(2, A2InverseExpected, beta13Expected, beta12Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta12Expected);
+      CommonOps_DDRM.mult(2, A2InverseExpected, beta13Expected, beta12Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta12Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma12Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta12Expected, gamma12Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma12Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta12Expected, gamma12Expected);
 
       vrpTrajectory1.getCoefficients(0, coefficients);
-      CommonOps.subtractEquals(coefficients, finalPosition);
-      CommonOps.mult(A2InverseExpected, beta12Expected, beta11Expected);
-      CommonOps.multAdd(-1.0, A2InverseB2, coefficients, beta11Expected);
+      CommonOps_DDRM.subtractEquals(coefficients, finalPosition);
+      CommonOps_DDRM.mult(A2InverseExpected, beta12Expected, beta11Expected);
+      CommonOps_DDRM.multAdd(-1.0, A2InverseB2, coefficients, beta11Expected);
 
-      CommonOps.mult(R1InvDQ, coefficients, gamma11Expected);
-      CommonOps.multAdd(-0.5, R1InvBTrans, beta11Expected, gamma11Expected);
+      CommonOps_DDRM.mult(R1InvDQ, coefficients, gamma11Expected);
+      CommonOps_DDRM.multAdd(-0.5, R1InvBTrans, beta11Expected, gamma11Expected);
 
       EjmlUnitTests.assertEquals(beta14Expected, controller.betas.get(0).get(3), epsilon);
       EjmlUnitTests.assertEquals(gamma14Expected, controller.gammas.get(0).get(3), epsilon);
@@ -1243,46 +1244,46 @@ public class LQRMomentumControllerTest
 
       MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
 
-      DenseMatrix64F alpha3Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F alpha2Expected = new DenseMatrix64F(6, 1);
-      DenseMatrix64F alpha1Expected = new DenseMatrix64F(6, 1);
+      DMatrixRMaj alpha3Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj alpha2Expected = new DMatrixRMaj(6, 1);
+      DMatrixRMaj alpha1Expected = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F timeScaledDynamics = new DenseMatrix64F(6, 6);
-      DenseMatrix64F matrixExponential = new DenseMatrix64F(6, 6);
-      DenseMatrix64F betaSum = new DenseMatrix64F(6, 1);
+      DMatrixRMaj timeScaledDynamics = new DMatrixRMaj(6, 6);
+      DMatrixRMaj matrixExponential = new DMatrixRMaj(6, 6);
+      DMatrixRMaj betaSum = new DMatrixRMaj(6, 1);
 
-      CommonOps.scale((finalTime3 - finalTime2), A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale((finalTime3 - finalTime2), A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 0), beta31Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 1), beta32Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 2), beta33Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 3), beta34Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 0), beta31Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 1), beta32Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 2), beta33Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime3 - finalTime2, 3), beta34Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha3Expected);
 
-      CommonOps.scale((finalTime2 - finalTime1), A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale((finalTime2 - finalTime1), A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
       betaSum.zero();
-      CommonOps.addEquals(betaSum, alpha3Expected);
-      CommonOps.addEquals(betaSum, beta31Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 0), beta21Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 1), beta22Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 2), beta23Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 3), beta24Expected);
+      CommonOps_DDRM.addEquals(betaSum, alpha3Expected);
+      CommonOps_DDRM.addEquals(betaSum, beta31Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 0), beta21Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 1), beta22Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 2), beta23Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime2 - finalTime1, 3), beta24Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha2Expected);
 
-      CommonOps.scale(finalTime1, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
       betaSum.zero();
-      CommonOps.addEquals(betaSum, alpha2Expected);
-      CommonOps.addEquals(betaSum, beta21Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 0), beta11Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 1), beta12Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 2), beta13Expected);
-      CommonOps.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 3), beta14Expected);
+      CommonOps_DDRM.addEquals(betaSum, alpha2Expected);
+      CommonOps_DDRM.addEquals(betaSum, beta21Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 0), beta11Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 1), beta12Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 2), beta13Expected);
+      CommonOps_DDRM.addEquals(betaSum, -1.0 * MathTools.pow(finalTime1, 3), beta14Expected);
 
       solver.setA(matrixExponential);
       solver.solve(betaSum, alpha1Expected);
@@ -1295,49 +1296,49 @@ public class LQRMomentumControllerTest
 
       // check for continuity
 
-      DenseMatrix64F s2EndOf1 = new DenseMatrix64F(6, 1);
-      DenseMatrix64F s2StartOf2 = new DenseMatrix64F(6, 1);
-      DenseMatrix64F s2EndOf2 = new DenseMatrix64F(6, 1);
-      DenseMatrix64F s2StartOf3 = new DenseMatrix64F(6, 1);
+      DMatrixRMaj s2EndOf1 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj s2StartOf2 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj s2EndOf2 = new DMatrixRMaj(6, 1);
+      DMatrixRMaj s2StartOf3 = new DMatrixRMaj(6, 1);
 
-      CommonOps.scale(finalTime1, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(matrixExponential, controller.alphas.get(0), s2EndOf1);
-      CommonOps.addEquals(s2EndOf1, MathTools.pow(finalTime1, 0), controller.betas.get(0).get(0));
-      CommonOps.addEquals(s2EndOf1, MathTools.pow(finalTime1, 1), controller.betas.get(0).get(1));
-      CommonOps.addEquals(s2EndOf1, MathTools.pow(finalTime1, 2), controller.betas.get(0).get(2));
-      CommonOps.addEquals(s2EndOf1, MathTools.pow(finalTime1, 3), controller.betas.get(0).get(3));
+      CommonOps_DDRM.mult(matrixExponential, controller.alphas.get(0), s2EndOf1);
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 0), controller.betas.get(0).get(0));
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 1), controller.betas.get(0).get(1));
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 2), controller.betas.get(0).get(2));
+      CommonOps_DDRM.addEquals(s2EndOf1, MathTools.pow(finalTime1, 3), controller.betas.get(0).get(3));
 
-      CommonOps.scale(0, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(0, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(matrixExponential, controller.alphas.get(1), s2StartOf2);
-      CommonOps.addEquals(s2StartOf2, MathTools.pow(0, 0), controller.betas.get(1).get(0));
-      CommonOps.addEquals(s2StartOf2, MathTools.pow(0, 1), controller.betas.get(1).get(1));
-      CommonOps.addEquals(s2StartOf2, MathTools.pow(0, 2), controller.betas.get(1).get(2));
-      CommonOps.addEquals(s2StartOf2, MathTools.pow(0, 2), controller.betas.get(1).get(3));
+      CommonOps_DDRM.mult(matrixExponential, controller.alphas.get(1), s2StartOf2);
+      CommonOps_DDRM.addEquals(s2StartOf2, MathTools.pow(0, 0), controller.betas.get(1).get(0));
+      CommonOps_DDRM.addEquals(s2StartOf2, MathTools.pow(0, 1), controller.betas.get(1).get(1));
+      CommonOps_DDRM.addEquals(s2StartOf2, MathTools.pow(0, 2), controller.betas.get(1).get(2));
+      CommonOps_DDRM.addEquals(s2StartOf2, MathTools.pow(0, 2), controller.betas.get(1).get(3));
 
       EjmlUnitTests.assertEquals(s2EndOf1, s2StartOf2, epsilon);
 
 
-      CommonOps.scale(finalTime2 - finalTime1, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(finalTime2 - finalTime1, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(matrixExponential, controller.alphas.get(1), s2EndOf2);
-      CommonOps.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 0), controller.betas.get(1).get(0));
-      CommonOps.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 1), controller.betas.get(1).get(1));
-      CommonOps.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 2), controller.betas.get(1).get(2));
-      CommonOps.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 3), controller.betas.get(1).get(3));
+      CommonOps_DDRM.mult(matrixExponential, controller.alphas.get(1), s2EndOf2);
+      CommonOps_DDRM.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 0), controller.betas.get(1).get(0));
+      CommonOps_DDRM.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 1), controller.betas.get(1).get(1));
+      CommonOps_DDRM.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 2), controller.betas.get(1).get(2));
+      CommonOps_DDRM.addEquals(s2EndOf2, MathTools.pow(finalTime2 - finalTime1, 3), controller.betas.get(1).get(3));
 
-      CommonOps.scale(0, A2Expected, timeScaledDynamics);
+      CommonOps_DDRM.scale(0, A2Expected, timeScaledDynamics);
       matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
-      CommonOps.mult(matrixExponential, controller.alphas.get(2), s2StartOf3);
-      CommonOps.addEquals(s2StartOf3, MathTools.pow(0, 0), controller.betas.get(2).get(0));
-      CommonOps.addEquals(s2StartOf3, MathTools.pow(0, 1), controller.betas.get(2).get(1));
-      CommonOps.addEquals(s2StartOf3, MathTools.pow(0, 2), controller.betas.get(2).get(2));
-      CommonOps.addEquals(s2StartOf3, MathTools.pow(0, 3), controller.betas.get(2).get(3));
+      CommonOps_DDRM.mult(matrixExponential, controller.alphas.get(2), s2StartOf3);
+      CommonOps_DDRM.addEquals(s2StartOf3, MathTools.pow(0, 0), controller.betas.get(2).get(0));
+      CommonOps_DDRM.addEquals(s2StartOf3, MathTools.pow(0, 1), controller.betas.get(2).get(1));
+      CommonOps_DDRM.addEquals(s2StartOf3, MathTools.pow(0, 2), controller.betas.get(2).get(2));
+      CommonOps_DDRM.addEquals(s2StartOf3, MathTools.pow(0, 3), controller.betas.get(2).get(3));
 
       EjmlUnitTests.assertEquals(s2EndOf2, s2StartOf3, epsilon);
 
-      DenseMatrix64F finalY = new DenseMatrix64F(3, 1);
+      DMatrixRMaj finalY = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalY);
 
       // check trajectory
@@ -1346,15 +1347,15 @@ public class LQRMomentumControllerTest
       {
          controller.computeS2(time);
 
-         CommonOps.scale(time, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(time, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alpha1Expected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 0), beta11Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 1), beta12Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 2), beta13Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(time, 3), beta14Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alpha1Expected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 0), beta11Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 1), beta12Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 2), beta13Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(time, 3), beta14Expected);
 
          EjmlUnitTests.assertEquals(timeScaledDynamics, controller.timeScaledA2, epsilon);
          EjmlUnitTests.assertEquals(matrixExponential, controller.A2Exponential, epsilon);
@@ -1365,22 +1366,22 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory1.compute(time);
          vrpTrajectory1.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps_DDRM.subtractEquals(yd, finalY);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
          tempMatrix.reshape(3, 6);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(0), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(0), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
-         CommonOps.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 0), controller.gammas.get(0).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 1), controller.gammas.get(0).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 2), controller.gammas.get(0).get(2));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(time, 3), controller.gammas.get(0).get(3));
 
-         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
@@ -1393,15 +1394,15 @@ public class LQRMomentumControllerTest
          double localTime = time - finalTime1;
          controller.computeS2(time);
 
-         CommonOps.scale(localTime, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(localTime, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alpha2Expected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 0), beta21Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 1), beta22Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 2), beta23Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 3), beta24Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alpha2Expected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 0), beta21Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 1), beta22Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 2), beta23Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 3), beta24Expected);
 
          EjmlUnitTests.assertEquals(alpha2Expected, controller.alphas.get(1), epsilon);
 
@@ -1409,22 +1410,22 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory2.compute(localTime);
          vrpTrajectory2.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps_DDRM.subtractEquals(yd, finalY);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
          tempMatrix.reshape(3, 6);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(1), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(1), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(1).get(2));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(1).get(3));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(1).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(1).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(1).get(2));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(1).get(3));
 
-         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
@@ -1436,15 +1437,15 @@ public class LQRMomentumControllerTest
          double localTime = time - finalTime2;
          controller.computeS2(time);
 
-         CommonOps.scale(localTime, A2Expected, timeScaledDynamics);
+         CommonOps_DDRM.scale(localTime, A2Expected, timeScaledDynamics);
          matrixExponentialCalculator.compute(matrixExponential, timeScaledDynamics);
 
-         DenseMatrix64F s2Expected = new DenseMatrix64F(6, 1);
-         CommonOps.mult(matrixExponential, alpha3Expected, s2Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 0), beta31Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 1), beta32Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 2), beta33Expected);
-         CommonOps.addEquals(s2Expected, MathTools.pow(localTime, 3), beta34Expected);
+         DMatrixRMaj s2Expected = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(matrixExponential, alpha3Expected, s2Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 0), beta31Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 1), beta32Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 2), beta33Expected);
+         CommonOps_DDRM.addEquals(s2Expected, MathTools.pow(localTime, 3), beta34Expected);
 
          EjmlUnitTests.assertEquals(alpha3Expected, controller.alphas.get(2), epsilon);
 
@@ -1452,22 +1453,22 @@ public class LQRMomentumControllerTest
 
          vrpTrajectory3.compute(localTime);
          vrpTrajectory3.getPosition().get(yd);
-         CommonOps.subtractEquals(yd, finalY);
+         CommonOps_DDRM.subtractEquals(yd, finalY);
 
-         CommonOps.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
-         CommonOps.multAdd(R1InvDQ, yd, k2Method1);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, s2Expected, k2Method1);
+         CommonOps_DDRM.multAdd(R1InvDQ, yd, k2Method1);
 
          tempMatrix.reshape(3, 6);
-         CommonOps.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
-         CommonOps.mult(tempMatrix, controller.alphas.get(2), k2Method2);
+         CommonOps_DDRM.mult(-0.5, R1InvBTrans, matrixExponential, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, controller.alphas.get(2), k2Method2);
 
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(2).get(0));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(2).get(1));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(2).get(2));
-         CommonOps.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(2).get(3));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 0), controller.gammas.get(2).get(0));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 1), controller.gammas.get(2).get(1));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 2), controller.gammas.get(2).get(2));
+         CommonOps_DDRM.addEquals(k2Method2, MathTools.pow(localTime, 3), controller.gammas.get(2).get(3));
 
-         DenseMatrix64F K1Expected = new DenseMatrix64F(3, 6);
-         CommonOps.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
+         DMatrixRMaj K1Expected = new DMatrixRMaj(3, 6);
+         CommonOps_DDRM.mult(-1.0, controller.R1Inverse, NBExpected, K1Expected);
 
          EjmlUnitTests.assertEquals(k2Method1, k2Method2, epsilon);
          MatrixTestTools.assertMatrixEquals(k2Method1, controller.k2, epsilon);
@@ -1477,7 +1478,7 @@ public class LQRMomentumControllerTest
       controller.computeS2(finalTime3);
 
       // should be zero at tf
-      DenseMatrix64F zeroMatrix = new DenseMatrix64F(6, 1);
+      DMatrixRMaj zeroMatrix = new DMatrixRMaj(6, 1);
       EjmlUnitTests.assertEquals(zeroMatrix, controller.getCostJacobian(), epsilon);
    }
 
@@ -1535,7 +1536,7 @@ public class LQRMomentumControllerTest
       FrameVector3D previousVelocity = new FrameVector3D();
       FrameVector3D previousAcceleration = new FrameVector3D();
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       comPosition.get(currentState);
       comVelocity.get(3, currentState);
       controller.computeControlInput(currentState, time);

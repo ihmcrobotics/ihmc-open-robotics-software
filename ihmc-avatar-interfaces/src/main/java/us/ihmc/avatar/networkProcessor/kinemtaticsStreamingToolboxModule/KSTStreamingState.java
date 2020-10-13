@@ -46,7 +46,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -57,7 +57,7 @@ public class KSTStreamingState implements State
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final KSTTools tools;
    private final double toolboxControllerPeriod;
@@ -173,7 +173,12 @@ public class KSTStreamingState implements State
 
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
-      preferredArmConfigWeight.set(0.1);
+      /*
+       * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
+       * impacting too much the task-space objectives and preventing the privileged configuration to kick
+       * in when there's a singularity.
+       */
+      preferredArmConfigWeight.set(0.075);
 
       for (RobotSide robotSide : RobotSide.values)
       {

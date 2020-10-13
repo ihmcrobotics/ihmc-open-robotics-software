@@ -11,7 +11,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -176,7 +176,7 @@ public class PawStepPlannerParametersUIController
 
       // set JavaFX user input to update stored properties and publish messager message
       javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
-      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
+      javaFXStoredPropertyMap.addAnyJavaFXValueChangedListener(() -> publishParameters());
    }
 
    private void publishParameters()

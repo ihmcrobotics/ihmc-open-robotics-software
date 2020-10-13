@@ -2,6 +2,14 @@ package us.ihmc.pathPlanning;
 
 public enum DataSetName
 {
+	_20200624_110132_FBDemoDebris_Large,
+	_20200624_105955_FBDemoDebris_Medium,
+	_20200624_105726_FBDemoDebris_Small,
+	_20200607_174141_FBDemoStairs_Modeled,
+	_20200513_151318_StairsIHMC_Top,
+	_20200513_151318_StairsIHMC_Bottom,
+	_20200512_132300_SlopedTerrainWithCeiling,
+	_20200406_103421_UnreachablePlatform,
 	_20200226_135000_FlatGround_StartOffRegion,
 	_20200226_120200_FlatGround_StartMidRegion,
 	_20191213_134839_Cinders,

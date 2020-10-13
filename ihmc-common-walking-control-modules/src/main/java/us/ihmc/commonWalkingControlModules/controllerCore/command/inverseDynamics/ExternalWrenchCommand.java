@@ -9,6 +9,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>, VirtualModelControlCommand<ExternalWrenchCommand>
 {
+   private int commandId;
    private RigidBodyBasics rigidBody;
    private final Wrench externalWrenchAppliedOnRigidBody = new Wrench();
 
@@ -41,6 +42,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    @Override
    public void set(ExternalWrenchCommand other)
    {
+      commandId = other.commandId;
       rigidBody = other.rigidBody;
       externalWrenchAppliedOnRigidBody.setIncludingFrame(other.externalWrenchAppliedOnRigidBody);
    }
@@ -49,6 +51,18 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.EXTERNAL_WRENCH;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 
    @Override
@@ -61,6 +75,8 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
       else if (object instanceof ExternalWrenchCommand)
       {
          ExternalWrenchCommand other = (ExternalWrenchCommand) object;
+         if (commandId != other.commandId)
+            return false;
          if (rigidBody != other.rigidBody)
             return false;
          if (!externalWrenchAppliedOnRigidBody.equals(other.externalWrenchAppliedOnRigidBody))

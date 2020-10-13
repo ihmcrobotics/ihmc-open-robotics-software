@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -36,7 +37,7 @@ public class REAGraphics3DTools
 
    public static void transformNode(Node nodeToTransform, RigidBodyTransform transform)
    {
-      nodeToTransform.getTransforms().add(JavaFXTools.convertRigidBodyTransformToAffine(transform));
+      nodeToTransform.getTransforms().add(JavaFXTools.createRigidBodyTransformToAffine(transform));
    }
 
    public static MeshView pointcloud(List<? extends Tuple3DReadOnly> pointcloud, Color color, double size)
@@ -50,24 +51,41 @@ public class REAGraphics3DTools
 
    public static MeshView multiLine(RigidBodyTransform transformToWorld, ConcaveHullCollection concaveHullCollection, Color color, double lineWidth)
    {
-      JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
+      return multiLine(transformToWorld, concaveHullCollection, (a, b) -> color, lineWidth);
+   }
+
+   public static MeshView multiLine(RigidBodyTransform transformToWorld, ConcaveHullCollection concaveHullCollection, BiFunction<Double, Double, Color> color,
+                                    double lineWidth)
+   {
+      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(1024));
+
+      int hullIndex = -1;
+      int numberOfConcaveHulls = concaveHullCollection.getNumberOfConcaveHulls();
 
       for (ConcaveHull concaveHull : concaveHullCollection)
       {
+         hullIndex++;
+
          if (concaveHull.getNumberOfVertices() <= 1)
             continue;
 
          List<Point3D> vertices = concaveHull.toVerticesInWorld(transformToWorld);
-         Point3D previousVertex = vertices.get(vertices.size() - 1);
-         for (Point3D vertex : vertices)
+         int numberOfVertices = vertices.size();
+         Point3D previousVertex = vertices.get(numberOfVertices - 1);
+
+         for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
          {
-            meshBuilder.addLine(previousVertex, vertex, lineWidth);
+            Point3D vertex = vertices.get(vertexIndex);
+            meshBuilder.addLine(previousVertex,
+                                vertex,
+                                lineWidth,
+                                color.apply(hullIndex / (numberOfConcaveHulls - 1.0), vertexIndex / (numberOfVertices - 1.0)));
             previousVertex = vertex;
          }
       }
 
       MeshView meshView = new MeshView(meshBuilder.generateMesh());
-      meshView.setMaterial(new PhongMaterial(color));
+      meshView.setMaterial(meshBuilder.generateMaterial());
       return meshView;
    }
 
@@ -80,7 +98,6 @@ public class REAGraphics3DTools
       return meshView;
    }
 
-
    public static MeshView triangles(Collection<Triangle3D> triangles, Supplier<Color> colorSupplier)
    {
       return triangles(triangles, triangle -> colorSupplier.get());
@@ -90,7 +107,7 @@ public class REAGraphics3DTools
    {
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(512));
       for (Triangle3D triangle : triangles)
-         meshBuilder.addPolyon(Arrays.asList(triangle.getA(), triangle.getB(), triangle.getC()), colorFunction.apply(triangle));
+         meshBuilder.addPolygon(Arrays.asList(triangle.getA(), triangle.getB(), triangle.getC()), colorFunction.apply(triangle));
       MeshView meshView = new MeshView(meshBuilder.generateMesh());
       meshView.setMaterial(meshBuilder.generateMaterial());
       return meshView;

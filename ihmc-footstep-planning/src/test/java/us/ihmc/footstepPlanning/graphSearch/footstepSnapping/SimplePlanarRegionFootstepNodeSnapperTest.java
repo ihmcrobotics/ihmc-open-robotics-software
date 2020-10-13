@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -31,7 +32,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    private final Random random = new Random(1209L);
    private final double epsilon = 1e-8;
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+   private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+   private final FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
    private final ConvexPolygon2D unitSquare = new ConvexPolygon2D();
 
    private boolean visualize = true;
@@ -74,7 +76,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setTranslationZ(-1.0);
+      transformToWorld.getTranslation().setZ(-1.0);
 
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
@@ -87,7 +89,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
+      transformToWorld.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
 
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
@@ -100,8 +102,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
-      transformToWorld.setTranslationZ(-1.0);
+      transformToWorld.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
+      transformToWorld.getTranslation().setZ(-1.0);
 
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
@@ -114,8 +116,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
-      transformToWorld.setTranslationZ(-1.0);
+      transformToWorld.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
+      transformToWorld.getTranslation().setZ(-1.0);
 
       ConvexPolygon2D partialFootholdPolygon = new ConvexPolygon2D(footPolygons.get(RobotSide.LEFT));
       partialFootholdPolygon.scale(0.5);
@@ -151,8 +153,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
          RigidBodyTransform regionToWorld = new RigidBodyTransform(nodeToWorldTransform);
          double xRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
          double yRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
-         regionToWorld.setRotationEuler(xRotation, yRotation, 0.0);
-         regionToWorld.setTranslationZ(EuclidCoreRandomTools.nextDouble(random, 2.0));
+         regionToWorld.getRotation().setEuler(xRotation, yRotation, 0.0);
+         regionToWorld.getTranslation().setZ(EuclidCoreRandomTools.nextDouble(random, 2.0));
 
          doAFullFootholdTest(regionToWorld, node);
       }

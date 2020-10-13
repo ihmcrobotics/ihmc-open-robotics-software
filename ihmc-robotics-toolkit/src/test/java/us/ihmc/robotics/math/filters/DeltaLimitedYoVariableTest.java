@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  *
@@ -18,14 +18,14 @@ public class DeltaLimitedYoVariableTest
 {
    private static final int RANDOM_LOWER_BOUND = 10;
    private static final int RANDOM_UPPER_BOUND = 30000;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private DeltaLimitedYoVariable variable;
 
    @Test
    public void testReferenceAndInputBothNegativeNoOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -49,7 +49,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothNegativeNoOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -73,7 +73,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothPositiveNoOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -97,7 +97,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothPositiveNoOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -121,7 +121,7 @@ public class DeltaLimitedYoVariableTest
    public void testPositiveReferenceNegativeInputNoOvershoot()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -145,7 +145,7 @@ public class DeltaLimitedYoVariableTest
    public void testNegativeReferencePositiveInputNoOvershoot()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -169,7 +169,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothNegativeWithOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -197,7 +197,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothNegativeWithOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -225,7 +225,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothPositiveWithOvershootInputGreaterThanReference()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -253,7 +253,7 @@ public class DeltaLimitedYoVariableTest
    public void testReferenceAndInputBothPositiveWithOvershootReferenceGreaterThanInput()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -281,7 +281,7 @@ public class DeltaLimitedYoVariableTest
    public void testPositiveReferenceNegativeInputWithOvershoot()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -309,7 +309,7 @@ public class DeltaLimitedYoVariableTest
    public void testNegativeReferencePositiveInputWithOvershoot()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)
@@ -337,7 +337,7 @@ public class DeltaLimitedYoVariableTest
    public void testOvershootThenNoOvershoot()
    {
       Random random = new Random(1976L);
-      registry = new YoVariableRegistry("registry");
+      registry = new YoRegistry("registry");
       variable = new DeltaLimitedYoVariable("testVar", registry, 0.0);
 
       for(int i = 0; i < 60000; i++)

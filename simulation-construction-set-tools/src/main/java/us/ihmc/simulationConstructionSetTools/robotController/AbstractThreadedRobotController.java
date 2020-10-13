@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 public abstract class AbstractThreadedRobotController implements RobotController
 {
    private final String name;
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
 
    protected final ArrayList<RobotControllerExecutor> controllers = new ArrayList<RobotControllerExecutor>();
    protected final YoDouble yoTime;
@@ -23,7 +23,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
    public AbstractThreadedRobotController(String name, Robot simulatedRobot)
    {
       this.name = name;
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
       this.currentControlTick = new YoLong("currentControlTick", registry);
       this.yoTime = simulatedRobot.getYoTime();
       this.simulatedRobot = simulatedRobot;
@@ -32,7 +32,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
    public AbstractThreadedRobotController(String name)
    {
       this.name = name;
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
       this.currentControlTick = new YoLong("currentControlTick", registry);
       this.yoTime = new YoDouble("time", registry);
       this.simulatedRobot = null;
@@ -50,7 +50,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
    }
 
    @Override
-   public final YoVariableRegistry getYoVariableRegistry()
+   public final YoRegistry getYoRegistry()
    {
       return registry;
    }

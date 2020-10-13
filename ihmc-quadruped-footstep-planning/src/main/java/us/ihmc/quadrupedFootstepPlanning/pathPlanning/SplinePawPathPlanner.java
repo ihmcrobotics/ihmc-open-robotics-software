@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
 {
@@ -16,12 +16,12 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
    private final YoPolynomial zPoly;
    private final YoPolynomial yawPoly;
 
-   public SplinePawPathPlanner(YoVariableRegistry registry)
+   public SplinePawPathPlanner(YoRegistry registry)
    {
       this("", registry);
    }
 
-   public SplinePawPathPlanner(String prefix, YoVariableRegistry registry)
+   public SplinePawPathPlanner(String prefix, YoRegistry registry)
    {
       super(prefix, registry);
 
@@ -47,8 +47,8 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
          zPoly.compute(percent);
          yawPoly.compute(percent);
          Pose3D pose = new Pose3D();
-         pose.setPosition(xPoly.getPosition(), yPoly.getPosition(), zPoly.getPosition());
-         pose.setOrientationYawPitchRoll(yawPoly.getPosition(), 0.0, 0.0);
+         pose.getPosition().set(xPoly.getPosition(), yPoly.getPosition(), zPoly.getPosition());
+         pose.getOrientation().setYawPitchRoll(yawPoly.getPosition(), 0.0, 0.0);
          waypoints.add(pose);
       }
 

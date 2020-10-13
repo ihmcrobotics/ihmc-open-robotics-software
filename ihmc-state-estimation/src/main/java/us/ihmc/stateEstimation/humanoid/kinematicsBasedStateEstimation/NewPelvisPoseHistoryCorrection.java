@@ -10,6 +10,7 @@ import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -18,10 +19,10 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
@@ -32,7 +33,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
 
@@ -61,7 +62,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final YoDouble totalErrorTranslation_X;
    private final YoDouble totalErrorTranslation_Y;
    private final YoDouble totalErrorTranslation_Z;
-   private final double[] totalErrorYawPitchRoll = new double[3];
+   private final YawPitchRoll totalErrorYawPitchRoll = new YawPitchRoll();
    private final YoDouble totalErrorRotation_Yaw;
    private final YoDouble totalErrorRotation_Pitch;
    private final YoDouble totalErrorRotation_Roll;
@@ -91,7 +92,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final YoBoolean isErrorTooBig;
    private final TimeStampedTransform3D timeStampedTransform3DToPack = new TimeStampedTransform3D();
 
-   public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
+   public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoRegistry parentRegistry,
                                          YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
                                          ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
@@ -100,13 +101,13 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
                                          PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt,
-                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
+                                         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, int pelvisBufferSize,
                                          ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber, parameters);
    }
 
-   public NewPelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public NewPelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoRegistry parentRegistry, int pelvisBufferSize,
                                          YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber,
                                          ClippedSpeedOffsetErrorInterpolatorParameters parameters)
    {
@@ -115,7 +116,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.rootJoint = sixDofJoint;
       this.pelvisReferenceFrame = rootJoint.getFrameAfterJoint();
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
-      this.registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
+      this.registry = new YoRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
 
       enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
@@ -174,6 +175,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       }
    }
 
+   @Override
    public void doControl(long timestamp)
    {
       if (pelvisPoseCorrectionCommunicator != null)
@@ -203,11 +205,11 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
       correctedPelvisPoseInWorldFrame.get(correctedPelvisTransformInWorldFrame);
 
-      correctedPelvisTransformInWorldFrame.getTranslation(correctedPelvisTranslation);
+      correctedPelvisTranslation.set(correctedPelvisTransformInWorldFrame.getTranslation());
       localizationTranslation.set(iterativeClosestPointInWorldFramePose.getPosition());
 
       localizationOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
-      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotationMatrix());
+      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotation());
 
       errorBetweenCorrectedAndLocalizationTransform_Rotation.difference(correctedPelvisOrientation, localizationOrientation);
       errorBetweenCorrectedAndLocalizationQuaternion_Rotation.set(errorBetweenCorrectedAndLocalizationTransform_Rotation);
@@ -217,8 +219,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       ////// for SCS feedback
       yoCorrectedPelvisPoseInWorldFrame.set(correctedPelvisPoseInWorldFrame);
       //////
-      errorBetweenCorrectedAndLocalizationTransform.setTranslation(errorBetweenCorrectedAndLocalizationTransform_Translation);
-      errorBetweenCorrectedAndLocalizationTransform.setRotation(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
+      errorBetweenCorrectedAndLocalizationTransform.getTranslation().set(errorBetweenCorrectedAndLocalizationTransform_Translation);
+      errorBetweenCorrectedAndLocalizationTransform.getRotation().set(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
 
       rootJoint.setJointConfiguration(correctedPelvisTransformInWorldFrame);
    }
@@ -262,8 +264,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             tempTransform.set(stateEstimatorPose);
             tempTransform.invert();
             tempTransform.multiply(localizationPose);
-            tempTransform.getTranslation(tempTranslation);
-            tempTransform.getRotation(tempRotation);
+            tempTranslation.set(tempTransform.getTranslation());
+            tempRotation.set(tempTransform.getRotation());
 
             // If we are in the deadband just return
 
@@ -301,15 +303,15 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
       ////for SCS feedback
       yoIterativeClosestPointPoseInWorldFrame.set(iterativeClosestPointInWorldFramePose);
-      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(totalErrorTranslation);
+      totalErrorTranslation.set(totalErrorBetweenPelvisAndLocalizationTransform.getTranslation());
       totalErrorTranslation_X.set(totalErrorTranslation.getX());
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
       totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
-      totalErrorBetweenPelvisAndLocalizationTransform.getRotation(totalErrorRotation);
+      totalErrorRotation.set(totalErrorBetweenPelvisAndLocalizationTransform.getRotation());
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(totalErrorRotation, totalErrorYawPitchRoll);
-      totalErrorRotation_Yaw.set(totalErrorYawPitchRoll[0]);
-      totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
-      totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
+      totalErrorRotation_Yaw.set(totalErrorYawPitchRoll.getYaw());
+      totalErrorRotation_Pitch.set(totalErrorYawPitchRoll.getPitch());
+      totalErrorRotation_Roll.set(totalErrorYawPitchRoll.getRoll());
       /////
 
       if (correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, true))
@@ -346,8 +348,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    private void sendCorrectionUpdatePacket()
    {
-      errorBetweenCorrectedAndLocalizationTransform.getTranslation(translationalResidualError);
-      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(translationalTotalError);
+      translationalResidualError.set(errorBetweenCorrectedAndLocalizationTransform.getTranslation());
+      translationalTotalError.set(totalErrorBetweenPelvisAndLocalizationTransform.getTranslation());
 
       double absoluteResidualError = translationalResidualError.length();
       double absoluteTotalError = translationalTotalError.length();

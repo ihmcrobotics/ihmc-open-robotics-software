@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class HumanoidControllerWarmupVisualizer
 {
@@ -18,7 +18,7 @@ public class HumanoidControllerWarmupVisualizer
       DoubleProvider timeProvider = controllerWarumup.getTimeProvider();
       FullRobotModel fullRobotModel = controllerWarumup.getFullRobotModel();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerWarumup.getYoGraphicsListRegistry();
-      YoVariableRegistry registry = controllerWarumup.getRegistry();
+      YoRegistry registry = controllerWarumup.getRegistry();
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(true);
@@ -27,7 +27,7 @@ public class HumanoidControllerWarmupVisualizer
       plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       plotterFactory.createOverheadPlotter();
       scs.setCameraTracking(true, true, true, true);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setGroundVisible(false);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
       scs.setTime(0.0);
@@ -49,7 +49,7 @@ public class HumanoidControllerWarmupVisualizer
          e.printStackTrace();
       }
 
-      scs.setIndex(1);
+      scs.setCurrentIndex(1);
       scs.setInPoint();
       scs.cropBuffer();
       scs.play();

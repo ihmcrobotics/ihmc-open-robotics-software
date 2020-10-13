@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
-<BorderPane xmlns="http://javafx.com/javafx/8.0.201" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController">
+<BorderPane xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController">
 
     <left>
         <Region prefWidth="50" />
@@ -18,48 +15,54 @@
     </right>
 
     <top>
-        <HBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+        <HBox>
             <children>
-                <VBox alignment="CENTER">
-                    <Label text="Debugger"/>
-                    <Region prefHeight="10"/>
-                    <Button fx:id="reset" text="Reset" prefWidth="150"/>
-                    <Region prefHeight="10"/>
-                    <Button fx:id="stepInto" text="Step Into" onAction="#stepInto" prefWidth="150"/>
-                    <Region prefHeight="10"/>
-                    <Button fx:id="stepBack" text="Step Back" onAction="#stepBack" prefWidth="150"/>
+                <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+                    <children>
+                        <TextField fx:id="searchTextField" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="25.0">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                            </VBox.margin>
+                        </TextField>
+
+                        <ListView fx:id="variableListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+                    </children>
                 </VBox>
 
-                <Separator prefWidth="20" orientation="VERTICAL"/>
+                <Separator orientation="VERTICAL" prefWidth="20" />
 
-                <GridPane alignment="TOP_CENTER" BorderPane.alignment="CENTER" prefWidth="1500">
-                    <Label text="Parent Step" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.halignment="RIGHT" GridPane.valignment="TOP" minWidth="90">
-                        <GridPane.margin>
-                            <Insets right="10"/>
-                            <Insets top="5"/>
-                        </GridPane.margin>
-                    </Label>
+                <VBox alignment="TOP_CENTER" prefWidth="1500" BorderPane.alignment="CENTER">
+                    <TableView fx:id="parentTable" maxHeight="24" />
+                    <TableView fx:id="childTable" prefHeight="300" />
+                </VBox>
 
-                    <Label text="Child Steps" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="RIGHT" GridPane.valignment="TOP" minWidth="90">
-                        <GridPane.margin>
-                            <Insets right="10"/>
-                            <Insets top="30"/>
-                        </GridPane.margin>
-                    </Label>
+                <VBox>
+                    <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+                        <Region prefHeight="20"/>
+                        <Button fx:id="reset" prefWidth="150" text="Reset"/>
+                        <Region prefHeight="10"/>
+                        <Button fx:id="stepInto" onAction="#stepInto" prefWidth="150" text="Step Into"/>
+                        <Region prefHeight="10"/>
+                        <Button fx:id="stepBack" onAction="#stepBack" prefWidth="150" text="Step Back"/>
+                        <Region prefHeight="10"/>
+                    </VBox>
 
-                    <TableView fx:id="debugParentStepTable" maxHeight="24" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <TableView fx:id="debugChildStepTable" prefHeight="300" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Separator orientation="HORIZONTAL" prefHeight="20"/>
 
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" />
-                        <ColumnConstraints hgrow="ALWAYS" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints />
-                        <RowConstraints />
-                    </rowConstraints>
+                    <VBox>
+                        <CheckBox fx:id="showStanceStep" selected="true" text="Show stance step"/>
+                        <Region prefHeight="5"/>
+                        <CheckBox fx:id="showUnsnappedStep" selected="true" text="Show unsnapped step"/>
+                        <Region prefHeight="5"/>
+                        <CheckBox fx:id="showSnappedStep" selected="true" text="Show snapped step"/>
+                        <Region prefHeight="5"/>
+                        <CheckBox fx:id="showSnapAndWiggledStep" selected="true" text="Show snap and wiggled step"/>
+                        <Region prefHeight="5"/>
+                        <CheckBox fx:id="showIdealStep" selected="true" text="Show ideal step"/>
+                        <padding><Insets left="20"/></padding>
+                    </VBox>
+                </VBox>
 
-                </GridPane>
             </children>
         </HBox>
     </top>

@@ -140,7 +140,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3D(xCenter, yCenter, stairTopHeight - thickness / 2));
+      location.getTranslation().set(new Vector3D(xCenter, yCenter, stairTopHeight - thickness / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, tread, width, thickness), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
@@ -155,7 +155,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
       tilt.setRotationPitchAndZeroTranslation(-slopeRadians);
       location.multiply(tilt);
 
-      location.setTranslation(new Vector3D(xCenter, yCenter, zCenter));
+      location.getTranslation().set(new Vector3D(xCenter, yCenter, zCenter));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

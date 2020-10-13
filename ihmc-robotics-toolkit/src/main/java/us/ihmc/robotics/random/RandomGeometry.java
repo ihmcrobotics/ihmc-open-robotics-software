@@ -2,7 +2,7 @@ package us.ihmc.robotics.random;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import Jama.Matrix;
 import us.ihmc.commons.RandomNumbers;
@@ -292,14 +292,14 @@ public class RandomGeometry
       return ret;
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns)
+   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns)
    {
       return nextDenseMatrix64F(random, numberOfRows, numberOfColumns, 1.0);
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double maxAbsoluteValue)
+   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double maxAbsoluteValue)
    {
-      DenseMatrix64F matrixToReturn = new DenseMatrix64F(numberOfRows, numberOfColumns);
+      DMatrixRMaj matrixToReturn = new DMatrixRMaj(numberOfRows, numberOfColumns);
 
       for (int row = 0; row < numberOfRows; row++)
       {
@@ -312,9 +312,9 @@ public class RandomGeometry
       return matrixToReturn;
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double boundaryOne, double boundaryTwo)
+   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double boundaryOne, double boundaryTwo)
    {
-      DenseMatrix64F matrixToReturn = new DenseMatrix64F(numberOfRows, numberOfColumns);
+      DMatrixRMaj matrixToReturn = new DMatrixRMaj(numberOfRows, numberOfColumns);
 
       for (int row = 0; row < numberOfRows; row++)
       {

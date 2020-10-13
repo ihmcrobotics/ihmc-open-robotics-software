@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.simulation;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
@@ -13,7 +14,7 @@ import java.util.function.Supplier;
 public class PlanarRegionsFromCodeViewer extends Application
 {
    public static final Supplier<PlanarRegionsList> PLANNER_ENVIRONMENT = PlannerTestEnvironments::getMazeCorridor;
-   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
+   public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown;
 
    public static final Supplier<PlanarRegionsList> PLANAR_REGIONS_TO_VIEW = BEHAVIOR_ENVIRONMENT;
 
@@ -24,7 +25,7 @@ public class PlanarRegionsFromCodeViewer extends Application
       FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);
       double isoZoomOut = 10.0;
       camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-      view3dFactory.addWorldCoordinateSystem(0.3);
+      view3dFactory.addWorldCoordinateSystem(0.5);
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();

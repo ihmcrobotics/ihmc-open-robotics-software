@@ -1,17 +1,14 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,7 +18,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.testing.JUnitTools;
 
 public class TransformToolsTest
 {
@@ -36,7 +32,7 @@ public class TransformToolsTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      TransformTools.appendRotation(transform, Math.PI / 4, Axis.X);
+      TransformTools.appendRotation(transform, Math.PI / 4, Axis3D.X);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
 
@@ -46,7 +42,7 @@ public class TransformToolsTest
 
       transform = new RigidBodyTransform();
 
-      TransformTools.appendRotation(transform, 3 * Math.PI / 4, Axis.Y);
+      TransformTools.appendRotation(transform, 3 * Math.PI / 4, Axis3D.Y);
 
       transform2 = new RigidBodyTransform();
 
@@ -56,7 +52,7 @@ public class TransformToolsTest
 
       transform = new RigidBodyTransform();
 
-      TransformTools.appendRotation(transform, -Math.PI / 2, Axis.Z);
+      TransformTools.appendRotation(transform, -Math.PI / 2, Axis3D.Z);
 
       transform2 = new RigidBodyTransform();
 
@@ -70,15 +66,15 @@ public class TransformToolsTest
    {
       Vector3D vectorA1 = new Vector3D(-1.0, -2.0, -3.0);
       RigidBodyTransform transformFromWorldToA1 = new RigidBodyTransform();
-      transformFromWorldToA1.setTranslation(vectorA1);
+      transformFromWorldToA1.getTranslation().set(vectorA1);
 
       Vector3D vectorA2 = new Vector3D(vectorA1);
       vectorA2.negate();
       RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform();
-      transformFromWorldToA2.setTranslation(vectorA2);
+      transformFromWorldToA2.getTranslation().set(vectorA2);
 
-      ReferenceFrame a1 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
-      ReferenceFrame a2 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
+      ReferenceFrame a1 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
+      ReferenceFrame a2 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
 
       RigidBodyTransform transformA2toA1 = TransformTools.getTransformFromA2toA1(transformFromWorldToA1, transformFromWorldToA2);
 
@@ -99,7 +95,7 @@ public class TransformToolsTest
    @Test
    public void testGetTransformFromA1toA2Random()
    {
-      DenseMatrix64F matrix = new DenseMatrix64F(4, 4);
+      DMatrixRMaj matrix = new DMatrixRMaj(4, 4);
       Random random = new Random(111L);
 
       this.createRandomTransformationMatrix(matrix, random);
@@ -109,8 +105,8 @@ public class TransformToolsTest
       this.createRandomTransformationMatrix(matrix, random);
       RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform(matrix);
 
-      ReferenceFrame a1 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
-      ReferenceFrame a2 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
+      ReferenceFrame a1 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
+      ReferenceFrame a2 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
 
       RigidBodyTransform transformA2toA1 = TransformTools.getTransformFromA2toA1(transformFromWorldToA1, transformFromWorldToA2);
 
@@ -172,7 +168,7 @@ public class TransformToolsTest
       int numberOfTests = 1000;
       for (int i = 0; i < numberOfTests; i++)
       {
-         DenseMatrix64F matrix = new DenseMatrix64F(4, 4);
+         DMatrixRMaj matrix = new DMatrixRMaj(4, 4);
 
          this.createRandomTransformationMatrix(matrix, random);
 
@@ -192,7 +188,7 @@ public class TransformToolsTest
       }
    }
 
-   private void createRandomTransformationMatrix(DenseMatrix64F matrix, Random random)
+   private void createRandomTransformationMatrix(DMatrixRMaj matrix, Random random)
    {
       RotationMatrix rotX = new RotationMatrix();
       RotationMatrix rotY = new RotationMatrix();
@@ -228,19 +224,19 @@ public class TransformToolsTest
    private void createRandomRotationMatrixX(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      matrix.setToRollMatrix(theta);
+      matrix.setToRollOrientation(theta);
    }
 
    private void createRandomRotationMatrixY(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      matrix.setToPitchMatrix(theta);
+      matrix.setToPitchOrientation(theta);
    }
 
    private void createRandomRotationMatrixZ(Random random, RotationMatrix matrix)
    {
       double theta = random.nextDouble();
-      matrix.setToYawMatrix(theta);
+      matrix.setToYawOrientation(theta);
    }
 
    private void randomizeVector(Random random, Vector3D vector)

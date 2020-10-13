@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DelayedYoDoubleTest
@@ -15,7 +15,7 @@ public class DelayedYoDoubleTest
 	@Test
    public void testDelayedYoVariableMultipleTickDelays()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble variableToDelay = new YoDouble("variableToDelay", registry);
 
       for (int ticksToDelay = 0; ticksToDelay < 10; ticksToDelay++)
@@ -56,7 +56,7 @@ public class DelayedYoDoubleTest
 	@Test
    public void testDelayedYoVariableOneTickDelay()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble variableToDelay = new YoDouble("variableToDelay", registry);
 
       int ticksToDelay = 1;
@@ -90,7 +90,7 @@ public class DelayedYoDoubleTest
 	@Test
    public void testDelayedYoVariableZeroTickDelay()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble variableToDelay = new YoDouble("variableToDelay", registry);
 
       int ticksToDelay = 0;

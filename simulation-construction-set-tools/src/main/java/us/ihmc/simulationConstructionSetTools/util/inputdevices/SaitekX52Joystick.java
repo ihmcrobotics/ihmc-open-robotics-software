@@ -5,16 +5,16 @@ import java.util.ArrayList;
 
 import net.java.games.input.Component;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationConstructionSetTools.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.mapping.SaitekX52Mapping;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * @deprecated Use us.ihmc.tools.inputDevices.joystick.Joystick
@@ -69,7 +69,7 @@ public class SaitekX52Joystick
    
    public void mapDoubleVariableToComponent(YoVariableHolder holder, SaitekX52Mapping mapping, String variableName, double minValue, double maxValue, double deadZone, boolean invert)
    {
-      YoDouble yoVariable = (YoDouble) holder.getVariable(variableName);
+      YoDouble yoVariable = (YoDouble) holder.findVariable(variableName);
       if (yoVariable != null)
       {
          mapDoubleVariableToComponent(mapping, yoVariable, minValue, maxValue, deadZone, invert);
@@ -90,7 +90,7 @@ public class SaitekX52Joystick
    
    public void mapBooleanVariableToComponent(YoVariableHolder holder, SaitekX52Mapping mapping, String variableName, boolean toggle, boolean invert)
    {
-      YoBoolean yoVariable = (YoBoolean) holder.getVariable(variableName);
+      YoBoolean yoVariable = (YoBoolean) holder.findVariable(variableName);
       if (yoVariable != null)
       {
          mapBooleanVariableToComponent(mapping, yoVariable, toggle, invert);
@@ -138,7 +138,7 @@ public class SaitekX52Joystick
    }
 
    /** @deprecated */
-   public void attachVariableChangedListener(VariableChangedListener listener)
+   public void attachVariableChangedListener(YoVariableChangedListener listener)
    {      
       
    }

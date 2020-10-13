@@ -8,9 +8,7 @@ import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -18,8 +16,11 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -29,14 +30,14 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
    //wakeup, request plan
-   private final boolean DEBUG = false;
+   private final boolean DEBUG = true;
    private boolean planningSuccess = false;
 
    private FootstepPlanningResult planningResult;
@@ -57,6 +58,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
    private final IHMCROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
+   private final IHMCROS2Publisher<FootstepDataListMessage> goalFootstepToUIVisualization;
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
@@ -65,17 +67,18 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private boolean assumeFlatGround = false;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
+   public PlanPathToLocationBehavior(String robotName, ROS2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
       this.footstepPlannerParameters = footstepPlannerParameters;
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, footPlanStatusQueue::put);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
 
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlanningToolboxSubGenerator);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
+      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
+      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlannerInputTopic);
+      goalFootstepToUIVisualization = createBehaviorOutputPublisher(FootstepDataListMessage.class);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }
@@ -151,6 +154,20 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                                                                                                                     goalPose,
                                                                                                                     footstepPlannerParameters.getIdealFootstepWidth(),
                                                                                                                     planBodyPath);
+
+            FootstepPlan footstepPlan = new FootstepPlan();
+            Pose3D goalLeftFootPose = new Pose3D(goalPose);
+            Pose3D goalRightFootPose = new Pose3D(goalPose);
+            goalLeftFootPose.appendTranslation(0.0, 0.5 * footstepPlannerParameters.getIdealFootstepWidth(), 0.0);
+            goalRightFootPose.appendTranslation(0.0, -0.5 * footstepPlannerParameters.getIdealFootstepWidth(), 0.0);
+            footstepPlan.addFootstep(RobotSide.LEFT, startLeftFootPose);
+            footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
+            FootstepDataListMessage footstepDataGoalStepForVisualization = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
+                                                                                                                                       0.0,
+                                                                                                                                       0.0);
+
+            goalFootstepToUIVisualization.publish(footstepDataGoalStepForVisualization);
+
             request.setTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null)
@@ -163,6 +180,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             }
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
+            request.setGenerateLog(true);
+            FootstepPlannerLogger.deleteOldLogs(30);
 
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 
@@ -179,7 +198,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-
+            publishTextToSpeech("PlanPathToLocationBehavior: Waiting until plan response for " + timeout);
             sleepBehavior.setSleepTime(timeout);
          }
 
@@ -191,11 +210,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
         	 {
         		 footstepPlanningToolboxOutputStatus= footPlanStatusQueue.getLatestPacket();
         		 planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
+        		 publishTextToSpeech("Plan received: " + planningResult);
         	 }
         	 
-        	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
+//        	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
         	 
-            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.PLANNING);
 
          }
       };
@@ -212,16 +232,16 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
               // footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
               // planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
 
-               if (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
+               if (planningResult == FootstepPlanningResult.FOUND_SOLUTION)
                {
                   planningSuccess = true;
                   footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
                }
-               else if (planningResult == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+               else if (planningResult == FootstepPlanningResult.PLANNING)
                {
-            	   publishTextToSpeech("PlanPathToLocationBehavior: planner timed out after "+timeout+" seconds");
-
-                   planningSuccess = false;
+//            	   publishTextToSpeech("PlanPathToLocationBehavior: planner timed out after "+timeout+" seconds");
+//
+//                   planningSuccess = false;
                }
                else
                {
@@ -257,7 +277,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    public boolean planSuccess()
    {
       if (planningResult != null)
-         return (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION);
+         return planningResult == FootstepPlanningResult.FOUND_SOLUTION;
       return false;
    }
 

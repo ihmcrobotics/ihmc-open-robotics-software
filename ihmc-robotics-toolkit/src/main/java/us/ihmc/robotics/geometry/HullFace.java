@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 
 /**
  * @author agrabertilton
@@ -83,8 +84,8 @@ public class HullFace
       }
 
       faceCenter.scale(1.0 / numPoints);
-      plane.setPoint(faceCenter);
-      plane.setNormal(planeNormal);
+      plane.getPoint().set(faceCenter);
+      plane.getNormal().set(planeNormal);
    }
 
    public double getSlopeAngle()
@@ -152,8 +153,8 @@ public class HullFace
          return;
       }
 
-      List<Point3D> projectedPoints = new ArrayList<>();
-      Point3D projectedPoint;
+      List<Point3DBasics> projectedPoints = new ArrayList<>();
+      Point3DBasics projectedPoint;
       Point3D averagePoint = new Point3D();
       for (Point3D point3d : facePoints)
       {
@@ -162,24 +163,24 @@ public class HullFace
          projectedPoints.add(projectedPoint);
       }
       averagePoint.scale(1.0 / facePoints.size());
-      polygonPose.setPosition(averagePoint);
+      polygonPose.getPosition().set(averagePoint);
 
       Vector3D xVec = new Vector3D(projectedPoints.get(0));
       xVec.sub(averagePoint);
       xVec.normalize();
 
-      Vector3D zVec = plane.getNormalCopy();
+      Vector3D zVec = new Vector3D(plane.getNormal());
       Vector3D yVec = new Vector3D();
       yVec.cross(zVec, xVec);
       yVec.normalize();
 
       RotationMatrix rotationMatrix = new RotationMatrix();
       rotationMatrix.setColumns(xVec, yVec, zVec);
-      polygonPose.setOrientation(rotationMatrix);
+      polygonPose.getOrientation().set(rotationMatrix);
 
       rotationMatrix.transpose();
       polygonToPack.clear();
-      for (Point3D point : projectedPoints)
+      for (Point3DBasics point : projectedPoints)
       {
          point.sub(averagePoint);
          rotationMatrix.transform(point);

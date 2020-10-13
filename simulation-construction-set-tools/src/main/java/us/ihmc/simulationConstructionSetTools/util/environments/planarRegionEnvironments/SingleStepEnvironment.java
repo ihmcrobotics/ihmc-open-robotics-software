@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class SingleStepEnvironment extends PlanarRegionEnvironmentInterface
@@ -17,12 +17,12 @@ public class SingleStepEnvironment extends PlanarRegionEnvironmentInterface
 
       generator.identity();
       generator.translate(1.0, 0.0, 0.5 * stepUpHeight);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(stepUpHeight, 2.0);
 
       generator.identity();
       generator.translate(1.0 + stepLength, 0.0, 0.5 * stepUpHeight);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(stepUpHeight, 2.0);
 
       // second ground plane

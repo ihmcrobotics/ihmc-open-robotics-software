@@ -15,9 +15,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FootstepVisualizer
 {
@@ -37,13 +37,13 @@ public class FootstepVisualizer
    private final YoGraphicPolygon footholdViz;
 
    public FootstepVisualizer(String name, String graphicListName, RobotSide robotSide, ContactablePlaneBody contactableFoot, AppearanceDefinition footstepColor,
-                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+                             YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       this(name, graphicListName, robotSide, contactableFoot.getContactPoints2d(), footstepColor, yoGraphicsListRegistry, registry);
    }
 
    public FootstepVisualizer(String name, String graphicListName, RobotSide robotSide, List<? extends Point2DReadOnly> footPolygon,
-                             AppearanceDefinition footstepColor, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+                             AppearanceDefinition footstepColor, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       this.robotSide = robotSide;
       yoFootstepPose = new YoFramePose3D(name + "Pose", worldFrame, registry);

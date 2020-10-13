@@ -68,7 +68,7 @@ public class M2Simulation implements SimulationDoneListener
          groundBz = 500.0;
       }
 
-      GroundContactModel linearGroundModel = new LinearGroundContactModel(m2, groundKxy, groundBxy, groundKz, groundBz, m2.getRobotsYoVariableRegistry());
+      GroundContactModel linearGroundModel = new LinearGroundContactModel(m2, groundKxy, groundBxy, groundKz, groundBz, m2.getRobotsYoRegistry());
 
       // HurosotGroundProfile profile = new HurosotGroundProfile(30.0, 1.5);
 //    HurosotTerrain profile = new HurosotTerrain(30.0, 1.5);
@@ -192,7 +192,7 @@ public class M2Simulation implements SimulationDoneListener
 
          else
          {
-            boolean xGotToSameValue = Math.abs(((YoDouble)sim.getVariable("q_x")).getDoubleValue() - 4.32420) < 1e-4;
+            boolean xGotToSameValue = Math.abs(((YoDouble)sim.findVariable("q_x")).getDoubleValue() - 4.32420) < 1e-4;
 
             String message = "Sims are different. xGotToSameValue = " + xGotToSameValue + "\n" + VariableDifference.allVariableDifferencesToString(variableDifferences);
             System.err.println(message);

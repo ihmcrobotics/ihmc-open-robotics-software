@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.*;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -35,10 +35,10 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
@@ -83,12 +83,12 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
       YoDouble velocity = new YoDouble("velocity", registry);
 
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
@@ -138,12 +138,12 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
       YoDouble velocity = new YoDouble("velocity", registry);
 
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
@@ -194,10 +194,10 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setCreateGUI(false);
@@ -241,10 +241,10 @@ public class YoVariableValueDataCheckerTest
       Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
@@ -270,10 +270,10 @@ public class YoVariableValueDataCheckerTest
       Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
@@ -296,10 +296,10 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
@@ -322,10 +322,10 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
@@ -362,10 +362,10 @@ public class YoVariableValueDataCheckerTest
    {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
@@ -404,10 +404,10 @@ public class YoVariableValueDataCheckerTest
       Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
@@ -427,10 +427,10 @@ public class YoVariableValueDataCheckerTest
       Assertions.assertThrows(RuntimeException.class, () -> {
       Robot robot = new Robot("Derivative");
 
-      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      YoRegistry registry = new YoRegistry("variables");
       YoDouble position = new YoDouble("position", registry);
 
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 

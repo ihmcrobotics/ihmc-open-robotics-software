@@ -14,10 +14,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class SkippyICPAndIDBasedController extends SimpleRobotController
 {

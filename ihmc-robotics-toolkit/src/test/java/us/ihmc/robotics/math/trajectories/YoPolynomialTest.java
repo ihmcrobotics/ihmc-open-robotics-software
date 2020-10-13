@@ -1,16 +1,11 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
-import java.util.Arrays;
-
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoPolynomialTest
 {
@@ -22,7 +17,7 @@ public class YoPolynomialTest
    public void testLinearDerivativePointManual()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoPolynomial linear = new YoPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -52,7 +47,7 @@ public class YoPolynomialTest
    public void testLinearDerivativePointAutomated()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoPolynomial linear = new YoPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -70,7 +65,7 @@ public class YoPolynomialTest
    public void testCubicDerivativePointAutomated()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoPolynomial cubic = new YoPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
       
@@ -89,7 +84,7 @@ public class YoPolynomialTest
    public void testXPowersDerivativeVectorCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoPolynomial cubic = new YoPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
       
@@ -116,7 +111,7 @@ public class YoPolynomialTest
    public void testDerivativeCoefficients()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 8;
       YoPolynomial septic = new YoPolynomial(namePrefix + "Septic", numberOfCoefficients, registry);
       
@@ -163,7 +158,7 @@ public class YoPolynomialTest
    public void testDerivativeVersionsCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoPolynomial cubic = new YoPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
       
@@ -216,8 +211,8 @@ public class YoPolynomialTest
       double[] coefficients = polynomial.getCoefficients();
       for(int i = 0; i < coefficients.length + 3; i++)
       {
-         DenseMatrix64F generalizedDYPoly = polynomial.getXPowersDerivativeVector(i, x);
-         DenseMatrix64F generalizedDYHand = new DenseMatrix64F(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
+         DMatrixRMaj generalizedDYPoly = polynomial.getXPowersDerivativeVector(i, x);
+         DMatrixRMaj generalizedDYHand = new DMatrixRMaj(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
          if(i < coefficients.length)
          {
             for(int j = i; j < coefficients.length; j++)
@@ -241,7 +236,7 @@ public class YoPolynomialTest
          double generalizedDYPolyScalar = polynomial.getDerivative(i, x);
          double generalizedDYHandScalar = 0.0;
          
-         DenseMatrix64F generalizedDYPolyVector = polynomial.getXPowersDerivativeVector(i, x);
+         DMatrixRMaj generalizedDYPolyVector = polynomial.getXPowersDerivativeVector(i, x);
          for(int j = 0; j < generalizedDYPolyVector.numRows; j++)
          {
             generalizedDYHandScalar += generalizedDYPolyVector.get(j,0) * coefficients[j];

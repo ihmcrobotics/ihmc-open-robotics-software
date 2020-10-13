@@ -17,7 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CenterOfMassTrajectoryHandlerTest
@@ -31,7 +31,7 @@ public class CenterOfMassTrajectoryHandlerTest
    @Test
    public void testSimpleExample()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
       CenterOfMassTrajectoryCommand command = new CenterOfMassTrajectoryCommand();
       double omega0 = 1.0;
@@ -82,7 +82,7 @@ public class CenterOfMassTrajectoryHandlerTest
    @Test
    public void testNonZeroStartTime()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
       CenterOfMassTrajectoryCommand command = new CenterOfMassTrajectoryCommand();
       double omega0 = 1.0;
@@ -136,7 +136,7 @@ public class CenterOfMassTrajectoryHandlerTest
    @Test
    public void testQueuing()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
       YoDouble yoTime = new YoDouble("time", registry);
       double omega0 = 1.0;
       double epsilon = 1.0e-10;

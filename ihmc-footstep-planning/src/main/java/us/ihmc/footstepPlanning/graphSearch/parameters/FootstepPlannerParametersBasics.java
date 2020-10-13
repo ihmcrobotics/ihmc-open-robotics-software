@@ -1,12 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance;
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.distanceFromPathTolerance;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
@@ -30,9 +27,19 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms, distance);
    }
 
-   default void setCliffHeightToAvoid(double height)
+   default void setCliffBaseHeightToAvoid(double height)
    {
-      set(FootstepPlannerParameterKeys.cliffHeightToAvoid, height);
+      set(FootstepPlannerParameterKeys.cliffBaseHeightToAvoid, height);
+   }
+
+   default void setMinimumDistanceFromCliffTops(double distance)
+   {
+      set(FootstepPlannerParameterKeys.minimumDistanceFromCliffTops, distance);
+   }
+
+   default void setCliffTopHeightToAvoid(double height)
+   {
+      set(FootstepPlannerParameterKeys.cliffTopHeightToAvoid, height);
    }
 
    default void setMaximumStepReach(double reach)
@@ -55,9 +62,20 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepYaw, yaw);
    }
 
+   default void setMaximumLeftStepZ(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.maxLeftStepZ, stepZ);
+   }
+
+   default void setMaximumRightStepZ(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.maxRightStepZ, stepZ);
+   }
+
    default void setMaximumStepZ(double stepZ)
    {
-      set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
+      setMaximumLeftStepZ(stepZ);
+      setMaximumRightStepZ(stepZ);
    }
 
    default void setMinimumStepZWhenFullyPitched(double stepZ)
@@ -105,19 +123,19 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minSurfaceIncline, surfaceInclineRadians);
    }
 
-   default void setMinXClearanceFromStance(double clearance)
+   default void setMinClearanceFromStance(double clearance)
    {
-      set(FootstepPlannerParameterKeys.minXClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.minClearanceFromStance, clearance);
    }
 
-   default void setMinYClearanceFromStance(double clearance)
+   default void setWiggleInsideDeltaTarget(double wiggleInsideDeltaTarget)
    {
-      set(FootstepPlannerParameterKeys.minYClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaTarget, wiggleInsideDeltaTarget);
    }
 
-   default void setWiggleInsideDelta(double wiggleInsideDelta)
+   default void setWiggleInsideDeltaMinimum(double wiggleInsideDeltaMinimum)
    {
-      set(FootstepPlannerParameterKeys.wiggleInsideDelta, wiggleInsideDelta);
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaMinimum, wiggleInsideDeltaMinimum);
    }
 
    default void setMaximumStepZWhenSteppingUp(double maxStepZ)
@@ -175,26 +193,20 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.idealBackStepLength, idealBackStepLength);
    }
 
-   default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
+   default void setWiggleWhilePlanning(boolean wiggleWhilePlanning)
    {
-      set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
+      set(FootstepPlannerParameterKeys.wiggleWhilePlanning, wiggleWhilePlanning);
+   }
+
+   default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
+   {
+      set(FootstepPlannerParameterKeys.enableConcaveHullWiggler, enableConcaveHullWiggler);
    }
 
    default void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
    {
       set(FootstepPlannerParameterKeys.maximumZPenetrationOnValleyRegions, maximumZPenetrationOnValleyRegions);
    }
-
-   default void setReturnBestEffortPlan(boolean returnBestEffortPlan)
-   {
-      set(FootstepPlannerParameterKeys.returnBestEffortPlan, returnBestEffortPlan);
-   }
-
-   default void setMinimumStepsForBestEffortPlan(int minimumStepForBestEffortPlan)
-   {
-      set(FootstepPlannerParameterKeys.minimumStepsForBestEffortPlan, minimumStepForBestEffortPlan);
-   }
-
 
    default void setBodyBoxHeight(double bodyBoxHeight)
    {
@@ -226,34 +238,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
    }
 
-   default void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
+   default void setMaximumSnapHeight(double maximumSnapHeight)
    {
-      set(FootstepPlannerParameterKeys.useQuadraticDistanceCost, useQuadraticDistanceCost);
-   }
-
-   default void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
-   {
-      set(FootstepPlannerParameterKeys.useQuadraticHeightCost, useQuadraticHeightCost);
+      set(FootstepPlannerParameterKeys.maximumSnapHeight, maximumSnapHeight);
    }
 
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
    {
       set(FootstepPlannerParameterKeys.aStarHeuristicsWeight, aStarHeuristicsWeight);
-   }
-
-   default void setVisGraphWithAStarHeuristicsWeight(double visGraphWithAStarHeuristicsWeight)
-   {
-      set(FootstepPlannerParameterKeys.visGraphWithAStarHeuristicsWeight, visGraphWithAStarHeuristicsWeight);
-   }
-
-   default void setDepthFirstHeuristicsWeight(double depthFirstHeuristicsWeight)
-   {
-      set(FootstepPlannerParameterKeys.depthFirstHeuristicsWeight, depthFirstHeuristicsWeight);
-   }
-
-   default void setBodyPathBasedHeuristicWeight(double bodyPathBasedHeuristicWeight)
-   {
-      set(FootstepPlannerParameterKeys.bodyPathBasedHeuristicsWeight, bodyPathBasedHeuristicWeight);
    }
 
    default void setYawWeight(double yawWeight)
@@ -306,39 +298,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
    }
 
-   default void setBoundingBoxCost(double boundingBoxCost)
-   {
-      set(FootstepPlannerParameterKeys.boundingBoxCost, boundingBoxCost);
-   }
-
    default void setFinalTurnProximity(double finalTurnProximity)
    {
       set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
-   default void setFinalTurnBodyPathProximity(double finalTurnProximity)
-   {
-      set(FootstepPlannerParameterKeys.finalTurnBodyPathProximity, finalTurnProximity);
-   }
-
-   default void setFinalTurnProximityBlendFactor(double finalTurnProximityBlendFactor)
-   {
-      set(FootstepPlannerParameterKeys.finalTurnProximityBlendFactor, finalTurnProximityBlendFactor);
-   }
-
    default void setFootholdAreaWeight(double footholdAreaWeight)
    {
       set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
-   }
-
-   default void setLongStepWeight(double weight)
-   {
-      set(FootstepPlannerParameterKeys.longStepWeight, weight);
-   }
-
-   default void setBodyPathViolationWeight(double weight)
-   {
-      set(FootstepPlannerParameterKeys.bodyPathViolationWeight, weight);
    }
 
    default void setDistanceFromPathTolerance(double tolerance)
@@ -349,6 +316,46 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setDeltaYawFromReferenceTolerance(double tolerance)
    {
       set(deltaYawFromReferenceTolerance, tolerance);
+   }
+
+   default void setMaximumBranchFactor(int maximumBranchFactor)
+   {
+      set(FootstepPlannerParameterKeys.maximumBranchFactor, maximumBranchFactor);
+   }
+
+   default void setEnableExpansionMask(boolean enableExpansionMask)
+   {
+      set(FootstepPlannerParameterKeys.enableExpansionMask, enableExpansionMask);
+   }
+
+   default void setEnableShinCollisionCheck(boolean enableShinCollisionCheck)
+   {
+      set(FootstepPlannerParameterKeys.enableShinCollisionCheck, enableShinCollisionCheck);
+   }
+
+   default void setShinToeClearance(double shinToeClearance)
+   {
+      set(FootstepPlannerParameterKeys.shinToeClearance, shinToeClearance);
+   }
+
+   default void setShinHeelClearance(double shinHeelClearance)
+   {
+      set(FootstepPlannerParameterKeys.shinHeelClearance, shinHeelClearance);
+   }
+
+   default void setShinLength(double shinLength)
+   {
+      set(FootstepPlannerParameterKeys.shinLength, shinLength);
+   }
+
+   default void setShinHeightOffset(double shinHeightOffet)
+   {
+      set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
+   }
+
+   default void setStepOnlyWithRequestedSide(byte side)
+   {
+      set(stepOnlyWithRequestedSide, side);
    }
 
    default void set(FootstepPlannerParametersPacket parametersPacket)
@@ -365,8 +372,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
       if (parametersPacket.getIdealBackStepLength() != noValue)
          setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
-      if (parametersPacket.getWiggleInsideDelta() != noValue)
-         setWiggleInsideDelta(parametersPacket.getWiggleInsideDelta());
+      if (parametersPacket.getWiggleInsideDeltaTarget() != noValue)
+         setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
+      if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
+         setWiggleInsideDeltaMinimum(parametersPacket.getWiggleInsideDeltaMinimum());
       if (parametersPacket.getMaximumStepReach() != noValue)
          setMaximumStepReach(parametersPacket.getMaximumStepReach());
       if (parametersPacket.getMaximumStepYaw() != noValue)
@@ -391,8 +400,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
       if (parametersPacket.getTranslationScaleFromGrandparentNode() != noValue)
          setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
-      if (parametersPacket.getMaximumStepZ() != noValue)
-         setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getMaximumLeftStepZ() != noValue)
+         setMaximumLeftStepZ(parametersPacket.getMaximumLeftStepZ());
+      if (parametersPacket.getMaximumRightStepZ() != noValue)
+         setMaximumRightStepZ(parametersPacket.getMaximumRightStepZ());
       if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
          setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
       if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
@@ -403,7 +414,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumFootholdPercent(parametersPacket.getMinimumFootholdPercent());
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
-      setWiggleIntoConvexHullOfPlanarRegions(parametersPacket.getWiggleIntoConvexHullOfPlanarRegions());
+      setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
+      setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
       if (parametersPacket.getMaximumYawWiggle() != noValue)
@@ -412,13 +424,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumZPenetrationOnValleyRegions(parametersPacket.getMaximumZPenetrationOnValleyRegions());
       if (parametersPacket.getMaximumStepWidth() != noValue)
          setMaximumStepWidth(parametersPacket.getMaximumStepWidth());
-      if (parametersPacket.getCliffHeightToAvoid() != noValue)
-         setCliffHeightToAvoid(parametersPacket.getCliffHeightToAvoid());
+      if (parametersPacket.getCliffBaseHeightToAvoid() != noValue)
+         this.setCliffBaseHeightToAvoid(parametersPacket.getCliffBaseHeightToAvoid());
       if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinimumDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
-      setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
-      if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
-         setMinimumStepsForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
+      if (parametersPacket.getCliffTopHeightToAvoid() != noValue)
+         this.setCliffTopHeightToAvoid(parametersPacket.getCliffTopHeightToAvoid());
+      if (parametersPacket.getMinimumDistanceFromCliffTops() != noValue)
+         setMinimumDistanceFromCliffTops(parametersPacket.getMinimumDistanceFromCliffTops());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != noValue)
@@ -431,28 +444,17 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
       if (parametersPacket.getBodyBoxBaseZ() != noValue)
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
-      if (parametersPacket.getMinXClearanceFromStance() != noValue)
-         setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
-      if (parametersPacket.getMinYClearanceFromStance() != noValue)
-         setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+      if (parametersPacket.getMaximumSnapHeight() != noValue)
+         setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
+      if (parametersPacket.getMinClearanceFromStance() != noValue)
+         setMinClearanceFromStance(parametersPacket.getMinClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
-      if (parametersPacket.getFinalTurnBodyPathProximity() != noValue)
-         setFinalTurnBodyPathProximity(parametersPacket.getFinalTurnBodyPathProximity());
-      if (parametersPacket.getFinalTurnProximityBlendFactor() != noValue)
-         setFinalTurnProximityBlendFactor(parametersPacket.getFinalTurnProximityBlendFactor());
-
-      setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
-      setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
+      setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
+      setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
 
       if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());
-      if (parametersPacket.getVisGraphWithAStarHeuristicsWeight() != noValue)
-         setVisGraphWithAStarHeuristicsWeight(parametersPacket.getVisGraphWithAStarHeuristicsWeight());
-      if (parametersPacket.getDepthFirstHeuristicsWeight() != noValue)
-         setDepthFirstHeuristicsWeight(parametersPacket.getDepthFirstHeuristicsWeight());
-      if (parametersPacket.getBodyPathBasedHeuristicsWeight() != noValue)
-         setBodyPathBasedHeuristicWeight(parametersPacket.getBodyPathBasedHeuristicsWeight());
 
       if (parametersPacket.getYawWeight() != noValue)
          setYawWeight(parametersPacket.getYawWeight());
@@ -472,18 +474,22 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setCostPerStep(parametersPacket.getCostPerStep());
       if (parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize() != noValue)
          setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
-      if (parametersPacket.getBoundingBoxCost() != noValue)
-         setBoundingBoxCost(parametersPacket.getBoundingBoxCost());
 
       if (parametersPacket.getFootholdAreaWeight() != noValue)
          setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
-      if (parametersPacket.getLongStepWeight() != noValue)
-         setLongStepWeight(parametersPacket.getLongStepWeight());
-      if (parametersPacket.getBodyPathViolationWeight() != noValue)
-         setBodyPathViolationWeight(parametersPacket.getBodyPathViolationWeight());
       if (parametersPacket.getDistanceFromPathTolerance() != noValue)
          setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
       if (parametersPacket.getDeltaYawFromReferenceTolerance() != noValue)
          setDeltaYawFromReferenceTolerance(parametersPacket.getDeltaYawFromReferenceTolerance());
+      setEnableShinCollisionCheck(parametersPacket.getEnableShinCollisionCheck());
+      if (parametersPacket.getShinLength() != noValue)
+         setShinLength(parametersPacket.getShinLength());
+      if (parametersPacket.getShinToeClearance() != noValue)
+         setShinToeClearance(parametersPacket.getShinToeClearance());
+      if (parametersPacket.getShinHeelClearance() != noValue)
+         setShinHeelClearance(parametersPacket.getShinHeelClearance());
+      if (parametersPacket.getShinHeightOffet() != noValue)
+         setShinHeightOffset(parametersPacket.getShinHeightOffet());
+      setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

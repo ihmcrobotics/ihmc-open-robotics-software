@@ -124,7 +124,7 @@ vt 0.2417 0.5928 0.0000
 vt 0.7583 0.5928 0.0000
 # 38 texture coords
 
-o Cylinder
+#o Cylinder
 g Cylinder
 usemtl Material
 s off

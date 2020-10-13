@@ -119,7 +119,7 @@ public class TurnWalkTurnPlanner
          robotSide = robotSide.getOppositeSide();
          footstepPlan.addFootstep(robotSide, FlatGroundPlanningUtils.poseFormPose2d(footstepPose2d, groundHeight));
       }
-      return FootstepPlanningResult.OPTIMAL_SOLUTION;
+      return FootstepPlanningResult.FOUND_SOLUTION;
    }
 
    private void addSquareUp(ArrayList<FramePose2D> footstepList, FramePoint2D robotPosition)

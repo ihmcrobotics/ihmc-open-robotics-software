@@ -484,17 +484,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepPlanRequestPacket nextFootstepPlanRequestPacket(Random random)
-   {
-      FootstepPlanRequestPacket next = new FootstepPlanRequestPacket();
-      next.getStartFootstep().set(nextFootstepDataMessage(random));
-      next.setThetaStart(random.nextDouble());
-      next.setMaxSubOptimality(random.nextDouble());
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getGoals());
-      next.setFootstepPlanRequestType(RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte());
-      return next;
-   }
-
    public static HeatMapPacket nextHeatMapPacket(Random random)
    {
       HeatMapPacket next = new HeatMapPacket();
@@ -652,24 +641,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepPathPlanPacket nextFootstepPathPlanPacket(Random random)
-   {
-      FootstepPathPlanPacket next = new FootstepPathPlanPacket();
-      next.setGoalsValid(random.nextBoolean());
-      next.getStart().set(nextFootstepDataMessage(random));
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getOriginalGoals());
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getPathPlan());
-      int size = Math.abs(random.nextInt(1000));
-      for (int i = 0; i < size; i++)
-      {
-         next.getFootstepUnknown().add((byte) random.nextInt(2));
-      }
-      next.setSubOptimality(random.nextDouble());
-      next.setPathCost(random.nextDouble());
-
-      return next;
-   }
-
    public static AtlasWristSensorCalibrationRequestPacket nextAtlasWristSensorCalibrationRequestPacket(Random random)
    {
       AtlasWristSensorCalibrationRequestPacket next = new AtlasWristSensorCalibrationRequestPacket();
@@ -700,8 +671,8 @@ public final class RandomHumanoidMessages
       next.getDesiredCapturePoint2d().set(RandomGeometry.nextPoint3D(random, max, max, 0.0));
       next.getCenterOfMass3d().set(RandomGeometry.nextPoint3D(random, max, max, max));
 
-      IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getLeftFootSupportPolygon2d().add()::set);
-      IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getRightFootSupportPolygon2d().add()::set);
+      IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getLeftFootSupportPolygon3d().add()::set);
+      IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getRightFootSupportPolygon3d().add()::set);
 
       return next;
    }
@@ -753,8 +724,8 @@ public final class RandomHumanoidMessages
 
          previousFootstep.transform(position);
 
-         previousFootstep.setTranslation(new Vector3D32(position));
-         previousFootstep.setRotation(orientation);
+         previousFootstep.getTranslation().set(new Vector3D32(position));
+         previousFootstep.getRotation().set(orientation);
 
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, new Point3D(position), orientation);
 

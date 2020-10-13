@@ -4,7 +4,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Provides a default implementation for Yo PID gains for a SE3 PID controller.
@@ -39,7 +39,7 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
     * @param configuration and initial values for the gains.
     * @param registry the registry to which the tuning variables are attached.
     */
-   public DefaultYoPIDSE3Gains(String suffix, PIDSE3Configuration configuration, YoVariableRegistry registry)
+   public DefaultYoPIDSE3Gains(String suffix, PIDSE3Configuration configuration, YoRegistry registry)
    {
       this(suffix, configuration.getPositionConfiguration(), configuration.getOrientationConfiguration(), registry);
    }
@@ -53,7 +53,7 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
     * @param registry the registry to which the tuning variables are attached.
     */
    public DefaultYoPIDSE3Gains(String suffix, PID3DConfiguration positionConfiguration, PID3DConfiguration orientationConfiguration,
-                               YoVariableRegistry registry)
+                               YoRegistry registry)
    {
       this(suffix, positionConfiguration.getGainCoupling(), orientationConfiguration.getGainCoupling(), positionConfiguration.isUseIntegrator(),
            orientationConfiguration.isUseIntegrator(), positionConfiguration.getGains(), orientationConfiguration.getGains(), registry);
@@ -68,7 +68,7 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
     * @param useIntegrator whether the position and orientation gains will use an integrator.
     * @param registry the registry to which the tuning variables are attached.
     */
-   public DefaultYoPIDSE3Gains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
+   public DefaultYoPIDSE3Gains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoRegistry registry)
    {
       this(suffix, gainCoupling, gainCoupling, useIntegrator, useIntegrator, null, null, registry);
    }
@@ -87,7 +87,7 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
     * @param registry the registry to which the tuning variables are attached.
     */
    public DefaultYoPIDSE3Gains(String suffix, GainCoupling gainCouplingPosition, GainCoupling gainCouplingOrientation, boolean useIntegratorPosition,
-                               boolean useIntegratorOrientation, PID3DGainsReadOnly positionGains, PID3DGainsReadOnly orientationGains, YoVariableRegistry registry)
+                               boolean useIntegratorOrientation, PID3DGainsReadOnly positionGains, PID3DGainsReadOnly orientationGains, YoRegistry registry)
    {
       this.positionGains = new DefaultYoPID3DGains(suffix + "Position", gainCouplingPosition, useIntegratorPosition, positionGains, registry);
       this.orientationGains = new DefaultYoPID3DGains(suffix + "Orientation", gainCouplingOrientation, useIntegratorOrientation, orientationGains, registry);

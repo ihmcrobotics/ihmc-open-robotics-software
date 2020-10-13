@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableDoorRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -20,7 +20,7 @@ import us.ihmc.commons.thread.ThreadTools;
 
 public class ContactableDoorRobotTest
 {   
-   private YoVariableRegistry doorTestRegistry;
+   private YoRegistry doorTestRegistry;
    
    private Robot[] robots;
    
@@ -52,7 +52,7 @@ public class ContactableDoorRobotTest
    @Test
    public void testDoorIsClosing()
    {
-      doorTestRegistry = new YoVariableRegistry("doorTestRegistry");
+      doorTestRegistry = new YoRegistry("doorTestRegistry");
       robots = new Robot[1];
       
       // create door   
@@ -67,7 +67,7 @@ public class ContactableDoorRobotTest
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robots, parameters);
       
-      scs.addYoVariableRegistry(doorTestRegistry);
+      scs.addYoRegistry(doorTestRegistry);
       
       Thread myThread = new Thread(scs);
       myThread.start();

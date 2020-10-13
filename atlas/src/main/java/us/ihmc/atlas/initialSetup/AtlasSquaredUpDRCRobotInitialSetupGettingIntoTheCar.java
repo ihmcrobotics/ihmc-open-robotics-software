@@ -354,8 +354,8 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          throw new RuntimeException("Not implemented yet!");
       }
 
-      pelvisInitialPose.setPosition(pelvisPosition);
-      pelvisInitialPose.setOrientation(pelvisOrientation);
+      pelvisInitialPose.getPosition().set(pelvisPosition);
+      pelvisInitialPose.getOrientation().set(pelvisOrientation);
 
       armInitialJointPositions.put(RobotSide.LEFT, leftArmInitialJointPositions);
       armInitialJointPositions.put(RobotSide.RIGHT, rightArmInitialJointPositions);

@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.UtilPlane3D_F64;
@@ -31,8 +31,8 @@ public class EstimateMotionFromBox
    Vector3D_F64 v1 = new Vector3D_F64();
    Vector3D_F64 v2 = new Vector3D_F64();
 
-   DenseMatrix64F R0 = new DenseMatrix64F(3,3);
-   DenseMatrix64F R1 = new DenseMatrix64F(3,3);
+   DMatrixRMaj R0 = new DMatrixRMaj(3,3);
+   DMatrixRMaj R1 = new DMatrixRMaj(3,3);
 
    public void setSrc( PlaneNormal3D_F64 left , PlaneNormal3D_F64 right , PlaneNormal3D_F64 top ) {
       intersect(left, right, top, centerA);
@@ -44,7 +44,7 @@ public class EstimateMotionFromBox
       intersect(dstLeft, dstRight, dstTop, centerB);
       createRotation(dstLeft,dstRight,R1);
 
-      CommonOps.multTransB(R1,R0,found.getR());
+      CommonOps_DDRM.multTransB(R1,R0,found.getR());
 
       GeometryMath_F64.mult(found.getR(),centerA,centerA);
 
@@ -67,7 +67,7 @@ public class EstimateMotionFromBox
       System.out.println("Intersection of all planes: "+p);
    }
 
-   private void createRotation( PlaneNormal3D_F64 left , PlaneNormal3D_F64 right , DenseMatrix64F R ) {
+   private void createRotation( PlaneNormal3D_F64 left , PlaneNormal3D_F64 right , DMatrixRMaj R ) {
 
       v0.set(left.n);
       v1.set(right.n);

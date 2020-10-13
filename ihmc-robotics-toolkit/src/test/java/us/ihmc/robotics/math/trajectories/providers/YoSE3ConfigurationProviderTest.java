@@ -13,22 +13,22 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoSE3ConfigurationProviderTest
 {
    private String name = "nameTest";
 
    private ReferenceFrame referenceFrame;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    private YoSE3ConfigurationProvider provider;
 
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      registry = new YoVariableRegistry("registryTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
+      registry = new YoRegistry("registryTEST");
    }
 
    @AfterEach

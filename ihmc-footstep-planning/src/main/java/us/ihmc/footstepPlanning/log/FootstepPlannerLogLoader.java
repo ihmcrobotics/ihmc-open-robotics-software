@@ -3,17 +3,16 @@ package us.ihmc.footstepPlanning.log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -24,24 +23,100 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.variable.YoVariableType;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
+   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
+   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer  = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    private FootstepPlannerLog log = null;
    private final ObjectMapper objectMapper = new ObjectMapper();
 
-   public boolean load()
+   public enum LoadResult
+   {
+      LOADED, CANCELLED, ERROR
+   }
+
+   public enum LoadRequestType
+   {
+      FILE_CHOOSER, LATEST, NEXT, PREVIOUS
+   }
+
+   public LoadResult load(LoadRequestType loadRequestType, FootstepPlannerLog alreadyOpenLog)
+   {
+      if (loadRequestType == LoadRequestType.FILE_CHOOSER)
+      {
+         return load();
+      }
+      else
+      {
+         if ((loadRequestType == LoadRequestType.PREVIOUS || loadRequestType == LoadRequestType.NEXT) && alreadyOpenLog == null)
+         {
+            LogTools.warn("Must have log open to view {} log", loadRequestType.name());
+            return LoadResult.ERROR;
+         }
+
+         SortedSet<Path> sortedLogFolderPaths = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+         PathTools.walkFlat(Paths.get(FootstepPlannerLogger.defaultLogsDirectory), (path, type) -> {
+            if (type == BasicPathVisitor.PathType.DIRECTORY
+                && path.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
+               sortedLogFolderPaths.add(path);
+            return FileVisitResult.CONTINUE;
+         });
+
+         if (loadRequestType == LoadRequestType.LATEST)
+         {
+            return load(sortedLogFolderPaths.last().toFile());
+         }
+         else
+         {
+            Path loadedLog = sortedLogFolderPaths.last().getParent().resolve(alreadyOpenLog.getLogName());
+
+            if (loadRequestType == LoadRequestType.PREVIOUS)
+            {
+               SortedSet<Path> headSet = sortedLogFolderPaths.headSet(loadedLog);
+               if (headSet.isEmpty())
+               {
+                  LogTools.warn("No earlier logs found!");
+                  return LoadResult.ERROR;
+               }
+               else
+               {
+                  return load(headSet.last().toFile());
+               }
+            }
+            else // if (type == LoadRequestType.NEXT)
+            {
+               SortedSet<Path> tailSet = sortedLogFolderPaths.tailSet(loadedLog);
+               tailSet.remove(tailSet.first());
+               if (tailSet.isEmpty())
+               {
+                  LogTools.warn("No newer logs found!");
+                  return LoadResult.ERROR;
+               }
+               else
+               {
+                  return load(tailSet.first().toFile());
+               }
+            }
+         }
+      }
+   }
+
+   public LoadResult load()
    {
       JFileChooser fileChooser = new JFileChooser();
       File logDirectory = new File(FootstepPlannerLogger.getDefaultLogsDirectory());
@@ -49,8 +124,14 @@ public class FootstepPlannerLogLoader
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
       int chooserState = fileChooser.showOpenDialog(null);
 
-      if (chooserState != JFileChooser.APPROVE_OPTION)
-         return false;
+      if (chooserState == JFileChooser.CANCEL_OPTION)
+      {
+         return LoadResult.CANCELLED;
+      }
+      else if (chooserState != JFileChooser.APPROVE_OPTION)
+      {
+         return LoadResult.ERROR;
+      }
 
       return load(fileChooser.getSelectedFile());
    }
@@ -59,12 +140,12 @@ public class FootstepPlannerLogLoader
     * Loads the given log file. If successful, retreive the log by calling {@link #getLog}
     * @return if the log loaded successfully
     */
-   public boolean load(File logDirectory)
+   public LoadResult load(File logDirectory)
    {
       if (!logDirectory.isDirectory())
       {
          LogTools.error("The given file isn't a directory. This method should receive a directory as input");
-         return false;
+         return LoadResult.ERROR;
       }
 
       try
@@ -78,6 +159,13 @@ public class FootstepPlannerLogLoader
          log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
+         // load body path parameters packet
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
+         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+         bodyPathParametersPacketInputStream.close();
+
          // load footstep parameters packet
          File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
          InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
@@ -85,12 +173,25 @@ public class FootstepPlannerLogLoader
          log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
          footstepParametersPacketInputStream.close();
 
-         // load footstep parameters packet
-         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
-         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
-         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
-         bodyPathParametersPacketInputStream.close();
+         // load swing parameters packet
+         File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
+         if (swingParametersFile.exists())
+         {
+            InputStream swingParametersPacketInputStream = new FileInputStream(swingParametersFile);
+            jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
+            log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
+            swingParametersPacketInputStream.close();
+         }
+
+         // load split fraction parameters packet
+         File splitFractionParametersFile = new File(logDirectory, FootstepPlannerLogger.splitFractionParametersFileName);
+         if (splitFractionParametersFile.exists())
+         {
+            InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
+            jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
+            log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
+            splitFractionParametersInputStream.close();
+         }
 
          // load status packet
          File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);
@@ -122,22 +223,64 @@ public class FootstepPlannerLogLoader
             log.getVisibilityGraphHolder().addNavigableRegion(navigableRegion);
          }
 
+         // load header file
+         dataFileReader.close();
+         File headerFile = new File(logDirectory, FootstepPlannerLogger.headerFileName);
+         dataFileReader = new BufferedReader(new FileReader(headerFile));
+
+         List<String[]> enumValues = new ArrayList<>();
+
+         int numberOfEnums = getIntCSV(true, dataFileReader.readLine())[0];
+         for (int i = 0; i < numberOfEnums; i++)
+         {
+            String line = dataFileReader.readLine();
+            if (line == null)
+            {
+               throw new RuntimeException("Reached end of header file before expected");
+            }
+            enumValues.add(line.split(":")[1].split(","));
+         }
+
+         int numberOfVariables = getIntCSV(true, dataFileReader.readLine())[0];
+         for (int i = 0; i < numberOfVariables; i++)
+         {
+            String line = dataFileReader.readLine();
+            if (line == null)
+            {
+               break;
+            }
+
+            String[] descriptorStrings = line.replaceAll("\\s+", "").split(",");
+            YoVariableType type = YoVariableType.valueOf(descriptorStrings[1]);
+            if (type == YoVariableType.ENUM)
+            {
+               log.getVariableDescriptors().add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2], enumValues.get(Integer.parseInt(descriptorStrings[3]))));
+            }
+            else
+            {
+               log.getVariableDescriptors().add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2]));
+            }
+         }
+
+         log.getFootPolygons().put(RobotSide.LEFT, readPolygon(dataFileReader.readLine()));
+         log.getFootPolygons().put(RobotSide.RIGHT, readPolygon(dataFileReader.readLine()));
+
          // load data file
          dataFileReader.close();
          File dataFile = new File(logDirectory, FootstepPlannerLogger.dataFileName);
          dataFileReader = new BufferedReader(new FileReader(dataFile));
 
-         // data variables
-         dataFileReader.readLine();
-
-         while(dataFileReader.readLine() != null)
+         while (dataFileReader.readLine() != null)
          {
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setStanceNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealStep(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
+            iterationData.getStanceNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+            iterationData.getStanceNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
+            iterationData.getStanceNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
             log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
@@ -145,36 +288,34 @@ public class FootstepPlannerLogLoader
                // edge marker
                dataFileReader.readLine();
 
-               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData(numberOfVariables);
                edgeData.setStanceNode(iterationData.getStanceNode());
                edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
+               edgeData.setSolutionEdge(getBooleanCSV(true, dataFileReader.readLine())[0]);
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
+               edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+               edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
+               edgeData.getCandidateNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
 
-               double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
-               edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
-               edgeData.setFootAreaPercentage(doubleCSV[1]);
-               edgeData.setStepWidth(doubleCSV[2]);
-               edgeData.setStepLength(doubleCSV[3]);
-               edgeData.setStepHeight(doubleCSV[4]);
-               edgeData.setStepReach(doubleCSV[5]);
-               edgeData.setCostFromStart(doubleCSV[6]);
-               edgeData.setEdgeCost(doubleCSV[7]);
-               edgeData.setHeuristicCost(doubleCSV[8]);
-               edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
+               long[] longCSV = getLongCSV(true, dataFileReader.readLine());
+               for (int j = 0; j < longCSV.length; j++)
+               {
+                  edgeData.setData(j, longCSV[j]);
+               }
+
                iterationData.getChildNodes().add(edgeData.getCandidateNode());
-
                log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
             }
          }
 
-         return true;
+         return LoadResult.LOADED;
       }
       catch (Exception e)
       {
          LogTools.error("Exception while loading log");
          e.printStackTrace();
-         return false;
+         return LoadResult.ERROR;
       }
    }
 
@@ -277,6 +418,20 @@ public class FootstepPlannerLogLoader
       return data;
    }
 
+   private static long[] getLongCSV(boolean removeKey, String dataFileLine)
+   {
+      if(dataFileLine.contains("null"))
+         return new long[0];
+
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
+      long[] data = new long[csvString.length];
+      for (int i = 0; i < csvString.length; i++)
+      {
+         data[i] = Long.parseLong(csvString[i]);
+      }
+      return data;
+   }
+
    private static double[] getDoubleCSV(boolean removeKey, String dataFileLine)
    {
       if(dataFileLine.contains("null"))
@@ -287,6 +442,17 @@ public class FootstepPlannerLogLoader
       for (int i = 0; i < csvString.length; i++)
       {
          data[i] = Double.parseDouble(csvString[i]);
+      }
+      return data;
+   }
+
+   private static boolean[] getBooleanCSV(boolean removeKey, String dataFileLine)
+   {
+      String[] csvString = getStringCSV(removeKey, dataFileLine);
+      boolean[] data = new boolean[csvString.length];
+      for (int i = 0; i < csvString.length; i++)
+      {
+         data[i] = Boolean.parseBoolean(csvString[i]);
       }
       return data;
    }

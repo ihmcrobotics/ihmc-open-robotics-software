@@ -34,6 +34,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -79,7 +80,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
       nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.845 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08);
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -101,14 +102,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          double z = -0.40;
          Vector3D translation = new Vector3D(x, y, z);
          translation.scale(jointMap.getModelScale());
-         transform.setTranslation(translation);
+         transform.getTranslation().set(translation);
 
          RotationMatrix rotation = new RotationMatrix();
          double yaw = 0.0; // robotSide.negateIfRightSide(-1.7);
          double pitch = 0.7;
          double roll = 0.0; // robotSide.negateIfRightSide(-0.8);
          rotation.setYawPitchRoll(yaw, pitch, roll);
-         transform.setRotation(rotation);
+         transform.getRotation().set(rotation);
 
          handPosesWithRespectToChestFrame.put(robotSide, transform);
       }
@@ -487,7 +488,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
-      String[] joints = {bkxName, bkyName};
+      String leftKnyName = jointMap.getLegJointName(RobotSide.LEFT, LegJointName.KNEE_PITCH);
+      String rightKnyName = jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.KNEE_PITCH);
+      String[] joints = {bkxName, bkyName, leftKnyName, rightKnyName};
       return joints;
    }
 
@@ -607,5 +610,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
    {
       this.leapOfFaithParameters = leapOfFaithParameters;
+   }
+
+   /**
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
+    * Not a very clean variable and probably should not be here, but here it is...
+    */
+   @Override
+   public double getMaximumVelocityCoMHeight()
+   {
+      return 0.5;
    }
 }

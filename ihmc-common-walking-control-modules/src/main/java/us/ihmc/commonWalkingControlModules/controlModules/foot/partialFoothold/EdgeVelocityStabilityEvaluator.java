@@ -7,7 +7,7 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -45,7 +45,7 @@ public class EdgeVelocityStabilityEvaluator
                                          DoubleProvider centerOfRotationStableVelocityThreshold,
                                          IntegerProvider stableWindowWize,
                                          double dt,
-                                         YoVariableRegistry registry)
+                                         YoRegistry registry)
    {
       this.lineOfRotation = lineOfRotation;
       this.lineOfRotationStableVelocityThreshold = lineOfRotationStableVelocityThreshold;

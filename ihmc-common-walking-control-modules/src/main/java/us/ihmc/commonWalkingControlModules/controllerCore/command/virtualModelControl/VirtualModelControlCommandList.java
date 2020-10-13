@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
  */
 public class VirtualModelControlCommandList implements VirtualModelControlCommand<VirtualModelControlCommandList>
 {
+   private int commandId;
    /**
     * Internal storage of the commands.
     */
@@ -77,6 +78,7 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
     */
    public void clear()
    {
+      commandId = 0;
       commandList.clear();
    }
 
@@ -132,6 +134,9 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
    public void set(VirtualModelControlCommandList other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
    }
@@ -148,6 +153,18 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -158,6 +175,8 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
       {
          VirtualModelControlCommandList other = (VirtualModelControlCommandList) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfCommands() != other.getNumberOfCommands())
             return false;
          for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)

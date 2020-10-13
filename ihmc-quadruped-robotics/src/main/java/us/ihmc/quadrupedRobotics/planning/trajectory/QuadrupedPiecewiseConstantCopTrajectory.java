@@ -1,6 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.mutable.MutableDouble;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -26,12 +30,9 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
@@ -47,7 +48,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final WeightDistributionCalculator weightDistributionCalculator;
    private final DCMPlannerParameters plannerParameters;
 
-   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals, DCMPlannerParameters plannerParameters, YoVariableRegistry registry)
+   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals, DCMPlannerParameters plannerParameters, YoRegistry registry)
    {
       this.plannerParameters = plannerParameters;
       this.weightDistributionCalculator = plannerParameters.getWeightDistributionCalculatorForInclines();
@@ -266,7 +267,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       RobotQuadrant smallSideQuadrant = RobotQuadrant.getQuadrant(bigEnd, smallSide);
 
       double nominalYaw = getNominalYawForStance(contactState, solePositions);
-      nominalOrientation.setToYawQuaternion(nominalYaw);
+      nominalOrientation.setToYawOrientation(nominalYaw);
 
       smallSideContact.setIncludingFrame(solePositions.get(smallSideQuadrant));
       smallEndContact.setIncludingFrame(solePositions.get(smallEndQuadrant));
@@ -348,7 +349,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       double averageLength = 0.0;
       double averageWidth = 0.0;
       double nominalYaw = getNominalYawForStance(contactState, solePositions);
-      nominalOrientation.setToYawQuaternion(nominalYaw);
+      nominalOrientation.setToYawOrientation(nominalYaw);
 
       for (int i = 0; i < nextSteps.size(); i++)
       {
