@@ -62,6 +62,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+    * Ideal step length is linearly interpolated between {@link #getIdealFootstepLength} on flat ground and this value at max stance height
+    */
+   default double getIdealStepLengthAtMaxStepZ()
+   {
+      return get(idealStepLengthAtMaxStepZ);
+   }
+
+   /**
     * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
     * to the edge. A negative value means the footstep can overhang a region.
     */
@@ -323,6 +332,22 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getMaxStepZ()
    {
       return get(maxStepZ);
+   }
+
+   /**
+    * Maximum vertical distance between start-of-swing and touchdown
+    */
+   default double getMaxSwingZ()
+   {
+      return get(maxSwingZ);
+   }
+
+   /**
+    * Maximum xy distance between start-of-swing and touchdown
+    */
+   default double getMaxSwingReach()
+   {
+      return get(maxSwingReach);
    }
 
    /**

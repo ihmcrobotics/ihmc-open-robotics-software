@@ -20,6 +20,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  idealFootstepLength                          = keys.addDoubleKey ("Ideal footstep length", 0.3);
    public static final DoubleStoredPropertyKey  idealSideStepWidth                           = keys.addDoubleKey ("Ideal side step width", 0.35);
    public static final DoubleStoredPropertyKey  idealBackStepLength                          = keys.addDoubleKey ("Ideal back step length", 0.2);
+   public static final DoubleStoredPropertyKey  idealStepLengthAtMaxStepZ                    = keys.addDoubleKey ("Ideal step length at max step z", 0.2);
 
    // Footstep restriction parameters
    public static final DoubleStoredPropertyKey  minStepWidth                                 = keys.addDoubleKey ("Min step width", 0.15);
@@ -33,7 +34,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  maxStepWidth                                 = keys.addDoubleKey ("Max step width", 0.4);
    public static final DoubleStoredPropertyKey  maxStepReach                                 = keys.addDoubleKey ("Max step reach", 0.45);
    public static final DoubleStoredPropertyKey  maxStepYaw                                   = keys.addDoubleKey ("Max step yaw", 0.6);
-   public static final DoubleStoredPropertyKey  maxStepZ                                     = keys.addDoubleKey ("Max step Z", 0.28);
    public static final DoubleStoredPropertyKey  maxStepXWhenFullyPitched                     = keys.addDoubleKey ("Max step X when fully pitched", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepXWhenForwardAndDown               = keys.addDoubleKey ("Max step X when forward and down", 0.35);
    public static final DoubleStoredPropertyKey  maximumStepYWhenForwardAndDown               = keys.addDoubleKey ("Max step Y when forward and down", 0.4);
@@ -41,6 +41,10 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  maximumStepReachWhenSteppingUp               = keys.addDoubleKey ("Max step reach when stepping up", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepWidthWhenSteppingUp               = keys.addDoubleKey ("Max step width when stepping up", 0.4);
    public static final DoubleStoredPropertyKey  maximumStepZWhenSteppingUp                   = keys.addDoubleKey ("Max step Z when stepping up", Double.POSITIVE_INFINITY);
+
+   public static final DoubleStoredPropertyKey  maxStepZ                                     = keys.addDoubleKey ("Max step Z", 0.28);
+   public static final DoubleStoredPropertyKey  maxSwingZ                                    = keys.addDoubleKey ("Max swing Z", 0.56);
+   public static final DoubleStoredPropertyKey  maxSwingReach                                = keys.addDoubleKey ("Max swing reach", 0.9);
 
    public static final DoubleStoredPropertyKey  stepYawReductionFactorAtMaxReach             = keys.addDoubleKey("Step yaw reduction factor at max reach", 0.0);
 

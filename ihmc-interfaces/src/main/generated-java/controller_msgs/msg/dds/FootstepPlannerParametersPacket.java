@@ -69,6 +69,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double ideal_back_step_length_ = -11.1;
    /**
+            * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+            */
+   public double ideal_step_length_at_max_step_z_ = -11.1;
+   /**
             * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
             * to the edge. A negative value means the footstep can overhang a region.
             */
@@ -190,6 +194,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * z-up sole frame.
             */
    public double maximum_step_z_ = -11.1;
+   /**
+            * Maximum vertical distance between start-of-swing and touchdown
+            */
+   public double maximum_swing_z_ = -11.1;
+   /**
+            * Maximum xy distance between start-of-swing and touchdown
+            */
+   public double maximum_swing_reach_ = -11.1;
    /**
             * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
             * 
@@ -488,6 +500,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       ideal_back_step_length_ = other.ideal_back_step_length_;
 
+      ideal_step_length_at_max_step_z_ = other.ideal_step_length_at_max_step_z_;
+
       wiggle_inside_delta_target_ = other.wiggle_inside_delta_target_;
 
       wiggle_inside_delta_minimum_ = other.wiggle_inside_delta_minimum_;
@@ -515,6 +529,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_step_z_when_forward_and_down_ = other.maximum_step_z_when_forward_and_down_;
 
       maximum_step_z_ = other.maximum_step_z_;
+
+      maximum_swing_z_ = other.maximum_swing_z_;
+
+      maximum_swing_reach_ = other.maximum_swing_reach_;
 
       minimum_step_z_when_fully_pitched_ = other.minimum_step_z_when_fully_pitched_;
 
@@ -719,6 +737,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getIdealBackStepLength()
    {
       return ideal_back_step_length_;
+   }
+
+   /**
+            * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+            */
+   public void setIdealStepLengthAtMaxStepZ(double ideal_step_length_at_max_step_z)
+   {
+      ideal_step_length_at_max_step_z_ = ideal_step_length_at_max_step_z;
+   }
+   /**
+            * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+            */
+   public double getIdealStepLengthAtMaxStepZ()
+   {
+      return ideal_step_length_at_max_step_z_;
    }
 
    /**
@@ -1061,6 +1094,36 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepZ()
    {
       return maximum_step_z_;
+   }
+
+   /**
+            * Maximum vertical distance between start-of-swing and touchdown
+            */
+   public void setMaximumSwingZ(double maximum_swing_z)
+   {
+      maximum_swing_z_ = maximum_swing_z;
+   }
+   /**
+            * Maximum vertical distance between start-of-swing and touchdown
+            */
+   public double getMaximumSwingZ()
+   {
+      return maximum_swing_z_;
+   }
+
+   /**
+            * Maximum xy distance between start-of-swing and touchdown
+            */
+   public void setMaximumSwingReach(double maximum_swing_reach)
+   {
+      maximum_swing_reach_ = maximum_swing_reach;
+   }
+   /**
+            * Maximum xy distance between start-of-swing and touchdown
+            */
+   public double getMaximumSwingReach()
+   {
+      return maximum_swing_reach_;
    }
 
    /**
@@ -1966,6 +2029,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_back_step_length_, other.ideal_back_step_length_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_step_length_at_max_step_z_, other.ideal_step_length_at_max_step_z_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_target_, other.wiggle_inside_delta_target_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_minimum_, other.wiggle_inside_delta_minimum_, epsilon)) return false;
@@ -1993,6 +2058,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_when_forward_and_down_, other.maximum_step_z_when_forward_and_down_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_swing_z_, other.maximum_swing_z_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_swing_reach_, other.maximum_swing_reach_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_z_when_fully_pitched_, other.minimum_step_z_when_fully_pitched_, epsilon)) return false;
 
@@ -2115,6 +2184,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.ideal_back_step_length_ != otherMyClass.ideal_back_step_length_) return false;
 
+      if(this.ideal_step_length_at_max_step_z_ != otherMyClass.ideal_step_length_at_max_step_z_) return false;
+
       if(this.wiggle_inside_delta_target_ != otherMyClass.wiggle_inside_delta_target_) return false;
 
       if(this.wiggle_inside_delta_minimum_ != otherMyClass.wiggle_inside_delta_minimum_) return false;
@@ -2142,6 +2213,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.maximum_step_z_when_forward_and_down_ != otherMyClass.maximum_step_z_when_forward_and_down_) return false;
 
       if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
+
+      if(this.maximum_swing_z_ != otherMyClass.maximum_swing_z_) return false;
+
+      if(this.maximum_swing_reach_ != otherMyClass.maximum_swing_reach_) return false;
 
       if(this.minimum_step_z_when_fully_pitched_ != otherMyClass.minimum_step_z_when_fully_pitched_) return false;
 
@@ -2261,6 +2336,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.ideal_side_step_width_);      builder.append(", ");
       builder.append("ideal_back_step_length=");
       builder.append(this.ideal_back_step_length_);      builder.append(", ");
+      builder.append("ideal_step_length_at_max_step_z=");
+      builder.append(this.ideal_step_length_at_max_step_z_);      builder.append(", ");
       builder.append("wiggle_inside_delta_target=");
       builder.append(this.wiggle_inside_delta_target_);      builder.append(", ");
       builder.append("wiggle_inside_delta_minimum=");
@@ -2289,6 +2366,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_z_when_forward_and_down_);      builder.append(", ");
       builder.append("maximum_step_z=");
       builder.append(this.maximum_step_z_);      builder.append(", ");
+      builder.append("maximum_swing_z=");
+      builder.append(this.maximum_swing_z_);      builder.append(", ");
+      builder.append("maximum_swing_reach=");
+      builder.append(this.maximum_swing_reach_);      builder.append(", ");
       builder.append("minimum_step_z_when_fully_pitched=");
       builder.append(this.minimum_step_z_when_fully_pitched_);      builder.append(", ");
       builder.append("maximum_step_x_when_fully_pitched=");
