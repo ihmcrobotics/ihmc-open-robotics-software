@@ -177,9 +177,12 @@ public class LineSegmentEstimator {
                 ArrayList<Point> pointList = new ArrayList<>();
                 Point2D regionMidPoint = new Point2D(0, 0);
 
-                pointList = lineRegionAssoc.projectPlanarRegion(region, regionMidPoint);
-                lineRegionAssoc.drawProjectedRegion(curImg, pointList, regionMidPoint, region.getRegionId());
-                lineRegionAssoc.drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint);
+                if(region.getConvexHull().getArea()*1000 > 50){
+
+                    pointList = lineRegionAssoc.projectPlanarRegion(region, regionMidPoint);
+                    lineRegionAssoc.drawPolygonOnImage(curImg, pointList, regionMidPoint, region.getRegionId());
+                    lineRegionAssoc.drawLineRegionAssociation(curImgLeft, pointList, regionMidPoint, region.getRegionId());
+                }
 
             }
         }
