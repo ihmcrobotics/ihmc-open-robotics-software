@@ -21,6 +21,7 @@ ihmc {
 }
 
 mainDependencies {
+   implementation(files("/usr/local/share/java/opencv4/opencv-440.jar"))
    api("org.bytedeco:javacv-platform:1.5") {
       exclude(group = "org.bytedeco", module = "opencv")
    }
@@ -66,6 +67,9 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
+   api("us.ihmc:joctomap:1.11.0")
+   api("us.ihmc:ihmc-path-planning:source")
 }
 
 testDependencies {
@@ -76,3 +80,5 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
+
+
