@@ -46,6 +46,7 @@ public class AtlasPerceptionSimulation
                                     PlanarRegionsList map,
                                     boolean runRealsenseSLAM,
                                     boolean spawnUIs,
+                                    boolean simulateMultisenseLidar,
                                     boolean runLidarREA,
                                     DRCRobotModel robotModel)
    {
@@ -56,12 +57,14 @@ public class AtlasPerceptionSimulation
       // might be a weird delay with threads at 0.5 hz depending on each other
       double period = 1.0;
 
-      if (runLidarREA)
+      if (simulateMultisenseLidar)
       {
          MultisenseLidarSimulator multisenseLidar = new MultisenseLidarSimulator(robotModel, ros2Node, map);
          IHMCROS2Publisher<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
          multisenseLidar.addLidarScanListener(scan -> publisher.publish(PointCloudMessageTools.toLidarScanMessage(scan, multisenseLidar.getSensorPose())));
-
+      }
+      if (runLidarREA)
+      {
          ExceptionTools.handle(() ->
          {
             REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(
