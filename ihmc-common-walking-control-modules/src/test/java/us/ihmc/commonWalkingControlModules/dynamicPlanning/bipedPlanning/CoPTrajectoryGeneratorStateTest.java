@@ -2,12 +2,14 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -20,7 +22,7 @@ import java.util.Random;
 
 public class CoPTrajectoryGeneratorStateTest
 {
-   private static final double epsilon = 1e-7;
+   private static final double epsilon = 1e-5;
 
    @Test
    public void testConstruction()
@@ -92,8 +94,14 @@ public class CoPTrajectoryGeneratorStateTest
          EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(randomRightFootPose.getOrientation(),
                                                                        stateB.getFootPose(RobotSide.RIGHT).getOrientation(),
                                                                        epsilon);
-         EuclidFrameTestTools.assertFrameConvexPolygon2DEquals(randomLeftFootPolygon, stateB.getFootPolygonInSole(RobotSide.LEFT), epsilon);
-         EuclidFrameTestTools.assertFrameConvexPolygon2DEquals(randomRightFootPolygon, stateB.getFootPolygonInSole(RobotSide.RIGHT), epsilon);
+         EuclidGeometryTestTools.assertConvexPolygon2DGeometricallyEquals(randomLeftFootPolygon, stateB.getFootPolygonInSole(RobotSide.LEFT), epsilon);
+         EuclidGeometryTestTools.assertConvexPolygon2DGeometricallyEquals(randomRightFootPolygon, stateB.getFootPolygonInSole(RobotSide.RIGHT), epsilon);
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(randomLeftFootPolygon.getReferenceFrame().getTransformToWorldFrame(),
+                                                            stateB.getFootPolygonInSole(RobotSide.LEFT).getReferenceFrame().getTransformToWorldFrame(),
+                                                            epsilon);
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(randomRightFootPolygon.getReferenceFrame().getTransformToWorldFrame(),
+                                                            stateB.getFootPolygonInSole(RobotSide.RIGHT).getReferenceFrame().getTransformToWorldFrame(),
+                                                            epsilon);
       }
    }
 }
