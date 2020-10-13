@@ -17,12 +17,12 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class GradientDescentStepConstraintInput
 {
    /**
-    * Step polygon to be constrained. Expressed in "local frame", i.e. "snap frame", note that is different from the planar region's local frame
+    * Step polygon to be constrained. Expressed in the planar region's "local frame", note this is different than the "snap frame"
     */
    private final ConvexPolygon2D initialStepPolygon = new ConvexPolygon2D();
 
    /**
-    * Constraint region, i.e. planar region perimeter
+    * Constraint region, i.e. planar region perimeter. Expressed in planar region's "local frame"
     */
    private Vertex2DSupplier polygonToWiggleInto = null;
 
@@ -89,7 +89,7 @@ public class GradientDescentStepConstraintInput
 
    public void setPlanarRegion(PlanarRegion planarRegion)
    {
-      this.localToWorld.set(planarRegion.getTransformToLocal());
+      this.localToWorld.set(planarRegion.getTransformToWorld());
       this.polygonToWiggleInto = Vertex2DSupplier.asVertex2DSupplier(planarRegion.getConcaveHull());
    }
 

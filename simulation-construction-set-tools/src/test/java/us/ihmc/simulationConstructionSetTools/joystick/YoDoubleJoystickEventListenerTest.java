@@ -8,7 +8,7 @@ import net.java.games.input.Component;
 import net.java.games.input.Event;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.robotics.Assert.*;
@@ -19,7 +19,7 @@ public class YoDoubleJoystickEventListenerTest
 	@Test
    public void testMinMaxAverage()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble variable = new YoDouble("test", registry);
       TestComponent component = new TestComponent();
       component.setAnalog(true);

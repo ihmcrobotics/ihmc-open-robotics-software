@@ -11,102 +11,68 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus> implements Settable<FootstepPlanningToolboxOutputStatus>, EpsilonComparable<FootstepPlanningToolboxOutputStatus>
 {
-
    public static final byte BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION = (byte) 0;
-
    public static final byte BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 1;
-
    public static final byte BODY_PATH_PLANNING_RESULT_EXCEPTION = (byte) 2;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNING = (byte) 0;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_FOUND_SOLUTION = (byte) 1;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = (byte) 2;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 3;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 4;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED = (byte) 5;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = (byte) 6;
-
    public static final byte FOOTSTEP_PLANNING_RESULT_HALTED = (byte) 7;
-
    public static final int NO_PLAN_ID = -1;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * ID of the request this output corresponds to
             */
    public int plan_id_ = -1;
-
    /**
             * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
             */
    public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
-
    /**
             * Body path plan result. Null if no result is available
             */
    public byte body_path_planning_result_ = (byte) 255;
-
    /**
             * Footstep planner result. Null if no result is available
             */
    public byte footstep_planning_result_ = (byte) 255;
-
    /**
             * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
             */
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
-
    /**
             * Planned body path. Empty if planner failed
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
-
    /**
             * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
             */
    public us.ihmc.euclid.geometry.Pose3D goal_pose_;
-
    /**
             * Object to record various planner timings, helpful for debugging
             */
    public controller_msgs.msg.dds.FootstepPlanningTimingsMessage planner_timings_;
-
    /**
             * Contains planner stack trace if failure is due to an exception
             */
    public java.lang.StringBuilder exception_message_;
-
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  stacktrace_;
 
    public FootstepPlanningToolboxOutputStatus()
    {
-
-
-
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
-
-
-
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
-
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
-
       goal_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-
       planner_timings_ = new controller_msgs.msg.dds.FootstepPlanningTimingsMessage();
-
       exception_message_ = new java.lang.StringBuilder(255);
-
       stacktrace_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (20, "type_d");
 
    }
@@ -119,36 +85,24 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
    public void set(FootstepPlanningToolboxOutputStatus other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       plan_id_ = other.plan_id_;
 
-
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.footstep_data_list_, footstep_data_list_);
-
       body_path_planning_result_ = other.body_path_planning_result_;
-
 
       footstep_planning_result_ = other.footstep_planning_result_;
 
-
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
-
       body_path_.set(other.body_path_);
-
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.goal_pose_, goal_pose_);
-
       controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.staticCopy(other.planner_timings_, planner_timings_);
-
       exception_message_.setLength(0);
       exception_message_.append(other.exception_message_);
 
-
       stacktrace_.set(other.stacktrace_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -164,7 +118,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       return sequence_id_;
    }
-
 
    /**
             * ID of the request this output corresponds to
@@ -182,7 +135,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-
    /**
             * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
             */
@@ -190,7 +142,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       return footstep_data_list_;
    }
-
 
    /**
             * Body path plan result. Null if no result is available
@@ -206,7 +157,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       return body_path_planning_result_;
    }
-
 
    /**
             * Footstep planner result. Null if no result is available
@@ -224,7 +174,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-
    /**
             * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
             */
@@ -232,7 +181,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       return planar_regions_list_;
    }
-
 
 
    /**
@@ -244,7 +192,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-
    /**
             * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
             */
@@ -254,7 +201,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-
    /**
             * Object to record various planner timings, helpful for debugging
             */
@@ -262,7 +208,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    {
       return planner_timings_;
    }
-
 
    /**
             * Contains planner stack trace if failure is due to an exception
@@ -289,7 +234,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
 
-
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getStacktrace()
    {
       return stacktrace_;
@@ -313,23 +257,16 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
 
-
       if (!this.footstep_data_list_.epsilonEquals(other.footstep_data_list_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_planning_result_, other.body_path_planning_result_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon)) return false;
 
-
       if (!this.planar_regions_list_.epsilonEquals(other.planar_regions_list_, epsilon)) return false;
-
       if (this.body_path_.size() != other.body_path_.size()) { return false; }
       else
       {
@@ -337,13 +274,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
          {  if (!this.body_path_.get(i).epsilonEquals(other.body_path_.get(i), epsilon)) return false; }
       }
 
-
       if (!this.goal_pose_.epsilonEquals(other.goal_pose_, epsilon)) return false;
-
       if (!this.planner_timings_.epsilonEquals(other.planner_timings_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.exception_message_, other.exception_message_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.stacktrace_, other.stacktrace_, epsilon)) return false;
 
@@ -360,31 +293,20 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       FootstepPlanningToolboxOutputStatus otherMyClass = (FootstepPlanningToolboxOutputStatus) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.plan_id_ != otherMyClass.plan_id_) return false;
 
-
       if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_)) return false;
-
       if(this.body_path_planning_result_ != otherMyClass.body_path_planning_result_) return false;
-
 
       if(this.footstep_planning_result_ != otherMyClass.footstep_planning_result_) return false;
 
-
       if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_)) return false;
-
       if (!this.body_path_.equals(otherMyClass.body_path_)) return false;
-
       if (!this.goal_pose_.equals(otherMyClass.goal_pose_)) return false;
-
       if (!this.planner_timings_.equals(otherMyClass.planner_timings_)) return false;
-
       if (!us.ihmc.idl.IDLTools.equals(this.exception_message_, otherMyClass.exception_message_)) return false;
-
 
       if (!this.stacktrace_.equals(otherMyClass.stacktrace_)) return false;
 
@@ -397,37 +319,26 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanningToolboxOutputStatus {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("plan_id=");
       builder.append(this.plan_id_);      builder.append(", ");
-
       builder.append("footstep_data_list=");
       builder.append(this.footstep_data_list_);      builder.append(", ");
-
       builder.append("body_path_planning_result=");
       builder.append(this.body_path_planning_result_);      builder.append(", ");
-
       builder.append("footstep_planning_result=");
       builder.append(this.footstep_planning_result_);      builder.append(", ");
-
       builder.append("planar_regions_list=");
       builder.append(this.planar_regions_list_);      builder.append(", ");
-
       builder.append("body_path=");
       builder.append(this.body_path_);      builder.append(", ");
-
       builder.append("goal_pose=");
       builder.append(this.goal_pose_);      builder.append(", ");
-
       builder.append("planner_timings=");
       builder.append(this.planner_timings_);      builder.append(", ");
-
       builder.append("exception_message=");
       builder.append(this.exception_message_);      builder.append(", ");
-
       builder.append("stacktrace=");
       builder.append(this.stacktrace_);
       builder.append("}");

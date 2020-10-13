@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
+import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -160,9 +160,9 @@ public class BehaviorBuilderPatternTest
       AllRequiredClass allRequired = new AllRequiredClass();
 
       LogTools.info("Exceptions are supposed to print out here.");
-      executor.execute(() -> allRequired.run());
-      executor.execute(() -> allRequired.run());
-      executor.execute(() -> allRequired.run());
+      executor.submitTask(() -> allRequired.run());
+      executor.submitTask(() -> allRequired.run());
+      executor.submitTask(() -> allRequired.run());
    }
 
    class ExtendingClass extends AllRequiredClass

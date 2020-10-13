@@ -6,9 +6,9 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public interface SLAMInterface
 {
-   abstract void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage);
+   abstract void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss);
 
-   abstract boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage);
+   abstract boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage, boolean insertMiss);
 
    abstract void clear();
 

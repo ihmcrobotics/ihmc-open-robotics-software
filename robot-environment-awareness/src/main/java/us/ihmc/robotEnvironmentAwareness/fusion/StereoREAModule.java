@@ -20,12 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatur
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class StereoREAModule implements Runnable
 {

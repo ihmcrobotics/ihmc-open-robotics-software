@@ -9,7 +9,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkPr
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import javax.swing.*;
 import java.io.File;
@@ -23,7 +23,7 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 public class ConstantPlanarRegionsPublisher
 {
    private final PlanarRegionsList planarRegionsList;
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
    private final REAPlanarRegionPublicNetworkProvider publisher;
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;

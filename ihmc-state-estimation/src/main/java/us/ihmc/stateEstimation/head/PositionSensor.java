@@ -10,7 +10,7 @@ import us.ihmc.ekf.filter.sensor.Sensor;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A simple implementation of a body position sensor for the EKF framework.
@@ -32,7 +32,7 @@ public class PositionSensor extends Sensor
    private final DMatrixRMaj stateVector = new DMatrixRMaj(0, 0);
    private final Point3D measurement = new Point3D();
 
-   public PositionSensor(String sensorName, double dt, YoVariableRegistry registry)
+   public PositionSensor(String sensorName, double dt, YoRegistry registry)
    {
       this.sensorName = sensorName;
       sqrtHz = 1.0 / Math.sqrt(dt);

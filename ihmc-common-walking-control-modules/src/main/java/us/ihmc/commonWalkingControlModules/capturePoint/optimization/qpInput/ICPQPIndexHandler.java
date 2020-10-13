@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
@@ -31,7 +31,7 @@ public class ICPQPIndexHandler
    /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private final YoBoolean useAngularMomentum;
 
-   public ICPQPIndexHandler(YoVariableRegistry registry)
+   public ICPQPIndexHandler(YoRegistry registry)
    {
       useStepAdjustment = new YoBoolean(prefix + "UseStepAdjustment", registry);
       hasCMPFeedbackTask = new YoBoolean(prefix + "HasCMPFeedbackTask", registry);

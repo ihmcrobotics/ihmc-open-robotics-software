@@ -62,7 +62,13 @@ public class UIFootstepPlanManager
 
       // Send plan to robot when requested
       Runnable dispathPlanRunnable = () -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, adjustedPath.get());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send -> new Thread(dispathPlanRunnable).start());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SendPlan, send ->
+      {
+         if (adjustedPath.get() != null)
+         {
+            new Thread(dispathPlanRunnable, "SendPlan").start();
+         }
+      });
    }
 
    private void updatePartialFootholds(boolean ignorePartialFootholds)
@@ -167,12 +173,18 @@ public class UIFootstepPlanManager
 
    private static void setManualStepTimes(FootstepDataListMessage messageToSet, double manualSwingTime, double manualTransferTime)
    {
+      if (messageToSet == null)
+         return;
+
       messageToSet.getFootstepDataList().forEach(message -> message.setSwingDuration(manualSwingTime));
       messageToSet.getFootstepDataList().forEach(message -> message.setTransferDuration(manualTransferTime));
    }
 
    private static void copyStepTimes(FootstepDataListMessage messageToCopyFrom, FootstepDataListMessage messageToSet)
    {
+      if (messageToCopyFrom == null || messageToSet == null)
+         return;
+
       for (int i = 0; i < messageToSet.getFootstepDataList().size(); i++)
       {
          double swingTimeToCopy = messageToCopyFrom.getFootstepDataList().get(i).getSwingDuration();

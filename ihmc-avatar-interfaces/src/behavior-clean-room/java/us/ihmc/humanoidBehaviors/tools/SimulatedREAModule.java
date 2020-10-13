@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -12,7 +13,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import static us.ihmc.humanoidBehaviors.tools.SimulatedREAModule.SimulatedREAMod
 
 /**
  * Acts as REA, reporting currently visible area as planar regions.
+ * @deprecated Older class. not sure about this abstraction
  */
 public class SimulatedREAModule
 {
@@ -48,10 +50,10 @@ public class SimulatedREAModule
    {
       this.map = map;
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput());
-      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
+      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MODULE.withOutput());
 
       mode = robotModel == null ? REPUBLISH_FULL_MAP : REDUCE_TO_VIEWABLE_AREA;
 
@@ -61,7 +63,7 @@ public class SimulatedREAModule
          neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
          double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = 180.0;
-         simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
+         simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, neckFrame);
       }
 
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withInput(), this::acceptSupportRegionsList);
@@ -92,7 +94,7 @@ public class SimulatedREAModule
       {
          if (syncedRobot.hasReceivedFirstMessage())
          {
-            combinedRegionsList.addAll(simulatedDepthCamera.filterMapToVisible(map).getPlanarRegionsAsList());
+            combinedRegionsList.addAll(simulatedDepthCamera.computeAndPolygonize(map).getPlanarRegionsAsList());
          }
          else
          {

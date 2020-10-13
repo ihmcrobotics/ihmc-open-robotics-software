@@ -40,9 +40,7 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10000; ++i0)
       {
@@ -60,9 +58,7 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -76,9 +72,7 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
 
    public static void write(controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
-
 
       if(data.getOccupiedCells().size() <= 10000)
       cdr.write_type_e(data.getOccupiedCells());else
@@ -88,10 +82,8 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       cdr.read_type_e(data.getOccupiedCells());	
 
    }
@@ -99,18 +91,14 @@ public class FootstepPlannerOccupancyMapMessagePubSubType implements us.ihmc.pub
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_e("occupied_cells", data.getOccupiedCells());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerOccupancyMapMessage data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       ser.read_type_e("occupied_cells", data.getOccupiedCells());
    }
 

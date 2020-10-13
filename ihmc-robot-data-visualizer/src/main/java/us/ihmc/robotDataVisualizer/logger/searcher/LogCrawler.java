@@ -84,7 +84,7 @@ public class LogCrawler implements Runnable
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, null, useCollisionMeshes);
 
-      YoVariable<?>[] yoVariablesToUpdate = playbackListener.getYovariablesToUpdate(parser.getRootRegistry(), robotDescription);
+      YoVariable[] yoVariablesToUpdate = playbackListener.getYovariablesToUpdate(parser.getRootRegistry(), robotDescription);
       
       robot = new SpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties,
             yoVariablesToUpdate);

@@ -19,7 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SmoothCapturePointToolboxTest
 {
@@ -29,7 +29,7 @@ public class SmoothCapturePointToolboxTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private Random random = new Random(5165415);
    
-   YoVariableRegistry registry = new YoVariableRegistry("");
+   YoRegistry registry = new YoRegistry("Dummy");
    String namePrefix = "SmoothCapturePointToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
@@ -142,7 +142,7 @@ public class SmoothCapturePointToolboxTest
    public void testMatricesPrime3DLinear()
    {
       // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -208,7 +208,7 @@ public class SmoothCapturePointToolboxTest
    public void testMatricesPrime3DCubic()
    {
       // Cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       FrameTrajectory3D cubic3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -277,7 +277,7 @@ public class SmoothCapturePointToolboxTest
    public void testCalculateICPPositionAndVelocityOnSegment3DLinear()
    {
    // Linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
@@ -335,7 +335,7 @@ public class SmoothCapturePointToolboxTest
    public void testCalculateICPPositionAndVelocityOnSegment3DCubic()
    {
       // Cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       FrameTrajectory3D cubic3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       

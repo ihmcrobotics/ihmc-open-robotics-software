@@ -24,7 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class JoystickBasedGraspingMainUI
 {
@@ -41,7 +41,7 @@ public class JoystickBasedGraspingMainUI
    @FXML
    private GraspingPaneController graspingPaneController;
 
-   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public JoystickBasedGraspingMainUI(String robotName, Stage primaryStage, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
          throws Exception
    {

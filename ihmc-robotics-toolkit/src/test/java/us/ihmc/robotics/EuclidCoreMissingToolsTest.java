@@ -16,6 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
@@ -320,7 +321,7 @@ public class EuclidCoreMissingToolsTest
 
       for (int i = 0; i < iters; i++)
       { // We build the normal and tangential parts of the vector and then assemble it and expect to get the normal part pack.
-         // Setting trivial setup using Axis3D
+        // Setting trivial setup using Axis3D
          Axis3D normalAxis = EuclidCoreRandomTools.nextAxis3D(random);
          Axis3D tangentialAxis = random.nextBoolean() ? normalAxis.next() : normalAxis.previous();
          Vector3D normalPart = new Vector3D();
@@ -362,6 +363,66 @@ public class EuclidCoreMissingToolsTest
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
          EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
+      }
+   }
+
+   @Test
+   public void testSetNormalPart()
+   {
+      Random random = new Random(897632);
+
+      for (int i = 0; i < iters; i++)
+      {
+         // Setting trivial setup using Axis3D
+         Axis3D normalAxis = EuclidCoreRandomTools.nextAxis3D(random);
+         Axis3D tangentialAxis = random.nextBoolean() ? normalAxis.next() : normalAxis.previous();
+         Vector3D normalPart = new Vector3D();
+         Vector3D tangentialPart = new Vector3D();
+         double normalMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         double tangentialMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         normalPart.setAndScale(normalMagnitude, normalAxis);
+         tangentialPart.setAndScale(tangentialMagnitude, tangentialAxis);
+
+         Point3D input = new Point3D(normalPart);
+         input.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), tangentialPart, input);
+
+         Vector3D tupleToModify = new Vector3D(tangentialPart);
+         tupleToModify.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), normalPart, tupleToModify);
+
+         Vector3D expected = new Vector3D();
+         expected.add(normalPart, tangentialPart);
+
+         EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
+         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+      }
+
+      for (int i = 0; i < iters; i++)
+      {
+         Vector3D normalAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+         Vector3D tangentialAxis = EuclidCoreRandomTools.nextOrthogonalVector3D(random, normalAxis, true);
+         Vector3D normalPart = new Vector3D();
+         Vector3D tangentialPart = new Vector3D();
+         double normalMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         double tangentialMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         normalPart.setAndScale(normalMagnitude, normalAxis);
+         tangentialPart.setAndScale(tangentialMagnitude, tangentialAxis);
+
+         Point3D input = new Point3D(normalPart);
+         input.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), tangentialPart, input);
+
+         Vector3D tupleToModify = new Vector3D(tangentialPart);
+         tupleToModify.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), normalPart, tupleToModify);
+
+         Vector3D expected = new Vector3D();
+         expected.add(normalPart, tangentialPart);
+
+         EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
+         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
+
+         // Randomize the axis
+         normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
+         EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
+         EuclidCoreTestTools.assertTuple3DEquals(expected, tupleToModify, EPSILON);
       }
    }
 

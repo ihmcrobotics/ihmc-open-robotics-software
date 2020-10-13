@@ -20,7 +20,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -28,7 +28,7 @@ public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
    private final IHMCROS2Publisher<Image32> imagePublisher;
 
@@ -52,7 +52,7 @@ public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
       rosMainNode.execute();
 
       imagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT);
-      System.out.println(ROS2Tools.IHMC_ROOT.withType(Image32.class));
+      System.out.println(ROS2Tools.IHMC_ROOT.withTypeName(Image32.class));
 
       cameraInfoBridge = new MultisenseCameraInfoROS1Bridge();
 

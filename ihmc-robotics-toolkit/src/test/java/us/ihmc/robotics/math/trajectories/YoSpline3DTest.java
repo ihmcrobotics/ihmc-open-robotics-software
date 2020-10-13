@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoSpline3DTest
 {
@@ -29,7 +29,7 @@ public class YoSpline3DTest
    public void testCubic()
    {
       //cubic is constructed such that x(t) = t^3 + 2t^2 + t + 1, y(t) = 2t^3 + t + 4, z(t) = t^2 + 7
-      YoVariableRegistry registry = new YoVariableRegistry("Spline3DTest");
+      YoRegistry registry = new YoRegistry("Spline3DTest");
       YoSpline3D cubic = new YoSpline3D(4, 4, worldFrame, registry, "");
       double t0 = 1.0;
       double tf = 5.0;
@@ -54,7 +54,7 @@ public class YoSpline3DTest
 	@Test
    public void testQuintic()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Spline3DTest");
+      YoRegistry registry = new YoRegistry("Spline3DTest");
 	   YoSpline3D quintic = new YoSpline3D(6, 4, worldFrame, registry, "");
 	   // quintic is constructed such that x(t) = t^5 - t^3 + t - 1, y(t) = 2t^5 - 4, z(t) = t^5 + 2t^4
 	   double t0 = 0.0;
@@ -118,7 +118,7 @@ public class YoSpline3DTest
    
    private YoSpline3D generateRandomQuintic(Random random)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Spline3DTest");
+      YoRegistry registry = new YoRegistry("Spline3DTest");
 	   YoSpline3D spline = new YoSpline3D(6, 4, worldFrame, registry, "");
 	   
 	   double t0 = random.nextDouble() - 1;
@@ -143,7 +143,7 @@ public class YoSpline3DTest
    public void testArcLengthMethods()
    {
 	   // find arc length from t=0 to t=1 of: x = t, y = t, z = t
-      YoVariableRegistry registry = new YoVariableRegistry("Spline3DTest");
+      YoRegistry registry = new YoRegistry("Spline3DTest");
 	   YoSpline3D spline = new YoSpline3D(4, 500, worldFrame, registry, "");
 	   
 	   double t0 = 0.0;

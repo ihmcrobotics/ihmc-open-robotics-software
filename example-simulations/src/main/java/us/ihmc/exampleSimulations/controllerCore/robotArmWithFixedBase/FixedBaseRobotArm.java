@@ -21,7 +21,7 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class FixedBaseRobotArm extends Robot
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
    private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslation(), this);
-   private final YoDouble dummyAlpha = new YoDouble("dummy", new YoVariableRegistry("dummy"));
+   private final YoDouble dummyAlpha = new YoDouble("dummy", new YoRegistry("dummy"));
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
@@ -122,9 +122,9 @@ public class FixedBaseRobotArm extends Robot
 
       handControlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
-      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
+      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                            controlFrameTracker.getYoVelocity());
-      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
+      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                             controlFrameTracker.getYoAngularVelocity());
 
       setJointLimits();

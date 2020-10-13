@@ -14,22 +14,18 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage> implements Settable<SO3TrajectoryPointMessage>, EpsilonComparable<SO3TrajectoryPointMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
             */
    public double time_;
-
    /**
             * Define the desired 3D orientation to be reached at this trajectory point.
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
-
    /**
             * Define the desired 3D angular velocity to be reached at this trajectory point.
             */
@@ -37,13 +33,8 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
    public SO3TrajectoryPointMessage()
    {
-
-
-
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-
       angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-
    }
 
    public SO3TrajectoryPointMessage(SO3TrajectoryPointMessage other)
@@ -54,18 +45,13 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
    public void set(SO3TrajectoryPointMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       time_ = other.time_;
 
-
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
-
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -81,7 +67,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    {
       return sequence_id_;
    }
-
 
    /**
             * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
@@ -99,7 +84,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    }
 
 
-
    /**
             * Define the desired 3D orientation to be reached at this trajectory point.
             */
@@ -107,7 +91,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    {
       return orientation_;
    }
-
 
 
    /**
@@ -136,15 +119,11 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon)) return false;
 
-
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
-
       if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon)) return false;
 
       return true;
@@ -159,15 +138,11 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
       SO3TrajectoryPointMessage otherMyClass = (SO3TrajectoryPointMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.time_ != otherMyClass.time_) return false;
 
-
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
-
       if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_)) return false;
 
       return true;
@@ -179,16 +154,12 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("SO3TrajectoryPointMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("time=");
       builder.append(this.time_);      builder.append(", ");
-
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
-
       builder.append("angular_velocity=");
       builder.append(this.angular_velocity_);
       builder.append("}");

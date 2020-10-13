@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepPoseChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -53,7 +53,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Returns the ideal length when walking backwards. This value is negative.
+    * Returns the ideal length when walking backwards. This value is positive.
     */
    default double getIdealBackStepLength()
    {
@@ -61,23 +61,21 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
-    * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-    * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-    * to allowing footsteps that partially intersect planar regions.
-    *
-    * <p>
-    * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-    * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-    * <ul>
-    *    <li>The smallest acceptable distance to the edge of a cliff</li>
-    *    <li>The maximum error between desired and actual foot placement</li>
-    * </ul>
-    * </p>
+    * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+    * to the edge. A negative value means the footstep can overhang a region.
     */
-   default double getWiggleInsideDelta()
+   default double getWiggleInsideDeltaTarget()
    {
-      return get(wiggleInsideDelta);
+      return get(wiggleInsideDeltaTarget);
+   }
+
+   /**
+    * This parameter only is used if {@link #getWiggleWhilePlanning} is true. If a step cannot be wiggled inside by this amount or more,
+    * it will be rejected. Note that if {@link #getWiggleWhilePlanning} if false, it's always best effort on the final plan.
+    */
+   default double getWiggleInsideDeltaMinimum()
+   {
+      return get(wiggleInsideDeltaMinimum);
    }
 
    /**
@@ -129,7 +127,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
+    *    The {@link FootstepPoseChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
    default double getMinimumStepWidth()
@@ -487,7 +485,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </p>
     *
     * <p>
-    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
+    *   The {@link FootstepPoseChecker} will reject a node if it is too wide using this parameter.
     * </p>
     */
    default double getMaximumStepWidth()
@@ -809,11 +807,19 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Radius of the shin collidable cylinder
+    * How far the shin collision cylinder extends from the toe
     */
-   default double getShinRadius()
+   default double getShinToeClearance()
    {
-      return get(shinRadius);
+      return get(shinToeClearance);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the heel
+    */
+   default double getShinHeelClearance()
+   {
+      return get(shinHeelClearance);
    }
 
    /**
@@ -825,27 +831,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Pitch of the shin collidable cylinder
-    */
-   default double getShinPitch()
-   {
-      return get(shinPitch);
-   }
-
-   /**
     * Height offset of shin collidable cylinder
     */
    default double getShinHeightOffset()
    {
       return get(shinHeightOffet);
-   }
-
-   /**
-    * Distance epsilon below snapped footstep that will be added to foothold
-    */
-   default double getDistanceEpsilonToBridgeRegions()
-   {
-      return get(distanceEpsilonToBridgeRegions);
    }
 
    /**

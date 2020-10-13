@@ -12,34 +12,21 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage> implements Settable<HighLevelStateMessage>, EpsilonComparable<HighLevelStateMessage>
 {
-
    public static final byte DO_NOTHING_BEHAVIOR = (byte) 0;
-
    public static final byte STAND_PREP_STATE = (byte) 1;
-
    public static final byte STAND_READY = (byte) 2;
-
    public static final byte FREEZE_STATE = (byte) 3;
-
    public static final byte STAND_TRANSITION_STATE = (byte) 4;
-
    public static final byte WALKING = (byte) 5;
-
    public static final byte EXIT_WALKING = (byte) 6;
-
    public static final byte DIAGNOSTICS = (byte) 7;
-
    public static final byte CALIBRATION = (byte) 8;
-
    public static final byte CUSTOM1 = (byte) 9;
-
    public static final byte FALLING_STATE = (byte) 10;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies the which state the controller should transition into.
             */
@@ -47,9 +34,6 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
    public HighLevelStateMessage()
    {
-
-
-
    }
 
    public HighLevelStateMessage(HighLevelStateMessage other)
@@ -60,14 +44,11 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
    public void set(HighLevelStateMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       high_level_controller_name_ = other.high_level_controller_name_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -83,7 +64,6 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
    {
       return sequence_id_;
    }
-
 
    /**
             * Specifies the which state the controller should transition into.
@@ -118,9 +98,7 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.high_level_controller_name_, other.high_level_controller_name_, epsilon)) return false;
 
@@ -137,9 +115,7 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
       HighLevelStateMessage otherMyClass = (HighLevelStateMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.high_level_controller_name_ != otherMyClass.high_level_controller_name_) return false;
 
@@ -153,10 +129,8 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("HighLevelStateMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("high_level_controller_name=");
       builder.append(this.high_level_controller_name_);
       builder.append("}");

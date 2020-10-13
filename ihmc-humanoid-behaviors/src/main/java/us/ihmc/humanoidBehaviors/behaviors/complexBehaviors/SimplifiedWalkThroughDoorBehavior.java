@@ -38,7 +38,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -96,10 +96,10 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
    private final HumanoidReferenceFrames referenceFrames;
    // private BasicTimingBehavior basicTimingBehavior;
 
-   public SimplifiedWalkThroughDoorBehavior(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
-                                  FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                  WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimplifiedWalkThroughDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                                            FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                            WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions,
+                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);

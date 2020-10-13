@@ -106,7 +106,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
@@ -184,7 +184,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
@@ -268,7 +268,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
@@ -347,7 +347,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
@@ -447,7 +447,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
@@ -520,7 +520,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       Quaternion offsetOrientationChest = new Quaternion();
@@ -575,7 +575,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(drcBehaviorTestHelper.getRobotName(), getRobotModel(),
-                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getRos2Node(),
+                                                                                     drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getROS2Node(),
                                                                                      drcBehaviorTestHelper.getSDFFullRobotModel());
 
       Quaternion offsetOrientationPelvis = new Quaternion();

@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -70,7 +70,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    {
       super(name);
       this.name = name;
-      this.buttonStatus = new YoBoolean(this.name + "_Status", yoVariableRegistry);
+      this.buttonStatus = new YoBoolean(this.name + "_Status", yoRegistry);
       buttonStatus.set(true);
      
       this.name = name;
@@ -161,11 +161,11 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       this.addStaticLink(caseLink);
 
       // Add listener to the button
-      buttonSliderJoint.getQYoVariable().addVariableChangedListener(
-            new VariableChangedListener()
+      buttonSliderJoint.getQYoVariable().addListener(
+            new YoVariableChangedListener()
             {
                @Override
-               public void notifyOfVariableChange(YoVariable<?> v)
+               public void changed(YoVariable v)
                {
                   if (buttonIsSwitchable == true && buttonSliderJoint.getQYoVariable().getDoubleValue() > buttonLimit * buttonSwitchLimit)
                   {

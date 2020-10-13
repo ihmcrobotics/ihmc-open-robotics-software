@@ -10,14 +10,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class NullspaceCalculatorTimingTest
 {
    @Test
    public void testRemoveNullspaceComponent()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       ExecutionTimer svdTimer = new ExecutionTimer("svdTimer", registry);
       ExecutionTimer leastSquaresTimer = new ExecutionTimer("leastSquarestTimer", registry);
       ExecutionTimer qrTimer = new ExecutionTimer("qrTimer", registry);

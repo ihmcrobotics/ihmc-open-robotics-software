@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -33,7 +33,7 @@ import static us.ihmc.robotics.Assert.*;
 public class PartialFootholdCropperModuleTest
 {
    protected RobotSide side;
-   protected YoVariableRegistry registry;
+   protected YoRegistry registry;
    protected double dt;
    protected Twist soleTwist;
    protected Pose3D solePose;
@@ -42,7 +42,7 @@ public class PartialFootholdCropperModuleTest
    @BeforeEach
    public void setup()
    {
-      registry = new YoVariableRegistry(FeetManager.class.getSimpleName());
+      registry = new YoRegistry(FeetManager.class.getSimpleName());
       dt = 0.001;
       side = RobotSide.LEFT;
       soleTwist = new Twist();
@@ -81,9 +81,9 @@ public class PartialFootholdCropperModuleTest
                                                                                             registry,
                                                                                             null);
 
-      YoInteger shrinkMaxLimit = ((YoInteger) registry.getVariable("Cropping_ShrinkMaxLimit"));
+      YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
-      YoBoolean applyPartialFootholds = ((YoBoolean) registry.getVariable("applyPartialFootholds"));
+      YoBoolean applyPartialFootholds = ((YoBoolean) registry.findVariable("applyPartialFootholds"));
       applyPartialFootholds.set(true);
 
 
@@ -184,9 +184,9 @@ public class PartialFootholdCropperModuleTest
                                                                                             registry,
                                                                                             null);
 
-      YoInteger shrinkMaxLimit = ((YoInteger) registry.getVariable("Cropping_ShrinkMaxLimit"));
+      YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
-      YoBoolean applyPartialFootholds = ((YoBoolean) registry.getVariable("leftApplyPartialFootholds"));
+      YoBoolean applyPartialFootholds = ((YoBoolean) registry.findVariable("leftApplyPartialFootholds"));
       applyPartialFootholds.set(true);
 
       int historyRequirement = 20;      // create random cop location (zero linear velocity) and a rotational velocity

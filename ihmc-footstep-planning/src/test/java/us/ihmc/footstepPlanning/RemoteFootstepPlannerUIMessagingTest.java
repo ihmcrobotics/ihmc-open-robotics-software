@@ -44,6 +44,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -58,7 +59,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -68,7 +69,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static final boolean VISUALIZE = false;
    private static final String robotName = "testBot";
 
-   private RealtimeRos2Node localNode = null;
+   private RealtimeROS2Node localNode = null;
    private RemoteUIMessageConverter messageConverter = null;
    private SharedMemoryMessager messager = null;
    private DomainFactory.PubSubImplementation pubSubImplementation = null;
@@ -103,7 +104,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
    public void setup()
    {
-      localNode = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      localNode = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
       if (VISUALIZE)
          messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       else
@@ -384,8 +385,12 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPlannerParametersReadOnly randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
+         FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
          VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
+
+         // step only with requested side is exception, has to be in interval [-1,1]
+         randomParameters.setStepOnlyWithRequestedSide((byte) (random.nextInt(2) - 1));
+
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
@@ -701,7 +706,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Check for path collisions flags aren't equal.", parameters.checkForPathCollisions(), packet.getCheckForPathCollisions());
       assertEquals("Ideal footstep widths aren't equal.", parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon);
       assertEquals("Ideal footstep lengths aren't equal.", parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon);
-      assertEquals("Wiggle inside deltas aren't equal.", parameters.getWiggleInsideDelta(), packet.getWiggleInsideDelta(), epsilon);
+      assertEquals("Wiggle inside delta targets aren't equal.", parameters.getWiggleInsideDeltaTarget(), packet.getWiggleInsideDeltaTarget(), epsilon);
+      assertEquals("Wiggle inside delta minimums aren't equal.", parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon);
       assertEquals("Maximum step reaches aren't equal.", parameters.getMaximumStepReach(), parameters.getMaximumStepReach(), epsilon);
       assertEquals("Maximum step yaws aren't equal.", parameters.getMaximumStepYaw(), packet.getMaximumStepYaw(), epsilon);
       assertEquals("Minimum step widths aren't equal.", parameters.getMinimumStepWidth(), packet.getMinimumStepWidth(), epsilon);
@@ -747,7 +753,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Step up weights aren't equal.", parameters.getStepUpWeight(), packet.getStepUpWeight(), epsilon);
       assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
-      assertEquals("Distance epsilon to bridge regions isn't equal.", parameters.getDistanceEpsilonToBridgeRegions(), packet.getDistanceEpsilonToBridgeRegions(), epsilon);
    }
 
 

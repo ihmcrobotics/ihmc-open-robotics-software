@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StateMachineTest
@@ -30,7 +30,7 @@ public class StateMachineTest
 
       SimpleState[] arrayOfStates = new SimpleState[States.values().length];
 
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoDouble time = new YoDouble("time", registry);
 
       StateMachine<States> stateMachine = new StateMachine<States>("stateMachine", "switchTime", States.class, time, registry);

@@ -1,11 +1,14 @@
 package us.ihmc.footstepPlanning.icp;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * The purpose of this class is to modify elements of the dynamic trajectory planner based on the step position.
@@ -36,6 +39,11 @@ public class PositionBasedSplitFractionCalculator
 
    public void computeSplitFractions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
    {
+      computeSplitFractions(footstepPlan, request.getStartFootPoses());
+   }
+
+   public void computeSplitFractions(FootstepPlan footstepPlan, SideDependentList<? extends Pose3DReadOnly> startFootPoses)
+   {
       if (footstepPlan.getNumberOfSteps() == 0)
       {
          return;
@@ -51,7 +59,7 @@ public class PositionBasedSplitFractionCalculator
       {
          if (stepNumber == 0)
          {
-            Pose3D initialStancePose = request.getStartFootPoses().get(footstepPlan.getFootstep(stepNumber).getRobotSide().getOppositeSide());
+            Pose3DReadOnly initialStancePose = startFootPoses.get(footstepPlan.getFootstep(stepNumber).getRobotSide().getOppositeSide());
             stanceFootPose.set(initialStancePose);
          }
          else

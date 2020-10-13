@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 public class StoredPropertyTableViewWrapper
@@ -32,9 +33,9 @@ public class StoredPropertyTableViewWrapper
    private final int tableColumns;
 
    private final TableView<ParametersTableRow> parameterTable;
+   private final HashMap<StoredPropertyKey, Control> controlMap = new HashMap<>();
    private final ObservableList<ParametersTableRow> parameterTableRows = FXCollections.observableArrayList();
    private final JavaFXStoredPropertyMap javaFXStoredPropertyMap;
-   private Runnable tableUpdateCallback = () -> {};
 
    public StoredPropertyTableViewWrapper(double cellWidth,
                                          double cellLabelWidth,
@@ -47,47 +48,8 @@ public class StoredPropertyTableViewWrapper
       this.tableColumns = tableColumns;
       this.parameterTable = parameterTable;
       this.javaFXStoredPropertyMap = javaFXStoredPropertyMap;
+
       setup();
-   }
-
-   public void setTableUpdatedCallback(Runnable tableUpdateCallback)
-   {
-      this.tableUpdateCallback = tableUpdateCallback;
-   }
-
-   /**
-    * Should be called after table is loaded, after Stage.show() is called on primary stage
-     */
-   public void removeHeader()
-   {
-      Pane header = (Pane) parameterTable.lookup("TableHeaderRow");
-      if (header.isVisible())
-      {
-         header.setMaxHeight(0);
-         header.setMinHeight(0);
-         header.setPrefHeight(0);
-         header.setVisible(false);
-      }
-
-      parameterTable.setSelectionModel(null);
-   }
-
-   /**
-    * Loads new file. Subsequent saves will write to the selected file
-    */
-   public void loadNewFile()
-   {
-      JFileChooser fileChooser = new JFileChooser();
-      Path saveFileDirectory = javaFXStoredPropertyMap.getStoredPropertySet().findSaveFileDirectory();
-      fileChooser.setCurrentDirectory(saveFileDirectory.toFile());
-      int chooserState = fileChooser.showOpenDialog(null);
-
-      if (chooserState == JFileChooser.APPROVE_OPTION)
-      {
-         File selectedFile = fileChooser.getSelectedFile();
-         String fileName = selectedFile.getName();
-         javaFXStoredPropertyMap.getStoredPropertySet().load(fileName);
-      }
    }
 
    private void setup()
@@ -100,6 +62,14 @@ public class StoredPropertyTableViewWrapper
       List<StoredPropertyKey<?>> orderedKeys = new ArrayList<>(keys.keys());
       Comparator<StoredPropertyKey<?>> nameSorter = Comparator.comparing(StoredPropertyKey::getTitleCasedName, String.CASE_INSENSITIVE_ORDER);
       orderedKeys.sort(nameSorter);
+
+      // create all the controls up front
+      for (StoredPropertyKey<?> propertyKey : orderedKeys)
+      {
+         controlMap.put(propertyKey, createEditor(propertyKey));
+      }
+      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
+
       parameterTableRows.clear();
 
       // TableView sometimes doesn't show final row, add extra at the bottom...
@@ -139,6 +109,47 @@ public class StoredPropertyTableViewWrapper
 
       parameterTable.refresh();
 
+   }
+
+   public void setTableUpdatedCallback(Runnable tableUpdateCallback)
+   {
+      javaFXStoredPropertyMap.addAnyJavaFXValueChangedListener(tableUpdateCallback);
+   }
+
+   /**
+    * Should be called after table is loaded, after Stage.show() is called on primary stage
+     */
+   public void removeHeader()
+   {
+      Pane header = (Pane) parameterTable.lookup("TableHeaderRow");
+      if (header.isVisible())
+      {
+         header.setMaxHeight(0);
+         header.setMinHeight(0);
+         header.setPrefHeight(0);
+         header.setVisible(false);
+      }
+
+      parameterTable.setSelectionModel(null);
+   }
+
+   /**
+    * Loads new file. Subsequent saves will write to the selected file
+    */
+   public void loadNewFile()
+   {
+      JFileChooser fileChooser = new JFileChooser();
+      Path saveFileDirectory = javaFXStoredPropertyMap.getStoredPropertySet().findSaveFileDirectory();
+      fileChooser.setCurrentDirectory(saveFileDirectory.toFile());
+      int chooserState = fileChooser.showOpenDialog(null);
+
+      if (chooserState == JFileChooser.APPROVE_OPTION)
+      {
+         File selectedFile = fileChooser.getSelectedFile();
+         String fileName = selectedFile.getName();
+         javaFXStoredPropertyMap.getStoredPropertySet().load(fileName);
+         javaFXStoredPropertyMap.copyStoredToJavaFX();
+      }
    }
 
    public class ParametersTableRow
@@ -181,8 +192,9 @@ public class StoredPropertyTableViewWrapper
             protected void updateItem(ParameterTableCell tableCell, boolean empty)
             {
                super.updateItem(tableCell, empty);
-               hBox.getChildren().clear();
 
+               hBox.getChildren().clear();
+               
                if (tableCell != null && !tableCell.isEmpty())
                {
                   StoredPropertyKey<?> propertyKey = tableCell.parameter;
@@ -190,55 +202,56 @@ public class StoredPropertyTableViewWrapper
                   hBox.getChildren().add(label);
 
                   label.setPrefWidth(cellLabelWidth);
-                  label.textProperty().setValue(propertyKey.getCamelCasedName());
+                  label.textProperty().setValue(propertyKey.getTitleCasedName());
 
                   Region region = new Region();
                   HBox.setHgrow(region, Priority.ALWAYS);
                   hBox.getChildren().add(region);
 
-                  Control spinner = createEditor(propertyKey);
+                  Control spinner = controlMap.get(propertyKey);
                   spinner.setPrefWidth(cellWidth - cellLabelWidth);
-                  javaFXStoredPropertyMap.bindStoredToJavaFXUserInput(propertyKey);
-                  javaFXStoredPropertyMap.bindToJavaFXUserInput(propertyKey, tableUpdateCallback);
 
                   hBox.getChildren().add(spinner);
                }
 
                setGraphic(hBox);
             }
-
-            private Control createEditor(StoredPropertyKey<?> propertyKey)
-            {
-               if (propertyKey instanceof BooleanStoredPropertyKey)
-               {
-                  CheckBox checkBox = new CheckBox("");
-                  javaFXStoredPropertyMap.put(checkBox, (BooleanStoredPropertyKey) propertyKey);
-                  checkBox.setAlignment(Pos.CENTER);
-                  return checkBox;
-               }
-               else if (propertyKey instanceof DoubleStoredPropertyKey)
-               {
-                  Spinner<Double> spinner = new Spinner<>(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1);
-                  spinner.setEditable(true);
-                  spinner.getEditor().setTextFormatter(new TextFormatter<>(new DoubleStringConverter()));
-                  spinner.getValueFactory().setConverter(new DoubleStringConverter());
-                  javaFXStoredPropertyMap.put(spinner, (DoubleStoredPropertyKey) propertyKey);
-                  return spinner;
-               }
-               else if (propertyKey instanceof IntegerStoredPropertyKey)
-               {
-                  Spinner<Integer> spinner = new Spinner<>(Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 1);
-                  spinner.setEditable(true);
-                  javaFXStoredPropertyMap.put(spinner, (IntegerStoredPropertyKey) propertyKey);
-                  return spinner;
-               }
-               else
-               {
-                  throw new RuntimeException("Unknown parameter property: " + propertyKey.getClass());
-               }
-            }
          };
       }
+   }
+
+   private Control createEditor(StoredPropertyKey<?> propertyKey)
+   {
+      Control control;
+      if (propertyKey instanceof BooleanStoredPropertyKey)
+      {
+         CheckBox checkBox = new CheckBox("");
+         javaFXStoredPropertyMap.put(checkBox, (BooleanStoredPropertyKey) propertyKey);
+         checkBox.setAlignment(Pos.CENTER);
+         control = checkBox;
+      }
+      else if (propertyKey instanceof DoubleStoredPropertyKey)
+      {
+         Spinner<Double> spinner = new Spinner<>(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0, 0.1);
+         spinner.setEditable(true);
+         spinner.getEditor().setTextFormatter(new TextFormatter<>(new DoubleStringConverter()));
+         spinner.getValueFactory().setConverter(new DoubleStringConverter());
+         javaFXStoredPropertyMap.put(spinner, (DoubleStoredPropertyKey) propertyKey);
+         control = spinner;
+      }
+      else if (propertyKey instanceof IntegerStoredPropertyKey)
+      {
+         Spinner<Integer> spinner = new Spinner<>(Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 1);
+         spinner.setEditable(true);
+         javaFXStoredPropertyMap.put(spinner, (IntegerStoredPropertyKey) propertyKey);
+         control = spinner;
+      }
+      else
+      {
+         throw new RuntimeException("Unknown parameter property: " + propertyKey.getClass());
+      }
+
+      return control;
    }
 
    private static final NumberFormat numberFormat = NumberFormat.getInstance();
@@ -268,5 +281,4 @@ public class StoredPropertyTableViewWrapper
          return Double.parseDouble(string);
       }
    }
-
 }

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.physics;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -11,7 +11,7 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    private final YoBoolean computeMomentFriction;
    private final YoDouble coulombMomentFrictionRatio;
 
-   public YoContactParameters(String prefix, YoVariableRegistry registry)
+   public YoContactParameters(String prefix, YoRegistry registry)
    {
       super(prefix, registry);
 

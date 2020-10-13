@@ -1,18 +1,19 @@
 package us.ihmc.robotics.statistics;
 
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class Point2DStandardDeviationCalculatorTest
 {
@@ -21,7 +22,7 @@ public class Point2DStandardDeviationCalculatorTest
    @Test
    public void testNoVariance()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoFramePoint2D valueProvider = new YoFramePoint2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
       Point2DStandardDeviationCalculator calculator = new Point2DStandardDeviationCalculator("value", valueProvider, testRegistry);
 
@@ -42,7 +43,7 @@ public class Point2DStandardDeviationCalculatorTest
    @Test
    public void testFromList()
    {
-      YoVariableRegistry testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry testRegistry = new YoRegistry(getClass().getSimpleName());
       YoFramePoint2D valueProvider = new YoFramePoint2D("valueProvider", ReferenceFrame.getWorldFrame(), testRegistry);
       Point2DStandardDeviationCalculator calculator = new Point2DStandardDeviationCalculator("value", valueProvider, testRegistry);
 

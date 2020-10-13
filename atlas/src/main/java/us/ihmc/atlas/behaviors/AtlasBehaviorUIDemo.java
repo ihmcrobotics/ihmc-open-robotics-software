@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -92,7 +92,7 @@ public class AtlasBehaviorUIDemo
       else
       {
          LogTools.info("Creating dynamics simulation");
-         AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
+         AtlasDynamicsSimulation.createForManualTest(createRobotModel(),
                                                      new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
                                                      recordFrequencySpeedup, 10).simulate();
       }

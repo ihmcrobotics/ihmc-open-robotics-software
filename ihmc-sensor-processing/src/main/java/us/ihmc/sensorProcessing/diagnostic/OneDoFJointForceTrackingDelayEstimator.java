@@ -2,21 +2,21 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final OneDoFJointBasics joint;
    private final JointDesiredOutputReadOnly output;
    private final DelayEstimatorBetweenTwoSignals delayEstimator;
 
-   public OneDoFJointForceTrackingDelayEstimator(OneDoFJointBasics joint, JointDesiredOutputReadOnly outputDataToCheck, double dt, YoVariableRegistry parentRegistry)
+   public OneDoFJointForceTrackingDelayEstimator(OneDoFJointBasics joint, JointDesiredOutputReadOnly outputDataToCheck, double dt, YoRegistry parentRegistry)
    {
       this.joint = joint;
       this.output = outputDataToCheck;
       String jointName = joint.getName();
-      registry = new YoVariableRegistry(jointName + "ForceTrackingDelayEstimator");
+      registry = new YoRegistry(jointName + "ForceTrackingDelayEstimator");
       delayEstimator = new DelayEstimatorBetweenTwoSignals(jointName + "ForceTracking", dt, registry);
    }
 

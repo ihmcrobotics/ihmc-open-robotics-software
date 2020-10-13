@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PoseSequenceEditorGUI extends JFrame
 {
@@ -30,7 +30,7 @@ public class PoseSequenceEditorGUI extends JFrame
       buttonPanelInit();
    }
 
-   public PoseSequenceEditorGUI(YoVariableRegistry registry, HumanoidFloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceEditorGUI(YoRegistry registry, HumanoidFloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super("Pose sequence editor");
       setSize(1400, 600);

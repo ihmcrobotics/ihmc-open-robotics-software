@@ -1,8 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.externalcontroller;
 
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 
 class GroundContactPointRobotSensor implements SensorInterface
 {

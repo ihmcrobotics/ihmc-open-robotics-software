@@ -13,6 +13,7 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    /** Initial capacity of the internal memory. */
    private static final int initialCapacity = 40;
 
+   private int commandId;
    /** sets whether or not to utilize the privileged acceleration calculator */
    private boolean enable = false;
 
@@ -35,6 +36,7 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
     */
    public void clear()
    {
+      commandId = 0;
       enable = false;
       joints.clear();
       privilegedOneDoFJointCommands.reset();
@@ -91,6 +93,8 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    public void set(PrivilegedJointSpaceCommand other)
    {
       clear();
+
+      commandId = other.commandId;
       enable = other.enable;
 
       for (int jointIndex = 0; jointIndex < other.getNumberOfJoints(); jointIndex++)
@@ -169,6 +173,18 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -179,6 +195,8 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
       {
          PrivilegedJointSpaceCommand other = (PrivilegedJointSpaceCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (isEnabled() != other.isEnabled())
             return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())

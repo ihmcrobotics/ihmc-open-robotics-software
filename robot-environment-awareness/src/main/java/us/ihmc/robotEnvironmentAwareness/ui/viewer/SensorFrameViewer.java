@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -8,12 +9,14 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -26,6 +29,7 @@ import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
@@ -43,6 +47,8 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    private static final int DEFAULT_NUMBER_OF_FRAMES = 1;
    private final LinkedList<SensorFrame> sensorOriginHistory = new LinkedList<SensorFrame>();
    private final AtomicReference<Integer> numberOfFramesToShow;
+   private final AtomicBoolean clearRequest = new AtomicBoolean(false);
+   private boolean isRunning = false;
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
 
@@ -83,8 +89,27 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    }
 
    @Override
+   public void start()
+   {
+      super.start();
+      isRunning = true;
+   }
+
+   @Override
+   public void stop()
+   {
+      super.stop();
+      isRunning = false;
+   }
+
+   @Override
    public void handle(long now)
    {
+      if (clearRequest.getAndSet(false))
+      {
+         clearNow();
+      }
+
       if (latestMessage.get() == null)
          return;
 
@@ -121,12 +146,19 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       }
       if (numberOfSensorFrames > 1)
       {
-         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfSensorFrames,
-                                                                                                              TRAJECTORY_RADIAL_RESOLUTION,
-                                                                                                              TRAJECTORY_MESH_RADIUS);
-         segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
-         for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
-            meshBuilder.addMesh(mesh, Color.ALICEBLUE);
+         try
+         {
+            SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfSensorFrames,
+                                                                                                                 TRAJECTORY_RADIAL_RESOLUTION,
+                                                                                                                 TRAJECTORY_MESH_RADIUS);
+            segmentedLine3DMeshGenerator.compute(sensorPoseTrajectoryPoints);
+            for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+               meshBuilder.addMesh(mesh, Color.ALICEBLUE);
+         }
+         catch (NotARotationMatrixException e)
+         {
+            LogTools.warn("Could not compute sensor frame trajectory mesh!");
+         }
       }
 
       MeshView historyMeshView = new MeshView(meshBuilder.generateMesh());
@@ -140,7 +172,15 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       }
    }
 
-   private void clear()
+   public void clear()
+   {
+      if (isRunning)
+         clearRequest.set(true);
+      else
+         Platform.runLater(this::clearNow);
+   }
+
+   private void clearNow()
    {
       sensorOriginHistory.clear();
       historyRoot.getChildren().clear();

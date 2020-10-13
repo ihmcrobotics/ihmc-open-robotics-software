@@ -63,7 +63,7 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManag
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * SCS wrapper around {@link ExperimentalPhysicsEngine}.
@@ -235,7 +235,7 @@ public class ExperimentalSimulation extends Simulation
             updateGroundContactPointsVelocity(rootBodies.get(i), robot);
          }
 
-         getDataBuffer().copyValuesThrough();
+         getDataBuffer().fillBuffer();
       }
    }
 
@@ -286,7 +286,7 @@ public class ExperimentalSimulation extends Simulation
                numTicks = -1;
          }
 
-         getDataBuffer().tickAndUpdate();
+         getDataBuffer().tickAndWriteIntoBuffer();
          numTicks -= getRecordFreq();
       }
 
@@ -420,7 +420,7 @@ public class ExperimentalSimulation extends Simulation
       throw new UnsupportedOperationException();
    }
 
-   public YoVariableRegistry getPhysicsEngineRegistry()
+   public YoRegistry getPhysicsEngineRegistry()
    {
       return physicsEngine.getPhysicsEngineRegistry();
    }

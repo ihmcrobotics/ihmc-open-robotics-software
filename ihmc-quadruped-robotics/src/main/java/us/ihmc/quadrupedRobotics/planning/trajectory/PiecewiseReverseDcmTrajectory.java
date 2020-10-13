@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.commons.MathTools;
@@ -14,12 +17,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PiecewiseReverseDcmTrajectory
 {
@@ -44,7 +44,7 @@ public class PiecewiseReverseDcmTrajectory
 
    private final DoubleProvider omega;
 
-   public PiecewiseReverseDcmTrajectory(int maxSteps, DoubleProvider omega, double gravity, YoVariableRegistry registry)
+   public PiecewiseReverseDcmTrajectory(int maxSteps, DoubleProvider omega, double gravity, YoRegistry registry)
    {
       if (maxSteps < 1)
          throw new RuntimeException("maxSteps must be greater than 0");
@@ -198,7 +198,7 @@ public class PiecewiseReverseDcmTrajectory
    {
       double comHeight = 1.0;
       double gravity = 9.81;
-      YoVariableRegistry registry = new YoVariableRegistry("you");
+      YoRegistry registry = new YoRegistry("you");
       DoubleProvider omega = () -> Math.sqrt(gravity / comHeight);
       PiecewiseReverseDcmTrajectory dcmTrajectory = new PiecewiseReverseDcmTrajectory(10, omega, gravity, registry);
 

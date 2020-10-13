@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.icp;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -44,6 +46,13 @@ public class AreaBasedSplitFractionCalculator
 
    public void computeSplitFractions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
    {
+      computeSplitFractions(footstepPlan, request.getStartFootPoses(), request.getStartFootholds());
+   }
+
+   public void computeSplitFractions(FootstepPlan footstepPlan,
+                                     SideDependentList<? extends Pose3DReadOnly> startFootPoses,
+                                     SideDependentList<ConvexPolygon2D> startFootholds)
+   {
       if (footstepPlan.getNumberOfSteps() == 0)
       {
          return;
@@ -63,9 +72,9 @@ public class AreaBasedSplitFractionCalculator
          if (stepNumber == 0)
          {
             RobotSide stanceSide = footstepPlan.getFootstep(0).getRobotSide().getOppositeSide();
-            previousFrame.setPoseAndUpdate(request.getStartFootPoses().get(stanceSide));
+            previousFrame.setPoseAndUpdate(startFootPoses.get(stanceSide));
 
-            ConvexPolygon2D initialStanceFoothold = request.getStartFootholds().get(stanceSide);
+            ConvexPolygon2D initialStanceFoothold = startFootholds.get(stanceSide);
             if (initialStanceFoothold.isEmpty())
             {
                previousPolygon.set(footPolygons.get(stanceSide));

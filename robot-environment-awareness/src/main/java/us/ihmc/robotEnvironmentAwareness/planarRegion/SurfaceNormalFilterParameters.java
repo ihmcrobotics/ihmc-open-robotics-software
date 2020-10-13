@@ -1,5 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
+import us.ihmc.jOctoMap.tools.ScannerTools;
+
 import java.util.Scanner;
 
 public class SurfaceNormalFilterParameters
@@ -74,19 +76,12 @@ public class SurfaceNormalFilterParameters
    {
       parametersAsString = parametersAsString.replace(",", "");
       Scanner scanner = new Scanner(parametersAsString);
-      while (!scanner.hasNextDouble())
-         scanner.next();
-      double surfaceNormalUpperBound = scanner.nextDouble();
-      while (!scanner.hasNextDouble())
-         scanner.next();
-      double surfaceNormalLowerBound = scanner.nextDouble();
-      boolean useSurfaceNormalFilter = scanner.nextBoolean();
-      scanner.close();
 
       SurfaceNormalFilterParameters parameters = new SurfaceNormalFilterParameters();
-      parameters.setSurfaceNormalUpperBound(surfaceNormalUpperBound);
-      parameters.setSurfaceNormalLowerBound(surfaceNormalLowerBound);
-      parameters.setUseSurfaceNormalFilter(useSurfaceNormalFilter);
+      parameters.setSurfaceNormalUpperBound(ScannerTools.readNextDouble(scanner, parameters.getSurfaceNormalUpperBound()));
+      parameters.setSurfaceNormalLowerBound(ScannerTools.readNextDouble(scanner, parameters.getSurfaceNormalLowerBound()));
+      parameters.setUseSurfaceNormalFilter(ScannerTools.readNextBoolean(scanner, parameters.useSurfaceNormalFilter));
+      scanner.close();
       return parameters;
    }
 }

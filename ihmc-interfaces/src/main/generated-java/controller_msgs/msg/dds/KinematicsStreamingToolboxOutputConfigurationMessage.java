@@ -12,53 +12,45 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet<KinematicsStreamingToolboxOutputConfigurationMessage> implements Settable<KinematicsStreamingToolboxOutputConfigurationMessage>, EpsilonComparable<KinematicsStreamingToolboxOutputConfigurationMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Whether the left arm should be controller in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
    public boolean enable_left_arm_jointspace_ = true;
-
    /**
             * Whether the right arm should be controller in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
    public boolean enable_right_arm_jointspace_ = true;
-
    /**
             * Whether the neck should be controller in joint-space.
             * Default value is true.
             * Whether the neck should be controller in joint-space.
             */
    public boolean enable_neck_jointspace_ = true;
-
    /**
             * Whether the left hand should be controlled in task-space.
             * This is compatible with the arm task-space control.
             * Default value is true.
             */
    public boolean enable_left_hand_taskspace_ = true;
-
    /**
             * Whether the right hand should be controlled in task-space.
             * This is compatible with the arm task-space control.
             * Default value is true.
             */
    public boolean enable_right_hand_taskspace_ = true;
-
    /**
             * Whether the chest orientation should be controlled.
             * Default value is true.
             */
    public boolean enable_chest_taskspace_ = true;
-
    /**
             * Whether the pelvis should be controlled in task-space.
             * Default value is true.
@@ -67,15 +59,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
    public KinematicsStreamingToolboxOutputConfigurationMessage()
    {
-
-
-
-
-
-
-
-
-
    }
 
    public KinematicsStreamingToolboxOutputConfigurationMessage(KinematicsStreamingToolboxOutputConfigurationMessage other)
@@ -86,32 +69,23 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
    public void set(KinematicsStreamingToolboxOutputConfigurationMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       enable_left_arm_jointspace_ = other.enable_left_arm_jointspace_;
 
-
       enable_right_arm_jointspace_ = other.enable_right_arm_jointspace_;
-
 
       enable_neck_jointspace_ = other.enable_neck_jointspace_;
 
-
       enable_left_hand_taskspace_ = other.enable_left_hand_taskspace_;
-
 
       enable_right_hand_taskspace_ = other.enable_right_hand_taskspace_;
 
-
       enable_chest_taskspace_ = other.enable_chest_taskspace_;
-
 
       enable_pelvis_taskspace_ = other.enable_pelvis_taskspace_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -127,7 +101,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    {
       return sequence_id_;
    }
-
 
    /**
             * Whether the left arm should be controller in joint-space.
@@ -148,7 +121,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
       return enable_left_arm_jointspace_;
    }
 
-
    /**
             * Whether the right arm should be controller in joint-space.
             * This is compatible with the hand task-space control.
@@ -167,7 +139,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    {
       return enable_right_arm_jointspace_;
    }
-
 
    /**
             * Whether the neck should be controller in joint-space.
@@ -188,7 +159,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
       return enable_neck_jointspace_;
    }
 
-
    /**
             * Whether the left hand should be controlled in task-space.
             * This is compatible with the arm task-space control.
@@ -207,7 +177,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    {
       return enable_left_hand_taskspace_;
    }
-
 
    /**
             * Whether the right hand should be controlled in task-space.
@@ -228,7 +197,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
       return enable_right_hand_taskspace_;
    }
 
-
    /**
             * Whether the chest orientation should be controlled.
             * Default value is true.
@@ -245,7 +213,6 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    {
       return enable_chest_taskspace_;
    }
-
 
    /**
             * Whether the pelvis should be controlled in task-space.
@@ -282,27 +249,19 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_left_arm_jointspace_, other.enable_left_arm_jointspace_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_right_arm_jointspace_, other.enable_right_arm_jointspace_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_neck_jointspace_, other.enable_neck_jointspace_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_left_hand_taskspace_, other.enable_left_hand_taskspace_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_right_hand_taskspace_, other.enable_right_hand_taskspace_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_chest_taskspace_, other.enable_chest_taskspace_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_pelvis_taskspace_, other.enable_pelvis_taskspace_, epsilon)) return false;
 
@@ -319,27 +278,19 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
       KinematicsStreamingToolboxOutputConfigurationMessage otherMyClass = (KinematicsStreamingToolboxOutputConfigurationMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.enable_left_arm_jointspace_ != otherMyClass.enable_left_arm_jointspace_) return false;
 
-
       if(this.enable_right_arm_jointspace_ != otherMyClass.enable_right_arm_jointspace_) return false;
-
 
       if(this.enable_neck_jointspace_ != otherMyClass.enable_neck_jointspace_) return false;
 
-
       if(this.enable_left_hand_taskspace_ != otherMyClass.enable_left_hand_taskspace_) return false;
-
 
       if(this.enable_right_hand_taskspace_ != otherMyClass.enable_right_hand_taskspace_) return false;
 
-
       if(this.enable_chest_taskspace_ != otherMyClass.enable_chest_taskspace_) return false;
-
 
       if(this.enable_pelvis_taskspace_ != otherMyClass.enable_pelvis_taskspace_) return false;
 
@@ -353,28 +304,20 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsStreamingToolboxOutputConfigurationMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("enable_left_arm_jointspace=");
       builder.append(this.enable_left_arm_jointspace_);      builder.append(", ");
-
       builder.append("enable_right_arm_jointspace=");
       builder.append(this.enable_right_arm_jointspace_);      builder.append(", ");
-
       builder.append("enable_neck_jointspace=");
       builder.append(this.enable_neck_jointspace_);      builder.append(", ");
-
       builder.append("enable_left_hand_taskspace=");
       builder.append(this.enable_left_hand_taskspace_);      builder.append(", ");
-
       builder.append("enable_right_hand_taskspace=");
       builder.append(this.enable_right_hand_taskspace_);      builder.append(", ");
-
       builder.append("enable_chest_taskspace=");
       builder.append(this.enable_chest_taskspace_);      builder.append(", ");
-
       builder.append("enable_pelvis_taskspace=");
       builder.append(this.enable_pelvis_taskspace_);
       builder.append("}");

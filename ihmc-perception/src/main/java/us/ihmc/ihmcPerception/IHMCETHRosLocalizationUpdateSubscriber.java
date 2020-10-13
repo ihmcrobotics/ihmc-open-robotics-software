@@ -17,7 +17,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -32,7 +32,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
    private final IHMCROS2Publisher<LocalizationPointMapPacket> localizationPointMapPublisher;
 
-   public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, Ros2Node ros2Node, LongUnaryOperator robotMonotonicTimeCalculator)
+   public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, ROS2Node ros2Node, LongUnaryOperator robotMonotonicTimeCalculator)
    {
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, LocalizationPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
       localizationPointMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.IHMC_ROOT);

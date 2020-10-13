@@ -12,14 +12,14 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable, CloseableAndDisposable
 {
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> publisher;
    private final FullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
@@ -29,7 +29,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
 
    public ZeroPoseMockRobotConfigurationDataPublisherModule(final DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_zero_pose_mock_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_zero_pose_mock_node");
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 

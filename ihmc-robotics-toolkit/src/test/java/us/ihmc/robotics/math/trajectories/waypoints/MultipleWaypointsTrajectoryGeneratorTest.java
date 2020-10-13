@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectory
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MultipleWaypointsTrajectoryGeneratorTest
 {
@@ -21,7 +21,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
    @Test
    public void test()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       double trajectoryTime = 1.0;
       double dt = 0.001;
@@ -73,7 +73,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
    @Test
    public void testPassingThroughWayPoints()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       int numberOfWaypoints = 11;
 
@@ -112,7 +112,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
    @Test
    public void testOneWaypoint()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       int maxNumberOfWaypoints = 5;
       MultipleWaypointsTrajectoryGenerator trajectory = new MultipleWaypointsTrajectoryGenerator("testedTraj", maxNumberOfWaypoints, registry);

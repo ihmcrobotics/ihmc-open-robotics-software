@@ -1,7 +1,5 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -9,7 +7,8 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectoryPointBasics
@@ -20,18 +19,18 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    private final String namePrefix;
    private final String nameSuffix;
 
-   public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
    }
 
-   public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   public YoFrameEuclideanTrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry, ReferenceFrame referenceFrame)
    {
       euclideanWaypoint = new YoFrameEuclideanWaypoint(namePrefix, nameSuffix, registry);
-      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
       setToZero(referenceFrame);

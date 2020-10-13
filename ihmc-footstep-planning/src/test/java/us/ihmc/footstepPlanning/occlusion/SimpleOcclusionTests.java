@@ -1,9 +1,14 @@
 package us.ihmc.footstepPlanning.occlusion;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -37,12 +42,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleOcclusionTests
 {
@@ -85,7 +90,7 @@ public class SimpleOcclusionTests
    private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
                         VisibilityGraphsParametersReadOnly visibilityGraphsParameters, double maxAllowedSolveTime)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
+      YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
@@ -351,11 +356,11 @@ public class SimpleOcclusionTests
       }
    }
 
-   private static SimulationConstructionSet setupSCS(String testName, YoVariableRegistry testRegistry, PlanarRegionsList regions, FramePose3D startPose,
+   private static SimulationConstructionSet setupSCS(String testName, YoRegistry testRegistry, PlanarRegionsList regions, FramePose3D startPose,
                                                      FramePose3D goalPose)
    {
       Robot robot = new Robot(SimpleOcclusionTests.class.getSimpleName());
-      robot.addYoVariableRegistry(testRegistry);
+      robot.addYoRegistry(testRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();

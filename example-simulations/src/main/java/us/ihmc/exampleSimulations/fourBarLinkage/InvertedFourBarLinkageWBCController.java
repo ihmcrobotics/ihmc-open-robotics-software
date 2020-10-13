@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -30,7 +31,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Controller demonstrating the usage of the {@link WholeBodyControllerCore} in the presence of a
@@ -38,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class InvertedFourBarLinkageWBCController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getName());
+   private final YoRegistry registry = new YoRegistry(getName());
    private final RigidBodyBasics rootBody;
    private final FourBarKinematicLoopFunction fourBarKinematicLoop;
    private final WholeBodyControllerCore controllerCore;
@@ -139,7 +140,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
       controllerCoreToolbox.addKinematicLoopFunction(fourBarKinematicLoop);
       controllerCoreToolbox.setupForInverseDynamicsSolver(Collections.emptyList());
 
-      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, allPossibleCommands, registry);
+      controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, new FeedbackControllerTemplate(allPossibleCommands), registry);
    }
 
    private static Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointCorrespondenceList(RigidBodyBasics rootBody, Robot robot)
@@ -246,7 +247,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

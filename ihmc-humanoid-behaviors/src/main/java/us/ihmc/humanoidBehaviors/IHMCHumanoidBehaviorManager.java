@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
@@ -34,15 +33,16 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 {
@@ -50,9 +50,9 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
@@ -120,7 +120,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_humanoid_behavior_node");
 
       FullHumanoidRobotModel fullRobotModel = robotModelFactory.createFullRobotModel();
 
@@ -255,7 +255,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    private void createAndRegisterBehaviors(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher, LogModelProvider logModelProvider,
                                            FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
-                                           YoDouble yoTime, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                           YoDouble yoTime, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
                                            CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters<?> wholeBodyControllerParameters,
                                            FootstepPlannerParametersBasics footstepPlannerParameters)
    {
@@ -487,7 +487,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    private void createAndRegisterAutomaticDiagnostic(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
                                                      FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
-                                                     Ros2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
+                                                     ROS2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
                                                      WholeBodyControllerParameters wholeBodyControllerParameters,
                                                      FootstepPlannerParametersBasics footstepPlannerParameters, double timeToWait,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)

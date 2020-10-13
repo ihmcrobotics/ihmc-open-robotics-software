@@ -2,100 +2,112 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters.*;
+
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default double getMaxPlanStrayDistance()
+   default boolean getAutomaticallyInjectSupportRegions()
    {
-      return get(LookAndStepBehaviorParameters.maxPlanStrayDistance);
+      return get(automaticallyInjectSupportRegions);
+   }
+
+   default boolean getEnableBipedalSupportRegions()
+   {
+      return get(enableBipedalSupportRegions);
+   }
+
+   default boolean getFlatGroundBodyPathPlan()
+   {
+      return get(flatGroundBodyPathPlan);
    }
 
    default int getMinimumNumberOfPlannedSteps()
    {
-      return get(LookAndStepBehaviorParameters.minimumNumberOfPlannedSteps);
+      return get(minimumNumberOfPlannedSteps);
+   }
+
+   default double getMinimumStepTranslation()
+   {
+      return get(minimumStepTranslation);
+   }
+
+   default double getMinimumStepOrientation()
+   {
+      return get(minimumStepOrientation);
    }
 
    default double getGoalSatisfactionRadius()
    {
-      return get(LookAndStepBehaviorParameters.goalSatisfactionRadius);
+      return get(goalSatisfactionRadius);
    }
 
    default double getGoalSatisfactionOrientationDelta()
    {
-      return get(LookAndStepBehaviorParameters.goalSatisfactionOrientationDelta);
+      return get(goalSatisfactionOrientationDelta);
    }
 
    default double getPlanarRegionsExpiration()
    {
-      return get(LookAndStepBehaviorParameters.planarRegionsExpiration);
-   }
-
-   default double getDirection()
-   {
-      return get(LookAndStepBehaviorParameters.direction);
-   }
-
-   default double getWiggleInsideDeltaOverride()
-   {
-      return get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride);
+      return get(planarRegionsExpiration);
    }
 
    default double getPlanHorizon()
    {
-      return get(LookAndStepBehaviorParameters.planHorizon);
-   }
-
-   default double getIdealFootstepLengthOverride()
-   {
-      return get(LookAndStepBehaviorParameters.idealFootstepLengthOverride);
-   }
-
-   default double getCliffBaseHeightToAvoidOverride()
-   {
-      return get(LookAndStepBehaviorParameters.cliffBaseHeightToAvoidOverride);
-   }
-
-   default boolean getEnableConcaveHullWigglerOverride()
-   {
-      return get(LookAndStepBehaviorParameters.enableConcaveHullWigglerOverride);
+      return get(planHorizon);
    }
 
    default double getFootstepPlannerTimeout()
    {
-      return get(LookAndStepBehaviorParameters.footstepPlannerTimeout);
+      return get(footstepPlannerTimeout);
    }
 
    default double getSwingTime()
    {
-      return get(LookAndStepBehaviorParameters.swingTime);
+      return get(swingTime);
    }
 
    default double getTransferTime()
    {
-      return get(LookAndStepBehaviorParameters.transferTime);
+      return get(transferTime);
    }
 
    default double getWaitTimeAfterPlanFailed()
    {
-      return get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
-   }
-
-   default boolean getReturnBestEffortPlanOverride()
-   {
-      return get(LookAndStepBehaviorParameters.returnBestEffortPlanOverride);
+      return get(waitTimeAfterPlanFailed);
    }
 
    default double getPercentSwingToWait()
    {
-      return get(LookAndStepBehaviorParameters.percentSwingToWait);
+      return get(percentSwingToWait);
    }
 
    default double getRobotConfigurationDataExpiration()
    {
-      return get(LookAndStepBehaviorParameters.robotConfigurationDataExpiration);
+      return get(robotConfigurationDataExpiration);
    }
 
    default int getAcceptableIncompleteFootsteps()
    {
-      return get(LookAndStepBehaviorParameters.acceptableIncompleteFootsteps);
+      return get(acceptableIncompleteFootsteps);
+   }
+
+   default double getNeckPitchForBodyPath()
+   {
+      return get(neckPitchForBodyPath);
+   }
+
+   default double getNeckPitchTolerance()
+   {
+      return get(neckPitchTolerance);
+   }
+
+   default double getResetDuration()
+   {
+      return get(resetDuration);
+   }
+
+   default int getSwingPlannerType()
+   {
+      return get(swingPlannerType);
    }
 }

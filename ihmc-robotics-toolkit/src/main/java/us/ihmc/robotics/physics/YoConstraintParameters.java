@@ -1,6 +1,6 @@
 package us.ihmc.robotics.physics;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoConstraintParameters implements ConstraintParametersBasics
@@ -9,7 +9,7 @@ public class YoConstraintParameters implements ConstraintParametersBasics
    private final YoDouble restitutionThreshold;
    private final YoDouble errorReductionParameter;
 
-   public YoConstraintParameters(String prefix, YoVariableRegistry registry)
+   public YoConstraintParameters(String prefix, YoRegistry registry)
    {
       String corName, erpName, rthName;
 

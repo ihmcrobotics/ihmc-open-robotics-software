@@ -21,7 +21,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class LidarScanLogReader
 {
@@ -33,7 +33,7 @@ public class LidarScanLogReader
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(threadName));
    private ScheduledFuture<?> currentLoggingTask = null;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
    private IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanPublisher;
    private PacketConsumer<LidarScanMessage> lidarScanConsumer = null;
 
@@ -57,7 +57,7 @@ public class LidarScanLogReader
       }
       else
       {
-         ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "lidar_log");
+         ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "lidar_log");
          lidarScanPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
          ros2Node.spin();
       }

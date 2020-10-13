@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterizedPIDController extends AbstractPIDController
 {
@@ -12,7 +12,7 @@ public class ParameterizedPIDController extends AbstractPIDController
    final DoubleProvider maxOutput;
    final DoubleProvider integralLeakRatio;
 
-   public ParameterizedPIDController(String suffix, YoVariableRegistry registry)
+   public ParameterizedPIDController(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
 
@@ -28,7 +28,7 @@ public class ParameterizedPIDController extends AbstractPIDController
    }
 
    public ParameterizedPIDController(DoubleParameter proportionalGain, DoubleParameter integralGain, DoubleParameter derivativeGain,
-                                     DoubleParameter maxIntegralError, String suffix, YoVariableRegistry registry)
+                                     DoubleParameter maxIntegralError, String suffix, YoRegistry registry)
    {
       super(suffix, registry);
       this.pdController = new ParameterizedPDController(proportionalGain, derivativeGain, suffix, registry);

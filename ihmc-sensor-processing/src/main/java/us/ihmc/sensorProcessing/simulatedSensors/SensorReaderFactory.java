@@ -5,7 +5,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface SensorReaderFactory
 {
@@ -14,7 +14,7 @@ public interface SensorReaderFactory
    }
 
    public abstract void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                              JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry);
+                              JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry);
 
    public abstract SensorReader getSensorReader();
 

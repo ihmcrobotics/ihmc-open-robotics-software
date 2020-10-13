@@ -30,7 +30,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -67,7 +67,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private boolean assumeFlatGround = false;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
+   public PlanPathToLocationBehavior(String robotName, ROS2Node ros2Node, FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
@@ -181,7 +181,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
             request.setGenerateLog(true);
-            FootstepPlannerLogger.deleteOldLogs(10);
+            FootstepPlannerLogger.deleteOldLogs(30);
 
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 

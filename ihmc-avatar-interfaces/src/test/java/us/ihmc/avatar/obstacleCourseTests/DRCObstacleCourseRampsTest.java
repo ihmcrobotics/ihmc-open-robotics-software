@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterface
@@ -198,7 +198,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
-     YoEnum<HighLevelControllerName> localRequestedControllerState = new YoEnum<>("test", new YoVariableRegistry("Dummy"), HighLevelControllerName.class, true);
+     YoEnum<HighLevelControllerName> localRequestedControllerState = new YoEnum<>("test", new YoRegistry("Dummy"), HighLevelControllerName.class, true);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.registerHighLevelControllerState(new StandPrepControllerStateFactory());

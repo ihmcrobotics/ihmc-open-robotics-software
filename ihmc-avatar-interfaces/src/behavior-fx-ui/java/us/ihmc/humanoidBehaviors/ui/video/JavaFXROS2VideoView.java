@@ -1,124 +1,61 @@
 package us.ihmc.humanoidBehaviors.ui.video;
 
 import controller_msgs.msg.dds.VideoPacket;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import sensor_msgs.msg.dds.CompressedImage;
+import sensor_msgs.msg.dds.Image;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2NodeInterface;
 
-import java.awt.image.BufferedImage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-public class JavaFXROS2VideoView extends ImageView
+public class JavaFXROS2VideoView extends JavaFXVideoView
 {
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
-   private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
-   private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
-   private final ConcurrentRingBuffer<WritableImage> writableImageBuffer;
-   private final boolean flipX;
-   private final boolean flipY;
+   private final ROS2NodeInterface ros2Node;
+   private final ROS2Topic<?> topic;
+   private IHMCROS2Callback<?> ros2Callback;
 
-   private volatile boolean running = false;
-
-   public JavaFXROS2VideoView(int width, int height, boolean flipX, boolean flipY)
+   public JavaFXROS2VideoView(ROS2NodeInterface ros2Node, ROS2Topic<?> topic, int width, int height, boolean flipX, boolean flipY)
    {
-      this.flipX = flipX;
-      this.flipY = flipY;
+      super(width, height, flipX, flipY);
 
-      writableImageBuffer = new ConcurrentRingBuffer<>(() -> new WritableImage(width, height), 4);
+      this.ros2Node = ros2Node;
+      this.topic = topic;
    }
 
-   public void start(Ros2Node ros2Node)
+   @Override
+   public void start()
    {
-      if (running)
+      LogTools.info("Subscribing to {}", topic.getName());
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), message ->
       {
-         LogTools.error("Video view is already running.");
-         return;
-      }
-
-      running = true;
-      new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::acceptVideo);
-      animationTimer.start();
+         if (message instanceof VideoPacket)
+         {
+            acceptVideo(((VideoPacket) message).getData());
+         }
+         else if (message instanceof Image)
+         {
+            acceptVideo(((Image) message).getData());
+         }
+         else if (message instanceof CompressedImage)
+         {
+            acceptVideo(((CompressedImage) message).getData());
+         }
+      });
+      super.start();
    }
 
-   public void start(Messager messager, Topic<VideoPacket> videoTopic)
-   {
-      if (running)
-      {
-         LogTools.error("Video view is already running.");
-         return;
-      }
-
-      running = true;
-      messager.registerTopicListener(videoTopic, this::acceptVideo);
-      animationTimer.start();
-   }
-
+   @Override
    public void stop()
    {
-      running = false;
-      animationTimer.stop();
-      executorService.shutdownNow();
+      ros2Callback.destroy();
+      super.stop();
    }
 
-   private void acceptVideo(VideoPacket message)
+   @Override
+   public void destroy()
    {
-      if (running && VideoSource.fromByte(message.getVideoSource()) == VideoSource.MULTISENSE_LEFT_EYE)
-      {
-         executorService.submit(() ->
-         {
-            // decompress and pack writableimage
-            BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().toArray());
-            LogTools.trace("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
-
-            WritableImage nextImage = writableImageBuffer.next();
-
-            if (nextImage != null)
-            {
-               PixelWriter pixelWriter = nextImage.getPixelWriter();
-               for (int x = 0; x < bufferedImage.getWidth(); x++)
-               {
-                  for (int y = 0; y < bufferedImage.getHeight(); y++)
-                  {
-                     pixelWriter.setArgb(flipX ? bufferedImage.getWidth()  - 1 - x : x,
-                                         flipY ? bufferedImage.getHeight() - 1 - y : y,
-                                         bufferedImage.getRGB(x, y));
-                  }
-               }
-
-               writableImageBuffer.commit();
-            }
-         });
-      }
-   }
-
-   private void handle(long now)
-   {
-      if (writableImageBuffer.poll())
-      {
-         WritableImage latestImage = null;
-         WritableImage image = null;
-         while ((image = writableImageBuffer.read()) != null)
-         {
-            latestImage = image;
-         }
-
-         // set image in scene
-         if (latestImage != null)
-            setImage(latestImage);
-
-         writableImageBuffer.flush();
-      }
+      ros2Callback.destroy();
+      super.destroy();
    }
 }

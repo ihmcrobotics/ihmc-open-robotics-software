@@ -24,14 +24,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VirtualModelController
 {
    private final static boolean USE_SUPER_JACOBIAN = true;
    private final static boolean DISPLAY_GRAVITY_WRENCHES = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final RigidBodyBasics defaultRootBody;
@@ -55,7 +55,7 @@ public class VirtualModelController
 
    private List<RigidBodyBasics> allBodies = new ArrayList<>();
 
-   public VirtualModelController(RigidBodyBasics defaultRootBody, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public VirtualModelController(RigidBodyBasics defaultRootBody, ReferenceFrame centerOfMassFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultRootBody = defaultRootBody;
       this.centerOfMassFrame = centerOfMassFrame;

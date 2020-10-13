@@ -9,15 +9,10 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.simulationconstructionset.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootPathRunnerLeg
 {
@@ -39,7 +34,7 @@ public class FootPathRunnerLeg
 
    public FootPathRunnerLeg(RobotSide robotSide, Robot robot, Joint rootJoint, ReferenceFrame bodyReferenceFrame)
    {
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       String sideName = robotSide.getCamelCaseNameForStartOfExpression();
 
       footXJoint = new SliderJoint(sideName + "FootX", new Vector3D(0.0, robotSide.negateIfRightSide(hipWidth/2.0), 0.0), robot, Axis3D.X);

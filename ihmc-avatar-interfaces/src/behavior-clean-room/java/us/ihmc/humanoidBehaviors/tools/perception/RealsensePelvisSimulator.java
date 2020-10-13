@@ -1,14 +1,20 @@
 package us.ihmc.humanoidBehaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.SimulatedDepthCamera;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
@@ -39,7 +45,9 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       // algorithm operates if X forward frame (same as robot)
    }
 
-   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, Ros2NodeInterface ros2Node)
+   private final FramePose3D tempSensorFramePose = new FramePose3D();
+
+   public RealsensePelvisSimulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       this.map = map;
 
@@ -54,19 +62,54 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, realsenseSensorFrame);
    }
 
-   @Override
-   public PlanarRegionsList get()
+   public List<Point3DReadOnly> getPointCloud()
+   {
+      syncedRobot.update();
+
+      List<Point3DReadOnly> pointCloud;
+      if (syncedRobot.hasReceivedFirstMessage())
+      {
+         pointCloud = simulatedDepthCamera.computePointCloudFrame(map);
+      }
+      else
+      {
+         // blank result
+         pointCloud = new ArrayList<>();
+      }
+
+      return pointCloud;
+   }
+
+   public Pose3DReadOnly getSensorPose()
+   {
+      tempSensorFramePose.setToZero(realsenseSensorFrame);
+      tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      return tempSensorFramePose;
+   }
+
+   public PlanarRegionsList computeRegions()
    {
       syncedRobot.update();
 
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return simulatedDepthCamera.filterMapToVisible(map);
+         return simulatedDepthCamera.computeAndPolygonize(map);
       }
       else
       {
          // blank result
          return new PlanarRegionsList();
       }
+   }
+
+   @Override
+   public PlanarRegionsList get()
+   {
+      return computeRegions();
+   }
+
+   public void setMap(PlanarRegionsList map)
+   {
+      this.map = map;
    }
 }

@@ -15,8 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPControlPolygons
 {
@@ -30,7 +30,7 @@ public class ICPControlPolygons
    private static boolean VISUALIZE = false;
    private static final int maxNumberOfContactPointsPerFoot = 6;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("ICPControlPolygons");
+   private final YoRegistry registry = new YoRegistry("ICPControlPolygons");
 
    // Polygons:
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footControlPolygonsInWorldFrame = new SideDependentList<>();
@@ -45,7 +45,7 @@ public class ICPControlPolygons
    private final FramePoint3D tempProjectedContactPosition = new FramePoint3D();
    private final FramePoint3D tempContactPosition = new FramePoint3D();
 
-   public ICPControlPolygons(ICPControlPlane icpControlPlane, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPControlPolygons(ICPControlPlane icpControlPlane, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
 

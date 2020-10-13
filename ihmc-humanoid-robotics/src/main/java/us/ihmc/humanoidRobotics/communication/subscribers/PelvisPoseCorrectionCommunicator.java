@@ -9,7 +9,7 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCommunicatorInterface
 {
@@ -17,12 +17,12 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    private final IHMCRealtimeROS2Publisher<PelvisPoseErrorPacket> poseErrorPublisher;
    private final IHMCRealtimeROS2Publisher<LocalizationPacket> localizationPublisher;
 
-   public PelvisPoseCorrectionCommunicator(RealtimeRos2Node realtimeRos2Node, ROS2Topic topicName)
+   public PelvisPoseCorrectionCommunicator(RealtimeROS2Node realtimeROS2Node, ROS2Topic topicName)
    {
-      if (realtimeRos2Node != null && topicName != null)
+      if (realtimeROS2Node != null && topicName != null)
       {
-         poseErrorPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, PelvisPoseErrorPacket.class, topicName);
-         localizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, LocalizationPacket.class, topicName);
+         poseErrorPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, PelvisPoseErrorPacket.class, topicName);
+         localizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, LocalizationPacket.class, topicName);
       }
       else
       {

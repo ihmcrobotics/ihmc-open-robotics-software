@@ -31,7 +31,11 @@ public class PlanarRegionsFromPlannerLogViewer
       view3dFactory.addDefaultLighting();
 
       FootstepPlannerLogLoader loader = new FootstepPlannerLogLoader();
-      loader.load(new File(filepath));
+      if (loader.load(new File(filepath)) != FootstepPlannerLogLoader.LoadResult.LOADED)
+      {
+         return;
+      }
+
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(loader.getLog()
                                                                                                           .getRequestPacket()
                                                                                                           .getPlanarRegionsListMessage());

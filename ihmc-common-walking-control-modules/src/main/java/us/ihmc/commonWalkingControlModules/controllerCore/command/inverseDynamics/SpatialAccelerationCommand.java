@@ -47,6 +47,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class SpatialAccelerationCommand implements InverseDynamicsCommand<SpatialAccelerationCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -119,6 +120,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public void set(SpatialAccelerationCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearAcceleration.set(other.desiredLinearAcceleration);
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
@@ -938,6 +940,18 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -948,6 +962,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       {
          SpatialAccelerationCommand other = (SpatialAccelerationCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredLinearAcceleration.equals(other.desiredLinearAcceleration))

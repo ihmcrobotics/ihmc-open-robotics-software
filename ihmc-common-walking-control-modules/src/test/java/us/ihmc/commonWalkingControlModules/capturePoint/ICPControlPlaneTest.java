@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPControlPlaneTest
 {
@@ -35,7 +35,7 @@ public class ICPControlPlaneTest
    @Test
    public void testProjectPointForwardAndLeftOntoPlane()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
@@ -240,7 +240,7 @@ public class ICPControlPlaneTest
    @Test
    public void testProjectPointForwardAndLeftOntoPlaneEdgeCase()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
@@ -280,7 +280,7 @@ public class ICPControlPlaneTest
 
       for (int iter = 0; iter < 1000; iter++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("robert");
+         YoRegistry registry = new YoRegistry("robert");
          double gravity = 9.81;
 
          double xCoMPosition = RandomNumbers.nextDouble(random, 10.0);
@@ -319,7 +319,7 @@ public class ICPControlPlaneTest
    @Test
    public void testProjectPointForwardAndLeftFromPlaneOntoSurface()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
@@ -517,7 +517,7 @@ public class ICPControlPlaneTest
 
       for (int iter = 0; iter < 1000; iter++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("robert");
+         YoRegistry registry = new YoRegistry("robert");
          double gravity = 9.81;
 
          double xCoMPosition = RandomNumbers.nextDouble(random, 10.0);
@@ -557,7 +557,7 @@ public class ICPControlPlaneTest
    @Test
    public void testProjectPlanarRegionMostBasic()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.0, 0.0, 1.0);
@@ -610,7 +610,7 @@ public class ICPControlPlaneTest
    @Test
    public void testProjectPlanarRegion()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);

@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ public class FootstepPlanningWithBodyPathTest
    @Test
    public void testWaypointPathOnFlat(TestInfo testInfo)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
+      YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 

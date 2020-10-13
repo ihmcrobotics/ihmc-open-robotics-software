@@ -2,6 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import com.jme3.math.Transform;
 
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface UIParameters
@@ -27,5 +28,10 @@ public interface UIParameters
       return 3.0;
    }
 
-   public Transform getJmeTransformWristToHand(RobotSide side);
+   public abstract Transform getJmeTransformWristToHand(RobotSide side);
+
+   public default RobotCollisionModel getSelectionModel()
+   {
+      return null;
+   }
 }

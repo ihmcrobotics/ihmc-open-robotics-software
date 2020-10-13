@@ -26,14 +26,14 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.awt.*;
 import java.io.IOException;
@@ -56,12 +56,12 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
    protected CommandInputManager commandInputManager;
    protected StatusMessageOutputManager statusOutputManager;
-   protected YoVariableRegistry toolboxRegistry;
+   protected YoRegistry toolboxRegistry;
    protected YoGraphicsListRegistry yoGraphicsListRegistry;
    protected FullHumanoidRobotModel desiredFullRobotModel;
    protected KinematicsStreamingToolboxController toolboxController;
    private HumanoidFloatingRootJointRobot toolboxGhost;
-   private RealtimeRos2Node toolboxRos2Node;
+   private RealtimeROS2Node toolboxROS2Node;
    protected static final YoAppearanceRGBColor toolboxGhostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
 
    public abstract DRCRobotModel newRobotModel();
@@ -88,7 +88,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setInitialSetup(new RobotConfigurationDataInitialSetup(initialRobotConfigurationData, newRobotModel().createFullRobotModel()));
 
-      toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       createToolboxController(toolboxGhostRobotModel);
       toolboxGhost.setController(new RobotController()
       {
@@ -110,7 +110,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return toolboxRegistry;
          }
@@ -151,13 +151,13 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       ROS2Topic toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
       desiredFullRobotModel = robotModel.createFullRobotModel();
-      toolboxRegistry = new YoVariableRegistry("toolboxMain");
+      toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
-      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxRos2Node);
+      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,
@@ -169,15 +169,15 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
                                                                    toolboxRegistry);
       toolboxController.setOutputPublisher(drcSimulationTestHelper::publishToController);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxRos2Node,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
                                                     RobotConfigurationData.class,
                                                     controllerOutputTopic,
                                            s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxRos2Node,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
                                                     CapturabilityBasedStatus.class,
                                                     controllerOutputTopic,
                                            s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
-      toolboxRos2Node.spin();
+      toolboxROS2Node.spin();
    }
 
    @AfterEach
@@ -208,10 +208,10 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       desiredFullRobotModel = null;
       toolboxController = null;
       toolboxGhost = null;
-      if (toolboxRos2Node != null)
+      if (toolboxROS2Node != null)
       {
-         toolboxRos2Node.destroy();
-         toolboxRos2Node = null;
+         toolboxROS2Node.destroy();
+         toolboxROS2Node = null;
       }
    }
 }

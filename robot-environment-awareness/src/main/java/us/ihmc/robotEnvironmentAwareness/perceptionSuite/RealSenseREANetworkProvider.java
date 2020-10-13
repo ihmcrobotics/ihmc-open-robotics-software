@@ -1,41 +1,41 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 public class RealSenseREANetworkProvider implements REANetworkProvider
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
+   private final ROS2Topic inputTopic;
 
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
-   public RealSenseREANetworkProvider(ROS2Topic stereoOutputTopic)
+   public RealSenseREANetworkProvider(ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
    {
-      this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), stereoOutputTopic);
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), inputTopic, stereoOutputTopic);
    }
 
-   public RealSenseREANetworkProvider(Ros2Node ros2Node, ROS2Topic stereoOutputTopic)
+   public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
    {
       this.ros2Node = ros2Node;
+      this.inputTopic = inputTopic;
 
       stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
    }
@@ -43,6 +43,21 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerMessager(Messager messager)
    {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    NormalEstimationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PlanarRegionSegmentationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PolygonizerParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
    }
 
    @Override
@@ -69,8 +84,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StereoVisionPointCloudMessage.class,
-                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           ROS2Tools.D435_POINT_CLOUD,
                                            stereoVisionPointCloudHandler);
    }
 
@@ -89,6 +103,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
    {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
    }
 
    @Override

@@ -24,10 +24,10 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class PlaneContactStateToWrenchMatrixHelper
 {
@@ -99,7 +99,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
                                                 int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator,
-                                                YoVariableRegistry parentRegistry)
+                                                YoRegistry parentRegistry)
    {
       List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
 
@@ -135,7 +135,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       String bodyName = contactablePlaneBody.getName();
       String namePrefix = bodyName + "WrenchMatrixHelper";
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
 
       RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());

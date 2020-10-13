@@ -4,7 +4,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.UniversalJoint;
 
 public class M2Robot extends Robot
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("Orientation");
+   private final YoRegistry registry = new YoRegistry("Orientation");
    private final YoDouble q_yaw = new YoDouble("q_yaw", registry);
    private final YoDouble q_roll = new YoDouble("q_roll", registry);
    private final YoDouble q_pitch = new YoDouble("q_pitch", registry);
@@ -30,7 +30,7 @@ public class M2Robot extends Robot
 
       this.m2Parameters = m2Parameters;
 
-      this.addYoVariableRegistry(registry);
+      this.addYoRegistry(registry);
       bodyJoint = new FloatingJoint("body", new Vector3D(), this);
       Link bodyLink = body();
       bodyJoint.setLink(bodyLink);

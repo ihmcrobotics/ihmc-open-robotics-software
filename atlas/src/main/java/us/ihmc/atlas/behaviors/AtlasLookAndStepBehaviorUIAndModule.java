@@ -1,12 +1,11 @@
 package us.ihmc.atlas.behaviors;
 
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.tools.processManagement.JavaProcessManager;
 
 public class AtlasLookAndStepBehaviorUIAndModule
 {
    public static void main(String[] args)
    {
-      new AtlasBehaviorUIAndModule(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION));
+      JavaProcessManager.teeToLogFile(AtlasBehaviorUIAndModule.class);
    }
 }

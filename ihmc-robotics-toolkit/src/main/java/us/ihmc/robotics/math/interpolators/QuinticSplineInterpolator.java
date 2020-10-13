@@ -8,7 +8,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.TrajectoryGenerator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -25,7 +25,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    private final int maximumNumberOfPoints;
    private final int numberOfSplines;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoBoolean initialized;
    private final YoDouble currentTime;
 
@@ -63,18 +63,18 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    /**
     * Create a new QuinticSplineInterpolator
     * 
-    * @param name                  Name of the YoVariableRegistry
+    * @param name                  Name of the YoRegistry
     * @param maximumNumberOfPoints Maximum number of points the spline can interpolate (>= 2)
     * @param numberOfSplines       Number of splines it creates that have the same x coordinates for
     *                              the points to interpolate. This allows re-use of memory and saves
     *                              some computational time.
     */
-   public QuinticSplineInterpolator(String name, int maximumNumberOfPoints, int numberOfSplines, YoVariableRegistry parentRegistry)
+   public QuinticSplineInterpolator(String name, int maximumNumberOfPoints, int numberOfSplines, YoRegistry parentRegistry)
    {
       this.maximumNumberOfPoints = maximumNumberOfPoints;
       this.numberOfSplines = numberOfSplines;
 
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
       initialized = new YoBoolean(name + "_initialized", registry);
       initialized.set(false);
       numberOfPoints = new YoInteger(name + "_numberOfPoints", registry);
@@ -108,7 +108,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
       splines = new QuinticSpline[numberOfSplines];
       for (int i = 0; i < numberOfSplines; i++)
       {
-         String eName = name + "[" + i + "]";
+         String eName = name + "-" + i;
          splines[i] = new QuinticSpline(eName, maximumNumberOfPoints, registry);
 
          position[i] = new YoDouble(eName + "_position", registry);
@@ -402,7 +402,7 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
    private class QuinticSpline
    {
       private final int segments;
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
 
       private final double[] a;
       private final double[] b;
@@ -413,10 +413,10 @@ public class QuinticSplineInterpolator implements TrajectoryGenerator
 
       private final YoBoolean coefficientsSet;
 
-      public QuinticSpline(String name, int pointsToInterpolate, YoVariableRegistry parentRegistry)
+      public QuinticSpline(String name, int pointsToInterpolate, YoRegistry parentRegistry)
       {
          this.segments = pointsToInterpolate - 1;
-         this.registry = new YoVariableRegistry(name);
+         this.registry = new YoRegistry(name);
          parentRegistry.addChild(this.registry);
          a = new double[segments];
          b = new double[segments];

@@ -16,7 +16,7 @@ import javax.swing.table.DefaultTableModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -26,7 +26,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 {
    private static final long serialVersionUID = 7616401668436177628L;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final HumanoidFloatingRootJointRobot sdfRobot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final DRCRobotMidiSliderBoardPositionManipulation sliderBoard;
@@ -38,7 +38,7 @@ public class PoseSequenceSelectorPanel extends JPanel
    public PoseSequenceSelectorPanel(DRCRobotModel robotModel)
    {
       super(new GridLayout(1, 0));
-      registry = new YoVariableRegistry("PoseSequenceGUI");
+      registry = new YoRegistry("PoseSequenceGUI");
 
 
       fullRobotModel = robotModel.createFullRobotModel();
@@ -52,7 +52,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       controller.setRawSensorReader(reader);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.startOnAThread();
       sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModel, null);
 
@@ -98,7 +98,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       add(scrollPane);
    }
 
-   public PoseSequenceSelectorPanel(YoVariableRegistry registry, HumanoidFloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceSelectorPanel(YoRegistry registry, HumanoidFloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super(new GridLayout(1, 0));
 

@@ -180,7 +180,7 @@ public class PlanarRegionSegmentationCalculator
       }
 
       return regionToNavigate.nodeStream().filter(node -> otherRegion.distanceFromBoundingBox(node) < searchRadiusSquared)
-                             .filter(node -> isNodeInOtherRegionNeighborhood(root, node, otherRegion, searchRadius)).findFirst().isPresent();
+                             .anyMatch(node -> isNodeInOtherRegionNeighborhood(root, node, otherRegion, searchRadius));
    }
 
    public static boolean isNodeInOtherRegionNeighborhood(NormalOcTreeNode root, NormalOcTreeNode nodeFromOneRegion,
@@ -298,6 +298,7 @@ public class PlanarRegionSegmentationCalculator
          return;
       if (!isNodePartOfRegion(neighborNode, region, parameters.getMaxDistanceFromPlane(), Math.cos(parameters.getMaxAngleFromPlane())))
          return;
+
       if (!neighborNode.isNormalSet() || !neighborNode.isHitLocationSet())
          return;
 

@@ -4,11 +4,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -18,6 +19,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class FootstepNodeSnapAndWigglerTest
@@ -28,10 +32,10 @@ public class FootstepNodeSnapAndWigglerTest
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumXYWiggleDistance(0.1);
       footstepPlannerParameters.setMaximumYawWiggle(0.1);
-      footstepPlannerParameters.setWiggleInsideDelta(0.05);
+      footstepPlannerParameters.setWiggleInsideDeltaTarget(0.05);
 
       double epsilon = 1e-5;
-      double wiggleInsideDelta = footstepPlannerParameters.getWiggleInsideDelta();
+      double wiggleInsideDelta = footstepPlannerParameters.getWiggleInsideDeltaTarget();
       double pX = 0.5 * PlannerTools.footLength;
       double pY = 0.5 * PlannerTools.footWidth;
 
@@ -250,127 +254,100 @@ public class FootstepNodeSnapAndWigglerTest
    }
 
    @Test
-   public void testFullFootholdOverCoplanarRegions1()
+   public void testDeltaInsideComputationForConvexRegion()
    {
-      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
+      ConvexPolygon2D regionPolygon = new ConvexPolygon2D();
+      regionPolygon.addVertex(-1.0, -1.0);
+      regionPolygon.addVertex(-1.0, 1.0);
+      regionPolygon.addVertex(1.0, -1.0);
+      regionPolygon.addVertex(1.0, 1.0);
+      regionPolygon.update();
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), regionPolygon);
 
-      double epsilonDistance = 1e-3;
-      parameters.setDistanceEpsilonToBridgeRegions(epsilonDistance);
+      Random random = new Random(392032);
+      for (int i = 0; i < 50; i++)
+      {
+         ConvexPolygon2D stepPolygon = new ConvexPolygon2D(regionPolygon);
+         double scale = EuclidCoreRandomTools.nextDouble(random, 0.1, 2.0);
+         stepPolygon.scale(scale);
+         stepPolygon.update();
 
-      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
-      planarRegionsListGenerator.translate(-0.5, 0.0, 0.0);
-      planarRegionsListGenerator.addRectangle(1.0, 1.0);
-      planarRegionsListGenerator.translate(1.0, 0.0, - epsilonDistance / 10.0);
-      planarRegionsListGenerator.addRectangle(1.0, 1.0);
-      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+         double distance = FootstepNodeSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, false);
 
-      snapper.setPlanarRegions(planarRegionsList);
+         // distance measured from step vertex to closest region edge
+         double expectedDistance = (scale > 1.0) ? (- Math.sqrt(2.0) * (scale - 1.0)) : (1.0 - scale);
+         double epsilon = 1e-6;
 
-      FootstepNode footstepNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(footstepNode);
-
-      double fullArea = footPolygons.get(RobotSide.LEFT).getArea();
-      double snappedArea = snapData.getCroppedFoothold().getArea();
-      double expectedPercentage = 1.0;
-      Assertions.assertTrue(Math.abs(snappedArea / fullArea - expectedPercentage) < 1.0e-6);
-
-      planarRegionsListGenerator.reset();
-      planarRegionsListGenerator.translate(-0.5, 0.0, 0.0);
-      planarRegionsListGenerator.addRectangle(1.0, 1.0);
-      planarRegionsListGenerator.translate(1.0, 0.0, - 1.01 * epsilonDistance);
-      planarRegionsListGenerator.addRectangle(1.0, 1.0);
-      planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
-
-      snapper.setPlanarRegions(planarRegionsList);
-
-      snapper.reset();
-      snapData = snapper.snapFootstepNode(footstepNode);
-
-      fullArea = footPolygons.get(RobotSide.LEFT).getArea();
-      snappedArea = snapData.getCroppedFoothold().getArea();
-      expectedPercentage = 0.5;
-      Assertions.assertTrue(Math.abs(snappedArea / fullArea - expectedPercentage) < 1.0e-6);
+         Assertions.assertTrue(Math.abs(expectedDistance - distance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for convex region");
+      }
    }
 
    @Test
-   public void testFullFootholdOverCoplanarRegions2()
+   public void testDeltaInsideComputationForConcaveRegion()
    {
-      Random random = new Random(329023);
+      List<Point2D> concaveHullVertices = new ArrayList<>();
+      concaveHullVertices.add(new Point2D(-2.0, -2.0));
+      concaveHullVertices.add(new Point2D(-2.0, 2.0));
+      concaveHullVertices.add(new Point2D(0.0, 0.0));
+      concaveHullVertices.add(new Point2D(0.0, 2.0));
+      concaveHullVertices.add(new Point2D(2.0, 2.0));
+      concaveHullVertices.add(new Point2D(2.0, -2.0));
 
-      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
+      ConvexPolygon2D convexHull = new ConvexPolygon2D();
+      convexHull.addVertex(-2.0, -2.0);
+      convexHull.addVertex(-2.0, 2.0);
+      convexHull.addVertex(2.0, -2.0);
+      convexHull.addVertex(2.0, 2.0);
+      convexHull.update();
 
-      double epsilonDistance = 1e-3;
-      parameters.setDistanceEpsilonToBridgeRegions(epsilonDistance);
+      RigidBodyTransform transform = new RigidBodyTransform();
+      ConvexPolygon2D stepPolygon = new ConvexPolygon2D(convexHull);
+      stepPolygon.scale(0.5);
+      stepPolygon.update();
 
-      RigidBodyTransform randomXYTranslationAndYaw = new RigidBodyTransform();
-      double deltaYaw = LatticeNode.gridSizeYaw;
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, Arrays.asList(convexHull));
+      double epsilon = 1e-6;
 
-      randomXYTranslationAndYaw.getTranslation().setX(random.nextInt(100) * LatticeNode.gridSizeXY);
-      randomXYTranslationAndYaw.getTranslation().setY(random.nextInt(100) * LatticeNode.gridSizeXY);
-      randomXYTranslationAndYaw.getRotation().setYawPitchRoll(deltaYaw, 0.0, 0.0);
+      double distance = FootstepNodeSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      double expectedDistance = 0.0;
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
-      double gap = 0.02;
-      double sideLength = 1.0;
+      double dx = 0.01, dy = 0.0;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
 
-      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
-      planarRegionsListGenerator.setTransform(randomXYTranslationAndYaw);
-      planarRegionsListGenerator.translate(-0.5 * (sideLength + gap), 0.0, 0.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
-      planarRegionsListGenerator.translate(sideLength + gap, 0.0, -epsilonDistance / 10.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
+      distance = FootstepNodeSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dx / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
-      // add some overlapping regions
-      planarRegionsListGenerator.translate(-0.5 * (sideLength + gap), 0.5 * (sideLength + gap), 0.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
-      planarRegionsListGenerator.translate(0.0, - (sideLength + gap), 0.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
+      stepPolygon.applyInverseTransform(transform);
+      dx = -0.01;
+      dy = 0.0;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
 
-      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
-      snapper.setPlanarRegions(planarRegionsList);
+      distance = FootstepNodeSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dx / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
-      FootstepNode footstepNode = new FootstepNode(randomXYTranslationAndYaw.getTranslationX(),
-                                                   randomXYTranslationAndYaw.getTranslationY(),
-                                                   randomXYTranslationAndYaw.getRotation().getYaw() + deltaYaw,
-                                                   RobotSide.LEFT);
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(footstepNode);
+      stepPolygon.applyInverseTransform(transform);
+      dx = 0.0;
+      dy = 0.01;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
 
-      double fullArea = footPolygons.get(RobotSide.LEFT).getArea();
-      double snappedArea = snapData.getCroppedFoothold().getArea();
-      double expectedPercentage = 1.0;
+      distance = FootstepNodeSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dy / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
 
-      Assertions.assertTrue(Math.abs(snappedArea / fullArea - expectedPercentage) < 1.0e-6);
+      stepPolygon.applyInverseTransform(transform);
+      dx = 0.0;
+      dy = -0.01;
+      transform.getTranslation().set(dx, dy, 0.0);
+      stepPolygon.applyTransform(transform);
 
-      gap = 0.0;
-      planarRegionsListGenerator.reset();
-      planarRegionsListGenerator.setTransform(randomXYTranslationAndYaw);
-      planarRegionsListGenerator.translate(-0.5 * (sideLength + gap), 0.0, 0.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
-      planarRegionsListGenerator.translate(sideLength + gap, 0.0, -1.01 * epsilonDistance);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
-
-      // add some overlapping regions
-      planarRegionsListGenerator.translate(-0.5 * (sideLength + gap), 0.5 * (sideLength + gap), 0.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
-      planarRegionsListGenerator.translate(0.0, - (sideLength + gap), 0.0);
-      planarRegionsListGenerator.addRectangle(sideLength, sideLength);
-
-      planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
-      snapper.setPlanarRegions(planarRegionsList);
-
-      footstepNode = new FootstepNode(randomXYTranslationAndYaw.getTranslationX(),
-                                      randomXYTranslationAndYaw.getTranslationY(),
-                                      randomXYTranslationAndYaw.getRotation().getYaw() + deltaYaw,
-                                      RobotSide.LEFT);
-      snapData = snapper.snapFootstepNode(footstepNode);
-
-      fullArea = footPolygons.get(RobotSide.LEFT).getArea();
-      snappedArea = snapData.getCroppedFoothold().getArea();
-      expectedPercentage = 0.5;
-
-      Assertions.assertTrue(Math.abs(snappedArea / fullArea - expectedPercentage) < 1.0e-6);
+      distance = FootstepNodeSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
+      expectedDistance = - dy / Math.sqrt(2.0);
+      Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
    }
 }

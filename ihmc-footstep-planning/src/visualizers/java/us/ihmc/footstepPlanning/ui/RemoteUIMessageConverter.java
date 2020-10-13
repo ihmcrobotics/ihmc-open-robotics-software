@@ -22,16 +22,16 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,7 +51,7 @@ public class RemoteUIMessageConverter
 {
    private static final boolean verbose = false;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final Messager messager;
 
@@ -76,7 +76,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
-   private final AtomicReference<FootstepPlanHeading> pathHeadingReference;
+   private final AtomicReference<Double> pathHeadingReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
@@ -102,7 +102,14 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
+
    private IHMCRealtimeROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<HandTrajectoryMessage> handTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<ChestTrajectoryMessage> chestTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<SpineTrajectoryMessage> spineTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<HeadTrajectoryMessage> headTrajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<NeckTrajectoryMessage> neckTrajectoryMessagePublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -116,11 +123,11 @@ public class RemoteUIMessageConverter
 
    public static RemoteUIMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_footstep_planner_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_footstep_planner_ui");
       return new RemoteUIMessageConverter(ros2Node, messager, robotName);
    }
 
-   public RemoteUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
+   public RemoteUIMessageConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
@@ -146,7 +153,7 @@ public class RemoteUIMessageConverter
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
       maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
-      pathHeadingReference = messager.createInput(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, FootstepPlanHeading.FORWARD);
+      pathHeadingReference = messager.createInput(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, 0.0);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
       plannerHorizonLengthReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerHorizonLength);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
@@ -171,7 +178,7 @@ public class RemoteUIMessageConverter
       ros2Node.destroy();
    }
 
-   private void registerPubSubs(RealtimeRos2Node ros2Node)
+   private void registerPubSubs(RealtimeROS2Node ros2Node)
    {
       /* subscribers */
       // we want to listen to the incoming request to the planning toolbox
@@ -231,6 +238,12 @@ public class RemoteUIMessageConverter
       walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);
       walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
       armTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      handTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HandTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      footTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      chestTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ChestTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      spineTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, SpineTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      headTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HeadTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      neckTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, NeckTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
@@ -261,6 +274,14 @@ public class RemoteUIMessageConverter
          armTrajectoryMessagePublisher.publish(armTrajectoryMessage);
 
       });
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ArmTrajectoryMessageTopic, armTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.HandTrajectoryMessageTopic, handTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootTrajectoryMessageTopic, footTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ChestTrajectoryMessageTopic, chestTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.SpineTrajectoryMessageTopic, spineTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.HeadTrajectoryMessageTopic, headTrajectoryMessagePublisher::publish);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.NeckTrajectoryMessageTopic, neckTrajectoryMessagePublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -376,8 +397,8 @@ public class RemoteUIMessageConverter
    {
       ConvexPolygon2D leftFootPolygon = new ConvexPolygon2D();
       ConvexPolygon2D rightFootPolygon = new ConvexPolygon2D();
-      packet.getLeftFootSupportPolygon2d().forEach(leftFootPolygon::addVertex);
-      packet.getRightFootSupportPolygon2d().forEach(rightFootPolygon::addVertex);
+      packet.getLeftFootSupportPolygon3d().forEach(leftFootPolygon::addVertex);
+      packet.getRightFootSupportPolygon3d().forEach(rightFootPolygon::addVertex);
       leftFootPolygon.update();
       rightFootPolygon.update();
 
@@ -508,7 +529,7 @@ public class RemoteUIMessageConverter
       packet.setGoalDistanceProximity(goalDistanceProximity.get());
       packet.setGoalYawProximity(goalYawProximity.get());
       if (pathHeadingReference.get() != null)
-         packet.setRequestedPathHeading(pathHeadingReference.get().toByte());
+         packet.setRequestedPathHeading(AngleTools.trimAngleMinusPiToPi(Math.toRadians(pathHeadingReference.get())));
       packet.setSnapGoalSteps(snapGoalSteps.get());
       packet.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());
       packet.setMaxIterations(maxIterations.get());

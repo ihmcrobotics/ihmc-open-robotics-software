@@ -3,8 +3,8 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -16,7 +16,7 @@ public class PIDController extends AbstractPIDController
    private final YoDouble maxFeedback;
    private final YoDouble integralLeakRatio;
 
-   public PIDController(String suffix, YoVariableRegistry registry)
+   public PIDController(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
 
@@ -39,20 +39,20 @@ public class PIDController extends AbstractPIDController
 
    private void addLeakRatioClipper()
    {
-      VariableChangedListener leakRatioClipper = new VariableChangedListener()
+      YoVariableChangedListener leakRatioClipper = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             integralLeakRatio.set(MathTools.clamp(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
          }
       };
 
-      integralLeakRatio.addVariableChangedListener(leakRatioClipper);
+      integralLeakRatio.addListener(leakRatioClipper);
    }
 
    public PIDController(YoDouble proportionalGain, YoDouble integralGain, YoDouble derivativeGain, YoDouble maxIntegralError, String suffix,
-                        YoVariableRegistry registry)
+                        YoRegistry registry)
    {
       super(suffix, registry);
 
@@ -69,7 +69,7 @@ public class PIDController extends AbstractPIDController
       addLeakRatioClipper();
    }
 
-   public PIDController(YoPIDGains yoPIDGains, String suffix, YoVariableRegistry registry)
+   public PIDController(YoPIDGains yoPIDGains, String suffix, YoRegistry registry)
    {
       super(suffix, registry);
 

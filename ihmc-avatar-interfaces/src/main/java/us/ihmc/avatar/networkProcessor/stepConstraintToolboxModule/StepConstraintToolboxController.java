@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -54,7 +54,7 @@ public class StepConstraintToolboxController extends ToolboxController
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           double gravityZ,
-                                          YoVariableRegistry parentRegistry,
+                                          YoRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -107,8 +107,8 @@ public class StepConstraintToolboxController extends ToolboxController
          CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getAndSet(null);
          if (capturabilityBasedStatus != null)
          {
-            stepConstraintCalculator.setRightFootSupportPolygon(capturabilityBasedStatus.getRightFootSupportPolygon2d());
-            stepConstraintCalculator.setLeftFootSupportPolygon(capturabilityBasedStatus.getLeftFootSupportPolygon2d());
+            stepConstraintCalculator.setRightFootSupportPolygon(capturabilityBasedStatus.getRightFootSupportPolygon3d());
+            stepConstraintCalculator.setLeftFootSupportPolygon(capturabilityBasedStatus.getLeftFootSupportPolygon3d());
             stepConstraintCalculator.setOmega(capturabilityBasedStatus.getOmega());
             stepConstraintCalculator.setCapturePoint(capturabilityBasedStatus.getCapturePoint2d());
          }

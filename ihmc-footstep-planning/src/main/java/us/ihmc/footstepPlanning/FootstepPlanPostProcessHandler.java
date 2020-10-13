@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,16 +19,17 @@ import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.function.Consumer;
 
 public class FootstepPlanPostProcessHandler
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
@@ -63,7 +66,7 @@ public class FootstepPlanPostProcessHandler
       }
       else
       {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, walkingControllerParameters);
+         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, footstepPlannerParameters, walkingControllerParameters);
          this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
@@ -73,46 +76,69 @@ public class FootstepPlanPostProcessHandler
       this.positionBasedSplitFractionCalculator = new PositionBasedSplitFractionCalculator(splitFractionParameters);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput output)
    {
-      boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
-      if (flatGroundMode)
+      if (!request.getAssumeFlatGround())
       {
-         statusCallback.accept(output);
-         return;
-      }
-
-      if (request.getSwingPlannerType() == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
-      {
-         adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(request.getPlanarRegionsList());
-         RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
-         Pose3D initialStancePose = request.getStartFootPoses().get(initialStanceSide);
-         adaptiveSwingTrajectoryCalculator.setSwingParameters(initialStancePose, output.getFootstepPlan());
-      }
-      else if (request.getSwingPlannerType() == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
-      {
-         computeSwingWaypoints(request, output.getFootstepPlan());
-      }
-
-      if (request.performPositionBasedSplitFractionCalculation())
-      {
-         positionBasedSplitFractionCalculator.computeSplitFractions(request, output.getFootstepPlan());
-      }
-      if (request.performAreaBasedSplitFractionCalculation())
-      {
-         areaBasedSplitFractionCalculator.computeSplitFractions(request, output.getFootstepPlan());
+         performPostProcessing(request.getPlanarRegionsList(),
+                               output.getFootstepPlan(),
+                               request.getStartFootPoses(),
+                               request.getStartFootholds(),
+                               request.getSwingPlannerType(),
+                               request.performPositionBasedSplitFractionCalculation(),
+                               request.performAreaBasedSplitFractionCalculation());
       }
 
       statusCallback.accept(output);
    }
 
-   // TODO make this a method of the swing trajectory solver after moving it to this package
+   public void performPostProcessing(PlanarRegionsList planarRegionsList,
+                                     FootstepPlan footstepPlan,
+                                     SideDependentList<? extends Pose3DReadOnly> startFootPoses,
+                                     SideDependentList<ConvexPolygon2D> startFootholds,
+                                     SwingPlannerType swingPlannerType,
+                                     boolean performPositionBasedSplitFractionCalculation,
+                                     boolean performAreaBasedSplitFractionCalculation)
+   {
+      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      {
+         return;
+      }
+
+      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
+      {
+         adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
+         adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
+      }
+      else if (swingPlannerType == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
+      {
+         computeSwingWaypoints(planarRegionsList, footstepPlan, startFootPoses);
+      }
+
+      if (performPositionBasedSplitFractionCalculation)
+      {
+         positionBasedSplitFractionCalculator.computeSplitFractions(footstepPlan, startFootPoses);
+      }
+      if (performAreaBasedSplitFractionCalculation)
+      {
+         areaBasedSplitFractionCalculator.computeSplitFractions(footstepPlan, startFootPoses, startFootholds);
+      }
+   }
+
    public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlan footstepPlan)
+   {
+      computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses());
+   }
+
+   // TODO make this a method of the swing trajectory solver after moving it to this package
+   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
+                                     FootstepPlan footstepPlan,
+                                     SideDependentList<? extends Pose3DReadOnly> startFootPoses)
    {
       swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
       swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(swingPlannerParameters.getFastApproximationLessClearance());
@@ -139,12 +165,12 @@ public class FootstepPlanPostProcessHandler
 
          if (i == 0)
          {
-            swingStartPose.set(request.getStartFootPoses().get(swingSide));
-            stanceFootPose.set(request.getStartFootPoses().get(stanceSide));
+            swingStartPose.set(startFootPoses.get(swingSide));
+            stanceFootPose.set(startFootPoses.get(stanceSide));
          }
          else if (i == 1)
          {
-            swingStartPose.set(request.getStartFootPoses().get(swingSide));
+            swingStartPose.set(startFootPoses.get(swingSide));
             stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
          }
          else
@@ -156,7 +182,7 @@ public class FootstepPlanPostProcessHandler
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
                                                                                     swingStartPose,
                                                                                     swingEndPose,
-                                                                                    request.getPlanarRegionsList());
+                                                                                    planarRegionsList);
          if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
          {
             footstep.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -165,13 +191,13 @@ public class FootstepPlanPostProcessHandler
             footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
 
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength() / nominalSwingTrajectoryLength);
-            double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * walkingControllerParameters.getDefaultSwingTime();
+            double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
          }
          else
          {
             double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getInitialTrajectoryLength() / nominalSwingTrajectoryLength);
-            double swingTime = swingScale * walkingControllerParameters.getDefaultSwingTime();
+            double swingTime = swingScale * swingPlannerParameters.getMinimumSwingTime();
             footstep.setSwingDuration(swingTime);
          }
       }

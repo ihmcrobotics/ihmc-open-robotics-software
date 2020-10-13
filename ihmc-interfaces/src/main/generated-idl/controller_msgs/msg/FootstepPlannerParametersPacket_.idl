@@ -77,22 +77,22 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double ideal_side_step_width;
         /**
-         * Returns the ideal length when walking backwards. This value is negative.
+         * Returns the ideal length when walking backwards. This value is positive.
          */
         @defaultValue(value=-11.1)
         double ideal_back_step_length;
         /**
-         * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
-         * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-         * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-         * to allowing footsteps that partially intersect planar regions.
-         * 
-         * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-         * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-         * The smallest acceptable distance to the edge of a cliff
-         * The maximum error between desired and actual foot placement
+         * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+         * to the edge. A negative value means the footstep can overhang a region.
          */
-        double wiggle_inside_delta;
+        @defaultValue(value=-11.1)
+        double wiggle_inside_delta_target;
+        /**
+         * This parameter only is used if wiggle_while_planning is true. If a step cannot be wiggled inside by this amount or more,
+         * it will be rejected. Note that if {wiggle_while_planning if false, it's always best effort on the final plan.
+         */
+        @defaultValue(value=-11.1)
+        double wiggle_inside_delta_minimum;
         /**
          * Maximum xy-distance the planner will consider for candidate steps.
          * Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
@@ -284,17 +284,14 @@ module controller_msgs
          */
         boolean wiggle_while_planning;
         /**
+         * If wiggle_while_planning is true, this will reject a step if the wiggle meet the specified parameters. If it's false the wiggle does a best effort
+         */
+        boolean reject_if_wiggle_not_satisfied;
+        /**
          * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
          * this toggles between them.
          */
         boolean enable_concave_hull_wiggler;
-        /**
-         * If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
-         * This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
-         * {@link #getMaximumXYWiggleDistance}, and {@link #getMaximumYawWiggle}. If this transform cannot be found, the
-         * candidate footstep will be rejected if this method returns {@code true}.
-         */
-        boolean reject_if_cannot_fully_wiggle_inside;
         /**
          * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
          * distance the planner will use
@@ -533,30 +530,25 @@ module controller_msgs
          */
         boolean enable_shin_collision_check;
         /**
-         * Radius of the shin collidable cylinder
+         * How far the shin collision cylinder extends from the toe
          */
         @defaultValue(value=-11.1)
-        double shin_radius;
+        double shin_toe_clearance;
+        /**
+         * How far the shin collision cylinder extends from the heel
+         */
+        @defaultValue(value=-11.1)
+        double shin_heel_clearance;
         /**
          * Length of the shin collidable cylinder
          */
         @defaultValue(value=-11.1)
         double shin_length;
         /**
-         * Pitch of the shin collidable cylinder
-         */
-        @defaultValue(value=-11.1)
-        double shin_pitch;
-        /**
          * Height offset of shin collidable cylinder
          */
         @defaultValue(value=-11.1)
         double shin_height_offet;
-        /**
-         * Distance epsilon below snapped footstep that will be added to foothold
-         */
-        @defaultValue(value=-11.1)
-        double distance_epsilon_to_bridge_regions;
         /**
          * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
          * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,

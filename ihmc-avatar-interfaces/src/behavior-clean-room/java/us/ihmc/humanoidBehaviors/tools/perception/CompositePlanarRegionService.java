@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class CompositePlanarRegionService
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
    private long sequenceId = 0;
 
-   public CompositePlanarRegionService(Ros2NodeInterface ros2Node, List<String> topicNames, double period, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   public CompositePlanarRegionService(ROS2NodeInterface ros2Node, List<String> topicNames, double period, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
 

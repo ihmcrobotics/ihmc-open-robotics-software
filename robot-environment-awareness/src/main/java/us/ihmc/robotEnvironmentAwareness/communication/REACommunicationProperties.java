@@ -52,9 +52,10 @@ public class REACommunicationProperties
 {
    public static final ROS2Topic outputTopic = ROS2Tools.REA.withRobot(null).withOutput();
    public static final ROS2Topic lidarOutputTopic = ROS2Tools.REA.withPrefix("lidar").withRobot(null).withOutput();
-   public static final ROS2Topic stereoOutputTopic = ROS2Tools.REA.withPrefix("stereo").withRobot(null).withOutput();
+   public static final ROS2Topic stereoOutputTopic = ROS2Tools.REALSENSE_REA;
    public static final ROS2Topic depthOutputTopic = ROS2Tools.REA.withPrefix("depth").withRobot(null).withOutput();
    public static final ROS2Topic inputTopic = ROS2Tools.REA.withRobot(null).withInput();
+   public static final ROS2Topic stereoInputTopic = ROS2Tools.REA.withPrefix("depth").withRobot(null).withInput();
    public static final ROS2Topic subscriberCustomRegionsTopicName = ROS2Tools.REA.withRobot(null)
                                                                                  .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME)
                                                                                  .withInput();

@@ -13,17 +13,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<ChestHybridJointspaceTaskspaceTrajectoryMessage> implements Settable<ChestHybridJointspaceTaskspaceTrajectoryMessage>, EpsilonComparable<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The taskspace trajectory information.
             */
    public controller_msgs.msg.dds.SO3TrajectoryMessage taskspace_trajectory_message_;
-
    /**
             * The jointspace trajectory information.
             * The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
@@ -32,12 +29,8 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
-
-
       taskspace_trajectory_message_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
-
       jointspace_trajectory_message_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
-
    }
 
    public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
@@ -48,15 +41,11 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
-
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_message_, jointspace_trajectory_message_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -74,7 +63,6 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
    }
 
 
-
    /**
             * The taskspace trajectory information.
             */
@@ -82,7 +70,6 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
    {
       return taskspace_trajectory_message_;
    }
-
 
 
    /**
@@ -112,12 +99,9 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!this.taskspace_trajectory_message_.epsilonEquals(other.taskspace_trajectory_message_, epsilon)) return false;
-
       if (!this.jointspace_trajectory_message_.epsilonEquals(other.jointspace_trajectory_message_, epsilon)) return false;
 
       return true;
@@ -132,12 +116,9 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
       ChestHybridJointspaceTaskspaceTrajectoryMessage otherMyClass = (ChestHybridJointspaceTaskspaceTrajectoryMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.taskspace_trajectory_message_.equals(otherMyClass.taskspace_trajectory_message_)) return false;
-
       if (!this.jointspace_trajectory_message_.equals(otherMyClass.jointspace_trajectory_message_)) return false;
 
       return true;
@@ -149,13 +130,10 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
       StringBuilder builder = new StringBuilder();
 
       builder.append("ChestHybridJointspaceTaskspaceTrajectoryMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("taskspace_trajectory_message=");
       builder.append(this.taskspace_trajectory_message_);      builder.append(", ");
-
       builder.append("jointspace_trajectory_message=");
       builder.append(this.jointspace_trajectory_message_);
       builder.append("}");

@@ -1,7 +1,15 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
+import static us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest.showPlotterAndSleep;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PointInPolygonSolver;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,23 +20,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest.showPlotterAndSleep;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PointInPolygonTest
 {
    private static final boolean visualize = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
 
    @Test
@@ -72,7 +73,7 @@ public class PointInPolygonTest
    }
 
 
-   static void addLineSegments(String name, Vertex2DSupplier polygon, Color color, ArtifactList artifacts, YoVariableRegistry registry)
+   static void addLineSegments(String name, Vertex2DSupplier polygon, Color color, ArtifactList artifacts, YoRegistry registry)
    {
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
@@ -86,7 +87,7 @@ public class PointInPolygonTest
       }
    }
 
-   static void addVertex(String name, Point2D vertex, Color color, ArtifactList artifacts, YoVariableRegistry registry)
+   static void addVertex(String name, Point2D vertex, Color color, ArtifactList artifacts, YoRegistry registry)
    {
       YoFramePoint2D framePoint2D = new YoFramePoint2D(name + "Point", worldFrame, registry);
       framePoint2D.set(vertex);

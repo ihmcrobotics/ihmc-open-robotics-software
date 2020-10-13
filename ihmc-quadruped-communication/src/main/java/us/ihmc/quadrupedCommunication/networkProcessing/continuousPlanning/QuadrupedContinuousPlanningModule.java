@@ -14,7 +14,7 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
 import java.util.ArrayList;
@@ -53,25 +53,25 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node)
    {
       // status messages from the controller
       ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
       ROS2Topic plannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                    .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopic,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
                                            s -> processQuadrupedXGaitSettings(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getInputTopic(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedContinuousPlanningRequestPacket.class, getInputTopic(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 

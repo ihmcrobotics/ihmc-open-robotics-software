@@ -14,25 +14,18 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBearingMessage> implements Settable<QuadrupedFootLoadBearingMessage>, EpsilonComparable<QuadrupedFootLoadBearingMessage>
 {
-
    public static final byte FRONT_LEFT = (byte) 0;
-
    public static final byte FRONT_RIGHT = (byte) 1;
-
    public static final byte HIND_RIGHT = (byte) 2;
-
    public static final byte HIND_LEFT = (byte) 3;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies which quadrant should be loaded.
             */
    public byte robot_quadrant_ = (byte) 255;
-
    /**
             * The time to delay this command on the controller side before being executed.
             */
@@ -40,10 +33,6 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
 
    public QuadrupedFootLoadBearingMessage()
    {
-
-
-
-
    }
 
    public QuadrupedFootLoadBearingMessage(QuadrupedFootLoadBearingMessage other)
@@ -54,17 +43,13 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
 
    public void set(QuadrupedFootLoadBearingMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       robot_quadrant_ = other.robot_quadrant_;
-
 
       execution_delay_time_ = other.execution_delay_time_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -81,7 +66,6 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
       return sequence_id_;
    }
 
-
    /**
             * Specifies which quadrant should be loaded.
             */
@@ -96,7 +80,6 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
    {
       return robot_quadrant_;
    }
-
 
    /**
             * The time to delay this command on the controller side before being executed.
@@ -131,12 +114,9 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_quadrant_, other.robot_quadrant_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
@@ -153,12 +133,9 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
 
       QuadrupedFootLoadBearingMessage otherMyClass = (QuadrupedFootLoadBearingMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if(this.robot_quadrant_ != otherMyClass.robot_quadrant_) return false;
-
 
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
@@ -172,13 +149,10 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
       StringBuilder builder = new StringBuilder();
 
       builder.append("QuadrupedFootLoadBearingMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("robot_quadrant=");
       builder.append(this.robot_quadrant_);      builder.append(", ");
-
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
       builder.append("}");

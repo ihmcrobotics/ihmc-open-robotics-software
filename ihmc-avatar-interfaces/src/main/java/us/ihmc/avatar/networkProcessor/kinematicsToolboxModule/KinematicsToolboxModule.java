@@ -5,22 +5,25 @@ import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class KinematicsToolboxModule extends ToolboxModule
 {
@@ -28,34 +31,52 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
+      this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+   }
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds,
+                                  PubSubImplementation pubSubImplementation)
+   {
+      this(robotModel, startYoVariableServer, updatePeriodMilliseconds, true, pubSubImplementation);
+   }
+
+   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds, boolean setupInitialConfiguration,
+                                  PubSubImplementation pubSubImplementation)
+   {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+            updatePeriodMilliseconds, pubSubImplementation);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
                                                                             robotModel,
-                                                                            Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
+                                                                            0.001, // Note that the gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period.
                                                                             yoGraphicsListRegistry,
                                                                             registry);
-      kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
+      if (setupInitialConfiguration)
+         kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
             kinematicsToolBoxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
             kinematicsToolBoxController.updateCapturabilityBasedStatus(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MultiContactBalanceStatus.class, controllerOutputTopic, s ->
+      {
+         if (kinematicsToolBoxController != null)
+            kinematicsToolBoxController.updateMultiContactBalanceStatus(s.takeNextData());
       });
    }
 
@@ -80,6 +101,9 @@ public class KinematicsToolboxModule extends ToolboxModule
       commands.add(KinematicsToolboxRigidBodyCommand.class);
       commands.add(KinematicsToolboxOneDoFJointCommand.class);
       commands.add(KinematicsToolboxConfigurationCommand.class);
+      commands.add(KinematicsToolboxContactStateCommand.class);
+      commands.add(KinematicsToolboxPrivilegedConfigurationCommand.class);
+      commands.add(KinematicsToolboxInputCollectionCommand.class);
       commands.add(HumanoidKinematicsToolboxConfigurationCommand.class);
       return commands;
    }
@@ -113,23 +137,23 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
    }

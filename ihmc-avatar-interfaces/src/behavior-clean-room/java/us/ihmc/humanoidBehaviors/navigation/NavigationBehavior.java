@@ -27,7 +27,7 @@ import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.NonReactiveLoopSequenceNode;
 import us.ihmc.log.LogTools;
@@ -225,7 +225,7 @@ public class NavigationBehavior implements BehaviorInterface
       goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
 //      LogTools.info("Creating A* planner");
-//      YoVariableRegistry registry = new YoVariableRegistry("registry");
+//      YoRegistry registry = new YoRegistry("registry");
 //      AStarFootstepPlanner planner = new AStarFootstepPlanner(footstepPlannerParameters,
 //                                                              nodeChecker,
 //                                                              heuristics,

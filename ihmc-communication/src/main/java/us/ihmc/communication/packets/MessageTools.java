@@ -10,8 +10,8 @@ import controller_msgs.msg.dds.DetectedFacesPacket;
 import controller_msgs.msg.dds.HeatMapPacket;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.LidarScanParametersMessage;
@@ -31,7 +31,6 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -51,6 +50,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -666,7 +666,7 @@ public class MessageTools
       }
       catch (ArrayIndexOutOfBoundsException e)
       {
-         PrintTools.error("Caught exception while copying data from array of length: " + source.length);
+         LogTools.error("Caught exception while copying data from array of length: " + source.length);
          throw e;
       }
    }
@@ -1022,13 +1022,12 @@ public class MessageTools
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *                                  are different.
     */
-   public static void packPrivilegedRobotConfiguration(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage,
-                                                       Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, int[] jointHashCodes,
-                                                       float[] jointAngles)
+   public static void packPrivilegedRobotConfiguration(KinematicsToolboxPrivilegedConfigurationMessage message, Tuple3DReadOnly rootJointPosition,
+                                                       QuaternionReadOnly rootJointOrientation, int[] jointHashCodes, float[] jointAngles)
    {
-      kinematicsToolboxConfigurationMessage.getPrivilegedRootJointPosition().set(rootJointPosition);
-      kinematicsToolboxConfigurationMessage.getPrivilegedRootJointOrientation().set(rootJointOrientation);
-      MessageTools.packPrivilegedJointAngles(kinematicsToolboxConfigurationMessage, jointHashCodes, jointAngles);
+      message.getPrivilegedRootJointPosition().set(rootJointPosition);
+      message.getPrivilegedRootJointOrientation().set(rootJointOrientation);
+      MessageTools.packPrivilegedJointAngles(message, jointHashCodes, jointAngles);
    }
 
    /**
@@ -1050,16 +1049,15 @@ public class MessageTools
     * @throws IllegalArgumentException if the lengths of {@code jointAngles} and {@code jointHashCodes}
     *                                  are different.
     */
-   public static void packPrivilegedJointAngles(KinematicsToolboxConfigurationMessage kinematicsToolboxConfigurationMessage, int[] jointHashCodes,
-                                                float[] jointAngles)
+   public static void packPrivilegedJointAngles(KinematicsToolboxPrivilegedConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
    {
       if (jointHashCodes.length != jointAngles.length)
          throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
 
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointHashCodes().reset();
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointHashCodes().add(jointHashCodes);
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().reset();
-      kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().add(jointAngles);
+      message.getPrivilegedJointHashCodes().reset();
+      message.getPrivilegedJointHashCodes().add(jointHashCodes);
+      message.getPrivilegedJointAngles().reset();
+      message.getPrivilegedJointAngles().add(jointAngles);
    }
 
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
@@ -1100,7 +1098,7 @@ public class MessageTools
    {
       return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
    }
-   
+
    /*
     * Set the sequence ID for a RobotConfigurationData object and propagate it to all sensor values.
     */

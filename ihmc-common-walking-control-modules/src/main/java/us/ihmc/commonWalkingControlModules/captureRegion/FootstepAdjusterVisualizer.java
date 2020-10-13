@@ -6,8 +6,8 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FootstepAdjusterVisualizer
 {
@@ -15,7 +15,7 @@ public class FootstepAdjusterVisualizer
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name + "Registry");
+   private final YoRegistry registry = new YoRegistry(name + "Registry");
    private final YoArtifactPolygon nextFootstepPolygonArtifact;
 
    private final FootstepAdjustor footstepAdjustor;
@@ -23,7 +23,7 @@ public class FootstepAdjusterVisualizer
    private YoFrameConvexPolygon2D yoNextFootstepPolygon;
    private FrameConvexPolygon2D nextFootstepPolygon;
 
-   public FootstepAdjusterVisualizer(FootstepAdjustor footstepAdjustor, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootstepAdjusterVisualizer(FootstepAdjustor footstepAdjustor, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.footstepAdjustor = footstepAdjustor;
 

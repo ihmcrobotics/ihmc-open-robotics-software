@@ -77,8 +77,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -132,7 +132,7 @@ public class StepGeneratorJavaFXController
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
 
-   public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, Ros2Node ros2Node,
+   public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, ROS2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
                                         HumanoidRobotPunchMessenger punchMessenger, RobotLowLevelMessenger lowLevelMessenger,
                                         SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
@@ -249,8 +249,8 @@ public class StepGeneratorJavaFXController
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          CapturabilityBasedStatus status = s.takeNextData();
-         isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
-         isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
+         isLeftFootInSupport.set(!status.getLeftFootSupportPolygon3d().isEmpty());
+         isRightFootInSupport.set(!status.getRightFootSupportPolygon3d().isEmpty());
       });
 
       double collisionBoxDepth = 0.65;

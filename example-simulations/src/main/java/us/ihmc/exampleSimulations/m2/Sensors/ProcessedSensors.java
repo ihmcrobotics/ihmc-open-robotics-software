@@ -9,7 +9,7 @@ import us.ihmc.exampleSimulations.m2.RobotAxis;
 import us.ihmc.exampleSimulations.m2.RobotOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -27,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class ProcessedSensors
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("ProcessedSensors");
+   private final YoRegistry registry = new YoRegistry("ProcessedSensors");
 
    public final YoDouble time = new YoDouble("time", registry);
 
@@ -513,12 +513,12 @@ public class ProcessedSensors
 
    public ProcessedSensors()
    {
-      List<YoVariable<?>> variables = registry.getAllVariablesIncludingDescendants();
+      List<YoVariable> variables = registry.collectSubtreeVariables();
       allVariables = new YoDouble[variables.size()];
       variables.toArray(allVariables);
    }
 
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

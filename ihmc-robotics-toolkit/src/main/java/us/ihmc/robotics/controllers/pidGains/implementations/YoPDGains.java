@@ -2,8 +2,8 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -16,7 +16,7 @@ public class YoPDGains implements PDGainsReadOnly
    private final YoDouble maximumFeedbackRate;
    private final YoDouble positionDeadband;
 
-   public YoPDGains(String suffix, YoVariableRegistry registry)
+   public YoPDGains(String suffix, YoRegistry registry)
    {
       kp = new YoDouble("kp" + suffix, registry);
       zeta = new YoDouble("zeta" + suffix, registry);
@@ -140,19 +140,19 @@ public class YoPDGains implements PDGainsReadOnly
 
    public void createDerivativeGainUpdater(boolean updateNow)
    {
-      VariableChangedListener kdUpdater = new VariableChangedListener()
+      YoVariableChangedListener kdUpdater = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
          }
       };
 
-      kp.addVariableChangedListener(kdUpdater);
-      zeta.addVariableChangedListener(kdUpdater);
+      kp.addListener(kdUpdater);
+      zeta.addListener(kdUpdater);
 
-      if (updateNow) kdUpdater.notifyOfVariableChange(null);
+      if (updateNow) kdUpdater.changed(null);
    }
 
    public void set(YoPDGains other)

@@ -8,15 +8,15 @@ import javafx.stage.StageStyle;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class JavaFXROS2VideoViewer
 {
-   private static final int width = 1024;
-   private static final int height = 544;
-   private Ros2Node ros2Node;
+   private static final int width = 640;
+   private static final int height = 480;
+   private ROS2Node ros2Node;
 
-   public JavaFXROS2VideoViewer(Ros2Node ros2Node)
+   public JavaFXROS2VideoViewer(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
       JavaFXApplicationCreator.createAJavaFXApplication();
@@ -27,7 +27,7 @@ public class JavaFXROS2VideoViewer
    {
       Stage primaryStage = new Stage();
 
-      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(width, height, false, false);
+      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, ROS2Tools.D435_VIDEO, width, height, false, false);
 
       StackPane stackPaneNode = new StackPane(ros2VideoView);
       stackPaneNode.setPrefSize(width, height);
@@ -43,11 +43,11 @@ public class JavaFXROS2VideoViewer
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.show();
 
-      ros2VideoView.start(ros2Node);
+      ros2VideoView.start();
    }
 
    public static void main(String[] args)
    {
-      new JavaFXROS2VideoViewer(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
+      new JavaFXROS2VideoViewer(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "video_viewer"));
    }
 }

@@ -6,12 +6,12 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MatrixYoVariableConversionTools
 {
-   public static void populateYoVariables(YoDouble[][] yoVariableArray, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariables(YoDouble[][] yoVariableArray, String prefix, YoRegistry registry)
    {
       for (int i = 0; i < yoVariableArray.length; i++)
       {
@@ -22,7 +22,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void populateYoVariablesSymmetric(YoDouble[] yoVariableArray, String prefix, int size, YoVariableRegistry registry)
+   public static void populateYoVariablesSymmetric(YoDouble[] yoVariableArray, String prefix, int size, YoRegistry registry)
    {
       int n = 0;
       for (int i = 0; i < size; i++)
@@ -35,7 +35,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void populateYoVariables(YoDouble[] yoVariableArray, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariables(YoDouble[] yoVariableArray, String prefix, YoRegistry registry)
    {
       for (int i = 0; i < yoVariableArray.length; i++)
       {
@@ -113,7 +113,7 @@ public class MatrixYoVariableConversionTools
    }
 
    public static void populateYoVariablesMatrix(List<List<YoDouble>> yoVariableArray, int nRows, int nColumns, String prefix,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       for (int i = 0; i < nRows; i++)
       {
@@ -125,7 +125,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void populateYoVariablesSymmetricMatrix(List<List<YoDouble>> yoVariableArray, int size, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariablesSymmetricMatrix(List<List<YoDouble>> yoVariableArray, int size, String prefix, YoRegistry registry)
    {
       for (int i = 0; i < size; i++)
       {
@@ -138,7 +138,7 @@ public class MatrixYoVariableConversionTools
       }
    }
 
-   public static void populateYoVariablesVector(List<YoDouble> yoVariableArray, int size, String prefix, YoVariableRegistry registry)
+   public static void populateYoVariablesVector(List<YoDouble> yoVariableArray, int size, String prefix, YoRegistry registry)
    {
       for (int i = yoVariableArray.size(); i < size; i++)
       {

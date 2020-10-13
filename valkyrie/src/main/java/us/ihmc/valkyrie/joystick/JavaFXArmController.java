@@ -43,8 +43,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 
 public class JavaFXArmController
 {
@@ -100,7 +100,7 @@ public class JavaFXArmController
 
    FullHumanoidRobotModelFactory fullRobotModelFactory;
 
-   public JavaFXArmController(String robotName, JavaFXMessager messager, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public JavaFXArmController(String robotName, JavaFXMessager messager, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                               JavaFXRobotVisualizer javaFXRobotVisualizer, HandFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher)
    {
       this.fullRobotModelFactory = fullRobotModelFactory;

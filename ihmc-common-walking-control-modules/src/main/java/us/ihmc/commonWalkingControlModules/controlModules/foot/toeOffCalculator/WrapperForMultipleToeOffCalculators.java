@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
+import java.util.EnumMap;
+
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.EnumMap;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
 {
@@ -16,11 +17,11 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    private final YoEnum<ToeOffEnum> activeToeOffCalculator;
    private final EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators;
 
-   public WrapperForMultipleToeOffCalculators(EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators, YoVariableRegistry registry)
+   public WrapperForMultipleToeOffCalculators(EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators, YoRegistry registry)
    {
       this.toeOffCalculators = toeOffCalculators;
 
-      activeToeOffCalculator = YoEnum.create("ActiveToeOffCalculator", ToeOffEnum.class, registry);
+      activeToeOffCalculator = new YoEnum<>("ActiveToeOffCalculator", registry, ToeOffEnum.class);
       activeToeOffCalculator.set(ToeOffEnum.CENTROID_PROJECTION);
    }
 
@@ -38,35 +39,35 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3DReadOnly exitCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.setExitCMP(exitCMP, trailingLeg);
    }
 
    @Override
-   public void computeToeOffContactPoint(FramePoint2D desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactPoint(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    @Override
-   public void getToeOffContactPoint(FramePoint2D contactPointToPack, RobotSide trailingLeg)
+   public void getToeOffContactPoint(FramePoint2DBasics contactPointToPack, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.getToeOffContactPoint(contactPointToPack, trailingLeg);
    }
 
    @Override
-   public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactLine(FramePoint2DReadOnly desiredCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);
    }
 
    @Override
-   public void getToeOffContactLine(FrameLineSegment2D contactLineToPack, RobotSide trailingLeg)
+   public void getToeOffContactLine(FrameLineSegment2DBasics contactLineToPack, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(activeToeOffCalculator.getEnumValue());
       currentCalculator.getToeOffContactLine(contactLineToPack, trailingLeg);

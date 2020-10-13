@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.commonWalkingControlModules.touchdownDetector.NecessaryTouchdownDetectors;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -11,12 +11,12 @@ import java.util.List;
 
 public abstract class TouchdownDetectorBasedFootSwitch implements FootSwitchInterface
 {
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    protected final List<TouchdownDetector> touchdownDetectors = new ArrayList<>();
 
    protected final YoBoolean controllerThinksHasTouchedDown;
 
-   public TouchdownDetectorBasedFootSwitch(String name, YoVariableRegistry parentRegistry)
+   public TouchdownDetectorBasedFootSwitch(String name, YoRegistry parentRegistry)
    {
       this.registry = parentRegistry;
       controllerThinksHasTouchedDown = new YoBoolean(name + "_controllerThinksHasTouchedDown", parentRegistry);

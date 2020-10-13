@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -76,7 +76,7 @@ public class ConvexStepConstraintOptimizer
 
    private final YoInteger iterations;
 
-   public ConvexStepConstraintOptimizer(YoVariableRegistry registry)
+   public ConvexStepConstraintOptimizer(YoRegistry registry)
    {
       iterations = new YoInteger("StepConstrationOptimizerIterations", registry);
    }
@@ -178,7 +178,7 @@ public class ConvexStepConstraintOptimizer
             LogTools.info("Result: " + solution);
          }
       }
-      catch (Exception e)
+      catch (Throwable e)
       {
          e.printStackTrace();
          return null;

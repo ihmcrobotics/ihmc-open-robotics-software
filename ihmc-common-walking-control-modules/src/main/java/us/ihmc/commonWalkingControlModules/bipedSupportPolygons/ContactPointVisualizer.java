@@ -10,9 +10,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @author twan
@@ -22,7 +22,7 @@ public class ContactPointVisualizer implements Updatable
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final List<YoFramePoint3D> contactPointsWorld = new ArrayList<YoFramePoint3D>();
    private final List<YoGraphicPosition> yoGraphicPositions = new ArrayList<YoGraphicPosition>();
    private final List<YoGraphicVector> yoGraphicVectors = new ArrayList<YoGraphicVector>();
@@ -32,7 +32,7 @@ public class ContactPointVisualizer implements Updatable
    private final ArrayList<? extends PlaneContactState> contactStates;
 
    public ContactPointVisualizer(ArrayList<? extends PlaneContactState> contactStates, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this.contactStates = contactStates;
       int totalNumberOfContactPoints = 0;

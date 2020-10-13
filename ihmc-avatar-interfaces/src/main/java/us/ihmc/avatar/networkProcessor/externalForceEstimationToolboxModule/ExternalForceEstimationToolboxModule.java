@@ -12,7 +12,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,17 +33,17 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if(forceEstimationToolboxController != null)
             forceEstimationToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotDesiredConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotDesiredConfigurationData.class, controllerOutputTopic, s ->
       {
          if(forceEstimationToolboxController != null)
             forceEstimationToolboxController.updateRobotDesiredConfigurationData(s.takeNextData());

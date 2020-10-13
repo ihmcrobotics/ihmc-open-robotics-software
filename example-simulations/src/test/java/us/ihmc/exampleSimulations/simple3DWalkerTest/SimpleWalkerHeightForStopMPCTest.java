@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.exampleSimulations.simple3DWalker.SimpleWalkerHeightStopMPC;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimpleWalkerHeightForStopMPCTest
 {
-   YoVariableRegistry registry = new YoVariableRegistry("registry");
+   YoRegistry registry = new YoRegistry("registry");
    double umax = 1000;
    double zmax = 1.1;
    double zf = 1.0;

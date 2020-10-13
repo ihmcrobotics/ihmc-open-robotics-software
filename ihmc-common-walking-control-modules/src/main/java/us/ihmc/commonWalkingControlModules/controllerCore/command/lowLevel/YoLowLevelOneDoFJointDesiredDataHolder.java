@@ -5,7 +5,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
@@ -13,14 +13,14 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    private final YoJointDesiredOutput[] lowLevelJointDataList;
    private final TLongObjectHashMap<YoJointDesiredOutput> lowLevelJointDataMap;
 
-   public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJointReadOnly[] controlledJoints, YoVariableRegistry parentRegistry)
+   public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJointReadOnly[] controlledJoints, YoRegistry parentRegistry)
    {
       this("", controlledJoints, parentRegistry);
    }
 
-   public YoLowLevelOneDoFJointDesiredDataHolder(String prefix, OneDoFJointReadOnly[] controlledJoints, YoVariableRegistry parentRegistry)
+   public YoLowLevelOneDoFJointDesiredDataHolder(String prefix, OneDoFJointReadOnly[] controlledJoints, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + "LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
+      YoRegistry registry = new YoRegistry(prefix + "LowLevelOneDoFJointDesiredData" + parentRegistry.getName());
       parentRegistry.addChild(registry);
 
       int capacity = controlledJoints.length;

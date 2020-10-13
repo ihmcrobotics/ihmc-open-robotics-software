@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.tools.lists.ArraySorter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -26,7 +26,7 @@ public class YoLowestNPointsPlaneContactState extends YoPlaneContactState
    private final TObjectIntHashMap<YoContactPoint> contactPointIndexLookup = new TObjectIntHashMap<>();
 
    public YoLowestNPointsPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
-                                           double numberOfContactsToActivate, double coefficientOfFriction, YoVariableRegistry parentRegistry)
+                                           double numberOfContactsToActivate, double coefficientOfFriction, YoRegistry parentRegistry)
    {
       super(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, parentRegistry);
 

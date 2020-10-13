@@ -48,7 +48,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public final class PointFeedbackControllerTest
 {
@@ -61,7 +61,7 @@ public final class PointFeedbackControllerTest
       double simulationTime = 4.0;
       int integrationSteps = 100;
       Random random = new Random(562968L);
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
 
       // Create two floating joints. This test attempts to control the end effector body with respect to the moving base body.
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
@@ -137,7 +137,7 @@ public final class PointFeedbackControllerTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
@@ -225,7 +225,7 @@ public final class PointFeedbackControllerTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
@@ -343,7 +343,7 @@ public final class PointFeedbackControllerTest
    {
       Random random = new Random(5641654L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       int numberOfRevoluteJoints = 10;
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
@@ -358,8 +358,8 @@ public final class PointFeedbackControllerTest
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
-      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
-      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
       pointFeedbackController.setEnabled(true);
       spatialFeedbackController.setEnabled(true);
 

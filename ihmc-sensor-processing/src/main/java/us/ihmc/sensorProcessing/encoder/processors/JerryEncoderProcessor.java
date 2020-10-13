@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -29,19 +29,19 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
    private final YoDouble minPriorRate, maxPriorRate, averagePriorRate;
    private int updateCount=0;
    private final int slowUpdateFactor;
-   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt,YoRegistry registry)
    {
       this( name,  rawTicks,  time,  distancePerTick,  dt, 1, registry);
    }
 
-   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, double dt, int slowUpdateFactor,YoRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
       this.slowUpdateFactor = slowUpdateFactor;
       this.dt = dt*slowUpdateFactor;
 
-      this.state = YoEnum.create(name + "state", EncoderState.class, registry);
+      this.state = new YoEnum<>(name + "state", registry, EncoderState.class);
 
       this.minPriorRate = new YoDouble(name + "minPriorRate", registry);
       this.maxPriorRate = new YoDouble(name + "maxPriorRate", registry);

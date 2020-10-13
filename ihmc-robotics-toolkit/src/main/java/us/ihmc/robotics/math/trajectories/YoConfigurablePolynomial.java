@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -8,7 +8,7 @@ public class YoConfigurablePolynomial extends YoPolynomial
 {
    private int numberOfConstraints = 0;
 
-   public YoConfigurablePolynomial(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
+   public YoConfigurablePolynomial(String name, int maximumNumberOfCoefficients, YoRegistry registry)
    {
       super(name, maximumNumberOfCoefficients, registry);
    }

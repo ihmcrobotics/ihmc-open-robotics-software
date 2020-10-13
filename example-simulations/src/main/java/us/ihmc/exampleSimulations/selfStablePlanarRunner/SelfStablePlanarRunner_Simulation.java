@@ -56,7 +56,7 @@ public class SelfStablePlanarRunner_Simulation implements SimulationDoneListener
 	GroundContactModel[] groundModels = new GroundContactModel[robots.length];
 	initGroundProfile();
 	for (int i = 0; i < robots.length; i++) {
-	    groundModels[i] = new LinearGroundContactModel(robots[i], groundKxy, groundBxy, groundKz, groundBz, robots[i].getRobotsYoVariableRegistry());
+	    groundModels[i] = new LinearGroundContactModel(robots[i], groundKxy, groundBxy, groundKz, groundBz, robots[i].getRobotsYoRegistry());
 	    groundModels[i].setGroundProfile3D(groundProfile);
 	    robots[i].setGroundContactModel(groundModels[i]);
 	}

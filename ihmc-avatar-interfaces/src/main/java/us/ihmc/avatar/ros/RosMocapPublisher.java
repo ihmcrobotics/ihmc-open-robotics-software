@@ -8,14 +8,14 @@ import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
 
 public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
 {
-      private YoVariableRegistry registry = new YoVariableRegistry("MOCAP");
+      private YoRegistry registry = new YoRegistry("MOCAP");
       private CallFrequencyCalculator frequencyCalculator = new CallFrequencyCalculator(registry, "");
       
       RosMainNode mainNode;

@@ -9,7 +9,7 @@ import java.util.Map;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PhysicsEngineRobotData implements CollidableHolder
 {
@@ -20,10 +20,10 @@ public class PhysicsEngineRobotData implements CollidableHolder
    private MultiBodySystemStateWriter robotInitialStateWriter;
    private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
 
-   private final YoVariableRegistry robotRegistry;
-   private final YoVariableRegistry environmentContactCalculatorRegistry = new YoVariableRegistry("Environment" + ContactCalculatorNameSuffix);
-   private final YoVariableRegistry interRobotContactCalculatorRegistry = new YoVariableRegistry("InterRobot" + ContactCalculatorNameSuffix);
-   private final YoVariableRegistry selfContactCalculatorRegistry = new YoVariableRegistry("Self" + ContactCalculatorNameSuffix);
+   private final YoRegistry robotRegistry;
+   private final YoRegistry environmentContactCalculatorRegistry = new YoRegistry("Environment" + ContactCalculatorNameSuffix);
+   private final YoRegistry interRobotContactCalculatorRegistry = new YoRegistry("InterRobot" + ContactCalculatorNameSuffix);
+   private final YoRegistry selfContactCalculatorRegistry = new YoRegistry("Self" + ContactCalculatorNameSuffix);
    private final MultiBodySystemBasics multiBodySystem;
    private final List<Collidable> collidables;
 
@@ -41,7 +41,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
    {
       this.robotName = robotName;
       this.rootBody = rootBody;
-      robotRegistry = new YoVariableRegistry(robotName);
+      robotRegistry = new YoRegistry(robotName);
       multiBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);
 
       collidables = robotCollisionModel != null ? robotCollisionModel.getRobotCollidables(multiBodySystem) : Collections.emptyList();
@@ -50,7 +50,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       FrameShapePosePredictor frameShapePosePredictor = new FrameShapePosePredictor(forwardDynamicsPlugin.getForwardDynamicsCalculator());
       collidables.forEach(collidable -> collidable.setFrameShapePosePredictor(frameShapePosePredictor));
 
-      YoVariableRegistry jointLimitConstraintCalculatorRegistry = new YoVariableRegistry(RobotJointLimitImpulseBasedCalculator.class.getSimpleName());
+      YoRegistry jointLimitConstraintCalculatorRegistry = new YoRegistry(RobotJointLimitImpulseBasedCalculator.class.getSimpleName());
       robotRegistry.addChild(jointLimitConstraintCalculatorRegistry);
 
       jointLimitConstraintCalculator = new YoRobotJointLimitImpulseBasedCalculator(rootBody,
@@ -206,7 +206,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       return calculators.nextAvailable();
    }
 
-   public YoVariableRegistry getRobotRegistry()
+   public YoRegistry getRobotRegistry()
    {
       return robotRegistry;
    }

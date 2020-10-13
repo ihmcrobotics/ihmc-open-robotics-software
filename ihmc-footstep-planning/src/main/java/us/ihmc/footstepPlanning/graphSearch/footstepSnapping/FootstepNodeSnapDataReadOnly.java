@@ -53,6 +53,11 @@ public interface FootstepNodeSnapDataReadOnly
     */
    int getRegionIndex();
 
+   /**
+    * If wiggle was performed, this gives the achieved distance inside the region. If wiggle hasn't been performed, returns {@link Double#NaN}
+    */
+   double getAchievedInsideDelta();
+
    default void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(getSnapTransform());

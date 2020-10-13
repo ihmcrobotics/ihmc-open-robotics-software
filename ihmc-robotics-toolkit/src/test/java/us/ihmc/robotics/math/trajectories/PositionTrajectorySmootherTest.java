@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
@@ -26,7 +26,7 @@ public class PositionTrajectorySmootherTest
    private PositionTrajectorySmoother smoother;
    private PositionProvider positionProvider;
    private FramePoint3D position;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private double xValue = Math.random();
    private double yValue = Math.random();
@@ -38,7 +38,7 @@ public class PositionTrajectorySmootherTest
    @BeforeEach
    public void setUp()
    {
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionProvider = new ConstantPositionProvider(position);

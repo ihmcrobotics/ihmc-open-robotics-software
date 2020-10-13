@@ -33,6 +33,7 @@ import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -62,7 +63,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -171,7 +172,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       this.target = target;
 
-      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
+      InputStream stream = selectedVersion.getSdfFileAsStream();
+      if (stream == null)
+      {
+         LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
+      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), stream, this);
 
       sensorInformation = new AtlasSensorInformation(atlasVersion, target);
 
@@ -443,14 +449,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
       switch (selectedVersion.getHandModel())
       {
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeRos2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       realtimeROS2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                        ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
@@ -841,6 +847,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   {
+      return new AtlasFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
@@ -850,6 +862,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return new AtlasSwingPlannerParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
+   {
+      return new AtlasSwingPlannerParameters(fileNameSuffix);
    }
 
    @Override

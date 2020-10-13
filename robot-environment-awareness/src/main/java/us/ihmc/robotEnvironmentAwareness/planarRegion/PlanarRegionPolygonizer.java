@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vividsolutions.jts.triangulate.quadedge.LocateFailureException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -40,7 +41,21 @@ public abstract class PlanarRegionPolygonizer
                                                          PlanarRegionSegmentationDataExporter dataExporter)
    {
       List<List<PlanarRegion>> regions = rawData.parallelStream().filter(data -> data.size() >= polygonizerParameters.getMinNumberOfNodes())
-                                                .map(data -> createPlanarRegion(data, concaveHullFactoryParameters, polygonizerParameters, dataExporter))
+                                                .map(data ->
+                                                     {
+                                                        List<PlanarRegion> planarRegion;
+                                                        try
+                                                        {
+                                                           planarRegion = createPlanarRegion(data, concaveHullFactoryParameters,
+                                                                                             polygonizerParameters, dataExporter);
+                                                        }
+                                                        catch (LocateFailureException e)
+                                                        {
+                                                           LogTools.warn("Locate failed to converge.");
+                                                           planarRegion = new ArrayList<>();
+                                                        }
+                                                        return planarRegion;
+                                                     })
                                                 .filter(region -> region != null).collect(Collectors.toList());
 
       List<PlanarRegion> flattenedRegions = new ArrayList<>();

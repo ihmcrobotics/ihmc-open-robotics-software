@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -25,7 +26,7 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHan
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 {
@@ -55,12 +56,13 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 
    private static long DEFAULT_PUBLISHING_PERIOD_MS = 250;
    private final ScheduledExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CANCEL_AND_REPORT);
+   private ScheduledFuture<?> scheduledFuture;
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();
    private int indexToPublish = 0;
 
    public SLAMDataManagerAnchorPaneController()
    {
-      executor.scheduleAtFixedRate(this::publish, 0, DEFAULT_PUBLISHING_PERIOD_MS, TimeUnit.MILLISECONDS);
+      scheduledFuture = executor.scheduleAtFixedRate(this::publish, 0, DEFAULT_PUBLISHING_PERIOD_MS, TimeUnit.MILLISECONDS);
    }
 
    public void setMainWindow(Window ownerWindow)
@@ -81,7 +83,8 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    @FXML
    private void exportSLAMData()
    {
-      //TODO: implement
+      uiMessager.submitMessageToModule(SLAMModuleAPI.UISLAMDataExportDirectory, currentSLAMDataOutputFolderTextField.getText());
+      uiMessager.submitMessageToModule(SLAMModuleAPI.UISLAMDataExportRequest, true);
    }
 
    @FXML
@@ -96,22 +99,6 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 
       LogTools.info("Loading Data Is Done " + messagesFromFile.size() + " messages.");
       LogTools.info("Publishing Is Started.");
-   }
-
-   @FXML
-   private void importPlanarRegions()
-   {
-      String planarRegionsFilePath = currentPlanarRegionsInputFolderTextField.getText();
-      File planarRegionsFile = new File(planarRegionsFilePath);
-      PlanarRegionsList planarRegionDataToImport = PlanarRegionFileTools.importPlanarRegionData(planarRegionsFile);
-      if (planarRegionDataToImport == null)
-      {
-         LogTools.warn("Empty file path.");
-         return;
-      }
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionDataToImport);
-      uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsState, planarRegionsListMessage);
-      uiMessager.submitMessageInternal(SLAMModuleAPI.ShowImportedPlanarRegions, true);
    }
 
    @FXML
@@ -148,13 +135,8 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
       Platform.runLater(() -> currentPlanarRegionsInputFolderTextField.setText(newPath));
    }
 
-   @FXML
-   private void hideImportedPlanarRegions()
-   {
-      uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsVizClear, true);
-   }
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                              StereoVisionPointCloudMessage.class,
                                                                                                                              ROS2Tools.IHMC_ROOT);
@@ -179,5 +161,16 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
          stereoVisionPublisher.publish(stereoVisionPointCloudMessage);
          indexToPublish++;
       }
+   }
+
+   public void destroy()
+   {
+      if (scheduledFuture != null)
+      {
+         scheduledFuture.cancel(true);
+         scheduledFuture = null;
+      }
+
+      executor.shutdownNow();
    }
 }

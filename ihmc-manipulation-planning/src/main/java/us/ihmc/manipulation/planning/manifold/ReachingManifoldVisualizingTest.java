@@ -23,10 +23,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 /**
  * This test tests whether manifold is well constructed by visualizing.
@@ -42,7 +42,7 @@ public class ReachingManifoldVisualizingTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double trajectoryTime = 0.05;
    private final double dt = 0.001;
@@ -130,7 +130,7 @@ public class ReachingManifoldVisualizingTest
       yoGraphicsListRegistry.registerYoGraphic("pointViz", new YoGraphicCoordinateSystem("closestPointViz", yoFramePoint, yoFrameYawPitchRoll, 0.2));
 
       // run scs
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setDT(dt, recordFrequency);
       Graphics3DObject worldFrameGraphics = new Graphics3DObject();
       worldFrameGraphics.addCoordinateSystem(0.3);

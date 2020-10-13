@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.diagnostic;
 import org.ejml.data.DMatrixRMaj;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 
 public class Online1DSignalFourierAnalysis
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final GlitchFilteredYoInteger principalOscillationIndex;
    private final GlitchFilteredYoInteger secondaryOscillationIndex;
@@ -45,11 +45,11 @@ public class Online1DSignalFourierAnalysis
 
    private final double dt;
 
-   public Online1DSignalFourierAnalysis(String namePrefix, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
+   public Online1DSignalFourierAnalysis(String namePrefix, double estimationWindow, double dt, YoRegistry parentRegistry)
    {
       this.dt = dt;
 
-      registry = new YoVariableRegistry(namePrefix + "FrequencyAnalysis");
+      registry = new YoRegistry(namePrefix + "FrequencyAnalysis");
       parentRegistry.addChild(registry);
 
       enabled = new YoBoolean(registry.getName() + "_enabled", registry);

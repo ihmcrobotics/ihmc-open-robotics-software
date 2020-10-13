@@ -54,20 +54,20 @@ public class SphereRobot
    {
       scsRobot.getYoTime().set(0.0);
 
-      YoDouble q_x = (YoDouble) scsRobot.getVariable("q_x");
-      YoDouble q_y = (YoDouble) scsRobot.getVariable("q_y");
-      YoDouble q_z = (YoDouble) scsRobot.getVariable("q_z");
-      YoDouble qd_x = (YoDouble) scsRobot.getVariable("qd_x");
-      YoDouble qd_y = (YoDouble) scsRobot.getVariable("qd_y");
-      YoDouble qd_z = (YoDouble) scsRobot.getVariable("qd_z");
+      YoDouble q_x = (YoDouble) scsRobot.findVariable("q_x");
+      YoDouble q_y = (YoDouble) scsRobot.findVariable("q_y");
+      YoDouble q_z = (YoDouble) scsRobot.findVariable("q_z");
+      YoDouble qd_x = (YoDouble) scsRobot.findVariable("qd_x");
+      YoDouble qd_y = (YoDouble) scsRobot.findVariable("qd_y");
+      YoDouble qd_z = (YoDouble) scsRobot.findVariable("qd_z");
 
-      YoDouble q_qs = (YoDouble) scsRobot.getVariable("q_qs");
-      YoDouble q_qx = (YoDouble) scsRobot.getVariable("q_qx");
-      YoDouble q_qy = (YoDouble) scsRobot.getVariable("q_qy");
-      YoDouble q_qz = (YoDouble) scsRobot.getVariable("q_qz");
-      YoDouble qd_wx = (YoDouble) scsRobot.getVariable("qd_wx");
-      YoDouble qd_wy = (YoDouble) scsRobot.getVariable("qd_wy");
-      YoDouble qd_wz = (YoDouble) scsRobot.getVariable("qd_wz");
+      YoDouble q_qs = (YoDouble) scsRobot.findVariable("q_qs");
+      YoDouble q_qx = (YoDouble) scsRobot.findVariable("q_qx");
+      YoDouble q_qy = (YoDouble) scsRobot.findVariable("q_qy");
+      YoDouble q_qz = (YoDouble) scsRobot.findVariable("q_qz");
+      YoDouble qd_wx = (YoDouble) scsRobot.findVariable("qd_wx");
+      YoDouble qd_wy = (YoDouble) scsRobot.findVariable("qd_wy");
+      YoDouble qd_wz = (YoDouble) scsRobot.findVariable("qd_wz");
 
       q_x.set(initialPosition.getX());
       q_y.set(initialPosition.getY());

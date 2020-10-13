@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import org.junit.jupiter.api.Test;
-import org.ojalgo.random.RandomNumber;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -80,9 +79,13 @@ public class FootstepPlannerParametersTest
       parameters.setMaximumStepZWhenForwardAndDown(maxStepZWhenForwardAndDown);
       assertEquals(maxStepZWhenForwardAndDown, parameters.getMaximumStepZWhenForwardAndDown(), epsilon);
 
-      double wiggleInsideDelta = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setWiggleInsideDelta(wiggleInsideDelta);
-      assertEquals(wiggleInsideDelta, parameters.getWiggleInsideDelta(), epsilon);
+      double wiggleInsideDeltaTarget = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setWiggleInsideDeltaTarget(wiggleInsideDeltaTarget);
+      assertEquals(wiggleInsideDeltaTarget, parameters.getWiggleInsideDeltaTarget(), epsilon);
+
+      double wiggleInsideDeltaMinimum = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setWiggleInsideDeltaMinimum(wiggleInsideDeltaMinimum);
+      assertEquals(wiggleInsideDeltaMinimum, parameters.getWiggleInsideDeltaMinimum(), epsilon);
 
       double maximumStepReachWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
       parameters.setMaximumStepReachWhenSteppingUp(maximumStepReachWhenSteppingUp);
@@ -224,9 +227,13 @@ public class FootstepPlannerParametersTest
       parameters.setEnableShinCollisionCheck(enableShinCollision);
       assertEquals(enableShinCollision, parameters.getEnableShinCollisionCheck());
 
-      double shinRadius = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setShinRadius(shinRadius);
-      assertEquals(shinRadius, parameters.getShinRadius());
+      double shinToeClearance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinToeClearance(shinToeClearance);
+      assertEquals(shinToeClearance, parameters.getShinToeClearance());
+
+      double shinHeelClearance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinHeelClearance(shinHeelClearance);
+      assertEquals(shinHeelClearance, parameters.getShinHeelClearance());
 
       double shinLength = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinLength(shinLength);
@@ -235,14 +242,6 @@ public class FootstepPlannerParametersTest
       double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
       parameters.setShinHeightOffset(shinHeightOffset);
       assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
-
-      double shinPitch = RandomNumbers.nextDouble(random, Math.PI);
-      parameters.setShinPitch(shinPitch);
-      assertEquals(shinPitch, parameters.getShinPitch());
-
-      double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setDistanceEpsilonToBridgeRegions(distanceEpsilonToBridgeRegions);
-      assertEquals(distanceEpsilonToBridgeRegions, parameters.getDistanceEpsilonToBridgeRegions());
 
       byte stepOnlyWithRequestedSide = ((byte) RandomNumbers.nextInt(random, -1, 1));
       parameters.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide);

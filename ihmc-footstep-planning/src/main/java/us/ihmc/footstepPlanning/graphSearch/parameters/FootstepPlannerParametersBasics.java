@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
@@ -129,9 +128,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minClearanceFromStance, clearance);
    }
 
-   default void setWiggleInsideDelta(double wiggleInsideDelta)
+   default void setWiggleInsideDeltaTarget(double wiggleInsideDeltaTarget)
    {
-      set(FootstepPlannerParameterKeys.wiggleInsideDelta, wiggleInsideDelta);
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaTarget, wiggleInsideDeltaTarget);
+   }
+
+   default void setWiggleInsideDeltaMinimum(double wiggleInsideDeltaMinimum)
+   {
+      set(FootstepPlannerParameterKeys.wiggleInsideDeltaMinimum, wiggleInsideDeltaMinimum);
    }
 
    default void setMaximumStepZWhenSteppingUp(double maxStepZ)
@@ -329,9 +333,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.enableShinCollisionCheck, enableShinCollisionCheck);
    }
 
-   default void setShinRadius(double shinRadius)
+   default void setShinToeClearance(double shinToeClearance)
    {
-      set(FootstepPlannerParameterKeys.shinRadius, shinRadius);
+      set(FootstepPlannerParameterKeys.shinToeClearance, shinToeClearance);
+   }
+
+   default void setShinHeelClearance(double shinHeelClearance)
+   {
+      set(FootstepPlannerParameterKeys.shinHeelClearance, shinHeelClearance);
    }
 
    default void setShinLength(double shinLength)
@@ -339,19 +348,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.shinLength, shinLength);
    }
 
-   default void setShinPitch(double shinPitch)
-   {
-      set(FootstepPlannerParameterKeys.shinPitch, shinPitch);
-   }
-
    default void setShinHeightOffset(double shinHeightOffet)
    {
       set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
-   }
-
-   default void setDistanceEpsilonToBridgeRegions(double distanceEpsilonToBridgeRegions)
-   {
-      set(FootstepPlannerParameterKeys.distanceEpsilonToBridgeRegions, distanceEpsilonToBridgeRegions);
    }
 
    default void setStepOnlyWithRequestedSide(byte side)
@@ -373,8 +372,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
       if (parametersPacket.getIdealBackStepLength() != noValue)
          setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
-      if (parametersPacket.getWiggleInsideDelta() != noValue)
-         setWiggleInsideDelta(parametersPacket.getWiggleInsideDelta());
+      if (parametersPacket.getWiggleInsideDeltaTarget() != noValue)
+         setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
+      if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
+         setWiggleInsideDeltaMinimum(parametersPacket.getWiggleInsideDeltaMinimum());
       if (parametersPacket.getMaximumStepReach() != noValue)
          setMaximumStepReach(parametersPacket.getMaximumStepReach());
       if (parametersPacket.getMaximumStepYaw() != noValue)
@@ -483,14 +484,12 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setEnableShinCollisionCheck(parametersPacket.getEnableShinCollisionCheck());
       if (parametersPacket.getShinLength() != noValue)
          setShinLength(parametersPacket.getShinLength());
-      if (parametersPacket.getShinRadius() != noValue)
-         setShinRadius(parametersPacket.getShinRadius());
+      if (parametersPacket.getShinToeClearance() != noValue)
+         setShinToeClearance(parametersPacket.getShinToeClearance());
+      if (parametersPacket.getShinHeelClearance() != noValue)
+         setShinHeelClearance(parametersPacket.getShinHeelClearance());
       if (parametersPacket.getShinHeightOffet() != noValue)
          setShinHeightOffset(parametersPacket.getShinHeightOffet());
-      if (parametersPacket.getShinPitch() != noValue)
-         setShinPitch(parametersPacket.getShinPitch());
-      if (parametersPacket.getDistanceEpsilonToBridgeRegions() != noValue)
-         setDistanceEpsilonToBridgeRegions(parametersPacket.getDistanceEpsilonToBridgeRegions());
       setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

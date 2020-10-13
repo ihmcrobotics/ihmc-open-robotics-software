@@ -54,7 +54,7 @@ public class FootPlacementConstraintCalculator
       }
    }
 
-   private static double distanceSquaredFromPerimeter(Vertex2DSupplier polygon, Point2DReadOnly queryPoint, Point2D closestPointToPack)
+   public static double distanceSquaredFromPerimeter(Vertex2DSupplier polygon, Point2DReadOnly queryPoint, Point2D closestPointToPack)
    {
       double minimumDistanceSquared = Double.MAX_VALUE;
       Point2D tempPoint = new Point2D();
@@ -74,7 +74,10 @@ public class FootPlacementConstraintCalculator
          if (distanceSquared < minimumDistanceSquared)
          {
             minimumDistanceSquared = distanceSquared;
-            closestPointToPack.set(tempPoint);
+            if (closestPointToPack != null)
+            {
+               closestPointToPack.set(tempPoint);
+            }
          }
       }
 

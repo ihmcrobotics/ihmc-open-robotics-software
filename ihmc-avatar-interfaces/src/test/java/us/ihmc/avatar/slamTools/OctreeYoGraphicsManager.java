@@ -12,9 +12,9 @@ import us.ihmc.jOctoMap.iterators.OcTreeIterable;
 import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OctreeYoGraphicsManager
 {
@@ -28,7 +28,7 @@ public class OctreeYoGraphicsManager
    private final YoFrameVector3D[] yoFrameNormals;
    private final YoGraphicVector[] yoGraphicNormals;
 
-   public OctreeYoGraphicsManager(String prefix, NormalOcTree octree, AppearanceDefinition appearance, YoVariableRegistry registry,
+   public OctreeYoGraphicsManager(String prefix, NormalOcTree octree, AppearanceDefinition appearance, YoRegistry registry,
                                   YoGraphicsListRegistry graphicsRegistry, boolean visualizeNormal)
    {
       YoGraphicsList yoGraphicListRegistry = new YoGraphicsList(prefix + "_Octree_Viz");

@@ -14,6 +14,7 @@ public class AtlasNetworkProcessor
    private static final Application DEFAULT = AtlasNetworkProcessor::defaultNetworkProcessor;
    private static final Application VR = AtlasNetworkProcessor::vrNetworkProcessor;
    private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
+   private static final Application STAIRS = AtlasNetworkProcessor::stairsNetworkProcessor;
 
    private static final Application APPLICATION = DEFAULT;
 
@@ -79,9 +80,12 @@ public class AtlasNetworkProcessor
       HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
       LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
 
+      LogTools.info("Setting up network processor modules...");
       APPLICATION.setup(args, model, networkProcessor);
 
       networkProcessor.setupShutdownHook();
+
+      LogTools.info("Starting modules!");
       networkProcessor.start();
    }
 
@@ -94,7 +98,8 @@ public class AtlasNetworkProcessor
    {
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
       networkProcessor.setupKinematicsToolboxModule(false);
       
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
@@ -111,7 +116,7 @@ public class AtlasNetworkProcessor
    {
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       sensorModule.setEnableDepthPointCloudPublisher(false);
@@ -130,6 +135,21 @@ public class AtlasNetworkProcessor
       networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
       networkProcessor.setupBehaviorModule(false, false, 0);
    }
+
+   private static void stairsNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupKinematicsToolboxModule(false);
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 15));
+   }
+
 
    private static void minimalNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
    {

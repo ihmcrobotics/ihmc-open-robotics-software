@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -24,13 +24,13 @@ public class BacklashProcessingYoVariable extends YoDouble implements Processing
 
    private final double dt;
 
-   public BacklashProcessingYoVariable(String name, String description, double dt, DoubleProvider slopTime, YoVariableRegistry registry)
+   public BacklashProcessingYoVariable(String name, String description, double dt, DoubleProvider slopTime, YoRegistry registry)
    {
       this(name, description, null, dt, slopTime, registry);
    }
 
    public BacklashProcessingYoVariable(String name, String description, YoDouble velocityVariable, double dt, DoubleProvider slopTime,
-         YoVariableRegistry registry)
+         YoRegistry registry)
    {
       super(name, description, registry);
 

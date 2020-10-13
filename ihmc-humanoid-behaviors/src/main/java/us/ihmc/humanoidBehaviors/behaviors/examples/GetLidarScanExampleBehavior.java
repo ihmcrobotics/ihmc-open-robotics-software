@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class GetLidarScanExampleBehavior extends AbstractBehavior
 {
@@ -19,7 +19,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
 
-   public GetLidarScanExampleBehavior(String robotName, Ros2Node ros2Node)
+   public GetLidarScanExampleBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
       //      coactiveBehaviorsNetworkManager = ros2Node; FIXME

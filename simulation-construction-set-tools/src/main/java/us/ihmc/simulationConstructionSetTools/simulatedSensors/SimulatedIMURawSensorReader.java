@@ -15,13 +15,13 @@ import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 {
    private final String name;
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
 
    private final RawIMUSensorsInterface rawSensors;
    protected final int imuIndex;
@@ -97,7 +97,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       spatialAccelerationCalculator.setRootAcceleration(rootAcceleration);
 
       name = getClass().getSimpleName() + imuIndex;
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
 
       imuFramePoint = new FramePoint3D(imuFrame);
       bodyFrame = rigidBody.getBodyFixedFrame();
@@ -237,7 +237,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    protected abstract void simulateIMU();
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

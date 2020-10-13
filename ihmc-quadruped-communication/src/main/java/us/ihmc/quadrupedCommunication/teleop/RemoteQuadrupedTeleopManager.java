@@ -22,16 +22,16 @@ import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RemoteQuadrupedTeleopManager
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
@@ -65,8 +65,8 @@ public class RemoteQuadrupedTeleopManager
    private final QuadrupedNetworkProcessor networkProcessor;
    private final String robotName;
 
-   public RemoteQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
-                                       FullQuadrupedRobotModel robotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
+   public RemoteQuadrupedTeleopManager(String robotName, ROS2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
+                                       FullQuadrupedRobotModel robotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoRegistry parentRegistry)
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;
@@ -389,7 +389,7 @@ public class RemoteQuadrupedTeleopManager
       return xGaitSettings;
    }
 
-   public Ros2Node getRos2Node()
+   public ROS2Node getROS2Node()
    {
       return ros2Node;
    }

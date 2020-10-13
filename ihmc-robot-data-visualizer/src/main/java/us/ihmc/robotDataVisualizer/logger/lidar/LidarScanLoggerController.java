@@ -19,11 +19,11 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class LidarScanLoggerController
 {
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidar_scan_logger");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidar_scan_logger");
 
    private final LidarScanLogWriter logWriter = new LidarScanLogWriter(ros2Node);
    private final LidarScanLogReader logReader = new LidarScanLogReader();

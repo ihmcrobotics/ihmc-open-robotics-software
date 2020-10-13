@@ -23,11 +23,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
@@ -67,13 +67,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
 
    public WholeBodyInverseKinematicsBehavior(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
-                                             Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
+                                             ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
       this(robotName, null, fullRobotModelFactory, yoTime, ros2Node, fullRobotModel);
    }
 
    public WholeBodyInverseKinematicsBehavior(String robotName, String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
-                                             Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
+                                             ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
       super(robotName, namePrefix, ros2Node);
       this.yoTime = yoTime;

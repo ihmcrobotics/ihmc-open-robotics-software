@@ -5,7 +5,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.List;
 public class SimulatedFrictionController implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final HashMap<OneDegreeOfFreedomJoint, YoDouble> viscousDampings = new HashMap<>();
    private final HashMap<OneDegreeOfFreedomJoint, YoDouble> dynamicFrictions = new HashMap<>();
@@ -96,7 +96,7 @@ public class SimulatedFrictionController implements RobotController
 
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

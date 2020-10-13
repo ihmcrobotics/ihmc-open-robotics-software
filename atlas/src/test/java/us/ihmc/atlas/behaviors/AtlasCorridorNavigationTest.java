@@ -2,11 +2,11 @@ package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
@@ -29,19 +29,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
-import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.humanoidBehaviors.tools.*;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.OcclusionHandlingPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -53,7 +48,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
@@ -136,21 +131,21 @@ public class AtlasCorridorNavigationTest
 
    private void runAtlasToGoalUsingBodyPathWithOcclusions(PlanarRegionsList map, Point3D goal, ArrayDeque<Pose3D> waypointsToHit)
    {
-      new Thread(() ->
+      ThreadTools.startAThread(() ->
       {
          LogTools.info("Creating simulated REA module");
          SimulatedREAModule simulatedREAModule = new SimulatedREAModule(map, createRobotModel(), pubSubMode);
          simulatedREAModule.start();
-      }).start();
+      }, "REAModule");
 
-      new Thread(() ->
+      ThreadTools.startAThread(() ->
       {
          LogTools.info("Creating planar regions mapping module");
          PlanarRegionsMappingModule planarRegionsMappingModule = new PlanarRegionsMappingModule(pubSubMode);
          slamUpdated = planarRegionsMappingModule.getSlamUpdated();
-      }).start();
+      }, "MappingModule");
 
-      new Thread(() ->
+      ThreadTools.startAThread(() ->
       {
          LogTools.info("Creating simulation");
          HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
@@ -158,27 +153,27 @@ public class AtlasCorridorNavigationTest
          kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
          kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
          AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
-      }).start();
+      }, "KinematicsSimulation");
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, "test_node");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubMode, "test_node");
 
       if (VISUALIZE)
       {
          // option to launch SCS 2
 //         new Thread(() -> JavaFXMissingTools.runApplication(new SessionV))
 
-         new Thread(() ->
+         ThreadTools.startAThread(() ->
          {
             LogTools.info("Creating robot and map viewer");
             robotAndMapViewer = new RobotAndMapViewer(createRobotModel(), ros2Node);
-         }).start();
+         }, "RobotAndMapViewer");
       }
 
       ThreadTools.sleepSeconds(5.0); // wait a bit for other threads to start
 
       // create map subscriber
       ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class,
-                                                                            ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
+                                                                            ROS2Tools.REALSENSE_SLAM_MODULE.withOutput());
 
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robotInterface = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
@@ -331,32 +326,6 @@ public class AtlasCorridorNavigationTest
          {
             LogTools.error("Footstep plan not valid for execution! {}", plannerOutput.getFootstepPlanningResult());
 
-            EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionReasonCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
-            Arrays.stream(BipedalFootstepPlannerNodeRejectionReason.values).forEach(reason -> rejectionReasonCount.put(reason, new MutableInt()));
-
-            List<FootstepPlannerIterationData> iterationDataList = planner.getIterationData();
-            HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = planner.getEdgeDataMap();
-            iterationDataList.stream().forEach(iterationData ->
-                                               {
-                                                  List<FootstepNode> childNodes = iterationData.getChildNodes();
-                                                  for (int i = 0; i < childNodes.size(); i++)
-                                                  {
-                                                     GraphEdge<FootstepNode> edge = new GraphEdge<>(iterationData.getStanceNode(), childNodes.get(i));
-                                                     if (!edgeDataMap.containsKey(edge))
-                                                        continue;
-                                                     BipedalFootstepPlannerNodeRejectionReason rejectionReason = edgeDataMap.get(edge).getRejectionReason();
-                                                     if (rejectionReason != null)
-                                                        rejectionReasonCount.get(rejectionReason).incrementAndGet();
-                                                  }
-                                               });
-
-            for (BipedalFootstepPlannerNodeRejectionReason rejectionReason : BipedalFootstepPlannerNodeRejectionReason.values)
-            {
-               System.out.println("Reason: " + rejectionReason + "  " + rejectionReasonCount.get(rejectionReason));
-            }
-
-            ThreadTools.sleep(1000);
-            continue;
          }
 
          FootstepPlan footstepPlan = plannerOutput.getFootstepPlan();

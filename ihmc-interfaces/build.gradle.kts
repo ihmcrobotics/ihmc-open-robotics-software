@@ -8,13 +8,13 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.18.3")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.19.3")
    }
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
-   id("us.ihmc.ihmc-ci") version "5.3"
+   id("us.ihmc.ihmc-build") version "0.22.0"
+   id("us.ihmc.ihmc-ci") version "6.4"
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
@@ -31,24 +31,24 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.15.0")
-   api("us.ihmc:euclid-geometry:0.15.0")
-   api("us.ihmc:ihmc-pub-sub:0.12.0")
-   api("us.ihmc:ros2-common-interfaces:0.18.3")
-   api("us.ihmc:ihmc-commons:0.30.0")
+   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:euclid-geometry:0.15.1")
+   api("us.ihmc:ihmc-pub-sub:0.15.0")
+   api("us.ihmc:ros2-common-interfaces:0.19.3")
+   api("us.ihmc:ihmc-commons:0.30.3")
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.18.3")
+   api("us.ihmc:ihmc-ros2-library:0.19.3")
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.15.0")
-   api("us.ihmc:ihmc-commons:0.30.0")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:0.18.3")
+   api("us.ihmc:euclid:0.15.1")
+   api("us.ihmc:ihmc-commons:0.30.3")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.19.3")
 }
 
-val generator = us.ihmc.ros2.rosidl.RosInterfaceGenerator()
+val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
 
 tasks.create("generateMessages") {
    doFirst {
@@ -102,8 +102,8 @@ tasks.create("generateMessages") {
          into("src/main/messages/ros1/controller_msgs")
       }
 
-      us.ihmc.ros2.rosidl.RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
-      us.ihmc.ros2.rosidl.RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
-      us.ihmc.ros2.rosidl.RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
+      us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
+      us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
+      us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }

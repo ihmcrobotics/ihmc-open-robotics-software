@@ -1,11 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
 
 public class RemoteLidarBasedREAModuleLauncher
 {
@@ -13,11 +16,8 @@ public class RemoteLidarBasedREAModuleLauncher
 
    public static void main(String[] args) throws Exception
    {
-      REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(outputTopic,
-                                                                                    lidarOutputTopic,
-                                                                                    stereoOutputTopic,
-                                                                                    depthOutputTopic);
-      LIDARBasedREAModule remoteModule = LIDARBasedREAModule.createRemoteModule(MODULE_CONFIGURATION_FILE_NAME, networkProvider);
+      REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
+      LIDARBasedREAModule remoteModule = LIDARBasedREAModule.createRemoteModule(new FilePropertyHelper(MODULE_CONFIGURATION_FILE_NAME), networkProvider);
       remoteModule.start();
    }
 }

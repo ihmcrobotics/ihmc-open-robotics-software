@@ -10,9 +10,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -24,7 +24,7 @@ public class HeightOffsetHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isTrajectoryOffsetStopped = new YoBoolean("isPelvisOffsetHeightTrajectoryStopped", registry);
 
@@ -50,7 +50,7 @@ public class HeightOffsetHandler
 
    private final DoubleProvider yoTime;
 
-   public HeightOffsetHandler(DoubleProvider yoTime, double defaultOffsetHeightAboveGround, YoVariableRegistry parentRegistry)
+   public HeightOffsetHandler(DoubleProvider yoTime, double defaultOffsetHeightAboveGround, YoRegistry parentRegistry)
    {
       this.yoTime = yoTime;
 
@@ -58,10 +58,10 @@ public class HeightOffsetHandler
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
       offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
       offsetHeightAboveGroundPrevValue.set(defaultOffsetHeightAboveGround);
-      offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
+      offsetHeightAboveGround.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
             double previous = offsetHeightTrajectoryGenerator.getValue();

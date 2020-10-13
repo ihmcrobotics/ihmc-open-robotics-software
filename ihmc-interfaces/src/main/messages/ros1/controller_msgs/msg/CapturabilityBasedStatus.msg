@@ -18,10 +18,10 @@ geometry_msgs/Point desired_capture_point_2d
 # This is the measured position in world of the robot's center of mass.
 geometry_msgs/Point center_of_mass_3d
 
-# List of the active contact points used for the left foot. The coordinates are in world frame. Only x and y coordinates are relevant.
-geometry_msgs/Point[] left_foot_support_polygon_2d
+# List of the active contact points used for the left foot. The coordinates are in world frame.
+geometry_msgs/Point[] left_foot_support_polygon_3d
 
-# List of the active contact points used for the right foot. The coordinates are in world frame. Only x and y coordinates are relevant.
-geometry_msgs/Point[] right_foot_support_polygon_2d
+# List of the active contact points used for the right foot. The coordinates are in world frame.
+geometry_msgs/Point[] right_foot_support_polygon_3d
 
 

@@ -1,18 +1,15 @@
 package us.ihmc.ihmcPerception.bagTools;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import geometry_msgs.msg.dds.PoseStamped;
-import geometry_msgs.msg.dds.PoseStampedPubSubType;
 import gnu.trove.list.array.TByteArrayList;
-import org.apache.commons.lang3.mutable.MutableInt;
 import sensor_msgs.msg.dds.PointCloud2;
 import sensor_msgs.msg.dds.PointCloud2PubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2QosProfile;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Converts incoming PointCloud2 messages to LidarScanMessage. The result is exported as a JSON file
@@ -43,7 +39,7 @@ public class PointCloud2Converter
 
    public PointCloud2Converter() throws IOException
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
       AtomicLong timestamp = new AtomicLong(-1);
       AtomicInteger counter = new AtomicInteger();
@@ -61,7 +57,7 @@ public class PointCloud2Converter
          }
       };
 
-      Ros2QosProfile rosQoSProfile = Ros2QosProfile.DEFAULT();
+      ROS2QosProfile rosQoSProfile = ROS2QosProfile.DEFAULT();
       ros2Node.createSubscription(pointCloudDataType, pointCloudCallback, pointCloudTopicName, rosQoSProfile);
 
       ThreadFactory threadFactory = ThreadTools.createNamedThreadFactory(getClass().getSimpleName());

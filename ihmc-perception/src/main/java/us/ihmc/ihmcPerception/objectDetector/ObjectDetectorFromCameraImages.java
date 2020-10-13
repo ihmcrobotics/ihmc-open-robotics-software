@@ -42,10 +42,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
@@ -61,7 +61,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
 
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
@@ -93,7 +93,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
    private final ConcurrentLinkedQueue<ObjectDetectorResultPacket> results = new ConcurrentLinkedQueue<>();
    private final PacketCommunicator valveDetectorClient = PacketCommunicator.createTCPPacketCommunicatorClient("172.16.66.103", NetworkPorts.VALVE_DETECTOR_SERVER_PORT, new IHMCCommunicationKryoNetClassList());
 
-   public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
+   public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
       this.expectedObjectSize.set(1.0);
       targetIDHasBeenLocated.set(true);

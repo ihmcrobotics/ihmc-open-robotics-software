@@ -3,20 +3,22 @@ package us.ihmc.robotEnvironmentAwareness;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
+import us.ihmc.tools.io.WorkspacePathTools;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMModuleConfiguration.txt";
+   private static final String SEGMENTATION_CONFIGURATION_FILE_NAME = "defaultSLAMSegmentationModuleConfiguration.txt";
 
    private Messager slamMessager;
    private SLAMModule slamModule;
@@ -36,13 +38,12 @@ public class SLAMBasedREAStandaloneLauncher extends Application
       segmentationMessager = new SharedMemoryJavaFXMessager(SegmentationModuleAPI.API);
       segmentationMessager.startMessager();
 
+      Path segmentationConfigurationFilePath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      segmentationConfigurationFilePath = Paths.get(segmentationConfigurationFilePath.toString(), "/robot-environment-awareness/src/main/resources/" + SEGMENTATION_CONFIGURATION_FILE_NAME);
+
       Stage secondStage = new Stage();
       planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(segmentationMessager, secondStage);
-      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
-                                                                             REACommunicationProperties.subscriberCustomRegionsTopicName,
-                                                                             ROS2Tools.REALSENSE_SLAM_MAP,
-                                                                             MODULE_CONFIGURATION_FILE_NAME,
-                                                                             segmentationMessager);
+      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(segmentationConfigurationFilePath.toFile(), segmentationMessager);
 
       slamModule.attachOcTreeConsumer(segmentationModule);
 

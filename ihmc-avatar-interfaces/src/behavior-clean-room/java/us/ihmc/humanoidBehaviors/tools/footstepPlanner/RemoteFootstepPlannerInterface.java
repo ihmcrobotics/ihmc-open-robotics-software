@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,7 +58,7 @@ public class RemoteFootstepPlannerInterface
 
    private final HashMap<Integer, TypedNotification<RemoteFootstepPlannerResult>> resultNotifications = new HashMap<>();
 
-   public RemoteFootstepPlannerInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel, Messager messager)
+   public RemoteFootstepPlannerInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, Messager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)

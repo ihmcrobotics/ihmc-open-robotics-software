@@ -11,8 +11,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2PublisherBasics;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 
 import java.io.IOException;
 
@@ -35,13 +35,13 @@ public class ManagedROS2NodeTest
    @Test
    public void test() throws IOException
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "TestNode");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "TestNode");
       ManagedROS2Node managedROS2Node = new ManagedROS2Node(ros2Node);
 
       TypedNotification<java.lang.String> topicOneNotification = new TypedNotification<>();
       managedROS2Node.createSubscription(newTopicDataType(), message -> topicOneNotification.set(message.takeNextData().getDataAsString()), "/topicOne");
 
-      Ros2PublisherBasics<String> topicOnePublisher = managedROS2Node.createPublisher(newTopicDataType(), "/topicOne");
+      ROS2PublisherBasics<String> topicOnePublisher = managedROS2Node.createPublisher(newTopicDataType(), "/topicOne");
 
       topicOnePublisher.publish(newMessage("1"));
 
@@ -64,7 +64,7 @@ public class ManagedROS2NodeTest
 
       managedROS2Node.setEnabled(false);
 
-      Ros2PublisherBasics<String> topicTwoPublisher = managedROS2Node.createPublisher(newTopicDataType(), "/topicTwo");
+      ROS2PublisherBasics<String> topicTwoPublisher = managedROS2Node.createPublisher(newTopicDataType(), "/topicTwo");
       TypedNotification<java.lang.String> topicTwoNotification = new TypedNotification<>();
       managedROS2Node.createSubscription(newTopicDataType(), message -> topicTwoNotification.set(message.takeNextData().getDataAsString()), "/topicTwo");
 

@@ -30,7 +30,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,7 +39,7 @@ public class QuadrupedUIMessageConverter
 {
    private static final boolean verbose = false;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
 
    private final Messager messager;
    private final String robotName;
@@ -85,7 +85,7 @@ public class QuadrupedUIMessageConverter
 
    private IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
-   public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
+   public QuadrupedUIMessageConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
       this.robotName = robotName;
@@ -510,11 +510,11 @@ public class QuadrupedUIMessageConverter
 
    public static QuadrupedUIMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
    {
-      RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "ihmc_quadruped_ui");
+      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_quadruped_ui");
       return createConverter(ros2Node, messager, robotName);
    }
 
-   public static QuadrupedUIMessageConverter createConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
+   public static QuadrupedUIMessageConverter createConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {
       return new QuadrupedUIMessageConverter(ros2Node, messager, robotName);
    }

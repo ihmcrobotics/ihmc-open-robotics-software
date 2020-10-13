@@ -22,7 +22,7 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class RobotAndMapViewer
    private PositionGraphic goalGraphic;
    private Group markers = new Group();
 
-   public RobotAndMapViewer(DRCRobotModel robotModel, Ros2Node ros2Node)
+   public RobotAndMapViewer(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       JavaFXApplicationCreator.createAJavaFXApplication();
 

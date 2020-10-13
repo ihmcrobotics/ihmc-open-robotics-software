@@ -13,12 +13,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements Settable<PauseWalkingMessage>, EpsilonComparable<PauseWalkingMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * True to pause walking, false to unpause and resume an existing footstep plan.
             */
@@ -26,9 +24,6 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
    public PauseWalkingMessage()
    {
-
-
-
    }
 
    public PauseWalkingMessage(PauseWalkingMessage other)
@@ -39,14 +34,11 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
    public void set(PauseWalkingMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       pause_ = other.pause_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -62,7 +54,6 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
    {
       return sequence_id_;
    }
-
 
    /**
             * True to pause walking, false to unpause and resume an existing footstep plan.
@@ -97,9 +88,7 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.pause_, other.pause_, epsilon)) return false;
 
@@ -116,9 +105,7 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
       PauseWalkingMessage otherMyClass = (PauseWalkingMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.pause_ != otherMyClass.pause_) return false;
 
@@ -132,10 +119,8 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("PauseWalkingMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("pause=");
       builder.append(this.pause_);
       builder.append("}");

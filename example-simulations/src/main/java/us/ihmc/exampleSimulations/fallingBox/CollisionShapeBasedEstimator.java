@@ -13,13 +13,13 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.CollisionShapeBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CollisionShapeBasedEstimator implements RobotController
 {
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final CollisionShapeBasedWrenchCalculator wrenchCalculator;
 
@@ -27,7 +27,7 @@ public class CollisionShapeBasedEstimator implements RobotController
 
    public CollisionShapeBasedEstimator(Robot robot)
    {
-      registry = new YoVariableRegistry(robot.getName() + "_registry");
+      registry = new YoRegistry(robot.getName() + "_registry");
 
       Joint joint = robot.getJoint("bodyJoint");
       List<ExternalForcePoint> contactingExternalForcePoints = robot.getAllExternalForcePoints();
@@ -45,7 +45,7 @@ public class CollisionShapeBasedEstimator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

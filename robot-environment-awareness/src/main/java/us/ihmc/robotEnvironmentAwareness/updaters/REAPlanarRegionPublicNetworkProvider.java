@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -10,14 +9,12 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
@@ -32,24 +29,21 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    private REACurrentStateProvider currentStateProvider = null;
    private AtomicReference<Boolean> isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final ROS2Topic<PlanarRegionsListMessage> outputTopic;
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
-   public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic,
-                                               ROS2Topic lidarOutputTopic,
-                                               ROS2Topic stereoOutputTopic,
-                                               ROS2Topic depthOutputTopic)
+   public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic, ROS2Topic lidarOutputTopic, ROS2Topic stereoOutputTopic, ROS2Topic depthOutputTopic)
    {
-      this(ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            outputTopic,
            lidarOutputTopic,
            stereoOutputTopic,
            depthOutputTopic);
    }
 
-   public REAPlanarRegionPublicNetworkProvider(Ros2Node ros2Node,
+   public REAPlanarRegionPublicNetworkProvider(ROS2Node ros2Node,
                                                ROS2Topic outputTopic,
                                                ROS2Topic lidarOutputTopic,
                                                ROS2Topic stereoOutputTopic,
@@ -72,8 +66,20 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       isUsingLidar = messager.createInput(REAModuleAPI.LidarBufferEnable);
       isUsingStereoVision = messager.createInput(REAModuleAPI.StereoVisionBufferEnable);
       isUsingDepthCloud = messager.createInput(REAModuleAPI.DepthCloudBufferEnable);
-   }
 
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    NormalEstimationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PlanarRegionSegmentationParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PolygonizerParametersMessage.class,
+                                                    inputTopic,
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+   }
 
    @Override
    public void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated)
@@ -112,7 +118,10 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    @Override
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, REASourceType.STEREO_POINT_CLOUD.getTopicName(), stereoVisionPointCloudHandler);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           StereoVisionPointCloudMessage.class,
+                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
+                                           stereoVisionPointCloudHandler);
    }
 
    @Override

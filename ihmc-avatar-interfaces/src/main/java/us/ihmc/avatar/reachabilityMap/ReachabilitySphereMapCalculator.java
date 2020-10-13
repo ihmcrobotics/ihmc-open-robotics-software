@@ -19,11 +19,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ReachabilitySphereMapCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private Voxel3DGrid voxel3dGrid;
    private SphereVoxelShape sphereVoxelShape;
 
@@ -60,7 +60,7 @@ public class ReachabilitySphereMapCalculator
       scs.addYoGraphic(gridFrameViz);
       scs.addYoGraphic(currentEvaluationPose);
       scs.addYoGraphic(currentEvaluationPosition);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
    }
 
    /**

@@ -46,7 +46,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public final class SpatialFeedbackControllerTest
 {
@@ -58,7 +58,7 @@ public final class SpatialFeedbackControllerTest
       double controlDT = 0.004;
       double simulationTime = 4.0;
       Random random = new Random(562968L);
-      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      YoRegistry registry = new YoRegistry("TestRegistry");
 
       // Create two floating joints. This test attempts to control the end effector body with respect to the moving base body.
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
@@ -130,7 +130,7 @@ public final class SpatialFeedbackControllerTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
@@ -234,7 +234,7 @@ public final class SpatialFeedbackControllerTest
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();

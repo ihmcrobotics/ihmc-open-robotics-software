@@ -58,7 +58,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public abstract class PawStepPlannerToolboxDataSetTest
 {
@@ -80,7 +80,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
    private PawPlanningModule footstepPlanningModule = null;
 
-   private RealtimeRos2Node ros2Node;
+   private RealtimeROS2Node ros2Node;
    private RemoteUIMessageConverter converter;
 
    private final AtomicReference<PawStepPlan> plannerPlanReference = new AtomicReference<>(null);
@@ -130,7 +130,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
                                                      new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
 
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningToolboxOutputStatus.class,
                                                     PawStepPlannerCommunicationProperties.outputTopic(robotName),

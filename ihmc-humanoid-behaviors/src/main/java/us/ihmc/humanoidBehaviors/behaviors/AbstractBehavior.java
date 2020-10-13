@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
@@ -20,9 +21,8 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -42,7 +42,7 @@ public abstract class AbstractBehavior implements RobotController
 
    KryoMessager messager;
 
-   protected final Ros2Node ros2Node;
+   protected final ROS2Node ros2Node;
    private final Map<ROS2Topic<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
@@ -53,7 +53,7 @@ public abstract class AbstractBehavior implements RobotController
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be
     * visualized in SCS.
     */
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
 
    protected final YoEnum<BehaviorStatus> yoBehaviorStatus;
    protected final YoBoolean hasBeenInitialized;
@@ -76,18 +76,18 @@ public abstract class AbstractBehavior implements RobotController
 
    private static int behaviorUniqID = 0;
    
-   public AbstractBehavior(String robotName, Ros2Node ros2Node)
+   public AbstractBehavior(String robotName, ROS2Node ros2Node)
    {
       this(robotName, null, ros2Node);
    }
 
-   public AbstractBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
+   public AbstractBehavior(String robotName, String namePrefix, ROS2Node ros2Node)
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName()+"-"+behaviorUniqID++);
-      registry = new YoVariableRegistry(behaviorName);
+      registry = new YoRegistry(behaviorName);
 
       yoBehaviorStatus = new YoEnum<BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
@@ -136,7 +136,7 @@ public abstract class AbstractBehavior implements RobotController
    @SuppressWarnings("unchecked")
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
-      ROS2Topic<T> typedNamedTopic = topicName.withType(messageType);
+      ROS2Topic<T> typedNamedTopic = topicName.withTypeName(messageType);
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(typedNamedTopic);
 
       if (publisher == null) // !containsKey
@@ -299,7 +299,7 @@ public abstract class AbstractBehavior implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

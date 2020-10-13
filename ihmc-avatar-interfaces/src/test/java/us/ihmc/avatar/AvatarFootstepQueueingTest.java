@@ -57,7 +57,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createSimulation(className);
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getROS2Node(), FootstepStatusMessage.class,
                                                     ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
@@ -134,7 +134,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createSimulation(className);
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getROS2Node(), FootstepStatusMessage.class,
                                                     ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
@@ -217,7 +217,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createSimulation(className);
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getROS2Node(), FootstepStatusMessage.class,
                                                     ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {

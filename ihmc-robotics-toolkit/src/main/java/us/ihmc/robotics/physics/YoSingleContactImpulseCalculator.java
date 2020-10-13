@@ -23,11 +23,11 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalculator
 {
@@ -50,7 +50,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 
    public YoSingleContactImpulseCalculator(String prefix, int identifier, ReferenceFrame rootFrame, RigidBodyBasics rootBodyA,
                                            ForwardDynamicsCalculator forwardDynamicsCalculatorA, RigidBodyBasics rootBodyB,
-                                           ForwardDynamicsCalculator forwardDynamicsCalculatorB, YoVariableRegistry registry)
+                                           ForwardDynamicsCalculator forwardDynamicsCalculatorB, YoRegistry registry)
    {
       super(rootFrame, rootBodyA, forwardDynamicsCalculatorA, rootBodyB, forwardDynamicsCalculatorB);
 
@@ -251,7 +251,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       }
    }
 
-   private static JointVelocityChange toJointVelocityChange(String prefix, String suffix, int identifier, JointReadOnly joint, YoVariableRegistry registry)
+   private static JointVelocityChange toJointVelocityChange(String prefix, String suffix, int identifier, JointReadOnly joint, YoRegistry registry)
    {
       if (joint instanceof SixDoFJointReadOnly)
          return new SixDoFJointVelocityChange(prefix, suffix, identifier, (SixDoFJointReadOnly) joint, registry);
@@ -277,7 +277,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       private final SixDoFJointReadOnly joint;
       private final YoFixedFrameTwist velocityChange;
 
-      public SixDoFJointVelocityChange(String prefix, String suffix, int identifier, SixDoFJointReadOnly joint, YoVariableRegistry registry)
+      public SixDoFJointVelocityChange(String prefix, String suffix, int identifier, SixDoFJointReadOnly joint, YoRegistry registry)
       {
          this.joint = joint;
 
@@ -315,7 +315,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       private final OneDoFJointReadOnly joint;
       private final YoDouble velocityChange;
 
-      public OneDoFJointVelocityChange(String prefix, String suffix, int identifier, OneDoFJointReadOnly joint, YoVariableRegistry registry)
+      public OneDoFJointVelocityChange(String prefix, String suffix, int identifier, OneDoFJointReadOnly joint, YoRegistry registry)
       {
          this.joint = joint;
 

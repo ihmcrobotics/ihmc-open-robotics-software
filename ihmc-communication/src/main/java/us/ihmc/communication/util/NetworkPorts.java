@@ -66,7 +66,8 @@ public class NetworkPorts
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046, "mission_control_server");
    public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(2147, "mission_control_cpu0_test");
    public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(2148, "mission_control_cpu1_test");
-   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(2149, "mission_control_cpu2_test");
+//   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(2149, "mission_control_cpu2_test");
+   public static final NetworkPorts MISSION_CONTROL_JETSON_TEST_PORT = new NetworkPorts(2150, "mission_control_jetson_test");
 
    // Teleop ports
    public static final NetworkPorts XBOX_CONTROLLER_TELEOP_PORT = new NetworkPorts(3001, "xbox_controller_teleop");

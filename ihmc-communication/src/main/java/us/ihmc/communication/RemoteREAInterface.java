@@ -4,10 +4,9 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.function.Consumer;
 
@@ -18,7 +17,7 @@ public class RemoteREAInterface
 
    private final Stopwatch stopwatch = new Stopwatch();
 
-   public RemoteREAInterface(Ros2NodeInterface ros2Node)
+   public RemoteREAInterface(ROS2NodeInterface ros2Node)
    {
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
       planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.LIDAR_REA_REGIONS);

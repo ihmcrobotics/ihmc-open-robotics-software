@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * <p>
@@ -36,12 +36,12 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector3D
 
    /**
     * @deprecated Use
-    *             {@link #FilteredVelocityYoFrameVector(String, String, DoubleProvider, double, YoVariableRegistry, FrameTuple3DReadOnly)}
+    *             {@link #FilteredVelocityYoFrameVector(String, String, DoubleProvider, double, YoRegistry, FrameTuple3DReadOnly)}
     *             instead.
     */
    @Deprecated
    public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt,
-                                                                                   YoVariableRegistry registry,
+                                                                                   YoRegistry registry,
                                                                                    FrameTuple3DReadOnly frameTuple3DToDifferentiate)
    {
       return new FilteredVelocityYoFrameVector(namePrefix, nameSuffix, alpha, dt, registry, frameTuple3DToDifferentiate);
@@ -49,17 +49,17 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector3D
 
    /**
     * @deprecated Use
-    *             {@link #FilteredVelocityYoFrameVector(String, String, DoubleProvider, double, YoVariableRegistry, ReferenceFrame)}
+    *             {@link #FilteredVelocityYoFrameVector(String, String, DoubleProvider, double, YoRegistry, ReferenceFrame)}
     *             instead.
     */
    @Deprecated
    public static FilteredVelocityYoFrameVector createFilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt,
-                                                                                   YoVariableRegistry registry, ReferenceFrame referenceFrame)
+                                                                                   YoRegistry registry, ReferenceFrame referenceFrame)
    {
       return new FilteredVelocityYoFrameVector(namePrefix, nameSuffix, alpha, dt, registry, referenceFrame);
    }
 
-   public FilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoVariableRegistry registry,
+   public FilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoRegistry registry,
                                         FrameTuple3DReadOnly frameTuple3DToDifferentiate)
    {
       super(namePrefix, nameSuffix, frameTuple3DToDifferentiate.getReferenceFrame(), registry);
@@ -72,7 +72,7 @@ public class FilteredVelocityYoFrameVector extends YoFrameVector3D
       reset();
    }
 
-   public FilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoVariableRegistry registry,
+   public FilteredVelocityYoFrameVector(String namePrefix, String nameSuffix, DoubleProvider alpha, double dt, YoRegistry registry,
                                         ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);

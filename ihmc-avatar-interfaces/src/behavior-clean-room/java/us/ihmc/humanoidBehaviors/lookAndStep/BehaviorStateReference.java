@@ -23,8 +23,13 @@ public class BehaviorStateReference<E extends Enum<E>>
    public void set(E state)
    {
       atomicReference.set(state);
-      statusLogger.info("Entering state: {}", get().name());
-      uiPublisher.publishToUI(CurrentState, state.name());
+      statusLogger.info(1, "Entering state: " + get().name());
+      broadcast();
+   }
+
+   public void broadcast()
+   {
+      uiPublisher.publishToUI(CurrentState, atomicReference.get().name());
    }
 
    public E get()

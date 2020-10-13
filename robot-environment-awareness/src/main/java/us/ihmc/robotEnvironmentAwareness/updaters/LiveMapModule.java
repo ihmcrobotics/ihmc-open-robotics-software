@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -15,7 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParam
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -29,7 +28,7 @@ public class LiveMapModule implements PerceptionModule
 {
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final Messager messager;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -59,12 +58,17 @@ public class LiveMapModule implements PerceptionModule
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> combinedMapPublisher;
 
-   private LiveMapModule(Ros2Node ros2Node, Messager messager)
+   private LiveMapModule(ROS2Node ros2Node, Messager messager)
+   {
+      this(ros2Node, messager, null);
+   }
+
+   private LiveMapModule(ROS2Node ros2Node, Messager messager, String configurationFileProject)
    {
       this.ros2Node = ros2Node;
       this.messager = messager;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP, this::dispatchLocalizedMap);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_REGIONS, this::dispatchLocalizedMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic, this::dispatchLidarMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic, this::dispatchRegionsAtFeet);
 
@@ -72,7 +76,11 @@ public class LiveMapModule implements PerceptionModule
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
       mostRecentLidarMap = messager.createInput(LiveMapModuleAPI.LidarMap, null);
 
-      slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
+      if (configurationFileProject != null)
+         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap", configurationFileProject);
+      else
+         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
+
       messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
          slamParameters.setAllFromStrings(parameters);
@@ -197,7 +205,7 @@ public class LiveMapModule implements PerceptionModule
 
       shouldUpdateMap |= hasNewLocalizedMap.get() || hasNewRegionsAtFeet.get() || hasNewLidarMap.get() || hasNewParameters.get();
 
-      if (shouldUpdateMap && mostRecentLocalizedMap.get() != null)
+      if (shouldUpdateMap)
       {
          PlanarRegionsList localizedMap = null;
          if (mostRecentLocalizedMap.get() != null)
@@ -210,7 +218,7 @@ public class LiveMapModule implements PerceptionModule
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
             if (localizedMap != null)
-               localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
+               localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(regionsToFuse, localizedMap, slamParameters, null);
             else
                localizedMap = regionsToFuse;
 
@@ -241,8 +249,13 @@ public class LiveMapModule implements PerceptionModule
       }
    }
 
-   public static LiveMapModule createIntraprocess(Ros2Node ros2Node, Messager messager)
+   public static LiveMapModule createIntraprocess(ROS2Node ros2Node, Messager messager)
    {
-      return new LiveMapModule(ros2Node, messager);
+      return createIntraprocess(ros2Node, messager, null);
+   }
+
+   public static LiveMapModule createIntraprocess(ROS2Node ros2Node, Messager messager, String configurationFileProject)
+   {
+      return new LiveMapModule(ros2Node, messager, configurationFileProject);
    }
 }

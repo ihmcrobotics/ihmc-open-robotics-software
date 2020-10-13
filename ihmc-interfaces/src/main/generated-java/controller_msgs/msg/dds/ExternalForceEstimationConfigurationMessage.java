@@ -12,33 +12,27 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class ExternalForceEstimationConfigurationMessage extends Packet<ExternalForceEstimationConfigurationMessage> implements Settable<ExternalForceEstimationConfigurationMessage>, EpsilonComparable<ExternalForceEstimationConfigurationMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
             */
    public double estimator_gain_ = 0.5;
-
    /**
             * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
             */
    public double solver_alpha_ = 0.005;
-
    /**
             * Indicates whether the wrench at the root joint should be included in the solver
             */
    public boolean calculate_root_joint_wrench_ = true;
-
    /**
             * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
             * See RigidBody.hashCode() for calculation of the hash code
             */
    public us.ihmc.idl.IDLSequence.Integer  rigid_body_hash_codes_;
-
    /**
             * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
             */
@@ -46,13 +40,7 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
    public ExternalForceEstimationConfigurationMessage()
    {
-
-
-
-
-
       rigid_body_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (10, "type_2");
-
 
       contact_point_positions_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
 
@@ -66,24 +54,17 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
    public void set(ExternalForceEstimationConfigurationMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       estimator_gain_ = other.estimator_gain_;
 
-
       solver_alpha_ = other.solver_alpha_;
-
 
       calculate_root_joint_wrench_ = other.calculate_root_joint_wrench_;
 
-
       rigid_body_hash_codes_.set(other.rigid_body_hash_codes_);
-
       contact_point_positions_.set(other.contact_point_positions_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -100,7 +81,6 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       return sequence_id_;
    }
 
-
    /**
             * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
             */
@@ -116,7 +96,6 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       return estimator_gain_;
    }
 
-
    /**
             * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
             */
@@ -131,7 +110,6 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
    {
       return solver_alpha_;
    }
-
 
    /**
             * Indicates whether the wrench at the root joint should be included in the solver
@@ -149,7 +127,6 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
    }
 
 
-
    /**
             * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
             * See RigidBody.hashCode() for calculation of the hash code
@@ -158,7 +135,6 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
    {
       return rigid_body_hash_codes_;
    }
-
 
 
    /**
@@ -187,21 +163,15 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.estimator_gain_, other.estimator_gain_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solver_alpha_, other.solver_alpha_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calculate_root_joint_wrench_, other.calculate_root_joint_wrench_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.rigid_body_hash_codes_, other.rigid_body_hash_codes_, epsilon)) return false;
-
 
       if (this.contact_point_positions_.size() != other.contact_point_positions_.size()) { return false; }
       else
@@ -223,21 +193,15 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
       ExternalForceEstimationConfigurationMessage otherMyClass = (ExternalForceEstimationConfigurationMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.estimator_gain_ != otherMyClass.estimator_gain_) return false;
 
-
       if(this.solver_alpha_ != otherMyClass.solver_alpha_) return false;
-
 
       if(this.calculate_root_joint_wrench_ != otherMyClass.calculate_root_joint_wrench_) return false;
 
-
       if (!this.rigid_body_hash_codes_.equals(otherMyClass.rigid_body_hash_codes_)) return false;
-
       if (!this.contact_point_positions_.equals(otherMyClass.contact_point_positions_)) return false;
 
       return true;
@@ -249,22 +213,16 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
       StringBuilder builder = new StringBuilder();
 
       builder.append("ExternalForceEstimationConfigurationMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("estimator_gain=");
       builder.append(this.estimator_gain_);      builder.append(", ");
-
       builder.append("solver_alpha=");
       builder.append(this.solver_alpha_);      builder.append(", ");
-
       builder.append("calculate_root_joint_wrench=");
       builder.append(this.calculate_root_joint_wrench_);      builder.append(", ");
-
       builder.append("rigid_body_hash_codes=");
       builder.append(this.rigid_body_hash_codes_);      builder.append(", ");
-
       builder.append("contact_point_positions=");
       builder.append(this.contact_point_positions_);
       builder.append("}");

@@ -24,6 +24,8 @@ public class ControllerAPIDefinition
    static
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
+
+      /** Commands supported by bipedal walking controller {@link WalkingControllerState} */
       commands.add(ArmTrajectoryCommand.class);
       commands.add(HandTrajectoryCommand.class);
       commands.add(FootTrajectoryCommand.class);
@@ -58,10 +60,16 @@ public class ControllerAPIDefinition
       commands.add(StepConstraintRegionCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
 
+      /** Commands supported by multi-contact controller, not in this repo */
+      commands.add(WholeBodyMultiContactTrajectoryCommand.class);
+      commands.add(ContactStateChangeCommand.class);
+
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
+
+      /** Statuses supported by bipedal walking controller {@link WalkingControllerState} */
       statusMessages.add(CapturabilityBasedStatus.class);
       statusMessages.add(FootstepStatusMessage.class);
       statusMessages.add(PlanOffsetStatus.class);
@@ -75,6 +83,9 @@ public class ControllerAPIDefinition
       statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
       statusMessages.add(JointDesiredOutputMessage.class);
       statusMessages.add(RobotDesiredConfigurationData.class);
+
+      /** Statuses supported by multi-contact controller, not in this repo */
+      statusMessages.add(MultiContactBalanceStatus.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
       outputMessageClasses.addAll(controllerSupportedStatusMessages);
@@ -193,11 +204,11 @@ public class ControllerAPIDefinition
    {
       if (inputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withType(messageClass);
+         return getInputTopic(robotName).withTypeName(messageClass);
       }
       if (outputMessageClasses.contains(messageClass))
       {
-         return getOutputTopic(robotName).withType(messageClass);
+         return getOutputTopic(robotName).withTypeName(messageClass);
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);

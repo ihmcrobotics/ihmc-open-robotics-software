@@ -13,19 +13,14 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulationAbortMessage> implements Settable<AutomaticManipulationAbortMessage>, EpsilonComparable<AutomaticManipulationAbortMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public boolean enable_;
 
    public AutomaticManipulationAbortMessage()
    {
-
-
-
    }
 
    public AutomaticManipulationAbortMessage(AutomaticManipulationAbortMessage other)
@@ -36,14 +31,11 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
 
    public void set(AutomaticManipulationAbortMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       enable_ = other.enable_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -59,7 +51,6 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
    {
       return sequence_id_;
    }
-
 
    public void setEnable(boolean enable)
    {
@@ -88,9 +79,7 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_, other.enable_, epsilon)) return false;
 
@@ -107,9 +96,7 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
 
       AutomaticManipulationAbortMessage otherMyClass = (AutomaticManipulationAbortMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.enable_ != otherMyClass.enable_) return false;
 
@@ -123,10 +110,8 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       StringBuilder builder = new StringBuilder();
 
       builder.append("AutomaticManipulationAbortMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("enable=");
       builder.append(this.enable_);
       builder.append("}");

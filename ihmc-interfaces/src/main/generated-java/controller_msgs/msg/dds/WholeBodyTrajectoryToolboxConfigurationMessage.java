@@ -12,26 +12,17 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<WholeBodyTrajectoryToolboxConfigurationMessage> implements Settable<WholeBodyTrajectoryToolboxConfigurationMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxConfigurationMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public int number_of_initial_guesses_ = -1;
-
    public int maximum_expansion_size_ = -1;
-
    public controller_msgs.msg.dds.KinematicsToolboxOutputStatus initial_configuration_;
 
    public WholeBodyTrajectoryToolboxConfigurationMessage()
    {
-
-
-
-
       initial_configuration_ = new controller_msgs.msg.dds.KinematicsToolboxOutputStatus();
-
    }
 
    public WholeBodyTrajectoryToolboxConfigurationMessage(WholeBodyTrajectoryToolboxConfigurationMessage other)
@@ -42,19 +33,14 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 
    public void set(WholeBodyTrajectoryToolboxConfigurationMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       number_of_initial_guesses_ = other.number_of_initial_guesses_;
 
-
       maximum_expansion_size_ = other.maximum_expansion_size_;
-
 
       controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.staticCopy(other.initial_configuration_, initial_configuration_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -71,7 +57,6 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       return sequence_id_;
    }
 
-
    public void setNumberOfInitialGuesses(int number_of_initial_guesses)
    {
       number_of_initial_guesses_ = number_of_initial_guesses;
@@ -81,7 +66,6 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       return number_of_initial_guesses_;
    }
 
-
    public void setMaximumExpansionSize(int maximum_expansion_size)
    {
       maximum_expansion_size_ = maximum_expansion_size;
@@ -90,7 +74,6 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
    {
       return maximum_expansion_size_;
    }
-
 
 
    public controller_msgs.msg.dds.KinematicsToolboxOutputStatus getInitialConfiguration()
@@ -116,15 +99,11 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_initial_guesses_, other.number_of_initial_guesses_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_expansion_size_, other.maximum_expansion_size_, epsilon)) return false;
-
 
       if (!this.initial_configuration_.epsilonEquals(other.initial_configuration_, epsilon)) return false;
 
@@ -140,15 +119,11 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 
       WholeBodyTrajectoryToolboxConfigurationMessage otherMyClass = (WholeBodyTrajectoryToolboxConfigurationMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.number_of_initial_guesses_ != otherMyClass.number_of_initial_guesses_) return false;
 
-
       if(this.maximum_expansion_size_ != otherMyClass.maximum_expansion_size_) return false;
-
 
       if (!this.initial_configuration_.equals(otherMyClass.initial_configuration_)) return false;
 
@@ -161,16 +136,12 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryToolboxConfigurationMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("number_of_initial_guesses=");
       builder.append(this.number_of_initial_guesses_);      builder.append(", ");
-
       builder.append("maximum_expansion_size=");
       builder.append(this.maximum_expansion_size_);      builder.append(", ");
-
       builder.append("initial_configuration=");
       builder.append(this.initial_configuration_);
       builder.append("}");

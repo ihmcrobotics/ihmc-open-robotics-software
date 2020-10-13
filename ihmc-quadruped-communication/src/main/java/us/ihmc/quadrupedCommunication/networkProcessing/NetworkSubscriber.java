@@ -16,7 +16,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,24 +59,24 @@ public class NetworkSubscriber
     */
    private final Map<Class<? extends Settable<?>>, IHMCRealtimeROS2Publisher<?>> outputMessagePublisherMap = new HashMap<>();
 
-   private final RealtimeRos2Node realtimeRos2Node;
+   private final RealtimeROS2Node realtimeROS2Node;
 
    private final ROS2Topic inputTopic;
 
    public NetworkSubscriber(ROS2Topic inputTopic, CommandInputManager controllerCommandInputManager,
-                            ROS2Topic outputTopic, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
+                            ROS2Topic outputTopic, OutputManager messageOutputManager, RealtimeROS2Node realtimeROS2Node)
    {
       this.inputTopic = inputTopic;
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.messageOutputManager = messageOutputManager;
-      this.realtimeRos2Node = realtimeRos2Node;
+      this.realtimeROS2Node = realtimeROS2Node;
       listOfSupportedOutputMessages = messageOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
 
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (realtimeRos2Node == null)
+      if (realtimeROS2Node == null)
          PrintTools.error(this, "No ROS2 node, " + getClass().getSimpleName() + " cannot be created.");
 
       messageOutputManager.registerOutputMessage(InvalidPacketNotificationPacket.class, outputTopic);
@@ -110,8 +110,8 @@ public class NetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic topicName = inputTopic.withType(multipleMessageType);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, multipleMessageType, topicName,
+      ROS2Topic topicName = inputTopic.withTypeName(multipleMessageType);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, multipleMessageType, topicName,
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
 
@@ -159,8 +159,8 @@ public class NetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Topic topicName = inputTopic.withType(MessageCollection.class);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, MessageCollection.class, topicName, s -> {
+      ROS2Topic topicName = inputTopic.withTypeName(MessageCollection.class);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MessageCollection.class, topicName, s -> {
          s.takeNextData(messageCollection, null);
 
          for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
@@ -211,9 +211,9 @@ public class NetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2Topic topicName = inputTopic.withType(messageClass);
+         ROS2Topic topicName = inputTopic.withTypeName(messageClass);
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, messageClass, topicName, s -> {
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, messageClass, topicName, s -> {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
          });
@@ -222,7 +222,7 @@ public class NetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass, ROS2Topic topicName)
    {
-      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, messageClass, topicName);
+      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, messageClass, topicName);
       return publisher;
    }
 

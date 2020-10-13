@@ -10,7 +10,7 @@ import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class QuadrupedHeadTeleopNode implements JoystickEventListener
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    /**
     * Period at which to send control packets.
     */
@@ -44,7 +44,7 @@ public class QuadrupedHeadTeleopNode implements JoystickEventListener
    private boolean teleopEnabled = true;
    private HashMap<QuadrupedJointName, Double> neckJointPositionSetpoints = new HashMap<>();
 
-   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device, YoVariableRegistry parentRegistry) throws IOException
+   public QuadrupedHeadTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device, YoRegistry parentRegistry) throws IOException
    {
 
       // TODO: Don't hardcode localhost

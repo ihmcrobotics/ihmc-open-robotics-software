@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -24,22 +26,24 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jOctoMap.iterators.OcTreeIterable;
 import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPBasedPointCloudDriftCorrectionVisualizer
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double trajectoryTime = 100.0;
    private final double dt = 1.0;
@@ -53,7 +57,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
    private static final boolean VISUALIZE_OCTREE = false;
 
-   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction();
+   private final Function<DMatrixRMaj, RigidBodyTransform> inputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 
@@ -108,7 +112,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       Robot robot = new Robot("dummy");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.setDT(dt, recordFrequency);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -137,19 +141,15 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap,
-                                                                       frameForSourcePoints.getOriginalPointCloudToSensorPose(),
-                                                                       frameForSourcePoints.getInitialSensorPoseToWorld());
+                                                                       frameForSourcePoints.getPointCloudInLocalFrame(),
+                                                                       frameForSourcePoints.getUncorrectedLocalPoseInWorld());
 
-      RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frameForSourcePoints.getInitialSensorPoseToWorld());
-      correctedSensorPoseToWorld.multiply(icpTransformer);
+      RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform();
+      RigidBodyTransform correctedLocalPoseInWorld = new RigidBodyTransform(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
+      correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
 
-      Point3D[] correctedData = new Point3D[frameForSourcePoints.getOriginalPointCloudToSensorPose().length];
-      for (int i = 0; i < correctedData.length; i++)
-      {
-         correctedData[i] = new Point3D(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
-         icpTransformer.transform(correctedData[i]);
-      }
+      List<Point3D> correctedData = frameForSourcePoints.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+      correctedData.forEach(driftCorrectionTransform::transform);
 
       frame1GraphicsManager.updateGraphics();
       frame2GraphicsManager.updateGraphics();
@@ -164,17 +164,14 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          optimizer.iterate();
 
          // get parameter.
-         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), icpTransformer);
-         correctedSensorPoseToWorld.set(frameForSourcePoints.getInitialSensorPoseToWorld());
-         correctedSensorPoseToWorld.multiply(icpTransformer);
-         for (int i = 0; i < correctedData.length; i++)
-         {
-            correctedData[i].set(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
-            icpTransformer.transform(correctedData[i]);
-         }
+         optimizer.convertInputToTransform(optimizer.getOptimalParameter(), driftCorrectionTransform);
+         correctedLocalPoseInWorld.set(frameForSourcePoints.getUncorrectedLocalPoseInWorld());
+         correctedLocalPoseInWorld.multiply(driftCorrectionTransform);
+         correctedData = frameForSourcePoints.getPointCloudInLocalFrame().stream().map(Point3D::new).collect(Collectors.toList());
+         correctedData.forEach(driftCorrectionTransform::transform);
 
-         frame2.updateOptimizedCorrection(icpTransformer);
-         frameForSourcePoints.updateOptimizedCorrection(icpTransformer);
+         frame2.updateOptimizedCorrection(driftCorrectionTransform);
+         frameForSourcePoints.updateOptimizedCorrection(driftCorrectionTransform);
 
          // update viz.
          frame1GraphicsManager.updateGraphics();
@@ -183,7 +180,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
          // update yo variables.   
          optimizerQuality.set(optimizer.getQuality());
-         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorespondingPoints());
+         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorrespondingPoints());
 
          scs.tickAndUpdate();
       }
@@ -197,29 +194,25 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       new ICPBasedPointCloudDriftCorrectionVisualizer();
    }
 
-   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, Point3DReadOnly[] sourcePointsToSensorPose,
-                                                                RigidBodyTransformReadOnly sensorPoseToWorld)
+   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, List<Point3DReadOnly> sourcePointsInLocalFrame,
+                                                                RigidBodyTransformReadOnly uncorrectedLocalPoseInWorld)
    {
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = new RigidBodyTransform(inputFunction.apply(inputParameter));
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(sensorPoseToWorld);
-            correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
+            RigidBodyTransform correctedLocalPoseToWorld = new RigidBodyTransform(uncorrectedLocalPoseInWorld);
+            correctedLocalPoseToWorld.multiply(driftCorrectionTransform);
 
-            Point3D[] correctedData = new Point3D[sourcePointsToSensorPose.length];
-            for (int i = 0; i < sourcePointsToSensorPose.length; i++)
-            {
-               correctedData[i] = new Point3D(sourcePointsToSensorPose[i]);
-               correctedSensorPoseToWorld.transform(correctedData[i]);
-            }
+            List<Point3D> correctedData = sourcePointsInLocalFrame.stream().map(Point3D::new).collect(Collectors.toList());
+            correctedData.forEach(correctedLocalPoseToWorld::transform);
 
-            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedData.length, 1);
-            for (int i = 0; i < correctedData.length; i++)
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedData.size(), 1);
+            for (int i = 0; i < correctedData.size(); i++)
             {
-               double distance = computeClosestDistance(correctedData[i]);
+               double distance = computeClosestDistance(correctedData.get(i));
                errorSpace.set(i, distance);
             }
             return errorSpace;
@@ -234,7 +227,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(inputFunction,
                                                                                                 outputCalculator,
                                                                                                 6,
-                                                                                                sourcePointsToSensorPose.length);
+                                                                                                sourcePointsInLocalFrame.size());
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0001);
       purterbationVector.set(1, 0.0001);
@@ -255,24 +248,26 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       File pointCloudFile = new File(DATA_PATH);
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
-      frame1 = new SLAMFrame(messages.get(0));
-      frame2 = new SLAMFrame(frame1, messages.get(1));
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(10);
+      frame1 = new SLAMFrame(messages.get(0), normalEstimationParameters);
+      frame2 = new SLAMFrame(frame1, messages.get(1), normalEstimationParameters);
 
       // octree.
       Point3D dummySensorLocation = new Point3D();
-      octreeMap = SLAMTools.computeOctreeData(frame1.getPointCloud(), dummySensorLocation, OCTREE_RESOLUTION);
+      octreeMap = SLAMTools.computeOctreeData(frame1.getCorrectedPointCloudInWorld(), dummySensorLocation, OCTREE_RESOLUTION);
 
       // define source points.
       double windowMargin = 0.05;
-      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getSensorPose());
+      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getCorrectedLocalPoseInWorld());
 
-      Point3DReadOnly[] newPointCloud = frame2.getPointCloud();
-      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getOriginalPointCloudToSensorPose();
-      boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
+      List<? extends Point3DReadOnly> newPointCloud = frame2.getCorrectedPointCloudInWorld();
+      List<Point3DReadOnly> newPointCloudToSensorPose = frame2.getPointCloudInLocalFrame();
+      boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.size()];
       int numberOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
+      for (int i = 0; i < newPointCloudToSensorPose.size(); i++)
       {
-         Point3DReadOnly point = newPointCloudToSensorPose[i];
+         Point3DReadOnly point = newPointCloudToSensorPose.get(i);
          isInPreviousView[i] = false;
          if (windowForMap.isPointInside(point.getX(), point.getY(), -windowMargin))
          {
@@ -285,11 +280,11 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       Point3D[] pointsInPreviousWindow = new Point3D[numberOfPointsInWindow];
       int[] colors = new int[numberOfPointsInWindow];
       int indexOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
+      for (int i = 0; i < newPointCloudToSensorPose.size(); i++)
       {
          if (isInPreviousView[i])
          {
-            pointsInPreviousWindow[indexOfPointsInWindow] = new Point3D(newPointCloud[i]);
+            pointsInPreviousWindow[indexOfPointsInWindow] = new Point3D(newPointCloud.get(i));
             indexOfPointsInWindow++;
          }
       }
@@ -301,8 +296,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
                                                                                                            pointsInPreviousWindow.length,
                                                                                                            0.005,
                                                                                                            null);
-      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getSensorPose().getTranslation());
-      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getSensorPose().getRotation());
-      frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints);
+      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getCorrectedSensorPoseInWorld().getTranslation());
+      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getCorrectedSensorPoseInWorld().getRotation());
+      frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints, normalEstimationParameters);
    }
 }

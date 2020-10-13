@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
 {
@@ -16,12 +16,12 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
    private final YoPolynomial zPoly;
    private final YoPolynomial yawPoly;
 
-   public SplinePawPathPlanner(YoVariableRegistry registry)
+   public SplinePawPathPlanner(YoRegistry registry)
    {
       this("", registry);
    }
 
-   public SplinePawPathPlanner(String prefix, YoVariableRegistry registry)
+   public SplinePawPathPlanner(String prefix, YoRegistry registry)
    {
       super(prefix, registry);
 

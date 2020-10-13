@@ -41,7 +41,7 @@ import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class QuadrupedSupportPlanarRegionPublisher
 {
@@ -58,7 +58,7 @@ public class QuadrupedSupportPlanarRegionPublisher
 
    private static final int numberOfRegions = 6;
 
-   private final RealtimeRos2Node ros2Node;
+   private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
@@ -83,7 +83,7 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
-      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
+      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
