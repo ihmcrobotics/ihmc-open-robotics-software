@@ -37,22 +37,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-logger:0.20.1")
    api("us.ihmc:ihmc-messager-kryo:0.1.5")
 
-   api("org.bytedeco:javacv-platform:1.5") {
-      exclude(group = "org.bytedeco", module = "opencv")
-   }
-   api("org.bytedeco:opencv:4.1.2-1.5.2:")
-   if (SystemUtils.IS_OS_UNIX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
-   }
-   else if (SystemUtils.IS_OS_WINDOWS)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
-   }
-   else if (SystemUtils.IS_OS_MAC_OSX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
-   }
+   api("org.bytedeco:javacv-platform:1.5.2")
 }
 
 applicationDependencies {
