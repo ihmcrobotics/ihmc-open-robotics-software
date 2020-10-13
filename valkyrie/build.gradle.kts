@@ -72,7 +72,7 @@ testDependencies {
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }
 
-ihmc.jarWithLibFolder()
+afterEvaluate { ihmc.jarWithLibFolder() }
 tasks.getByPath("installDist").dependsOn("compositeJar")
 
 app.entrypoint("IHMCValkyrieJoystickApplication", "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication")
