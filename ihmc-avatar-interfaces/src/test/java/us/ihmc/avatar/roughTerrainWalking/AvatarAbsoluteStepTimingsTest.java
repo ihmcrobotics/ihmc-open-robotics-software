@@ -55,7 +55,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final double swingStartTimeEpsilon = 0.005;
+   private static final double swingStartTimeEpsilon = 0.0075;
 
    @Test
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
