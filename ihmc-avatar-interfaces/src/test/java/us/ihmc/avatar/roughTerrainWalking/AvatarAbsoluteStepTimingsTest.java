@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -349,7 +350,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", SmoothCMPBasedICPPlanner.class.getSimpleName());
+      YoDouble firstTransferTime = getDoubleYoVariable(scs, "transferTime0", BalanceManager.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 
