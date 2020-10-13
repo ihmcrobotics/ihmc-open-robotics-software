@@ -21,7 +21,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacv-platform:1.5.2")
+   api(ihmc.sourceSetProject("javacv"))
+
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
    api("org.georegression:georegression:0.22")
@@ -53,16 +54,16 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
-opencvDependencies {
-   api("org.openpnp:opencv:3.4.2-2")
+openpnpDependencies {
+   api("org.openpnp:opencv:4.3.0-2")
 }
 
 bytedecoDependencies {
-   api("org.bytedeco:opencv-platform:4.1.2-1.5.2")
+   api("org.bytedeco:opencv-platform:4.4.0-1.5.4")
 }
 
 javacvDependencies {
-   api("org.bytedeco:javacv-platform:1.5.2")
+   api("org.bytedeco:javacv-platform:1.5.4")
 }
 
 testDependencies {
