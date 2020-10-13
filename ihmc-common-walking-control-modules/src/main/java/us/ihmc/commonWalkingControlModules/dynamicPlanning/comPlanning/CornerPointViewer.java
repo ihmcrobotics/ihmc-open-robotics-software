@@ -29,6 +29,11 @@ public class CornerPointViewer
 
    public CornerPointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(false, registry, yoGraphicsListRegistry);
+   }
+
+   public CornerPointViewer(boolean artifactsOnly, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       for (int i = 0; i < maxPoints; i++)
       {
          YoFramePoint3D dcmCornerPoint = new YoFramePoint3D("dcmCornerPoint" + i, worldFrame, registry);
@@ -51,10 +56,13 @@ public class CornerPointViewer
          YoGraphicPosition vrpStartPointGraphic = new YoGraphicPosition("vrpStartPoint" + i, vrpStartPoint, size, YoAppearance.Green(), GraphicType.BALL);
          YoGraphicPosition vrpEndPointGraphic = new YoGraphicPosition("vrpEndPoint" + i, vrpEndPoint, size, YoAppearance.Green(), GraphicType.SOLID_BALL);
 
-         yoGraphicsListRegistry.registerYoGraphic(name, dcmCornerPointGraphic);
-         yoGraphicsListRegistry.registerYoGraphic(name, comCornerPointGraphic);
-         yoGraphicsListRegistry.registerYoGraphic(name, vrpStartPointGraphic);
-         yoGraphicsListRegistry.registerYoGraphic(name, vrpEndPointGraphic);
+         if (!artifactsOnly)
+         {
+            yoGraphicsListRegistry.registerYoGraphic(name, dcmCornerPointGraphic);
+            yoGraphicsListRegistry.registerYoGraphic(name, comCornerPointGraphic);
+            yoGraphicsListRegistry.registerYoGraphic(name, vrpStartPointGraphic);
+            yoGraphicsListRegistry.registerYoGraphic(name, vrpEndPointGraphic);
+         }
 
          yoGraphicsListRegistry.registerArtifact(name, dcmCornerPointGraphic.createArtifact());
          yoGraphicsListRegistry.registerArtifact(name, comCornerPointGraphic.createArtifact());

@@ -221,7 +221,7 @@ public class BalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
+         ((CoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(true, registry, yoGraphicsListRegistry));
 //         copTrajectory.setWaypointViewer(new WaypointViewer(registry, yoGraphicsListRegistry));
 
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
