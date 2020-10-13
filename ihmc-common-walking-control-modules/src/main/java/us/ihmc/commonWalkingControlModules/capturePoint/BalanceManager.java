@@ -562,6 +562,8 @@ public class BalanceManager
       yoFinalDesiredICP.setToNaN();
       yoFinalDesiredCoM.setToNaN();
       yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
+      yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
+      yoDesiredCoMVelocity.setToZero();
 
       yoPerfectCoP.set(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
       copTrajectoryState.setInitialCoP(bipedSupportPolygons.getSupportPolygonInWorld().getCentroid());
