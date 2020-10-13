@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TraverseStairsPlanStepsState implements State
 {
    private static final String footstepPlannerParameterFileName = "atlasFootstepPlannerParameters_Stairs.ini";
+   private static final String swingParameterFileName = "atlasSwingPlannerParameters_Stairs.ini";
 
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
@@ -58,6 +59,7 @@ public class TraverseStairsPlanStepsState implements State
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       planningModule.getFootstepPlannerParameters().load(footstepPlannerParameterFileName);
+      planningModule.getSwingPlannerParameters().load(swingParameterFileName);
 
       footstepListPublisher = new IHMCROS2Publisher<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
       new IHMCROS2Callback<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
