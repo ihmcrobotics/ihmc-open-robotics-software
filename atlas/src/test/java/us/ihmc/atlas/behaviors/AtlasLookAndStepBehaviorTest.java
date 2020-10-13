@@ -95,18 +95,18 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(0).goalPose = new Pose3D(1.5, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(0).reachedCondition = pelvisPose ->
       {
-         double remainingDistance = 0.8 - pelvisPose.getPosition().getX();
+         double remainingDistance = waypoints.get(0).goalPose.getX() - pelvisPose.getPosition().getX();
          LogTools.info("Remaining distance: {}", remainingDistance);
-         return remainingDistance < 0.0;
+         return Math.abs(remainingDistance) < 0.7;
       };
       waypoints.add(new TestWaypoint());
       waypoints.get(1).name = "ALL THE WAY";
       waypoints.get(1).goalPose = new Pose3D(3.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(1).reachedCondition = pelvisPose ->
       {
-         double remainingDistance = 2.2 - pelvisPose.getPosition().getX();
+         double remainingDistance = waypoints.get(0).goalPose.getX() - pelvisPose.getPosition().getX();
          LogTools.info("Remaining distance: {}", remainingDistance);
-         return remainingDistance < 0.0;
+         return Math.abs(remainingDistance) < 0.8;
       };
 
       boolean useDynamicsSimulation = false;
@@ -131,9 +131,9 @@ public class AtlasLookAndStepBehaviorTest
       waypoints.get(0).goalPose = new Pose3D(4.1, 0.0, 0.0, 0.0, 0.0, 0.0);
       waypoints.get(0).reachedCondition = pelvisPose ->
       {
-         double remainingDistance = 0.8 - pelvisPose.getPosition().getX();
+         double remainingDistance = waypoints.get(0).goalPose.getX() - pelvisPose.getPosition().getX();
          LogTools.info("Remaining distance: {}", remainingDistance);
-         return remainingDistance < 0.0;
+         return Math.abs(remainingDistance) < 0.8;
       };
 
 
