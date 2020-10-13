@@ -11,7 +11,7 @@ import java.util.function.*;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-public class SplitFractionFromAreaCalculator
+public class SplitFractionFromPositionCalculator
 {
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D nextFootPose = new FramePose3D();
@@ -19,44 +19,72 @@ public class SplitFractionFromAreaCalculator
    private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
-   private final IntSupplier numberOfStepsProvider;
+   private IntSupplier numberOfStepsProvider;
    private final IntFunction<Footstep> stepGetter;
-   private final DoubleSupplier finalTransferWeightDistributionProvider;
-   private final DoubleSupplier finalTransferSplitFractionProvider;
-   private final IntToDoubleFunction transferWeightDistributionProvider;
-   private final IntToDoubleFunction transferSplitFractionProvider;
-   private final DoubleConsumer finalTransferWeightDistributionConsumer;
-   private final DoubleConsumer finalTransferSplitFractionConsumer;
-   private final IntFunction<DoubleConsumer> transferWeightDistributionConsumer;
-   private final IntFunction<DoubleConsumer> transferSplitFractionConsumer;
+   private DoubleSupplier finalTransferWeightDistributionProvider;
+   private DoubleSupplier finalTransferSplitFractionProvider;
+   private IntToDoubleFunction transferWeightDistributionProvider;
+   private IntToDoubleFunction transferSplitFractionProvider;
+   private DoubleConsumer finalTransferWeightDistributionConsumer;
+   private DoubleConsumer finalTransferSplitFractionConsumer;
+   private IntFunction<DoubleConsumer> transferWeightDistributionConsumer;
+   private IntFunction<DoubleConsumer> transferSplitFractionConsumer;
 
-   public SplitFractionFromAreaCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters,
-                                          SideDependentList<? extends ReferenceFrame> soleFrames,
-                                          IntSupplier numberOfStepsProvider,
-                                          IntFunction<Footstep> stepGetter,
-                                          DoubleSupplier finalTransferWeightDistributionProvider,
-                                          DoubleSupplier finalTransferSplitFractionProvider,
-                                          IntToDoubleFunction transferWeightDistributionProvider,
-                                          IntToDoubleFunction transferSplitFractionProvider,
-                                          DoubleConsumer finalTransferWeightDistributionConsumer,
-                                          DoubleConsumer finalTransferSplitFractionConsumer,
-                                          IntFunction<DoubleConsumer> transferWeightDistributionConsumer,
-                                          IntFunction<DoubleConsumer> transferSplitFractionConsumer)
+   public SplitFractionFromPositionCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters,
+                                              SideDependentList<? extends ReferenceFrame> soleFrames,
+                                              IntFunction<Footstep> stepGetter)
    {
       this.splitFractionParameters = splitFractionParameters;
       this.soleFrames = soleFrames;
 
-      this.numberOfStepsProvider = numberOfStepsProvider;
       this.stepGetter = stepGetter;
+   }
+
+   public void setNumberOfStepsProvider(IntSupplier numberOfStepsProvider)
+   {
+      this.numberOfStepsProvider = numberOfStepsProvider;
+   }
+
+   public void setFinalTransferWeightDistributionProvider(DoubleSupplier finalTransferWeightDistributionProvider)
+   {
       this.finalTransferWeightDistributionProvider = finalTransferWeightDistributionProvider;
+   }
+
+   public void setFinalTransferSplitFractionProvider(DoubleSupplier finalTransferSplitFractionProvider)
+   {
       this.finalTransferSplitFractionProvider = finalTransferSplitFractionProvider;
-      this.transferWeightDistributionProvider = transferWeightDistributionProvider;
-      this.transferSplitFractionProvider = transferSplitFractionProvider;
+   }
+
+   public void setFinalTransferWeightDistributionConsumer(DoubleConsumer finalTransferWeightDistributionConsumer)
+   {
       this.finalTransferWeightDistributionConsumer = finalTransferWeightDistributionConsumer;
+   }
+
+   public void setFinalTransferSplitFractionConsumer(DoubleConsumer finalTransferSplitFractionConsumer)
+   {
       this.finalTransferSplitFractionConsumer = finalTransferSplitFractionConsumer;
+   }
+
+   public void setTransferWeightDistributionProvider(IntToDoubleFunction transferWeightDistributionProvider)
+   {
+      this.transferWeightDistributionProvider = transferWeightDistributionProvider;
+   }
+
+   public void setTransferSplitFractionProvider(IntToDoubleFunction transferSplitFractionProvider)
+   {
+      this.transferSplitFractionProvider = transferSplitFractionProvider;
+   }
+
+   public void setTransferWeightDistributionConsumer(IntFunction<DoubleConsumer> transferWeightDistributionConsumer)
+   {
       this.transferWeightDistributionConsumer = transferWeightDistributionConsumer;
+   }
+
+   public void setTransferSplitFractionConsumer(IntFunction<DoubleConsumer> transferSplitFractionConsumer)
+   {
       this.transferSplitFractionConsumer = transferSplitFractionConsumer;
    }
+
 
    public void computeSplitFractionsFromPosition()
    {
