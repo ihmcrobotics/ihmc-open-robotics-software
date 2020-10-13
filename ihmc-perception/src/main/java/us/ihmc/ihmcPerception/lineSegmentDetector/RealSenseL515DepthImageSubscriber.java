@@ -10,7 +10,7 @@ import sensor_msgs.Image;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ihmcPerception.camera.RosCameraInfoSubscriber;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -33,7 +33,7 @@ public class RealSenseL515DepthImageSubscriber extends AbstractRosTopicSubscribe
     private final IHMCROS2Publisher<VideoPacket> depthPublisher;
     private final RosCameraInfoSubscriber depthImageInfoSubscriber;
 
-    public RealSenseL515DepthImageSubscriber(RosMainNode rosNode, Ros2Node ros2Node) {
+    public RealSenseL515DepthImageSubscriber(RosMainNode rosNode, ROS2Node ros2Node) {
         super(sensor_msgs.Image._TYPE);
         depthPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
         depthImageInfoSubscriber = new RosCameraInfoSubscriber(l515CameraInfoTopic);

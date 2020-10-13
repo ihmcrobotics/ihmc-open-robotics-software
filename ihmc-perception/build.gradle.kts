@@ -70,6 +70,8 @@ mainDependencies {
    api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:joctomap:1.11.0")
    api("us.ihmc:ihmc-path-planning:source")
+   api("us.ihmc:ihmc-footstep-planning:source")
+   api("us.ihmc:robot-environment-awareness:source")
 }
 
 testDependencies {
@@ -79,6 +81,7 @@ testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+
 }
 
 
