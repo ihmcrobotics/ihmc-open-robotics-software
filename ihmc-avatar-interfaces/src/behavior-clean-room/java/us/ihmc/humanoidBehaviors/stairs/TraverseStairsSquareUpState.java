@@ -29,7 +29,7 @@ public class TraverseStairsSquareUpState implements State
    @Override
    public void onEntry()
    {
-      LogTools.debug("Entering " + getClass().getSimpleName());
+      LogTools.info("Entering " + getClass().getSimpleName());
 
       double trajectoryTime = parameters.get(TraverseStairsBehaviorParameters.trajectoryTime);
 
@@ -67,7 +67,7 @@ public class TraverseStairsSquareUpState implements State
       double trajectoryTime = parameters.get(TraverseStairsBehaviorParameters.trajectoryTime);
       if (timeInState >= trajectoryTime)
       {
-         LogTools.debug(getClass().getSimpleName() + " is done");
+         LogTools.info(getClass().getSimpleName() + " is done");
          return true;
       }
       else

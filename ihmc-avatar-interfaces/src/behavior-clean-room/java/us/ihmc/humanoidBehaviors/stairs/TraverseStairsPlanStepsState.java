@@ -51,7 +51,7 @@ public class TraverseStairsPlanStepsState implements State
       this.parameters = parameters;
       helper.createROS2Callback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
       {
-         LogTools.debug("Received goal input: " + goalPose);
+         LogTools.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
@@ -69,7 +69,7 @@ public class TraverseStairsPlanStepsState implements State
    @Override
    public void onEntry()
    {
-      LogTools.debug("Entering " + getClass().getSimpleName());
+      LogTools.info("Entering " + getClass().getSimpleName());
 
       executeStepsSignaled.set(false);
       planSteps.set(true);
@@ -77,13 +77,13 @@ public class TraverseStairsPlanStepsState implements State
       if (goalInput.get() == null)
       {
          String message = "No goal received in traverse stairs behavior";
-         LogTools.debug(message);
+         LogTools.info(message);
          throw new RuntimeException(message);
       }
       else if (planarRegions.get() == null)
       {
          String message = "No regions received in traverse stairs behavior";
-         LogTools.debug(message);
+         LogTools.info(message);
          throw new RuntimeException(message);
       }
    }
@@ -123,9 +123,9 @@ public class TraverseStairsPlanStepsState implements State
       planningModule.clearCustomTerminationConditions();
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= targetNumberOfFootsteps);
 
-      LogTools.debug(getClass().getSimpleName() + ": planning");
+      LogTools.info(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
-      LogTools.debug(getClass().getSimpleName() + ": " + output.getFootstepPlanningResult());
+      LogTools.info(getClass().getSimpleName() + ": " + output.getFootstepPlanningResult());
 
       // lower height of first step down
       mutateFirstStepDownHeight(solePoses.get(request.getRequestedInitialStanceSide()));

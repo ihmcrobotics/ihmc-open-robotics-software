@@ -112,7 +112,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
    @Override
    public void setEnabled(boolean enable)
    {
-      LogTools.debug((enable ? "Enable" : "Disable") + " requested");
+      LogTools.info((enable ? "Enable" : "Disable") + " requested");
 
       if (enable)
       {
