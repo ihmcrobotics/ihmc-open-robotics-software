@@ -1,33 +1,26 @@
 package us.ihmc.ihmcPerception.lineSegmentDetector;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import javafx.scene.shape.Sphere;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -73,38 +66,11 @@ public class LineSegmentEstimator
 
       executorService.scheduleAtFixedRate(this::mainUpdate, 0, 32, TimeUnit.MILLISECONDS);
       lineRegionAssoc = new LineSegmentToPlanarRegionAssociator();
-
-      // execFootstepPlan();
    }
-
-   // public void setPlanarRegionsViewer(JavaFXPlanarRegionsViewer planarRegionsViewer) {
-   //     this.planarRegionsViewer = planarRegionsViewer;
-   // }
 
    public void setSensorNode(Sphere sensorNode)
    {
       this.sensorNode = sensorNode;
-   }
-
-   public void execFootstepPlan()
-   {
-      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      FootstepPlannerLogLoader.LoadResult loadresult = logLoader.load(new File("/home/quantum/.ihmc/logs/20200821_172044151_FootstepPlannerLog/"));
-      if (!(loadresult == FootstepPlannerLogLoader.LoadResult.LOADED))
-      {
-         LogTools.error("Couldn't find file");
-         return;
-      }
-      FootstepPlannerLog log = logLoader.getLog();
-      FootstepPlanningToolboxOutputStatus statusPacket = log.getStatusPacket();
-      FootstepDataListMessage footstepDataList = statusPacket.getFootstepDataList();
-
-      String robotName = "Atlas";
-
-      IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(this.ros2Node,
-                                                                                                                FootstepDataListMessage.class,
-                                                                                                                ROS2Tools.getControllerInputTopic(robotName));
-      footstepDataListPublisher.publish(footstepDataList);
    }
 
    public void videoPacketCallback(VideoPacket message)
