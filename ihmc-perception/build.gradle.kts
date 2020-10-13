@@ -21,23 +21,8 @@ ihmc {
 }
 
 mainDependencies {
-   implementation(files("/usr/local/share/java/opencv4/opencv-440.jar"))
-   api("org.bytedeco:javacv-platform:1.5") {
-      exclude(group = "org.bytedeco", module = "opencv")
-   }
-   api("org.bytedeco:opencv:4.1.2-1.5.2:")
-   if (SystemUtils.IS_OS_UNIX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
-   }
-   else if (SystemUtils.IS_OS_WINDOWS)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
-   }
-   else if (SystemUtils.IS_OS_MAC_OSX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
-   }
+   api(ihmc.sourceSetProject("javacv"))
+
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:ihmc-native-library-loader:1.2.1")
    api("org.georegression:georegression:0.22")
@@ -74,6 +59,18 @@ mainDependencies {
    api("us.ihmc:robot-environment-awareness:source")
 }
 
+openpnpDependencies {
+   api("org.openpnp:opencv:4.3.0-2")
+}
+
+bytedecoDependencies {
+   api("org.bytedeco:opencv-platform:4.4.0-1.5.4")
+}
+
+javacvDependencies {
+   api("org.bytedeco:javacv-platform:1.5.4")
+}
+
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.3")
    api("us.ihmc:simulation-construction-set:0.20.6")
@@ -81,7 +78,4 @@ testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-
 }
-
-
