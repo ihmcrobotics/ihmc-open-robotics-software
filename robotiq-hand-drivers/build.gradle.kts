@@ -4,7 +4,6 @@ plugins {
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.log-tools-plugin") version "0.5.0"
    id("us.ihmc.scs") version "0.4"
-   id "application"
 }
 
 ihmc {
@@ -33,9 +32,5 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
-applicationName = "RobotiqControlThread"
-mainClassName = "us.ihmc.robotiq.control.RobotiqControlThread"
 
-applicationDistribution.from(file("IHMCNetworkParameters.ini")) {
-   into "bin"
-}
+app.entrypoint("RobotiqControlThread", "us.ihmc.robotiq.control.RobotiqControlThread")
