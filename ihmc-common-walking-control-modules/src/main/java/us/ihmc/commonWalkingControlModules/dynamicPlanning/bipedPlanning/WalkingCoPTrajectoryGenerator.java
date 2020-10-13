@@ -352,7 +352,14 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    {
       SettableContactStateProvider previousContactState = contactStateProviders.getLast();
       previousCoPPosition.setIncludingFrame(previousContactState.getCopStartPosition());
+      previousCoPPosition.changeFrameAndProjectToXYPlane(previousPolygon.getReferenceFrame());
 
+      if (!previousPolygon.isPointInside(previousCoPPosition))
+      {
+         computeExitCoPLocation(previousCoPPosition, previousPolygon, nextPolygon, supportSide.getOppositeSide());
+      }
+
+      previousCoPPosition.changeFrameAndProjectToXYPlane(worldFrame);
       computeEntryCoPPointLocation(tempPointForCoPCalculation, previousPolygon, nextPolygon, supportSide);
       midfootCoP.interpolate(previousCoPPosition, tempPointForCoPCalculation, weightDistribution);
 
