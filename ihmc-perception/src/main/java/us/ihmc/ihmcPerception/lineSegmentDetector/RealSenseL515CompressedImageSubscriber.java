@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ihmcPerception.camera.RosCameraInfoSubscriber;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
@@ -36,7 +36,7 @@ public class RealSenseL515CompressedImageSubscriber extends RosCompressedImageSu
     private final IHMCROS2Publisher<VideoPacket> colorPublisher;
 
 
-    public RealSenseL515CompressedImageSubscriber(RosMainNode rosNode, Ros2Node ros2Node) {
+    public RealSenseL515CompressedImageSubscriber(RosMainNode rosNode, ROS2Node ros2Node) {
         super();
         colorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
         colorImageInfoSubscriber = new RosCameraInfoSubscriber(l515CameraInfoTopic);

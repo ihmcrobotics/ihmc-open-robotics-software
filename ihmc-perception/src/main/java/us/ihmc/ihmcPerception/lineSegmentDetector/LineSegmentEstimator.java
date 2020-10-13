@@ -20,11 +20,10 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -59,8 +58,8 @@ public class LineSegmentEstimator {
     private CameraPinholeBrown camIntrinsics;
 
     private LineSegmentToPlanarRegionAssociator lineRegionAssoc;
-    private JavaFXPlanarRegionsViewer planarRegionsViewer;
-    private Ros2Node ros2Node;
+    // private JavaFXPlanarRegionsViewer planarRegionsViewer;
+    private ROS2Node ros2Node;
     private JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
     private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
@@ -68,18 +67,18 @@ public class LineSegmentEstimator {
         // System.out.println(System.getProperty("java.library.path"));
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         // NativeLibraryLoader.loadLibrary("org.opencv", OpenCVTools.OPEN_CV_LIBRARY_NAME);
-        this.ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
+        this.ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "video_viewer");
         this.registerCallbacks(ros2Node);
 
         executorService.scheduleAtFixedRate(this::mainUpdate, 0, 32, TimeUnit.MILLISECONDS);
         lineRegionAssoc = new LineSegmentToPlanarRegionAssociator();
 
-        execFootstepPlan();
+        // execFootstepPlan();
     }
 
-    public void setPlanarRegionsViewer(JavaFXPlanarRegionsViewer planarRegionsViewer) {
-        this.planarRegionsViewer = planarRegionsViewer;
-    }
+    // public void setPlanarRegionsViewer(JavaFXPlanarRegionsViewer planarRegionsViewer) {
+    //     this.planarRegionsViewer = planarRegionsViewer;
+    // }
 
     public void setSensorNode(Sphere sensorNode) {
         this.sensorNode = sensorNode;
@@ -87,8 +86,8 @@ public class LineSegmentEstimator {
 
     public void execFootstepPlan() {
         FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-        boolean loadResult = logLoader.load(new File("/home/quantum/.ihmc/logs/20200821_172044151_FootstepPlannerLog/"));
-        if (!loadResult) {
+        FootstepPlannerLogLoader.LoadResult loadresult = logLoader.load(new File("/home/quantum/.ihmc/logs/20200821_172044151_FootstepPlannerLog/"));
+        if ( !(loadresult == FootstepPlannerLogLoader.LoadResult.LOADED)) {
             LogTools.error("Couldn't find file");
             return;
         }
@@ -114,7 +113,7 @@ public class LineSegmentEstimator {
         currentPlanarRegionsListMessage = message;
     }
 
-    public void registerCallbacks(Ros2Node ros2Node) {
+    public void registerCallbacks(ROS2Node ros2Node) {
         new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::planarRegionsListCallback);
         new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::videoPacketCallback);
     }
