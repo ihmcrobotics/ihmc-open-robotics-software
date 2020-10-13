@@ -32,6 +32,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class RosTools
 {
+   public static final String D435_VIDEO = "/depthcam/color/image_raw/compressed";
+   public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
 
    public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
    {
