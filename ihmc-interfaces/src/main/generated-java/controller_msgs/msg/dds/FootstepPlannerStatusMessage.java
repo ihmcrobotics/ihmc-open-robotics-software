@@ -12,25 +12,17 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMessage> implements Settable<FootstepPlannerStatusMessage>, EpsilonComparable<FootstepPlannerStatusMessage>
 {
-
    public static final byte FOOTSTEP_PLANNER_STATUS_IDLE = (byte) 0;
-
    public static final byte FOOTSTEP_PLANNER_STATUS_PLANNING_PATH = (byte) 1;
-
    public static final byte FOOTSTEP_PLANNER_STATUS_PLANNING_STEPS = (byte) 2;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public byte footstep_planner_status_ = (byte) 255;
 
    public FootstepPlannerStatusMessage()
    {
-
-
-
    }
 
    public FootstepPlannerStatusMessage(FootstepPlannerStatusMessage other)
@@ -41,14 +33,11 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
 
    public void set(FootstepPlannerStatusMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       footstep_planner_status_ = other.footstep_planner_status_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -64,7 +53,6 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
    {
       return sequence_id_;
    }
-
 
    public void setFootstepPlannerStatus(byte footstep_planner_status)
    {
@@ -93,9 +81,7 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planner_status_, other.footstep_planner_status_, epsilon)) return false;
 
@@ -112,9 +98,7 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
 
       FootstepPlannerStatusMessage otherMyClass = (FootstepPlannerStatusMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.footstep_planner_status_ != otherMyClass.footstep_planner_status_) return false;
 
@@ -128,10 +112,8 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlannerStatusMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("footstep_planner_status=");
       builder.append(this.footstep_planner_status_);
       builder.append("}");

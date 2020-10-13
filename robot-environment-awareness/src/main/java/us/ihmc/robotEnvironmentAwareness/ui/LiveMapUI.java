@@ -38,6 +38,11 @@ public class LiveMapUI implements PerceptionUI
 
    private LiveMapUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
+      this(uiMessager, primaryStage, null);
+   }
+
+   private LiveMapUI(REAUIMessager uiMessager, Stage primaryStage, String configurationFileProject) throws Exception
+   {
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -51,6 +56,7 @@ public class LiveMapUI implements PerceptionUI
 
       meshViewer = new LiveMapMeshViewer(uiMessager);
 
+      slamParametersUIController.setupParameters(configurationFileProject);
       initializeControllers(uiMessager);
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();

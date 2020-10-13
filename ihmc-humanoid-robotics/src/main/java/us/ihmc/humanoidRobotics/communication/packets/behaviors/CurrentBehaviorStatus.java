@@ -2,7 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 public enum CurrentBehaviorStatus
 {
-   NO_BEHAVIOR_RUNNING, BEHAVIOS_RUNNING, BEHAVIOR_PAUSED;
+   NO_BEHAVIOR_RUNNING, BEHAVIOS_RUNNING, BEHAVIOR_PAUSED,BEHAVIOR_FINISHED_FAILED,BEHAVIOR_FINISHED_SUCCESS;
+   
 
    public static final CurrentBehaviorStatus[] values = values();
 

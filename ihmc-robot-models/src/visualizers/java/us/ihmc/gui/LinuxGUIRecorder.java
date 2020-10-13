@@ -108,7 +108,8 @@ public class LinuxGUIRecorder
 
    public synchronized void stop()
    {
-      LogTools.info("Stopping recording to {}", filename);
+      if (filename != null)
+         LogTools.info("Stopping recording to {}", filename);
 
       scheduler.stop();
 

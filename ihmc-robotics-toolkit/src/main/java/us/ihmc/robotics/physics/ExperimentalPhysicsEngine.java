@@ -16,7 +16,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -47,7 +47,7 @@ public class ExperimentalPhysicsEngine
    private static final String collidableVisualizerGroupName = "Physics Engine - Active Collidable";
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("PhysicsPlugins");
+   private final YoRegistry registry = new YoRegistry("PhysicsPlugins");
    private final YoGraphicsListRegistry physicsEngineGraphicsRegistry = new YoGraphicsListRegistry();
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robotMap = new HashMap<>();
@@ -81,7 +81,7 @@ public class ExperimentalPhysicsEngine
 
    public ExperimentalPhysicsEngine()
    {
-      YoVariableRegistry multiContactCalculatorRegistry = new YoVariableRegistry(MultiContactImpulseCalculator.class.getSimpleName());
+      YoRegistry multiContactCalculatorRegistry = new YoRegistry(MultiContactImpulseCalculator.class.getSimpleName());
       registry.addChild(multiContactCalculatorRegistry);
 
       hasGlobalContactParameters = new YoBoolean("hasGlobalContactParameters", registry);
@@ -114,7 +114,7 @@ public class ExperimentalPhysicsEngine
                         MultiBodySystemStateReader physicsOutputReader)
    {
       PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotCollisionModel, physicsEngineGraphicsRegistry);
-      YoVariableRegistry robotRegistry = robot.getRobotRegistry();
+      YoRegistry robotRegistry = robot.getRobotRegistry();
       robot.setRobotInitialStateWriter(robotInitialStateWriter);
       robot.setControllerOutputWriter(controllerOutputWriter);
       robot.addPhysicsOutputReader(physicsOutputReader);
@@ -296,7 +296,7 @@ public class ExperimentalPhysicsEngine
       return time.getValue();
    }
 
-   public YoVariableRegistry getPhysicsEngineRegistry()
+   public YoRegistry getPhysicsEngineRegistry()
    {
       return registry;
    }

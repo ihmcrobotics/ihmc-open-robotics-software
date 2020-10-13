@@ -6,11 +6,6 @@ uint32 sequence_id
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
-byte FOOTSTEP_PLAN_HEADING_FORWARD = 0
-byte FOOTSTEP_PLAN_HEADING_BACKWARD = 1
-byte FOOTSTEP_PLAN_HEADING_LEFT = 2
-byte FOOTSTEP_PLAN_HEADING_RIGHT = 3
-
 byte SWING_PLANNER_TYPE_NONE = 0
 byte SWING_PLANNER_TYPE_POSITION = 1
 byte SWING_PLANNER_TYPE_PROPORTION = 2
@@ -49,8 +44,9 @@ geometry_msgs/Pose[<=50] body_path_waypoints
 float64 goal_distance_proximity -1.0
 # (In beta) acceptable yaw offset from the given goal for the planner to terminate
 float64 goal_yaw_proximity -1.0
-# Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-byte requested_path_heading 255
+# Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
+# The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+float64 requested_path_heading 0.0
 # Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
 float64 timeout 5.0
 # Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.

@@ -33,7 +33,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PelvisRotationalStateUpdaterTest
 {
@@ -50,7 +50,7 @@ public class PelvisRotationalStateUpdaterTest
 	@Test
    public void testConstructorWithOneIMU()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -77,7 +77,7 @@ public class PelvisRotationalStateUpdaterTest
 	@Test
    public void testConstructorWithZeroIMUSensor()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -105,7 +105,7 @@ public class PelvisRotationalStateUpdaterTest
 	@Test
    public void testInitializeAndReadWithOneIMU()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
+      YoRegistry registry = new YoRegistry("Blop");
 
       Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -204,7 +204,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
    
-   private SensorProcessing buildSensorConfigurations(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoVariableRegistry registry)
+   private SensorProcessing buildSensorConfigurations(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoRegistry registry)
    {
       SensorProcessingConfiguration sensorProcessingConfiguration = new SensorProcessingConfiguration()
       {

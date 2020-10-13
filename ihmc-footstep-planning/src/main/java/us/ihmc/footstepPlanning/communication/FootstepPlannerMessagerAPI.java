@@ -19,6 +19,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
+import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -35,7 +37,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Quaternion> GoalMidFootOrientation = topic("GoalMidFootOrientation");
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
-   public static final Topic<FootstepPlanHeading> RequestedFootstepPlanHeading = topic("FootstepPlanHeading");
+   public static final Topic<Double> RequestedFootstepPlanHeading = topic("FootstepPlanHeading");
 
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
    public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
@@ -167,12 +168,24 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 
+   // IK
+   public static final Topic<Boolean> IKEnabled = topic("IKEnabled");
+   public static final Topic<UserInterfaceIKMode> SelectedIKMode = topic("SelectedIKMode");
+   public static final Topic<double[]> IKSolution = topic("IKSolution");
+   public static final Topic<ArmTrajectoryMessage> ArmTrajectoryMessageTopic = topic("ArmTrajectoryMessageTopic");
+   public static final Topic<HandTrajectoryMessage> HandTrajectoryMessageTopic = topic("HandTrajectoryMessageTopic");
+   public static final Topic<FootTrajectoryMessage> FootTrajectoryMessageTopic = topic("FootTrajectoryMessageTopic");
+   public static final Topic<ChestTrajectoryMessage> ChestTrajectoryMessageTopic = topic("ChestTrajectoryMessageTopic");
+   public static final Topic<SpineTrajectoryMessage> SpineTrajectoryMessageTopic = topic("SpineTrajectoryMessageTopic");
+   public static final Topic<HeadTrajectoryMessage> HeadTrajectoryMessageTopic = topic("HeadTrajectoryMessageTopic");
+   public static final Topic<NeckTrajectoryMessage> NeckTrajectoryMessageTopic = topic("NeckTrajectoryMessageTopic");
+
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
-   public static final Topic<Boolean> RequestLoadLog = topic("RequestLoadLog");
+   public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
-   public static final Topic<Pair<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>>> GraphData = topic("GraphData");
+   public static final Topic<Triple<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>, List<VariableDescriptor>>> GraphData = topic("GraphData");
    public static final Topic<Pair<FootstepNode, FootstepNodeSnapData>> LoggedStanceStepToVisualize = topic("LoggedStanceStepToVisualize");
    public static final Topic<FootstepPlannerEdgeData> LoggedCandidateStepToVisualize = topic("LoggedCandidateStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
@@ -183,7 +196,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
 
-   // Test dashboard, only shown if launched from test class
+   // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
    public static final Topic<DataSet> TestDataSetSelected = topic("TestDataSetSelected");
 

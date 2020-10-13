@@ -37,7 +37,8 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -78,7 +79,7 @@ public class FootstepAngularMomentumPredictorTest
    private final double supportLegMass = angularMomentumEstimationParameters.getPercentageSupportLegMass() * robotMass;
 
    // Variables for testing
-   private final YoVariableRegistry testRegistry = new YoVariableRegistry("AngularMomentumTestRegistry");
+   private final YoRegistry testRegistry = new YoRegistry("AngularMomentumTestRegistry");
    private final YoDouble omega = new YoDouble("AngularMomentumTestOmega", testRegistry); // Taking the for Atlas
    private final YoInteger numberOfUpcomingFootsteps = new YoInteger("NumberOfUpcomingFootsteps", testRegistry);
    private final FramePoint3D currentLocation = new FramePoint3D();
@@ -197,8 +198,8 @@ public class FootstepAngularMomentumPredictorTest
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator", testParameters.getNumberOfFootstepsToConsider(),
                                                                    bipedSupportPolygons, contactableFeet, numberOfFootstepsToConsider, swingDurations,
                                                                    transferDurations, swingSplitFractions, swingShiftFractions, transferSplitFractions,
-                                                                   transferWeightDistributions, percentageChickenSupport, numberOfUpcomingFootsteps,
-                                                                   upcomingFootstepsData, soleFrames, testRegistry);
+                                                                   transferWeightDistributions, percentageChickenSupport, percentageChickenSupport, numberOfUpcomingFootsteps,
+                                                                   upcomingFootstepsData, soleFrames, soleFrames, testRegistry);
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isStanding, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
@@ -206,6 +207,8 @@ public class FootstepAngularMomentumPredictorTest
       angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, maxNumberOfStepsToConsider, testRegistry);
       copTrajectoryGenerator.initializeParameters(testParameters);
       angularMomentumGenerator.initializeParameters(testParameters, robotMass, gravityZ);
+
+      new DefaultParameterReader().readParametersInRegistry(testRegistry);
    }
 
    private void getFootLocationFromCoMLocation(FramePoint3D footLocationToPack, RobotSide side, FramePoint3D comLocation,

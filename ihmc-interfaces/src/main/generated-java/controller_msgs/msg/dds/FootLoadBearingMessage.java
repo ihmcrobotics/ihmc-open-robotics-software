@@ -13,30 +13,22 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> implements Settable<FootLoadBearingMessage>, EpsilonComparable<FootLoadBearingMessage>
 {
-
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
-
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-
    public static final byte LOAD_BEARING_REQUEST_LOAD = (byte) 0;
-
    public static final byte LOAD_BEARING_REQUEST_UNLOAD = (byte) 1;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Needed to identify a side dependent end-effector.
             */
    public byte robot_side_ = (byte) 255;
-
    /**
             * Whether the end-effector should be loaded or unloaded.
             */
    public byte load_bearing_request_;
-
    /**
             * The time to delay this command on the controller side before being executed.
             */
@@ -44,11 +36,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
    public FootLoadBearingMessage()
    {
-
-
-
-
-
    }
 
    public FootLoadBearingMessage(FootLoadBearingMessage other)
@@ -59,20 +46,15 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
    public void set(FootLoadBearingMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       robot_side_ = other.robot_side_;
 
-
       load_bearing_request_ = other.load_bearing_request_;
-
 
       execution_delay_time_ = other.execution_delay_time_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -89,7 +71,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
       return sequence_id_;
    }
 
-
    /**
             * Needed to identify a side dependent end-effector.
             */
@@ -105,7 +86,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
       return robot_side_;
    }
 
-
    /**
             * Whether the end-effector should be loaded or unloaded.
             */
@@ -120,7 +100,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
    {
       return load_bearing_request_;
    }
-
 
    /**
             * The time to delay this command on the controller side before being executed.
@@ -155,15 +134,11 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.load_bearing_request_, other.load_bearing_request_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
@@ -180,15 +155,11 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
       FootLoadBearingMessage otherMyClass = (FootLoadBearingMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-
       if(this.load_bearing_request_ != otherMyClass.load_bearing_request_) return false;
-
 
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
@@ -202,16 +173,12 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootLoadBearingMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-
       builder.append("load_bearing_request=");
       builder.append(this.load_bearing_request_);      builder.append(", ");
-
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
       builder.append("}");

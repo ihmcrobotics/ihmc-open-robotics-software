@@ -21,10 +21,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FlatGroundContactForceOptimizer
@@ -33,7 +33,7 @@ public class FlatGroundContactForceOptimizer
    private static final AppearanceDefinition transparentBlue = new YoAppearanceRGBColor(Color.BLUE, 0.8);
    private static final AppearanceDefinition transparentRed = new YoAppearanceRGBColor(Color.RED, 0.8);
 
-   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble friction = new YoDouble("Friction", registry);
    private final YoInteger vectorsPerContact = new YoInteger("VectorsPerContact", registry);
@@ -52,7 +52,7 @@ public class FlatGroundContactForceOptimizer
    private final QuadProgSolver solver = new QuadProgSolver();
 
    public FlatGroundContactForceOptimizer(double friction, int vectorsPerContact, double regWeight, YoGraphicsListRegistry graphicsListRegistry,
-                                          YoVariableRegistry parentRegistry)
+                                          YoRegistry parentRegistry)
    {
       this.friction.set(friction);
       this.vectorsPerContact.set(vectorsPerContact);

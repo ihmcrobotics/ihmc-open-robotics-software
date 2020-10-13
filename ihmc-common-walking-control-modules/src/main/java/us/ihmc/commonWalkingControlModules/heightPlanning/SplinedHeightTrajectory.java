@@ -1,5 +1,11 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.trajectories.OptimizedTrajectoryGenerator;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -11,15 +17,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.StringStretcher2d;
-import us.ihmc.robotics.math.trajectories.YoOptimizedPolynomial;
 import us.ihmc.tools.lists.ListSorter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 public class SplinedHeightTrajectory
 {
@@ -32,7 +33,7 @@ public class SplinedHeightTrajectory
    private final YoFramePoint3D contactFrameOnePosition;
 
    private final BagOfBalls bagOfBalls;
-   private final YoOptimizedPolynomial polynomial;
+   private final OptimizedTrajectoryGenerator trajectoryGenerator;
 
    private ReferenceFrame referenceFrame;
 
@@ -51,11 +52,9 @@ public class SplinedHeightTrajectory
    private final YoDouble partialDsDx;
    private final YoDouble partialDsDy;
 
-   public SplinedHeightTrajectory(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SplinedHeightTrajectory(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      polynomial = new YoOptimizedPolynomial("height", 7, registry);
-      polynomial.setAccelerationMinimizationWeight(1.0e-3);
-      polynomial.setJerkMinimizationWeight(1.0e-1);
+      trajectoryGenerator = new OptimizedTrajectoryGenerator("height", 10, 4, registry);
 
       partialDzDs = new YoDouble("partialDzDs", registry);
       partialDsDx = new YoDouble("partialDsDx", registry);
@@ -97,31 +96,36 @@ public class SplinedHeightTrajectory
       waypoints.add(waypoint);
    }
 
+   private final TDoubleArrayList heightWaypoints = new TDoubleArrayList();
+   private final TDoubleArrayList alphaWaypoints = new TDoubleArrayList();
+
    public void computeSpline()
    {
       ListSorter.sort(waypoints, sorter);
       computeHeightsToUseByStretchingString(waypoints);
-      //      removeUnnecessaryWaypoints(waypoints);
 
       int numberOfWaypoints = waypoints.size();
 
-      polynomial.clear();
-      polynomial.addPositionPoint(waypoints.get(0).getX(), waypoints.get(0).getHeight(), constraintWeight);
+      alphaWaypoints.clear();
+      heightWaypoints.clear();
+
+      CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
+      CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(numberOfWaypoints - 1);
+
       for (int i = 1; i < numberOfWaypoints - 1; i++)
       {
          CoMHeightTrajectoryWaypoint waypoint = waypoints.get(i);
-         if ((waypoint.getMaxHeight() - waypoint.getMinHeight()) < 5.0e-3)
-         {
-            polynomial.addPositionPoint(waypoint.getX(), waypoint.getHeight(), constraintWeight);
-         }
-         else
-         {
-            polynomial.addPositionPoint(waypoint.getX(), waypoint.getHeight());
-         }
+         double alpha = (waypoint.getX() - startWaypoint.getX()) / (endWaypoint.getX() - startWaypoint.getX());
+         heightWaypoints.add(waypoint.getHeight());
+         alphaWaypoints.add(alpha);
       }
-      polynomial.addPositionPoint(waypoints.get(numberOfWaypoints - 1).getX(), waypoints.get(numberOfWaypoints - 1).getHeight(), constraintWeight);
 
-      polynomial.fit();
+      trajectoryGenerator.reset();
+      trajectoryGenerator.setEndpointConditions(startWaypoint.getHeight(), 0.0, endWaypoint.getHeight(), 0.0);
+      trajectoryGenerator.setWaypoints(heightWaypoints);
+      trajectoryGenerator.setWaypointTimes(alphaWaypoints);
+
+      trajectoryGenerator.initialize();
 
       contactFrameZeroPosition.setMatchingFrame(waypoints.get(0).getWaypoint());
       contactFrameOnePosition.setMatchingFrame(waypoints.get(waypoints.size() - 1).getWaypoint());
@@ -175,43 +179,6 @@ public class SplinedHeightTrajectory
       }
    }
 
-   private void removeUnnecessaryWaypoints(List<CoMHeightTrajectoryWaypoint> waypoints)
-   {
-      int nextIndex = 2;
-
-      while (nextIndex < waypoints.size())
-      {
-         int prevIndex = nextIndex - 2;
-         int index = nextIndex - 1;
-
-         if (isOnLine(waypoints.get(prevIndex), waypoints.get(nextIndex), waypoints.get(index)))
-         {
-            waypoints.remove(index);
-         }
-         else
-         {
-            nextIndex++;
-         }
-      }
-   }
-
-   private static boolean isOnLine(CoMHeightTrajectoryWaypoint start, CoMHeightTrajectoryWaypoint end, CoMHeightTrajectoryWaypoint query)
-   {
-      double startX = start.getX();
-      double endX = end.getX();
-      double startZ = start.getHeight();
-      double endZ = end.getHeight();
-
-      double queryX = query.getX();
-      double queryZ = query.getHeight();
-
-      double alpha = (queryX - startX) / (endX - startX);
-
-      double heightOnLine = alpha * (endZ - startZ) + startZ;
-
-      return MathTools.epsilonEquals(heightOnLine, queryZ, 1e-3);
-   }
-
    private final Point2D tempPoint = new Point2D();
 
    public double solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack,
@@ -236,14 +203,15 @@ public class SplinedHeightTrajectory
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
 
+      double xLength = Math.max(1.0, Math.abs(endWaypoint.getX() - startWaypoint.getX()));
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
 
-      polynomial.compute(splineQuery);
+      trajectoryGenerator.compute(percentAlongSegment);
 
-      double z = polynomial.getPosition();
-      double dzds = polynomial.getVelocity();
-      double d2zds2 = polynomial.getAcceleration();
-      double d3zds3 = polynomial.getJerk();
+      double z = trajectoryGenerator.getPosition();
+      double dzds = trajectoryGenerator.getVelocity() / xLength ;
+      double d2zds2 = trajectoryGenerator.getAcceleration() / MathTools.square(xLength);
+      double d3zds3 = trajectoryGenerator.getJerk() / MathTools.pow(xLength, 3);
       partialDzDs.set(dzds);
       partialD2zDs2.set(d2zds2);
       partialD3zDs3.set(d3zds3);
@@ -296,6 +264,6 @@ public class SplinedHeightTrajectory
 
    public double getHeightSplineSetpoint()
    {
-      return polynomial.getPosition();
+      return trajectoryGenerator.getPosition();
    }
 }

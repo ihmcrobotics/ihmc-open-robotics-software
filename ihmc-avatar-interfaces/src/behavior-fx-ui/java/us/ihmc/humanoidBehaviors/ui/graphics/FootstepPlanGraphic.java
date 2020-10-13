@@ -36,9 +36,13 @@ public class FootstepPlanGraphic extends Group
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
    private Mesh mesh;
    private Material material;
+   private SideDependentList<Color> footstepColors = new SideDependentList<>();
 
    public FootstepPlanGraphic(DRCRobotModel robotModel)
    {
+      footstepColors.set(RobotSide.LEFT, Color.RED);
+      footstepColors.set(RobotSide.RIGHT, Color.GREEN);
+
       for(RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
@@ -50,6 +54,12 @@ public class FootstepPlanGraphic extends Group
       getChildren().addAll(meshView);
 
       animationTimer.start();
+   }
+
+   public void setTransparency(double opacity)
+   {
+      footstepColors.set(RobotSide.LEFT, new Color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue(), opacity));
+      footstepColors.set(RobotSide.RIGHT, new Color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue(), opacity));
    }
 
    /**
@@ -77,7 +87,7 @@ public class FootstepPlanGraphic extends Group
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
          PlannedFootstep footstep = plan.getFootstep(i);
-         Color regionColor = footstep.getRobotSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
+         Color regionColor = footstepColors.get(footstep.getRobotSide());
 
          footstep.getFootstepPose(footPose);
          footPose.get(transformToWorld);

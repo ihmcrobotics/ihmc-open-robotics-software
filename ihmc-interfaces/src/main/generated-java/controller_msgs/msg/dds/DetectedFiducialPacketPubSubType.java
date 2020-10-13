@@ -40,12 +40,9 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -62,13 +59,10 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getFiducialTransformToWorld(), current_alignment);
@@ -79,25 +73,19 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.CDR cdr)
    {
-
       cdr.write_type_4(data.getSequenceId());
 
-
       cdr.write_type_4(data.getFiducialId());
-
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFiducialTransformToWorld(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.CDR cdr)
    {
-
       data.setSequenceId(cdr.read_type_4());
       	
-
       data.setFiducialId(cdr.read_type_4());
       	
-
       geometry_msgs.msg.dds.PosePubSubType.read(data.getFiducialTransformToWorld(), cdr);	
 
    }
@@ -105,11 +93,8 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-
       ser.write_type_4("sequence_id", data.getSequenceId());
-
       ser.write_type_4("fiducial_id", data.getFiducialId());
-
       ser.write_type_a("fiducial_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFiducialTransformToWorld());
 
    }
@@ -117,11 +102,8 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DetectedFiducialPacket data)
    {
-
       data.setSequenceId(ser.read_type_4("sequence_id"));
-
       data.setFiducialId(ser.read_type_4("fiducial_id"));
-
       ser.read_type_a("fiducial_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFiducialTransformToWorld());
 
    }

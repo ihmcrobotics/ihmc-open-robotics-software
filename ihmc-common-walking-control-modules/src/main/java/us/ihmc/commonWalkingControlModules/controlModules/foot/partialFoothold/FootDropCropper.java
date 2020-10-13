@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -21,7 +21,7 @@ public class FootDropCropper
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final ReferenceFrame soleFrame;
 
-   public FootDropCropper(String namePrefix, ReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, YoVariableRegistry registry)
+   public FootDropCropper(String namePrefix, ReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, YoRegistry registry)
    {
       this.soleFrame = soleFrame;
       footDropThreshold = rotationParameters.getFootDropThresholdForCrop();

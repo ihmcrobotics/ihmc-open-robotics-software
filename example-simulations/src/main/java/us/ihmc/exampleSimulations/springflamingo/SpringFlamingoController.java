@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -39,7 +39,7 @@ public class SpringFlamingoController implements RobotController
     * Initialization
     */
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("SpringFlamingoController");
+   private final YoRegistry registry = new YoRegistry("SpringFlamingoController");
 
    private double comPosX, comPosZ, comVelX, icpPos; //TODO modified
    //   private ICPVisualizer icpVisualizer;
@@ -228,7 +228,7 @@ public class SpringFlamingoController implements RobotController
    //////////////////////////////////////////////////////////
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -597,7 +597,7 @@ public class SpringFlamingoController implements RobotController
    }
 
    //////////////////////////////////////////////////////////////////////////////
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

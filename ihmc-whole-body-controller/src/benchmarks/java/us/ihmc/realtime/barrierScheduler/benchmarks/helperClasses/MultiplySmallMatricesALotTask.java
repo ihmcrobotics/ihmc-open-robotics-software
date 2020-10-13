@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
@@ -29,7 +29,7 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
 
    private final ExecutionTimer executionTimer;
 
-   public MultiplySmallMatricesALotTask(YoDouble actualDTMillis, YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
+   public MultiplySmallMatricesALotTask(YoDouble actualDTMillis, YoRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
    {
       super(divisor);
       this.actualDTMillis = actualDTMillis;

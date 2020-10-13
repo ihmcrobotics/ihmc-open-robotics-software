@@ -32,10 +32,10 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class WrenchMatrixCalculator
 {
@@ -45,7 +45,7 @@ public class WrenchMatrixCalculator
    private final int rhoSize;
    private final int copTaskSize;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean useForceRateHighWeight = new YoBoolean("useForceRateHighWeight", registry);
 
@@ -93,12 +93,12 @@ public class WrenchMatrixCalculator
    private final DMatrixRMaj singleCopRow = new DMatrixRMaj(0, 0);
    private final FrameVector2D weight = new FrameVector2D();
 
-   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this(toolbox, toolbox.getCenterOfMassFrame(), parentRegistry);
    }
 
-   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
+   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, ReferenceFrame centerOfMassFrame, YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();

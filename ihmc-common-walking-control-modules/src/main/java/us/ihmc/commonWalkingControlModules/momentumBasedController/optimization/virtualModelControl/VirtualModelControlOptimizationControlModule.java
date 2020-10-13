@@ -31,7 +31,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -41,7 +41,7 @@ public class VirtualModelControlOptimizationControlModule
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExternalWrenchHandler externalWrenchHandler;
    private final SpatialForce centroidalMomentumRateSolution = new SpatialForce();
@@ -77,7 +77,7 @@ public class VirtualModelControlOptimizationControlModule
 
    private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
-   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       this.centerOfMassFrame = toolbox.getCenterOfMassFrame();

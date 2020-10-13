@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -146,7 +146,7 @@ public class ICPControllerQPSolver
       this(maximumNumberOfCMPVertices, true, null);
    }
 
-   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean autoSetPreviousSolution, YoVariableRegistry registry)
+   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean autoSetPreviousSolution, YoRegistry registry)
    {
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 

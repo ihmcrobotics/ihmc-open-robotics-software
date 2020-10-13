@@ -22,14 +22,14 @@ import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedFootControlModule
 {
    // control variables
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoQuadrupedTimedStep currentStepCommand;
    private final YoBoolean stepCommandIsValid;
 
@@ -58,11 +58,11 @@ public class QuadrupedFootControlModule
    private final QuadrupedSupportState supportState;
 
    public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoGraphicsListRegistry graphicsListRegistry,
-                                     YoVariableRegistry parentRegistry)
+                                     YoRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
-      this.registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
+      this.registry = new YoRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
       this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
       parameters = controllerToolbox.getFootControlModuleParameters();

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class LocateGoalBehavior extends AbstractBehavior
 {
@@ -16,7 +16,7 @@ public class LocateGoalBehavior extends AbstractBehavior
    private final FramePose3D foundFiducialPose = new FramePose3D();
    private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-   public LocateGoalBehavior(String robotName, Ros2Node ros2Node, GoalDetectorBehaviorService detectorBehaviorService)
+   public LocateGoalBehavior(String robotName, ROS2Node ros2Node, GoalDetectorBehaviorService detectorBehaviorService)
    {
       super(robotName, detectorBehaviorService.getClass().getSimpleName(), ros2Node);
 

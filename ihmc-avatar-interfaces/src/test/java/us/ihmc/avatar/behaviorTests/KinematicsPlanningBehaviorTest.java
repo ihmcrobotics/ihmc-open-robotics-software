@@ -115,7 +115,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       drcBehaviorTestHelper.updateRobotModel();
 
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node(),
                                                                            getRobotModel(), sdfFullRobotModel);
 
       double trajectoryTime = 5.0;
@@ -194,7 +194,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       drcBehaviorTestHelper.updateRobotModel();
 
       FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node(),
                                                                            getRobotModel(), sdfFullRobotModel);
 
       double trajectoryTime = 5.0;

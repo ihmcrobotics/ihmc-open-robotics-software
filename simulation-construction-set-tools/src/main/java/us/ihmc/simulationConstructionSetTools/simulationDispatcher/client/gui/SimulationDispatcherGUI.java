@@ -410,7 +410,7 @@ public class SimulationDispatcherGUI
       String[] vars = dispatchSim.getOutputStateVariableNames();
       for (int i = 0; i < vars.length; i++)
       {
-         YoVariable<?> var = simulation.getVariable(vars[i]);
+         YoVariable var = simulation.findVariable(vars[i]);
          if (var != null)
             varPanel.addVariable(var);
       }

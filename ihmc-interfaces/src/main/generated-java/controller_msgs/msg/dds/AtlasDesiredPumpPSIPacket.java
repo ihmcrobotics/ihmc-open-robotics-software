@@ -11,12 +11,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket> implements Settable<AtlasDesiredPumpPSIPacket>, EpsilonComparable<AtlasDesiredPumpPSIPacket>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The desired hydraulic pump PSI.
             */
@@ -24,9 +22,6 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
    public AtlasDesiredPumpPSIPacket()
    {
-
-
-
    }
 
    public AtlasDesiredPumpPSIPacket(AtlasDesiredPumpPSIPacket other)
@@ -37,14 +32,11 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
    public void set(AtlasDesiredPumpPSIPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       desired_pump_psi_ = other.desired_pump_psi_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -60,7 +52,6 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
    {
       return sequence_id_;
    }
-
 
    /**
             * The desired hydraulic pump PSI.
@@ -95,9 +86,7 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_pump_psi_, other.desired_pump_psi_, epsilon)) return false;
 
@@ -114,9 +103,7 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
       AtlasDesiredPumpPSIPacket otherMyClass = (AtlasDesiredPumpPSIPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.desired_pump_psi_ != otherMyClass.desired_pump_psi_) return false;
 
@@ -130,10 +117,8 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasDesiredPumpPSIPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("desired_pump_psi=");
       builder.append(this.desired_pump_psi_);
       builder.append("}");

@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.robotController;
 
 import java.util.List;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.util.ground.SimpleStickSlipContactModel
 
 public class ContactController implements RobotController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final SimpleStickSlipContactModel contactModel;
 
@@ -21,7 +21,7 @@ public class ContactController implements RobotController
 
    public ContactController(String namePrefix)
    {
-      registry = new YoVariableRegistry(namePrefix + "ContactController");
+      registry = new YoRegistry(namePrefix + "ContactController");
       contactModel = new SimpleStickSlipContactModel(namePrefix + "simpleContact", registry);
    }
 
@@ -71,7 +71,7 @@ public class ContactController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

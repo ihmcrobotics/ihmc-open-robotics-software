@@ -10,7 +10,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -48,17 +48,17 @@ public class DefaultYoPID3DGains implements YoPID3DGains
 
    private final YoBoolean updateFromDampingRatio;
 
-   public DefaultYoPID3DGains(String suffix, PID3DConfiguration configuration, YoVariableRegistry registry)
+   public DefaultYoPID3DGains(String suffix, PID3DConfiguration configuration, YoRegistry registry)
    {
       this(suffix, configuration.getGainCoupling(), configuration.isUseIntegrator(), configuration.getGains(), registry);
    }
 
-   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoVariableRegistry registry)
+   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, YoRegistry registry)
    {
       this(suffix, gainCoupling, useIntegrator, null, registry);
    }
 
-   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, PID3DGainsReadOnly gains, YoVariableRegistry registry)
+   public DefaultYoPID3DGains(String suffix, GainCoupling gainCoupling, boolean useIntegrator, PID3DGainsReadOnly gains, YoRegistry registry)
    {
       this.usingIntegrator = useIntegrator;
 
@@ -96,7 +96,7 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       }
    }
 
-   static void populateMap(Map<Axis3D, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoVariableRegistry registry)
+   static void populateMap(Map<Axis3D, YoDouble> mapToFill, String prefix, String suffix, GainCoupling gainCoupling, YoRegistry registry)
    {
       switch (gainCoupling)
       {
@@ -163,8 +163,8 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       YoDouble zeta = zetaMap.get(axis);
 
       DampingUpdater kdUpdater = new DampingUpdater(kp, kd, zeta, update);
-      kp.addVariableChangedListener(kdUpdater);
-      zeta.addVariableChangedListener(kdUpdater);
+      kp.addListener(kdUpdater);
+      zeta.addListener(kdUpdater);
    }
 
    @Override

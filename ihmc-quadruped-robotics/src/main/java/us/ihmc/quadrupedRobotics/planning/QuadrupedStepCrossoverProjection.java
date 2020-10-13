@@ -6,7 +6,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedStepCrossoverProjection
 {
@@ -18,7 +18,7 @@ public class QuadrupedStepCrossoverProjection
    private final FramePoint3D goalPosition = new FramePoint3D();
    private final ReferenceFrame bodyZUpFrame;
 
-   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, QuadrantDependentList<? extends ReferenceFrame> soleFrames, YoVariableRegistry registry)
+   public QuadrupedStepCrossoverProjection(ReferenceFrame bodyZUpFrame, QuadrantDependentList<? extends ReferenceFrame> soleFrames, YoRegistry registry)
    {
       this.bodyZUpFrame = bodyZUpFrame;
       this.soleFrames = soleFrames;

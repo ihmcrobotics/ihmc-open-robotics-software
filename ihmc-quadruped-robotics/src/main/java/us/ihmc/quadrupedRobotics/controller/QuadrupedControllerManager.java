@@ -49,7 +49,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -60,7 +60,7 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -76,7 +76,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoEnum<HighLevelControllerName> requestedControllerState;
    private final AtomicReference<HighLevelControllerName> requestedControllerStateReference = new AtomicReference<>();
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
@@ -148,7 +148,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       outputProcessor = outputProcessorBuilder.build();
 
       requestedControllerState.set(null);
-      requestedControllerState.addVariableChangedListener(v ->
+      requestedControllerState.addListener(v ->
       {
          HighLevelControllerName currentRequestedState = requestedControllerState.getEnumValue();
          if (currentRequestedState != null)
@@ -280,7 +280,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -445,14 +445,14 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          statusMessageOutputManager.reportStatusMessage(stateChangeMessage);
       });
 
-      registry.addChild(doNothingState.getYoVariableRegistry());
-      registry.addChild(standPrepState.getYoVariableRegistry());
-      registry.addChild(standReadyState.getYoVariableRegistry());
-      registry.addChild(freezeState.getYoVariableRegistry());
-      registry.addChild(walkingState.getYoVariableRegistry());
-      registry.addChild(standTransitionState.getYoVariableRegistry());
-      registry.addChild(exitWalkingState.getYoVariableRegistry());
-      registry.addChild(sitDownState.getYoVariableRegistry());
+      registry.addChild(doNothingState.getYoRegistry());
+      registry.addChild(standPrepState.getYoRegistry());
+      registry.addChild(standReadyState.getYoRegistry());
+      registry.addChild(freezeState.getYoRegistry());
+      registry.addChild(walkingState.getYoRegistry());
+      registry.addChild(standTransitionState.getYoRegistry());
+      registry.addChild(exitWalkingState.getYoRegistry());
+      registry.addChild(sitDownState.getYoRegistry());
 
       return factory.build(initialControllerState);
    }
@@ -478,7 +478,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
-   public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
       ROS2Topic inputTopic = ROS2Tools.getQuadrupedControllerInputTopic(robotName);
       ROS2Topic outputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
@@ -486,7 +486,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                                 commandInputManager,
                                                                                                 outputTopic,
                                                                                                 statusMessageOutputManager,
-                                                                                                realtimeRos2Node);
+                                                                                                realtimeROS2Node);
       controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
    }

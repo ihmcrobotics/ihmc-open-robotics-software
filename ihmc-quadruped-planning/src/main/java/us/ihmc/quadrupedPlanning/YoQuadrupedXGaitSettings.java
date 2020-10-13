@@ -1,12 +1,12 @@
 package us.ihmc.quadrupedPlanning;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble endPhaseShift = new YoDouble("endPhaseShift", registry);
    private final YoDouble stanceLength = new YoDouble("stanceLength", registry);
@@ -14,7 +14,7 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    private final YoDouble stepGroundClearance = new YoDouble("stepGroundClearance", registry);
    private final YoDouble maxHorizontalSpeedFraction = new YoDouble("maxHorizontalSpeedFraction", registry);
    private final YoDouble maxYawSpeedFraction = new YoDouble("maxYawSpeedFraction", registry);
-   private final YoEnum<QuadrupedSpeed> quadrupedSpeed = YoEnum.create("quadrupedSpeed", QuadrupedSpeed.class, registry);
+   private final YoEnum<QuadrupedSpeed> quadrupedSpeed = new YoEnum<>("quadrupedSpeed", registry, QuadrupedSpeed.class);
 
    private final QuadrupedGaitTimingsBasics paceSlowSettings;
    private final QuadrupedGaitTimingsBasics paceMediumSettings;
@@ -26,7 +26,7 @@ public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    private final QuadrupedGaitTimingsBasics trotMediumSettings;
    private final QuadrupedGaitTimingsBasics trotFastSettings;
 
-   public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultSettings, YoVariableRegistry parentRegistry)
+   public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultSettings, YoRegistry parentRegistry)
    {
       paceSlowSettings = new YoQuadrupedGaitTimings("paceSlow", defaultSettings.getPaceSlowTimings(), registry);
       paceMediumSettings = new YoQuadrupedGaitTimings("paceMedium", defaultSettings.getPaceMediumTimings(), registry);

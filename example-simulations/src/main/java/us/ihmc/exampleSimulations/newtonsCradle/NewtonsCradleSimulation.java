@@ -23,11 +23,11 @@ import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class NewtonsCradleSimulation
 {
-   private static CollisionHandler createCollisionHandler(double coefficientOfRestitution, double coefficientOfFriction, YoVariableRegistry registry,
+   private static CollisionHandler createCollisionHandler(double coefficientOfRestitution, double coefficientOfFriction, YoRegistry registry,
                                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       //      CollisionHandler collisionHandler =  new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
@@ -187,7 +187,7 @@ public class NewtonsCradleSimulation
       box.getOrientation().setYawPitchRoll(0.0, groundAngle, 0.0);
       boxTerrain.addRotatableBox(box, YoAppearance.Blue());
 
-      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(boxRobot, boxRobot.getRobotsYoVariableRegistry());
+      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(boxRobot, boxRobot.getRobotsYoRegistry());
       groundContactModel.setGroundProfile3D(boxTerrain);
 
       groundContactModel.setAlphaStickSlip(coefficientOfFriction, coefficientOfFriction);

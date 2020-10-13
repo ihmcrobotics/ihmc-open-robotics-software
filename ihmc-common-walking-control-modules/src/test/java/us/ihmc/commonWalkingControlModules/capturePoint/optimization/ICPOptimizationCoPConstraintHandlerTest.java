@@ -31,7 +31,7 @@ import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPOptimizationCoPConstraintHandlerTest
@@ -53,7 +53,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    @Test
    public void testDoubleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -117,7 +117,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    @Test
    public void testSingleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -227,7 +227,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    @Test
    public void testDoubleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -282,7 +282,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    @Test
    public void testSingleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -405,7 +405,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       return contactableFeet;
    }
 
-   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry,
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry,
                                                           SideDependentList<YoPlaneContactState> contactStatesToPack)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();

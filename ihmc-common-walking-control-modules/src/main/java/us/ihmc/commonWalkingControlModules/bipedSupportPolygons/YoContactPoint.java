@@ -4,33 +4,33 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class YoContactPoint implements ContactPointBasics
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoFramePoint3D yoPosition;
    private final YoBoolean isInContact;
    private final String namePrefix;
    private final PlaneContactState parentContactState;
 
    public YoContactPoint(String namePrefix, int index, FramePoint2D contactPointPosition2d, PlaneContactState parentContactState,
-                         YoVariableRegistry parentRegistry)
+                         YoRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition2d.getReferenceFrame(), parentContactState, parentRegistry);
       set(contactPointPosition2d);
    }
 
    public YoContactPoint(String namePrefix, int index, FramePoint3D contactPointPosition, PlaneContactState parentContactState,
-                         YoVariableRegistry parentRegistry)
+                         YoRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition.getReferenceFrame(), parentContactState, parentRegistry);
       set(contactPointPosition);
    }
 
-   public YoContactPoint(String namePrefix, int index, ReferenceFrame pointFrame, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+   public YoContactPoint(String namePrefix, int index, ReferenceFrame pointFrame, PlaneContactState parentContactState, YoRegistry parentRegistry)
    {
       this.parentContactState = parentContactState;
       this.namePrefix = namePrefix;

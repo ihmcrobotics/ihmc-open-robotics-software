@@ -12,12 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus> implements Settable<WholeBodyTrajectoryToolboxOutputStatus>, EpsilonComparable<WholeBodyTrajectoryToolboxOutputStatus>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * 0: not completed.
             * 1: fail to find initial guess.
@@ -26,18 +24,12 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
             * 4: solution is available.
             */
    public int planning_result_;
-
    public us.ihmc.idl.IDLSequence.Double  trajectory_times_;
-
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
 
    public WholeBodyTrajectoryToolboxOutputStatus()
    {
-
-
-
       trajectory_times_ = new us.ihmc.idl.IDLSequence.Double (50, "type_6");
-
 
       robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> (50, new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
 
@@ -51,18 +43,13 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
    public void set(WholeBodyTrajectoryToolboxOutputStatus other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       planning_result_ = other.planning_result_;
 
-
       trajectory_times_.set(other.trajectory_times_);
-
       robot_configurations_.set(other.robot_configurations_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -78,7 +65,6 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    {
       return sequence_id_;
    }
-
 
    /**
             * 0: not completed.
@@ -104,12 +90,10 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    }
 
 
-
    public us.ihmc.idl.IDLSequence.Double  getTrajectoryTimes()
    {
       return trajectory_times_;
    }
-
 
 
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  getRobotConfigurations()
@@ -135,15 +119,11 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planning_result_, other.planning_result_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.trajectory_times_, other.trajectory_times_, epsilon)) return false;
-
 
       if (this.robot_configurations_.size() != other.robot_configurations_.size()) { return false; }
       else
@@ -165,15 +145,11 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
       WholeBodyTrajectoryToolboxOutputStatus otherMyClass = (WholeBodyTrajectoryToolboxOutputStatus) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.planning_result_ != otherMyClass.planning_result_) return false;
 
-
       if (!this.trajectory_times_.equals(otherMyClass.trajectory_times_)) return false;
-
       if (!this.robot_configurations_.equals(otherMyClass.robot_configurations_)) return false;
 
       return true;
@@ -185,16 +161,12 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryToolboxOutputStatus {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("planning_result=");
       builder.append(this.planning_result_);      builder.append(", ");
-
       builder.append("trajectory_times=");
       builder.append(this.trajectory_times_);      builder.append(", ");
-
       builder.append("robot_configurations=");
       builder.append(this.robot_configurations_);
       builder.append("}");

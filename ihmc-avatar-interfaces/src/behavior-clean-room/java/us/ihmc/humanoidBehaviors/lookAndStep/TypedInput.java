@@ -5,12 +5,12 @@ import java.util.function.Consumer;
 
 public class TypedInput<T>
 {
-   private volatile T notification = null;
+   private volatile T latestData = null;
    private ArrayList<Consumer<T>> callbacks = new ArrayList<>();
 
-   public synchronized T get()
+   public synchronized T getLatest()
    {
-      return notification;
+      return latestData;
    }
 
    public void addCallback(Consumer<T> callback)
@@ -20,7 +20,7 @@ public class TypedInput<T>
 
    public synchronized void set(T value)
    {
-      notification = value;
+      latestData = value;
 
       for (Consumer<T> callback : callbacks)
       {

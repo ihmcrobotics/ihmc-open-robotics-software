@@ -12,10 +12,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.frameObjects.YoMutableFrameVector3D;
 
 public class LinearSpatialVectorTrajectoryGenerator
 {
@@ -23,7 +23,7 @@ public class LinearSpatialVectorTrajectoryGenerator
 
    private final int maximumNumberOfWaypoints;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble currentTrajectoryTime;
 
@@ -34,12 +34,12 @@ public class LinearSpatialVectorTrajectoryGenerator
    private final YoSpatialWaypoint currentValue;
 
    public LinearSpatialVectorTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
-                                                 YoVariableRegistry parentRegistry)
+                                                 YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       currentTrajectoryTime = new YoDouble(namePrefix + "CurrentTrajectoryTime", registry);
@@ -223,7 +223,7 @@ public class LinearSpatialVectorTrajectoryGenerator
       private final YoDouble time;
       private final FrameVector3DBasics angularPart, linearPart;
 
-      public YoSpatialWaypoint(String namePrefix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+      public YoSpatialWaypoint(String namePrefix, YoRegistry registry, ReferenceFrame referenceFrame)
       {
          time = new YoDouble(namePrefix + "Time", registry);
 

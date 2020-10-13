@@ -18,13 +18,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WholeBodyControllerBoundCalculator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DMatrixRMaj jointsRangeOfMotion;
    private final DMatrixRMaj jointLowerLimits;
@@ -48,7 +48,7 @@ public class WholeBodyControllerBoundCalculator
    private final double controlDT;
 
    public WholeBodyControllerBoundCalculator(JointIndexHandler jointIndexHandler, double controlDT, boolean considerJointVelocityLimits,
-                                             YoVariableRegistry parentRegistry)
+                                             YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.jointIndexHandler = jointIndexHandler;

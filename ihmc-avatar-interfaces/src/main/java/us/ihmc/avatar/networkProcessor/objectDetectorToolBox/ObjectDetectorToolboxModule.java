@@ -16,7 +16,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class ObjectDetectorToolboxModule extends ToolboxModule
 {
@@ -38,10 +38,10 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
 
    //TODO check this
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                     DetectedFiducialPacket.class,
                                                     FiducialDetectorToolboxModule.getOutputTopic(robotName),
                                                     s ->
@@ -72,23 +72,23 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
    }

@@ -1,8 +1,15 @@
 package us.ihmc.footstepPlanning.swing;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.awt.Color;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
@@ -13,12 +20,12 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -51,18 +58,13 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-
-import java.awt.*;
-import java.util.List;
-
-import static us.ihmc.robotics.Assert.assertTrue;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverPlanarRegionsTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
 
    @BeforeEach
    public void setup()
@@ -266,6 +268,7 @@ public class SwingOverPlanarRegionsTest
       checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
+   @Disabled
    @Test
    public void testTrickyStep2FullTrajectory()
    {
@@ -305,7 +308,8 @@ public class SwingOverPlanarRegionsTest
       startGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.blue));
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      registry.addChild(planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getYoVariableRegistry());
       YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
 
       RobotSide swingSide = RobotSide.RIGHT;
@@ -350,7 +354,7 @@ public class SwingOverPlanarRegionsTest
          expander.attachVisualizer(visualizer::update);
 
          scs.setDT(1.0, 1);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          scs.setGroundVisible(false);
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
@@ -398,7 +402,7 @@ public class SwingOverPlanarRegionsTest
                                                                                           steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                                           steppingParameters.getMaxSwingHeightFromStanceFoot(),
                                                                                           steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          new YoVariableRegistry(getClass().getSimpleName()),
+                                                                                          new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
 
       RobotSide swingSide = footstepPlan.getFootstep(0).getRobotSide();
@@ -445,8 +449,7 @@ public class SwingOverPlanarRegionsTest
       while (twoWaypointSwingGenerator.doOptimizationUpdate())
          twoWaypointSwingGenerator.compute(0.0);
 
-      double minDistance =
-            Math.max(steppingParameters.getFootBackwardOffset(), steppingParameters.getFootForwardOffset()) + getParameters().getMinimumSwingFootClearance();
+      double minDistance = getParameters().getMinimumSwingFootClearance();
 
       double dt = 1e-3;
 
@@ -455,12 +458,19 @@ public class SwingOverPlanarRegionsTest
       double heelLength = getWalkingControllerParameters().getSteppingParameters().getFootBackwardOffset();
       double distance = Math.max(Math.max(footLength / 2.0, toeLength), heelLength);
 
+      Box3D foot = new Box3D();
+      foot.getSize().set(getWalkingControllerParameters().getSteppingParameters().getActualFootLength(),
+                         getWalkingControllerParameters().getSteppingParameters().getActualFootWidth(),
+                         0.1);
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
          twoWaypointSwingGenerator.compute(time);
          FramePoint3D desiredPosition = new FramePoint3D();
          twoWaypointSwingGenerator.getPosition(desiredPosition);
+
+         foot.getPosition().set(desiredPosition);
+         foot.getPosition().addX(0.5 * (heelLength - toeLength));
 
          boolean isInFirstSegment = time < twoWaypointSwingGenerator.getWaypointTime(0);
          boolean isInLastSegment = time > twoWaypointSwingGenerator.getWaypointTime(1);
@@ -486,7 +496,7 @@ public class SwingOverPlanarRegionsTest
                hittingEndGoal |= endFootPolygon.getMinX() < desiredPosition.getX();
                hittingStartGoal |= desiredPosition.getX() < startFootPolygon.getMaxX();
 
-               double distanceToCollision = collision.distance(desiredPosition);
+               double distanceToCollision = foot.distance(collision);
                if ((!hittingEndGoal && !hittingStartGoal && ignoreGroundSegments) && distanceToCollision < closestDistance)
                {
                   closestDistance = distanceToCollision;
@@ -501,7 +511,8 @@ public class SwingOverPlanarRegionsTest
    public SwingPlannerParametersBasics getParameters()
    {
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
-      parameters.setDoInitialFastApproximation(true);
+//      parameters.setDoInitialFastApproximation(true);
+      parameters.setMinimumSwingFootClearance(0.05);
       return parameters;
    }
 

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -16,7 +16,7 @@ public class RateLimitedYoVariable extends YoDouble
 
    private final YoBoolean hasBeenCalled;
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, double dt)
+   public RateLimitedYoVariable(String name, YoRegistry registry, double maxRate, double dt)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -33,7 +33,7 @@ public class RateLimitedYoVariable extends YoDouble
       reset();
    }
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, DoubleProvider maxRateVariable, double dt)
+   public RateLimitedYoVariable(String name, YoRegistry registry, DoubleProvider maxRateVariable, double dt)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -46,7 +46,7 @@ public class RateLimitedYoVariable extends YoDouble
       reset();
    }
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, double maxRate, YoDouble positionVariable, double dt)
+   public RateLimitedYoVariable(String name, YoRegistry registry, double maxRate, YoDouble positionVariable, double dt)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
@@ -63,7 +63,7 @@ public class RateLimitedYoVariable extends YoDouble
       reset();
    }
 
-   public RateLimitedYoVariable(String name, YoVariableRegistry registry, DoubleProvider maxRateVariable, YoDouble positionVariable, double dt)
+   public RateLimitedYoVariable(String name, YoRegistry registry, DoubleProvider maxRateVariable, YoDouble positionVariable, double dt)
    {
       super(name, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);

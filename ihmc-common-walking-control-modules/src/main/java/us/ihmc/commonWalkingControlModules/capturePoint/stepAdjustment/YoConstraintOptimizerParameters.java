@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -19,7 +19,7 @@ public class YoConstraintOptimizerParameters implements ConstraintOptimizerParam
 
    private boolean parametersChanged = false;
 
-   public YoConstraintOptimizerParameters(YoVariableRegistry registry)
+   public YoConstraintOptimizerParameters(YoRegistry registry)
    {
       maxX = new YoDouble("maxX", registry);
       maxY = new YoDouble("maxY", registry);
@@ -31,10 +31,10 @@ public class YoConstraintOptimizerParameters implements ConstraintOptimizerParam
       deltaInside.set(defaultDeltaInside);
       constrainMaxAdjustment.set(defaultConstrainMaxAdjustment);
 
-      maxX.addVariableChangedListener(v -> parametersChanged = true);
-      maxY.addVariableChangedListener(v -> parametersChanged = true);
-      deltaInside.addVariableChangedListener(v -> parametersChanged = true);
-      constrainMaxAdjustment.addVariableChangedListener(v -> parametersChanged = true);
+      maxX.addListener(v -> parametersChanged = true);
+      maxY.addListener(v -> parametersChanged = true);
+      deltaInside.addListener(v -> parametersChanged = true);
+      constrainMaxAdjustment.addListener(v -> parametersChanged = true);
    }
 
 

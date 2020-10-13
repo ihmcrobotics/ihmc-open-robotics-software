@@ -2,12 +2,12 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    protected final DoubleProvider initialPositionProvider;
    protected final DoubleProvider finalPositionProvider;
    protected final YoPolynomial polynomial;
@@ -19,9 +19,9 @@ public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryG
    protected final YoDouble currentAcceleration;
 
    public PolynomialTrajectoryGenerator(String namePrefix, DoubleProvider initialPositionProvider, DoubleProvider finalPositionProvider,
-         DoubleProvider trajectoryTimeProvider, int numberOfCoefficients, YoVariableRegistry parentRegistry)
+         DoubleProvider trajectoryTimeProvider, int numberOfCoefficients, YoRegistry parentRegistry)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.initialPositionProvider = initialPositionProvider;
       this.finalPositionProvider = finalPositionProvider;
       this.polynomial = new YoPolynomial(namePrefix + "Polynomial", numberOfCoefficients, registry);

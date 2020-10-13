@@ -1,15 +1,18 @@
 package us.ihmc.robotEnvironmentAwareness;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
 
 public class LidarBasedREAStandaloneLauncher extends Application
 {
@@ -26,7 +29,7 @@ public class LidarBasedREAStandaloneLauncher extends Application
                                                                                     stereoOutputTopic,
                                                                                     depthOutputTopic);
       ui = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, networkProvider);
+      module = LIDARBasedREAModule.createIntraprocessModule(new FilePropertyHelper(MODULE_CONFIGURATION_FILE_NAME), networkProvider);
 
       ui.show();
       module.start();

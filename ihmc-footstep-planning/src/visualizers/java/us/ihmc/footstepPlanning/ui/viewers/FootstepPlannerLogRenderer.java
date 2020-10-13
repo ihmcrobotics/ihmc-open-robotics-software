@@ -86,6 +86,19 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    @Override
    public void handle(long now)
    {
+      try
+      {
+         handleInteral();
+      }
+      catch (Exception e)
+      {
+         // don't hard crash if RuntimeException is thrown
+         e.printStackTrace();
+      }
+   }
+
+   private void handleInteral()
+   {
       // Render stance step
       Pair<FootstepNode, FootstepNodeSnapData> stanceStepData = this.stanceStep.getAndSet(null);
       if (stanceStepData != null)

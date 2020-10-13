@@ -24,7 +24,7 @@ import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTaskExecutor;
 import us.ihmc.wholeBodyController.diagnostics.utils.WaitDiagnosticTask;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -32,7 +32,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 {
    private Logger logger;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getName());
+   private final YoRegistry registry = new YoRegistry(getName());
 
    private final YoDouble yoTime;
 
@@ -62,7 +62,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final double controlDT;
 
    public AutomatedDiagnosticAnalysisController(DiagnosticControllerToolbox toolbox, InputStream gainStream, InputStream setpointStream,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this.yoTime = toolbox.getYoTime();
       this.controlDT = toolbox.getDT();
@@ -368,7 +368,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

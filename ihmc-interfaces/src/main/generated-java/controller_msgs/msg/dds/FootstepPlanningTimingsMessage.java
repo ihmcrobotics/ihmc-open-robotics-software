@@ -11,27 +11,22 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimingsMessage> implements Settable<FootstepPlanningTimingsMessage>, EpsilonComparable<FootstepPlanningTimingsMessage>
 {
-
    /**
             * Total time measured in the planner process between receiving request message and publishing output message
             */
    public double total_elapsed_seconds_;
-
    /**
             * Elapsed time between receiving request message and starting to plan body path
             */
    public double time_before_planning_seconds_;
-
    /**
             * Elapsed time for planning body path
             */
    public double time_planning_body_path_seconds_;
-
    /**
             * Elapsed time for step planning
             */
    public double time_planning_steps_seconds_;
-
    /**
             * Number of iterations performed during step planning
             */
@@ -39,12 +34,6 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
    public FootstepPlanningTimingsMessage()
    {
-
-
-
-
-
-
    }
 
    public FootstepPlanningTimingsMessage(FootstepPlanningTimingsMessage other)
@@ -55,23 +44,17 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
    public void set(FootstepPlanningTimingsMessage other)
    {
-
       total_elapsed_seconds_ = other.total_elapsed_seconds_;
-
 
       time_before_planning_seconds_ = other.time_before_planning_seconds_;
 
-
       time_planning_body_path_seconds_ = other.time_planning_body_path_seconds_;
 
-
       time_planning_steps_seconds_ = other.time_planning_steps_seconds_;
-
 
       step_planning_iterations_ = other.step_planning_iterations_;
 
    }
-
 
    /**
             * Total time measured in the planner process between receiving request message and publishing output message
@@ -88,7 +71,6 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
       return total_elapsed_seconds_;
    }
 
-
    /**
             * Elapsed time between receiving request message and starting to plan body path
             */
@@ -103,7 +85,6 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
    {
       return time_before_planning_seconds_;
    }
-
 
    /**
             * Elapsed time for planning body path
@@ -120,7 +101,6 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
       return time_planning_body_path_seconds_;
    }
 
-
    /**
             * Elapsed time for step planning
             */
@@ -135,7 +115,6 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
    {
       return time_planning_steps_seconds_;
    }
-
 
    /**
             * Number of iterations performed during step planning
@@ -170,18 +149,13 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_elapsed_seconds_, other.total_elapsed_seconds_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_before_planning_seconds_, other.time_before_planning_seconds_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_planning_body_path_seconds_, other.time_planning_body_path_seconds_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_planning_steps_seconds_, other.time_planning_steps_seconds_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_planning_iterations_, other.step_planning_iterations_, epsilon)) return false;
 
@@ -198,18 +172,13 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
       FootstepPlanningTimingsMessage otherMyClass = (FootstepPlanningTimingsMessage) other;
 
-
       if(this.total_elapsed_seconds_ != otherMyClass.total_elapsed_seconds_) return false;
-
 
       if(this.time_before_planning_seconds_ != otherMyClass.time_before_planning_seconds_) return false;
 
-
       if(this.time_planning_body_path_seconds_ != otherMyClass.time_planning_body_path_seconds_) return false;
 
-
       if(this.time_planning_steps_seconds_ != otherMyClass.time_planning_steps_seconds_) return false;
-
 
       if(this.step_planning_iterations_ != otherMyClass.step_planning_iterations_) return false;
 
@@ -223,19 +192,14 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanningTimingsMessage {");
-
       builder.append("total_elapsed_seconds=");
       builder.append(this.total_elapsed_seconds_);      builder.append(", ");
-
       builder.append("time_before_planning_seconds=");
       builder.append(this.time_before_planning_seconds_);      builder.append(", ");
-
       builder.append("time_planning_body_path_seconds=");
       builder.append(this.time_planning_body_path_seconds_);      builder.append(", ");
-
       builder.append("time_planning_steps_seconds=");
       builder.append(this.time_planning_steps_seconds_);      builder.append(", ");
-
       builder.append("step_planning_iterations=");
       builder.append(this.step_planning_iterations_);
       builder.append("}");

@@ -10,14 +10,15 @@ import java.util.function.Supplier;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
- * Represents a buffer which capacity can be fixed to certain capacity, the but will grow up to
- * capacity and then will go back to the first element added when attempting to add a new element.
+ * Represents a buffer which capacity can be fixed to a given size. When adding elements, the buffer
+ * will initially grow up to capacity and then will start overwriting elements starting with the
+ * first one added.
  * <p>
  * This implementation can be useful to keep a history of the N most recent elements of some data
  * where N is the capacity of this buffer.
  * </p>
  * <p>
- * Note that as {@link RecyclingArrayList}, this implementation recycles internal memory.
+ * Note that as {@link RecyclingArrayList}, this implementation recycles memory internally.
  * </p>
  * 
  * @author Sylvain Bertrand

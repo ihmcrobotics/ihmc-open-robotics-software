@@ -42,12 +42,12 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class VisibilityGraphsOcclusionTest
 {
@@ -151,7 +151,7 @@ public class VisibilityGraphsOcclusionTest
    private void runTest(TestInfo testInfo, Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime,
                         double marchingSpeedInMetersPerTick)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
+      YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       NavigableRegionsManager vizGraphs = new NavigableRegionsManager(VISIBILITY_GRAPH_PARAMETERS);
@@ -449,10 +449,10 @@ public class VisibilityGraphsOcclusionTest
       return new Point3D(startingPosition);
    }
 
-   private static SimulationConstructionSet setupSCS(String testName, YoVariableRegistry testRegistry, PlanarRegionsList regions, Point3D start, Point3D goal)
+   private static SimulationConstructionSet setupSCS(String testName, YoRegistry testRegistry, PlanarRegionsList regions, Point3D start, Point3D goal)
    {
       Robot robot = new Robot(VisibilityGraphsOcclusionTest.class.getSimpleName());
-      robot.addYoVariableRegistry(testRegistry);
+      robot.addYoRegistry(testRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();

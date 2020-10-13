@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -61,8 +61,8 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
    private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
 
-   public OpenPushDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
-                           DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OpenPushDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
+                               DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
@@ -345,15 +345,14 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addState(OpenDoorState.DONE, done);
       factory.addState(OpenDoorState.FAILED, failed);
 
-      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.FAILED, t -> pushDoorALittle.isDone() &&doorOpenDetectorBehaviorService.getLastupdateTime()>=timeFirstDoorPushFinished && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.PUSH_OPEN_DOOR, t -> doorOpenDetectorBehaviorService.isDoorOpen());
+     // factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.FAILED, t -> pushDoorALittle.isDone() &&doorOpenDetectorBehaviorService.getLastupdateTime()>=timeFirstDoorPushFinished && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.PUSH_OPEN_DOOR, t -> pushDoorALittle.isDone());//doorOpenDetectorBehaviorService.isDoorOpen());
 
-      //removing door open checks durring fast motions for now.
       // factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.FAILED, t -> !doorOpenDetectorBehaviorService.isDoorOpen());
       factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.PULL_BACK_HANDS, t -> pushDoorOpen.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
 
-      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.FAILED, t -> pullHandsBack.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.DONE, t -> pullHandsBack.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
+      //factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.FAILED, t -> pullHandsBack.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.DONE, t -> pullHandsBack.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
 
       return OpenDoorState.START;
 

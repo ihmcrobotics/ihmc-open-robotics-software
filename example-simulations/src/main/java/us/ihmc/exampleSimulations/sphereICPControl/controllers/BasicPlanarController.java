@@ -7,9 +7,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class BasicPlanarController
 {
@@ -22,7 +22,7 @@ public class BasicPlanarController
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FullRobotModel robotModel;
 
@@ -50,7 +50,7 @@ public class BasicPlanarController
    private final double controlDT;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
-   public BasicPlanarController(SphereControlToolbox controlToolbox, YoVariableRegistry parentRegistry)
+   public BasicPlanarController(SphereControlToolbox controlToolbox, YoRegistry parentRegistry)
    {
       this.robotModel = controlToolbox.getFullRobotModel();
       this.controlDT = controlToolbox.getControlDT();

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ReferenceICPTrajectoryGeneratorTest
 {
@@ -22,7 +22,7 @@ public class ReferenceICPTrajectoryGeneratorTest
    public void testCalculateICPOnSegmentScalar()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoTrajectory linear = new YoTrajectory(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -71,7 +71,7 @@ public class ReferenceICPTrajectoryGeneratorTest
    public void testMatricesPrimeLinear()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoTrajectory linear = new YoTrajectory(namePrefix + "Linear", numberOfCoefficients, registry);
       

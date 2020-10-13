@@ -18,7 +18,6 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -33,8 +32,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObje
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
@@ -43,7 +41,7 @@ public class LidarImageFusionProcessorCommunicationModule
 {
    private final Messager messager;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final REAModuleStateReporter moduleStateReporter;
    private final StereoREAModule stereoREAModule;
 
@@ -58,7 +56,7 @@ public class LidarImageFusionProcessorCommunicationModule
    private final ExceptionHandlingThreadScheduler scheduler;
    private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 1500;
 
-   private LidarImageFusionProcessorCommunicationModule(Ros2Node ros2Node,  REANetworkProvider networkProvider, Messager reaMessager,SharedMemoryJavaFXMessager messager)
+   private LidarImageFusionProcessorCommunicationModule(ROS2Node ros2Node, REANetworkProvider networkProvider, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
       this.ros2Node = ros2Node;
@@ -151,7 +149,7 @@ public class LidarImageFusionProcessorCommunicationModule
       scheduler.shutdown();
    }
 
-   public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager)
+   public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager)
          throws IOException
    {
       KryoMessager kryoMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,

@@ -10,7 +10,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -51,7 +51,7 @@ public class TrajectoryPointOptimizer
 
    public static final int coefficients = 4;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoInteger dimensions;
    private final YoInteger nWaypoints;
@@ -90,12 +90,12 @@ public class TrajectoryPointOptimizer
    private final DMatrixRMaj tempCoeffs = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempLine = new DMatrixRMaj(1, 1);
 
-   public TrajectoryPointOptimizer(int dimensions, YoVariableRegistry parentRegistry)
+   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry)
    {
       this("", dimensions, parentRegistry);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoVariableRegistry parentRegistry)
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry)
    {
       this(namePrefix, dimensions);
       parentRegistry.addChild(registry);
@@ -108,7 +108,7 @@ public class TrajectoryPointOptimizer
 
    public TrajectoryPointOptimizer(String namePrefix, int dimensions)
    {
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.dimensions = new YoInteger(namePrefix + "Dimensions", registry);
       this.nWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
       this.intervals = new YoInteger(namePrefix + "NumberOfIntervals", registry);

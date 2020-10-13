@@ -38,7 +38,7 @@ public class ExecutorServiceTools
 
    public static ScheduledExecutorService newSingleThreadScheduledExecutor(Class<?> creator, ExceptionHandling exceptionHandling)
    {
-      return newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(creator.getSimpleName()), exceptionHandling);
+      return newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(creator.getSimpleName()), exceptionHandling);
    }
 
    public static ScheduledExecutorService newSingleThreadScheduledExecutor(ThreadFactory threadFactory, ExceptionHandling exceptionHandling)
@@ -48,7 +48,7 @@ public class ExecutorServiceTools
 
    public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize, Class<?> creator, ExceptionHandling exceptionHandling)
    {
-      return newScheduledThreadPool(corePoolSize, ThreadTools.getNamedThreadFactory(creator.getSimpleName()), exceptionHandling);
+      return newScheduledThreadPool(corePoolSize, ThreadTools.createNamedThreadFactory(creator.getSimpleName()), exceptionHandling);
    }
 
    public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize, ThreadFactory threadFactory, ExceptionHandling exceptionHandling)

@@ -9,7 +9,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
@@ -19,7 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -33,7 +33,7 @@ public class AtlasKinematicSimWithCamera
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    private IHMCROS2Publisher<VideoPacket> scsCameraPublisher;
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    public AtlasKinematicSimWithCamera(CommonAvatarEnvironmentInterface environment)
    {
@@ -45,7 +45,7 @@ public class AtlasKinematicSimWithCamera
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
       AtlasKinematicSimulation.create(robotModel, kinematicsSimulationParameters);
 
-      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
+      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
 
       if (SHOW_ROBOT_VIEWER) ThreadTools.startAThread(this::robotViewer, "RobotViewer");
 

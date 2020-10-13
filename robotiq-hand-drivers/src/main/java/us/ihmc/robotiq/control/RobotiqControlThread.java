@@ -44,13 +44,13 @@ public class RobotiqControlThread extends HandControlThread
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
-      IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
+      IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
                                                                                                                    outputTopic);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, inputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
                                                     handDesiredConfigurationMessageSubscriber);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ManualHandControlPacket.class, inputTopic, manualHandControlProvider);
-      realtimeRos2Node.spin();
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ManualHandControlPacket.class, inputTopic, manualHandControlProvider);
+      realtimeROS2Node.spin();
    }
 
    private void updateHandData()

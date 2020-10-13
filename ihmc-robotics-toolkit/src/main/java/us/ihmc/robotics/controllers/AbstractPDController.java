@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AbstractPDController
@@ -13,7 +13,7 @@ public abstract class AbstractPDController
    private final YoDouble actionP;
    private final YoDouble actionD;
 
-   protected AbstractPDController(String suffix, YoVariableRegistry registry)
+   protected AbstractPDController(String suffix, YoRegistry registry)
    {
       positionError = new YoDouble("positionError_" + suffix, registry);
       positionError.set(0.0);
@@ -68,7 +68,7 @@ public abstract class AbstractPDController
    }
 
    public static AbstractPDController createPDController(String suffix, DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider deadband,
-                                                         YoVariableRegistry registry)
+                                                         YoRegistry registry)
    {
       return new AbstractPDController(suffix, registry)
       {

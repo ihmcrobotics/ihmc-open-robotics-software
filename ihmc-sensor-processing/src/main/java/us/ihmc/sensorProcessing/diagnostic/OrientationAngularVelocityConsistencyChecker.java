@@ -1,21 +1,21 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.*;
+import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector;
 
 import java.util.EnumMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OrientationAngularVelocityConsistencyChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final FiniteDifferenceAngularVelocityYoFrameVector localVelocityFromFD;
    private final YoFrameVector3D angularVelocityToCheck;
@@ -29,15 +29,15 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector3D angularVelocityToCheck, double updateDT,
-         YoVariableRegistry parentRegistry)
+         YoRegistry parentRegistry)
    {
       this(namePrefix, orientation, angularVelocityToCheck, angularVelocityToCheck.getReferenceFrame(), updateDT, parentRegistry);
    }
 
    public OrientationAngularVelocityConsistencyChecker(String namePrefix, YoFrameQuaternion orientation, YoFrameVector3D angularVelocityToCheck,
-         ReferenceFrame referenceFrameUsedForComparison, double updateDT, YoVariableRegistry parentRegistry)
+         ReferenceFrame referenceFrameUsedForComparison, double updateDT, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + "OrientationVelocityCheck");
+      registry = new YoRegistry(namePrefix + "OrientationVelocityCheck");
       this.referenceFrameUsedForComparison = referenceFrameUsedForComparison;
 
       localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector(namePrefix + "referenceFD", orientation, updateDT, registry);

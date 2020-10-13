@@ -9,7 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -25,7 +25,7 @@ public class MatrixYoVariableConversionToolsTest
       List<YoDouble> yoArray = new ArrayList<YoDouble>();
       int size = 50;
       String prefix = "test";
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       DMatrixRMaj matrix = new DMatrixRMaj(size, 1);
       Random random = new Random(1235612L);
@@ -46,7 +46,7 @@ public class MatrixYoVariableConversionToolsTest
       int nRows = 50;
       int nColumns = 60;
       String prefix = "test";
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       DMatrixRMaj matrix = new DMatrixRMaj(nRows, nColumns);
       Random random = new Random(1235612L);
@@ -66,7 +66,7 @@ public class MatrixYoVariableConversionToolsTest
       List<List<YoDouble>> yoArray = new ArrayList<List<YoDouble>>();
       int size = 50;
       String prefix = "test";
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       Random random = new Random(1235612L);
       DMatrixRMaj matrix = RandomMatrices_DDRM.symmetricPosDef(size, random);

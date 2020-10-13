@@ -11,23 +11,16 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehaviorDataPacket> implements Settable<SimpleCoactiveBehaviorDataPacket>, EpsilonComparable<SimpleCoactiveBehaviorDataPacket>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    public java.lang.StringBuilder key_;
-
    public double value_;
 
    public SimpleCoactiveBehaviorDataPacket()
    {
-
-
       key_ = new java.lang.StringBuilder(255);
-
-
    }
 
    public SimpleCoactiveBehaviorDataPacket(SimpleCoactiveBehaviorDataPacket other)
@@ -38,18 +31,14 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
 
    public void set(SimpleCoactiveBehaviorDataPacket other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       key_.setLength(0);
       key_.append(other.key_);
 
-
       value_ = other.value_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -66,7 +55,6 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
       return sequence_id_;
    }
 
-
    public void setKey(java.lang.String key)
    {
       key_.setLength(0);
@@ -81,7 +69,6 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
    {
       return key_;
    }
-
 
    public void setValue(double value)
    {
@@ -110,12 +97,9 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.key_, other.key_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.value_, other.value_, epsilon)) return false;
 
@@ -132,12 +116,9 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
 
       SimpleCoactiveBehaviorDataPacket otherMyClass = (SimpleCoactiveBehaviorDataPacket) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!us.ihmc.idl.IDLTools.equals(this.key_, otherMyClass.key_)) return false;
-
 
       if(this.value_ != otherMyClass.value_) return false;
 
@@ -151,13 +132,10 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
       StringBuilder builder = new StringBuilder();
 
       builder.append("SimpleCoactiveBehaviorDataPacket {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("key=");
       builder.append(this.key_);      builder.append(", ");
-
       builder.append("value=");
       builder.append(this.value_);
       builder.append("}");

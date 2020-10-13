@@ -10,11 +10,11 @@ bool do_initial_fast_approximation
 # If using the swing over planar regions module, this sets up the minimum swing foot clearance distance between the a ball of radius of the foot length
 # along the swing foot trajectory and the planar regions in the environment.
 # Field default value -1.0
-# Field default value -1.0
 float64 minimum_swing_foot_clearance
 
 # If using the swing over planar regions module, this sets up how much less clearance is required on the fast approximation, since it doesn't usually have
 # the same amount of curve to the trajectory.
+# Field default value -1.0
 float64 fast_approximation_less_clearance
 
 # If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
@@ -45,21 +45,10 @@ float64 adjustment_increment_distance_gain
 # Field default value -1.0
 float64 minimum_height_above_floor_for_collision
 
-# Specifies the minimum swing height in the swing waypoint proportion calculator
+# Collision boxes are checked for the start and end of swing at the toe and heel, respectively.
+# If a collision is detected at either, this swing height is used.
 # Field default value -1.0
-float64 minimum_swing_height
-
-# Specifies the maximum swing height in the swing waypoint proportion calculator
-# Field default value -1.0
-float64 maximum_swing_height
-
-# The waypoint proportion calculator does a linear interpolation to compute swing height. This is the minimum swing height for that interpolation
-# Field default value -1.0
-float64 maximum_step_height_for_minimum_swing_height
-
-# The waypoint proportion calculator does a linear interpolation to compute swing height. This is the maximum swing height for that interpolation
-# Field default value -1.0
-float64 minimum_step_height_for_maximum_swing_height
+float64 swing_height_if_collision_detected
 
 # Specifies the maximum swing time in the swing waypoint proportion calculator
 # Field default value -1.0
@@ -68,22 +57,6 @@ float64 minimum_swing_time
 # Specifies the maximum swing time in the swing waypoint proportion calculator
 # Field default value -1.0
 float64 maximum_swing_time
-
-# The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step translation for that interpolation
-# Field default value -1.0
-float64 maximum_step_translation_for_minimum_swing_time
-
-# The waypoint proportion calculator does a linear interpolation to compute swing time. This is the minimum step translation for that interpolation
-# Field default value -1.0
-float64 minimum_step_translation_for_maximum_swing_time
-
-# The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-# Field default value -1.0
-float64 maximum_step_height_for_minimum_swing_time
-
-# The waypoint proportion calculator does a linear interpolation to compute swing time. This is the maximum step height for that interpolation
-# Field default value -1.0
-float64 minimum_step_height_for_maximum_swing_time
 
 # The waypoint proportion calculator shifts the specified proportions if a foot collision is detected. This specifies the clearance of that collision
 # Field default value -1.0

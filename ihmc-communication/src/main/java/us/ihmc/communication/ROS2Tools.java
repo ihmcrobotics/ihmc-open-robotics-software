@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.function.Function;
 
-import controller_msgs.msg.dds.DoorParameterPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
+import sensor_msgs.msg.dds.CompressedImage;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.*;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -56,6 +57,7 @@ public class ROS2Tools
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
    public static final String T265_NAME = "t265";
+   public static final String MULTISENSE_NAME = "multisense";
    public static final String INPUT = ROS2Topic.INPUT;
    public static final String OUTPUT = ROS2Topic.OUTPUT;
 
@@ -83,17 +85,34 @@ public class ROS2Tools
    public static final ROS2Topic<?> BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
    public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
-   public static final ROS2Topic<?> REALSENSE_SLAM_MAP = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
+   public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
+   public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT
+         = REA.withRobot(null).withInput().withType(PlanarRegionsListMessage.class).withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);
+   public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
+
+   public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
+   public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
+
+   public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD
+         = IHMC_ROOT.withModule(MULTISENSE_NAME).withType(StereoVisionPointCloudMessage.class).withSuffix("pointcloud");
+   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD
+         = IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
+
+   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
+                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    /** Output regions from Lidar (Multisense) from REA */
-   public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withType(PlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_REA = ROS2Tools.REA.withOutput().withPrefix("stereo").withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from Atlas Realsense SLAM module */
-   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MAP.withOutput().withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
-   public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
@@ -119,7 +138,7 @@ public class ROS2Tools
 
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
    {
-      return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
+      return new ROS2Topic<>().withTypeName(messageType).withTypeName();
    }
 
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<?> topicName)
@@ -147,7 +166,7 @@ public class ROS2Tools
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
    private static final int DOMAIN_ID = FACTORY.getDomainId();
    private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
-   private static final Ros2Distro ROS2_DISTRO = Ros2Distro.fromEnvironment();
+   private static final ROS2Distro ROS2_DISTRO = ROS2Distro.fromEnvironment();
 
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
@@ -157,9 +176,9 @@ public class ROS2Tools
     * @param nodeName the name of the new ROS node.
     * @return the ROS node.
     */
-   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return createRealtimeRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
+      return createRealtimeROS2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
    }
 
    /**
@@ -171,9 +190,9 @@ public class ROS2Tools
     * @param exceptionHandler how to handle exceptions thrown during the instantiation.
     * @return the ROS node.
     */
-   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
-      return createRealtimeRos2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, exceptionHandler);
+      return createRealtimeROS2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName, exceptionHandler);
    }
 
    /**
@@ -185,11 +204,11 @@ public class ROS2Tools
     * @param nodeName the name of the new ROS node.
     * @return the ROS node.
     */
-   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation,
                                                          PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
                                                          String nodeName)
    {
-      return createRealtimeRos2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, RUNTIME_EXCEPTION);
+      return createRealtimeROS2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, RUNTIME_EXCEPTION);
    }
 
    /**
@@ -202,14 +221,14 @@ public class ROS2Tools
     * @param exceptionHandler how to handle exceptions thrown during the instantiation.
     * @return the ROS node.
     */
-   public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
+   public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation,
                                                          PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
                                                          String nodeName,
                                                          ExceptionHandler exceptionHandler)
    {
       try
       {
-         return new RealtimeRos2Node(pubSubImplementation, ROS2_DISTRO, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new RealtimeROS2Node(pubSubImplementation, ROS2_DISTRO, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -218,16 +237,16 @@ public class ROS2Tools
       }
    }
 
-   public static Ros2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return createRos2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
+      return createROS2Node(pubSubImplementation, nodeName, RUNTIME_EXCEPTION);
    }
 
-   public static Ros2Node createRos2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
+   public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName, ExceptionHandler exceptionHandler)
    {
       try
       {
-         return new Ros2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+         return new ROS2Node(pubSubImplementation, ROS2_DISTRO, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
       }
       catch (IOException e)
       {
@@ -236,7 +255,7 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscriptionTypeNamed(Ros2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
                                                                              Class<T> messageType,
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
@@ -244,12 +263,12 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
       return createCallbackSubscription(ros2Node, topic.getType(), topic.getName(), newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     ROS2Topic<?> topicName,
                                                                     NewMessageListener<T> newMessageListener)
@@ -257,7 +276,7 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, messageType, topicName.toString(), newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener)
@@ -265,7 +284,7 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener,
@@ -274,7 +293,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, Ros2QosProfile.DEFAULT());
+         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, ROS2QosProfile.DEFAULT());
       }
       catch (IOException e)
       {
@@ -283,45 +302,55 @@ public class ROS2Tools
       }
    }
 
-   public static <T> void createCallbackSubscriptionTypeNamed(RealtimeRos2Node realtimeRos2Node,
+   public static <T> void createCallbackSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,
                                                               Class<T> messageType,
                                                               ROS2Topic<?> topicName,
                                                               NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeRos2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
+      createCallbackSubscription(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeRos2Node, topic.getType(), topic.getName(), newMessageListener);
+      createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
                                                      Class<T> messageType,
                                                      ROS2Topic<?> topicName,
                                                      NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeRos2Node, messageType, topicName.toString(), newMessageListener);
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName.toString(), newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
                                                      Class<T> messageType,
                                                      String topicName,
                                                      NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeRos2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
                                                      Class<T> messageType,
                                                      String topicName,
                                                      NewMessageListener<T> newMessageListener,
                                                      ExceptionHandler exceptionHandler)
    {
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
+                                                     Class<T> messageType,
+                                                     String topicName,
+                                                     NewMessageListener<T> newMessageListener,
+                                                     ROS2QosProfile qosProfile,
+                                                     ExceptionHandler exceptionHandler)
+   {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeRos2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, Ros2QosProfile.DEFAULT());
+         realtimeROS2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, qosProfile);
       }
       catch (IOException e)
       {
@@ -329,29 +358,29 @@ public class ROS2Tools
       }
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscriptionTypeNamed(RealtimeRos2Node realtimeRos2Node,
+   public static <T> RealtimeROS2Subscription<T> createQueuedSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,
                                                                                    Class<T> messageType,
                                                                                    ROS2Topic<?> topicName)
    {
-      return createQueuedSubscription(realtimeRos2Node, typeNamedTopic(messageType).withTopic(topicName));
+      return createQueuedSubscription(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName));
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic)
+   public static <T> RealtimeROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
    {
-      return createQueuedSubscription(realtimeRos2Node, topic.getType(), topic.getName());
+      return createQueuedSubscription(realtimeROS2Node, topic.getType(), topic.getName());
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> RealtimeROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
-      return createQueuedSubscription(realtimeRos2Node, messageType, topicName.toString());
+      return createQueuedSubscription(realtimeROS2Node, messageType, topicName.toString());
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName)
+   public static <T> RealtimeROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, String topicName)
    {
-      return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
+      return createQueuedSubscription(realtimeROS2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node,
+   public static <T> RealtimeROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node,
                                                                           Class<T> messageType,
                                                                           String topicName,
                                                                           ExceptionHandler exceptionHandler)
@@ -359,7 +388,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return realtimeRos2Node.createQueuedSubscription(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10);
+         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10);
       }
       catch (IOException e)
       {
@@ -368,29 +397,29 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisherTypeNamed(RealtimeRos2Node realtimeRos2Node,
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisherTypeNamed(RealtimeROS2Node realtimeROS2Node,
                                                                            Class<T> messageType,
                                                                            ROS2Topic<?> topicName)
    {
-      return createPublisher(realtimeRos2Node, typeNamedTopic(messageType).withTopic(topicName));
+      return createPublisher(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName));
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic)
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
    {
-      return createPublisher(realtimeRos2Node, topic.getType(), topic.getName());
+      return createPublisher(realtimeROS2Node, topic.getType(), topic.getName());
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
-      return createPublisher(realtimeRos2Node, messageType, topicName.toString());
+      return createPublisher(realtimeROS2Node, messageType, topicName.toString());
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName)
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, String topicName)
    {
-      return createPublisher(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
+      return createPublisher(realtimeROS2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node,
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
                                                                   Class<T> messageType,
                                                                   String topicName,
                                                                   ExceptionHandler exceptionHandler)
@@ -398,7 +427,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCRealtimeROS2Publisher<T>(realtimeRos2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10));
+         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10));
       }
       catch (IOException e)
       {
@@ -407,32 +436,46 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisherTypeNamed(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> IHMCROS2Publisher<T> createPublisherTypeNamed(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, typeNamedTopic(messageType).withTopic(topicName));
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, ROS2Topic<T> topic)
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic)
    {
       return createPublisher(ros2Node, topic.getType(), topic.getName());
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, ROS2QosProfile qosProfile)
+   {
+      return createPublisher(ros2Node, topic.getType(), topic.getName(), qosProfile, RUNTIME_EXCEPTION);
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, messageType, topicName.toString());
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       return createPublisher(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   {
+      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node,
+                                                          Class<T> messageType,
+                                                          String topicName,
+                                                          ROS2QosProfile qosProfile,
+                                                          ExceptionHandler exceptionHandler)
    {
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT()));
+         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
       }
       catch (IOException e)
       {

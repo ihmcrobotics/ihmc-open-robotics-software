@@ -14,9 +14,9 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoGraphicPolynomial3DTest
@@ -35,7 +35,7 @@ public class YoGraphicPolynomial3DTest
       for (int iteration = 0; iteration < 10; iteration++)
       {
          String name = "writer";
-         YoVariableRegistry registry = new YoVariableRegistry("writerRegistry");
+         YoRegistry registry = new YoRegistry("writerRegistry");
          int numberOfPolynomials = random.nextInt(20) + 3;
 
          YoFramePose3D poseToPolynomialFrame = new YoFramePose3D(name + "Pose", ReferenceFrame.getWorldFrame(), registry);
@@ -58,13 +58,13 @@ public class YoGraphicPolynomial3DTest
          YoGraphicPolynomial3D yoGraphicWriter = new YoGraphicPolynomial3D(name, poseToPolynomialFrame, yoPolynomial3Ds, waypointTimes, radius, resolution,
                                                                            radialResolution, registry);
 
-         YoVariable<?>[] allWriterYoVariables = yoGraphicWriter.getVariables();
+         YoVariable[] allWriterYoVariables = yoGraphicWriter.getVariables();
          double[] allWriterConstants = new double[yoGraphicWriter.getConstants().length];
          for (int i = 0; i < yoGraphicWriter.getConstants().length; i++)
             allWriterConstants[i] = yoGraphicWriter.getConstants()[i];
 
          YoGraphicPolynomial3D yoGraphicReader = YoGraphicPolynomial3D.createAsRemoteYoGraphic("reader", allWriterYoVariables, allWriterConstants);
-         YoVariable<?>[] allReaderYoVariables = yoGraphicReader.getVariables();
+         YoVariable[] allReaderYoVariables = yoGraphicReader.getVariables();
          double[] allReaderConstants = new double[yoGraphicReader.getConstants().length];
          for (int i = 0; i < yoGraphicReader.getConstants().length; i++)
             allReaderConstants[i] = yoGraphicReader.getConstants()[i];

@@ -69,7 +69,7 @@ public class UnicycleRobot extends Robot
       }
       backJoint.addJoint(wheelJoint);
 
-      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoRegistry());
       this.setGroundContactModel(groundContactModel);
 
       showCoordinatesRecursively(rootJoint, false);

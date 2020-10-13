@@ -62,38 +62,13 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
          this.appearances = appearances;
       }
 
-      combinedTerrainObject = createCombinedTerrainObjectFromPlanarRegionsList(this.environmentName, allowablePenetrationThickness);
+      combinedTerrainObject = new CombinedTerrainObject3D(environmentName);
+      PlanarRegionEnvironmentTools.addRegionsToEnvironment(combinedTerrainObject, planarRegionsLists, appearances, allowablePenetrationThickness);
 
       if (generateGroundPlane)
       {
          combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
       }
-   }
-
-   private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, double allowablePenetrationThickness)
-   {
-      CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(environmentName);
-
-      for (int i = 0; i < planarRegionsLists.length; i++)
-      {
-         PlanarRegionsList planarRegionsList = planarRegionsLists[i];
-         for (int j = 0; j < planarRegionsList.getNumberOfPlanarRegions(); j++)
-         {
-            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(j);
-
-            if(appearances == null)
-            {
-               combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness));
-            }
-            else
-            {
-//               LogTools.info("Applying appearance {} of type {}", i, appearances[i].getClass());
-               combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness, appearances[i]));
-            }
-         }
-      }
-
-      return combinedTerrainObject3D;
    }
 
    public CombinedTerrainObject3D getCombinedTerrainObject3D()

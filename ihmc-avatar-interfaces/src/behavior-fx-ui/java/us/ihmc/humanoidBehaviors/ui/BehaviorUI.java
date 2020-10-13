@@ -5,12 +5,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
@@ -25,8 +27,9 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,8 +42,12 @@ public class BehaviorUI
 
    private BorderPane mainPane;
    private final Messager behaviorMessager;
+   private final ROS2Node ros2Node;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
+   private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
+   private LocalParameterServer parameterServer;
+   private JavaFXRemoteRobotVisualizer robotVisualizer;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
@@ -66,11 +73,11 @@ public class BehaviorUI
    {
       this.behaviorMessager = behaviorMessager;
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
       {
-         LocalParameterServer parameterServer = new LocalParameterServer(getClass(), 16784);
+         parameterServer = new LocalParameterServer(getClass(), 16784);
          LabelGraphic.initializeYoVariables(parameterServer.getRegistry());
          parameterServer.start();
       }
@@ -91,14 +98,21 @@ public class BehaviorUI
             tabPane.getTabs().add(tab);
          }
 
+         AnchorPane mainAnchorPane = new AnchorPane();
+
          View3DFactory view3DFactory = View3DFactory.createSubscene();
          view3DFactory.addCameraController(0.05, 2000.0, true);
          view3DFactory.addWorldCoordinateSystem(0.3);
          view3DFactory.addDefaultLighting();
          SubScene subScene3D = view3DFactory.getSubScene();
          Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
+         StackPane view3DStackPane = new StackPane(view3DSubSceneWrappedInsidePane);
+         AnchorPane.setTopAnchor(view3DStackPane, 0.0);
+         AnchorPane.setBottomAnchor(view3DStackPane, 0.0);
+         AnchorPane.setLeftAnchor(view3DStackPane, 0.0);
+         AnchorPane.setRightAnchor(view3DStackPane, 0.0);
+         mainAnchorPane.getChildren().add(view3DStackPane);
 
-//         AnchorPane sideVisualizationArea = new AnchorPane();
          VBox sideVisualizationArea = new VBox();
 
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
@@ -121,20 +135,18 @@ public class BehaviorUI
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUIController.init(subScene3D, ros2Node, robotModel);
+         directRobotUIController.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
          view3DFactory.addNodeToView(directRobotUIController);
-         view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+         robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
+         view3DFactory.addNodeToView(robotVisualizer);
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-//         sideVisualizationArea.setPrefWidth(200.0);
-//         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
-         mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
+         mainSplitPane.getItems().add(mainAnchorPane);
          mainSplitPane.getItems().add(consoleScrollPane);
-//         mainSplitPane.getItems().add(sideVisualizationArea);
          mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();
-         primaryStage.setTitle(getClass().getSimpleName());
+         primaryStage.setTitle("Behavior UI");
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
@@ -142,15 +154,25 @@ public class BehaviorUI
          primaryStage.show();
          primaryStage.toFront();
 
+         primaryStage.setOnCloseRequest(event -> onCloseRequestListeners.forEach(Runnable::run));
+
          guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
-         primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
-         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+         onCloseRequestListeners.add(guiRecorder::stop);
+         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
 
          if (RECORD_VIDEO)
          {
             ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
             ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
          }
+
+         IHMCROS2Publisher<Empty> shutdownPublisher = ROS2Tools.createPublisher(ros2Node, BehaviorModule.API.SHUTDOWN);
+         onCloseRequestListeners.add(() ->
+         {
+            LogTools.info("Publishing SHUTDOWN on {}", BehaviorModule.API.SHUTDOWN.getName());
+            shutdownPublisher.publish(new Empty());
+            destroy();
+         });
 
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();
@@ -161,7 +183,7 @@ public class BehaviorUI
    {
       startRecording.setDisable(true);
       stopRecording.setDisable(false);
-      guiRecorder.deleteOldLogs(10);
+      guiRecorder.deleteOldLogs(15);
       ThreadTools.startAThread(() -> guiRecorder.start(), "RecordingStart");
       ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 3600.0);
    }
@@ -171,6 +193,16 @@ public class BehaviorUI
       startRecording.setDisable(false);
       stopRecording.setDisable(true);
       ThreadTools.startAThread(() -> guiRecorder.stop(), "RecordingStop");
+   }
+
+   public void addOnCloseRequestListener(Runnable onCloseRequest)
+   {
+      onCloseRequestListeners.add(onCloseRequest);
+   }
+
+   public void closeMessager()
+   {
+      ExceptionTools.handle(behaviorMessager::closeMessager, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
    private void onBehaviorSelection(ObservableValue<? extends String> observable, String oldValue, String newValue)
@@ -201,5 +233,19 @@ public class BehaviorUI
          BehaviorUI.ACTIVE_EDITOR = claimingEditor;
          LogTools.debug("editor activated: {}", claimingEditor.getClass().getSimpleName());
       }
+   }
+
+   public void destroy()
+   {
+      if (robotVisualizer != null)
+         robotVisualizer.destroy();
+      if (parameterServer != null)
+         parameterServer.destroy();
+      for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
+      {
+         behaviorUIInterface.destroy();
+      }
+      directRobotUIController.destroy();
+      ros2Node.destroy();
    }
 }

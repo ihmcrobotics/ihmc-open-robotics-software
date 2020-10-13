@@ -66,6 +66,11 @@ public class SLAMViewer
    {
       stereoVisionPointCloudGraphic.addPointsMeshes(point3dReadOnlies, color);
    }
+
+   public void addPointCloud(List<? extends Point3DReadOnly> point3dReadOnlies, Color color)
+   {
+      stereoVisionPointCloudGraphic.addPointsMeshes(point3dReadOnlies, color);
+   }
    
    public void addPointCloud(Point3DReadOnly[] point3dReadOnlies, Color color, double pointSize)
    {

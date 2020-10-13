@@ -1,5 +1,9 @@
 package us.ihmc.exampleSimulations.simple3DWalker;
 
+import static java.lang.Math.sqrt;
+
+import java.util.ArrayList;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,12 +23,15 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.ArrayList;
-
-import static java.lang.Math.sqrt;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SimpleWalkerController implements RobotController
 {
@@ -41,7 +48,7 @@ public class SimpleWalkerController implements RobotController
    private double deltaT;
 
    private SimpleWalkerRobot robot;
-   private YoVariableRegistry registry = new YoVariableRegistry("Controller");
+   private YoRegistry registry = new YoRegistry("Controller");
    private SideDependentList<PIDController> kneeControllers = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> kneeControllersSoft = new SideDependentList<PIDController>();
    private SideDependentList<PIDController> hipPitchControllers = new SideDependentList<PIDController>();
@@ -898,7 +905,7 @@ public class SimpleWalkerController implements RobotController
 
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

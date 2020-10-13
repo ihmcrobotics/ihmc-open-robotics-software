@@ -10,7 +10,7 @@ import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredWrappingYoVariableTest
@@ -21,7 +21,7 @@ public class AlphaFilteredWrappingYoVariableTest
    @Test
    public void testInputModulo()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble alpha = new YoDouble("alpha", registry);
       alpha.set(0.0); //sets the alpha to 0.0 so that the correction is instantaneous to check the result which is in fact the input with modulo
       
@@ -69,7 +69,7 @@ public class AlphaFilteredWrappingYoVariableTest
    public void testNoisyFixedPosition()
    {
       // Use a reasonably large alpha for a reasonably large amount of noise
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble alpha = new YoDouble("alpha", registry);
       alpha.set(0.8);
       
@@ -97,7 +97,7 @@ public class AlphaFilteredWrappingYoVariableTest
 	public void testErrorAlwaysDecreases()
 	{
 	   // Use a reasonably large alpha for a reasonably large amount of noise
-	   YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+	   YoRegistry registry = new YoRegistry("testRegistry");
 	   YoDouble alpha = new YoDouble("alpha", registry);
 	   alpha.set(0.999999);
 

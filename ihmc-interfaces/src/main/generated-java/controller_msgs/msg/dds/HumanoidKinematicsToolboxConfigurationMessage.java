@@ -8,41 +8,37 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC whole-body inverse kinematics module.
+       * Similar to KinematicsToolboxConfigurationMessage, this contains auxiliary information that allows to further customized the behavior of the solver.
+       * The parameters exposed through this message are specific to application to humanoid robots.
        */
 public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<HumanoidKinematicsToolboxConfigurationMessage> implements Settable<HumanoidKinematicsToolboxConfigurationMessage>, EpsilonComparable<HumanoidKinematicsToolboxConfigurationMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
-   /**
-            * When true, the solve enforces the solution to have the projection of the center of mass contained
-            * inside the current support polygon. By 'current', it means that the solver will use the robot configuration data
-            * broadcasted by the controller to obtain the support polygon.
-            */
-   public boolean enable_support_polygon_constraint_ = true;
-
    /**
             * When set to true, the solver will maintain, if possible, the current x and y coordinates of the center
             * of mass. By 'current', it means that the solver will use the robot configuration data
             * broadcasted by the controller to obtain the center of mass position.
             */
    public boolean hold_current_center_of_mass_xy_position_ = true;
-
    /**
-            * When set to true, the solver will hold the pose of the active support foot/feet.
+            * When set to true, the solver will process the balance status from an active controller session and build a support polygon.
+            * Note that the auto support polygon feature is overidden by a user specified support polygon when provided.
+            * - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
+            * - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
             */
-   public boolean hold_support_foot_positions_ = true;
+   public boolean enable_auto_support_polygon_ = true;
+   /**
+            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+            * - when the walking controller is running, the rigid-bodies in question are the feet.
+            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+            */
+   public boolean hold_support_rigid_bodies_ = true;
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
-
-
-
-
-
    }
 
    public HumanoidKinematicsToolboxConfigurationMessage(HumanoidKinematicsToolboxConfigurationMessage other)
@@ -53,20 +49,15 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
    public void set(HumanoidKinematicsToolboxConfigurationMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
-
-      enable_support_polygon_constraint_ = other.enable_support_polygon_constraint_;
-
 
       hold_current_center_of_mass_xy_position_ = other.hold_current_center_of_mass_xy_position_;
 
+      enable_auto_support_polygon_ = other.enable_auto_support_polygon_;
 
-      hold_support_foot_positions_ = other.hold_support_foot_positions_;
+      hold_support_rigid_bodies_ = other.hold_support_rigid_bodies_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -82,27 +73,6 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    {
       return sequence_id_;
    }
-
-
-   /**
-            * When true, the solve enforces the solution to have the projection of the center of mass contained
-            * inside the current support polygon. By 'current', it means that the solver will use the robot configuration data
-            * broadcasted by the controller to obtain the support polygon.
-            */
-   public void setEnableSupportPolygonConstraint(boolean enable_support_polygon_constraint)
-   {
-      enable_support_polygon_constraint_ = enable_support_polygon_constraint;
-   }
-   /**
-            * When true, the solve enforces the solution to have the projection of the center of mass contained
-            * inside the current support polygon. By 'current', it means that the solver will use the robot configuration data
-            * broadcasted by the controller to obtain the support polygon.
-            */
-   public boolean getEnableSupportPolygonConstraint()
-   {
-      return enable_support_polygon_constraint_;
-   }
-
 
    /**
             * When set to true, the solver will maintain, if possible, the current x and y coordinates of the center
@@ -123,20 +93,44 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       return hold_current_center_of_mass_xy_position_;
    }
 
-
    /**
-            * When set to true, the solver will hold the pose of the active support foot/feet.
+            * When set to true, the solver will process the balance status from an active controller session and build a support polygon.
+            * Note that the auto support polygon feature is overidden by a user specified support polygon when provided.
+            * - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
+            * - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
             */
-   public void setHoldSupportFootPositions(boolean hold_support_foot_positions)
+   public void setEnableAutoSupportPolygon(boolean enable_auto_support_polygon)
    {
-      hold_support_foot_positions_ = hold_support_foot_positions;
+      enable_auto_support_polygon_ = enable_auto_support_polygon;
    }
    /**
-            * When set to true, the solver will hold the pose of the active support foot/feet.
+            * When set to true, the solver will process the balance status from an active controller session and build a support polygon.
+            * Note that the auto support polygon feature is overidden by a user specified support polygon when provided.
+            * - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
+            * - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
             */
-   public boolean getHoldSupportFootPositions()
+   public boolean getEnableAutoSupportPolygon()
    {
-      return hold_support_foot_positions_;
+      return enable_auto_support_polygon_;
+   }
+
+   /**
+            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+            * - when the walking controller is running, the rigid-bodies in question are the feet.
+            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+            */
+   public void setHoldSupportRigidBodies(boolean hold_support_rigid_bodies)
+   {
+      hold_support_rigid_bodies_ = hold_support_rigid_bodies;
+   }
+   /**
+            * When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
+            * - when the walking controller is running, the rigid-bodies in question are the feet.
+            * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
+            */
+   public boolean getHoldSupportRigidBodies()
+   {
+      return hold_support_rigid_bodies_;
    }
 
 
@@ -157,17 +151,13 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_support_polygon_constraint_, other.enable_support_polygon_constraint_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_current_center_of_mass_xy_position_, other.hold_current_center_of_mass_xy_position_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_auto_support_polygon_, other.enable_auto_support_polygon_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_foot_positions_, other.hold_support_foot_positions_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_rigid_bodies_, other.hold_support_rigid_bodies_, epsilon)) return false;
 
 
       return true;
@@ -182,17 +172,13 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       HumanoidKinematicsToolboxConfigurationMessage otherMyClass = (HumanoidKinematicsToolboxConfigurationMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
-
-      if(this.enable_support_polygon_constraint_ != otherMyClass.enable_support_polygon_constraint_) return false;
-
 
       if(this.hold_current_center_of_mass_xy_position_ != otherMyClass.hold_current_center_of_mass_xy_position_) return false;
 
+      if(this.enable_auto_support_polygon_ != otherMyClass.enable_auto_support_polygon_) return false;
 
-      if(this.hold_support_foot_positions_ != otherMyClass.hold_support_foot_positions_) return false;
+      if(this.hold_support_rigid_bodies_ != otherMyClass.hold_support_rigid_bodies_) return false;
 
 
       return true;
@@ -204,18 +190,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       StringBuilder builder = new StringBuilder();
 
       builder.append("HumanoidKinematicsToolboxConfigurationMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
-      builder.append("enable_support_polygon_constraint=");
-      builder.append(this.enable_support_polygon_constraint_);      builder.append(", ");
-
       builder.append("hold_current_center_of_mass_xy_position=");
       builder.append(this.hold_current_center_of_mass_xy_position_);      builder.append(", ");
-
-      builder.append("hold_support_foot_positions=");
-      builder.append(this.hold_support_foot_positions_);
+      builder.append("enable_auto_support_polygon=");
+      builder.append(this.enable_auto_support_polygon_);      builder.append(", ");
+      builder.append("hold_support_rigid_bodies=");
+      builder.append(this.hold_support_rigid_bodies_);
       builder.append("}");
       return builder.toString();
    }

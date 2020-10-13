@@ -128,7 +128,7 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       if(!Double.isNaN(desiredBodyHeight))
          stepTeleopManager.setDesiredBodyHeight(desiredBodyHeight);
 
-      YoEnum<QuadrupedSteppingStateEnum> steppingCurrentState = (YoEnum<QuadrupedSteppingStateEnum>) conductor.getScs().getVariable("steppingCurrentState");
+      YoEnum<QuadrupedSteppingStateEnum> steppingCurrentState = (YoEnum<QuadrupedSteppingStateEnum>) conductor.getScs().findVariable("steppingCurrentState");
 
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

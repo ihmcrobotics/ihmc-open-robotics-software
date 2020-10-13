@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.tools.ros2;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.HashMap;
 
@@ -12,7 +12,7 @@ public class ROS2ControllerPublisherMap
    private final ROS2PublisherMap publisherMap;
    private final HashMap<Class, ROS2Topic> topicMap = new HashMap<>();
 
-   public ROS2ControllerPublisherMap(Ros2NodeInterface ros2Node, String robotName)
+   public ROS2ControllerPublisherMap(ROS2NodeInterface ros2Node, String robotName)
    {
       this.robotName = robotName;
       publisherMap = new ROS2PublisherMap(ros2Node);

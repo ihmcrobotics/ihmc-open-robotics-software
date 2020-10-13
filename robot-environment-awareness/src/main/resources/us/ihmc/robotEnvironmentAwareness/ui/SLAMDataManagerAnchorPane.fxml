@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController">
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController">
    <children>
       <VBox layoutX="18.0" layoutY="16.0" prefHeight="150.0" prefWidth="700.0">
          <children>
@@ -49,12 +49,6 @@
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browsePlanarRegionsInputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   <TextField fx:id="currentRawDataInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
                   <TextField fx:id="currentPlanarRegionsInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" GridPane.rowIndex="1">
-                     <children>
-                        <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importPlanarRegions" prefHeight="25.0" prefWidth="150.0" text="Import Planar Regions" />
-                        <Button maxWidth="1.7976931348623157E308" minWidth="50.0" mnemonicParsing="false" onAction="#hideImportedPlanarRegions" prefWidth="50.0" text="hide" />
-                     </children>
-                  </HBox>
                </children>
             </GridPane>
          </children>

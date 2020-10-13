@@ -13,37 +13,27 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoHomeMessage>, EpsilonComparable<GoHomeMessage>
 {
-
    public static final byte HUMANOID_BODY_PART_ARM = (byte) 0;
-
    public static final byte HUMANOID_BODY_PART_CHEST = (byte) 1;
-
    public static final byte HUMANOID_BODY_PART_PELVIS = (byte) 2;
-
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
-
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies the part of the body the use wants to move back to its home configuration.
             */
    public byte humanoid_body_part_ = (byte) 255;
-
    /**
             * Needed to identify a side dependent end-effector.
             */
    public byte robot_side_ = (byte) 255;
-
    /**
             * How long the trajectory will spline from the current desired to the home configuration.
             */
    public double trajectory_time_;
-
    /**
             * The time to delay this command on the controller side before being executed.
             */
@@ -51,12 +41,6 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
 
    public GoHomeMessage()
    {
-
-
-
-
-
-
    }
 
    public GoHomeMessage(GoHomeMessage other)
@@ -67,23 +51,17 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
 
    public void set(GoHomeMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       humanoid_body_part_ = other.humanoid_body_part_;
 
-
       robot_side_ = other.robot_side_;
 
-
       trajectory_time_ = other.trajectory_time_;
-
 
       execution_delay_time_ = other.execution_delay_time_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -100,7 +78,6 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       return sequence_id_;
    }
 
-
    /**
             * Specifies the part of the body the use wants to move back to its home configuration.
             */
@@ -115,7 +92,6 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    {
       return humanoid_body_part_;
    }
-
 
    /**
             * Needed to identify a side dependent end-effector.
@@ -132,7 +108,6 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       return robot_side_;
    }
 
-
    /**
             * How long the trajectory will spline from the current desired to the home configuration.
             */
@@ -147,7 +122,6 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    {
       return trajectory_time_;
    }
-
 
    /**
             * The time to delay this command on the controller side before being executed.
@@ -182,18 +156,13 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_body_part_, other.humanoid_body_part_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_time_, other.trajectory_time_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon)) return false;
 
@@ -210,18 +179,13 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
 
       GoHomeMessage otherMyClass = (GoHomeMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.humanoid_body_part_ != otherMyClass.humanoid_body_part_) return false;
 
-
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-
       if(this.trajectory_time_ != otherMyClass.trajectory_time_) return false;
-
 
       if(this.execution_delay_time_ != otherMyClass.execution_delay_time_) return false;
 
@@ -235,19 +199,14 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       StringBuilder builder = new StringBuilder();
 
       builder.append("GoHomeMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("humanoid_body_part=");
       builder.append(this.humanoid_body_part_);      builder.append(", ");
-
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-
       builder.append("trajectory_time=");
       builder.append(this.trajectory_time_);      builder.append(", ");
-
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
       builder.append("}");

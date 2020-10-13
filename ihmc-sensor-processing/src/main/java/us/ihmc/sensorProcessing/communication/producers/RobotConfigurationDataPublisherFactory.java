@@ -1,8 +1,11 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.log.LogTools;
@@ -16,7 +19,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -44,7 +47,7 @@ public class RobotConfigurationDataPublisherFactory
 
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
-   private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
+   private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
    private final RequiredFactoryField<ROS2Topic<?>> outputTopicField = new RequiredFactoryField<>("outputTopic");
 
    public RobotConfigurationDataPublisherFactory()
@@ -177,9 +180,9 @@ public class RobotConfigurationDataPublisherFactory
     * @param ros2Node    the real-time node to create the publisher with.
     * @param outputTopic the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic<?> outputTopic)
+   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic<?> outputTopic)
    {
-      realtimeRos2NodeField.set(ros2Node);
+      realtimeROS2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);
    }
 
@@ -206,7 +209,7 @@ public class RobotConfigurationDataPublisherFactory
       List<IMUSensorReadOnly> imuSensorDataToPublish = filterIMUSensorDataToPublish();
       List<ForceSensorDataReadOnly> forceSensorDataToPublish = filterForceSensorDataToPublish();
 
-      RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeRos2NodeField.get(),
+      RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeROS2NodeField.get(),
                                                                                       outputTopicField.get(),
                                                                                       rootJointSensorData.get(),
                                                                                       jointSensorDataToPublish,
@@ -249,10 +252,20 @@ public class RobotConfigurationDataPublisherFactory
 
    private List<IMUSensorReadOnly> filterIMUSensorDataToPublish()
    {
+      IMUDefinition[] imuSelection = imuDefinitionsField.get();
+
+      if (imuSelection == null || imuSelection.length == 0)
+         return Collections.emptyList();
+
       List<IMUSensorReadOnly> sensorDataToPublish = new ArrayList<>();
 
-      IMUDefinition[] imuSelection = imuDefinitionsField.get();
       List<? extends IMUSensorReadOnly> allSensorData = imuSensorData.get();
+
+      if (allSensorData == null || allSensorData.isEmpty())
+      {
+         LogTools.warn("Could not find any sensor data for the IMUs.");
+         return Stream.of(imuSelection).map(definition -> new IMUSensor(definition, null)).collect(Collectors.toList());
+      }
 
       for (IMUDefinition imu : imuSelection)
       {
@@ -275,10 +288,20 @@ public class RobotConfigurationDataPublisherFactory
 
    private List<ForceSensorDataReadOnly> filterForceSensorDataToPublish()
    {
+      ForceSensorDefinition[] forceSensorSelection = forceSensorDefinitionsField.get();
+
+      if (forceSensorSelection == null || forceSensorSelection.length == 0)
+         return Collections.emptyList();
+
       List<ForceSensorDataReadOnly> sensorDataToPublish = new ArrayList<>();
 
-      ForceSensorDefinition[] forceSensorSelection = forceSensorDefinitionsField.get();
       ForceSensorDataHolderReadOnly allSensorData = forceSensorDataHolder.get();
+
+      if (allSensorData == null)
+      {
+         LogTools.warn("Could not find any sensor data for the F/T sensors.");
+         return Stream.of(forceSensorSelection).map(definition -> createEmptyForceSensor(definition)).collect(Collectors.toList());
+      }
 
       for (ForceSensorDefinition forceSensor : forceSensorSelection)
       {
@@ -290,12 +313,17 @@ public class RobotConfigurationDataPublisherFactory
          }
          else
          {
-            ForceSensorData dummySensor = new ForceSensorData();
-            dummySensor.setDefinition(forceSensor);
-            sensorDataToPublish.add(dummySensor);
+            sensorDataToPublish.add(createEmptyForceSensor(forceSensor));
             LogTools.warn("Could not find sensor data for the F/T sensor: " + forceSensor.getSensorName());
          }
       }
       return sensorDataToPublish;
+   }
+
+   private static ForceSensorData createEmptyForceSensor(ForceSensorDefinition forceSensor)
+   {
+      ForceSensorData dummySensor = new ForceSensorData();
+      dummySensor.setDefinition(forceSensor);
+      return dummySensor;
    }
 }

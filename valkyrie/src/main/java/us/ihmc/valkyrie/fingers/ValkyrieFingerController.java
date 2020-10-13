@@ -15,17 +15,17 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlFingerStateEstimator;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieFingerController implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final YoDouble time;
 
@@ -34,7 +34,7 @@ public class ValkyrieFingerController implements RobotController
    private final SideDependentList<ValkyrieFingerSetController> fingerSetControllers = new SideDependentList<>();
 
    public ValkyrieFingerController(YoDouble yoTime, double controlDT, ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
-                                   List<YoEffortJointHandleHolder> jointHandles, YoVariableRegistry parentRegistry)
+                                   List<YoEffortJointHandleHolder> jointHandles, YoRegistry parentRegistry)
    {
       time = yoTime;
       YoPIDGains thumbRollGains = new YoPIDGains("HandThumbRoll", registry);
@@ -89,14 +89,14 @@ public class ValkyrieFingerController implements RobotController
       parentRegistry.addChild(registry);
    }
 
-   public void setupCommunication(String robotName, RealtimeRos2Node realtimeRos2Node)
+   public void setupCommunication(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                        HandDesiredConfigurationMessage.class, ROS2Tools.getControllerInputTopic(robotName),
                                                        handDesiredConfigurationMessageSubscribers.get(robotSide));
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                        ValkyrieHandFingerTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName),
                                                        valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide));
       }
@@ -156,7 +156,7 @@ public class ValkyrieFingerController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.gui;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.simulationconstructionset.NewDataListener;
@@ -19,12 +19,12 @@ public class YoVariableToggler implements NewDataListener
    private String falseString = "Turn Off";
    private boolean firstRun = true;
 
-   public YoVariableToggler(String name, YoVariableRegistry parent, YoVariableToggleContainer parentContainer, YoBoolean currentStateVariable)
+   public YoVariableToggler(String name, YoRegistry parent, YoVariableToggleContainer parentContainer, YoBoolean currentStateVariable)
    {
       if (currentStateVariable != null)
          this.currentState = currentStateVariable;
       this.parentContainer = parentContainer;
-      toggleMode = (YoEnum<ToggleMode>) parent.getVariable(name);
+      toggleMode = (YoEnum<ToggleMode>) parent.findVariable(name);
 
       toggleMode.set(ToggleMode.NO_CHANGE);
 
@@ -148,9 +148,9 @@ public class YoVariableToggler implements NewDataListener
    }
 
 
-   public void registerWithVariableChangedListener(VariableChangedListener changedListener)
+   public void registerWithVariableChangedListener(YoVariableChangedListener changedListener)
    {
-      toggleMode.addVariableChangedListener(changedListener);
+      toggleMode.addListener(changedListener);
    }
 
 }

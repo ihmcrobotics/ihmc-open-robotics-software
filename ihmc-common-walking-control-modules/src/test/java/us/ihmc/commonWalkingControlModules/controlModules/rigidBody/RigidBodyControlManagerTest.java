@@ -53,7 +53,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyControlManagerTest
@@ -62,7 +62,7 @@ public class RigidBodyControlManagerTest
    private static final Random random = new Random(94391892L);
    private static final double epsilon = 1.0E-10;
 
-   private YoVariableRegistry testRegistry;
+   private YoRegistry testRegistry;
    private YoDouble yoTime;
    private RigidBodyBasics bodyToControl;
 
@@ -453,7 +453,7 @@ public class RigidBodyControlManagerTest
    private RigidBodyControlManager createManager()
    {
       // create test registry
-      testRegistry = new YoVariableRegistry(getClass().getSimpleName());
+      testRegistry = new YoRegistry(getClass().getSimpleName());
 
       // create time variable
       yoTime = new YoDouble("yoTime", testRegistry);

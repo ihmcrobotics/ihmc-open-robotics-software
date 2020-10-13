@@ -14,7 +14,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunEvent;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class TimingBehaviorHelper extends AbstractBehavior
 {
@@ -30,7 +30,7 @@ public class TimingBehaviorHelper extends AbstractBehavior
    public final AtomicReference<FootstepPlanningRequestPacket> footstepPlanningRequestPacket = new AtomicReference<>(null);
    public SQLBehaviorDatabaseManager dataBase;
 
-   public TimingBehaviorHelper(String robotName, Ros2Node ros2Node)
+   public TimingBehaviorHelper(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
 

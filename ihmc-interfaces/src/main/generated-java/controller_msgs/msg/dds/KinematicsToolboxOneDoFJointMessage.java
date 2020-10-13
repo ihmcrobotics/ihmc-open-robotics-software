@@ -13,24 +13,20 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolboxOneDoFJointMessage> implements Settable<KinematicsToolboxOneDoFJointMessage>, EpsilonComparable<KinematicsToolboxOneDoFJointMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * The is the unique hash code of the joint to be solved for.
             * It is used on the solver side to retrieve the desired joint to be controlled.
             * See Joint.hashCode() for the computation of a joint hash code.
             */
    public int joint_hash_code_;
-
    /**
             * The is the desired joint position.
             */
    public double desired_position_;
-
    /**
             * Weight used to define the priority for reaching the desired position.
             */
@@ -38,11 +34,6 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
 
    public KinematicsToolboxOneDoFJointMessage()
    {
-
-
-
-
-
    }
 
    public KinematicsToolboxOneDoFJointMessage(KinematicsToolboxOneDoFJointMessage other)
@@ -53,20 +44,15 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
 
    public void set(KinematicsToolboxOneDoFJointMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
-
 
       joint_hash_code_ = other.joint_hash_code_;
 
-
       desired_position_ = other.desired_position_;
-
 
       weight_ = other.weight_;
 
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -82,7 +68,6 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
    {
       return sequence_id_;
    }
-
 
    /**
             * The is the unique hash code of the joint to be solved for.
@@ -103,7 +88,6 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
       return joint_hash_code_;
    }
 
-
    /**
             * The is the desired joint position.
             */
@@ -118,7 +102,6 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
    {
       return desired_position_;
    }
-
 
    /**
             * Weight used to define the priority for reaching the desired position.
@@ -153,15 +136,11 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_hash_code_, other.joint_hash_code_, epsilon)) return false;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_position_, other.desired_position_, epsilon)) return false;
-
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_, other.weight_, epsilon)) return false;
 
@@ -178,15 +157,11 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
 
       KinematicsToolboxOneDoFJointMessage otherMyClass = (KinematicsToolboxOneDoFJointMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
 
       if(this.joint_hash_code_ != otherMyClass.joint_hash_code_) return false;
 
-
       if(this.desired_position_ != otherMyClass.desired_position_) return false;
-
 
       if(this.weight_ != otherMyClass.weight_) return false;
 
@@ -200,16 +175,12 @@ public class KinematicsToolboxOneDoFJointMessage extends Packet<KinematicsToolbo
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxOneDoFJointMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("joint_hash_code=");
       builder.append(this.joint_hash_code_);      builder.append(", ");
-
       builder.append("desired_position=");
       builder.append(this.desired_position_);      builder.append(", ");
-
       builder.append("weight=");
       builder.append(this.weight_);
       builder.append("}");

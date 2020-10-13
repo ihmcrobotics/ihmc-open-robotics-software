@@ -4,7 +4,7 @@ import java.util.Map;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -21,7 +21,7 @@ public class YoMultiContactImpulseCalculator extends MultiContactImpulseCalculat
    private final YoDouble maxUpdateMagnitude;
    private final YoInteger noConvergenceCounter;
 
-   public YoMultiContactImpulseCalculator(int identifier, ReferenceFrame rootFrame, YoVariableRegistry registry)
+   public YoMultiContactImpulseCalculator(int identifier, ReferenceFrame rootFrame, YoRegistry registry)
    {
       super(rootFrame);
 

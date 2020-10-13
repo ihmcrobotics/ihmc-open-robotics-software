@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.diagnostic;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -49,7 +49,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
 
    private final double dt;
 
-   public DelayEstimatorBetweenTwoSignals(String namePrefix, double dt, YoVariableRegistry registry)
+   public DelayEstimatorBetweenTwoSignals(String namePrefix, double dt, YoRegistry registry)
    {
       this(namePrefix, null, null, dt, registry);
    }
@@ -58,7 +58,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
     * @param referenceSignal is the signal used as ground truth to estimate the delay of {@code delayedSignal}.
     * @param delayedSignal is the signal for which the delay is estimated.
     */
-   public DelayEstimatorBetweenTwoSignals(String namePrefix, YoDouble referenceSignal, YoDouble delayedSignal, double dt, YoVariableRegistry registry)
+   public DelayEstimatorBetweenTwoSignals(String namePrefix, YoDouble referenceSignal, YoDouble delayedSignal, double dt, YoRegistry registry)
    {
       this.dt = dt;
       this.referenceSignal = referenceSignal;

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoOptimizedPolynomialTest
 {
@@ -19,7 +19,7 @@ public class YoOptimizedPolynomialTest
    public void testLinearDerivativePointManual()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
 
@@ -71,7 +71,7 @@ public class YoOptimizedPolynomialTest
    public void testLinearDerivativePointAndSlope()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
 
@@ -121,7 +121,7 @@ public class YoOptimizedPolynomialTest
    public void testLinearDerivativePointAutomated()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
 
@@ -143,7 +143,7 @@ public class YoOptimizedPolynomialTest
    public void testCubicDerivativePointAutomated()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoOptimizedPolynomial cubic = new YoOptimizedPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
 
@@ -176,7 +176,7 @@ public class YoOptimizedPolynomialTest
    public void testXPowersDerivativeVectorCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoOptimizedPolynomial cubic = new YoOptimizedPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
 
@@ -218,7 +218,7 @@ public class YoOptimizedPolynomialTest
    public void testDerivativeCoefficients()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 8;
       YoOptimizedPolynomial septic = new YoOptimizedPolynomial(namePrefix + "Septic", numberOfCoefficients, registry);
 
@@ -274,7 +274,7 @@ public class YoOptimizedPolynomialTest
    public void testDerivativeVersionsCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoOptimizedPolynomial cubic = new YoOptimizedPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
 
@@ -314,7 +314,7 @@ public class YoOptimizedPolynomialTest
    @Test
    public void testComputeSquaredHessianLinear()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 2, registry);
 
       double x0 = 0.5, xf = 2.5;
@@ -375,7 +375,7 @@ public class YoOptimizedPolynomialTest
    @Test
    public void testComputeSquaredHessianQuadratic()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 3, registry);
 
       double x0 = 0.5, xm = 1.3, xf = 2.5;
@@ -494,7 +494,7 @@ public class YoOptimizedPolynomialTest
    @Test
    public void testComputeSquaredHessianCubic()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 4, registry);
 
       double x0 = 0.5, xm1 = 1.3, xm2 = 2.0, xf = 2.5;

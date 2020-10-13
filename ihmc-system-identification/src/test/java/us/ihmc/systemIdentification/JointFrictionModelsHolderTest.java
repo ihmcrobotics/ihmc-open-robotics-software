@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
@@ -57,7 +57,7 @@ public class JointFrictionModelsHolderTest
                                                                                   negativeSigma, negativeFc0, negativeFs0, negativeCs);
 
    private String name = "simpleHolder";
-   private YoVariableRegistry registry = new YoVariableRegistry("simpleRegistry");
+   private YoRegistry registry = new YoRegistry("simpleRegistry");
 
 	@Test
    public void testConstructorAndFrictionStateSelection()
@@ -137,7 +137,7 @@ public class JointFrictionModelsHolderTest
 
    private class JointFrictionModelsHolderForTest extends JointFrictionModelsHolder
    {
-      public JointFrictionModelsHolderForTest(String name, YoVariableRegistry registry)
+      public JointFrictionModelsHolderForTest(String name, YoRegistry registry)
       {
          super(name, registry, alphaForFilteredVelocity, forceThreshold, stictionTransitionVelocity, maxVelocityForCompensation);
          frictionModels.put(FrictionModel.OFF, noCompensatingModel);

@@ -16,7 +16,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class JointPrivilegedConfigurationHandler
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isJointPrivilegedConfigurationEnabled = new YoBoolean("isJointPrivilegedConfigurationEnabled", registry);
    private boolean hasDefaultConfigurationWeightChanged = true;
@@ -70,7 +70,7 @@ public class JointPrivilegedConfigurationHandler
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJointBasics[] oneDoFJoints, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-                                              YoVariableRegistry parentRegistry)
+                                              YoRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints); // note that this should be equal to oneDoFJoints.length
@@ -100,11 +100,11 @@ public class JointPrivilegedConfigurationHandler
       defaultMaxAcceleration.set(jointPrivilegedConfigurationParameters.getDefaultMaxAcceleration());
       defaultConfigurationWeight.set(jointPrivilegedConfigurationParameters.getDefaultWeight());
 
-      defaultConfigurationGain.addVariableChangedListener(v -> hasDefaultConfigurationGainChanged = true);
-      defaultVelocityGain.addVariableChangedListener(v -> hasDefaultVelocityGainChanged = true);
-      defaultMaxVelocity.addVariableChangedListener(v -> hasDefaultMaxVelocityChanged = true);
-      defaultMaxAcceleration.addVariableChangedListener(v -> hasDefaultMaxAccelerationChanged = true);
-      defaultConfigurationWeight.addVariableChangedListener(v -> hasDefaultConfigurationWeightChanged = true);
+      defaultConfigurationGain.addListener(v -> hasDefaultConfigurationGainChanged = true);
+      defaultVelocityGain.addListener(v -> hasDefaultVelocityGainChanged = true);
+      defaultMaxVelocity.addListener(v -> hasDefaultMaxVelocityChanged = true);
+      defaultMaxAcceleration.addListener(v -> hasDefaultMaxAccelerationChanged = true);
+      defaultConfigurationWeight.addListener(v -> hasDefaultConfigurationWeightChanged = true);
 
       yoJointPrivilegedConfigurations = new YoDouble[numberOfDoFs];
       yoJointPrivilegedVelocities = new YoDouble[numberOfDoFs];

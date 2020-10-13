@@ -1,20 +1,18 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
 {
    private final String name = "VelTchdwnDetect";
-   private final YoVariableRegistry registry ;
+   private final YoRegistry registry ;
 
    private final MovingReferenceFrame soleFrame;
 
@@ -25,13 +23,13 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    private final YoFrameVector3D footVelocity;
 
    public FootVelocityBasedTouchDownDetection(String suffix, MovingReferenceFrame soleFrame, RobotQuadrant robotQuadrant, DoubleProvider speedThreshold,
-                                              DoubleProvider zVelocityThreshold, YoVariableRegistry parentRegistry)
+                                              DoubleProvider zVelocityThreshold, YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
       this.speedThreshold = speedThreshold;
       this.zVelocityThreshold = zVelocityThreshold;
       String prefix = robotQuadrant.getShortName() + name;
-      registry = new YoVariableRegistry(prefix);
+      registry = new YoRegistry(prefix);
 
       isInContact = new YoBoolean(prefix + "IsInContact" + suffix, registry);
       footVelocity = new YoFrameVector3D(prefix + "FootVelocity" + suffix, ReferenceFrame.getWorldFrame(), registry);

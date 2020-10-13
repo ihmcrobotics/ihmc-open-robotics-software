@@ -31,7 +31,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class JoystickBasedSteppingMainUI
 {
@@ -48,7 +48,7 @@ public class JoystickBasedSteppingMainUI
    @FXML
    private StepGeneratorParametersPaneController stepGeneratorParametersPaneController;
 
-   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters, HumanoidRobotKickMessenger kickMessenger,
                                       HumanoidRobotPunchMessenger punchMessenger, RobotLowLevelMessenger lowLevelMessenger,
                                       SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
@@ -58,7 +58,7 @@ public class JoystickBasedSteppingMainUI
            footPolygons);
    }
 
-   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, String workingDirectoryPath,
+   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, ROS2Node ros2Node, String workingDirectoryPath,
                                       FullHumanoidRobotModelFactory fullRobotModelFactory, WalkingControllerParameters walkingControllerParameters,
                                       HumanoidRobotKickMessenger kickMessenger, HumanoidRobotPunchMessenger punchMessenger,
                                       RobotLowLevelMessenger lowLevelMessenger, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)

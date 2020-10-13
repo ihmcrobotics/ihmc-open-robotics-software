@@ -8,7 +8,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class FeetInContactForPlanner
    private final DoubleProvider time;
    private final DoubleProvider durationToAllowEarlyTouchdown;
 
-   public FeetInContactForPlanner(QuadrupedControllerToolbox controllerToolbox, DoubleProvider durationToAllowEarlyTouchdown, YoVariableRegistry registry)
+   public FeetInContactForPlanner(QuadrupedControllerToolbox controllerToolbox, DoubleProvider durationToAllowEarlyTouchdown, YoRegistry registry)
    {
       this.controllerToolbox = controllerToolbox;
       this.durationToAllowEarlyTouchdown = durationToAllowEarlyTouchdown;

@@ -5,7 +5,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoPolynomialTest
 {
@@ -17,7 +17,7 @@ public class YoPolynomialTest
    public void testLinearDerivativePointManual()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoPolynomial linear = new YoPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -47,7 +47,7 @@ public class YoPolynomialTest
    public void testLinearDerivativePointAutomated()
    {
       //linear polynomial: y(x) = a0 + a1*x
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 2;
       YoPolynomial linear = new YoPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
       
@@ -65,7 +65,7 @@ public class YoPolynomialTest
    public void testCubicDerivativePointAutomated()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoPolynomial cubic = new YoPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
       
@@ -84,7 +84,7 @@ public class YoPolynomialTest
    public void testXPowersDerivativeVectorCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoPolynomial cubic = new YoPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
       
@@ -111,7 +111,7 @@ public class YoPolynomialTest
    public void testDerivativeCoefficients()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 8;
       YoPolynomial septic = new YoPolynomial(namePrefix + "Septic", numberOfCoefficients, registry);
       
@@ -158,7 +158,7 @@ public class YoPolynomialTest
    public void testDerivativeVersionsCubic()
    {
       //cubic polynomial: y(x) = a0 + a1*x + a2*x^2 + a3*x^3
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoRegistry registry = new YoRegistry(namePrefix);
       int numberOfCoefficients = 4;
       YoPolynomial cubic = new YoPolynomial(namePrefix + "Cubic", numberOfCoefficients, registry);
       

@@ -27,7 +27,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotVisionSensorInformation;
@@ -42,7 +42,7 @@ public class RosModule implements CloseableAndDisposable
 
    private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
 
    private final RosMainNode rosMainNode;
    private final RobotROSClockCalculator rosClockCalculator;
@@ -54,7 +54,7 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDescription().getName()).withType(RobotConfigurationData.class),
+           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDescription().getName()).withTypeName(RobotConfigurationData.class),
            pubSubImplementation);
    }
 
@@ -66,7 +66,7 @@ public class RosModule implements CloseableAndDisposable
       LogTools.info("Starting ROS Module");
 
       String simpleRobotName = robotModelFactory.getRobotDescription().getName();
-      ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "ihmc_ros_node");
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_ros_node");
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       robotName = simpleRobotName.toLowerCase();
       String rosTopicPrefix = "/ihmc_ros/" + robotName;

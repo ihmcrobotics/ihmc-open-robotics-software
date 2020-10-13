@@ -20,12 +20,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class UnloadedAnkleControlModule
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final JointDesiredOutputList jointDesiredOutputList;
    private final JointspaceAccelerationCommand accelerationCommand = new JointspaceAccelerationCommand();
@@ -48,7 +48,7 @@ public class UnloadedAnkleControlModule
    private final RotationMatrix rotationMatrix = new RotationMatrix();
    private final FrameVector3D footAngularVelocityInShin = new FrameVector3D();
 
-   public UnloadedAnkleControlModule(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, AnkleIKSolver ankleIKSolver, YoVariableRegistry parentRegistry)
+   public UnloadedAnkleControlModule(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, AnkleIKSolver ankleIKSolver, YoRegistry parentRegistry)
    {
       this.ankleIKSolver = ankleIKSolver;
 

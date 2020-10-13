@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -31,7 +31,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> implements FootSwitchInterface
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final GeometricJacobian jacobian;
    private final OneDoFJointBasics[] jointsFromRootToSole;
 
@@ -51,10 +51,10 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    private final double standingZForce;
    private MovingReferenceFrame soleFrame;
    
-   public ComputedForceBasedFootSwitch(FullLeggedRobotModel<E> robotModel, E robotSegment, DoubleProvider contactThresholdForce, YoVariableRegistry parentRegistry)
+   public ComputedForceBasedFootSwitch(FullLeggedRobotModel<E> robotModel, E robotSegment, DoubleProvider contactThresholdForce, YoRegistry parentRegistry)
    {
       String prefix = robotSegment.toString() + name;
-      registry = new YoVariableRegistry(prefix);
+      registry = new YoRegistry(prefix);
       
       int filterWindowSize = 3;
       

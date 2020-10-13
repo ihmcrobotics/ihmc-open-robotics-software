@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -103,10 +104,12 @@ public class PointCloudGraphic extends Group
 
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz)
    {
-      int numberOfScanPoints = points.length;
-      int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
-      IntStream limit = selector.ints(0, points.length).distinct().limit(sizeOfPointCloudToVisualize);
-      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), points[index], colorToViz));
+      addPointsMeshes(points, colorToViz, SCAN_POINT_SIZE);
+   }
+
+   public void addPointsMeshes(List<? extends Point3DReadOnly> points, Color colorToViz)
+   {
+      addPointsMeshes(points, colorToViz, SCAN_POINT_SIZE);
    }
 
    /**
@@ -114,10 +117,15 @@ public class PointCloudGraphic extends Group
     */
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz, double size)
    {
-      int numberOfScanPoints = points.length;
+      addPointsMeshes(Arrays.asList(points), colorToViz, size);
+   }
+
+   public void addPointsMeshes(List<? extends Point3DReadOnly> points, Color colorToViz, double size)
+   {
+      int numberOfScanPoints = points.size();
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
-      IntStream limit = selector.ints(0, points.length).distinct().limit(sizeOfPointCloudToVisualize);
-      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), points[index], colorToViz));
+      IntStream limit = selector.ints(0, points.size()).distinct().limit(sizeOfPointCloudToVisualize);
+      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), points.get(index), colorToViz));
    }
 
    public void addLineMesh(Point3DReadOnly from, Point3DReadOnly to, Color color, double width)

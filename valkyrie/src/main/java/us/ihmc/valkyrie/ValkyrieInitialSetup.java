@@ -3,12 +3,14 @@ package us.ihmc.valkyrie;
 import java.util.List;
 
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,6 +36,16 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    {
       setInitialGroundHeight(groundZ);
       setInitialYaw(initialYaw);
+   }
+
+   public List<Double> getInitialJointAngles() // Implement for kinematics sim & start pose
+   {
+      return null;
+   }
+
+   public Pose3DReadOnly getInitialPelvisPose() // Implement for kinematics sim & start pose
+   {
+      return null;
    }
 
    @Override

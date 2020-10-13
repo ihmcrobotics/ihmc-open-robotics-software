@@ -228,6 +228,16 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load(String fileName)
    {
+      load(fileName, true);
+   }
+
+   public void loadUnsafe()
+   {
+      load(saveFileName, false);
+   }
+
+   private void load(String fileName, boolean crashIfMissingKeys)
+   {
       this.saveFileName = fileName;
 
       ExceptionTools.handle(() ->
@@ -248,7 +258,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
             {
                if (!properties.containsKey(key.getCamelCasedName()))
                {
-                  if (key.hasDefaultValue())
+                  if (!crashIfMissingKeys && key.hasDefaultValue())
                   {
                      setInternal(key, key.getDefaultValue());
                      continue;
@@ -380,6 +390,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
       // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
       // of just save the file in the working directory
 
+      // TODO: This should probably use PathTools#findDirectoryInline
+
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
 
       Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
@@ -428,5 +440,20 @@ public class StoredPropertySet implements StoredPropertySetBasics
    public StoredPropertyKeyListReadOnly getKeyList()
    {
       return keys;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (this == object)
+         return true;
+      else if (!(object instanceof StoredPropertySet))
+         return false;
+      else
+      {
+         StoredPropertySet other = (StoredPropertySet) object;
+
+         return Objects.deepEquals(values, other.values);
+      }
    }
 }

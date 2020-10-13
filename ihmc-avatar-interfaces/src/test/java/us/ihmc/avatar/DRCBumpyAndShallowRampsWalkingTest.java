@@ -134,12 +134,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       track.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getCommandInputManager().submitMessage(pelvisHeightMessage);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
-      YoDouble q_x = (YoDouble) scs.getVariable("q_x");
-      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityCSGX");
+      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
+      YoDouble q_x = (YoDouble) scs.findVariable("q_x");
+      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocityCSGX");
 
       //    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
-      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
+      YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
       //      YoDouble leftFootHeight = (YoDouble) scs.getVariable("p_leftFootPositionZ");
       //      YoDouble rightFootHeight = (YoDouble) scs.getVariable("p_rightFootPositionZ");
 
@@ -210,12 +210,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
-      YoDouble q_x = (YoDouble) scs.getVariable("q_x");
-      YoDouble desiredSpeed = (YoDouble) scs.getVariable("desiredVelocityCSGX");
+      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
+      YoDouble q_x = (YoDouble) scs.findVariable("q_x");
+      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocityCSGX");
 
       //    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
-      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
+      YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
 
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);
@@ -334,10 +334,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      YoBoolean walk = (YoBoolean) scs.getVariable("walkCSG");
-      YoDouble stepLength = (YoDouble) scs.getVariable("maxStepLengthCSG");
-      YoDouble offsetHeightAboveGround = (YoDouble) scs.getVariable("offsetHeightAboveGround");
-      YoDouble comError = (YoDouble) scs.getVariable("positionError_comHeight");
+      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
+      YoDouble stepLength = (YoDouble) scs.findVariable("maxStepLengthCSG");
+      YoDouble offsetHeightAboveGround = (YoDouble) scs.findVariable("offsetHeightAboveGround");
+      YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
       stepLength.set(0.4);
       offsetHeightAboveGround.set(-0.1);
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);

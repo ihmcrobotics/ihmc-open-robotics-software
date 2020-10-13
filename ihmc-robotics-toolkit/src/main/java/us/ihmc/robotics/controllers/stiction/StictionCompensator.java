@@ -4,7 +4,7 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -71,12 +71,12 @@ public class StictionCompensator
 
    private final double controlDt;
 
-   public StictionCompensator(String prefix, StictionModel stictionModel, double controlDT, YoVariableRegistry parentRegistry)
+   public StictionCompensator(String prefix, StictionModel stictionModel, double controlDT, YoRegistry parentRegistry)
    {
       this.stictionModel = stictionModel;
       this.controlDt = controlDT;
 
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       movingVelocityThreshold = new DoubleParameter(prefix + "_MovingVelocityThreshold", registry, 1e-2);
       movingAccelerationThreshold = new DoubleParameter(prefix + "_MovingAccelerationThreshold", registry, 1e-1);

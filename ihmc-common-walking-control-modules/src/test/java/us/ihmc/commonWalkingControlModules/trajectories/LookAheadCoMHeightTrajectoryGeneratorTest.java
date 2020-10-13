@@ -33,7 +33,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -83,7 +83,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       double doubleSupportPercentageIn = 0.3;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
+      YoRegistry registry = new YoRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
 
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
@@ -112,7 +112,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
       scs.setDT(dt, 2);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.025);
 
@@ -272,13 +272,13 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       }
 
       scs.gotoInPointNow();
-      scs.tick(2);
+      scs.tickAndReadFromBuffer(2);
       scs.setInPoint();
       scs.cropBuffer();
 
-      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionX")).getData();
-      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionY")).getData();
-      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionZ")).getData();
+      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getBuffer();
+      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getBuffer();
+      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getBuffer();
 
       double maxChangePerTick = dt * 0.75;
       boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);
@@ -323,7 +323,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       double doubleSupportPercentageIn = 0.3;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
+      YoRegistry registry = new YoRegistry("LookAheadCoMHeightTrajectoryGeneratorTest");
 
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
@@ -357,7 +357,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, testingParameters);
       scs.setDT(dt, 1);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       CameraConfiguration cameraConfigurationOne = new CameraConfiguration("one");
@@ -492,13 +492,13 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       }
 
       scs.gotoInPointNow();
-      scs.tick(2);
+      scs.tickAndReadFromBuffer(2);
       scs.setInPoint();
       scs.cropBuffer();
 
-      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionX")).getData();
-      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionY")).getData();
-      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.getVariable("desiredCoMPositionZ")).getData();
+      double[] desiredCoMPositionXData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionX")).getBuffer();
+      double[] desiredCoMPositionYData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionY")).getBuffer();
+      double[] desiredCoMPositionZData = scs.getDataBuffer().getEntry(scs.findVariable("desiredCoMPositionZ")).getBuffer();
 
       double maxChangePerTick = dt * 0.75;
       boolean isDesiredCoMPositionXContinuous = ArrayTools.isContinuous(desiredCoMPositionXData, maxChangePerTick);
@@ -527,7 +527,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       }
    }
 
-   private void setupStuff(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   private void setupStuff(YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

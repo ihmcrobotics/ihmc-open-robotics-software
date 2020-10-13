@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoSingleContactImpulseCalculatorPool
 {
@@ -15,7 +15,7 @@ public class YoSingleContactImpulseCalculatorPool
    public YoSingleContactImpulseCalculatorPool(int initialCapacity, String prefix, ReferenceFrame rootFrame, RigidBodyBasics rootBodyA,
                                                ForwardDynamicsCalculator forwardDynamicsCalculatorA, RigidBodyBasics rootBodyB,
                                                ForwardDynamicsCalculator forwardDynamicsCalculatorB, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                               YoVariableRegistry registry)
+                                               YoRegistry registry)
    {
       pool = new RecyclingArrayList<>(initialCapacity, SupplierBuilder.indexedSupplier(identifier ->
       {

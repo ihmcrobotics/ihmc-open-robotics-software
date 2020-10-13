@@ -1,7 +1,10 @@
 #ifndef __controller_msgs__msg__QuixCrutchMessage__idl__
 #define __controller_msgs__msg__QuixCrutchMessage__idl__
 
+#include "controller_msgs/msg/./FlatStepTypeMessage_.idl"
 #include "controller_msgs/msg/./QuixMotionStateMessage_.idl"
+#include "controller_msgs/msg/./QuixSideStepDirectionMessage_.idl"
+#include "controller_msgs/msg/./QuixStairsStepTypeMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -22,6 +25,10 @@ module controller_msgs
         boolean start_behavior;
         controller_msgs::msg::dds::QuixMotionStateMessage requested_motion_state;
         boolean execute_behavior;
+        boolean continuous_walking;
+        controller_msgs::msg::dds::FlatStepTypeMessage flat_step_type;
+        controller_msgs::msg::dds::QuixStairsStepTypeMessage stairs_step_type;
+        controller_msgs::msg::dds::QuixSideStepDirectionMessage side_step_direction;
       };
     };
   };

@@ -14,12 +14,12 @@ public class AStarIterationData<N>
       return parentNode;
    }
 
-   void setParentNode(N parentNode)
+   public void setParentNode(N parentNode)
    {
       this.parentNode = parentNode;
    }
 
-   void clear()
+   public void clear()
    {
       this.parentNode = null;
       validChildNodes.clear();

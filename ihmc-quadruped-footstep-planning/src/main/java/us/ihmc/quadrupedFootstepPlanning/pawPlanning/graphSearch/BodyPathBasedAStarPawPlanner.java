@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch;
 
 import java.util.Arrays;
 
-import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
+import controller_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -32,7 +32,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNod
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.stepCost.PawNodeCostBuilder;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
@@ -49,11 +49,11 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    private PawStepPlannerGoal highLevelGoal;
 
    public BodyPathBasedAStarPawPlanner(String prefix, BodyPathPlanHolder bodyPathPlanner, PawStepPlannerParametersReadOnly parameters,
-                                       QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry parentRegistry)
+                                       QuadrupedXGaitSettingsReadOnly xGaitSettings, YoRegistry parentRegistry)
    {
       this.bodyPathPlanner = bodyPathPlanner;
 
-      YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
       PawNodeSnapper snapper = new SimplePlanarRegionPawNodeSnapper(parameters, true);
       CompositePawPlanningCostToGoHeuristics costToGoHeuristics = new CompositePawPlanningCostToGoHeuristics(parameters);
@@ -120,7 +120,7 @@ public class BodyPathBasedAStarPawPlanner implements PawStepPlanner
    }
 
    @Override
-   public void setGroundPlane(QuadrupedGroundPlaneMessage groundPlane)
+   public void setGroundPlane(GroundPlaneMessage groundPlane)
    {
 
    }

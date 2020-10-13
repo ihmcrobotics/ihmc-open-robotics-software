@@ -6,7 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrainOperatorTimingBehaviorStates>
@@ -22,7 +22,7 @@ public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrai
       PLANNING, WALKING
    }
 
-   public RoughTerrainTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node)
+   public RoughTerrainTimingBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node)
    {
       super(robotName, "RoughTerrainOperatorTimingBehavior", RoughTerrainOperatorTimingBehaviorStates.class, yoTime, ros2Node);
       timingBehavior = new TimingBehaviorHelper(robotName, ros2Node);

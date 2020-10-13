@@ -1,9 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.RandomICPSLAMParametersProperty;
+import us.ihmc.robotEnvironmentAwareness.ui.properties.SurfaceElementICPSLAMParametersProperty;
 
 public class SLAMAnchorPaneController extends REABasicUIController
 {
@@ -14,56 +19,74 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private TextField queuedBufferSize;
 
    @FXML
-   private TextField slamStatus;
+   private TextField frameComputationTime;
+
+   @FXML
+   private TextField slamComputationTime;
+
+   @FXML
+   private TextField averageComputationTime;
+
+   @FXML
+   private TextField listenerComputationTime;
+
+   @FXML
+   private TextField totalComputationTime;
 
    @FXML
    private ToggleButton latestFrameEnable;
 
    @FXML
    private ToggleButton octreeMapEnable;
-   
+
    @FXML
-   private CheckBox showNormal;
+   private ToggleButton showNormal;
 
    @FXML
    private ToggleButton sensorFrameEnable;
 
    @FXML
-   private Slider sourcePointsSlider;
-
-   @FXML
-   private Slider searchingSizeSlider;
-
-   @FXML
-   private Slider minimumOverlappedRatioSlider;
-
-   @FXML
-   private Slider windowMarginSlider;
-
-   @FXML
-   private Slider minimumInliersRatioSlider;
-
-   @FXML
    private Label stationaryFlag;
+   @FXML
+   private Label velocityLimitFlag;
+   
+   @FXML
+   private TextField speed;
 
-   private final RandomICPSLAMParametersProperty ihmcSLAMParametersProperty = new RandomICPSLAMParametersProperty(this, "ihmcSLAMParameters");
+   private final BooleanProperty sensorMovingProperty = new SimpleBooleanProperty(this, "sensorMovingProperty", false);
+   private final BooleanProperty velocityLimitProperty = new SimpleBooleanProperty(this, "velocityLimitProperty", false);
+
+
+   private final SurfaceElementICPSLAMParametersProperty ihmcSLAMParametersProperty = new SurfaceElementICPSLAMParametersProperty(this, "ihmcSLAMParameters");
 
    public SLAMAnchorPaneController()
    {
 
    }
 
-   private void updateSensorStatusViz(boolean moving)
+   private void updateSensorStatusViz(boolean notMoving)
    {
-      if (moving)
+      Platform.runLater(() ->
       {
-         stationaryFlag.setStyle("-fx-background-color: red;");
-      }
-      else
-      {
-         stationaryFlag.setStyle("-fx-background-color: green;");
-      }
+         if (!notMoving)
+            stationaryFlag.setStyle("-fx-background-color: red;");
+         else
+            stationaryFlag.setStyle("-fx-background-color: green;");
+      });
    }
+
+
+   private void updateVelocityLimitStatus(boolean notMoving)
+   {
+      Platform.runLater(() ->
+      {
+         if (!notMoving)
+            velocityLimitFlag.setStyle("-fx-background-color: red;");
+         else
+            velocityLimitFlag.setStyle("-fx-background-color: green;");
+      });
+   }
+
 
    @Override
    public void bindControls()
@@ -71,24 +94,39 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMEnable, enableSLAMButton.selectedProperty());
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.QueuedBuffers, queuedBufferSize.textProperty());
-      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMStatus, slamStatus.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.FrameComputationTime, frameComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMComputationTime, slamComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.AverageComputationTime, averageComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ListenerComputationTime, listenerComputationTime.textProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.TotalComputationTime, totalComputationTime.textProperty());
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowLatestFrame, latestFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeNormalMap, showNormal.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
 
-      ihmcSLAMParametersProperty.bindBidirectionalNumberOfSourcePoints(sourcePointsSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalMaximumICPSearchingSize(searchingSizeSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalMinimumOverlappedRatio(minimumOverlappedRatioSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalWindowSize(windowMarginSlider.valueProperty());
-      ihmcSLAMParametersProperty.bindBidirectionalMinimumInliersRatioOfKeyFrame(minimumInliersRatioSlider.valueProperty());
-
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SLAMParameters, ihmcSLAMParametersProperty);
 
       initializeSetup();
 
-      uiMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, (moving) -> updateSensorStatusViz(moving));
+      uiMessager.bindPropertyToTopic(SLAMModuleAPI.SensorStatus, sensorMovingProperty);
+
+      updateSensorStatusViz(false);
+      sensorMovingProperty.addListener((o, oldValue, newValue) ->
+      {
+         if (newValue != oldValue)
+            updateSensorStatusViz(newValue);
+      });
+      
+      uiMessager.bindPropertyToTopic(SLAMModuleAPI.VelocityLimitStatus, velocityLimitProperty);
+      updateVelocityLimitStatus(false);
+      velocityLimitProperty.addListener((o, oldValue, newValue) ->
+      {
+         if (newValue != oldValue)
+            updateVelocityLimitStatus(newValue);
+      });
+
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.SensorSpeed, speed.textProperty());
    }
 
    private void initializeSetup()
@@ -97,7 +135,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(SLAMModuleAPI.ShowLatestFrame, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.ShowSLAMOctreeMap, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.ShowSLAMSensorTrajectory, true);
-      uiMessager.broadcastMessage(SLAMModuleAPI.ShowPlanarRegionsMap, true);
    }
 
    @FXML
@@ -107,7 +144,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(SLAMModuleAPI.SLAMVizClear, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.SensorPoseHistoryClear, true);
    }
-   
+
    @FXML
    public void clearFootsteps()
    {

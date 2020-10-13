@@ -14,7 +14,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class EndEffectorWrenchEstimator
@@ -32,13 +32,13 @@ public class EndEffectorWrenchEstimator
    private final OneDoFJointBasics[] joints;
 
    public EndEffectorWrenchEstimator(String prefix, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
-                                     YoVariableRegistry registry)
+                                     YoRegistry registry)
    {
       this(prefix, base, endEffector, wrenchMeasurementFrame, OneDoFJointReadOnly::getTau, registry);
    }
 
    public EndEffectorWrenchEstimator(String name, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
-                                     JointTorqueProvider jointTorqueProvider, YoVariableRegistry registry)
+                                     JointTorqueProvider jointTorqueProvider, YoRegistry registry)
    {
       this.name = name;
       this.jointTorqueProvider = jointTorqueProvider;

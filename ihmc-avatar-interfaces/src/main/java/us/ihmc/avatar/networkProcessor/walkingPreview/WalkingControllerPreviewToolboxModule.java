@@ -15,8 +15,8 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 {
@@ -33,11 +33,11 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
          if (controller != null)
             controller.updateRobotConfigurationData(s.takeNextData());
       });
@@ -93,7 +93,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
       return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }
 
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

@@ -43,7 +43,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -67,7 +67,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.Kinematic
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -81,7 +81,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    /** Set this to true to use the EKF estimator */
    private static final boolean USE_EKF_ESTIMATOR = false;
 
-   private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
+   private final YoRegistry estimatorRegistry = new YoRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
@@ -123,7 +123,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public DRCEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              DRCRobotModel robotModel, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
-                             ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeRos2Node realtimeRos2Node,
+                             ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeROS2Node realtimeROS2Node,
                              PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter,
                              RobotVisualizer robotVisualizer, double gravity)
    {
@@ -150,8 +150,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       rawSensorOutputMap = sensorReader.getRawSensorOutputMap();
 
-      if (realtimeRos2Node != null)
-         controllerCrashPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node,
+      if (realtimeROS2Node != null)
+         controllerCrashPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
                                                                        ControllerCrashNotificationPacket.class, ROS2Tools.getControllerOutputTopic(robotName));
       else
          controllerCrashPublisher = null;
@@ -174,11 +174,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             forceSensorStateUpdater = null;
          }
 
-         if (realtimeRos2Node != null)
+         if (realtimeROS2Node != null)
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
             ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                           RequestWristForceSensorCalibrationPacket.class,
                                                           inputTopic,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
@@ -236,7 +236,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
       }
 
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
          if (sensorReaderFactory.useStateEstimator() && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
@@ -248,7 +248,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          factory.setDefinitionsToPublish(estimatorFullRobotModel);
          factory.setSensorSource(estimatorFullRobotModel, forceSensorDataHolderToSend, rawSensorOutputMap);
          factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
-         factory.setROS2Info(realtimeRos2Node, ROS2Tools.getControllerOutputTopic(robotName));
+         factory.setROS2Info(realtimeROS2Node, ROS2Tools.getControllerOutputTopic(robotName));
 
          estimatorController.setRawOutputWriter(factory.createRobotConfigurationDataPublisher());
       }
@@ -256,7 +256,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       firstTick.set(true);
       controllerDataValid.set(false);
 
-      estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
+      estimatorRegistry.addChild(estimatorController.getYoRegistry());
 
       this.outputWriter = outputWriter;
       if (this.outputWriter != null)
@@ -298,7 +298,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             {
                throw new RuntimeException("Did not find parameter file for EKF.");
             }
-            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoRegistry());
 
             estimatorController.addRobotController(ekfStateEstimator);
          }
@@ -327,7 +327,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             {
                throw new RuntimeException("Did not find parameter file for EKF.");
             }
-            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+            ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoRegistry());
 
             estimatorController.addRobotController(ekfStateEstimator);
          }
@@ -349,11 +349,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
    }
 
-   public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
+   public void setupHighLevelControllerCallback(String robotName, RealtimeROS2Node realtimeROS2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, outputTopic, subscriber ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, outputTopic, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
          LogTools.debug("Estimator recieved message: controller going to {}", HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
@@ -373,7 +373,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return estimatorRegistry;
    }

@@ -35,12 +35,12 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  */
 public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>, VirtualModelControlCommand<MomentumRateCommand>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private int commandId;
    /**
     * It defines the 6-components of the desired rate of change of momentum to achieve for the next
     * control.
@@ -82,6 +82,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    @Override
    public void set(MomentumRateCommand other)
    {
+      commandId = other.commandId;
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       momentumRateOfChange.set(other.momentumRateOfChange);
@@ -95,6 +96,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       weightMatrix.set(command.getWeightMatrix());
       command.getSelectionMatrix(selectionMatrix);
    }
@@ -115,7 +117,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param momentumRateOfChange the desired momentum rate at the center of mass expressed in world
-    *           frame. Not modified.
+    *                             frame. Not modified.
     */
    public void setMomentumRate(DMatrixRMaj momentumRateOfChange)
    {
@@ -130,10 +132,11 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param angularMomentumRateOfChange the desired angular momentum rate at the center of mass
-    *           expressed in world frame. Not modified.
-    * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not modified.
+    *                                    expressed in world frame. Not modified.
+    * @param linearMomentumRateOfChange  the desired linear momentum rate in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} or
-    *            {@code linearMomentumRateOfChange} is not expressed in world frame.
+    *                                         {@code linearMomentumRateOfChange} is not expressed in
+    *                                         world frame.
     */
    public void setMomentumRate(FrameVector3D angularMomentumRateOfChange, FrameVector3D linearMomentumRateOfChange)
    {
@@ -153,9 +156,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param angularMomentumRateOfChange the desired angular momentum rate at the center of mass
-    *           expressed in world frame. Not modified.
+    *                                    expressed in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} is not expressed
-    *            in world frame.
+    *                                         in world frame.
     */
    public void setAngularMomentumRate(FrameVector3D angularMomentumRateOfChange)
    {
@@ -171,7 +174,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * 
     * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed in
-    *            world frame.
+    *                                         world frame.
     */
    public void setLinearMomentumRate(FrameVector3D linearMomentumRateOfChange)
    {
@@ -187,7 +190,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * 
     * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not modified.
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed in
-    *            world frame.
+    *                                         world frame.
     */
    public void setLinearMomentumXYRate(FrameVector2D linearMomentumRateOfChange)
    {
@@ -227,7 +230,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
-    *           Not modified.
+    *                              Not modified.
     */
    public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
    {
@@ -311,7 +314,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param angular the weight to use for the angular part of this command. Not modified.
-    * @param linear the weight to use for the linear part of this command. Not modified.
+    * @param linear  the weight to use for the linear part of this command. Not modified.
     */
    public void setWeight(double angular, double linear)
    {
@@ -330,9 +333,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param angularX the weight to use for the x-axis of the angular part of this command.
     * @param angularY the weight to use for the y-axis of the angular part of this command.
     * @param angularZ the weight to use for the z-axis of the angular part of this command.
-    * @param linearX the weight to use for the x-axis of the linear part of this command.
-    * @param linearY the weight to use for the y-axis of the linear part of this command.
-    * @param linearZ the weight to use for the z-axis of the linear part of this command.
+    * @param linearX  the weight to use for the x-axis of the linear part of this command.
+    * @param linearY  the weight to use for the y-axis of the linear part of this command.
+    * @param linearZ  the weight to use for the z-axis of the linear part of this command.
     */
    public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
    {
@@ -349,7 +352,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param weightMatrix weight matrix holding the weights to use for each component of the desired
-    *           acceleration. Not modified.
+    *                     acceleration. Not modified.
     */
    public void setWeights(WeightMatrix6D weightMatrix)
    {
@@ -395,7 +398,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param angular the weights to use for the angular part of this command. Not modified.
-    * @param linear the weights to use for the linear part of this command. Not modified.
+    * @param linear  the weights to use for the linear part of this command. Not modified.
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
@@ -466,7 +469,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * </p>
     * 
     * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
-    *           reshaped to ensure proper size. Modified.
+    *                           reshaped to ensure proper size. Modified.
     */
    public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
    {
@@ -488,9 +491,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with this
     * command.
     * 
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed in.
+    * @param destinationFrame      the reference frame in which the selection matrix should be
+    *                              expressed in.
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
-    *           stored in. Modified.
+    *                              stored in. Modified.
     */
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
@@ -531,9 +535,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * Packs the value of the desired rate of change of momentum into two frame vectors.
     * 
     * @param angularPartToPack frame vector to pack the desired rate of change of angular momentum at
-    *           the center of mass. Modified.
-    * @param linearPartToPack frame vector to pack the desired rate of change of linear momentum.
-    *           Modified.
+    *                          the center of mass. Modified.
+    * @param linearPartToPack  frame vector to pack the desired rate of change of linear momentum.
+    *                          Modified.
     */
    public void getMomentumRate(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack)
    {
@@ -553,6 +557,18 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -563,6 +579,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       {
          MomentumRateCommand other = (MomentumRateCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!MatrixFeatures_DDRM.isEquals(momentumRateOfChange, other.momentumRateOfChange))
             return false;
          if (!weightMatrix.equals(other.weightMatrix))

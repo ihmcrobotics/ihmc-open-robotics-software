@@ -1,5 +1,6 @@
 package us.ihmc.avatar.slamTools;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
@@ -7,23 +8,33 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import gnu.trove.list.array.TIntArrayList;
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import cern.colt.list.BooleanArrayList;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.OutputCalculator;
 
 /**
  * see {@link LevenbergMarquardtParameterOptimizer}.
@@ -80,6 +91,66 @@ public class LevenbergMarquardtICPTest
       };
       assertTrue(true);
    }
+
+   @Test
+   public void testForwardBackwardsInputConverter()
+   {
+      Function<DMatrixRMaj, RigidBodyTransform> spatialInputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(false);
+      Function<RigidBodyTransformReadOnly, DMatrixRMaj> inverseSpatialInputFunction = LevenbergMarquardtParameterOptimizer.createInverseSpatialInputFunction(false);
+
+      Random random = new Random(1738L);
+      for (int i = 0; i < 1000; i++)
+      {
+         RigidBodyTransform transformOriginal = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+         DMatrixRMaj input = inverseSpatialInputFunction.apply(transformOriginal);
+         RigidBodyTransform reconstructedTransform = spatialInputFunction.apply(input);
+
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(transformOriginal.getTranslation(), reconstructedTransform.getTranslation(), 1e-7);
+         assertTrue(AngleTools.computeAngleDifferenceMinusPiToPi(transformOriginal.getRotation().getYaw(), reconstructedTransform.getRotation().getYaw()) < 1e-7);
+//         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformOriginal, reconstructedTransform, 1e-7);
+
+         DMatrixRMaj randomInput = new DMatrixRMaj(4, 1);
+         randomInput.set(0, RandomNumbers.nextDouble(random, 100));
+         randomInput.set(1, RandomNumbers.nextDouble(random, 100));
+         randomInput.set(2, RandomNumbers.nextDouble(random, 100));
+         randomInput.set(3, RandomNumbers.nextDouble(random, Math.PI));
+
+         transformOriginal = spatialInputFunction.apply(randomInput);
+         input = inverseSpatialInputFunction.apply(transformOriginal);
+
+         EjmlUnitTests.assertEquals(randomInput, input, 1e-7);
+      }
+
+
+      spatialInputFunction = LevenbergMarquardtParameterOptimizer.createSpatialInputFunction(true);
+      inverseSpatialInputFunction = LevenbergMarquardtParameterOptimizer.createInverseSpatialInputFunction(true);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         RigidBodyTransform transformOriginal = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+         DMatrixRMaj input = inverseSpatialInputFunction.apply(transformOriginal);
+         RigidBodyTransform reconstructedTransform = spatialInputFunction.apply(input);
+
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformOriginal, reconstructedTransform, 1e-7);
+
+         DMatrixRMaj randomInput = new DMatrixRMaj(6, 1);
+         randomInput.set(0, RandomNumbers.nextDouble(random, 100));
+         randomInput.set(1, RandomNumbers.nextDouble(random, 100));
+         randomInput.set(2, RandomNumbers.nextDouble(random, 100));
+         randomInput.set(3, RandomNumbers.nextDouble(random, Math.PI));
+         randomInput.set(4, RandomNumbers.nextDouble(random, Math.PI));
+         randomInput.set(5, RandomNumbers.nextDouble(random, Math.PI));
+
+         transformOriginal = spatialInputFunction.apply(randomInput);
+         input = inverseSpatialInputFunction.apply(transformOriginal);
+
+         Quaternion orientationA = new Quaternion(randomInput.get(3), randomInput.get(4), randomInput.get(5));
+         Quaternion orientationB = new Quaternion(input.get(3), input.get(4), input.get(5));
+
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientationA, orientationB, 1e-7);
+      }
+   }
+
 
    @Test
    public void testVisualization()
@@ -284,7 +355,7 @@ public class LevenbergMarquardtICPTest
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
 
-      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
+      OutputCalculator outputCalculator = new OutputCalculator()
       {
          @Override
          public DMatrixRMaj apply(DMatrixRMaj inputParameter)
@@ -320,7 +391,6 @@ public class LevenbergMarquardtICPTest
          }
          System.out.println(i + " " + optimizer.getQuality());
       }
-      LogTools.info("Computation is done " + optimizer.getComputationTime() + " sec.");
       System.out.println("is solved? " + isSolved + " " + optimizer.getIteration() + " " + optimizer.getQuality());
       optimizer.getOptimalParameter().print();
 

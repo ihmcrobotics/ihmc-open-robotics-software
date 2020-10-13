@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -31,7 +31,7 @@ public class PolynomialFittingEncoderProcessor extends AbstractEncoderProcessor
    private double timespan = Double.NaN;
 
    public PolynomialFittingEncoderProcessor(String name, YoInteger rawPosition, YoDouble time, double distancePerTick, int nEncoderEvents,
-           int fitOrder, int skipFactor, YoVariableRegistry registry)
+           int fitOrder, int skipFactor, YoRegistry registry)
    {
       super(name, rawPosition, time, distancePerTick, registry);
 

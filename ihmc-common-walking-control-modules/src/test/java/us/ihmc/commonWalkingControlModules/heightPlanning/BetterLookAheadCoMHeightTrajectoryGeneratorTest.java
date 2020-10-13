@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,10 +21,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-
-import static us.ihmc.robotics.Assert.assertTrue;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
 {
@@ -212,7 +213,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
                         boolean inTransfer)
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       Robot robot = new Robot("dummy");
 
       SideDependentList<PoseReferenceFrame> soleFrames = new SideDependentList<>();

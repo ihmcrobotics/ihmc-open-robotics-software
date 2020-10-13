@@ -12,18 +12,15 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolboxCenterOfMassMessage> implements Settable<KinematicsToolboxCenterOfMassMessage>, EpsilonComparable<KinematicsToolboxCenterOfMassMessage>
 {
-
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-
    /**
             * Specifies the desired center of mass position.
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
-
    /**
             * The selection matrix is used to determinate which degree of freedom of the center of mass
             * should be controlled.
@@ -35,7 +32,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
             * if not defined otherwise.
             */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
-
    /**
             * Specifies the priority of controller the position along each axis independently.
             * If no frame is provided, the weight matrix will be applied in the center of mass frame which is
@@ -45,14 +41,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
    public KinematicsToolboxCenterOfMassMessage()
    {
-
-
       desired_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-
       selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-
       weights_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();
-
    }
 
    public KinematicsToolboxCenterOfMassMessage(KinematicsToolboxCenterOfMassMessage other)
@@ -63,17 +54,12 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
    public void set(KinematicsToolboxCenterOfMassMessage other)
    {
-
       sequence_id_ = other.sequence_id_;
 
-
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
-
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
-
       controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
    }
-
 
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -91,7 +77,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    }
 
 
-
    /**
             * Specifies the desired center of mass position.
             * The data is assumed to be expressed in world frame.
@@ -100,7 +85,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    {
       return desired_position_in_world_;
    }
-
 
 
    /**
@@ -117,7 +101,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    {
       return selection_matrix_;
    }
-
 
 
    /**
@@ -148,14 +131,10 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       if(other == null) return false;
       if(other == this) return true;
 
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-
       if (!this.desired_position_in_world_.epsilonEquals(other.desired_position_in_world_, epsilon)) return false;
-
       if (!this.selection_matrix_.epsilonEquals(other.selection_matrix_, epsilon)) return false;
-
       if (!this.weights_.epsilonEquals(other.weights_, epsilon)) return false;
 
       return true;
@@ -170,14 +149,10 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
       KinematicsToolboxCenterOfMassMessage otherMyClass = (KinematicsToolboxCenterOfMassMessage) other;
 
-
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-
       if (!this.desired_position_in_world_.equals(otherMyClass.desired_position_in_world_)) return false;
-
       if (!this.selection_matrix_.equals(otherMyClass.selection_matrix_)) return false;
-
       if (!this.weights_.equals(otherMyClass.weights_)) return false;
 
       return true;
@@ -189,16 +164,12 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxCenterOfMassMessage {");
-
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-
       builder.append("desired_position_in_world=");
       builder.append(this.desired_position_in_world_);      builder.append(", ");
-
       builder.append("selection_matrix=");
       builder.append(this.selection_matrix_);      builder.append(", ");
-
       builder.append("weights=");
       builder.append(this.weights_);
       builder.append("}");

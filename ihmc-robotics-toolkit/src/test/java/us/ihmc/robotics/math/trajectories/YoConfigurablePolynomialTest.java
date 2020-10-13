@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
@@ -14,7 +14,7 @@ public class YoConfigurablePolynomialTest
    @Test
    public void test8DoF()
    {
-      YoConfigurablePolynomial polynomial = new YoConfigurablePolynomial("test", 8, new YoVariableRegistry("test"));
+      YoConfigurablePolynomial polynomial = new YoConfigurablePolynomial("test", 8, new YoRegistry("test"));
 
       Point2D point0 = new Point2D(0.007, 0.919);
       Vector2D slope0 = new Vector2D(0.007, 0.0);
@@ -64,7 +64,7 @@ public class YoConfigurablePolynomialTest
    @Test
    public void testTrickyCase()
    {
-      YoConfigurablePolynomial polynomial = new YoConfigurablePolynomial("test", 8, new YoVariableRegistry("test"));
+      YoConfigurablePolynomial polynomial = new YoConfigurablePolynomial("test", 8, new YoRegistry("test"));
 
       Point2D point0 = new Point2D(0.5716, 0.919);
 //      Vector2D slope0 = new Vector2D(0.007, 0.0);

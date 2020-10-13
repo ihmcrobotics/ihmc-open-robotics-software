@@ -6,7 +6,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class SearchForDoorBehavior extends AbstractBehavior
 {
@@ -17,7 +17,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
 
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
 
-   public SearchForDoorBehavior(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SearchForDoorBehavior(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, yoNamePrefix, ros2Node);
 

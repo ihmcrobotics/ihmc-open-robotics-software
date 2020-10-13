@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.ObjectWeightPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ObjectWeightBehavior extends AbstractBehavior
@@ -14,7 +14,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    private ObjectWeightPacket objectWeightPacket;
    private IHMCROS2Publisher<ObjectWeightPacket> publisher;
 
-   public ObjectWeightBehavior(String robotName, Ros2Node ros2Node)
+   public ObjectWeightBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
 

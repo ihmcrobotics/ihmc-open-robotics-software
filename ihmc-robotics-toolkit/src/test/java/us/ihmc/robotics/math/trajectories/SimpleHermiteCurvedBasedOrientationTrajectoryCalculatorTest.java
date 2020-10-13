@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculatorTest
 {
@@ -37,7 +37,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculatorTest
       System.out.println("## " + initialOrientation + " " + finalOrientation);
 
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
-                                                                                                                 new YoVariableRegistry("null"));
+                                                                                                                 new YoRegistry("null"));
       traj.setTrajectoryTime(endIntegrationTime - startIntegrationTime);
       traj.setInitialConditions(initialOrientation, initialAngularVelocity);
       traj.setFinalConditions(finalOrientation, finalAngularVelocity);

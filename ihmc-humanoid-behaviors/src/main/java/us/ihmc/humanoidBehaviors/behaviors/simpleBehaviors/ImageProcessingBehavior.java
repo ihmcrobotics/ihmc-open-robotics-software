@@ -13,13 +13,13 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {
    private final CompressedVideoDataServer videoDataServer;
 
-   public ImageProcessingBehavior(String robotName, String namePrefix, Ros2Node ros2Node)
+   public ImageProcessingBehavior(String robotName, String namePrefix, ROS2Node ros2Node)
    {
       super(robotName, namePrefix, ros2Node);
 

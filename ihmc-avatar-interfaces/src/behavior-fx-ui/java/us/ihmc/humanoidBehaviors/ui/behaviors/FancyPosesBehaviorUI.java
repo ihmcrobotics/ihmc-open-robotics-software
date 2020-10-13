@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 public class FancyPosesBehaviorUI extends BehaviorUIInterface
 {
@@ -17,7 +17,7 @@ public class FancyPosesBehaviorUI extends BehaviorUIInterface
    private Messager behaviorMessager;
 
    @Override
-   public void init(SubScene sceneNode, Pane visualizationPane, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
    }
@@ -74,5 +74,11 @@ public class FancyPosesBehaviorUI extends BehaviorUIInterface
    public void requestShutdownPose()
    {
       behaviorMessager.submitMessage(FancyPosesBehavior.API.GoToShutdownPose, false);
+   }
+
+   @Override
+   public void destroy()
+   {
+
    }
 }

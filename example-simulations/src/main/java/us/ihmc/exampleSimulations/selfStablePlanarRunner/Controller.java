@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.selfStablePlanarRunner;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class Controller implements RobotController {
@@ -9,7 +9,7 @@ public class Controller implements RobotController {
     private YoDouble q_wheel, qd_wheel, qdd_wheel, tau_wheel;
     private YoDouble q_l_knee, qd_l_knee, qdd_l_knee, tau_l_knee;
     private YoDouble q_r_knee, qd_r_knee, qdd_r_knee, tau_r_knee;
-    private final YoVariableRegistry registry = new YoVariableRegistry("Controller");
+    private final YoRegistry registry = new YoRegistry("Controller");
     private final YoDouble b_wheel = new YoDouble("b_wheel", registry);
     private final YoDouble qd_d_wheel = new YoDouble("qd_d_wheel", registry);
     private final YoDouble k_knee = new YoDouble("k_knee", registry);
@@ -24,18 +24,18 @@ public class Controller implements RobotController {
     }
     
     private void initControl() {
-	q_wheel   = (YoDouble) robot.getVariable(  "q_driving_wheel");
-	qd_wheel  = (YoDouble) robot.getVariable( "qd_driving_wheel");
-	qdd_wheel = (YoDouble) robot.getVariable("qdd_driving_wheel");
-	tau_wheel = (YoDouble) robot.getVariable("tau_driving_wheel");
-	q_l_knee   = (YoDouble) robot.getVariable(  "q_l_knee");
-	qd_l_knee  = (YoDouble) robot.getVariable( "qd_l_knee");
-	qdd_l_knee = (YoDouble) robot.getVariable("qdd_l_knee");
-	tau_l_knee = (YoDouble) robot.getVariable("tau_l_knee");
-	q_r_knee   = (YoDouble) robot.getVariable(  "q_r_knee");
-	qd_r_knee  = (YoDouble) robot.getVariable( "qd_r_knee");
-	qdd_r_knee = (YoDouble) robot.getVariable("qdd_r_knee");
-	tau_r_knee = (YoDouble) robot.getVariable("tau_r_knee");
+	q_wheel   = (YoDouble) robot.findVariable(  "q_driving_wheel");
+	qd_wheel  = (YoDouble) robot.findVariable( "qd_driving_wheel");
+	qdd_wheel = (YoDouble) robot.findVariable("qdd_driving_wheel");
+	tau_wheel = (YoDouble) robot.findVariable("tau_driving_wheel");
+	q_l_knee   = (YoDouble) robot.findVariable(  "q_l_knee");
+	qd_l_knee  = (YoDouble) robot.findVariable( "qd_l_knee");
+	qdd_l_knee = (YoDouble) robot.findVariable("qdd_l_knee");
+	tau_l_knee = (YoDouble) robot.findVariable("tau_l_knee");
+	q_r_knee   = (YoDouble) robot.findVariable(  "q_r_knee");
+	qd_r_knee  = (YoDouble) robot.findVariable( "qd_r_knee");
+	qdd_r_knee = (YoDouble) robot.findVariable("qdd_r_knee");
+	tau_r_knee = (YoDouble) robot.findVariable("tau_r_knee");
 	
 	qd_d_wheel.set(6.0);
 	b_wheel.set(100.0);
@@ -62,7 +62,7 @@ public class Controller implements RobotController {
     public void initialize() {
     }
 
-    public YoVariableRegistry getYoVariableRegistry() {
+    public YoRegistry getYoRegistry() {
 	return registry;
     }
 

@@ -6,12 +6,11 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class FootstepPlanWithTextGraphic extends Group
 {
@@ -32,39 +30,46 @@ public class FootstepPlanWithTextGraphic extends Group
    private final ArrayList<LabelGraphic> existingLabels = new ArrayList<>();
    private final ArrayList<LabelGraphic> labelsToAdd = new ArrayList<>();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
-   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
+   private final ExecutorService executorService = ThreadTools.newSingleThreadExecutor(getClass().getSimpleName());
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
    private Mesh mesh;
    private Material material;
+   private SideDependentList<Color> footstepColors = new SideDependentList<>();
 
-   public FootstepPlanWithTextGraphic(DRCRobotModel robotModel)
+   public FootstepPlanWithTextGraphic()
    {
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         robotModel.getContactPointParameters().getControllerFootGroundContactPoints().get(robotSide).forEach(point2D -> defaultFoothold.addVertex(point2D));
-         defaultFoothold.update();
-         defaultContactPoints.put(robotSide, defaultFoothold);
-      }
+      footstepColors.set(RobotSide.LEFT, Color.RED);
+      footstepColors.set(RobotSide.RIGHT, Color.GREEN);
 
       getChildren().addAll(meshView);
 
       animationTimer.start();
    }
 
+   public void setTransparency(double opacity)
+   {
+      footstepColors.set(RobotSide.LEFT, new Color(Color.RED.getRed(), Color.RED.getGreen(), Color.RED.getBlue(), opacity));
+      footstepColors.set(RobotSide.RIGHT, new Color(Color.GREEN.getRed(), Color.GREEN.getGreen(), Color.GREEN.getBlue(), opacity));
+   }
+
+   public void setColor(RobotSide side, Color color)
+   {
+      double priorOpacity = footstepColors.get(side).getOpacity();
+      footstepColors.set(side, new Color(color.getRed(), color.getGreen(), color.getBlue(), priorOpacity));
+   }
+
    /**
     * To process in parallel.
     */
-   public void generateMeshesAsynchronously(ArrayList<FootstepForUI> plan)
+   public void generateMeshesAsynchronously(ArrayList<MinimalFootstep> plan)
    {
       executorService.submit(() -> {
          generateMeshes(plan);
       });
    }
 
-   public void generateMeshes(ArrayList<FootstepForUI> message)
+   public void generateMeshes(ArrayList<MinimalFootstep> message)
    {
       meshBuilder.clear();
 
@@ -74,16 +79,13 @@ public class FootstepPlanWithTextGraphic extends Group
       ArrayList<LabelGraphic> tempLabelsToAdd = new ArrayList<>();
       for (int i = 0; i < message.size(); i++)
       {
-         FootstepForUI footstepForUI = message.get(i);
-         Color regionColor = footstepForUI.getSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
+         MinimalFootstep minimalFootstep = message.get(i);
+         Color regionColor = footstepColors.get(minimalFootstep.getSide());
 
-         footstepForUI.getSolePoseInWorld().get(transformToWorld);
+         minimalFootstep.getSolePoseInWorld().get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
-//         if (footstep.hasFoothold()) // TODO: Add foothold support
-//            footstep.getFoothold(foothold);
-//         else
-            foothold.set(defaultContactPoints.get(footstepForUI.getSide()));
+         foothold.set(minimalFootstep.getFoothold());
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)
@@ -94,8 +96,8 @@ public class FootstepPlanWithTextGraphic extends Group
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
 
-         LabelGraphic labelGraphic = labelRecycler.computeIfAbsent(Pair.of(footstepForUI.getDescription(), i), key -> new LabelGraphic(key.getLeft()));
-         labelGraphic.getPose().set(footstepForUI.getSolePoseInWorld());
+         LabelGraphic labelGraphic = labelRecycler.computeIfAbsent(Pair.of(minimalFootstep.getDescription(), i), key -> new LabelGraphic(key.getLeft()));
+         labelGraphic.getPose().set(minimalFootstep.getSolePoseInWorld());
          labelGraphic.update();
          tempLabelsToAdd.add(labelGraphic);
       }
@@ -136,5 +138,10 @@ public class FootstepPlanWithTextGraphic extends Group
    public void clear()
    {
       generateMeshes(new ArrayList<>());
+   }
+
+   public void destroy()
+   {
+      executorService.shutdownNow();
    }
 }

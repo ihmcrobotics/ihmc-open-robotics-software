@@ -18,7 +18,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RateLimitedYoFrameQuaternionTest
 {
@@ -36,7 +36,7 @@ public class RateLimitedYoFrameQuaternionTest
       Random random = new Random(46363);
       double dt = 0.004;
       MutableDouble maxRate = new MutableDouble();
-      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      YoRegistry registry = new YoRegistry("dummy");
       RateLimitedYoFrameQuaternion rateLimitedQuaternion = new RateLimitedYoFrameQuaternion("blop", "", registry, (DoubleProvider) () -> maxRate.doubleValue(),
                                                                                             dt, ReferenceFrame.getWorldFrame());
       rateLimitedQuaternion.update(new Quaternion());

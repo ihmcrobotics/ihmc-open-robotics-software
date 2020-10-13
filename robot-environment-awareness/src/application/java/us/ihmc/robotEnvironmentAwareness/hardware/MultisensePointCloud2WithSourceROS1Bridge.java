@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -24,7 +24,7 @@ public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicS
 {
    private static final MultisenseInformation multisense = MultisenseInformation.CART;
    
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
@@ -36,7 +36,7 @@ public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicS
       rosMainNode.attachSubscriber(MultisenseInformation.getLidarScanTopicName(), this);
       rosMainNode.execute();
 
-      lidarScanPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
    }
 
    @Override

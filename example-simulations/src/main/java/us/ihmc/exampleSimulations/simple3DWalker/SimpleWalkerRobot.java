@@ -21,18 +21,11 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.JointWrenchSensor;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SimpleWalkerRobot extends Robot
 {
@@ -97,8 +90,8 @@ public class SimpleWalkerRobot extends Robot
       bodyJoint = new FloatingJoint("body", bodyOffset, this, true);
       Link bodyLink = getBodyLink();
 
-      bodyVelocity = new YoFrameVector3D("bodyVelocity", worldFrame, getRobotsYoVariableRegistry());
-      bodyAcceleration = new YoFrameVector3D("bodyAcceleration", worldFrame, getRobotsYoVariableRegistry());
+      bodyVelocity = new YoFrameVector3D("bodyVelocity", worldFrame, getRobotsYoRegistry());
+      bodyAcceleration = new YoFrameVector3D("bodyAcceleration", worldFrame, getRobotsYoRegistry());
 
       Quaternion bodyRotation = new Quaternion();
       bodyFrame = new ReferenceFrame("bodyFrame", ReferenceFrame.getWorldFrame())
@@ -243,9 +236,9 @@ public class SimpleWalkerRobot extends Robot
             anklePitchJoint.addJointWrenchSensor(ankleWrenchSensor);
 
 
-            GroundContactPointBasedWrenchCalculator gcPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(robotSide.getSideNameFirstLetter()+"gcWrench", gCpoints.get(robotSide), ankleRollJoint, new RigidBodyTransform(), getRobotsYoVariableRegistry());
+            GroundContactPointBasedWrenchCalculator gcPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(robotSide.getSideNameFirstLetter()+"gcWrench", gCpoints.get(robotSide), ankleRollJoint, new RigidBodyTransform(), getRobotsYoRegistry());
             gcPointBasedWrenchCalculators.put(robotSide,gcPointBasedWrenchCalculator);
-            YoFixedFrameWrench yoWrench = new YoFixedFrameWrench(robotSide.getSideNameFirstLetter()+ "wrench",ReferenceFrame.getWorldFrame(),ReferenceFrame.getWorldFrame(),getRobotsYoVariableRegistry());
+            YoFixedFrameWrench yoWrench = new YoFixedFrameWrench(robotSide.getSideNameFirstLetter()+ "wrench",ReferenceFrame.getWorldFrame(),ReferenceFrame.getWorldFrame(),getRobotsYoRegistry());
             yoWrenchs.put(robotSide,yoWrench);
 
             YoGraphicVector reactionForceViz = new YoGraphicVector(robotSide.getSideNameFirstLetter()+"ReactionForceViz",  gCpoints.get(robotSide).get(0).getYoPosition(), yoWrenchs.get(robotSide).getLinearPart(),
@@ -268,7 +261,7 @@ public class SimpleWalkerRobot extends Robot
       double groundBxy = 1e2;
       double groundKz = 80.0;
       double groundBz = 500.0;
-      LinearGroundContactModel ground = new LinearGroundContactModel(this, groundKxy, groundBxy, groundKz, groundBz, this.getRobotsYoVariableRegistry());
+      LinearGroundContactModel ground = new LinearGroundContactModel(this, groundKxy, groundBxy, groundKz, groundBz, this.getRobotsYoRegistry());
 
 
 
@@ -453,9 +446,9 @@ public class SimpleWalkerRobot extends Robot
 
    public double getAnkleYawVelocity(RobotSide robotSide) { return ankleYawJoints.get(robotSide).getQDYoVariable().getDoubleValue();}
 
-   YoDouble xInWorldToPack = new YoDouble( "AnkleX", getRobotsYoVariableRegistry());
-   YoDouble yInWorldToPack = new YoDouble("AnkleY", getRobotsYoVariableRegistry());
-   YoDouble zInWorldToPack = new YoDouble("AnkleZ", getRobotsYoVariableRegistry());
+   YoDouble xInWorldToPack = new YoDouble( "AnkleX", getRobotsYoRegistry());
+   YoDouble yInWorldToPack = new YoDouble("AnkleY", getRobotsYoRegistry());
+   YoDouble zInWorldToPack = new YoDouble("AnkleZ", getRobotsYoRegistry());
 
    public double getAnklePositionInWorldX(RobotSide robotSide)
    {

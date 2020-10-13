@@ -1,30 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane minWidth="-Infinity" prefHeight="240.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane minWidth="-Infinity" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <FlowPane prefWrapLength="1300.0">
+        <FlowPane prefWrapLength="1650.0">
          <children>
             <VBox alignment="CENTER">
                <children>
-                  <Button fx:id="placeGoalButton" mnemonicParsing="false" onAction="#placeGoalButton" text="Place Goal">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button fx:id="reset" mnemonicParsing="false" onAction="#reset" text="Reset">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
-                     </VBox.margin>
+                  <FlowPane alignment="CENTER" prefWrapLength="100.0">
+                     <children>
+                        <Button fx:id="placeGoalButton" mnemonicParsing="false" onAction="#placeGoalButton" text="Place Goal">
+                           <FlowPane.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </FlowPane.margin>
+                        </Button>
+                        <Button fx:id="reset" mnemonicParsing="false" onAction="#reset" text="Reset">
+                           <FlowPane.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </FlowPane.margin>
+                        </Button>
+                     </children>
+                  </FlowPane>
+                  <Button fx:id="publishSupportRegions" mnemonicParsing="false" onAction="#publishSupportRegions" text="Publish Support Regions">
+                     <font>
+                        <Font size="11.0" />
+                     </font>
                   </Button>
                   <Separator prefWidth="200.0">
                      <VBox.margin>
@@ -77,6 +81,16 @@
             <VBox>
                <children>
                   <Button fx:id="saveFootstepPlanningParameters" mnemonicParsing="false" onAction="#saveFootstepPlanningParameters" text="Save">
+                     <VBox.margin>
+                        <Insets bottom="5.0" top="5.0" />
+                     </VBox.margin>
+                  </Button>
+               </children>
+            </VBox>
+            <TableView fx:id="swingPlannerParameterTable" prefHeight="233.0" prefWidth="419.0" />
+            <VBox>
+               <children>
+                  <Button fx:id="saveSwingPlannerParameters" mnemonicParsing="false" onAction="#saveSwingPlannerParameters" text="Save">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />
                      </VBox.margin>

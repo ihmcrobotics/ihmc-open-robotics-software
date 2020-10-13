@@ -8,16 +8,12 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SLAMFrameYoGraphicsManager
 {
@@ -43,7 +39,7 @@ public class SLAMFrameYoGraphicsManager
    private final YoGraphicVector[] yoGraphicSurfelNormals;
 
    public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, AppearanceDefinition surfelAppearance,
-                                     YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry, boolean visualizeSurfel)
+                                     YoRegistry registry, YoGraphicsListRegistry graphicsRegistry, boolean visualizeSurfel)
    {
       slamFrame = frame;
       this.visualizeSurfel = visualizeSurfel;
@@ -53,10 +49,10 @@ public class SLAMFrameYoGraphicsManager
       yoGraphicSensorPose = new YoGraphicCoordinateSystem(prefix + "_SensorPoseViz", yoFrameSensorPose, 0.1, appearance);
       yoGraphicListRegistry.add(yoGraphicSensorPose);
 
-      if (size < 0 || slamFrame.getPointCloud().length < size)
+      if (size < 0 || slamFrame.getCorrectedPointCloudInWorld().size() < size)
       {
-         sizeOfPointCloud = slamFrame.getPointCloud().length;
-         for (int i = 0; i < slamFrame.getPointCloud().length; i++)
+         sizeOfPointCloud = slamFrame.getCorrectedPointCloudInWorld().size();
+         for (int i = 0; i < slamFrame.getCorrectedPointCloudInWorld().size(); i++)
          {
             indicesArray.add(i);
          }
@@ -67,7 +63,7 @@ public class SLAMFrameYoGraphicsManager
          sizeOfPointCloud = size;
          while (indicesArray.size() != sizeOfPointCloud)
          {
-            int selectedIndex = selector.nextInt(slamFrame.getPointCloud().length);
+            int selectedIndex = selector.nextInt(slamFrame.getCorrectedPointCloudInWorld().size());
             if (!indicesArray.contains(selectedIndex))
             {
                indicesArray.add(selectedIndex);
@@ -108,7 +104,7 @@ public class SLAMFrameYoGraphicsManager
       graphicsRegistry.registerYoGraphicsList(yoGraphicListRegistry);
    }
 
-   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, YoVariableRegistry registry,
+   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, YoRegistry registry,
                                      YoGraphicsListRegistry graphicsRegistry)
    {
       this(prefix, frame, size, appearance, appearance, registry, graphicsRegistry, false);
@@ -116,11 +112,11 @@ public class SLAMFrameYoGraphicsManager
 
    public void updateGraphics()
    {
-      yoFrameSensorPose.set(slamFrame.getSensorPose());
-      Point3DReadOnly[] pointCloud = slamFrame.getPointCloud();
+      yoFrameSensorPose.set(slamFrame.getCorrectedSensorPoseInWorld());
+      List<? extends Point3DReadOnly> pointCloud = slamFrame.getCorrectedPointCloudInWorld();
       for (int i = 0; i < sizeOfPointCloud; i++)
       {
-         yoFramePointCloud[i].set(pointCloud[indicesArray.get(i)]);
+         yoFramePointCloud[i].set(pointCloud.get(indicesArray.get(i)));
       }
 
       if (visualizeSurfel)

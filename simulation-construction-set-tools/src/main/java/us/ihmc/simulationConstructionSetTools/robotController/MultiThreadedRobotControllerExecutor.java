@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
@@ -26,7 +26,7 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
    
    private final Robot simulatedRobot;
 
-   public MultiThreadedRobotControllerExecutor(Robot simulatedRobot, MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoVariableRegistry parentRegistry)
+   public MultiThreadedRobotControllerExecutor(Robot simulatedRobot, MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoRegistry parentRegistry)
    {
       this.ticksPerSimulationTick = ticksPerSimulationTick;
       this.skipFirstControlCycle = skipFirstControlCycle;
@@ -34,7 +34,7 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
       this.controlExecutor = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(robotControlElement.getName()));
       this.simulatedRobot = simulatedRobot;
 
-      YoVariableRegistry elementRegistry = robotControlElement.getYoVariableRegistry();
+      YoRegistry elementRegistry = robotControlElement.getYoVariableRegistry();
       if(elementRegistry!=null)
       {
               this.registry = new MirroredYoVariableRegistry(elementRegistry);

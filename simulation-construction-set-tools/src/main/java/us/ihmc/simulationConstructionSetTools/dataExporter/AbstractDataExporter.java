@@ -129,7 +129,7 @@ public abstract class AbstractDataExporter implements ActionListener
          int colorIndex = 0;
          for (String variableName : dataVsTimeVariableNames)
          {
-            YoVariable<?> variable = scs.getVariable(variableName);
+            YoVariable variable = scs.findVariable(variableName);
             if (variable == null)
             {
                System.err.println("Couldn't find variable named " + variableName);
@@ -153,8 +153,8 @@ public abstract class AbstractDataExporter implements ActionListener
                continue;
             }
 
-            YoVariable<?> variableOne = scs.getVariable(variableNames[0]);
-            YoVariable<?> variableTwo = scs.getVariable(variableNames[1]);
+            YoVariable variableOne = scs.findVariable(variableNames[0]);
+            YoVariable variableTwo = scs.findVariable(variableNames[1]);
 
             if (variableOne == null)
             {

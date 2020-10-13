@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.sensorProcessors;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ElasticityCompensatorYoVariable extends YoDouble implements ProcessingYoVariable
@@ -13,12 +13,12 @@ public class ElasticityCompensatorYoVariable extends YoDouble implements Process
    private final DoubleProvider jointTau;
    private final DoubleProvider maximumDeflection;
 
-   public ElasticityCompensatorYoVariable(String name, DoubleProvider stiffness, DoubleProvider maximumDeflection, YoVariableRegistry registry)
+   public ElasticityCompensatorYoVariable(String name, DoubleProvider stiffness, DoubleProvider maximumDeflection, YoRegistry registry)
    {
       this(name, stiffness, maximumDeflection, null, null, registry);
    }
 
-   public ElasticityCompensatorYoVariable(String name, DoubleProvider stiffness, DoubleProvider maximumDeflection, DoubleProvider rawJointPosition, DoubleProvider jointTau, YoVariableRegistry registry)
+   public ElasticityCompensatorYoVariable(String name, DoubleProvider stiffness, DoubleProvider maximumDeflection, DoubleProvider rawJointPosition, DoubleProvider jointTau, YoRegistry registry)
    {
       super(name, registry);
 

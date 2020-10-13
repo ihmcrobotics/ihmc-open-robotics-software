@@ -2,10 +2,12 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -33,14 +35,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
 {
-   private final Ros2NodeInterface ros2Node;
+   private final ROS2NodeInterface ros2Node;
    private final DRCRobotModel robotModel;
    private final String robotName;
    private final DRCRobotJointMap jointMap;
@@ -48,6 +50,7 @@ public class RemoteHumanoidRobotInterface
    private final ROS2ControllerPublisherMap controllerPublisherMap;
 
    private final ArrayList<TypedNotification<WalkingStatusMessage>> walkingCompletedNotifications = new ArrayList<>();
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
    private final ROS2Input<HighLevelStateChangeStatusMessage> controllerStateInput;
    private final ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
 
@@ -55,7 +58,7 @@ public class RemoteHumanoidRobotInterface
 
    private final ROS2Topic<?> topicName;
 
-   public RemoteHumanoidRobotInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel)
+   public RemoteHumanoidRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
@@ -66,6 +69,7 @@ public class RemoteHumanoidRobotInterface
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       
       new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, topicName.withOutput(), this::acceptWalkingStatus);
+      new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), footstepStatusMessage::set);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
@@ -106,6 +110,11 @@ public class RemoteHumanoidRobotInterface
    public ROS2Callback<FootstepStatusMessage> createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
       return new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), consumer);
+   }
+
+   public FootstepStatusMessage getLatestFootstepStatusMessage()
+   {
+      return footstepStatusMessage.get();
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan)
@@ -303,7 +312,7 @@ public class RemoteHumanoidRobotInterface
 
    public void pauseWalking()
    {
-      LogTools.debug("Sending pause walking to robot");
+      LogTools.info("Sending pause walking to robot");
       PauseWalkingMessage pause = new PauseWalkingMessage();
       pause.setPause(true);
       controllerPublisherMap.publish(pause);

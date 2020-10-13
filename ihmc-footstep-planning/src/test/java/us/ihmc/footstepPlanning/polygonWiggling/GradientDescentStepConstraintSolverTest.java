@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class GradientDescentStepConstraintSolverTest
    private GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry graphicsListRegistry;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private WiggleParameters wiggleParameters;
 
    @BeforeEach
@@ -49,7 +49,7 @@ public class GradientDescentStepConstraintSolverTest
       {
          scs = new SimulationConstructionSet(new Robot("testRobot"));
          scs.setGroundVisible(false);
-         registry = new YoVariableRegistry(getClass().getSimpleName());
+         registry = new YoRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
          gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
@@ -455,7 +455,7 @@ public class GradientDescentStepConstraintSolverTest
       transformGenerator.rotate(shinPitch, Axis3D.Y);
       transformGenerator.translate(0.0, 0.0, 0.5 * shinLength);
       RigidBodyTransform transformToSoleFrame = transformGenerator.getRigidBodyTransformCopy();
-      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, 15.0, transformToSoleFrame);
+      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, transformToSoleFrame);
 
       RigidBodyTransform footTransformInLocal = new RigidBodyTransform();
       footTransformInLocal.appendYawRotation(Math.toRadians(180.0));
@@ -497,7 +497,7 @@ public class GradientDescentStepConstraintSolverTest
       transformGenerator.translate(0.0, 0.0, 0.5 * shinLength);
       RigidBodyTransform transformToSoleFrame = transformGenerator.getRigidBodyTransformCopy();
 
-      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, 15.0, transformToSoleFrame);
+      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, transformToSoleFrame);
 
       GradientDescentStepConstraintInput input = new GradientDescentStepConstraintInput();
       input.setInitialStepPolygon(footPolygon);

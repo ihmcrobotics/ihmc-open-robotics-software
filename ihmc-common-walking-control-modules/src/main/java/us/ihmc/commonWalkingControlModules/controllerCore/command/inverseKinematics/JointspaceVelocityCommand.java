@@ -40,6 +40,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * beginning of the control.
     */
    private static final int initialCapacity = 15;
+   private int commandId;
    /** The list of joints for which desired velocities are assigned. */
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
@@ -71,6 +72,9 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    public void set(JointspaceVelocityCommand other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
@@ -85,6 +89,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     */
    public void clear()
    {
+      commandId = 0;
       joints.clear();
       desiredVelocities.clear();
       weights.reset();
@@ -349,6 +354,18 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -359,6 +376,8 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       {
          JointspaceVelocityCommand other = (JointspaceVelocityCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

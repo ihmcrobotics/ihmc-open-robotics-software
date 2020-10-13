@@ -1,145 +1,247 @@
 package us.ihmc.avatar.environments;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.NotImplementedException;
-
-import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
-import us.ihmc.simulationConstructionSetTools.util.environments.AdjustableStairsEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionEnvironmentTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableDoorRobot;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
-import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
 {
+   private static final double WALL_WIDTH = ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX();
+   private static final double WALL_DEPTH = 0.05;
+   private static final double WALL_HEIGHT = 2.4384;
+   private static final double efpRegionPenetrationThickness = 0.02;
+
    private final List<Robot> contactableRobots = new ArrayList<Robot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
-   private final double WALL_HEIGHT = 2.4384;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   private final Point3D pullDoorLocation = new Point3D(0, -3.5, 0);
+   private final List<PlanarRegionsList> planarRegionsLists = new ArrayList<>();
+   private final List<AppearanceDefinition> appearances = new ArrayList<>();
 
-   private final Point3D pushDoorLocation = new Point3D(0, -3.5, 0);
+   private final PlanarRegionsList debrisRegions = new PlanarRegionsList();
 
-   public PhaseOneDemoEnvironment(boolean door, boolean debris, boolean barrel, boolean wakling, boolean stairs)
+   private final Point3D pullDoorLocation = new Point3D(10.0, -0.5 * ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0);
+   private final Point3D pushDoorLocation = new Point3D(7.5, -0.5 * ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0);
+   private final Point3D stairsLocation = new Point3D(13.0, 0.0, 0.0);
+   private final double doorYaw = 0.5 * Math.PI;
+
+   public PhaseOneDemoEnvironment(boolean pushDoor, boolean pullDoor, boolean debris, boolean barrel, boolean stairs, boolean cinderBlockField)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
-      if (door)
-      {
-        // createPushDoor(pushDoorLocation);
-         createPullDoor(pullDoorLocation);
-      }
+      if (pushDoor)
+         createPushDoor();
+      if (pullDoor)
+         createPullDoor();
       if (barrel)
          createBarrel();
-      if (debris)
-         createDebris();
-      if (wakling)
-         createWalkingCourse();
       if (stairs)
          createStairs();
+      if (cinderBlockField)
+         createCinderBlockField(debris);
 
+      addGroundRegion();
+
+      PlanarRegionsList[] planarRegionsList = this.planarRegionsLists.toArray(new PlanarRegionsList[0]);
+      AppearanceDefinition[] appearances = this.appearances.toArray(new AppearanceDefinition[0]);
+
+      PlanarRegionEnvironmentTools.addRegionsToEnvironment(combinedTerrainObject, planarRegionsList, appearances, efpRegionPenetrationThickness);
    }
 
-   private void createWalkingCourse()
+   private void addGroundRegion()
    {
-      combinedTerrainObject.addTerrainObject(setUpCinderBlockFieldActual("walking", -90, 10, 1));
+      ConvexPolygon2D groundPolygon1 = new ConvexPolygon2D();
+      groundPolygon1.addVertex(-3.0, 2.5);
+      groundPolygon1.addVertex(-3.0, -2.5);
+      groundPolygon1.addVertex(-0.5, -2.5);
+      groundPolygon1.addVertex(-0.5, 2.5);
+      groundPolygon1.addVertex(1.25, -0.5);
+      groundPolygon1.addVertex(1.25, 0.5);
+      groundPolygon1.update();
+      PlanarRegion groundRegion1 = new PlanarRegion(new RigidBodyTransform(), groundPolygon1);
+      addRegions(new PlanarRegionsList(groundRegion1), YoAppearance.LightGray());
+
+      ConvexPolygon2D groundPolygon2 = new ConvexPolygon2D();
+      groundPolygon2.addVertex(4.5, -1.0);
+      groundPolygon2.addVertex(4.5, 1.0);
+      groundPolygon2.addVertex(6.0, 2.0);
+      groundPolygon2.addVertex(6.0, -2.0);
+      groundPolygon2.addVertex(9.0, -1.0);
+      groundPolygon2.addVertex(9.0, 1.0);
+      groundPolygon2.update();
+      PlanarRegion groundRegion2 = new PlanarRegion(new RigidBodyTransform(), groundPolygon2);
+      addRegions(new PlanarRegionsList(groundRegion2), YoAppearance.LightGray());
+      
+      ConvexPolygon2D groundPolygon3 = new ConvexPolygon2D();
+      groundPolygon3.addVertex(9.0, -1.0);
+      groundPolygon3.addVertex(9.0, 1.0);
+      groundPolygon3.addVertex(13.0, -1.0);
+      groundPolygon3.addVertex(13.0, 1.0);
+      groundPolygon3.update();
+      PlanarRegion groundRegion3 = new PlanarRegion(new RigidBodyTransform(), groundPolygon3);
+      addRegions(new PlanarRegionsList(groundRegion3), YoAppearance.LightGray());
+
+      PlanarRegionsListGenerator wallRegionsGenerator = new PlanarRegionsListGenerator();
+      double wallRegionWidth = 1.0;
+      double wallRegionHeight = 0.9;
+      double wallSeparationWidth = 1.4;
+      wallRegionsGenerator.translate(1.0 + 0.5 * wallRegionWidth, 0.5 * wallSeparationWidth + 0.5 * wallRegionWidth, 0.0);
+      wallRegionsGenerator.addCubeReferencedAtBottomMiddle(wallRegionWidth, wallRegionWidth, wallRegionHeight);
+      wallRegionsGenerator.identity();
+      wallRegionsGenerator.translate(1.0 + 0.5 * wallRegionWidth, -0.5 * wallSeparationWidth - 0.5 * wallRegionWidth, 0.0);
+      wallRegionsGenerator.addCubeReferencedAtBottomMiddle(wallRegionWidth, wallRegionWidth, wallRegionHeight);
+      addRegions(wallRegionsGenerator.getPlanarRegionsList(), YoAppearance.DarkGray());
    }
 
-   private void addFullCourseModel(boolean doingValve)
+   private void createPushDoor()
    {
-      combinedTerrainObject.getLinkGraphics().identity();
+      Vector3D offset = new Vector3D(ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
+      new AxisAngle(doorYaw, 0.0, 0.0).transform(offset);
+      pushDoorLocation.add(offset);
 
-      combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBed.obj");
+      ContactableDoorRobot door = new ContactableDoorRobot("pushDoorRobot", pushDoorLocation, doorYaw, Fiducial.FIDUCIAL50);
+      door.getPinJoint().setQ(Math.PI);
+
+      contactableRobots.add(door);
+      door.createAvailableContactPoints(0, 15, 15, 0.02, true);
+
+      RigidBodyTransform wall1Transform = new RigidBodyTransform();
+      wall1Transform.getTranslation().set(pushDoorLocation);
+      wall1Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
+      wall1Transform.appendTranslation(0.5 * WALL_WIDTH, 0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
+
+      RigidBodyTransform wall2Transform = new RigidBodyTransform();
+      wall2Transform.getTranslation().set(pushDoorLocation);
+      wall2Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
+      wall2Transform.appendTranslation(-ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
+      wall2Transform.appendTranslation(-0.5 * WALL_WIDTH, -0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
+
+      combinedTerrainObject.addRotatableBox(wall1Transform, WALL_WIDTH, WALL_DEPTH, WALL_HEIGHT, YoAppearance.Bisque());
+      combinedTerrainObject.addRotatableBox(wall2Transform, WALL_WIDTH, WALL_DEPTH, WALL_HEIGHT, YoAppearance.Bisque());
    }
 
-   private void createStairs()
+   private void createPullDoor()
    {
-      AdjustableStairsEnvironment environment = new AdjustableStairsEnvironment();
-      environment.setStairsParameters(4, 1.016, 0.2286, 0.2921);
-      environment.setRailingParameters(0.05, 0.3, 0.05, 0.8128, 2, false);
-      environment.setLandingPlatformParameters(1.27, 3, 1.143, 2);
-      environment.setCourseAngle(-90);
-      environment.setCourseStartDistance(14.2794);
-      environment.setCourseOffsetSide(1);
+      ContactableDoorRobot pullDoor = new ContactableDoorRobot("pullDoorRobot", pullDoorLocation, doorYaw, Fiducial.FIDUCIAL150);
 
-      environment.generateTerrains();
-      ArrayList<TerrainObject3D> stairs = ((CombinedTerrainObject3D) environment.getTerrainObject3D()).getTerrainObjects();
-      for (TerrainObject3D object : stairs)
+      contactableRobots.add(pullDoor);
+      pullDoor.createAvailableContactPoints(0, 15, 15, 0.02, true);
+
+      RigidBodyTransform wall1Transform = new RigidBodyTransform();
+      wall1Transform.getTranslation().set(pullDoorLocation);
+      wall1Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
+      wall1Transform.appendTranslation(- 0.5 * WALL_WIDTH, - 0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
+
+      RigidBodyTransform wall2Transform = new RigidBodyTransform();
+      wall2Transform.getTranslation().set(pullDoorLocation);
+      wall2Transform.getRotation().setYawPitchRoll(doorYaw, 0.0, 0.0);
+      wall2Transform.appendTranslation(ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
+      wall2Transform.appendTranslation(0.5 * WALL_WIDTH, 0.5 * WALL_DEPTH, 0.5 * WALL_HEIGHT); // referenced at middle
+
+      combinedTerrainObject.addRotatableBox(wall1Transform, WALL_WIDTH, WALL_DEPTH, WALL_HEIGHT, YoAppearance.Bisque());
+      combinedTerrainObject.addRotatableBox(wall2Transform, WALL_WIDTH, WALL_DEPTH, WALL_HEIGHT, YoAppearance.Bisque());
+   }
+
+   private void createCinderBlockField(boolean addDebris)
+   {
+      RigidBodyTransform startingBlockTransform = new RigidBodyTransform();
+      startingBlockTransform.getTranslation().set(-2.0, -1.0, 0.0);
+      startingBlockTransform.getRotation().setYawPitchRoll(Math.toRadians(20.0), 0.0, 0.0);
+
+      addRegions(BehaviorPlanarRegionEnvironments.generateStartingBlockRegions(startingBlockTransform), YoAppearance.Grey());
+      addRegions(BehaviorPlanarRegionEnvironments.createRoughUpAndDownStepsWithFlatTop(false), YoAppearance.Grey());
+
+      if (addDebris)
       {
-         if (object instanceof CombinedTerrainObject3D)
+         PlanarRegionsList debrisRegions = DataSetIOTools.loadDataSet(DataSetName._20200624_105955_FBDemoDebris_Medium).getPlanarRegionsList();
+         RigidBodyTransformGenerator debrisRegionsTransformGenerator = new RigidBodyTransformGenerator();
+         debrisRegionsTransformGenerator.rotate(0.5 * Math.PI, Axis3D.Z);
+         debrisRegionsTransformGenerator.translate(-0.8, -2.0, 0.6);
+         RigidBodyTransform debrisRegionsTransform = debrisRegionsTransformGenerator.getRigidBodyTransformCopy();
+
+         int indexToExcludeForMediumSizedDebris = 0;
+         for (int i = 0; i < debrisRegions.getNumberOfPlanarRegions(); i++)
          {
-            if (!((CombinedTerrainObject3D) object).getName().contains("ground"))
+            if (i != indexToExcludeForMediumSizedDebris)
             {
-               combinedTerrainObject.addTerrainObject(object);
+               PlanarRegion debrisRegion = debrisRegions.getPlanarRegion(i);
+               debrisRegion.applyTransform(debrisRegionsTransform);
+               this.debrisRegions.addPlanarRegion(debrisRegion);
             }
+         }
+
+         addRegionGraphics(this.debrisRegions, YoAppearance.DarkGray());
+      }
+   }
+
+   private void addRegions(PlanarRegionsList regionsToAdd, AppearanceDefinition appearance)
+   {
+      planarRegionsLists.add(regionsToAdd);
+      appearances.add(appearance);
+   }
+
+   private void addRegionGraphics(PlanarRegionsList planarRegionsToAdd, AppearanceDefinition appearance)
+   {
+      Graphics3DObject graphics3DObject = new Graphics3DObject();
+
+      for (int i = 0; i < planarRegionsToAdd.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion planarRegion = planarRegionsToAdd.getPlanarRegion(i);
+         double thickness = Math.max(efpRegionPenetrationThickness, 1e-4);
+         Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, thickness, appearance);
+      }
+
+      combinedTerrainObject.addStaticLinkGraphics(graphics3DObject);
+   }
+
+   public PlanarRegionsList getEnvironmentRegions()
+   {
+      PlanarRegionsList combinedRegions = new PlanarRegionsList();
+      for (int i = 0; i < planarRegionsLists.size(); i++)
+      {
+         PlanarRegionsList planarRegionsList = planarRegionsLists.get(i);
+         for (int j = 0; j < planarRegionsList.getNumberOfPlanarRegions(); j++)
+         {
+            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(j);
+            planarRegion.setRegionId(combinedRegions.getNumberOfPlanarRegions());
+            combinedRegions.addPlanarRegion(planarRegion);
          }
       }
 
+      return combinedRegions;
    }
 
-   private void createDebris()
+   public PlanarRegionsList getDebrisRegions()
    {
-      throw new NotImplementedException("Debris not implemented");
-   }
-
-   private void createPullDoor(Point3D location)
-   {
-      ContactableDoorRobot door = new ContactableDoorRobot("PullDoorRobot", location, Fiducial.FIDUCIAL150);
-      contactableRobots.add(door);
-      door.createAvailableContactPoints(0, 15, 15, 0.02, true);
-
-
-      combinedTerrainObject.addBox(location.getX()
-            - 1.2192, location.getY() - 0.025, location.getX() + 0, location.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
-      combinedTerrainObject.addBox(location.getX() + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() - 0.025,
-                                   location.getX() + 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() + 0.025,
-                                   WALL_HEIGHT,
-                                   YoAppearance.Beige());
-
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
-
-   }
-   
-   
-   private void createPushDoor(Point3D location)
-   {
-      ContactableDoorRobot door = new ContactableDoorRobot("PushDoorRobot", location, Fiducial.FIDUCIAL50);
-      contactableRobots.add(door);
-      door.getPinJoint().setQ(Math.toRadians(180));
-      door.createAvailableContactPoints(0, 15, 15, 0.02, true);
-
-
-      combinedTerrainObject.addBox(location.getX()
-            + 1.2192, location.getY() - 0.025, location.getX() + 0, location.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
-      combinedTerrainObject.addBox(location.getX() - ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() - 0.025,
-                                   location.getX() - 1.2192 - ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() + 0.025,
-                                   WALL_HEIGHT,
-                                   YoAppearance.Beige());
-
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
-
+      return debrisRegions;
    }
 
    private void createBarrel()
@@ -147,13 +249,29 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       throw new NotImplementedException("Barrel not implemented");
    }
 
-   private CombinedTerrainObject3D setUpGround(String name)
+   private void createStairs()
    {
-      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
+      double inchesPerMeter = 39.3701;
+      int numberOfSteps = 5;
+      double stepDepth = 11.0 / inchesPerMeter;
+      double stepHeight = 6.75 / inchesPerMeter;
+      double stepWidth = 1.0;
+      double topPlatformWidth = 1.0;
+      double topPlatformLength = 1.0;
 
-      combinedTerrainObject.addBox(-5.0, -30.0, 5.0, 5.0, -0.05, 0.0, YoAppearance.DarkGray());
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(stairsLocation);
 
-      return combinedTerrainObject;
+      // stairs
+      for (int i = 0; i < numberOfSteps - 1; i++)
+      {
+         generator.addCubeReferencedAtBottomMiddle(stepDepth, stepWidth, stepHeight * (i + 1));
+         generator.translate(stepDepth, 0.0, 0.0);
+      }
+
+      generator.translate(- 0.5 * stepDepth + 0.5 * topPlatformLength, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(topPlatformLength, topPlatformWidth, stepHeight * numberOfSteps);
+      addRegions(generator.getPlanarRegionsList(), YoAppearance.Grey());
    }
 
    @Override
@@ -196,175 +314,4 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
    }
-
-   private static final double cinderBlockLength = 0.40; // 40 cm (approx 16 in, just less than 16in)
-   private static final double cinderBlockWidth = cinderBlockLength / 2.0;
-   private static final double cinderBlockHeight = 0.15; // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
-   private static final double overlapToPreventGaps = 0.002;
-   private static final AppearanceDefinition cinderBlockAppearance = YoAppearance.DarkGray();
-   private static final double cinderBlockTiltDegrees = 15;
-   private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
-
-   private CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance, double leftRightOffset)
-   {
-      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
-
-      int nBlocksWide = 6;
-      int nBlocksLong = 7;
-
-      double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
-      int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
-      DefaultCommonAvatarEnvironment.BLOCKTYPE[][] blockType = new DefaultCommonAvatarEnvironment.BLOCKTYPE[nBlocksLong][nBlocksWide];
-      for (int i = 0; i < nBlocksLong; i++)
-      {
-         for (int j = 0; j < nBlocksWide; j++)
-         {
-            blockHeight[i][j] = -1; // (int) Math.round(Math.random()*4-1);
-            blockAngle[i][j] = 0; // (int) Math.round(Math.random()*3)*45;
-            blockType[i][j] = DefaultCommonAvatarEnvironment.BLOCKTYPE.ANGLED;
-         }
-      }
-
-      blockHeight = new int[][] {{0, 0, 0, 0, 0, 0}, {0, 0, 1, 1, 0, 0}, {0, 0, 1, 1, 0, 0}, {0, 1, 1, 1, 1, 0}, {1, 2, 1, 1, 2, 1}, {1, 1, 1, 1, 1, 1},
-            {0, 0, 0, 0, 0, 0}};
-
-      final int NORTH = 0;
-      final int SOUTH = 180;
-      final int WEST = 90;
-      final int EAST = -90;
-
-      blockAngle = new double[][] {{NORTH, EAST, SOUTH, WEST, NORTH, EAST}, {WEST, NORTH, EAST, SOUTH, WEST, NORTH}, {SOUTH, WEST, NORTH, EAST, SOUTH, WEST},
-            {EAST, SOUTH, WEST, NORTH, EAST, SOUTH}, {NORTH, EAST, SOUTH, WEST, NORTH, EAST}, {WEST, NORTH, EAST, SOUTH, WEST, NORTH},
-            {SOUTH, WEST, NORTH, EAST, SOUTH, WEST}};
-
-      startDistance += cinderBlockLength / 2;
-
-      for (int i = 0; i < nBlocksLong; i++)
-      {
-         for (int j = 0; j < nBlocksWide; j++)
-         {
-            double xCenter = startDistance + i * cinderBlockLength;
-            double yCenter = leftRightOffset + (nBlocksWide * cinderBlockLength) / 2 - j * cinderBlockLength - cinderBlockLength / 2;
-            double[] point = {xCenter, yCenter};
-            double[] rotatedPoint = rotateAroundOrigin(point, courseAngle);
-            int h = blockHeight[i][j];
-            double deg = blockAngle[i][j] + courseAngle;
-            setUpRampBlock(combinedTerrainObject, rotatedPoint, h, deg);
-
-         }
-      }
-
-      return combinedTerrainObject;
-   }
-
-   private void setUpRampBlock(CombinedTerrainObject3D combinedTerrainObject, double[] point, int h, double deg)
-   {
-      setUpRampBlock(combinedTerrainObject, point[0], point[1], h, deg);
-   }
-
-   private void setUpRampBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
-   {
-      if (numberFlatSupports < 0)
-         return;
-
-      setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
-
-      double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
-
-      RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
-      blockSupportLocation.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
-      double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
-      blockSupportLocation.getTranslation()
-                          .set(new Vector3D(xCenter + xySupportRotatedOffset[0],
-                                            yCenter + xySupportRotatedOffset[1],
-                                            rampRise / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
-                                                                       cinderBlockAppearance);
-      combinedTerrainObject.addTerrainObject(newBox);
-
-      double xOffset = 0, yOffset = cinderBlockWidth / 2;
-      double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
-      double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
-      setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated1[0], yCenter + xyRotated1[1], numberFlatSupports, yawDegrees);
-      setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
-   }
-
-   private void setUpSlopedCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
-   {
-      if (numberFlatSupports < 0)
-         return;
-
-      AppearanceDefinition app = cinderBlockAppearance;
-
-      RigidBodyTransform location = new RigidBodyTransform();
-      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
-
-      RigidBodyTransform tilt = new RigidBodyTransform();
-      tilt.setRotationPitchAndZeroTranslation(-cinderBlockTiltRadians);
-      location.multiply(tilt);
-
-      double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
-      location.getTranslation().set(new Vector3D(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
-      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3D(location,
-                                                                                                 cinderBlockLength,
-                                                                                                 cinderBlockWidth,
-                                                                                                 cinderBlockHeight),
-                                                                                       app);
-      combinedTerrainObject.addTerrainObject(newBox);
-   }
-
-   private void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
-   {
-      double xOffset = 0, yOffset = cinderBlockWidth / 2.0;
-      double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
-      double[] xyRotated2 = rotateAroundOrigin(new double[] {xOffset, -yOffset}, yawDegrees);
-
-      setUpCinderBlock(combinedTerrainObject, xCenter + xyRotated1[0], yCenter + xyRotated1[1], numberFlatSupports, yawDegrees);
-      setUpCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
-
-      if (numberFlatSupports > 0)
-         setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees + 90);
-   }
-
-   private void setUpCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
-   {
-      double[] centerPoint = {xCenter, yCenter};
-      setUpCinderBlock(combinedTerrainObject, centerPoint, numberFlatSupports, yawDegrees);
-   }
-
-   private double[] rotateAroundOrigin(double[] xy, double angdeg)
-   {
-      double x = xy[0];
-      double y = xy[1];
-      double[] newPoint = new double[2];
-      double angRad = Math.toRadians(angdeg);
-      newPoint[0] = x * Math.cos(angRad) - y * Math.sin(angRad);
-      newPoint[1] = y * Math.cos(angRad) + x * Math.sin(angRad);
-
-      return newPoint;
-   }
-
-   private void setUpCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double[] centerPoint, int numberFlatSupports, double yawDegrees)
-   {
-      if (numberFlatSupports < 0)
-         return;
-
-      AppearanceDefinition app = cinderBlockAppearance;
-
-      double xCenter = centerPoint[0];
-      double yCenter = centerPoint[1];
-
-      RigidBodyTransform location = new RigidBodyTransform();
-      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
-
-      location.getTranslation().set(new Vector3D(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3D(location,
-                                                                                                 cinderBlockLength + overlapToPreventGaps,
-                                                                                                 cinderBlockWidth + overlapToPreventGaps,
-                                                                                                 cinderBlockHeight + overlapToPreventGaps),
-                                                                                       app);
-      combinedTerrainObject.addTerrainObject(newBox);
-
-   }
-
 }

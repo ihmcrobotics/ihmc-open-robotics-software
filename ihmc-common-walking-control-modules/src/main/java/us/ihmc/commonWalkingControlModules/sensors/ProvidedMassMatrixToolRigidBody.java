@@ -6,11 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -19,10 +15,10 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * @author unknownid
@@ -30,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
  */
 public class ProvidedMassMatrixToolRigidBody
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final RigidBodyBasics toolBody;
 
@@ -51,11 +47,11 @@ public class ProvidedMassMatrixToolRigidBody
    private final FrameVector3D temporaryVector = new FrameVector3D();
    private final SpatialAcceleration toolAcceleration = new SpatialAcceleration();
 
-   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, YoVariableRegistry parentRegistry,
+   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, YoRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
-      this.registry = new YoVariableRegistry(name);
+      this.registry = new YoRegistry(name);
       this.gravity = gravity;
 
       this.handFixedFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();

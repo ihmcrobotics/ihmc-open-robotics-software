@@ -1,13 +1,13 @@
 package us.ihmc.exampleSimulations.fallingSphere;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FallingSphereController implements RobotController
 {
    private static final long serialVersionUID = -6115066729570319285L;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("FallingSphereController");
+   private final YoRegistry registry = new YoRegistry("FallingSphereController");
 
 
    private final FallingSphereRobot robot;
@@ -27,7 +27,7 @@ public class FallingSphereController implements RobotController
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -17,7 +17,7 @@ import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotKickMessenger, RobotLowLevelMessenger
 {
@@ -28,7 +28,7 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public AtlasKickAndPunchMessenger(Ros2Node ros2Node, String robotName)
+   public AtlasKickAndPunchMessenger(ROS2Node ros2Node, String robotName)
    {
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       armTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, inputTopic);

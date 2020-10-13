@@ -58,10 +58,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -378,12 +378,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    private void assertAngularWeightsMatchDefault(RigidBodyBasics rigidBody, SimulationConstructionSet scs)
    {
       String prefix = rigidBody.getName() + "TaskspaceOrientation";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentWeightX");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentWeightY");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentWeightZ");
-      YoDouble defaultAngularWeightX = (YoDouble) scs.getVariable("ChestAngularWeightX");
-      YoDouble defaultAngularWeightY = (YoDouble) scs.getVariable("ChestAngularWeightY");
-      YoDouble defaultAngularWeightZ = (YoDouble) scs.getVariable("ChestAngularWeightZ");
+      YoDouble angularWeightX = (YoDouble) scs.findVariable(prefix + "CurrentWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.findVariable(prefix + "CurrentWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.findVariable(prefix + "CurrentWeightZ");
+      YoDouble defaultAngularWeightX = (YoDouble) scs.findVariable("ChestAngularWeightX");
+      YoDouble defaultAngularWeightY = (YoDouble) scs.findVariable("ChestAngularWeightY");
+      YoDouble defaultAngularWeightZ = (YoDouble) scs.findVariable("ChestAngularWeightZ");
       assertEquals(defaultAngularWeightX.getDoubleValue(), angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(defaultAngularWeightY.getDoubleValue(), angularWeightY.getDoubleValue(), 1e-8);
       assertEquals(defaultAngularWeightZ.getDoubleValue(), angularWeightZ.getDoubleValue(), 1e-8);
@@ -393,9 +393,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    private void assertWeightsMatch(double xWeight, double yWeight, double zWeight, RigidBodyBasics rigidBody, SimulationConstructionSet scs)
    {
       String prefix = rigidBody.getName() + "TaskspaceOrientation";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentWeightX");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentWeightY");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentWeightZ");
+      YoDouble angularWeightX = (YoDouble) scs.findVariable(prefix + "CurrentWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.findVariable(prefix + "CurrentWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.findVariable(prefix + "CurrentWeightZ");
 
       assertEquals(xWeight, angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(yWeight, angularWeightY.getDoubleValue(), 1e-8);
@@ -1507,12 +1507,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
@@ -1573,7 +1573,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }
@@ -1615,9 +1615,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    public static Vector3D findControlErrorRotationVector(SimulationConstructionSet scs, RigidBodyBasics chest)
    {
       String chestPrefix = chest.getName();
-      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String varName = chestPrefix + "ErrorRotationVector";
-      return EndToEndTestTools.findVector3D(nameSpace, varName, scs);
+      return EndToEndTestTools.findVector3D(namespace, varName, scs);
    }
 
    public static SO3TrajectoryPoint findTrajectoryPoint(int trajectoryPointIndex, SimulationConstructionSet scs, RigidBodyBasics chestRigidBody)
@@ -1632,7 +1632,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       String angularVelocityName = chestPrefix + "AngularVelocity";
 
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
-      simpleSO3TrajectoryPoint.setTime(scs.getVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSO3TrajectoryPoint.setTime(scs.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSO3TrajectoryPoint.setOrientation(EndToEndTestTools.findQuaternion(orientationTrajectoryName, orientationName, suffix, scs));
       simpleSO3TrajectoryPoint.setAngularVelocity(EndToEndTestTools.findVector3D(orientationTrajectoryName, angularVelocityName, suffix, scs));
       return simpleSO3TrajectoryPoint;

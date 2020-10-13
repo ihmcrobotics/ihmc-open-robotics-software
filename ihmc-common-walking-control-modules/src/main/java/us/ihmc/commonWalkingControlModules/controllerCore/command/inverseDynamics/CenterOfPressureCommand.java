@@ -30,6 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
  */
 public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>, VirtualModelControlCommand<CenterOfPressureCommand>
 {
+   private int commandId;
    /**
     * The constraint type of this command can be set to either {@link ConstraintType#OBJECTIVE} or
     * {@link ConstraintType#EQUALITY}. Inequality constraints are not supported here.
@@ -57,16 +58,11 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
    @Override
    public void set(CenterOfPressureCommand other)
    {
+      this.commandId = other.commandId;
       this.constraintType = other.constraintType;
       this.contactingRigidBody = other.contactingRigidBody;
       this.weight.setIncludingFrame(other.weight);
       this.desiredCoP.setIncludingFrame(other.desiredCoP);
-   }
-
-   @Override
-   public ControllerCoreCommandType getCommandType()
-   {
-      return ControllerCoreCommandType.CENTER_OF_PRESSURE;
    }
 
    public void setConstraintType(ConstraintType constraintType)
@@ -115,6 +111,24 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
    }
 
    @Override
+   public ControllerCoreCommandType getCommandType()
+   {
+      return ControllerCoreCommandType.CENTER_OF_PRESSURE;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -124,6 +138,8 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
       else if (object instanceof CenterOfPressureCommand)
       {
          CenterOfPressureCommand other = (CenterOfPressureCommand) object;
+         if (commandId != other.commandId)
+            return false;
          if (constraintType != other.constraintType)
             return false;
          if (contactingRigidBody != other.contactingRigidBody)

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -26,24 +26,24 @@ public class JerkLimitedYoVariable extends YoDouble
    private final YoDouble inputVelocity;
    private final YoDouble inputAcceleration;
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk, double dt)
+   public JerkLimitedYoVariable(String name, YoRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk, double dt)
    {
       this(name, registry, maxAcceleration, maxJerk, null, null, null, dt);
    }
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
+   public JerkLimitedYoVariable(String name, YoRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
          YoDouble inputPosition, double dt)
    {
       this(name, registry, maxAcceleration, maxJerk, inputPosition, null, null, dt);
    }
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
+   public JerkLimitedYoVariable(String name, YoRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
          YoDouble inputPosition, YoDouble inputVelocity, double dt)
    {
       this(name, registry, maxAcceleration, maxJerk, inputPosition, inputVelocity, null, dt);
    }
 
-   public JerkLimitedYoVariable(String name, YoVariableRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
+   public JerkLimitedYoVariable(String name, YoRegistry registry, YoDouble maxAcceleration, YoDouble maxJerk,
          YoDouble inputPosition, YoDouble inputVelocity, YoDouble inputAcceleration, double dt)
    {
       super(name, registry);

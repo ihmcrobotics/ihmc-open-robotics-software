@@ -13,8 +13,9 @@ import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 
@@ -27,11 +28,14 @@ public class LookAndStepRemoteVisualizer
    private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
-   private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
+   private LivePlanarRegionsGraphic planarRegionsGraphic;
    private PoseGraphic goalGraphic;
 
-   public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, Ros2Node ros2Node, Messager behaviorMessager)
+   private Stage primaryStage;
+
+   public LookAndStepRemoteVisualizer(DRCRobotModel robotModel, ROS2Node ros2Node, Messager behaviorMessager)
    {
+      LogTools.info("Launching...");
       JavaFXApplicationCreator.createAJavaFXApplication();
 
       Platform.runLater(() ->
@@ -45,14 +49,14 @@ public class LookAndStepRemoteVisualizer
 
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
-         startAndGoalFootPoses = new FootstepPlanWithTextGraphic(robotModel);
+         startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
          behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
-         footstepPlanGraphic = new FootstepPlanWithTextGraphic(robotModel);
+         footstepPlanGraphic = new FootstepPlanWithTextGraphic();
          behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
-         livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-         behaviorMessager.registerTopicListener(MapRegionsForUI, planarRegions -> {
-            livePlanarRegionsGraphic.acceptPlanarRegions(planarRegions);
+         planarRegionsGraphic = new LivePlanarRegionsGraphic(false);
+         behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
+            planarRegionsGraphic.acceptPlanarRegions(planarRegions);
          });
 
          goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
@@ -78,15 +82,21 @@ public class LookAndStepRemoteVisualizer
          view3dFactory.addNodeToView(closestPointAlongPathGraphic);
          view3dFactory.addNodeToView(subGoalGraphic);
          view3dFactory.addNodeToView(goalGraphic);
-         view3dFactory.addNodeToView(livePlanarRegionsGraphic);
+         view3dFactory.addNodeToView(planarRegionsGraphic);
          view3dFactory.addNodeToView(startAndGoalFootPoses);
 
-         Stage primaryStage = new Stage();
+         primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
          primaryStage.setScene(view3dFactory.getScene());
 
+         LogTools.info("Showing window");
          primaryStage.show();
       });
+   }
+
+   public void close()
+   {
+      primaryStage.close();
    }
 }

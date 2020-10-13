@@ -11,8 +11,8 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 class ROS2ToolsTest
@@ -25,26 +25,26 @@ class ROS2ToolsTest
    @Test
    public void testTopicNameStuff()
    {
-      assertEquals("/ihmc/rea_state_request", ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).toString());
-      assertEquals("/ihmc/atlas/rea_state_request", ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).withRobot("atlas").toString());
+      assertEquals("/ihmc/rea_state_request", ROS2Tools.IHMC_ROOT.withTypeName(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/atlas/rea_state_request", ROS2Tools.IHMC_ROOT.withTypeName(REAStateRequestMessage.class).withRobot("atlas").toString());
       assertEquals("/ihmc/atlas/rea/input/rea_state_request",
-                   ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).withRobot("atlas").withModule("rea").withInput().toString());
+                   ROS2Tools.IHMC_ROOT.withTypeName(REAStateRequestMessage.class).withRobot("atlas").withModule("rea").withInput().toString());
 
       ROS2Topic<?> defaultTopicName = ROS2Tools.IHMC_ROOT;
-      assertEquals("/ihmc/rea_state_request", defaultTopicName.withType(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/rea_state_request", defaultTopicName.withTypeName(REAStateRequestMessage.class).toString());
 
       ROS2Topic<?> defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
-      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameWithRobot.withType(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameWithRobot.withTypeName(REAStateRequestMessage.class).toString());
 
       ROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
-      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withType(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withTypeName(REAStateRequestMessage.class).toString());
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
    }
 
    public void testROS2Communication()
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
       IHMCROS2Publisher<Int64> intPublisher = new IHMCROS2Publisher<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
 

@@ -16,11 +16,11 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadrupedStepPlanarRegionProjection
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final DoubleParameter minimumDistanceToRegionEdge = new DoubleParameter("minimumDistanceToRegionEdge", registry, 0.03);
 
@@ -38,7 +38,7 @@ public class QuadrupedStepPlanarRegionProjection
    private final Point3D tempPoint3D = new Point3D();
    private final Vector3D tempVector3D = new Vector3D();
 
-   public QuadrupedStepPlanarRegionProjection(YoVariableRegistry parentRegistry)
+   public QuadrupedStepPlanarRegionProjection(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
    }

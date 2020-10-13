@@ -10,16 +10,9 @@ public class SwingPlannerParameterKeys
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    // parameters for custom proportion planner
-   public static final DoubleStoredPropertyKey minimumSwingHeight                         = keys.addDoubleKey("Minimum Swing Height", 0.05);
-   public static final DoubleStoredPropertyKey maximumSwingHeight                         = keys.addDoubleKey("Maximum Swing Height", 0.1);
-   public static final DoubleStoredPropertyKey maximumStepHeightForMinimumSwingHeight     = keys.addDoubleKey("Maximum Step Height For Minimum Swing Height", 0.05);
-   public static final DoubleStoredPropertyKey minimumStepHeightForMaximumSwingHeight     = keys.addDoubleKey("Minimum Step Height For Maximum Swing Height", 0.1);
+   public static final DoubleStoredPropertyKey swingHeightIfCollisionDetected             = keys.addDoubleKey("Swing Height If Collision Detected", 0.1);
    public static final DoubleStoredPropertyKey minimumSwingTime                           = keys.addDoubleKey("Minimum Swing Time", 1.2);
    public static final DoubleStoredPropertyKey maximumSwingTime                           = keys.addDoubleKey("Maximum Swing Time", 2.4);
-   public static final DoubleStoredPropertyKey maximumStepTranslationForMinimumSwingTime  = keys.addDoubleKey("Maximum Step Translation For Minimum Swing Time", 0.2);
-   public static final DoubleStoredPropertyKey minimumStepTranslationForMaximumSwingTime  = keys.addDoubleKey("Minimum Step Translation For Maximum Swing Time", 0.75);
-   public static final DoubleStoredPropertyKey maximumStepHeightForMinimumSwingTime       = keys.addDoubleKey("Maximum Step Height For Minimum Swing Time", 0.05);
-   public static final DoubleStoredPropertyKey minimumStepHeightForMaximumSwingTime       = keys.addDoubleKey("Minimum Step Height For Maximum Swing Time", 0.1);
    public static final DoubleStoredPropertyKey footStubClearance                          = keys.addDoubleKey("Foot Stub Clearance", 0.09);
    public static final DoubleStoredPropertyKey waypointProportionShiftForStubAvoidance    = keys.addDoubleKey("Waypoint Proportion Shift For Stub Avoidance", 0.13);
 

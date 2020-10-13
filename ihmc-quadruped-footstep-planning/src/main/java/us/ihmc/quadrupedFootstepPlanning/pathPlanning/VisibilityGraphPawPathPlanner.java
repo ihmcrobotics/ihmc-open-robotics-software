@@ -14,7 +14,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcesso
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
@@ -25,18 +25,18 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
 
    private final VisibilityGraphHolder bodyPathPlannerGraph = new VisibilityGraphHolder();
 
-   public VisibilityGraphPawPathPlanner(VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoVariableRegistry registry)
+   public VisibilityGraphPawPathPlanner(VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoRegistry registry)
    {
       this("", visibilityGraphsParameters, registry);
    }
 
-   public VisibilityGraphPawPathPlanner(String prefix, VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoVariableRegistry registry)
+   public VisibilityGraphPawPathPlanner(String prefix, VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoRegistry registry)
    {
       this(prefix, visibilityGraphsParameters, null, registry);
    }
 
    public VisibilityGraphPawPathPlanner(String prefix, VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
-                                        BodyPathPostProcessor postProcessor, YoVariableRegistry registry)
+                                        BodyPathPostProcessor postProcessor, YoRegistry registry)
    {
       super(prefix, registry);
       this.navigableRegionsManager = new NavigableRegionsManager(visibilityGraphsParameters, null, postProcessor);

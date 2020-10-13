@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.35, 0.85" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
+<SplitPane dividerPositions="0.35, 0.85" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
     <items>
         <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0">
             <children>
@@ -48,7 +62,7 @@
                         <Label text="Distance proximity" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                         <Label text="Yaw proximity" textAlignment="RIGHT" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
 
-                        <CheckBox fx:id="bindStartToRobot" text="Bind start to robot" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" selected="true" />
+                        <CheckBox fx:id="bindStartToRobot" selected="true" text="Bind start to robot" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                         <CheckBox fx:id="snapGoalSteps" text="Snap goal steps" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                         <CheckBox fx:id="abortIfGoalStepSnapFails" text="Abort if goal snap fails" GridPane.columnIndex="5" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
 
@@ -74,26 +88,30 @@
                 <GridPane alignment="CENTER" hgap="5" vgap="5">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="125.0" minWidth="20.0" prefWidth="117.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="176.0" minWidth="20.0" prefWidth="138.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="161.0" minWidth="20.0" prefWidth="158.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="20.0" prefWidth="63.0" />
                     </columnConstraints>
 
                     <Button onAction="#generateLog" prefWidth="120.0" text="Generate log" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                     <Button onAction="#loadLog" prefWidth="120.0" text="Load log" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                     <TextField fx:id="logGenerationStatus" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="1" />
                     <TextField fx:id="logLoadStatus" GridPane.columnIndex="1" GridPane.columnSpan="4" GridPane.rowIndex="2" />
+               <Button fx:id="loadLatestLog" mnemonicParsing="false" onAction="#loadLatestLog" text="Load latest log" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+               <Button fx:id="loadPreviousLog" mnemonicParsing="false" onAction="#loadPreviousLog" text="Load previous log" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+               <Button fx:id="loadNextLog" mnemonicParsing="false" onAction="#loadNextLog" text="Load next log" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                <rowConstraints>
                   <RowConstraints />
                   <RowConstraints />
                   <RowConstraints />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" />
                </rowConstraints>
                 </GridPane>
             </children>
         </VBox>
 
-        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" >
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0">
             <children>
 
                 <Region prefHeight="5" />
@@ -122,6 +140,7 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints />
+                  <RowConstraints />
                     </rowConstraints>
                     <children>
                         <Button fx:id="computePath" mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
@@ -130,13 +149,13 @@
 
                         <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <ComboBox fx:id="initialSupportSide" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="pathHeading" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Spinner fx:id="pathHeading" editable="true" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                         <ComboBox fx:id="swingPlannerType" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                         <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                         <Spinner fx:id="horizonLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
                         <Label text="Initial Support" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
-                        <Label text="Path heading" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Path heading (degrees)" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label text="Swing planner" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Label text="Timeout" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <Label text="Horizon Length" GridPane.columnIndex="1" GridPane.rowIndex="5" />
@@ -163,7 +182,7 @@
             </opaqueInsets>
         </VBox>
 
-        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" >
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0">
             <children>
 
             <Region prefHeight="5" />
@@ -190,9 +209,9 @@
                         <RowConstraints />
                     </rowConstraints>
 
-                    <Label text="Swing time (s)" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" prefWidth="150.0" />
-                    <Label text="Transfer time (s)" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" prefWidth="150.0" />
-                    <Label text="Swing height (m)" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" prefWidth="150.0" />
+                    <Label prefWidth="150.0" text="Swing time (s)" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
+                    <Label prefWidth="150.0" text="Transfer time (s)" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                    <Label prefWidth="150.0" text="Swing height (m)" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
 
                     <Spinner fx:id="swingTimeSpinner" editable="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
                     <Spinner fx:id="transferTimeSpinner" editable="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
@@ -200,8 +219,8 @@
                     
                     <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
 	
-					<CheckBox fx:id="overrideTiming" text="Override" GridPane.columnIndex="3" GridPane.rowIndex="0" selected="true" indeterminate="false" />
-                    <CheckBox fx:id="overrideSwingHeight" text="Override" GridPane.columnIndex="3" GridPane.rowIndex="2" selected="true" indeterminate="false" />
+					<CheckBox fx:id="overrideTiming" indeterminate="false" selected="true" text="Override" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                    <CheckBox fx:id="overrideSwingHeight" indeterminate="false" selected="true" text="Override" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                     
                 </GridPane>
 
@@ -251,6 +270,18 @@
                             </ImageView>
                         </graphic>
                     </Button>
+               <columnConstraints>
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
                 </GridPane>
             </children>
 

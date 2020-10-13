@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -7,21 +8,33 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlannerTools
 {
@@ -86,7 +99,7 @@ public class PlannerTools
                                      });
    }
 
-   public static void addGoalViz(FramePose3D goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public static void addGoalViz(FramePose3D goalPose, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       YoFramePoint3D yoGoal = new YoFramePoint3D("GoalPosition", worldFrame, registry);
       yoGoal.set(goalPose.getPosition());
@@ -171,5 +184,71 @@ public class PlannerTools
       goalPosition.add(goalOffset);
 
       return goalPosition;
+   }
+
+   /**
+    * Checks the supplied body path for body collisions. The bounding box size and vertical offset are
+    * supplied by the parameters.
+    */
+   public static boolean doesPathContainBodyCollisions(Pose3DReadOnly robotPose,
+                                                       List<? extends Pose3DReadOnly> bodyPathWaypoints,
+                                                       PlanarRegionsList planarRegionsList,
+                                                       FootstepPlannerParametersReadOnly parameters,
+                                                       double horizonDistanceToCheck)
+   {
+      WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
+      bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
+
+      BoundingBoxCollisionDetector collisionDetector = new BoundingBoxCollisionDetector();
+      collisionDetector.setBoxDimensions(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight(), 0.0);
+      collisionDetector.setPlanarRegionsList(planarRegionsList);
+
+      double distanceAlongPathPerCheck = 0.15;
+      double totalPathLength = bodyPathPlanHolder.computePathLength(0.0);
+      double deltaAlphaPerCheck = distanceAlongPathPerCheck / totalPathLength;
+
+      Pose3D pathWaypoint = new Pose3D();
+      Pose3D pathLookAhead = new Pose3D();
+      Pose3D pathLookBehind = new Pose3D();
+
+      double alpha = bodyPathPlanHolder.getClosestPoint(new Point2D(robotPose.getX(), robotPose.getY()), new Pose3D());
+      double startLength = alpha * totalPathLength;
+
+      while (true)
+      {
+         if (alpha > 1.0 || alpha * totalPathLength > startLength + horizonDistanceToCheck)
+         {
+            break;
+         }
+
+         bodyPathPlanHolder.getPointAlongPath(alpha, pathWaypoint);
+         bodyPathPlanHolder.getPointAlongPath(MathTools.clamp(alpha - 0.01, 0.0, 1.0), pathLookBehind);
+         bodyPathPlanHolder.getPointAlongPath(MathTools.clamp(alpha + 0.01, 0.0, 1.0), pathLookAhead);
+         double yaw = Math.atan2(pathLookAhead.getY() - pathLookBehind.getY(), pathLookAhead.getX() - pathLookBehind.getX());
+
+         collisionDetector.setBoxPose(pathWaypoint.getX(), pathWaypoint.getY(), pathWaypoint.getZ() + parameters.getBodyBoxBaseZ(), yaw);
+         if (collisionDetector.checkForCollision().isCollisionDetected())
+         {
+            return true;
+         }
+
+         alpha += deltaAlphaPerCheck;
+      }
+
+      return false;
+   }
+
+   public static void extrapolatePose(Pose3DReadOnly robotPose,
+                                      List<? extends Pose3DReadOnly> bodyPathWaypoints,
+                                      double horizonDistanceToCheck,
+                                      Pose3D poseToPack)
+   {
+      WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
+      bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
+
+      double alpha = bodyPathPlanHolder.getClosestPoint(new Point2D(robotPose.getX(), robotPose.getY()), new Pose3D());
+      double totalPathLength = bodyPathPlanHolder.computePathLength(0.0);
+      double alphaToQuery = MathTools.clamp(alpha + horizonDistanceToCheck / totalPathLength, 0.0, 1.0);
+      bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
    }
 }
