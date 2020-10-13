@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.icp;
 
+import javafx.scene.transform.Scale;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionFromPositionCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -31,10 +33,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class PositionBasedSplitFractionCalculator
 {
    private final SplitFractionCalculatorParametersReadOnly parameters;
+   private final SplitFractionFromPositionCalculator calculator;
 
    public PositionBasedSplitFractionCalculator(SplitFractionCalculatorParametersReadOnly parameters)
    {
       this.parameters = parameters;
+      this.calculator = new SplitFractionFromPositionCalculator(parameters);
    }
 
    public void computeSplitFractions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
@@ -44,6 +48,22 @@ public class PositionBasedSplitFractionCalculator
 
    public void computeSplitFractions(FootstepPlan footstepPlan, SideDependentList<? extends Pose3DReadOnly> startFootPoses)
    {
+      calculator.setNumberOfStepsProvider(footstepPlan::getNumberOfSteps);
+
+      calculator.setFinalTransferSplitFractionProvider(footstepPlan::getFinalTransferSplitFraction);
+      calculator.setFinalTransferWeightDistributionProvider(footstepPlan::getFinalTransferWeightDistribution);
+
+      calculator.setTransferSplitFractionProvider((i) -> footstepPlan.getFootstep(i).getTransferSplitFraction());
+      calculator.setTransferWeightDistributionProvider((i) -> footstepPlan.getFootstep(i).getTransferWeightDistribution());
+
+      calculator.setFinalTransferSplitFractionConsumer(footstepPlan::setFinalTransferSplitFraction);
+      calculator.setFinalTransferWeightDistributionConsumer(footstepPlan::setFinalTransferWeightDistribution);
+
+      calculator.setTransferWeightDistributionConsumer((i) -> (d) -> footstepPlan.getFootstep(i).setTransferWeightDistribution(d));
+      calculator.setTransferSplitFractionConsumer((i) -> (d) -> footstepPlan.getFootstep(i).setTransferSplitFraction(d));
+
+      calculator.computeSplitFractionsFromPosition();
+
       if (footstepPlan.getNumberOfSteps() == 0)
       {
          return;
