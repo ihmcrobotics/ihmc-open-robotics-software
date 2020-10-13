@@ -2,7 +2,7 @@ package us.ihmc.atlas.behaviors;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
+import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -41,7 +41,7 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean LOG_TO_FILE = Boolean.parseBoolean(System.getProperty("log.to.file"));
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
    private static boolean USE_DYNAMICS_SIMULATION = Boolean.parseBoolean(System.getProperty("use.dynamics.simulation"));
-   private static boolean RUN_LIDAR_AND_CAMERA_SIMULATION = Boolean.parseBoolean(System.getProperty("run.lidar.and.camera.simulation"));
+   private static boolean RUN_SCS_CAMERA_SIMULATION = Boolean.parseBoolean(System.getProperty("run.scs.camera.simulation"));
    private static boolean USE_INTERPROCESS_ROS2 = Boolean.parseBoolean(System.getProperty("use.interprocess.ros2"));
    private static boolean USE_INTERPROCESS_KRYO = Boolean.parseBoolean(System.getProperty("use.interprocess.kryo"));
    private static boolean RUN_REALSENSE_SLAM = Boolean.parseBoolean(System.getProperty("run.realsense.slam", "true"));
@@ -86,7 +86,7 @@ public class AtlasLookAndStepBehaviorDemo
    private BehaviorUI behaviorUI;
    private final BehaviorModule behaviorModule;
    private AtlasPerceptionSimulation perceptionStack;
-   private SCSLidarAndCameraSimulator lidarAndCameraSimulator;
+   private SCSCameraSimulator cameraSimulator;
    private AtlasDynamicsSimulation dynamicSimulation;
    private HumanoidKinematicsSimulation kinematicsSimulation;
 
@@ -98,13 +98,14 @@ public class AtlasLookAndStepBehaviorDemo
                                                                                       environmentInitialSetup.getPlanarRegionsSupplier().get(),
                                                                                       RUN_REALSENSE_SLAM,
                                                                                       SHOW_REALSENSE_SLAM_UIS,
+                                                                                      true,
                                                                                       RUN_LIDAR_REA,
                                                                                       createRobotModel()),
                                 "PerceptionStack");
       ThreadTools.startAsDaemon(simulation, "Simulation");
 
-      if (RUN_LIDAR_AND_CAMERA_SIMULATION)
-         ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
+      if (RUN_SCS_CAMERA_SIMULATION)
+         ThreadTools.startAsDaemon(this::cameraSimulator, "SCSCamera");
 
       BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
@@ -129,11 +130,11 @@ public class AtlasLookAndStepBehaviorDemo
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DestroyViaKill"));
    }
 
-   private void lidarAndCameraSimulator()
+   private void cameraSimulator()
    {
-      lidarAndCameraSimulator = new SCSLidarAndCameraSimulator(communicationModeROS2.getPubSubImplementation(),
-                                                               createCommonAvatarEnvironment(),
-                                                               createRobotModel());
+      cameraSimulator = new SCSCameraSimulator(communicationModeROS2.getPubSubImplementation(),
+                                               createCommonAvatarEnvironment(),
+                                               createRobotModel());
    }
 
    private void dynamicsSimulation()
@@ -202,8 +203,8 @@ public class AtlasLookAndStepBehaviorDemo
          behaviorUI.closeMessager();
          behaviorModule.destroy();
          perceptionStack.destroy();
-         if (RUN_LIDAR_AND_CAMERA_SIMULATION)
-            lidarAndCameraSimulator.destroy();
+         if (RUN_SCS_CAMERA_SIMULATION)
+            cameraSimulator.destroy();
          if (USE_DYNAMICS_SIMULATION)
             dynamicSimulation.destroy();
          else
