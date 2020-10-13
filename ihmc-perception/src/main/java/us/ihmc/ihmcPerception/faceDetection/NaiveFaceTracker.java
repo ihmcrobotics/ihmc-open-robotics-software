@@ -1,8 +1,12 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
+import org.opencv.core.MatOfByte;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -43,7 +47,7 @@ public class NaiveFaceTracker
                if(faceShift < SHIFT_DELTA)
                {
                   matched = true;
-                  trackedFaces.get(i).set(new double[]{faces[j].x(), faces[j].y(), faces[j].width(), faces[j].height()});
+                  trackedFaces.get(i).put(new Rect(faces[j].x(), faces[j].y(), faces[j].width(), faces[j].height()));
                   faces[j] = null;
                }
             }
@@ -77,39 +81,39 @@ public class NaiveFaceTracker
 //      {
 //         PrintTools.error("Failed to load the OpenCV library.");
 //      }
-      VideoCapture cap = new VideoCapture(1);
-      OpenCVFaceDetector faceDetector = new OpenCVFaceDetector(0.5);
-      NaiveFaceTracker faceTracker = new NaiveFaceTracker();
-      ImagePanel panel = null;
-      Mat image = new Mat();
-      MatOfByte mem = new MatOfByte();
-      while (true)
-      {
-         cap.read(image);
-         //         Imgcodecs.imdecode(buf, flags)
-         Imgcodecs.imencode(".bmp", image, mem);
-         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
-
-         Graphics2D g2 = bufferedImage.createGraphics();
-         g2.setColor(Color.WHITE);
-
-         Rect[] faces = faceDetector.detect(bufferedImage);
-         ArrayList<Rect> trackedFaces = faceTracker.matchTrackedFaces(faces);
-
-         for (int i = 0; i < trackedFaces.size(); i++)
-         {
-            g2.drawRect(trackedFaces.get(i).x(), trackedFaces.get(i).y(), trackedFaces.get(i).width(),
-                  trackedFaces.get(i).height());
-         }
-
-         if (panel == null)
-         {
-            panel = ShowImages.showWindow(bufferedImage, "faces");
-         }
-         else
-         {
-            panel.setImageUI(bufferedImage);
-         }
-      }
+//      VideoCapture cap = new VideoCapture(1);
+//      OpenCVFaceDetector faceDetector = new OpenCVFaceDetector(0.5);
+//      NaiveFaceTracker faceTracker = new NaiveFaceTracker();
+//      ImagePanel panel = null;
+//      MatOfByte image = new MatOfByte();
+//      MatOfByte mem = new MatOfByte();
+//      while (true)
+//      {
+//         cap.read(image);
+//         //         Imgcodecs.imdecode(buf, flags)
+//         Imgcodecs.imencode(".bmp", image, mem);
+//         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
+//
+//         Graphics2D g2 = bufferedImage.createGraphics();
+//         g2.setColor(Color.WHITE);
+//
+//         Rect[] faces = faceDetector.detect(bufferedImage);
+//         ArrayList<Rect> trackedFaces = faceTracker.matchTrackedFaces(faces);
+//
+//         for (int i = 0; i < trackedFaces.size(); i++)
+//         {
+//            g2.drawRect(trackedFaces.get(i).x(), trackedFaces.get(i).y(), trackedFaces.get(i).width(),
+//                  trackedFaces.get(i).height());
+//         }
+//
+//         if (panel == null)
+//         {
+//            panel = ShowImages.showWindow(bufferedImage, "faces");
+//         }
+//         else
+//         {
+//            panel.setImageUI(bufferedImage);
+//         }
+//      }
    }
 }
