@@ -1,12 +1,12 @@
-// package us.ihmc.ihmcPerception.lineSegmentDetector;
+ package us.ihmc.ihmcPerception.lineSegmentDetector;
 //
-// import javafx.application.Application;
+ import javafx.application.Application;
 // import javafx.scene.Scene;
 // import javafx.scene.layout.BorderPane;
 // import javafx.scene.layout.Pane;
 // import javafx.scene.shape.Sphere;
 // import javafx.scene.transform.Translate;
-// import javafx.stage.Stage;
+ import javafx.stage.Stage;
 // import us.ihmc.commons.thread.ThreadTools;
 // import us.ihmc.communication.ROS2Tools;
 // import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,8 +17,8 @@
 // import us.ihmc.ros2.ROS2Node;
 //
 //
-// public class LineSegmentDetectorUI extends Application {
-//
+ public class LineSegmentDetectorUI extends Application {
+
 //     private Point3D sensorPosition;
 //
 //     private BorderPane mainPane;
@@ -27,8 +27,8 @@
 //
 //     private LineSegmentEstimator lineSegmentEstimator;
 //
-//     @Override
-//     public void start(Stage stage) throws Exception {
+     @Override
+     public void start(Stage stage) throws Exception {
 //         stage.setTitle("Line Segment Detector");
 //         Sphere sphere = new Sphere(0.1);
 //
@@ -63,7 +63,7 @@
 //
 //         planarRegionsViewer.start();
 //
-//     }
+     }
 //
 //     @Override
 //     public void stop(){
@@ -76,4 +76,4 @@
 //         }
 //         System.exit(0);
 //     }
-// }
+ }
