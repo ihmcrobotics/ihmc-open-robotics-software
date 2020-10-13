@@ -7,7 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -17,15 +16,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
-import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 
 public class SLAMDataManagerAnchorPaneController extends REABasicUIController

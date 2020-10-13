@@ -21,8 +21,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.REAPlanarRegio
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationNodeData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 
 public class PlanarRegionSegmentationDataExporter
 {

@@ -9,8 +9,8 @@ import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.robotEnvironmentAwareness.communication.LiveMapModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
 
 import java.util.ArrayList;
