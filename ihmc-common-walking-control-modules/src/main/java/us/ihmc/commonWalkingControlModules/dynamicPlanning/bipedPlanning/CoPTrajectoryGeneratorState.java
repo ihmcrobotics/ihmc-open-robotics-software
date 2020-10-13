@@ -73,6 +73,8 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getCamelCaseName() + "SoleFrame", footPose);
          soleContactFrames.put(robotSide, soleFrame);
 
+         footPose.attachVariableChangedListener(v -> soleFrame.setPoseAndUpdate(footPose));
+
          List<YoFramePoint2D> vertexBuffer = new ArrayList<>();
          String prefix = robotSide.getCamelCaseName() + "FootPolygonInSole";
          for (int i = 0; i < 6; i++)
@@ -101,7 +103,6 @@ public class CoPTrajectoryGeneratorState extends SaveableModuleState
    public void initializeStance(RobotSide robotSide, FrameConvexPolygon2DReadOnly supportPolygon, ReferenceFrame soleFrame)
    {
       footPoses.get(robotSide).setFromReferenceFrame(soleFrame);
-      soleContactFrames.get(robotSide).setPoseAndUpdate(footPoses.get(robotSide));
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
    }
 
