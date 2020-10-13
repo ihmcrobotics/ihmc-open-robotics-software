@@ -93,6 +93,7 @@ public class BalanceManager
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FramePoint2D desiredCoM2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
 
@@ -313,12 +314,12 @@ public class BalanceManager
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
       perfectCoP2d.set(comTrajectoryPlanner.getDesiredECMPPosition());
-      yoDesiredCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
+      desiredCoM2d.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
 
       capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
       pelvisICPBasedTranslationManager.compute(supportLeg);
-      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
+      pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCoM2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
@@ -350,9 +351,10 @@ public class BalanceManager
 
       yoDesiredCapturePoint.set(desiredCapturePoint2d);
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
+      yoDesiredCoMPosition.set(desiredCoM2d);
       yoPerfectCoP.set(perfectCoP2d);
 
-      CapturePointTools.computeCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
+      CapturePointTools.computeCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -372,7 +374,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
-      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
