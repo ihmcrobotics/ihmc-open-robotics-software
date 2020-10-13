@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
@@ -276,11 +277,8 @@ public class FootstepPlannerLogLoader
             iterationData.setParentNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealChildNode(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
-            iterationData.getParentEndSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
-            iterationData.getParentEndSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
-            iterationData.getParentEndSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-            iterationData.getParentEndSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
-            iterationData.getParentEndSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
+            readSnapData(iterationData.getParentStartSnapData(), dataFileReader);
+            readSnapData(iterationData.getParentEndSnapData(), dataFileReader);
             log.getIterationData().add(iterationData);
 
             for (int i = 0; i < edges; i++)
@@ -292,11 +290,7 @@ public class FootstepPlannerLogLoader
                edgeData.setParentNode(iterationData.getParentNode());
                edgeData.setChildNode(readNode(dataFileReader.readLine()));
                edgeData.setSolutionEdge(getBooleanCSV(true, dataFileReader.readLine())[0]);
-               edgeData.getEndStepSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
-               edgeData.getEndStepSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
-               edgeData.getEndStepSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-               edgeData.getEndStepSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
-               edgeData.getEndStepSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
+               readSnapData(edgeData.getEndStepSnapData(), dataFileReader);
 
                long[] longCSV = getLongCSV(true, dataFileReader.readLine());
                for (int j = 0; j < longCSV.length; j++)
@@ -480,6 +474,15 @@ public class FootstepPlannerLogLoader
       DiscreteFootstep firstStep = new DiscreteFootstep(csv[0], csv[1], csv[2], RobotSide.values[csv[3]]);
       DiscreteFootstep secondStep = new DiscreteFootstep(csv[4], csv[5], csv[6], RobotSide.values[csv[7]]);
       return new FootstepGraphNode(firstStep, secondStep);
+   }
+
+   private void readSnapData(FootstepSnapData footstepSnapDataToPack, BufferedReader dataFileReader) throws IOException
+   {
+      footstepSnapDataToPack.getSnapTransform().set(readTransform(dataFileReader.readLine()));
+      footstepSnapDataToPack.getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
+      footstepSnapDataToPack.getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+      footstepSnapDataToPack.setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
+      footstepSnapDataToPack.setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
    }
 
    private static RigidBodyTransform readTransform(String dataFileLine)
