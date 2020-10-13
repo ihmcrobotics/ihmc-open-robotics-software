@@ -27,6 +27,9 @@ float64 ideal_side_step_width -11.1
 # Returns the ideal length when walking backwards. This value is positive.
 float64 ideal_back_step_length -11.1
 
+# Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+float64 ideal_step_length_at_max_step_z -11.1
+
 # The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
 # to the edge. A negative value means the footstep can overhang a region.
 float64 wiggle_inside_delta_target -11.1
@@ -161,6 +164,12 @@ float64 maximum_step_z_when_forward_and_down -11.1
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
 float64 maximum_step_z -11.1
+
+# Maximum vertical distance between start-of-swing and touchdown
+float64 maximum_swing_z -11.1
+
+# Maximum xy distance between start-of-swing and touchdown
+float64 maximum_swing_reach -11.1
 
 # Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
 #

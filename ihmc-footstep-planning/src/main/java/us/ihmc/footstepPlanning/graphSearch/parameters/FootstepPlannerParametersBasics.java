@@ -67,6 +67,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maxStepZ, maxStepZ);
    }
 
+   default void setMaximumSwingZ(double maxSwingZ)
+   {
+      set(FootstepPlannerParameterKeys.maxSwingZ, maxSwingZ);
+   }
+
+   default void setMaximumSwingReach(double maxSwingReach)
+   {
+      set(FootstepPlannerParameterKeys.maxSwingReach, maxSwingReach);
+   }
+
    default void setMinimumStepZWhenFullyPitched(double stepZ)
    {
       set(FootstepPlannerParameterKeys.minStepZWhenFullyPitched, stepZ);
@@ -175,6 +185,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setIdealBackStepLength(double idealBackStepLength)
    {
       set(FootstepPlannerParameterKeys.idealBackStepLength, idealBackStepLength);
+   }
+
+   default void setIdealStepLengthAtMaxStepZ(double idealStepLengthAtMaxStepZ)
+   {
+      set(FootstepPlannerParameterKeys.idealStepLengthAtMaxStepZ, idealStepLengthAtMaxStepZ);
    }
 
    default void setWiggleWhilePlanning(boolean wiggleWhilePlanning)
@@ -351,6 +366,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
       if (parametersPacket.getIdealBackStepLength() != noValue)
          setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
+      if (parametersPacket.getIdealStepLengthAtMaxStepZ() != noValue)
+         setIdealStepLengthAtMaxStepZ(parametersPacket.getIdealStepLengthAtMaxStepZ());
       if (parametersPacket.getWiggleInsideDeltaTarget() != noValue)
          setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
       if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
@@ -379,6 +396,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZ() != noValue)
          setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getMaximumSwingZ() != noValue)
+         setMaximumSwingZ(parametersPacket.getMaximumSwingZ());
+      if (parametersPacket.getMaximumSwingReach() != noValue)
+         setMaximumSwingReach(parametersPacket.getMaximumSwingReach());
       if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
          setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
       if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)

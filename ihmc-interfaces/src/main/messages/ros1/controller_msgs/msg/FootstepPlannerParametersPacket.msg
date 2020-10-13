@@ -57,6 +57,10 @@ float64 ideal_side_step_width
 # Field default value -11.1
 float64 ideal_back_step_length
 
+# Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+# Field default value -11.1
+float64 ideal_step_length_at_max_step_z
+
 # The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
 # to the edge. A negative value means the footstep can overhang a region.
 # Field default value -11.1
@@ -178,6 +182,14 @@ float64 maximum_step_z_when_forward_and_down
 # z-up sole frame.
 # Field default value -11.1
 float64 maximum_step_z
+
+# Maximum vertical distance between start-of-swing and touchdown
+# Field default value -11.1
+float64 maximum_swing_z
+
+# Maximum xy distance between start-of-swing and touchdown
+# Field default value -11.1
+float64 maximum_swing_reach
 
 # Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
 # 
